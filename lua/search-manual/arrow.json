@@ -1,0 +1,179 @@
+[
+  {
+    "basearrow": "← \\longleftarrow"
+  },
+  {
+    "basearrow": "⇐ \\Longleftarrow"
+  },
+  {
+    "basearrow": "  \\hookleftarrow"
+  },
+  {
+    "basearrow": "  \\hookrightarrow"
+  },
+  {
+    "basearrow": "⇔ \\Leftrightarrow"
+  },
+  {
+    "basearrow": "↔ \\leftrightarrow"
+  },
+  {
+    "basearrow": "↦ \\mapsto"
+  },
+  {
+    "basearrow": "↗ \\nearrow"
+  },
+  {
+    "basearrow": "↝ \\leadsto"
+  },
+  {
+    "basearrow": "⇓ \\Downarrow"
+  },
+  {
+    "basearrow": "↓ \\downarrow"
+  },
+  {
+    "basearrow": "← \\leftarrow"
+  },
+  {
+    "basearrow": "⇐ \\Leftarrow"
+  },
+  {
+    "basearrow": "←→ \\longleftrightarrow"
+  },
+  {
+    "basearrow": "⇐⇒ \\Longleftrightarrow"
+  },
+  {
+    "basearrow": "|−→ \\longmapsto"
+  },
+  {
+    "basearrow": "⇒ \\Longrightarrow"
+  },
+  {
+    "basearrow": "−→ \\longrightarrow"
+  },
+  {
+    "basearrow": "↖ \\nwarrow"
+  },
+  {
+    "basearrow": "⇒ \\Rightarrow"
+  },
+  {
+    "basearrow": "→ \\rightarrow"
+  },
+  {
+    "basearrow": "↘ \\searrow"
+  },
+  {
+    "basearrow": "↙ \\swarrow"
+  },
+  {
+    "basearrow": "↑ \\uparrow"
+  },
+  {
+    "basearrow": "⇑ \\Uparrow"
+  },
+  {
+    "basearrow": "⭥ \\updownarrow"
+  },
+  {
+    "basearrow": "⭥ \\Updownarrow"
+  },
+  {
+    "basearrow": "↽ \\leftharpoondown"
+  },
+  {
+    "basearrow": "↼ \\leftharpoonup"
+  },
+  {
+    "basearrow": "⇁ \\rightharpoondown"
+  },
+  {
+    "basearrow": "⇀ \\rightharpoonup"
+  },
+  {
+    "basearrow": "⇌ \\rightleftharpoons"
+  },
+  {
+    "basearrow": "↓ \\textdownarrow"
+  },
+  {
+    "basearrow": "← \\textleftarrow"
+  },
+  {
+    "basearrow": "→ \\textrightarrow"
+  },
+  {
+    "basearrow": "↑ \\textuparrow"
+  },
+  {
+    "basearrow": "↺ \\circlearrowleft"
+  },
+  {
+    "basearrow": "↻ \\circlearrowright"
+  },
+  {
+    "basearrow": "↶ \\curvearrowleft"
+  },
+  {
+    "basearrow": "↷ \\curvearrowright"
+  },
+  {
+    "basearrow": "⇠ \\dashleftarrow"
+  },
+  {
+    "basearrow": "⇢ \\dashrightarrow"
+  },
+  {
+    "basearrow": "⇊ \\downdownarrows"
+  },
+  {
+    "basearrow": "↢ \\leftarrowtail"
+  },
+  {
+    "basearrow": "⇇ \\leftleftarrows"
+  },
+  {
+    "basearrow": "⇆ \\leftrightarrows "
+  },
+  {
+    "basearrow": "↭ \\leftrightsquigarrow"
+  },
+  {
+    "basearrow": "⇚ \\Lleftarrow"
+  },
+  {
+    "basearrow": "↫ \\looparrowleft"
+  },
+  {
+    "basearrow": "↬ \\looparrowright"
+  },
+  {
+    "basearrow": "↰ \\Lsh"
+  },
+  {
+    "basearrow": "↣ \\rightarrowtail"
+  },
+  {
+    "basearrow": "⇄  \\rightleftarrows"
+  },
+  {
+    "basearrow": "⇉ \\rightrightarrows"
+  },
+  {
+    "basearrow": "⇝ \\rightsquigarrow"
+  },
+  {
+    "basearrow": "↱ \\Rsh"
+  },
+  {
+    "basearrow": "↞ \\twoheadleftarrow"
+  },
+  {
+    "basearrow": "↠ \\twoheadrightarrow"
+  },
+  {
+    "basearrow": "⇈ \\upuparrows"
+  }
+]
