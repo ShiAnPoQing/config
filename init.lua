@@ -24,6 +24,19 @@ require("lazy").setup("plugins")
 K.add({
   ["<F8>"] = {
     function()
+      vim.api.nvim_create_user_command('Upper',
+        function(opts)
+          print(vim.inspect(opts))
+        end,
+        {
+          nargs = "+",
+          range = "%",
+          preview = function(opts, ns, buf)
+            print("fdafadasfdasf")
+            print(vim.inspect(opts), ns, buf)
+          end,
+          complete = "color",
+        })
     end,
     "n",
   },

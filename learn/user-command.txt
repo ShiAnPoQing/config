@@ -1,0 +1,234 @@
+nvim_create_user_command(name: string, command: fun|string, opts: table): void
+
+  创建一个全局 user-commands 命令
+
+
+name    string                                      
+              必须大写开头
+command string|(param: CommandFuncParam) => void
+              Vim 命令或 lua 函数
+opts    table: Opts
+
+CommandFuncParam: 
+  name: string 
+                命令名称
+  args: string 
+                传递给命令的参数（如果有）<args>
+  fargs: table 
+                由未转义的空格分隔的参数（当允许多个参数时），如果有 <f-args>
+  nargs: string 
+                参数数量 |:command-nargs|
+  bang: boolean 
+                如果命令是使用执行的，则为“true”！修饰符 <bang>
+  line1: number 
+                命令范围的起始行<line1>
+  line2: number 
+                命令范围的最后一行<line2>
+  range: number 
+                命令范围内的项目数：0、1 或 2 <range>
+                0	用户 没有提供任何范围或计数（命令无范围或仅作为普通命令调用）。	:MyCommand
+                1	用户提供了 单个行号或计数（如 :NMyCommand 或 :MyCommand N）。	:10MyCommand
+                2	用户提供了 明确的行范围（如 :start,endMyCommand）。	:5,15MyCommand
+  count: number 
+                提供的任何计数 <count>
+  reg: string
+                可选寄存器（如果指定）<reg>
+  mods: string
+                命令修饰符（如果有）<mods>
+  smods: table
+                结构化格式的命令修饰符。
+
+Opts:
+  desc：string      
+          用于在 Lua 函数用于 {command} 时列出命令。
+  force：boolean
+          默认为 true覆盖任何先前的定义。
+  preview：fun(opts, ns, buf)
+          “ns”是突出显示的预览命名空间 ID，
+          “buf”是预览例程将直接修改以显示预览结果的缓冲区（对于“inccommand=split”，或对于“inccommand=nosplit”为 nil）
+          “inccommand”的预览回调|:command-preview|
+  complete: fun(ArgLead, CmdLine, CursorPos) |
+            "arglist"       参数列表中的文件名
+            "augroup"       自动命令组
+            "breakpoint"    |:breakadd| 子选项
+            "buffer"        缓冲区名称
+            "color"         颜色方案
+            "command"       Ex 命令（和参数）
+            "compiler"      编译器
+            "diff_buffer"   差异缓冲区名称
+            "dir            目录名称
+            "dir_in_path    |'cdpath'| 中的目录名称
+            "environment    环境变量名称
+            "event          自动命令事件
+            "expression     Vim 表达式
+            "file           文件和目录名称
+            "file_in_path   |'path'| 中的文件和目录名称
+            "filetype       文件类型名称 |'filetype'|
+            "function       函数名称
+            "help           帮助主题
+            "highlight      高亮组
+            "history        |:history|子选项
+            "keymap         键盘映射
+            "locale         语言环境名称（作为 locale -a 的输出）
+            "lua Lua        表达式 |:lua|
+            "mapclear       缓冲区参数
+            "mapping        映射名称
+            "menu           菜单
+            "messages       |:messages| 子选项
+            "option         选项
+            "packadd        可选包 |pack-add| 名称
+            "runtime"       文件和目录名称（位于 |'runtimepath'|）
+            "scriptnames    源脚本名称
+            "shellcmd       Shell 命令
+            "shellcmdline   第一个是 shell 命令，后续的是文件名。与 |:!cmd| 的行为相同
+            "sign           |:sign| 子选项
+            "syntax         语法文件名 |'syntax'|
+            "syntime        |:syntime|子选项
+            "tag            标签
+            "tag_listfiles  标签，按 CTRL-D 键时显示文件名
+            "user           用户名
+            "var            用户变量
+
+          ArgLead     当前正在完成的参数的前导部分
+          CmdLine     整个命令行
+          CursorPos   光标在其中的位置（字节索引）
+
+  nargs: number| "*" | "?" | "+"
+          命令参数数量
+          nargs=0 不允许使用任何参数（默认）
+          nargs=1 只需要一个参数，包括空格
+          nargs=* 允许使用任意数量的参数（0、1 或多个），以空格分隔
+          nargs=? 允许使用 0 或 1 个参数
+          nargs=+ 必须提供参数，但允许使用任意数量的参数
+          在这种情况下，参数被视为由（未转义的）空格或制表符分隔，除非有一个参数，那么空格是参数的一部分。
+
+  range: boolean | number | "%"
+          range=true      允许范围
+          range=false     不允许范围
+          range=number    指定计数count
+          range="%"       默认整个文件 (1,$)
+
+
+示例：
+:call nvim_create_user_command('SayHello', 'echo "Hello world!"', {'bang': v:true})
+:SayHello
+
+vim.api.nvim_create_user_command('Upper',
+  function(opts)
+    print(string.upper(opts.fargs[1]))
+  end,
+  {
+    nargs = 1,
+    complete = function(ArgLead, CmdLine, CursorPos)
+      return { "foo", "bar", "baz" }
+    end,
+})
+vim.cmd.Upper('foo')
+--> FOO
+
+
+
+
+
+
+
+
+
+
+nvim_del_user_command({name})                        *nvim_del_user_command()*
+    Delete a user-defined command.
+
+    Attributes: ~
+        Since: 0.7.0
+
+    Parameters: ~
+      • {name}  Name of the command to delete.
+
+nvim_get_commands({opts})                                *nvim_get_commands()*
+    Gets a map of global (non-buffer-local) Ex commands.
+
+    Currently only |user-commands| are supported, not builtin Ex commands.
+
+    Attributes: ~
+        Since: 0.3.0
+
+    Parameters: ~
+      • {opts}  Optional parameters. Currently only supports {"builtin":false}
+
+    Return: ~
+        Map of maps describing commands.
+
+    See also: ~
+      • |nvim_get_all_options_info()|
+
+nvim_parse_cmd({str}, {opts})                               *nvim_parse_cmd()*
+    Parse command line.
+
+    Doesn't check the validity of command arguments.
+
+    Attributes: ~
+        |api-fast|
+        Since: 0.8.0
+
+    Parameters: ~
+      • {str}   Command line string to parse. Cannot contain "\n".
+      • {opts}  Optional parameters. Reserved for future use.
+
+    Return: ~
+        Dict containing command information, with these keys:
+        • cmd: (string) Command name.
+        • range: (array) (optional) Command range (<line1> <line2>). Omitted
+          if command doesn't accept a range. Otherwise, has no elements if no
+          range was specified, one element if only a single range item was
+          specified, or two elements if both range items were specified.
+        • count: (number) (optional) Command <count>. Omitted if command
+          cannot take a count.
+        • reg: (string) (optional) Command <register>. Omitted if command
+          cannot take a register.
+        • bang: (boolean) Whether command contains a <bang> (!) modifier.
+        • args: (array) Command arguments.
+        • addr: (string) Value of |:command-addr|. Uses short name or "line"
+          for -addr=lines.
+        • nargs: (string) Value of |:command-nargs|.
+        • nextcmd: (string) Next command if there are multiple commands
+          separated by a |:bar|. Empty if there isn't a next command.
+        • magic: (dict) Which characters have special meaning in the command
+          arguments.
+          • file: (boolean) The command expands filenames. Which means
+            characters such as "%", "#" and wildcards are expanded.
+          • bar: (boolean) The "|" character is treated as a command separator
+            and the double quote character (") is treated as the start of a
+            comment.
+        • mods: (dict) |:command-modifiers|.
+          • filter: (dict) |:filter|.
+            • pattern: (string) Filter pattern. Empty string if there is no
+              filter.
+            • force: (boolean) Whether filter is inverted or not.
+          • silent: (boolean) |:silent|.
+          • emsg_silent: (boolean) |:silent!|.
+          • unsilent: (boolean) |:unsilent|.
+          • sandbox: (boolean) |:sandbox|.
+          • noautocmd: (boolean) |:noautocmd|.
+          • browse: (boolean) |:browse|.
+          • confirm: (boolean) |:confirm|.
+          • hide: (boolean) |:hide|.
+          • horizontal: (boolean) |:horizontal|.
+          • keepalt: (boolean) |:keepalt|.
+          • keepjumps: (boolean) |:keepjumps|.
+          • keepmarks: (boolean) |:keepmarks|.
+          • keeppatterns: (boolean) |:keeppatterns|.
+          • lockmarks: (boolean) |:lockmarks|.
+          • noswapfile: (boolean) |:noswapfile|.
+          • tab: (integer) |:tab|. -1 when omitted.
+          • verbose: (integer) |:verbose|. -1 when omitted.
+          • vertical: (boolean) |:vertical|.
+          • split: (string) Split modifier string, is an empty string when
+            there's no split modifier. If there is a split modifier it can be
+            one of:
+            • "aboveleft": |:aboveleft|.
+            • "belowright": |:belowright|.
+            • "topleft": |:topleft|.
+            • "botright": |:botright|.
+
+
+
