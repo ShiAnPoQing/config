@@ -135,100 +135,77 @@ vim.cmd.Upper('foo')
 
 
 
-nvim_del_user_command({name})                        *nvim_del_user_command()*
-    Delete a user-defined command.
+nvim_del_user_command(name: string)
+  删除用户定义的命令
 
-    Attributes: ~
-        Since: 0.7.0
+nvim_get_commands({opts})
+    获取全局（非缓冲区本地）Ex 命令的映射
 
-    Parameters: ~
-      • {name}  Name of the command to delete.
+当前仅支持 |user-commands|，不支持内置 Ex 命令。
 
-nvim_get_commands({opts})                                *nvim_get_commands()*
-    Gets a map of global (non-buffer-local) Ex commands.
+参数：~
+    • {opts} 可选参数。
+    当前仅支持 {"builtin":false}
 
-    Currently only |user-commands| are supported, not builtin Ex commands.
+返回：~
+    描述命令的映射的映射。
 
-    Attributes: ~
-        Since: 0.3.0
+另请参阅：~
+• |nvim_get_all_options_info()|
 
-    Parameters: ~
-      • {opts}  Optional parameters. Currently only supports {"builtin":false}
 
-    Return: ~
-        Map of maps describing commands.
+nvim_parse_cmd({str}, {opts})
+    解析命令行
 
-    See also: ~
-      • |nvim_get_all_options_info()|
+不检查命令参数的有效性。
 
-nvim_parse_cmd({str}, {opts})                               *nvim_parse_cmd()*
-    Parse command line.
 
-    Doesn't check the validity of command arguments.
+参数：~
+   {str} 要解析的命令行字符串。不能包含“\n”。
+   {opts} 可选参数。保留以备将来使用。
 
-    Attributes: ~
-        |api-fast|
-        Since: 0.8.0
-
-    Parameters: ~
-      • {str}   Command line string to parse. Cannot contain "\n".
-      • {opts}  Optional parameters. Reserved for future use.
-
-    Return: ~
-        Dict containing command information, with these keys:
-        • cmd: (string) Command name.
-        • range: (array) (optional) Command range (<line1> <line2>). Omitted
-          if command doesn't accept a range. Otherwise, has no elements if no
-          range was specified, one element if only a single range item was
-          specified, or two elements if both range items were specified.
-        • count: (number) (optional) Command <count>. Omitted if command
-          cannot take a count.
-        • reg: (string) (optional) Command <register>. Omitted if command
-          cannot take a register.
-        • bang: (boolean) Whether command contains a <bang> (!) modifier.
-        • args: (array) Command arguments.
-        • addr: (string) Value of |:command-addr|. Uses short name or "line"
-          for -addr=lines.
-        • nargs: (string) Value of |:command-nargs|.
-        • nextcmd: (string) Next command if there are multiple commands
-          separated by a |:bar|. Empty if there isn't a next command.
-        • magic: (dict) Which characters have special meaning in the command
-          arguments.
-          • file: (boolean) The command expands filenames. Which means
-            characters such as "%", "#" and wildcards are expanded.
-          • bar: (boolean) The "|" character is treated as a command separator
-            and the double quote character (") is treated as the start of a
-            comment.
-        • mods: (dict) |:command-modifiers|.
-          • filter: (dict) |:filter|.
-            • pattern: (string) Filter pattern. Empty string if there is no
-              filter.
-            • force: (boolean) Whether filter is inverted or not.
-          • silent: (boolean) |:silent|.
-          • emsg_silent: (boolean) |:silent!|.
-          • unsilent: (boolean) |:unsilent|.
-          • sandbox: (boolean) |:sandbox|.
-          • noautocmd: (boolean) |:noautocmd|.
-          • browse: (boolean) |:browse|.
-          • confirm: (boolean) |:confirm|.
-          • hide: (boolean) |:hide|.
-          • horizontal: (boolean) |:horizontal|.
-          • keepalt: (boolean) |:keepalt|.
-          • keepjumps: (boolean) |:keepjumps|.
-          • keepmarks: (boolean) |:keepmarks|.
-          • keeppatterns: (boolean) |:keeppatterns|.
-          • lockmarks: (boolean) |:lockmarks|.
-          • noswapfile: (boolean) |:noswapfile|.
-          • tab: (integer) |:tab|. -1 when omitted.
-          • verbose: (integer) |:verbose|. -1 when omitted.
-          • vertical: (boolean) |:vertical|.
-          • split: (string) Split modifier string, is an empty string when
-            there's no split modifier. If there is a split modifier it can be
-            one of:
-            • "aboveleft": |:aboveleft|.
-            • "belowright": |:belowright|.
-            • "topleft": |:topleft|.
-            • "botright": |:botright|.
+返回：~
+包含命令信息的字典，具有以下键：
+• cmd：（字符串）命令名称。
+• range：（数组）（可选）命令范围（<line1> <line2>）。如果命令不接受范围，则省略。否则，如果未指定范围，则没有元素；如果仅指定了一个范围项，则有一个元素；如果指定了两个范围项，则有两个元素。
+• count：（数字）（可选）命令 <count>。如果命令不能进行计数，则省略。
+• reg：（字符串）（可选）命令 <register>。如果命令不能使用寄存器，则省略。
+• bang：（布尔值）命令是否包含 <bang> (!) 修饰符。
+• args：（数组）命令参数。
+• addr：（字符串）|:command-addr| 的值。对于 -addr=lines，使用短名称或“line”。
+• nargs：（字符串）|:command-nargs| 的值。
+• nextcmd：（字符串）如果有多个命令，则为下一个命令，这些命令由 |:bar| 分隔。如果没有下一个命令，则为空。
+• magic：（字典）命令参数中哪些字符具有特殊含义。
+• file：（布尔值）该命令扩展文件名。这意味着扩展了诸如“%”、“#”和通配符之类的字符。
+• bar：（布尔值）“|”字符被视为命令分隔符
+，双引号字符 (") 被视为注释的开头。
+• mods：（字典）|:command-modifiers|。
+• filter：（字典）|:filter|。
+• pattern：（字符串）过滤器模式。如果没有过滤器，则为空字符串。
+• force：（布尔值）过滤器是否反转。
+• silent：（布尔值）|:silent|。
+• emsg_silent：（布尔值）|:silent!|。
+• unsilent：（布尔值）|:unsilent|。
+• sandbox：（布尔值）|:sandbox|。
+• noautocmd：（布尔值）|:noautocmd|。
+• browser：（布尔值）|:browse|。
+• confirmed：（布尔值）|:confirm|。
+• hide：（布尔值）|:hide|。
+• Horizontal：（布尔值）|:horizontal|。
+• keepalt： (布尔值) |:keepalt|。
+• keepjumps: (布尔值) |:keepjumps|。
+• keepmarks: (布尔值) |:keepmarks|。
+• keeppatterns: (布尔值) |:keeppatterns|。
+• lockmarks: (布尔值) |:lockmarks|。
+• noswapfile: (布尔值) |:noswapfile|。
+• tab: (整数) |:tab|。省略时为 -1。
+• verbose: (整数) |:verbose|。省略时为 -1。
+• vertical: (布尔值) |:vertical|。
+• split: (字符串) 拆分修饰符字符串，当没有拆分修饰符时为空字符串。如果有拆分修饰符，则可以是以下之一：
+• “aboveleft”：|:aboveleft|。
+• “belowright”：|:belowright|。
+• “topleft”：|:左上|。
+• “botright”：|:右下|。
 
 
 
