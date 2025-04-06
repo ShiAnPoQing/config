@@ -1,59 +1,49 @@
-                                                  *nvim_create_user_command()*
-nvim_create_user_command({name}, {command}, {opts})
-    Creates a global |user-commands| command.
+nvim_create_user_command(name: string, command: fun|string, opts: table)
+  创建一个全局 user-commands 命令。
 
-    For Lua usage see |lua-guide-commands-create|.
+示例：>vim
+    :call nvim_create_user_command('SayHello', 'echo "Hello world!"', {'bang': v:true})
+    :SayHello
+    Hello world!
+    <
 
-    Example: >vim
-        :call nvim_create_user_command('SayHello', 'echo "Hello world!"', {'bang': v:true})
-        :SayHello
-        Hello world!
-<
+属性：~
 
-    Attributes: ~
-        Since: 0.7.0
+参数：~
+  • {name} 新用户命令的名称。必须以大写字母开头。
+  • {command} 执行此用户命令时要执行的替换命令。
 
-    Parameters: ~
-      • {name}     Name of the new user command. Must begin with an uppercase
-                   letter.
-      • {command}  Replacement command to execute when this user command is
-                   executed. When called from Lua, the command can also be a
-                   Lua function. The function is called with a single table
-                   argument that contains the following keys:
-                   • name: (string) Command name
-                   • args: (string) The args passed to the command, if any
-                     <args>
-                   • fargs: (table) The args split by unescaped whitespace
-                     (when more than one argument is allowed), if any <f-args>
-                   • nargs: (string) Number of arguments |:command-nargs|
-                   • bang: (boolean) "true" if the command was executed with a
-                     ! modifier <bang>
-                   • line1: (number) The starting line of the command range
-                     <line1>
-                   • line2: (number) The final line of the command range
-                     <line2>
-                   • range: (number) The number of items in the command range:
-                     0, 1, or 2 <range>
-                   • count: (number) Any count supplied <count>
-                   • reg: (string) The optional register, if specified <reg>
-                   • mods: (string) Command modifiers, if any <mods>
-                   • smods: (table) Command modifiers in a structured format.
-                     Has the same structure as the "mods" key of
-                     |nvim_parse_cmd()|.
-      • {opts}     Optional |command-attributes|.
-                   • Set boolean attributes such as |:command-bang| or
-                     |:command-bar| to true (but not |:command-buffer|, use
-                     |nvim_buf_create_user_command()| instead).
-                   • "complete" |:command-complete| also accepts a Lua
-                     function which works like
-                     |:command-completion-customlist|.
-                   • Other parameters:
-                     • desc: (string) Used for listing the command when a Lua
-                       function is used for {command}.
-                     • force: (boolean, default true) Override any previous
-                       definition.
-                     • preview: (function) Preview callback for 'inccommand'
-                       |:command-preview|
+从 Lua 调用时，该命令也可以是 Lua 函数。
+该函数使用单个表参数调用，该参数包含以下键：
+
+    • name：（字符串）命令名称
+    • args：（字符串）传递给命令的参数（如果有）<args>
+    • fargs：（表）由未转义的空格分隔的参数（当允许多个参数时），如果有 <f-args>
+    • nargs：（字符串）参数数量 |:command-nargs|
+    • bang：（布尔值）如果命令是使用执行的，则为“true”！修饰符 <bang>
+    • line1：（数字）命令范围的起始行<line1>
+    • line2：（数字）命令范围的最后一行<line2>
+    • range：（数字）命令范围内的项目数：0、1 或 2 <range>
+    • count：（数字）提供的任何计数 <count>
+    • reg：（字符串）可选寄存器（如果指定）<reg>
+    • mods：（字符串）命令修饰符（如果有）<mods>
+    • smods：（表）结构化格式的命令修饰符。
+    与 |nvim_parse_cmd()| 的“mods”键具有相同的结构。
+
+• {opts} 可选 command-attributes。
+      • 设置布尔属性，
+          例如 |:command-bang| 或|:command-bar|为 true
+          （但不是 |:command-buffer|，而是使用|nvim_buf_create_user_command()|）。
+      • “complete” |:command-complete| 还接受 Lua 函数，
+          其工作方式类似于|:command-completion-customlist|。
+
+      • desc：string      用于在 Lua 函数用于 {command} 时列出命令。
+      • force：boolean，  默认为 true覆盖任何先前的定义。
+      • preview：fun      “inccommand”的预览回调|:command-preview|
+
+
+
+
 
 nvim_del_user_command({name})                        *nvim_del_user_command()*
     Delete a user-defined command.
