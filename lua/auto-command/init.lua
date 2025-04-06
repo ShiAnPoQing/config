@@ -1,0 +1,45 @@
+-- vim.api.nvim_create_autocmd("TextYankPost", {
+-- callback = function()
+-- vim.highlight.on_yank({
+-- higroup = "IncSearch",
+-- timeout = 150,
+-- })
+-- end
+-- })
+vim.api.nvim_create_augroup("custom_buffer", { clear = true })
+-- vim.api.nvim_create_autocmd("TextYankPost", {
+-- group = "custom_buffer",
+-- pattern = "*",
+-- callback = function()
+-- vim.highlight.on_yank({ timeout = 200 })
+-- end,
+-- })
+
+-- vim.api.nvim_create_autocmd("BufWritePre", {
+-- group = vim.api.nvim_create_augroup("DelEndSpace", { clear = true }),
+-- pattern = "*",
+-- callback = function()
+-- if vim.bo.filetype ~= "diff" then
+-- local pos = vim.api.nvim_win_get_cursor(0)
+-- vim.api.nvim_exec(
+-- [[
+-- silent! %s/\s\+$//
+-- silent! %s/\(\s*\n\)\+\%$//
+-- ]],
+-- true
+-- )
+
+-- if vim.api.nvim_buf_line_count(vim.api.nvim_get_current_buf()) >= pos[1] then
+-- vim.api.nvim_win_set_cursor(0, pos)
+-- end
+-- end
+-- end,
+-- })
+
+-- auto open NeoTree
+-- vim.api.nvim_create_autocmd("VimEnter", {
+-- pattern = "*",
+-- callback = function()
+-- vim.cmd("Neotree")
+-- end,
+-- })

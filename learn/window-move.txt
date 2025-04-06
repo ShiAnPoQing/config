@@ -1,0 +1,391 @@
+CTRL-W s *CTRL-W_s*
+CTRL-W S *CTRL-W_S*
+CTRL-W CTRL-S *CTRL-W_CTRL-S*
+:[N]sp[lit] [++opt] [+cmd] [file] *:sp* *:split*
+      将当前窗口一分为二。结果是同一文件上有两个视口。
+      
+      使新窗口高度为 N（默认使用当前窗口高度的一半）。
+      降低当前窗口高度以腾出空间
+      （以及其他，如果设置了 'equalalways' 选项，'eadirection' 不是“hor”，并且其中一个高于当前窗口或新窗口）。
+      
+      如果给出了 [file]，它将在新窗口中进行编辑。
+      如果它未在任何缓冲区中加载，它将被读取。
+      否则，新窗口将使用已加载的缓冲区。
+      
+      注意： CTRL-S 并非在所有终端上都有效，可能会阻止进一步的输入，请使用 CTRL-Q 重新开始。 
+      另请参阅 |++opt| 和 |+cmd|。
+      
+      在自动命令中拆分窗口时要小心，如果在进行其他窗口布局更改时发生这种情况，可能会弄乱窗口布局。
+
+CTRL-W CTRL-V *CTRL-W_CTRL-V*
+CTRL-W v *CTRL-W_v*
+:[N]vs[plit] [++opt] [+cmd] [file] *:vs* *:vsplit*
+      类似于 |:split|，但垂直分割。
+      
+      如果
+      1. 未指定宽度，
+      2. 设置了 'equalalways'，
+      3. 'eadirection' 不是“ver”，并且
+      4. 其他窗口之一比当前或新窗口更宽，则窗口将水平展开。
+      如果指定了 N，则尽可能使新窗口宽度为 N 列。
+      注意：在其他地方，CTRL-Q 与 CTRL-V 的作用相同，但在这里，不是！
+
+CTRL-W n *CTRL-W_n*
+CTRL-W CTRL-N *CTRL-W_CTRL-N*
+:[N]new [++opt] [+cmd] *:new*
+      创建一个新窗口并开始在其中编辑一个空文件。
+      使新窗口高度为 N（默认使用现有高度的一半）。
+      降低当前窗口高度以腾出空间
+      （如果设置了 'equalalways' 选项并且 'eadirection' 不是“hor”，则降低其他高度）。
+      如果 'fileformats' 不为空，则将使用给定的第一个格式作为新缓冲区。
+      如果 'fileformats' 为空，则使用当前缓冲区的 'fileformat'。这可以用 |++opt| 参数覆盖。
+      自动命令按以下顺序执行：
+          1. WinLeave 用于当前窗口
+          2. WinEnter 用于新窗口
+          3. BufLeave 用于当前缓冲区
+          4. BufEnter 用于新缓冲区
+      其行为类似于先执行“:split”，然后执行“:enew”命令。
+
+:[N]new [++opt] [+cmd] {file}
+:[N]sp[lit] [++opt] [+cmd] {file} *:split_f*
+      创建一个新窗口并在其中开始编辑文件 {file}。
+      其行为类似于先执行“:split”，然后执行“:edit”命令，
+      但原始窗口中的备用文件名设置为 {file}。
+      
+      如果给出了 [+cmd]，则在文件已加载 |+cmd| 时执行该命令。
+      使新窗口高度为 N（默认为使用现有高度的一半）。
+      降低当前窗口高度以腾出空间
+      （如果设置了“equalalways”选项，则还有其他选项）。
+
+:[N]vne[w] [++opt] [+cmd] [file] *:vne* *:vnew*
+      类似于 |:new|，但垂直分割。如果设置了“equalalways”
+      并且“eadirection”不是“ver”，则窗口将水平展开，除非指定了宽度。
+
+:[N]sv[iew] [++opt] [+cmd] [file] *:sv* *:sview* *splitview*
+      与“:split”相同，但为此缓冲区设置了“readonly”选项。
+
+:[N]sf[ind] [++opt] [+cmd] {file} *:sf* *:sfi* *:sfind* *splitfind*
+      与 ":split" 相同，但像在 |:find| 中一样在 'path' 中搜索 {file}。如果未找到 {file}，则不拆分。
+
+CTRL-W CTRL-^ *CTRL-W_CTRL-^* *CTRL-W_^*
+CTRL-W ^ 将当前窗口拆分为两个并编辑备用文件。
+    当给定计数 N 时，拆分当前窗口并编辑缓冲区 N。
+    类似于 ":sp #" 和 ":sp #N"，但它允许另一个缓冲区未命名。
+    此命令与 |CTRL-^| 的行为一致，只是它首先拆分一个窗口。
+
+CTRL-W ge *CTRL-W_ge*
+    将当前窗口分离为外部窗口。
+    仅在使用支持 |ui-multigrid| 的 UI 时可用。
+
+请注意，“splitbelow”和“splitright”选项会影响新窗口出现的位置。
+如果空间不足，则创建窗口将失败。
+每个窗口至少需要一行和一列，有时甚至更多。
+选项“winminheight”和“winminwidth”是相关的。
+
+:vert[ical] {cmd}
+    执行 {cmd}。
+    如果它包含分割窗口的命令，它将被垂直分割。
+    对于 `vertical wincmd =`，窗口将仅在垂直方向上均衡。
+    不适用于 |:execute| 和 |:normal|。
+
+:hor[izontal] {cmd}
+    执行 {cmd}。
+
+目前仅对以下命令有影响：
+- `:wincmd =`：仅在水平方向上均衡窗口。
+- |:terminal|：在分割窗口中打开 |terminal| 缓冲区。
+- |:checkhealth|：在分割窗口中打开健康检查缓冲区。
+
+:lefta[bove] {cmd} *:lefta* *:leftabove*
+:abo[veleft] {cmd} *:abo* *:aboveleft*
+      执行 {cmd}。如果它包含一个分割窗口的命令，
+      它将在当前窗口的左侧（垂直分割）或上方（水平分割）打开。
+      否决 'splitbelow' 和 'splitright'。
+      不适用于 |:execute| 和 |:normal|。
+
+:rightb[elow] {cmd} *:rightb* *:rightbelow*
+:bel[owright] {cmd} *:bel* *:belowright*
+    执行 {cmd}。如果它包含一个分割窗口的命令，
+    它将在当前窗口的右侧（垂直分割）或下方（水平分割）打开。
+    否决 'splitbelow' 和 'splitright'。
+    不适用于 |:execute| 和 |:normal|。
+
+:to[pleft] {cmd}
+    执行 {cmd}。
+    如果它包含一个分割窗口的命令，它将出现在顶部并占据 Vim 窗口的整个宽度。
+    当分割是垂直时，窗口出现在最左边并占据 Vim 窗口的整个高度。
+    不适用于 |:execute| 和 |:normal|。
+:bo[tright] {cmd}
+    执行 {cmd}。如果它包含一个分割窗口的命令，
+    它将出现在底部并占据 Vim 窗口的整个宽度。
+    当分割是垂直时，窗口出现在最右边并占据 Vim 窗口的整个高度。
+    不适用于 |:execute| 和 |:normal|。
+
+这些命令修饰符可以组合使用，使垂直分割窗口占据整个高度。
+示例：
+    :vertical topleft split tags
+在 Vim 窗口最左侧的“tags”文件上打开一个垂直分割的全高窗口。
+
+
+
+
+
+
+
+在指定窗口执行命令：win_execute({id}, {command} [, {silent}])                        
+      类似于 `execute()`，但在窗口 {id} 的上下文中。
+      窗口将暂时成为当前窗口，而不会触发自动命令或更改目录。
+      执行 {command} 时将触发自动命令，这可能会产生意外的副作用。
+      如果需要，请使用 `:noautocmd`。
+      
+      示例：>vim
+            call win_execute(winid, 'syntax enable')
+      < 
+      
+      使用 `setwinvar()` 执行相同操作不会触发自动命令，也不会实际显示语法突出显示。
+      
+      当窗口 {id} 不存在时，不会给出任何错误，并返回一个空字符串。
+      
+      参数：~
+            • {id} (`integer`)
+            • {command} (`string`)
+            • {silent} (`boolean?`)
+      返回：~
+            (`any`)
+
+获取指定缓冲区的窗口win-id[]: win_findbuf({bufnr}): integer[]
+
+获取特定窗口的编号：winnr([{arg}]): integer
+      结果是一个数字，即当前窗口的编号。
+      顶部窗口的编号为 1。
+      对于弹出窗口，返回零。
+      
+      可选参数 {arg} 支持以下值：
+            $ 最后一个窗口的编号（窗口计数）。
+            # 上次访问的窗口的编号（|CTRL-W_p| 转到的位置）。
+              如果没有前一个窗口或它在另一个选项卡页中，则返回 0。
+              在某些情况下可能指当前窗口（例如，在评估“statusline”表达式时）。
+
+           {N}j 当前窗口下方的第 N 个窗口的编号（|CTRL-W_j| 转到的位置）。
+           {N}k 当前窗口上方的第 N 个窗口的编号（|CTRL-W_k| 转到的位置）。
+           {N}h 当前窗口左侧的第 N 个窗口的编号（|CTRL-W_h| 转到的位置）。
+           {N}l 当前窗口右侧第 N 个窗口的编号（|CTRL-W_l| 转到的位置）。
+
+      该编号可与 |CTRL-W_w| 和 ":wincmd w"、 |:wincmd| 一起使用。
+
+      当 {arg} 无效时，会给出错误并返回零。
+      示例：>vim
+          let window_count = winnr('$')
+          let prev_window = winnr('#')
+          let wnum = winnr('3k')
+      
+      参数：~
+        • {arg} (`string|integer?`)
+
+      另请参阅 |tabpagewinnr()| 和 |win_getid()|。
+获取指定窗口窗口编号: win_id2win(expr: integer): integer
+      如果在当前标签页中找不到该窗口，则返回 0。
+获取指定标签页中的窗口布局：winlayout(tabnr?: integer): any[]                                               
+      嵌套列表，包含标签页中窗口的布局。
+      如果没有 {tabnr}，则使用当前标签页，否则使用编号为 {tabnr} 的标签页。
+      如果未找到标签页 {tabnr}，则返回一个空列表。
+      
+      对于叶窗口，它返回： 
+
+                  ["leaf", {winid}]
+      
+      对于水平分割的窗口，它们形成一列，它返回： 
+
+                  ["col", [{嵌套的窗口列表}]]
+
+      对于垂直分割的窗口，它们形成一行，它返回： 
+
+                  ["row", [{嵌套的窗口列表}]]
+
+      示例：>vim
+          " 选项卡页中只有一个窗口
+          echo winlayout()
+          ['leaf', 1000]
+
+          " 两个水平分割的窗口
+          echo winlayout()
+          ['col', [['leaf', 1000], ['leaf', 1001]]]
+
+          " 第二个选项卡页，有三个水平分割的窗口，中间窗口中有两个垂直分割的窗口
+          echo winlayout(2)
+          ['col', [['leaf', 1002], ['row', [['leaf', 1003],
+          ['leaf', 1001]]], ['leaf', 1000]]]
+获取指定窗口关联的缓冲区编号：winbufnr(nr: integer{win-num|win-id}): integer
+      {nr} 可以是窗口编号或 |window-ID|。
+      当 {nr} 为零时，返回当前窗口中缓冲区的编号。
+      当窗口 {nr} 不存在时，返回 -1。
+      
+      示例：>vim
+          echo "当前窗口中的文件是 " .. bufname(winbufnr(0))
+获取指定窗口的id:  win_getid(win?: integer, tab?: integer)： integer
+      如果缺少 {win}，则使用当前窗口。
+      如果带有 {win}，则这是窗口编号。顶部窗口的编号为 1。
+      如果未带有 {tab}，则使用当前选项卡，否则使用编号为 {tab} 的选项卡。第一个选项卡的编号为 1。
+      如果找不到窗口，则返回零。
+获取指定窗口的类型: win_gettype(nr?: integer): 'autocmd'|'command'|''|'loclist'|'popup'|'preview'|'quickfix'|'unknown'
+      当省略 {nr} 时，返回当前窗口的类型。
+      当给出 {nr} 时，通过数字或|window-ID| 返回此窗口的类型。
+      
+      另请参阅“buftype”选项。
+      
+      “autocmd”自动命令窗口。临时窗口用于执行自动命令。
+      “command”命令行窗口 |cmdwin|
+      （空）普通窗口
+      “loclist”|location-list-window|
+      “popup”浮动窗口 |api-floatwin|
+      “preview”预览窗口 |preview-window|
+      “quickfix”|quickfix-window|
+      “unknown”窗口 {nr} 未找到
+获取指定窗口的宽度: winwidth(nr: integer{win-num | win-id}): integer
+      if nr == 0 then
+        return current_win_width
+      end
+      if not isExist(nr) then
+        return -1
+      end
+
+      现有窗口的宽度始终为零或更大。
+      
+      示例：vim
+              echo "当前窗口有 " .. winwidth(0) .. " 列。"
+              if winwidth(0) <= 50
+                  50 wincmd |
+              endif
+      要获取终端或屏幕大小，请参阅 'columns'选项。
+获取指定窗口的高度: winheight(nr: integer{win-num | win-id}): integer
+      if nr == 0 then
+        return current_win_width
+      end
+      if not isExist(nr) then
+        return -1
+      end
+      现有窗口的高度始终为零或更大。
+      
+      这不包括任何窗口工具栏行。
+获取指定窗口的屏幕位置：win_screenpos(nr: integer{win-num|win-id|0}): [row, col]                                            
+      第一个窗口的位置始终为 [1, 1]，除非有制表符，否则位置为 [2, 1]。
+      {nr} 可以是窗口编号或 |window-ID|。当前窗口使用零。
+      如果找不到窗口，则返回 [0, 0]。
+
+跳转到指定窗口: win_gotoid({expr})                                                
+      这也可能更改当前标签页。
+      如果成功则返回 TRUE，如果找不到窗口则返回 FALSE。
+      
+      参数：~
+      • {expr} (`integer`)
+      
+      返回：~
+      (`0|1`)
+
+
+获取当前窗口光标的屏幕列：wincol(): integer
+      这是从窗口左侧开始计算屏幕单元格。
+      最左边的列是 1。
+获取当前窗口光标的屏幕行：winline(): integer
+    这是从窗口顶部开始计算的屏幕行数。第一行是 1。
+    如果光标移动，文件上的视图将首先更新，这可能会导致滚动。
+保存当前窗口视图信息：winsaveview(): View                                               
+      如果您有一个在缓冲区中跳转的映射并且想要返回原始视图，这将非常有用。
+      这不会保存折叠信息。使用 'foldenable'选项暂时关闭折叠，以便在移动时不会打开折叠。这可能会产生副作用。
+
+      interface View {
+        lnum: number      光标行号
+        col: number       光标列（注意：第一列为零，与 |getcurpos()|返回的值相反）
+        coladd: number    'virtualedit' 的光标列偏移量
+        curswant: number  垂直移动的列（注意：第一列为零，与 |getcurpos()|返回的值相反）。在 |$| 命令之后，它将是一个非常大的数字，等于 |v:maxcol|。
+        topline: unknown  窗口中的第一行
+        topfill: unknown  填充行(diff模式)
+        leftcol: unknown  显示的第一列显示的第一列；仅在以下情况下使用'wrap' 关闭, 跳过 skipcol 列      请注意，不会保存任何选项值。
+      }
+      
+       return: (`vim.fn.winsaveview.ret`)
+恢复当前窗口的视图: winrestview(View): any                                              
+      使用 winsaveview() 返回的 Dictionary 恢复当前窗口的视图。
+
+      注意：{dict} 不必包含 winsaveview() 返回的所有值。
+      如果缺少值，则不会恢复这些设置。
+
+      因此，您可以使用：vim
+              call winrestview({'curswant': 4})
+      这只会将光标的 curswant 值（光标在垂直移动时想要移动的列）设置为第 5 列
+      （是的，就是 5），而所有其他设置将保持不变。
+      如果您手动设置光标位置，这将很有用。
+      
+      如果您更改了值，结果将不可预测。
+      如果窗口大小发生变化，结果将不一样。
+      
+      参数：~
+      • {dict} (`vim.fn.winrestview.dict`)
+      
+      返回：~
+      (`any`)
+获取resize命令：winrestcmd()                                                      
+      返回一系列 :resize 命令，用于恢复当前窗口大小。
+      仅在未打开或关闭任何窗口且当前窗口和标签页未改变时才有效。
+      示例：>vim
+          let cmd = winrestcmd()
+          call MessWithWindowSizes()
+          exe cmd
+      
+      返回：~
+        (`string`)
+
+win_splitmove(nr: integer{win-num|win-id}, target: integer{win-num|win-id} options?: Options): any
+      暂时切换到窗口 {target}，然后将窗口 {nr}移动到与 {target} 相邻的新分割。
+      与 |:split| 等命令不同，不会创建新窗口（移动后窗口 {nr} 的 |window-ID| 保持不变）。
+      
+      {nr} 和 {target} 都可以是窗口编号或 |window-ID|。
+      两者必须位于当前选项卡页中。
+      
+      成功时返回零，失败时返回非零。
+      
+      interface Options {
+        vertical?: boolean   为 TRUE 时，分割垂直创建，类似于 |:vsplit|。
+        rightbelow?: boolean
+                             为 TRUE 时，分割在下方或右侧（如果是垂直的）。       
+                             为 FALSE 时，分割在上方或左侧（如果是垂直的）。       
+                             如果不存在，则使用 'splitbelow' 和 'splitright' 的值。
+      }
+
+返回一个列表，其中包含 ID 为 {expr} 的窗口的选项卡号和窗口号：[tabnr, winnr]: win_id2tabwin({expr})                                         
+      如果找不到窗口，则返回 [0, 0]。
+      
+      参数：~
+      • {expr} (`integer`)
+      
+      返回：~
+      (`any`)
+
+将窗口 {nr} 的垂直分隔符（即右边框）移动 {offset} 列，就像被鼠标拖动一样: win_move_separator({nr}, {offset})                        
+      {nr} 可以是窗口编号或 |window-ID|。
+      正的 {offset} 向右移动，负的 {offset} 向左移动。
+      移动窗口的垂直分隔符将改变窗口的宽度以及与垂直分隔符相邻的其他窗口的宽度。
+      移动幅度可能小于指定的值（例如，由于保持 'winminwidth'）。
+      如果可以找到窗口，则返回 TRUE，否则返回 FALSE。对于最右边的窗口和全宽窗口，这将失败，因为它在右侧没有分隔符。仅适用于当前选项卡页。
+      
+      参数：~
+      • {nr} (`integer`)
+      • {offset} (`integer`)
+      
+      返回：~
+      (`any`)
+将窗口 {nr} 的状态行（即底部边框）移动{offset} 行，就像被鼠标拖动一样: win_move_statusline({nr}, {offset})                      
+
+      {nr} 可以是窗口编号或 |window-ID|。
+      正的 {offset} 向下移动，而负的 {offset} 向上移动。
+      移动窗口的状态行将改变窗口的高度以及状态行相邻的其他窗口的高度。
+      移动的幅度可能小于指定的幅度（例如，由于保持 'winminheight'）。
+      如果可以找到窗口，则返回 TRUE，否则返回 FALSE。
+      仅适用于当前选项卡页。
+      
+      参数：~
+      • {nr} (`integer`)
+      • {offset} (`integer`)
+      
+      返回：~
+      (`any`)

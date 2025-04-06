@@ -1,0 +1,152 @@
+                                                  *nvim_create_user_command()*
+nvim_create_user_command({name}, {command}, {opts})
+    Creates a global |user-commands| command.
+
+    For Lua usage see |lua-guide-commands-create|.
+
+    Example: >vim
+        :call nvim_create_user_command('SayHello', 'echo "Hello world!"', {'bang': v:true})
+        :SayHello
+        Hello world!
+<
+
+    Attributes: ~
+        Since: 0.7.0
+
+    Parameters: ~
+      • {name}     Name of the new user command. Must begin with an uppercase
+                   letter.
+      • {command}  Replacement command to execute when this user command is
+                   executed. When called from Lua, the command can also be a
+                   Lua function. The function is called with a single table
+                   argument that contains the following keys:
+                   • name: (string) Command name
+                   • args: (string) The args passed to the command, if any
+                     <args>
+                   • fargs: (table) The args split by unescaped whitespace
+                     (when more than one argument is allowed), if any <f-args>
+                   • nargs: (string) Number of arguments |:command-nargs|
+                   • bang: (boolean) "true" if the command was executed with a
+                     ! modifier <bang>
+                   • line1: (number) The starting line of the command range
+                     <line1>
+                   • line2: (number) The final line of the command range
+                     <line2>
+                   • range: (number) The number of items in the command range:
+                     0, 1, or 2 <range>
+                   • count: (number) Any count supplied <count>
+                   • reg: (string) The optional register, if specified <reg>
+                   • mods: (string) Command modifiers, if any <mods>
+                   • smods: (table) Command modifiers in a structured format.
+                     Has the same structure as the "mods" key of
+                     |nvim_parse_cmd()|.
+      • {opts}     Optional |command-attributes|.
+                   • Set boolean attributes such as |:command-bang| or
+                     |:command-bar| to true (but not |:command-buffer|, use
+                     |nvim_buf_create_user_command()| instead).
+                   • "complete" |:command-complete| also accepts a Lua
+                     function which works like
+                     |:command-completion-customlist|.
+                   • Other parameters:
+                     • desc: (string) Used for listing the command when a Lua
+                       function is used for {command}.
+                     • force: (boolean, default true) Override any previous
+                       definition.
+                     • preview: (function) Preview callback for 'inccommand'
+                       |:command-preview|
+
+nvim_del_user_command({name})                        *nvim_del_user_command()*
+    Delete a user-defined command.
+
+    Attributes: ~
+        Since: 0.7.0
+
+    Parameters: ~
+      • {name}  Name of the command to delete.
+
+nvim_get_commands({opts})                                *nvim_get_commands()*
+    Gets a map of global (non-buffer-local) Ex commands.
+
+    Currently only |user-commands| are supported, not builtin Ex commands.
+
+    Attributes: ~
+        Since: 0.3.0
+
+    Parameters: ~
+      • {opts}  Optional parameters. Currently only supports {"builtin":false}
+
+    Return: ~
+        Map of maps describing commands.
+
+    See also: ~
+      • |nvim_get_all_options_info()|
+
+nvim_parse_cmd({str}, {opts})                               *nvim_parse_cmd()*
+    Parse command line.
+
+    Doesn't check the validity of command arguments.
+
+    Attributes: ~
+        |api-fast|
+        Since: 0.8.0
+
+    Parameters: ~
+      • {str}   Command line string to parse. Cannot contain "\n".
+      • {opts}  Optional parameters. Reserved for future use.
+
+    Return: ~
+        Dict containing command information, with these keys:
+        • cmd: (string) Command name.
+        • range: (array) (optional) Command range (<line1> <line2>). Omitted
+          if command doesn't accept a range. Otherwise, has no elements if no
+          range was specified, one element if only a single range item was
+          specified, or two elements if both range items were specified.
+        • count: (number) (optional) Command <count>. Omitted if command
+          cannot take a count.
+        • reg: (string) (optional) Command <register>. Omitted if command
+          cannot take a register.
+        • bang: (boolean) Whether command contains a <bang> (!) modifier.
+        • args: (array) Command arguments.
+        • addr: (string) Value of |:command-addr|. Uses short name or "line"
+          for -addr=lines.
+        • nargs: (string) Value of |:command-nargs|.
+        • nextcmd: (string) Next command if there are multiple commands
+          separated by a |:bar|. Empty if there isn't a next command.
+        • magic: (dict) Which characters have special meaning in the command
+          arguments.
+          • file: (boolean) The command expands filenames. Which means
+            characters such as "%", "#" and wildcards are expanded.
+          • bar: (boolean) The "|" character is treated as a command separator
+            and the double quote character (") is treated as the start of a
+            comment.
+        • mods: (dict) |:command-modifiers|.
+          • filter: (dict) |:filter|.
+            • pattern: (string) Filter pattern. Empty string if there is no
+              filter.
+            • force: (boolean) Whether filter is inverted or not.
+          • silent: (boolean) |:silent|.
+          • emsg_silent: (boolean) |:silent!|.
+          • unsilent: (boolean) |:unsilent|.
+          • sandbox: (boolean) |:sandbox|.
+          • noautocmd: (boolean) |:noautocmd|.
+          • browse: (boolean) |:browse|.
+          • confirm: (boolean) |:confirm|.
+          • hide: (boolean) |:hide|.
+          • horizontal: (boolean) |:horizontal|.
+          • keepalt: (boolean) |:keepalt|.
+          • keepjumps: (boolean) |:keepjumps|.
+          • keepmarks: (boolean) |:keepmarks|.
+          • keeppatterns: (boolean) |:keeppatterns|.
+          • lockmarks: (boolean) |:lockmarks|.
+          • noswapfile: (boolean) |:noswapfile|.
+          • tab: (integer) |:tab|. -1 when omitted.
+          • verbose: (integer) |:verbose|. -1 when omitted.
+          • vertical: (boolean) |:vertical|.
+          • split: (string) Split modifier string, is an empty string when
+            there's no split modifier. If there is a split modifier it can be
+            one of:
+            • "aboveleft": |:aboveleft|.
+            • "belowright": |:belowright|.
+            • "topleft": |:topleft|.
+            • "botright": |:botright|.
+
