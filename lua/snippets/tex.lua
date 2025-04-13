@@ -24,6 +24,7 @@ local postfix = require("luasnip.extras.postfix").postfix
 local types = require("luasnip.util.types")
 local parse = require("luasnip.util.parser").parse_snippet
 
+
 local tex = {}
 tex.in_mathzone = function()
   return vim.fn["vimtex#syntax#in_mathzone"]() == 1
@@ -39,6 +40,16 @@ end
 local function has_TM_SELECTED_TEXT(snip)
   local TM_SELECTED_TEXT = snip.env.TM_SELECTED_TEXT
   return type(TM_SELECTED_TEXT) == "table" and next(TM_SELECTED_TEXT) ~= nil
+end
+
+local function dynamic_node_select_text(args, snip)
+  if has_TM_SELECTED_TEXT(snip) then
+    return sn(nil, {
+      i(1, snip.env.TM_SELECTED_TEXT)
+    })
+  else
+    return sn(nil, { i(1) })
+  end
 end
 
 local rec_enum
@@ -60,6 +71,14 @@ rec_enum = function()
       }),
     }),
   })
+end
+
+local function create_tex_command(cmd)
+  return {
+    t("\\" .. cmd .. "{"),
+    d(1, dynamic_node_select_text),
+    t("}")
+  }
 end
 
 local snippets = {
@@ -91,11 +110,11 @@ local snippets = {
 
   s("beg", {
     t("\\begin{"),
-    i(1, "something"),
+    i(1),
     t({ "}", "" }),
     d(2, function(_, snip)
       if next(snip.env.TM_SELECTED_TEXT) == nil then
-        return sn(nil, { t("\t"), i(1, "Text") })
+        return sn(nil, { t("\t"), i(1) })
       else
         return sn(1, {
           t("\t"),
@@ -109,62 +128,6 @@ local snippets = {
     i(3),
   }),
 
-  s("tbf", {
-    d(1, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
-        return sn(nil, {
-          t("\\textbf{"),
-          i(1, "粗体"),
-          t("}"),
-        })
-      else
-        return sn(nil, {
-          t("\\textbf{"),
-          i(1, snip.env.TM_SELECTED_TEXT),
-          t("}"),
-        })
-      end
-    end, {}),
-  }),
-
-  s("tit", {
-    d(1, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
-        return sn(nil, {
-          t("\\textit{"),
-          i(1),
-          t("}"),
-        })
-      else
-        return sn(nil, {
-          t("\\textit{"),
-          i(1, snip.env.TM_SELECTED_TEXT),
-          t("}"),
-        })
-      end
-    end, {}),
-  }),
-
-  s({
-    trig = "ttt",
-    wordTrig = false,
-  }, {
-    d(1, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
-        return sn(nil, {
-          t("\\texttt{"),
-          i(1),
-          t("}"),
-        })
-      else
-        return sn(nil, {
-          t("\\texttt{"),
-          i(1, snip.env.TM_SELECTED_TEXT),
-          t("}"),
-        })
-      end
-    end, {}),
-  }),
 
   s("inpt", {
     d(1, function(_, snip)
@@ -205,19 +168,6 @@ local snippets = {
     end),
   }),
 
-  s("emp", {
-    t("\\emph{"),
-    d(1, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
-        return sn(nil, { i(1, "Text") })
-      else
-        return sn(1, {
-          i(1, snip.env.TM_SELECTED_TEXT),
-        })
-      end
-    end),
-    t("}"),
-  }),
 
   s("alg", {
     t("\\begin{"),
@@ -517,110 +467,6 @@ local snippets = {
     show_condition = tex.in_mathzone,
   }),
 
-  s("rm", {
-    d(1, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
-        return sn(1, {
-          t("\\mathrm{"),
-          i(1, "直立体"),
-          t("}"),
-        })
-      else
-        return sn(1, {
-          t("\\mathrm{"),
-          i(1, snip.env.TM_SELECTED_TEXT),
-          t("}"),
-        })
-      end
-    end),
-  }, {
-    condition = tex.in_mathzone,
-    show_condition = tex.in_mathzone,
-  }),
-
-  s("rm", {
-    d(1, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
-        return sn(1, {
-          t("{\\rm "),
-          i(1, "直立体"),
-          t("}"),
-        })
-      else
-        return sn(1, {
-          t("{\\rm "),
-          i(1, snip.env.TM_SELECTED_TEXT),
-          t("}"),
-        })
-      end
-    end),
-  }, {
-    condition = tex.in_text,
-    show_condition = tex.in_text,
-  }),
-
-  s("bf", {
-    d(1, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
-        return sn(1, {
-          t("\\mathbf{"),
-          i(1, "粗体"),
-          t("}"),
-        })
-      else
-        return sn(1, {
-          t("\\mathbf{"),
-          i(1, snip.env.TM_SELECTED_TEXT),
-          t("}"),
-        })
-      end
-    end),
-  }, {
-    condition = tex.in_mathzone,
-    show_condition = tex.in_mathzone,
-  }),
-
-  s("bf", {
-    d(1, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
-        return sn(1, {
-          t("{\\bf "),
-          i(1, "粗体"),
-          t("}"),
-        })
-      else
-        return sn(1, {
-          t("{\\bf "),
-          i(1, snip.env.TM_SELECTED_TEXT),
-          t("}"),
-        })
-      end
-    end),
-  }, {
-    condition = tex.in_text,
-    show_condition = tex.in_text,
-  }),
-
-  s("bsy", {
-    d(1, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
-        return sn(1, {
-          t("\\boldsymbol{"),
-          i(1, "粗体"),
-          t("}"),
-        })
-      else
-        return sn(1, {
-          t("\\boldsymbol{"),
-          i(1, snip.env.TM_SELECTED_TEXT),
-          t("}"),
-        })
-      end
-    end),
-  }, {
-    condition = tex.in_mathzone,
-    show_condition = tex.in_mathzone,
-  }),
 
   s({
     trig = "lr([{%[%(|<]?)([}%)>%]|]?)",
@@ -717,40 +563,6 @@ local snippets = {
     -- end,
   }),
 
-  s("txt", {
-    d(1, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
-        return sn(1, {
-          t("\\text{"),
-          i(1, "TEXT"),
-          t("}"),
-        })
-      else
-        return sn(1, {
-          t("\\text{"),
-          i(1, snip.env.TM_SELECTED_TEXT),
-          t("}"),
-        })
-      end
-    end),
-  }, {
-    condition = function()
-      -- local toggle = require("core.config.plugins.luasnip.utils").toggle
-      -- if toggle == nil then
-      -- return vim.fn["vimtex#syntax#in_mathzone"]() == 1
-      -- else
-      -- return true
-      -- end
-    end,
-    show_condition = function()
-      -- local toggle = require("core.config.plugins.luasnip.utils").toggle
-      -- if toggle == nil then
-      -- return vim.fn["vimtex#syntax#in_mathzone"]() == 1
-      -- else
-      -- return true
-      -- end
-    end,
-  }),
 
   s({
     trig = "(%l%l)(%l?%l?)",
@@ -1336,33 +1148,7 @@ local snippets = {
     i(2),
   }),
 
-  s("ssscn", {
-    t("\\subsubsection{"),
-    i(1, "Title"),
-    t("}"),
-    i(2),
-  }),
 
-  s("cha", {
-    t("\\chapter{"),
-    i(1, "Title"),
-    t("}"),
-    i(2),
-  }),
-
-  s("para", {
-    t("\\paragraph{"),
-    i(1, "Title"),
-    t("}"),
-    i(2),
-  }),
-
-  s("spara", {
-    t("\\subparagraph{"),
-    i(1, "Title"),
-    t("}"),
-    i(2),
-  }),
 
   s("par", {
     t("\\par"),
@@ -1551,18 +1337,6 @@ local snippets = {
     end,
   }),
 
-  s("sect", {
-    t("\\section{"),
-    i(1, "Title"),
-    t("}"),
-    i(2),
-  }),
-  s("bsec", {
-    t("\\subsection{"),
-    i(1, "Title"),
-    t("}"),
-    i(2),
-  }),
 
   s("cubox", {
     t("\\node[below left="),
@@ -1702,7 +1476,81 @@ local snippets = {
     extras.rep(1),
     t("}"),
     i(3)
-  })
+  }),
+  s("vs", create_tex_command("vspace")),
+  s("hs", create_tex_command("hspace")),
+  s("tbf", create_tex_command("textbf")),
+  s("tit", create_tex_command("textit")),
+  s({
+    trig = "tt",
+    wordTrig = false,
+  }, create_tex_command("texttt")),
+  s("sect", create_tex_command("section")),
+  s("bsec", create_tex_command("subsection")),
+  s("ssscn", create_tex_command("subsubsection")),
+  s("emp", create_tex_command("emph")),
+  s("para", create_tex_command("paragraph")),
+  s("spara", create_tex_command("subparagraph")),
+  s("rm", create_tex_command("mathrm"), {
+    condition = tex.in_mathzone,
+    show_condition = tex.in_mathzone,
+  }),
+  s("cha", create_tex_command("chapter")),
+
+  s("txt", create_tex_command("text"), {
+    condition = function()
+      -- local toggle = require("core.config.plugins.luasnip.utils").toggle
+      -- if toggle == nil then
+      -- return vim.fn["vimtex#syntax#in_mathzone"]() == 1
+      -- else
+      -- return true
+      -- end
+    end,
+    show_condition = function()
+      -- local toggle = require("core.config.plugins.luasnip.utils").toggle
+      -- if toggle == nil then
+      -- return vim.fn["vimtex#syntax#in_mathzone"]() == 1
+      -- else
+      -- return true
+      -- end
+    end,
+  }),
+
+  s("rm", {
+    t("{\\rm "),
+    d(1, dynamic_node_select_text),
+    t("}"),
+  }, {
+    condition = tex.in_text,
+    show_condition = tex.in_text,
+  }),
+
+  s("bf", {
+    t("\\mathbf{"),
+    d(1, dynamic_node_select_text),
+    t("}"),
+  }, {
+    condition = tex.in_mathzone,
+    show_condition = tex.in_mathzone,
+  }),
+
+  s("bf", {
+    t("{\\bf "),
+    d(1, dynamic_node_select_text),
+    t("}"),
+  }, {
+    condition = tex.in_text,
+    show_condition = tex.in_text,
+  }),
+
+  s("bsy", {
+    t("\\boldsymbol{"),
+    d(1, dynamic_node_select_text),
+    t("}"),
+  }, {
+    condition = tex.in_mathzone,
+    show_condition = tex.in_mathzone,
+  }),
 }
 
 return snippets

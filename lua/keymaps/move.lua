@@ -8,6 +8,13 @@ local function space_h()
   end
 end
 
+local function space_h_omode()
+  vim.api.nvim_exec2(
+    string.format(
+      [[exec "normal! v^"]] -- 注意转义 <Up>
+    ), {})
+end
+
 -- 0 默认不支持 count
 local function space_space_h()
   local count = vim.v.count1
@@ -172,8 +179,14 @@ return {
 
   -- 支持 count 可以向上
   ["<space>h"] = {
-    { space_h, "n" },
-    { "^",     { "x", "o" } }
+    { space_h,       "n" },
+    { "^",           "x" },
+    { space_h_omode, "o" }
+  },
+  ["<space>D"] = {
+    "xd^",
+    "n",
+    { noremap = true }
   },
   -- 支持 count 可以向下
   ["<space>l"] = { "g_", { "n", "x", "o" } },

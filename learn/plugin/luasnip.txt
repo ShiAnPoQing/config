@@ -214,7 +214,10 @@ type Fn = (argnode_text: string[][], parent, user_args1,...,user_argsn) => text:
 
 - parent： functionNode 的直接父节点。
           它包含在此处，因为它允许轻松访问可能在 functionNodes 中有用的一些信息（有关示例，请参阅 |luasnip-snippets-data|）。
-          许多代码片段将周围的代码片段作为 `parent` 进行访问，但如果 `functionNode` 嵌套在`snippetNode` 中，则直接父节点是 `snippetNode`，而不是周围的代码片段（只有周围的代码片段包含 `env` 或 `captures` 等数据）。
+          许多代码片段将周围的代码片段作为 `parent` 进行访问，
+          但如果 `functionNode` 嵌套在`snippetNode` 中，
+          则直接父节点是 `snippetNode`，而不是周围的代码片段
+          （只有周围的代码片段包含 `env` 或 `captures` 等数据）。
 - user_args：在 opts 中传递的 user_args
           请注意，可能有多个`user_args`（例如 `user_args1, ..., user_argsn`）。
 
