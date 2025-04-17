@@ -52,26 +52,9 @@ K.add({
     "n",
   },
   ["<C-[>"] = { "<C-O>", "n" },
-  -- ????  ["<C-F11>"] = { "<C-v>", { "i" } },
   ["<M-->"] = { "J", "x" },
   ["<C-.>"] = { "<C-T>", "i" },
   ["<C-space><C-,>"] = { "0<C-D>", "i" },
   ["<C-,>"] = { "<C-D>", "i" },
   ["<C-space><C-.>"] = { "^<C-D>", "i" },
-  -- ["<F3>"] = {
-  --   function()
-  --     local conf = require("telescope.config").values
-  --
-  --     require("telescope.pickers").new({}, {
-  --       prompt_title = "colors",
-  --       finder = require("telescope.finders").new_table {
-  --         results = { "red", "green", "blue" }
-  --       },
-  --       previewer = conf.file_previewer({}),
-  --       sorter = conf.generic_sorter({}),
-  --     }):find()
-  --   end,
-  --   "n"
-  -- }
-
 })

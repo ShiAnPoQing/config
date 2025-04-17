@@ -109,3 +109,16 @@ return {
     end,
   },
 }
+-- create custom telescope pickers
+--   function()
+--     local conf = require("telescope.config").values
+--
+--     require("telescope.pickers").new({}, {
+--       prompt_title = "colors",
+--       finder = require("telescope.finders").new_table {
+--         results = { "red", "green", "blue" }
+--       },
+--       previewer = conf.file_previewer({}),
+--       sorter = conf.generic_sorter({}),
+--     }):find()
+--   end,
