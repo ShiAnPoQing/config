@@ -46,7 +46,7 @@ return {
           L.moveLine(count, "down")
         end)
       end,
-      { "n" },
+      { "n", "i" },
     },
     {
       function()
@@ -71,7 +71,7 @@ return {
           L.moveLine(count, "up")
         end)
       end,
-      { "n" },
+      { "n", "i" },
     },
     {
       function()

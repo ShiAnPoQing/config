@@ -42,8 +42,15 @@ K.add({
   },
   ["<F7>"] = {
     function()
+      vim.api.nvim_exec2([[
+      execute "normal! \<Esc>gh"
+      ]], {})
     end,
-    "n",
+    "i",
+  },
+  ["<M-s>"] = {
+    "<Esc>gh",
+    "i"
   },
   ["<C-F10>"] = {
     function()

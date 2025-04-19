@@ -1552,6 +1552,14 @@ local snippets = {
     condition = tex.in_mathzone,
     show_condition = tex.in_mathzone,
   }),
+  s("ltx", {
+    t("\\LaTeX"),
+    i(0)
+  }),
+  s("tx", {
+    t("\\TeX"),
+    i(0)
+  })
 }
 
 return snippets
