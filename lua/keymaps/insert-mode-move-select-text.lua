@@ -63,18 +63,33 @@ local function move_select_text(action)
 end
 
 
+--- @param action "left"| "right"
+local function word_move_select_text(action)
+  vim.api.nvim_exec2([[
+  execute "normal! \<C-G>dep"
+  ]], {})
 
+  local text = vim.fn.getreg('"')
 
-
-
-
-
-
-
+  local space = text:match("%s*$")
+  print(#space)
+end
 
 
 
 return {
+  ["<C-o>"] = {
+    function()
+      word_move_select_text("right")
+    end,
+    "s"
+  },
+  ["<C-i>"] = {
+    function()
+      word_move_select_text("left")
+    end,
+    "s"
+  },
   ["<C-h>"] = {
     function()
       move_select_text("left")
@@ -88,7 +103,7 @@ return {
     "s"
   },
   ["<M-o>"] = {
-    "<S-right>",
+    "<C-G>e<C-G>",
     "s"
   },
   ["<M-i>"] = {
@@ -107,7 +122,7 @@ return {
   },
   -- insert mode into select mode: right word
   ["<M-`><M-o>"] = {
-    "<C-o>",
+    "<C-o>ve<C-G>",
     "i"
   },
   -- insert mode into select mode: left word

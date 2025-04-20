@@ -29,8 +29,6 @@ K.add({
       local char_count = vim.fn.strchars(str)
       local result = str:sub(1, vim.str_byteindex(str, char_count - 1))
       print(result)
-      -- print(#a)
-      -- print(a:sub(1, vim.str_byteindex(a, 1)))
     end,
     "n"
   },
