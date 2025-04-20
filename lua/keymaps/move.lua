@@ -183,6 +183,10 @@ return {
     { "^",           "x" },
     { space_h_omode, "o" }
   },
+  ["<space><M-h>"] = {
+    "I",
+    "n"
+  },
   ["<space>D"] = {
     "xd^",
     "n",
@@ -190,7 +194,10 @@ return {
   },
   -- 支持 count 可以向下
   ["<space>l"] = { "g_", { "n", "x", "o" } },
-
+  ["<space><M-l>"] = {
+    "A",
+    "n"
+  },
   ["<space>j"] = {
     { space_j_Omode, "o" },
     { "<Down>g_",    { "n", "x" } }
@@ -313,27 +320,46 @@ return {
   ["<space><space>gg"] = { "gg0", { "n", "x", "o" } },
   -- insert mode move: k,
   ["<M-k>"] = {
-    { "<Up>",    { "i", "c", "s" }, { silent = false } },
-    { "<C-W>k^", { "n" } },
-    { "<up>",    "t" },
+    { "<Up>", { "i", "c", "s" }, { silent = false } },
+    -- { "<C-W>k^", { "n" } },
+    -- {""},
+    { "<up>", "t" },
+  },
+  ["<M-C-k>"] = {
+    "<C-W>k^",
+    "n"
   },
   -- insert mode move: j,
   ["<M-j>"] = {
-    { "<Down>",  { "i", "c", "s" }, { silent = false } },
-    { "<C-W>j^", { "n" } },
-    { "<down>",  "t" },
+    { "<Down>", { "i", "c", "s" }, { silent = false } },
+    -- { "<C-W>j^", { "n" } },
+    { "<down>", "t" },
+  },
+  ["<M-C-j>"] = {
+    "<C-W>j^",
+    "n"
   },
   -- insert mode move: h,
   ["<M-h>"] = {
-    { "<left>",  { "i", "c", "s" }, { silent = false } },
-    { "<C-W>h^", { "n" } },
-    { "<left>",  "t" },
+    { "<left>", { "i", "c", "s" }, { silent = false } },
+    -- { "<C-W>h^", { "n" } },
+    { "i",      "n" },
+    { "<left>", "t" },
+  },
+  ["<M-C-h>"] = {
+    "<C-W>h^",
+    "n"
   },
   -- insert mode move: l,
   ["<M-l>"] = {
     { "<right>", { "i", "c", "s" }, { silent = false } },
-    { "<C-W>l^", { "n" } },
+    { "a",       "n" },
+    -- { "<C-W>l^", { "n" } },
     { "<right>", "t" },
+  },
+  ["<M-C-l>"] = {
+    "<C-W>l^",
+    "n"
   },
   -- insert mode move: exclusive words like e,
   ["<M-space><M-i>"] = {
@@ -386,14 +412,16 @@ return {
   -- insert mode move: Home(ignore space),
   ["<M-space><M-h>"] = {
     { "<C-o>I", { "i" } },
-    { "<C-W>H", "n" },
+    { "I",      "n" }
+    -- { "<C-W>H", "n" },
   },
   -- insert mode move: Home,
   ["<M-space><M-space><M-h>"] = { "<Home>", { "i", "c" }, { silent = false } },
   -- insert mode move: End,
   ["<M-space><M-l>"] = {
     { "<C-o>A", { "i" } },
-    { "<C-W>L", "n" },
+    { "A",      "n" }
+    -- { "<C-W>L", "n" },
   },
   -- insert mode move: End,
   ["<M-space><M-space><M-l>"] = { "<End>", { "i", "c" }, { silent = false } },

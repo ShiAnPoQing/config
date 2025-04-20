@@ -62,6 +62,18 @@ local function move_select_text(action)
   vim.api.nvim_exec2([[  execute "normal! gv\<C-g>"  ]], {})
 end
 
+
+
+
+
+
+
+
+
+
+
+
+
 return {
   ["<C-h>"] = {
     function()
@@ -74,5 +86,33 @@ return {
       move_select_text("right")
     end,
     "s"
-  }
+  },
+  ["<M-o>"] = {
+    "<S-right>",
+    "s"
+  },
+  ["<M-i>"] = {
+    "<S-left>",
+    "s"
+  },
+  -- insert mode into select mode: left
+  ["<M-`><M-h>"] = {
+    "<Esc>gh",
+    "i"
+  },
+  -- insert mode into select mode: right
+  ["<M-`><M-l>"] = {
+    "<C-o>gh",
+    "i"
+  },
+  -- insert mode into select mode: right word
+  ["<M-`><M-o>"] = {
+    "<C-o>",
+    "i"
+  },
+  -- insert mode into select mode: left word
+  ["<M-`><M-i>"] = {
+    "<Esc>gh<S-left>",
+    "i"
+  },
 }

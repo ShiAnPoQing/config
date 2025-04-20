@@ -68,10 +68,6 @@ K.add({
     end,
     "n",
   },
-  ["<M-s>"] = {
-    "<Esc>gh",
-    "i"
-  },
   ["<C-F10>"] = {
     function()
       require("search-manual").searchManual()

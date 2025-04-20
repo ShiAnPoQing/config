@@ -1,6 +1,41 @@
 local color_column = ""
 
 return {
+  [";nb"] = {
+    function()
+      if vim.opt["number"]:get() then
+        vim.opt.number = false
+      else
+        vim.opt.number = true
+      end
+    end,
+    "n"
+  },
+  [";rb"] = {
+    function()
+      if vim.opt["relativenumber"]:get() then
+        vim.opt.relativenumber = false
+      else
+        vim.opt.relativenumber = true
+      end
+    end,
+    "n"
+  },
+  [";tb"] = {
+    function()
+      if vim.opt["relativenumber"]:get() or vim.opt.number:get() then
+        vim.opt.relativenumber = false
+        vim.opt.number = false
+        return
+      end
+
+      if not vim.opt["relativenumber"]:get() and not vim.opt.number:get() then
+        vim.opt.relativenumber = true
+        vim.opt.number = true
+      end
+    end,
+    "n"
+  },
   [";cl"] = {
     function()
       color_column = color_column == "72" and "" or "72"
