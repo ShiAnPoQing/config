@@ -8,6 +8,7 @@ local function move_select_text(action)
   vim.api.nvim_exec2([[
   execute "normal! \<Esc>"
   ]], {})
+
   local select_start_mark = vim.api.nvim_buf_get_mark(0, "<")
   local select_end_mark = vim.api.nvim_buf_get_mark(0, ">")
   local start_row = select_start_mark[1]

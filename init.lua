@@ -1,6 +1,7 @@
 require("auto-command")
 require("options").setup()
 require("repeat").setup()
+require("concat-mode")
 local K = require("plugin-keymap")
 K.setup()
 
@@ -22,6 +23,10 @@ require("globals")
 require("lazy").setup("plugins")
 
 K.add({
+  ["<F9>"] = {
+    "A",
+    "n"
+  },
   ["<F8>"] = {
     function()
       vim.api.nvim_create_user_command('Custom',
@@ -42,11 +47,19 @@ K.add({
   },
   ["<F7>"] = {
     function()
-      vim.api.nvim_exec2([[
-      execute "normal! \<Esc>gh"
-      ]], {})
+      local keys = vim.api.nvim_replace_termcodes("ekk", true, false, true)
+
+      -- 方法 1.1：同步发送按键（直接执行）
+      vim.api.nvim_feedkeys(keys, "mt", false)
+
+      -- local q = vim.fn.getreg("q")
+      -- vim.api.nvim_exec2(
+      --   string.format(
+      --     [[exec "normal <space>e"]], -- 注意转义 <Up>
+      --     -- q
+      --   ), {})
     end,
-    "i",
+    "n",
   },
   ["<M-s>"] = {
     "<Esc>gh",
@@ -64,4 +77,8 @@ K.add({
   ["<C-space><C-,>"] = { "0<C-D>", "i" },
   ["<C-,>"] = { "<C-D>", "i" },
   ["<C-space><C-.>"] = { "^<C-D>", "i" },
+  ["<C-b>"] = {
+    "<C-G>o<C-G>",
+    "s"
+  }
 })
