@@ -24,7 +24,14 @@ require("lazy").setup("plugins")
 
 K.add({
   ["<F9>"] = {
-    "A",
+    function()
+      local str = "你好a啊"
+      local char_count = vim.fn.strchars(str)
+      local result = str:sub(1, vim.str_byteindex(str, char_count - 1))
+      print(result)
+      -- print(#a)
+      -- print(a:sub(1, vim.str_byteindex(a, 1)))
+    end,
     "n"
   },
   ["<F8>"] = {

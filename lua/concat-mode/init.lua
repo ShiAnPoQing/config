@@ -1,5 +1,5 @@
 local save_maps;
-local custom_maps = { "<M-j>", "<Esc>" }
+local custom_maps = { "<M-j>", "<Esc>", "<C-j>" }
 
 local function createFloatWin(winId, title)
   local win_height = vim.api.nvim_win_get_height(winId)
@@ -51,11 +51,16 @@ vim.api.nvim_create_user_command("ConcatMode", function(opts)
       "n",
       { buffer = true }
     },
+    ["<C-j>"] = {
+      "gJ",
+      "n",
+      { buffer = true }
+    },
     ["<Esc>"] = {
       function()
         for _, lhs in ipairs(custom_maps) do
           local map = save_maps[lhs]
-          pcall(vim.keymap.del, "n", lhs)
+          pcall(vim.keymap.del, "n", lhs, { buffer = 0 })
 
           if map then
             vim.keymap.set("n", lhs, map.rhs, { noremap = map.noremap == 1, silent = map.silent == 1 })

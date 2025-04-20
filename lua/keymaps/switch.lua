@@ -1,4 +1,13 @@
+local color_column = ""
+
 return {
+  [";cl"] = {
+    function()
+      color_column = color_column == "72" and "" or "72"
+      vim.opt.colorcolumn = color_column
+    end,
+    'n'
+  },
   [";ig"] = {
     function()
       require("switch-function").switch("ignorecase")

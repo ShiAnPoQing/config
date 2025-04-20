@@ -70,7 +70,7 @@ function M.setup()
 
     conceallevel = 0,
 
-    colorcolumn = "72",
+    -- colorcolumn = "72",
     -- textwidth = 80,
     list = false,
     listchars = {

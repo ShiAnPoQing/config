@@ -3,71 +3,73 @@ local function set_mark(start_pos, end_pos)
   vim.api.nvim_buf_set_mark(0, ">", end_pos[1], end_pos[2], {})
 end
 
+local get_new_line = {
+  ["left"] = function(select, line_to_start, line_to_end)
+    local line_to_start_end_char = vim.fn.strcharpart(line_to_start, vim.fn.strchars(line_to_start) - 1, 1)
+    local line_to_start_without_end_char = line_to_start:sub(1,
+      vim.str_byteindex(line_to_start, vim.fn.strchars(line_to_start) - 1))
+
+    local line = line_to_start_without_end_char .. select .. line_to_start_end_char .. line_to_end
+    local mark_offset = - #line_to_start_end_char
+
+    return line, mark_offset
+  end,
+  ["right"] = function(select, line_to_start, line_to_end)
+    local line_to_end_start_char = line_to_end:sub(1, vim.str_byteindex(line_to_end, 1))
+    local line_to_end_without_start_char = line_to_end:sub(vim.str_byteindex(line_to_end, 1) + 1)
+
+    local line = line_to_start .. line_to_end_start_char .. select .. line_to_end_without_start_char
+    local mark_offset = vim.str_byteindex(line_to_end, 1)
+
+    return line, mark_offset
+  end
+}
+
+local Action = {
+  ["left"] = {
+    is_boundary = function(line_to_start, line_to_end)
+      return line_to_start == ""
+    end
+  },
+  ["right"] = {
+    is_boundary = function(line_to_start, line_to_end)
+      return line_to_end == ""
+    end
+  }
+}
+
 --- @param action "left"|"right"
 local function move_select_text(action)
-  vim.api.nvim_exec2([[
-  execute "normal! \<Esc>"
-  ]], {})
+  vim.api.nvim_exec2([[  execute "normal! \<Esc>gvy"  ]], {})
 
-  local select_start_mark = vim.api.nvim_buf_get_mark(0, "<")
-  local select_end_mark = vim.api.nvim_buf_get_mark(0, ">")
-  local start_row = select_start_mark[1]
-  local start_col = select_start_mark[2]
-  local end_row = select_end_mark[1]
-  local end_col = select_end_mark[2]
+  local select = vim.fn.getreg('"')
+  local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
+  local _, end_col = unpack(vim.api.nvim_buf_get_mark(0, ">"))
 
   local line = vim.api.nvim_get_current_line()
   local line_to_start = line:sub(1, start_col)
-  local line_to_end = line:sub(select_end_mark[2] + 2)
-  local selects = vim.api.nvim_buf_get_text(0, start_row - 1, start_col, end_row - 1,
-    end_col + 1, {})
+  local line_to_end = line:sub(start_col + #select + 1)
 
-  local new_line;
-
-  local Action = {
-    ["left"] = {
-      get_new_line = function()
-        return line_to_start:sub(1, -2) .. selects[1] .. line_to_start:sub(-1) .. line_to_end
-      end,
-      set_new_mark = function()
-        set_mark({ start_row, start_col - 1 }, { start_row, end_col - 1 })
-      end
-    },
-    ["right"] = {
-      get_new_line = function()
-        return line_to_start .. line_to_end:sub(1, 1) .. selects[1] .. line_to_end:sub(2)
-      end,
-      set_new_mark = function()
-        set_mark({ start_row, start_col + 1 }, { start_row, end_col + 1 })
-      end
-    }
-  }
-
-  vim.api.nvim_buf_set_text(0, start_row - 1, start_col, end_row - 1,
-    end_col + 1, {})
-
-  if #selects == 1 then
-    new_line = Action[action].get_new_line()
+  if Action[action].is_boundary(line_to_start, line_to_end) then
+    vim.api.nvim_exec2([[  execute "normal! gv\<C-g>"  ]], {})
+    return
   end
+
+  local new_line, mark_offset = get_new_line[action](select, line_to_start, line_to_end)
   vim.api.nvim_buf_set_lines(0, start_row - 1, start_row, false, { new_line })
+  set_mark({ start_row, start_col + mark_offset }, { start_row, end_col + mark_offset })
 
-  Action[action].set_new_mark()
-
-  vim.api.nvim_exec2([[
-  execute "normal! gv\<C-g>"
-  ]], {})
+  vim.api.nvim_exec2([[  execute "normal! gv\<C-g>"  ]], {})
 end
 
-
-
 return {
-  ["<M-left>"] = {
+  ["<C-h>"] = {
     function()
       move_select_text("left")
     end,
     "s"
   },
-  ["<M-right>"] = {
+  ["<C-l>"] = {
     function()
       move_select_text("right")
     end,
