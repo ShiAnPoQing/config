@@ -29,9 +29,27 @@ return {
     ":split<cr>",
     "n",
   },
-  ["<space>="] = { "<C-W>=", "n" },
-  ["<space>-"] = { "<C-W>|<C-W>_^", "n" },
-  ["<M-n>"] = { "<C-W>n", "n" },
+  ["<C-M-=>"] = { "<C-W>=", "n" },
+  ["<C-M-->"] = { "<C-W>|<C-W>_^", "n" },
+  ["<C-M-n>"] = { "<C-W>n", "n" },
+  ["<space><C-M-n>"] = {
+    function()
+      vim.api.nvim_exec2([[
+    vsplit
+    e n
+    ]], {})
+    end,
+    "n"
+  },
+  ["<C-M-space><C-M-n>"] = {
+    function()
+      vim.api.nvim_exec2([[
+    vsplit
+    e n
+    ]], {})
+    end,
+    "n"
+  },
   ["<M-S-l>"] = {
     function()
       require("windows-layout").win_exchange("right")

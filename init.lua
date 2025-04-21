@@ -4,6 +4,7 @@ require("repeat").setup()
 require("concat-mode")
 local K = require("plugin-keymap")
 K.setup()
+require("win-action").setup()
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -28,7 +29,6 @@ K.add({
       local str = "你好a啊"
       local char_count = vim.fn.strchars(str)
       local result = str:sub(1, vim.str_byteindex(str, char_count - 1))
-      print(result)
     end,
     "n"
   },

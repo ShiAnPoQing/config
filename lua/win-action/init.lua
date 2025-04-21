@@ -1,6 +1,6 @@
 local M = {}
 
-vim.api.nvim_set_hl(0, "MyFloatWin", { bg = "#8A2BE2" })
+vim.api.nvim_set_hl(0, "WinActionFloat", { bg = "#8A2BE2" })
 
 M.collectWinInfo = {}
 M.sign = false
@@ -141,7 +141,7 @@ local function createFloatWin(winId, mark, title)
   }
 
   local float_win = vim.api.nvim_open_win(float_bufnr, false, win_config)
-  vim.api.nvim_win_set_option(float_win, "winhl", "Normal:MyFloatWin")
+  vim.api.nvim_win_set_option(float_win, "winhl", "Normal:WinActionFloat")
   vim.api.nvim_buf_set_option(float_bufnr, "modifiable", false)
   vim.api.nvim_buf_set_option(float_bufnr, "readonly", true)
 end
@@ -224,6 +224,15 @@ function M.exchange(bufnr, currentWinId, winId)
   clearFloatWin()
   delActionMap(bufnr)
   delEscMap(bufnr)
+end
+
+function M.setup()
+  vim.api.nvim_create_user_command("WindowFocus", function()
+    M.windowJump()
+  end, {})
+  vim.api.nvim_create_user_command("WindowExchange", function()
+    M.windowExchange()
+  end, {})
 end
 
 return M
