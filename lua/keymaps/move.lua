@@ -412,7 +412,8 @@ return {
   -- insert mode move: Home(ignore space),
   ["<M-space><M-h>"] = {
     { "<C-o>I", { "i" } },
-    { "I",      "n" }
+    { "I",      "n" },
+    { "<Home>", "t" }
     -- { "<C-W>H", "n" },
   },
   -- insert mode move: Home,
@@ -420,7 +421,8 @@ return {
   -- insert mode move: End,
   ["<M-space><M-l>"] = {
     { "<C-o>A", { "i" } },
-    { "A",      "n" }
+    { "A",      "n" },
+    { "<End>",  "t" }
     -- { "<C-W>L", "n" },
   },
   -- insert mode move: End,

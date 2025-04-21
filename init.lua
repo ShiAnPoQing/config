@@ -26,9 +26,18 @@ require("lazy").setup("plugins")
 K.add({
   ["<F9>"] = {
     function()
-      local str = "你好a啊"
-      local char_count = vim.fn.strchars(str)
-      local result = str:sub(1, vim.str_byteindex(str, char_count - 1))
+      local function add_virtual_lines()
+        local ns_id = vim.api.nvim_create_namespace('virtual_lines')
+
+        vim.api.nvim_buf_set_extmark(0, ns_id, 2, 0, {
+          virt_lines = {
+            { { "Virtual Line 1", "Comment" } },
+            { { "Virtual Line 2", "String" } }
+          },
+          virt_lines_above = true
+        })
+      end
+      add_virtual_lines()
     end,
     "n"
   },

@@ -83,6 +83,7 @@ return {
     { "<Esc>ea",   { "i" } },
     { "<S-right>", { "c" } },
     { "ea",        { "n" } },
+    { "<C-right>", "t" }
   },
   -- normal mode into insert mode: Ei
   ["<M-S-o>"] = {
@@ -94,6 +95,7 @@ return {
     { "<Esc>bi",  { "i" } },
     { "<S-left>", { "c" } },
     { "bi",       { "n" } },
+    { "<C-left>", "t" }
   },
   -- normal mode into insert mode: Bi
   ["<M-S-i>"] = {
