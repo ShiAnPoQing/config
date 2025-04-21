@@ -27,6 +27,9 @@ local ms = ls.multi_snippet
 local k = require("luasnip.nodes.key_indexer").new_key
 
 local snippets = {
+  s(".help", {
+    t("vim:tw=78:ts=8:noet:ft=help:norl:")
+  }),
   s(
     {
       trig = '""',

@@ -1,7 +1,7 @@
 return {
-	"echasnovski/mini.nvim",
-	version = "*",
-	config = function()
-		-- require("mini.indentscope").setup()
-	end,
+  "echasnovski/mini.nvim",
+  version = "*",
+  config = function()
+    require("mini.doc").setup()
+  end,
 }
