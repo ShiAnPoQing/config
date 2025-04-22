@@ -1,3 +1,64 @@
+local function get_win_info()
+  local win = vim.api.nvim_get_current_win()
+  local win_info = vim.fn.getwininfo(win)[1]
+  return win_info
+end
+
+local function get_leftcol()
+  return get_win_info().leftcol
+end
+
+local function get_rightcol(line_displaywidth)
+  local win_info = get_win_info()
+  local screen_width = win_info.width - win_info.textoff
+  return line_displaywidth - win_info.leftcol - screen_width
+end
+
+local function left_move()
+  local line = vim.api.nvim_get_current_line()
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local col = pos[2]
+  local virtcol = vim.fn.virtcol(".")
+  local line_displaywidth = vim.fn.strdisplaywidth(line)
+
+  local line_to_end_without_space_count = #line:match('(.-)%s*$')
+  local start_space_count = #line:match("^%s*")
+
+  if virtcol > line_displaywidth then
+    vim.api.nvim_feedkeys("$", "n", true)
+    return
+  end
+
+  if col + 1 > line_to_end_without_space_count and col + 1 <= #line then
+    vim.api.nvim_feedkeys("g_", "n", true)
+    return
+  end
+
+  if col <= start_space_count then
+    vim.api.nvim_feedkeys("0", "n", true)
+    return
+  end
+
+  local leftcol = get_leftcol()
+
+  if leftcol > 0 then
+    local before_pos = vim.api.nvim_win_get_cursor(0)
+    vim.api.nvim_feedkeys("g0", "n", true)
+    vim.schedule(function()
+      local after_pos = vim.api.nvim_win_get_cursor(0)
+      if before_pos[2] == after_pos[2] then
+        vim.api.nvim_feedkeys("ze", "n", true)
+      end
+    end)
+    return
+  end
+
+  if col + 1 > start_space_count and col + 1 <= line_to_end_without_space_count then
+    vim.api.nvim_feedkeys("^", "n", true)
+    return
+  end
+end
+
 local function right_move()
   local line = vim.api.nvim_get_current_line()
   local pos = vim.api.nvim_win_get_cursor(0)
@@ -8,11 +69,6 @@ local function right_move()
   local line_to_end_without_space_count = #line:match('(.-)%s*$')
   local start_space_count = #line:match("^%s*")
 
-  local win = vim.api.nvim_get_current_win()
-  local win_info = vim.fn.getwininfo(win)[1]
-  local leftcol = win_info.leftcol
-  local screen_width = win_info.width - win_info.textoff
-  local rightcol = line_displaywidth - leftcol - screen_width
 
   if col < start_space_count then
     vim.api.nvim_feedkeys("^", "n", true)
@@ -20,6 +76,7 @@ local function right_move()
   end
 
 
+  local rightcol = get_rightcol(line_displaywidth)
   if rightcol > 0 then
     local before_pos = vim.api.nvim_win_get_cursor(0)
     vim.api.nvim_feedkeys("g$", "n", true)
@@ -48,60 +105,16 @@ local function right_move()
     return
   end
 end
+
 local MoveAction = {
   ["left"] = {
-    move = function()
-      local line = vim.api.nvim_get_current_line()
-      local pos = vim.api.nvim_win_get_cursor(0)
-      local col = pos[2]
-      local virtcol = vim.fn.virtcol(".")
-      local line_displaywidth = vim.fn.strdisplaywidth(line)
-
-      local line_to_end_without_space_count = #line:match('(.-)%s*$')
-      local start_space_count = #line:match("^%s*")
-
-      if virtcol > line_displaywidth then
-        vim.api.nvim_feedkeys("$", "n", true)
-        return
-      end
-
-      if col + 1 > line_to_end_without_space_count and col + 1 <= #line then
-        vim.api.nvim_feedkeys("g_", "n", true)
-        return
-      end
-
-      if col <= start_space_count then
-        vim.api.nvim_feedkeys("0", "n", true)
-        return
-      end
-
-
-      local win = vim.api.nvim_get_current_win()
-      local win_info = vim.fn.getwininfo(win)[1]
-      local leftcol = win_info.leftcol
-
-      if leftcol > 0 then
-        local before_pos = vim.api.nvim_win_get_cursor(0)
-        vim.api.nvim_feedkeys("g0", "n", true)
-        vim.schedule(function()
-          local after_pos = vim.api.nvim_win_get_cursor(0)
-          if before_pos[2] == after_pos[2] then
-            vim.api.nvim_feedkeys("ze", "n", true)
-          end
-        end)
-        return
-      end
-
-      if col + 1 > start_space_count and col + 1 <= line_to_end_without_space_count then
-        vim.api.nvim_feedkeys("^", "n", true)
-        return
-      end
-    end
+    move = left_move
   },
   ["right"] = {
     move = right_move
   }
 }
+
 --- @param action "left"|"right"
 local function increment_move(action)
   MoveAction[action].move()

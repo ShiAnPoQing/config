@@ -224,6 +224,14 @@ return {
     "<C-o>gh",
     "i"
   },
+  ["<M-`><M-`><M-l>"] = {
+    "<C-o><C-v><C-G>",
+    "i"
+  },
+  ["<M-`><M-`><M-h>"] = {
+    "<Esc><C-v><C-G>",
+    "i"
+  },
   -- insert mode into select mode: right word
   ["<M-`><M-o>"] = {
     "<C-o>ve<C-G>",

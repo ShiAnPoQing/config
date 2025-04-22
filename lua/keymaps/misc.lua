@@ -112,5 +112,25 @@ return {
   -- repeat latest F
   ["<M-S-f>"] = { ",", { "n" } },
   -- block visual
+  -- virtualedit = "all"
   ["<space>v"] = { "<C-v>", { "n", "x" } },
+  -- virtualedit = "none"
+  ["<space><space>v"] = {
+    function()
+      vim.opt.virtualedit = "none"
+      vim.api.nvim_exec2([[
+      execute "normal! $\<C-v>"
+      ]], {})
+
+      local group = vim.api.nvim_create_augroup('CustomModeChanged', { clear = true })
+      vim.api.nvim_create_autocmd('ModeChanged', {
+        group = group,
+        callback = function(ev)
+          vim.opt.virtualedit = "all"
+          vim.api.nvim_del_autocmd(ev.id)
+        end
+      })
+    end,
+    "n"
+  }
 }
