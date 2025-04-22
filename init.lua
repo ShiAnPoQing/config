@@ -26,18 +26,23 @@ require("lazy").setup("plugins")
 K.add({
   ["<F9>"] = {
     function()
-      local function add_virtual_lines()
-        local ns_id = vim.api.nvim_create_namespace('virtual_lines')
+      local win = vim.api.nvim_get_current_win()
+      local pos = vim.api.nvim_win_get_cursor(win)
+      local a = vim.api.nvim_win_get_width(win)
+      print(vim.fn.virtcol("."), a, b)
 
-        vim.api.nvim_buf_set_extmark(0, ns_id, 2, 0, {
-          virt_lines = {
-            { { "Virtual Line 1", "Comment" } },
-            { { "Virtual Line 2", "String" } }
-          },
-          virt_lines_above = true
-        })
-      end
-      add_virtual_lines()
+      -- local function add_virtual_lines()
+      --   local ns_id = vim.api.nvim_create_namespace('virtual_lines')
+      --
+      --   vim.api.nvim_buf_set_extmark(0, ns_id, 2, 0, {
+      --     virt_lines = {
+      --       { { "Virtual Line 1", "Comment" } },
+      --       { { "Virtual Line 2", "String" } }
+      --     },
+      --     virt_lines_above = true
+      --   })
+      -- end
+      -- add_virtual_lines()
     end,
     "n"
   },
@@ -90,5 +95,17 @@ K.add({
   ["<C-b>"] = {
     "<C-G>o<C-G>",
     "s"
-  }
+  },
+  ["a"] = {
+    "<nop>",
+    "n"
+  },
+  ["s"] = {
+    "<nop>",
+    "n"
+  },
+  ["<bs>"] = {
+    "s",
+    "n"
+  },
 })

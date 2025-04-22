@@ -53,6 +53,7 @@ local function space_j_Omode()
     ), {})
 end
 
+
 return {
   ["h"] = {
     function()
@@ -193,7 +194,9 @@ return {
     { noremap = true }
   },
   -- 支持 count 可以向下
-  ["<space>l"] = { "g_", { "n", "x", "o" } },
+  ["<space>l"] = {
+    { "g_", { "x", "o", "n" } }
+  },
   ["<space><M-l>"] = {
     "A",
     "n"
