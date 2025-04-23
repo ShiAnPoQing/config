@@ -136,6 +136,12 @@ end
 
 --- @param action "left" | "right"
 local function start_end_move_select_text(action)
+  local mode = vim.api.nvim_get_mode()
+
+  if mode.mode == "" then
+  end
+  -- 
+
   vim.api.nvim_exec2([[
   execute "normal! \<C-G>d"
   ]], {})
@@ -147,8 +153,8 @@ local function start_end_move_select_text(action)
     local row, col = unpack(vim.api.nvim_win_get_cursor(0))
     local text = vim.fn.getreg('"')
 
-    vim.api.nvim_buf_set_mark(0, "<", row, 0, {})
-    vim.api.nvim_buf_set_mark(0, ">", row, #text - 1, {})
+    vim.api.nvim_buf_set_mark(0, "<", row, col - #text + 1, {})
+    vim.api.nvim_buf_set_mark(0, ">", row, col, {})
     vim.api.nvim_exec2([[
     execute "normal! gv\<C-G>"
     ]], {})
@@ -159,6 +165,7 @@ local function start_end_move_select_text(action)
 
     local row, col = unpack(vim.api.nvim_win_get_cursor(0))
     local text = vim.fn.getreg('"')
+    print(text)
 
     vim.api.nvim_buf_set_mark(0, "<", row, col + 1, {})
     vim.api.nvim_buf_set_mark(0, ">", row, col + #text, {})

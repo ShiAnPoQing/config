@@ -22,7 +22,9 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("globals")
-require("lazy").setup("plugins")
+require("lazy").setup({
+  { import = "plugins" },
+})
 
 K.add({
   ["<F9>"] = {
