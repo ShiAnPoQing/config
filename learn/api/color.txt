@@ -1,0 +1,30 @@
+nvim_get_color_by_name({name})                      *nvim_get_color_by_name()*
+    返回 |nvim_get_color_map()| 颜色名称或 "#rrggbb" 十六进制字符串的 24 位 RGB 值。
+
+    示例：
+    >vim
+        :echo nvim_get_color_by_name("Pink")
+        :echo nvim_get_color_by_name("#cbcbcb")
+<
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {name}  颜色名称或 "#rrggbb" 字符串
+
+    返回：~
+        24 位 RGB 值，或无效参数时为 -1。
+
+nvim_get_color_map()                                    *nvim_get_color_map()*
+    返回颜色名称和 RGB 值的映射。
+
+    键是颜色名称（例如 "Aqua"），值是 24 位 RGB 颜色值（例如 65535）。
+
+    属性：~
+        自 0.1.0 起
+
+    返回：~
+        颜色名称和 RGB 值的映射。
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

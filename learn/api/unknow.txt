@@ -1,0 +1,151 @@
+                                                      *nvim_set_client_info()*
+nvim_set_client_info({name}, {version}, {type}, {methods}, {attributes})
+    自我识别客户端，并在通道上设置可选标志。定义 |nvim_get_chan_info()| 返回的 `client` 对象。
+
+    客户端应在连接后立即调用此函数，以提供调试和编排的提示。（注意：有总比没有好！字段是可选的，但至少设置 `name`。）
+
+    可以多次调用；如果合适，调用者应合并旧信息。示例：库首先识别通道，然后使用该库的插件稍后识别自己。
+
+    属性：~
+        |RPC| 仅
+        自 0.3.0 起
+
+    参数：~
+      • {name}        客户端简称。设置 |nvim_get_chan_info()| 的 `client.name` 字段。
+      • {version}     描述版本的字典，具有以下（可选）键：
+                      • "major" 主版本（如果未设置，则默认为 0，表示尚未发布）
+                      • "minor" 次版本
+                      • "patch" 补丁号
+                      • "prerelease" 描述预发布的字符串，如 "dev" 或 "beta1"
+                      • "commit" 提交的哈希或类似标识符
+      • {type}        必须是以下值之一。客户端库应默认为 "remote"，除非用户覆盖。
+                      • "remote" 远程客户端连接 "Nvim 风格" MessagePack-RPC（响应必须按请求的逆序）。|msgpack-rpc|
+                      • "msgpack-rpc" 远程客户端通过完全符合 MessagePack-RPC 的协议连接到 Nvim。
+                      • "ui" 图形前端
+                      • "embedder" 使用 Nvim 作为组件的应用程序（例如，实现 vim 模式的 IDE/编辑器）。
+                      • "host" 插件主机，通常由 nvim 启动
+                      • "plugin" 单个插件，由 nvim 启动
+      • {methods}     客户端中的内置方法。对于主机，这不包括稍后将发现的插件方法。键应为方法名称，值为字典，具有以下（可选）键（将来版本的 Nvim 可能会添加更多键，因此未知键将被忽略。客户端必须仅使用此版本或更高版本的 Nvim 中定义的键）：
+                      • "async" 如果为 true，则作为通知发送。如果为 false 或未指定，则使用阻塞请求
+                      • "nargs" 参数数量。可以是单个整数或两个整数的数组，最小值和最大值（含）。
+      • {attributes}  任意字符串：字符串映射的非正式客户端属性。建议的键：
+                      • "pid": 进程 id。
+                      • "website": 客户端主页 URL（例如 GitHub 仓库）
+                      • "license": 许可证描述（"Apache 2"、"GPLv3"、"MIT" 等）
+                      • "logo": 图像的 URI 或路径，最好是小徽标或图标。建议使用 .png 或 .svg 格式。
+
+
+nvim_load_context({dict})                                *nvim_load_context()*
+    从给定的 |context| 映射设置当前编辑器状态。
+
+    属性：~
+        自 0.4.0 起
+
+    参数：~
+      • {dict}  |Context| 映射。
+
+nvim_list_uis()                                              *nvim_list_uis()*
+    获取表示附加 UI 的字典列表。
+
+    示例：Nvim 内置 |TUI| 设置其通道信息，如 |startup-tui| 中所述。特别是，它将 `client.name` 设置为 "nvim-tui"。因此，您可以通过检查每个 UI 的客户端名称来检查 TUI 是否正在运行：
+    >lua
+        vim.print(vim.api.nvim_get_chan_info(vim.api.nvim_list_uis()[1].chan).client.name)
+<
+
+    属性：~
+        自 0.3.0 起
+
+    返回：~
+        UI 字典数组，每个字典具有以下键：
+        • "height" 请求的 UI 高度
+        • "width" 请求的 UI 宽度
+        • "rgb" 如果 UI 使用 RGB 颜色则为 true（false 表示 |cterm-colors|）
+        • "ext_..." 请求的 UI 扩展，参见 |ui-option|
+        • "chan" 远程 UI 的 |channel-id|
+
+nvim_list_chans()                                          *nvim_list_chans()*
+    获取有关所有打开通道的信息。
+
+    属性：~
+        自 0.3.0 起
+
+    返回：~
+        字典数组，每个字典描述一个通道，格式如 |nvim_get_chan_info()|。
+
+nvim_get_proc_children({pid})                       *nvim_get_proc_children()*
+    获取进程 `pid` 的直接子进程。
+
+    属性：~
+        自 0.3.0 起
+
+    返回：~
+        子进程 id 的数组，如果未找到进程则为空。
+
+nvim_get_proc({pid})                                         *nvim_get_proc()*
+    获取描述进程 `pid` 的信息。
+
+    属性：~
+        自 0.3.0 起
+
+    返回：~
+        进程属性的映射，如果未找到进程则为 NIL。
+
+nvim_get_chan_info({chan})                              *nvim_get_chan_info()*
+    获取有关通道的信息。
+
+    参见 |nvim_list_uis()| 了解如何获取通道信息的示例。
+
+    属性：~
+        自 0.3.0 起
+
+    参数：~
+      • {chan}  channel_id，或当前通道为 0
+
+    返回：~
+        包含以下键的通道信息字典：
+        • "id" 通道 id。
+        • "argv"（可选）作业参数列表。
+        • "stream" 通道的底层流。
+          • "stdio" 此 Nvim 实例的标准输入和标准输出
+          • "stderr" 此 Nvim 实例的标准错误
+          • "socket" TCP/IP 套接字或命名管道
+          • "job" 通过其标准输入/输出进行通信的作业。
+        • "mode" 通道上接收的数据的解释方式。
+          • "bytes" 发送和接收原始字节。
+          • "terminal" |terminal| 实例解释 ASCII 序列。
+          • "rpc" |RPC| 通道上的通信处于活动状态。
+        • "pty"（可选）伪终端的名称。在 POSIX 系统上，这是一个设备路径，如 "/dev/pts/1"。如果未知，仍会存在键，如果使用了 pty（例如 Windows 上的 conpty）。
+        • "buffer"（可选）连接到 |terminal| 实例的缓冲区。
+        • "client"（可选）关于对等方（通道另一端的客户端）的信息，由 |nvim_set_client_info()| 设置。
+
+
+nvim_get_api_info()                                      *nvim_get_api_info()*
+    返回一个 2 元组（数组），其中项目 0 是当前通道 id，项目 1 是 |api-metadata| 映射（字典）。
+
+    属性：~
+        |api-fast|
+        |RPC| 仅
+        自 0.1.0 起
+
+    返回：~
+        2 元组 `[{channel-id}, {api-metadata}]`
+
+nvim_chan_send({chan}, {data})                              *nvim_chan_send()*
+    将数据发送到通道 `id`。对于作业，它将其写入进程的标准输入。
+    对于标准输入/输出通道 |channel-stdio|，它将其写入 Nvim 的标准输出。
+    对于内部终端实例（|nvim_open_term()|），它直接写入终端输出。
+    有关更多信息，请参见 |channel-bytes|。
+
+    此函数写入原始数据，而不是 RPC 消息。
+    如果通道是使用 `rpc=true` 创建的，则通道期望 RPC 消息，请使用 |vim.rpcnotify()| 和 |vim.rpcrequest()|。
+
+    属性：~
+        |RPC| 仅
+        Lua |vim.api| 仅
+        自 0.5.0 起
+
+    参数：~
+      • {chan}  通道的 id
+      • {data}  要写入的数据。8 位清洁：可以包含 NUL 字节。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

@@ -89,6 +89,7 @@ function M.setup()
     foldmethod = "indent",
     foldexpr = "nvim_treesitter#foldexpr()",
     foldenable = false,
+    pumheight = 8
   }
 
   --vim.opt.whichwrap:append

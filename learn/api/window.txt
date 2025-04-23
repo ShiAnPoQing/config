@@ -1,0 +1,307 @@
+==============================================================================
+窗口函数                                                  *api-window*
+
+nvim_win_call({window}, {fun})                               *nvim_win_call()*
+    使用窗口作为临时当前窗口调用函数。
+
+    属性：~
+        仅限 Lua |vim.api|
+        自 0.5.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+      • {fun}     在窗口内调用的函数（目前仅限 Lua 可调用）
+
+    返回：~
+        函数的返回值。
+
+    另请参见：~
+      • |win_execute()|
+      • |nvim_buf_call()|
+
+nvim_win_close({window}, {force})                           *nvim_win_close()*
+    关闭窗口（类似于带有 |window-ID| 的 |:close|）。
+
+    属性：~
+        当 |textlock| 激活时不允许
+        自 0.4.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+      • {force}   类似于 `:close!` 的行为。可以关闭具有未写入更改的缓冲区的最后一个窗口。即使未设置 'hidden'，缓冲区也将变为隐藏。
+
+nvim_win_del_var({window}, {name})                        *nvim_win_del_var()*
+    移除窗口范围（w:）的变量
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+      • {name}    变量名称
+
+nvim_win_get_buf({window})                                *nvim_win_get_buf()*
+    获取窗口中的当前缓冲区
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+
+    返回：~
+        缓冲区 id
+
+nvim_win_get_cursor({window})                          *nvim_win_get_cursor()*
+    获取给定窗口的 (1,0) 索引、缓冲区相对的光标位置（显示相同缓冲区的不同窗口具有独立的光标位置）。|api-indexing|
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+
+    返回：~
+        (row, col) 元组
+
+    另请参见：~
+      • |getcurpos()|
+
+nvim_win_get_height({window})                          *nvim_win_get_height()*
+    获取窗口高度
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+
+    返回：~
+        以行数为单位的高度
+
+nvim_win_get_number({window})                          *nvim_win_get_number()*
+    获取窗口编号
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+
+    返回：~
+        窗口编号
+
+nvim_win_get_position({window})                      *nvim_win_get_position()*
+    获取窗口在显示单元格中的位置。第一个位置为零。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+
+    返回：~
+        窗口位置的 (row, col) 元组
+
+
+nvim_win_get_var({window}, {name})                        *nvim_win_get_var()*
+    获取窗口范围（w:）的变量
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+      • {name}    变量名称
+
+    返回：~
+        变量值
+
+nvim_win_get_width({window})                            *nvim_win_get_width()*
+    获取窗口宽度
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+
+    返回：~
+        以列数为单位的宽度
+
+nvim_win_hide({window})                                      *nvim_win_hide()*
+    关闭窗口并隐藏其包含的缓冲区（类似于带有 |window-ID| 的 |:hide|）。
+
+    类似于 |:hide|，缓冲区变为隐藏，除非另一个窗口正在编辑它，或者 'bufhidden' 是 `unload`、`delete` 或 `wipe`，与 |:close| 或 |nvim_win_close()| 相反，这将关闭缓冲区。
+
+    属性：~
+        当 |textlock| 激活时不允许
+        自 0.5.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+nvim_win_is_valid({window})                              *nvim_win_is_valid()*
+    检查窗口是否有效
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+
+    返回：~
+        如果窗口有效则为 true，否则为 false
+
+nvim_win_set_buf({window}, {buffer})                      *nvim_win_set_buf()*
+    在窗口中设置当前缓冲区，无副作用
+
+    属性：~
+        当 |textlock| 激活时不允许
+        自 0.3.2 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+      • {buffer}  缓冲区 id
+
+nvim_win_set_cursor({window}, {pos})                   *nvim_win_set_cursor()*
+    在窗口中设置 (1,0) 索引的光标位置。|api-indexing| 即使窗口不是当前窗口，也会滚动窗口。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+      • {pos}     表示新位置的 (row, col) 元组
+
+nvim_win_set_height({window}, {height})                *nvim_win_set_height()*
+    设置窗口高度。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+      • {height}  以行数为单位的高度
+
+nvim_win_set_hl_ns({window}, {ns_id})                   *nvim_win_set_hl_ns()*
+    为窗口设置高亮命名空间。这将使用为此命名空间定义的高亮，但在缺失时回退到全局高亮（ns=0）。
+
+    这优先于 'winhighlight' 选项。
+
+    属性：~
+        自 0.8.0 起
+
+    参数：~
+      • {ns_id}   要使用的命名空间
+
+nvim_win_set_var({window}, {name}, {value})               *nvim_win_set_var()*
+    设置窗口范围（w:）的变量
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+      • {name}    变量名称
+      • {value}   变量值
+
+nvim_win_set_width({window}, {width})                   *nvim_win_set_width()*
+    设置窗口宽度。仅当屏幕垂直分割时才会成功。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+      • {width}   以列数为单位的宽度
+
+nvim_win_text_height({window}, {opts})                *nvim_win_text_height()*
+    计算给定窗口中一段文本占用的屏幕行数。适用于屏幕外文本，并考虑折叠。
+
+    差异填充或虚拟行在行上方时被视为该行的一部分，除非行在 "start_row" 上并指定了 "start_vcol"。
+
+    差异填充或虚拟行在最后一个缓冲区行下方时，在省略 "end_row" 时计入结果。
+
+    行索引类似于 |nvim_buf_get_text()|。
+
+    属性：~
+        自 0.10.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0。
+      • {opts}    可选参数：
+                  • start_row: 起始行索引，0 基包含。当省略时从最顶部开始。
+                  • end_row: 结束行索引，0 基包含。当省略时在最底部结束。
+                  • start_vcol: "start_row" 上的起始虚拟列索引，0 基包含，向下舍入到完整屏幕行。当省略时包含整行。
+                  • end_vcol: "end_row" 上的结束虚拟列索引，0 基排除，向上舍入到完整屏幕行。当省略时包含整行。
+
+    返回：~
+        包含文本高度信息的字典，具有以下键：
+        • all: 范围占用的屏幕行总数。
+        • fill: 其中的差异填充或虚拟行数。
+
+    另请参见：~
+      • |virtcol()| 用于文本宽度。
+
+
+nvim_set_current_win({window})                        *nvim_set_current_win()*
+    设置当前窗口（并隐式设置标签页）。
+
+    属性：~
+        当 |textlock| 激活或在 |cmdwin| 中时不允许
+        自 0.1.0 起
+
+    参数：~
+      • {window}  要聚焦的 |window-ID|
+
+
+==============================================================================
+浮动窗口				*api-floatwin* *floating-windows*
+
+浮动窗口（“浮动”）显示在普通窗口之上。
+这对于实现简单的小部件很有用，例如显示在光标旁边的工具提示。
+浮动窗口是完全功能的窗口，支持用户编辑、常见的 |api-window| 调用和大多数窗口选项（除了 'statusline'）。
+
+
+创建浮动窗口的两种方式：
+- |nvim_open_win()| 创建一个新窗口（需要一个缓冲区，参见 |nvim_create_buf()|）
+- |nvim_win_set_config()| 将普通窗口重新配置为浮动窗口
+
+要关闭它，请使用 |nvim_win_close()| 或 |:close| 等命令。
+
+要检查窗口是否为浮动窗口，请检查其配置中的 `relative` 选项是否非空：>lua
+
+    if vim.api.nvim_win_get_config(window_id).relative ~= '' then
+      -- 具有此 window_id 的窗口是浮动的
+    end
+<
+
+缓冲区文本可以通过典型机制（语法高亮，|api-highlights|）进行高亮。
+|hl-NormalFloat| 组高亮普通文本；'winhighlight' 可以像往常一样用于本地覆盖组。
+浮动窗口继承当前窗口的选项；在 |nvim_open_win()| 中指定 `style=minimal` 以禁用各种视觉功能，例如 'number' 列。
+
+
+浮动窗口特定的其他高亮组：
+- |hl-FloatBorder| 用于窗口的边框
+- |hl-FloatTitle| 用于窗口的标题
+- |hl-FloatFooter| 用于窗口的页脚
+
+目前，浮动窗口不支持某些小部件，如滚动条。
+
+|:mksession| 的输出不包括用于恢复浮动窗口的命令。
+
+示例：创建一个带有临时缓冲区的浮动窗口：
+>vim
+
+    let buf = nvim_create_buf(v:false, v:true)
+    call nvim_buf_set_lines(buf, 0, -1, v:true, ["test", "text"])
+    let opts = {'relative': 'cursor', 'width': 10, 'height': 2, 'col': 0,
+        \ 'row': 1, 'anchor': 'NW', 'style': 'minimal'}
+    let win = nvim_open_win(buf, 0, opts)
+    " 可选：更改高亮，否则使用 Pmenu
+    call nvim_set_option_value('winhl', 'Normal:MyHighlight', {'win': win})
+<
+
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

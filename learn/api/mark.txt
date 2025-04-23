@@ -1,0 +1,442 @@
+==============================================================================
+扩展标记                       *api-extended-marks* *extmarks* *extmark*
+
+扩展标记（extmarks）表示缓冲区注释，跟踪缓冲区中的文本更改。
+它们可以表示光标、折叠、拼写错误的单词，任何需要随着时间推移跟踪缓冲区中逻辑位置的东西。
+|api-indexing|
+
+Extmark 位置像“垂直条”光标一样工作：它存在于字符之间。
+因此，行上的最大 extmark 索引比字符索引多 1：
+>
+
+     f o o b a r      行内容
+     0 1 2 3 4 5      字符位置（0 基）
+    0 1 2 3 4 5 6     extmark 位置（0 基）
+
+Extmarks 具有“前向重力”：如果您将光标直接放在 extmark 位置并输入一些文本，extmark 将向前迁移。
+>
+
+     f o o|b a r      行（| = 光标）
+          3           extmark
+
+     f o o z|b a r    行（| = 光标）
+            4         extmark（输入“z”后）
+
+如果 extmark 位于行的最后一个索引，并且您在该点输入换行符，extmark 将相应地迁移到下一行：
+>
+
+     f o o z b a r|   行（| = 光标）
+                  7   extmark
+
+     f o o z b a r    第一行
+                      extmarks（无）
+     |                第二行（| = 光标）
+     0                extmark（输入 <CR> 后）
+
+
+示例：
+
+让我们在第一行（row=0）和第三列（column=2）设置一个 extmark。
+|api-indexing| 传递 id=0 创建一个新标记并返回 id：
+>
+
+      01 2345678
+    0 ex|ample..
+        ^ extmark 位置
+<
+>vim
+    let g:mark_ns = nvim_create_namespace('myplugin')
+    let g:mark_id = nvim_buf_set_extmark(0, g:mark_ns, 0, 2, {})
+<
+我们可以通过其 id 获取标记：
+>vim
+
+    echo nvim_buf_get_extmark_by_id(0, g:mark_ns, g:mark_id, {})
+    " => [0, 2]
+
+我们可以通过 |namespace|（或通过范围）获取缓冲区中的所有标记：
+>vim
+
+    echo nvim_buf_get_extmarks(0, g:mark_ns, 0, -1, {})
+    " => [[1, 0, 2]]
+
+删除所有周围文本不会删除 extmark！要删除 extmarks，请使用 |nvim_buf_del_extmark()|。删除示例中的“x”：>
+
+      0 12345678
+    0 e|ample..
+       ^ extmark 位置
+<
+>vim
+    echo nvim_buf_get_extmark_by_id(0, g:mark_ns, g:mark_id, {})
+    " => [0, 1]
+<
+    注意：Extmark 的“重力”决定了它在文本编辑后如何移动。
+          参见 |nvim_buf_set_extmark()|
+
+命名空间允许任何插件仅管理其自己的 extmarks，忽略由其他插件创建的 extmarks。
+
+编辑更改的 extmark 位置将在撤销/重做时恢复。
+创建和删除 extmarks 不是缓冲区更改，因此不会为 extmark 更改创建新的撤销状态。
+
+
+
+nvim_del_mark({name})                                        *nvim_del_mark()*
+    删除大写/文件命名标记。参见 |mark-motions|。
+
+    注意：~
+      • 小写名称（或其他缓冲区本地标记）是错误的。
+
+    属性：~
+        自 0.6.0 起
+
+    参数：~
+      • {name}  标记名称
+
+    返回：~
+        如果标记被删除则为 true，否则为 false。
+
+    另请参见：~
+      • |nvim_buf_del_mark()|
+      • |nvim_get_mark()|
+
+nvim_get_mark({name}, {opts})                                *nvim_get_mark()*
+    返回表示大写/文件命名标记位置的 `(row, col, buffer, buffername)` 元组。“行尾”列位置返回为 |v:maxcol|（大数字）。参见 |mark-motions|。
+
+    标记是 (1,0) 索引的。|api-indexing|
+
+    注意：~
+      • 小写名称（或其他缓冲区本地标记）是错误的。
+
+    属性：~
+        自 0.6.0 起
+
+    参数：~
+      • {name}  标记名称
+      • {opts}  可选参数。保留供将来使用。
+
+    返回：~
+        4 元组 (row, col, buffer, buffername)，如果标记未设置，则为 (0, 0, 0, '')。
+
+    另请参见：~
+      • |nvim_buf_set_mark()|
+      • |nvim_del_mark()|
+
+
+nvim_buf_del_mark({buffer}, {name})                      *nvim_buf_del_mark()*
+    删除缓冲区中的命名标记。参见 |mark-motions|。
+
+    注意：~
+      • 仅删除在缓冲区中设置的标记，如果标记未在缓冲区中设置，则返回 false。
+
+    属性：~
+        自 0.6.0 起
+
+    参数：~
+      • {buffer}  要设置标记的缓冲区
+      • {name}    标记名称
+
+    返回：~
+        如果标记被删除，则为 true，否则为 false。
+
+    另请参见：~
+      • |nvim_buf_set_mark()|
+      • |nvim_del_mark()|
+
+
+nvim_buf_get_mark({buffer}, {name})                      *nvim_buf_get_mark()*
+    返回表示命名标记位置的 `(row,col)` 元组。"行尾" 列位置返回为 |v:maxcol|（大数字）。参见 |mark-motions|。
+
+    标记是 (1,0) 索引的。|api-indexing|
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {name}    标记名称
+
+    返回：~
+        (row, col) 元组，如果标记未设置，或是设置在另一个缓冲区中的大写/文件标记，则为 (0, 0)。
+
+    另请参见：~
+      • |nvim_buf_set_mark()|
+      • |nvim_buf_del_mark()|
+
+
+                                                         *nvim_buf_set_mark()*
+nvim_buf_set_mark({buffer}, {name}, {line}, {col}, {opts})
+    在给定缓冲区中设置命名标记，所有标记都允许文件/大写、可视、最后更改等。参见 |mark-motions|。
+
+    标记是 (1,0) 索引的。|api-indexing|
+
+    注意：~
+      • 传递 0 作为行会删除标记
+
+    属性：~
+        自 0.6.0 起
+
+    参数：~
+      • {buffer}  要设置标记的缓冲区
+      • {name}    标记名称
+      • {line}    行号
+      • {col}     列/行号
+      • {opts}    可选参数。保留供将来使用。
+
+    返回：~
+        如果标记已设置，则为 true，否则为 false。
+
+    另请参见：~
+      • |nvim_buf_del_mark()|
+      • |nvim_buf_get_mark()|
+
+
+
+
+==============================================================================
+Extmark 函数                                                *api-extmark*
+
+                                                  *nvim_buf_clear_namespace()*
+nvim_buf_clear_namespace({buffer}, {ns_id}, {line_start}, {line_end})
+    从区域中清除 |namespace|d 对象（高亮、|extmarks|、虚拟文本）。
+
+    行是 0 索引的。|api-indexing| 要清除整个缓冲区中的命名空间，请指定 line_start=0 和 line_end=-1。
+
+    属性：~
+        自 0.3.2 起
+
+    参数：~
+      • {buffer}      缓冲区 id，或当前缓冲区为 0
+      • {ns_id}       要清除的命名空间，或 -1 清除所有命名空间。
+      • {line_start}  要清除的行范围的开始
+      • {line_end}    要清除的行范围的结束（排除）或 -1 清除到缓冲区末尾。
+
+nvim_buf_del_extmark({buffer}, {ns_id}, {id})         *nvim_buf_del_extmark()*
+    移除一个 |extmark|。
+
+    属性：~
+        自 0.5.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {ns_id}   来自 |nvim_create_namespace()| 的命名空间 id
+      • {id}      Extmark id
+
+    返回：~
+        如果找到了 extmark，则为 true，否则为 false
+
+                                                *nvim_buf_get_extmark_by_id()*
+nvim_buf_get_extmark_by_id({buffer}, {ns_id}, {id}, {opts})
+    获取 |extmark| 的位置（从 0 开始索引）。
+
+    属性：~
+        自 0.5.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {ns_id}   来自 |nvim_create_namespace()| 的命名空间 id
+      • {id}      Extmark id
+      • {opts}    可选参数。键：
+                  • details: 是否包含详细信息字典
+                  • hl_name: 是否包含高亮组名称而不是 id，省略时为 true
+
+    返回：~
+        0 索引的 (row, col) 元组或空列表 () 如果 extmark id 不存在
+
+                                                     *nvim_buf_get_extmarks()*
+nvim_buf_get_extmarks({buffer}, {ns_id}, {start}, {end}, {opts})
+    从由缓冲区位置定义的 |charwise| 区域（包含，0 索引 |api-indexing|）中按“遍历顺序”获取 |extmarks|。
+
+    区域可以作为 (row,col) 元组或有效的 extmark id（其位置定义边界）给出。0 和 -1 被理解为 (0,0) 和 (-1,-1)，因此以下是等效的：>lua
+        vim.api.nvim_buf_get_extmarks(0, my_ns, 0, -1, {})
+        vim.api.nvim_buf_get_extmarks(0, my_ns, {0,0}, {-1,-1}, {})
+<
+
+    如果 `end` 小于 `start`，遍历将向后工作。（与 `limit` 一起使用时很有用，以获取给定位置之前的第一个标记。）
+
+    注意：使用 extmark 范围（具有 end_row/end_col 位置的标记）时，`overlap` 选项可能很有用。否则只会考虑 extmark 的起始位置。
+
+    注意：通过 |:sign| 命令放置的旧版标记实现为 extmarks，并将在此处显示。其详细信息数组将包含一个 `sign_name` 字段。
+
+    示例：
+    >lua
+        local api = vim.api
+        local pos = api.nvim_win_get_cursor(0)
+        local ns  = api.nvim_create_namespace('my-plugin')
+        -- 在第 1 行，第 1 列创建新 extmark。
+        local m1  = api.nvim_buf_set_extmark(0, ns, 0, 0, {})
+        -- 在第 3 行，第 1 列创建新 extmark。
+        local m2  = api.nvim_buf_set_extmark(0, ns, 2, 0, {})
+        -- 仅从第 3 行获取 extmarks。
+        local ms  = api.nvim_buf_get_extmarks(0, ns, {2,0}, {2,0}, {})
+        -- 获取此缓冲区 + 命名空间中的所有标记。
+        local all = api.nvim_buf_get_extmarks(0, ns, 0, -1, {})
+        vim.print(ms)
+<
+
+    属性：~
+        自 0.5.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {ns_id}   来自 |nvim_create_namespace()| 的命名空间 id 或 -1 表示所有命名空间
+      • {start}   范围的开始：0 索引的 (row, col) 或有效的 extmark id（其位置定义边界）。|api-indexing|
+      • {end}     范围的结束（包含）：0 索引的 (row, col) 或有效的 extmark id（其位置定义边界）。|api-indexing|
+      • {opts}    可选参数。键：
+                  • limit: 返回的最大标记数
+                  • details: 是否包含详细信息字典
+                  • hl_name: 是否包含高亮组名称而不是 id，省略时为 true
+                  • overlap: 还包括与范围重叠的标记，即使其起始位置小于 `start`
+                  • type: 按类型过滤标记："highlight"、"sign"、"virt_text" 和 "virt_lines"
+
+    返回：~
+        按“遍历顺序”的 `[extmark_id, row, col]` 元组列表。
+
+                                                      *nvim_buf_set_extmark()*
+nvim_buf_set_extmark({buffer}, {ns_id}, {line}, {col}, {opts})
+    创建或更新一个 |extmark|。
+
+    默认情况下，当未传入 id 时，会创建一个新的 extmark，但也可以通过传入先前未使用的 id 来创建新标记，或通过传入其 id 来移动现有标记。调用者必须自行跟踪现有和未使用的 id。（通过 RPC 使用时很有用，以避免等待返回值。）
+
+    使用可选参数，可以使用此方法突出显示文本范围，并将虚拟文本关联到标记。
+
+    如果存在，由 `end_col` 和 `end_row` 定义的位置应在起始位置之后，以便 extmark 覆盖一个范围。较早的结束位置不是错误，但它表现得像一个空范围（无高亮）。
+
+    属性：~
+        自 0.5.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {ns_id}   来自 |nvim_create_namespace()| 的命名空间 id
+      • {line}    放置标记的行，0 基。|api-indexing|
+      • {col}     放置标记的列，0 基。|api-indexing|
+      • {opts}    可选参数。
+                  • id : 要编辑的 extmark 的 id。
+                  • end_row : 标记的结束行，0 基包含。
+                  • end_col : 标记的结束列，0 基排除。
+                  • hl_group : 用于文本范围的高亮组。此处及以下的高亮组可以作为字符串或整数提供，后者可以使用 |nvim_get_hl_id_by_name()| 获得。可以通过传递数组来堆叠多个高亮组（优先级最高的最后）。
+                  • hl_eol : 当为多行高亮覆盖行尾时，继续高亮屏幕行的其余部分（就像差异和光标行高亮一样）。
+                  • virt_text : 链接到此标记的虚拟文本。一个 `[text, highlight]` 元组的列表，每个元组表示具有指定高亮的文本块。`highlight` 元素可以是单个高亮组，也可以是多个高亮组的数组，将被堆叠（优先级最高的最后）。
+                  • virt_text_pos : 虚拟文本的位置。可能的值：
+                    • "eol": 紧接在 eol 字符之后（默认）。
+                    • "eol_right_align": 在窗口中右对齐显示，除非虚拟文本长于可用空间。如果虚拟文本太长，则会被截断以适应窗口中的 eol 字符之后。如果行被换行，虚拟文本显示在行尾而不是前一个屏幕行之后。
+                    • "overlay": 显示在指定列上方，不移动底层文本。
+                    • "right_align": 在窗口中右对齐显示。
+                    • "inline": 显示在指定列，并根据需要将缓冲区文本向右移动。
+                  • virt_text_win_col : 将虚拟文本定位在固定的窗口列（从屏幕行的第一个文本列开始）而不是 "virt_text_pos"。
+                  • virt_text_hide : 当背景文本被选择或因滚动而隐藏时隐藏虚拟文本。当前仅影响 "overlay" virt_text。
+                  • virt_text_repeat_linebreak : 在换行时重复虚拟文本。
+                  • hl_mode : 控制如何将高亮与文本的高亮组合。当前仅影响 virt_text 高亮，但可能在以后的版本中影响 `hl_group`。
+                    • "replace": 仅显示 virt_text 颜色。这是默认值。
+                    • "combine": 与背景文本颜色组合。
+                    • "blend": 与背景文本颜色混合。不支持 "inline" virt_text。
+                  • virt_lines : 在此标记旁边添加的虚拟行。这应该是一个行数组，其中每行又是一个 `[text, highlight]` 元组的数组。通常，缓冲区和窗口选项不影响文本的显示。特别是 'wrap' 和 'linebreak' 选项不起作用，因此额外屏幕行的数量将始终与数组的大小匹配。然而，'tabstop' 缓冲区选项仍用于硬制表符。默认情况下，行放置在包含标记的缓冲区行下方。
+                  • virt_lines_above: 将虚拟行放置在上方。
+                  • virt_lines_leftcol: 将虚拟行放置在窗口的最左列，绕过标志和数字列。
+                  • virt_lines_overflow: 控制如何处理宽于窗口的虚拟行。当前接受以下值之一：
+                    • "trunc": 在右侧截断虚拟行（默认）。
+                    • "scroll": 虚拟行可以水平滚动 'nowrap'，否则与 "trunc" 相同。
+                  • ephemeral : 用于 |nvim_set_decoration_provider()| 回调。标记仅用于当前重绘周期，不会永久存储在缓冲区中。
+                  • right_gravity : 布尔值，指示在插入新文本时 extmark 将向哪个方向移动（true 为右，false 为左）。默认为 true。
+                  • end_right_gravity : 布尔值，指示在插入新文本时 extmark 结束位置（如果存在）将向哪个方向移动（true 为右，false 为左）。默认为 false。
+                  • undo_restore : 如果标记周围的文本被删除然后通过撤销恢复，则恢复标记的确切位置。默认为 true。
+                  • invalidate : 布尔值，指示如果其范围的全部被删除，是否隐藏 extmark。对于隐藏的标记，"invalid" 键将添加到 |nvim_buf_get_extmarks()| 及其家族的 "details" 数组中。如果 "undo_restore" 为 false，则删除 extmark。
+                  • priority: 高亮组、标志属性或虚拟文本的优先级值。对于虚拟文本，优先级最高的项目最后绘制。例如，treesitter 高亮使用值 100。
+                  • strict: 布尔值，指示如果行或列值分别超过缓冲区或行的末尾，则不应放置 extmark。默认为 true。
+                  • sign_text: 用于在标志列中显示的长度为 1-2 的字符串。
+                  • sign_hl_group: 用于标志列文本的高亮组。
+                  • number_hl_group: 用于数字列的高亮组。
+                  • line_hl_group: 用于整行的高亮组。
+                  • cursorline_hl_group: 当光标位于与标记相同的行上且启用了 'cursorline' 时，用于标志列文本的高亮组。
+                  • conceal: 应为空或单个字符的字符串。启用类似于 |:syn-conceal| 的隐藏。当提供字符时，它用作 |:syn-cchar|。如果提供，"hl_group" 用作 cchar 的高亮，否则默认为 |hl-Conceal|。
+                  • conceal_lines: 应为空的字符串。当提供时，范围内的行根本不绘制（根据 'conceallevel'）；而是绘制下一个未隐藏的行。
+                  • spell: 布尔值，指示应在此 extmark 内执行拼写检查
+                  • ui_watched: 布尔值，指示标记应由 UI 绘制。设置时，UI 将接收 win_extmark 事件。注意：标记由 virt_text 属性定位。可以与 virt_text 一起使用。
+                  • url: 与此 extmark 关联的 URL。在 TUI 中，OSC 8 控制序列用于生成可点击的超链接到此 URL。
+
+    返回：~
+        创建/更新的 extmark 的 id
+
+nvim_create_namespace({name})                        *nvim_create_namespace()*
+    创建一个新的命名空间或获取现有的命名空间。               *namespace*
+
+    命名空间用于缓冲区高亮和虚拟文本，参见 |nvim_buf_set_extmark()|。
+
+    命名空间可以是命名的或匿名的。如果 `name` 匹配现有命名空间，则返回关联的 id。如果 `name` 是空字符串，则创建一个新的匿名命名空间。
+
+    属性：~
+        自 0.3.2 起
+
+    参数：~
+      • {name}  命名空间名称或空字符串
+
+    返回：~
+        命名空间 id        
+nvim_get_namespaces()                                  *nvim_get_namespaces()*
+    获取现有的非匿名 |namespace|。
+
+    属性：~
+        自 0.3.2 起
+
+    返回：~
+        从名称到命名空间 id 的映射字典。
+
+                                              *nvim_set_decoration_provider()*
+nvim_set_decoration_provider({ns_id}, {opts})
+    为 |namespace| 设置或更改装饰提供者
+
+    这是一个非常通用的接口，用于在重绘代码期间触发 Lua 回调。
+
+    预期用法是为当前重绘的缓冲区设置 |extmarks|。可以调用 |nvim_buf_set_extmark()| 在每个窗口或每行的基础上添加标记。使用 `ephemeral` 键仅在当前屏幕重绘中使用标记（回调将在下次重绘时再次调用）。
+
+    注意：此函数不应频繁调用。相反，可以使用回调本身来限制不必要的回调。`on_start` 回调可以返回 `false` 以禁用提供者直到下次重绘。同样，在 `on_win` 中返回 `false` 将跳过该窗口的 `on_line` 调用（但在 `on_win` 中设置的任何 extmarks 仍将被使用）。管理多个装饰源的插件理想情况下应仅设置一个提供者，并在内部合并源。无论如何，您可以为回调中设置/修改的 extmarks 使用多个 `ns_id`。
+
+    注意：除了设置 extmarks 之外的任何操作都被视为实验性的。执行诸如更改选项之类的操作并未被明确禁止，但可能会产生意外后果（例如 100% CPU 消耗）。执行 `vim.rpcnotify` 应该没问题，但目前 `vim.rpcrequest` 还不太可行。
+
+    注意：在 `on_line` 回调中不允许删除或更新 extmarks。
+
+    属性：~
+        仅限 Lua |vim.api|
+        自 0.5.0 起
+
+    参数：~
+      • {ns_id}  来自 |nvim_create_namespace()| 的命名空间 id
+      • {opts}   回调表：
+                 • on_start: 在每次屏幕重绘时首先调用 >
+                    ["start", tick]
+<
+                 • on_buf: 为每个被重绘的缓冲区调用（每次编辑一次，在窗口回调之前） >
+                    ["buf", bufnr, tick]
+<
+                 • on_win: 开始重绘特定窗口时调用。 >
+                    ["win", winid, bufnr, toprow, botrow]
+<
+                 • on_line: 为每个被重绘的缓冲区行调用。（与折叠行的交互可能会更改） >
+                    ["line", winid, bufnr, row]
+<
+                 • on_end: 在重绘周期结束时调用 >
+                    ["end", tick]
+<
+
+nvim__ns_get({ns_id})                                         *nvim__ns_get()*
+    实验性：此 API 将来会更改。
+
+    获取命名空间的属性
+
+    参数：~
+      • {ns_id}  命名空间
+
+    返回：~
+        定义命名空间属性的映射，参见 |nvim__ns_set()|
+
+nvim__ns_set({ns_id}, {opts})                                 *nvim__ns_set()*
+    实验性：此 API 将来会更改。
+
+    为命名空间设置一些属性
+
+    参数：~
+      • {ns_id}  命名空间
+      • {opts}   要设置的可选参数：
+                 • wins: 要在其中作用的窗口列表
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

@@ -1,0 +1,76 @@
+nvim_set_current_line({line})                        *nvim_set_current_line()*
+    设置当前行的文本。
+
+    属性：~
+        当 |textlock| 激活时不允许
+        自 0.1.0 起
+
+    参数：~
+      • {line}  行内容
+
+nvim_del_current_line()                              *nvim_del_current_line()*
+    删除当前行。
+
+    属性：~
+        当 |textlock| 激活时不允许
+        自 0.1.0 起
+
+nvim_get_current_buf()                                *nvim_get_current_buf()*
+    获取当前缓冲区。
+
+    属性：~
+        自 0.1.0 起
+
+    返回：~
+        缓冲区 id
+
+nvim_get_current_line()                              *nvim_get_current_line()*
+    获取当前行。
+
+    属性：~
+        自 0.1.0 起
+
+    返回：~
+        当前行字符串
+
+
+nvim_get_current_win()                                *nvim_get_current_win()*
+    获取当前窗口。
+
+    属性：~
+        自 0.1.0 起
+
+    返回：~
+        |window-ID|
+
+
+nvim_get_mode()                                              *nvim_get_mode()*
+    获取当前模式。|mode()| 如果 Nvim 正在等待输入，则 "blocking" 为 true。
+
+    属性：~
+        |api-fast|
+        自 0.2.0 起
+
+    返回：~
+        字典 { "mode": String, "blocking": Boolean }
+
+
+nvim_set_current_buf({buffer})                        *nvim_set_current_buf()*
+    将当前窗口的缓冲区设置为 `buffer`。
+
+    属性：~
+        当 |textlock| 激活或在 |cmdwin| 中时不允许
+        自 0.1.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id
+
+nvim_set_current_dir({dir})                           *nvim_set_current_dir()*
+    更改全局工作目录。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {dir}  目录路径
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

@@ -1,0 +1,782 @@
+*api.txt*               Nvim
+
+
+                 NVIM 参考手册    作者 Thiago de Arruda
+
+
+Nvim API                                                           *API* *api*
+
+Nvim 提供了一个强大的 API，可以通过 |RPC|、|Lua| 和 Vimscript (|eval-api|) 被插件和外部进程使用。
+
+应用程序也可以嵌入 libnvim 以直接使用 C API。
+
+                                      输入 |gO| 查看目录。
+
+==============================================================================
+API 使用                                               *api-rpc* *RPC* *rpc*
+
+                                                        *msgpack-rpc*
+RPC 是以编程方式控制 Nvim 的主要方式。
+Nvim 实现了 MessagePack-RPC 协议，并有以下额外（超出规范）的约束：
+
+1. 响应必须按照请求的逆序给出（类似于“展开堆栈”）。
+2. Nvim 按接收到的顺序处理所有消息（请求和通知）。
+
+MessagePack-RPC 规范：
+  https://github.com/msgpack-rpc/msgpack-rpc/blob/master/spec.md
+  https://github.com/msgpack/msgpack/blob/0b8f5ac/spec.md
+
+许多客户端使用 API：用户界面（GUI）、远程插件、像“nvr”这样的脚本 (https://github.com/mhinz/neovim-remote)。
+甚至 Nvim 本身也可以控制其他 Nvim 实例。API 客户端可以：
+
+  - 调用任何 API 函数
+  - 监听事件
+  - 接收来自 Nvim 的远程调用
+
+RPC API 类似于 Vim 的“clientserver”功能的更强大版本。
+
+连接                                              *rpc-connecting*
+
+参见 |channel-intro| 了解打开通道的各种方式。通道打开函数在选项字典中接受一个 `rpc` 键。RPC 通道也可以通过其他进程连接到 Nvim 监听的 TCP/IP 套接字或命名管道来打开。
+
+Nvim 在 |startup| 时创建一个默认的 RPC 套接字，由 |v:servername| 给出。要使用 TCP/IP 套接字启动，请使用 |--listen| 和 TCP 风格的地址：>
+    nvim --listen 127.0.0.1:6666
+可以使用 |serverstart()| 启动更多端点。
+
+注意，本地主机 TCP 套接字通常比命名管道安全性更低，可能导致远程代码执行等漏洞。
+
+连接到套接字是程序员测试 API 的最简单方法，可以通过任何 msgpack-rpc 客户端库或全功能的 |api-client| 完成。以下是一个在当前 Nvim 实例中打印“hello world!”的 Ruby 脚本：
+>ruby
+    #!/usr/bin/env ruby
+    # 需要 msgpack-rpc：gem install msgpack-rpc
+    #
+    # 要运行此脚本，请从正在运行的 Nvim 实例中执行它（注意尾随的 '&'，因为 Nvim 在运行阻塞命令时不会处理事件）：
+    #
+    #   :!./hello.rb &
+    #
+    # 或者通过设置 NVIM_LISTEN_ADDRESS 从另一个 shell 运行：
+    # $ NVIM_LISTEN_ADDRESS=[address] ./hello.rb
+
+    require 'msgpack/rpc'
+    require 'msgpack/rpc/transport/unix'
+
+    nvim = MessagePack::RPC::Client.new(MessagePack::RPC::UNIXTransport.new, ENV['NVIM_LISTEN_ADDRESS'])
+    result = nvim.call(:nvim_command, 'echo "hello world!"')
+<
+更好的方法是使用带有“pynvim”包的 Python REPL，可以交互地调用 API 函数：
+>
+    >>> from pynvim import attach
+    >>> nvim = attach('socket', path='[address]')
+    >>> nvim.command('echo "hello world!"')
+<
+你也可以通过 |jobstart()| 嵌入 Nvim，并使用 |rpcrequest()| 和 |rpcnotify()| 进行通信：
+>vim
+    let nvim = jobstart(['nvim', '--embed'], {'rpc': v:true})
+    echo rpcrequest(nvim, 'nvim_eval', '"Hello " . "world!"')
+    call jobstop(nvim)
+<
+
+==============================================================================
+API 定义                                         *api-definitions*
+
+                                                        *api-types*
+Nvim C API 为所有函数参数定义了自定义类型。有些只是围绕 C99 标准类型的 typedef，其他是 Nvim 定义的数据结构。
+
+基本类型 ~
+>
+  API 类型                              C 类型
+  ------------------------------------------------------------------------
+  Nil
+  Boolean                               bool
+  Integer (有符号 64 位整数)       int64_t
+  Float (IEEE 754 双精度)     double
+  String                                {char* data, size_t size} 结构体
+  Array                                 kvec
+  Dict (msgpack: map)                   kvec
+  Object                                以上任意一种
+<
+  注意：
+    - 空数组被接受为有效的字典参数。
+    - 函数不能跨越 RPC 边界。但 API 函数（例如 |nvim_create_autocmd()|）可能支持非 RPC 调用的 Lua 函数参数。
+
+特殊类型 (msgpack EXT) ~
+
+  这些是作为单独对象子类型区分的整数 typedef。它们可以被视为不透明整数，但互不兼容：Buffer 可以作为整数传递，但不能作为 Window 或 Tabpage。
+
+  EXT 对象数据是（整数）对象句柄。|api-metadata| `types` 键中给出的 EXT 类型代码是稳定的：它们不会改变，因此是向前兼容的。
+>
+  EXT 类型      C 类型                                  数据
+  ------------------------------------------------------------------------
+  Buffer        枚举值 kObjectTypeBuffer            |bufnr()|
+  Window        枚举值 kObjectTypeWindow            |window-ID|
+  Tabpage       枚举值 kObjectTypeTabpage           内部句柄
+<
+
+                                                        *api-indexing*
+大多数 API 使用 0 基索引，范围是结束排除的。
+对于范围的结束，-1 表示最后一行/列。
+
+例外：以下 API 函数使用“标记样式”索引（1 基行，0 基列）：
+
+- |nvim_get_mark()|
+- |nvim_buf_get_mark()|
+- |nvim_buf_set_mark()|
+- |nvim_win_get_cursor()|
+- |nvim_win_set_cursor()|
+
+例外：以下 API 函数使用 |extmarks| 索引（0 基索引，结束包含）：
+
+- |nvim_buf_del_extmark()|
+- |nvim_buf_get_extmark_by_id()|
+- |nvim_buf_get_extmarks()|
+- |nvim_buf_set_extmark()|
+
+                                                        *api-fast*
+大多数 API 函数是“延迟的”：它们在主循环中排队，并与正常输入顺序处理。
+因此，如果编辑器在“模态”方式下等待用户输入（例如 |hit-enter-prompt|），请求将被阻塞。
+非延迟（快速）函数如 |nvim_get_mode()| 和 |nvim_input()| 立即提供服务（即不在输入队列中等待）。
+Lua 代码可以使用 |vim.in_fast_event()| 检测快速上下文。
+
+==============================================================================
+API 元数据                                            *api-metadata*
+
+Nvim C API 通过构建系统自动暴露给 RPC，构建系统解析 src/nvim/api/* 中的头文件，并生成将 RPC API 方法名映射到公共 C API 函数的调度函数，转换/验证参数和返回值。
+
+Nvim 以字典形式暴露其 API 元数据，包含以下项目：
+
+- version                 Nvim 版本，API 级别/兼容性
+- version.api_level       API 版本整数 *api-level*
+- version.api_compatible  API 向后兼容此级别
+- version.api_prerelease  声明 API 为不稳定/未发布
+                          `(version.api_prerelease && fn.since == version.api_level)`
+- functions               API 函数签名，包含 |api-types| 信息
+                          描述返回值和参数。
+- ui_events               |UI| 事件签名
+- ui_options              支持的 |ui-option|s
+- {fn}.since              函数 {fn} 引入的 API 级别
+- {fn}.deprecated_since   函数 {fn} 被弃用的 API 级别
+- types                   Nvim 定义的自定义句柄类型
+- error_types             API 函数返回的可能错误类型
+
+关于 `functions` 映射：
+
+  - 容器类型可能带有类型/大小约束，例如 ArrayOf(Buffer) 或 ArrayOf(Integer, 2)。
+  - 被认为是方法的函数在 Nvim 特殊类型（msgpack EXT）实例上操作，具有“method=true”标志。接收者类型是第一个参数的类型。方法名以 `nvim_` 加上类型名为前缀，例如 `nvim_buf_get_lines` 是 Buffer 实例的 `get_lines` 方法。|dev-api|
+  - 全局函数具有“method=false”标志，并仅以 `nvim_` 为前缀，例如 `nvim_list_bufs`。
+
+                                                        *api-mapping*
+外部程序（客户端）可以使用元数据发现 API，使用以下方法之一：
+
+  1. 连接到正在运行的 Nvim 实例，并通过 msgpack-RPC 调用 |nvim_get_api_info()|。这对于在运行时可以定义函数的动态语言编写的客户端是最好的。
+
+  2. 使用 |--api-info| 启动 Nvim。对于静态编译的客户端很有用。示例（需要 Python “pyyaml”和“msgpack-python”模块）：>
+     nvim --api-info | python -c 'import msgpack, sys, yaml; yaml.dump(msgpack.unpackb(sys.stdin.buffer.read()), sys.stdout)'
+<
+  3. 使用 |api_info()| Vimscript 函数。>vim
+     :lua vim.print(vim.fn.api_info())
+<     使用 |filter()| 排除非弃用 API 函数的示例：>vim
+     :new|put =map(filter(api_info().functions, '!has_key(v:val,''deprecated_since'')'), 'v:val.name')
+
+==============================================================================
+API 合同                                                     *api-contract*
+
+Nvim API 由函数和事件组成。
+
+- 客户端调用 |api-global| 中描述的函数。
+- 客户端可以订阅 |ui-events|、|api-buffer-updates| 等。
+- API 函数名以“nvim_”为前缀。
+- API 事件名以“nvim_”为前缀，并以“_event”为后缀。
+
+随着 Nvim 的发展，API 可能会根据以下合同进行更改：
+
+- 可以添加新函数和事件。
+  - 任何此类扩展都是可选的：旧客户端可以忽略它们。
+- 函数签名不会更改（发布后）。
+  - 在开发（未发布）版本中引入的函数可能会更改。
+    （客户端可以动态检查 `api_prerelease` 等。|api-metadata|）
+- 事件参数不会被删除或重新排序（发布后）。
+- 事件可能会扩展：可以添加新参数。
+- 可以向函数和事件的映射/列表参数/结果中添加新项目。
+  - 任何此类新项目都是可选的：旧客户端可以忽略它们。
+  - 现有项目不会被删除（发布后）。
+- 弃用的函数在 Nvim 版本 2.0 之前不会被删除
+
+“私有”接口不在此合同范围内：
+
+- 未记录的（不在 :help 中）任何类型的函数或事件
+- nvim__x（双下划线）函数
+
+这个想法是“无版本演化”，用 Rich Hickey 的话来说：
+
+- 放宽要求应视为兼容性更改。
+- 加强承诺应视为兼容性更改。
+
+==============================================================================
+全局事件                                               *api-global-events*
+
+当客户端以异步通知的方式调用 API 请求时，Nvim 无法发送错误响应。
+相反，在出现错误的情况下，将向客户端发送以下通知：
+
+                                                             *nvim_error_event*
+nvim_error_event[{type}, {message}]
+
+{type} 是由 `api_info().error_types` 定义的数字 ID，{message} 是包含错误信息的字符串。
+
+==============================================================================
+缓冲区更新事件                                    *api-buffer-updates*
+
+API 客户端可以“附加”到 Nvim 缓冲区以订阅缓冲区更新事件。
+
+这类似于 |TextChanged|，但更强大和细粒度。
+
+调用 |nvim_buf_attach()| 在通道上接收这些事件：
+
+                                                        *nvim_buf_lines_event*
+nvim_buf_lines_event[{buf}, {changedtick}, {firstline}, {lastline}, {linedata}, {more}]
+
+    当缓冲区文本在 {firstline} 和 {lastline}（结束排除，零索引）之间更改为 {linedata} 列表中的新文本时。
+    粒度为行，即如果编辑器中更改了单个字符，则整个行将被发送。
+
+    当 {changedtick} 为 |v:null| 时，这意味着屏幕行（显示）发生了变化，但缓冲区内容没有变化。
+    {linedata} 包含更改的屏幕行。这发生在 'inccommand' 显示缓冲区预览时。
+
+    属性：~
+        {buf} API 缓冲区句柄（缓冲区编号）
+
+        {changedtick} 缓冲区的 |b:changedtick| 值。
+                      如果您将 API 命令发送回 nvim，您可以在请求中检查 |b:changedtick| 的值，以确保没有其他更改。
+
+        {firstline} 被替换的第一行的整数行号。
+                    零索引：如果第 1 行被替换，则 {firstline} 将为 0，而不是 1。
+                    {firstline} 始终小于或等于替换行之前缓冲区中的行数。
+
+        {lastline}  未被替换的第一行的整数行号（即范围 {firstline}, {lastline} 是结束排除的）。
+                    零索引：如果行号 2 到 5 被替换，这将是 5 而不是 6。
+                    {lastline} 始终小于或等于替换行之前缓冲区中的行数。
+                    如果事件是附加后的初始更新的一部分，{lastline} 将为 -1。
+
+        {linedata}  包含新缓冲区行内容的字符串列表。
+                    省略换行符；空行作为空字符串发送。
+
+        {more} 布尔值，对于“多部分”更改通知为 true：当前更改被分块为多个 |nvim_buf_lines_event| 通知（例如，因为它太大）。
+
+nvim_buf_changedtick_event[{buf}, {changedtick}]  *nvim_buf_changedtick_event*
+
+    当 |b:changedtick| 增加但没有文本更改时。与撤销/重做相关。
+
+    属性：~
+        {buf} API 缓冲区句柄（缓冲区编号）
+        {changedtick} 缓冲区的 |b:changedtick| 新值
+
+nvim_buf_detach_event[{buf}]                           *nvim_buf_detach_event*
+
+    当缓冲区被分离（即更新被禁用）时。由 |nvim_buf_detach()| 显式触发，或在以下情况下隐式触发：
+    - 缓冲区被 |abandon|，且未设置 'hidden'。
+    - 缓冲区被重新加载，例如使用 |:edit| 或外部更改触发 |:checktime| 或 'autoread'。
+    - 通常：当缓冲区内容从内存中卸载时。
+
+    属性：~
+        {buf} API 缓冲区句柄（缓冲区编号）
+
+
+示例 ~
+
+在空缓冲区上调用 |nvim_buf_attach()| 并设置 send_buffer=true，发出：
+>
+    nvim_buf_lines_event[{buf}, {changedtick}, 0, -1, [""], v:false]
+
+用户向缓冲区添加两行，发出：
+>
+    nvim_buf_lines_event[{buf}, {changedtick}, 0, 0, ["line1", "line2"], v:false]
+
+用户移动到包含文本“Hello world”的行并插入“!”，发出：
+>
+    nvim_buf_lines_event[{buf}, {changedtick}, {linenr}, {linenr} + 1,
+                         ["Hello world!"], v:false]
+
+用户移动到第 3 行并使用“20dd”删除 20 行，发出：
+>
+    nvim_buf_lines_event[{buf}, {changedtick}, 2, 22, [], v:false]
+
+用户使用 |linewise-visual| 模式选择第 3-5 行，然后键入“p”粘贴一个 6 行的块，发出：
+>
+    nvim_buf_lines_event[{buf}, {changedtick}, 2, 5,
+      ['pasted line 1', 'pasted line 2', 'pasted line 3', 'pasted line 4',
+       'pasted line 5', 'pasted line 6'],
+      v:false
+    ]
+
+用户使用“:edit”重新加载缓冲区，发出：>
+    nvim_buf_detach_event[{buf}]
+<
+
+LUA ~
+                                                        *api-buffer-updates-lua*
+进程内 Lua 插件可以以 Lua 回调的形式接收缓冲区更新。
+这些回调在各种上下文中频繁调用；|textlock| 防止更改缓冲区内容和窗口布局（使用 |vim.schedule()| 将此类操作推迟到主循环）。
+移动光标是允许的，但之后会恢复。
+
+|nvim_buf_attach()| 将为回调接收关键字参数。
+“on_lines”将接收参数（“lines”，{buf}, {changedtick}, {firstline}, {lastline}, {new_lastline}, {old_byte_size} [, {old_utf32_size}, {old_utf16_size}])。与远程通道事件不同，文本内容不会传递。新文本可以在回调中访问 >lua
+
+    vim.api.nvim_buf_get_lines(buf, firstline, new_lastline, true)
+<
+{old_byte_size} 是替换区域 {firstline} 到 {lastline} 的总字节大小，包括 {lastline} 之后的最终换行符。
+如果在 |nvim_buf_attach()| 关键字参数中设置 `utf_sizes` 为 true，则删除区域的 UTF-32 和 UTF-16 大小也作为附加参数 {old_utf32_size} 和 {old_utf16_size} 传递。
+
+“on_changedtick”在 |b:changedtick| 增加但没有文本更改时调用。接收的参数是（“changedtick”，{buf}, {changedtick}）。
+
+                                                        *api-lua-detach*
+进程内 Lua 回调可以通过返回 `true` 来分离。这将分离所有通过相同的 |nvim_buf_attach()| 调用附加的回调。
+
+
+==============================================================================
+缓冲区高亮                                            *api-highlights*
+
+Nvim 允许插件向缓冲区添加基于位置的高亮。
+这类似于 |matchaddpos()|，但有一些关键区别。
+添加的高亮与缓冲区相关联，并适应行插入和删除，类似于标记。
+还可以将一组高亮作为一个组进行管理，并一次性删除或替换所有高亮。
+
+预期的用例是监视缓冲区更改的 linter 或语义高亮插件，并在后台计算缓冲区的高亮。
+另一个用例是显示输出的仅追加缓冲区的插件，并希望为输出添加高亮。
+高亮数据不能在写入和加载缓冲区到文件时保留，也不能在撤销/重做周期中保留。
+
+
+高亮通过 |nvim_buf_set_extmark()| 函数注册，该函数将高亮添加为 |extmarks|。
+如果需要在添加后跟踪或操作高亮，可以使用返回的 |extmark| id。
+>lua
+  -- 通过 extmark 创建高亮
+  extid = vim.api.nvim_buf_set_extmark(buf, ns_id, line, col_start, {end_col = col_end, hl_group = hl_group})
+
+  -- 示例：修改 extmark 的高亮组
+  vim.api.nvim_buf_set_extmark(buf, ns_id, line, col_start, {end_col = col_end, hl_group = NEW_HL_GROUP, id = extid})
+
+  -- 示例：更改高亮的位置
+  vim.api.nvim_buf_set_extmark(buf, ns_id, NEW_LINE, col_start, {end_col = col_end, hl_group = NEW_HL_GROUP, id = extid})
+<
+
+另请参见 |vim.hl.range()|。
+
+==============================================================================
+全局函数                                                  *api-global*
+
+
+nvim_echo({chunks}, {history}, {opts})                           *nvim_echo()*
+    打印由 `[text, hl_group]` “块”列表给出的消息。
+
+    示例：>lua
+        vim.api.nvim_echo({ { 'chunk1-line1\nchunk1-line2\n' }, { 'chunk2-line1' } }, true, {})
+<
+
+    属性：~
+        自 0.5.0 起
+
+    参数：~
+      • {chunks}   `[text, hl_group]` 对的列表，其中每个是由（可选）名称或 ID `hl_group` 高亮的 `text` 字符串。
+      • {history}  如果为 true，添加到 |message-history|。
+      • {opts}     可选参数。
+                   • err: 将消息视为 `:echoerr`。默认将 `hl_group` 设置为 |hl-ErrorMsg|。
+                   • verbose: 消息由 'verbose' 选项控制。Nvim 使用 `-V3log` 启动时将消息写入“日志”文件而不是标准输出。
+
+nvim_eval_statusline({str}, {opts})                   *nvim_eval_statusline()*
+    评估状态行字符串。
+
+    属性：~
+        |api-fast|
+        自 0.6.0 起
+
+    参数：~
+      • {str}   状态行字符串（参见 'statusline'）。
+      • {opts}  可选参数。
+                • winid: (number) 用作状态行上下文的窗口的 |window-ID|。
+                • maxwidth: (number) 状态行的最大宽度。
+                • fillchar: (string) 用于填充状态行空白的字符（参见 'fillchars'）。即使不是，也被视为单宽。
+                • highlights: (boolean) 返回高亮信息。
+                • use_winbar: (boolean) 评估 winbar 而不是状态行。
+                • use_tabline: (boolean) 评估 tabline 而不是状态行。当为 true 时，忽略 {winid}。与 {use_winbar} 互斥。
+                • use_statuscol_lnum: (number) 为此行号评估状态列而不是状态行。
+
+    返回：~
+        包含状态行信息的字典，具有以下键：
+        • str: (string) 将显示在状态行上的字符。
+        • width: (number) 状态行的显示宽度。
+        • highlights: 包含状态行高亮信息的数组。仅当 {opts} 中的“highlights”键为 true 时包含。数组的每个元素都是一个 |Dict|，具有以下键：
+          • start: (number) 使用高亮的第一个字符的字节索引（0 基）。
+          • group: (string) 已弃用。使用 `groups` 代替。
+          • groups: (array) 堆叠高亮组的名称（优先级最高的最后）。
+
+nvim_exec_lua({code}, {args})                                *nvim_exec_lua()*
+    执行 Lua 代码。参数（如果有）在块内可用作 `...`。块可以返回一个值。
+
+    仅执行语句。要评估表达式，请在前面加上 `return`：return my_function(...)
+
+    属性：~
+        |RPC| 仅
+        自 0.5.0 起
+
+    参数：~
+      • {code}  要执行的 Lua 代码
+      • {args}  代码的参数
+
+    返回：~
+        如果存在则返回 Lua 代码的返回值，否则为 NIL。
+
+nvim_feedkeys({keys}, {mode}, {escape_ks})                   *nvim_feedkeys()*
+    将输入键发送到 Nvim，受 `mode` 标志控制的各种怪癖影响。这是一个阻塞调用，与 |nvim_input()| 不同。
+
+    执行错误时：不会失败，但会更新 v:errmsg。
+
+    要输入像 <C-o> 这样的序列，请使用 |nvim_replace_termcodes()|（通常与 escape_ks=false 一起使用）替换 |keycodes|，然后将结果传递给 nvim_feedkeys()。
+
+    示例：
+    >vim
+        :let key = nvim_replace_termcodes("<C-o>", v:true, v:false, v:true)
+        :call nvim_feedkeys(key, 'n', v:false)
+<
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {keys}       要输入的键
+      • {mode}       行为标志，参见 |feedkeys()|
+      • {escape_ks}  如果为 true，则在 `keys` 中转义 K_SPECIAL 字节。如果您已经使用 |nvim_replace_termcodes()|，则应为 false，否则为 true。
+
+    另请参见：~
+      • feedkeys()
+      • vim_strsave_escape_ks
+
+
+
+nvim_get_context({opts})                                  *nvim_get_context()*
+    获取当前编辑器状态的映射。
+
+    属性：~
+        自 0.4.0 起
+
+    参数：~
+      • {opts}  可选参数。
+                • types: 要收集的 |context-types| 列表（"regs"、"jumps"、"bufs"、"gvars" 等），或为空表示“全部”。
+
+    返回：~
+        全局 |context| 的映射。
+
+
+
+
+nvim_get_runtime_file({name}, {all})                 *nvim_get_runtime_file()*
+    在运行时目录中查找文件，按 'runtimepath' 顺序。
+
+    "name" 可以包含通配符。例如
+    `nvim_get_runtime_file("colors/*.{vim,lua}", true)` 将返回所有颜色方案文件。无论平台如何，搜索子目录的模式中始终使用正斜杠（/）。
+
+    找不到任何文件不是错误。此时返回空数组。
+
+    属性：~
+        |api-fast|
+        自 0.5.0 起
+
+    参数：~
+      • {name}  要搜索的文件模式
+      • {all}   是否返回所有匹配项或仅返回第一个
+
+    返回：~
+        找到的文件的绝对路径列表
+
+nvim_input({keys})                                              *nvim_input()*
+    排队原始用户输入。与 |nvim_feedkeys()| 不同，这使用低级输入缓冲区，调用是非阻塞的（输入由事件循环异步处理）。
+
+    要输入文本块，|nvim_paste()| 更快，应该优先使用。
+
+    执行错误时：不会失败，但会更新 v:errmsg。
+
+    注意：~
+      • |keycodes| 如 <CR> 被翻译，因此 "<" 是特殊的。要输入字面 "<"，发送 <LT>。
+      • 对于鼠标事件，使用 |nvim_input_mouse()|。伪键形式 `<LeftMouse><col,row>` 自 |api-level| 6 起已弃用。
+
+    属性：~
+        |api-fast|
+        自 0.1.0 起
+
+    参数：~
+      • {keys}  要输入的键
+
+    返回：~
+        实际写入的字节数（如果缓冲区已满，可能少于请求的字节数）。
+
+                                                          *nvim_input_mouse()*
+nvim_input_mouse({button}, {action}, {modifier}, {grid}, {row}, {col})
+    从 GUI 发送鼠标事件。
+
+    非阻塞：不等待任何结果，但将事件排队以便事件循环尽快处理。
+
+    注意：~
+      • 目前，这不支持通过在循环中多次调用来“脚本化”多个鼠标事件：中间的鼠标位置将被忽略。它应该用于在 GUI 中实现实时鼠标输入。|nvim_input()| 的已弃用伪键形式（`<LeftMouse><col,row>`）具有相同的限制。
+
+    属性：~
+        |api-fast|
+        自 0.4.0 起
+
+    参数：~
+      • {button}    鼠标按钮：其中之一 "left", "right", "middle", "wheel",
+                    "move", "x1", "x2"。
+      • {action}    对于普通按钮，其中之一 "press", "drag", "release"。
+                    对于滚轮，其中之一 "up", "down", "left", "right"。
+                    对于 "move" 被忽略。
+      • {modifier}  每个由单个字符表示的修饰符字符串。
+                    使用与按键相同的说明符，除了 "-" 分隔符是可选的，因此 "C-A-", "c-a" 和 "CA" 都可以用来指定 Ctrl+Alt+点击。
+      • {grid}      如果客户端使用 |ui-multigrid|，则为网格编号，否则为 0。
+      • {row}       鼠标行位置（零基，如重绘事件）
+      • {col}       鼠标列位置（零基，如重绘事件）
+
+
+nvim_list_runtime_paths()                          *nvim_list_runtime_paths()*
+    获取 |runtime-search-path| 中包含的路径。
+
+    属性：~
+        自 0.1.0 起
+
+    返回：~
+        路径列表
+
+
+
+nvim_open_term({buffer}, {opts})                            *nvim_open_term()*
+    在缓冲区中打开一个终端实例
+
+    默认情况下（也是目前唯一的选项），终端不会连接到外部进程。相反，通道上发送的输入将由终端直接回显。这对于显示作为 rpc 消息一部分返回的 ANSI 终端序列或类似内容很有用。
+
+    注意：要直接使用正确的大小启动终端，请在调用此函数之前在配置的窗口中显示缓冲区。例如，对于浮动显示，首先使用 |nvim_create_buf()| 创建一个空缓冲区，然后使用 |nvim_open_win()| 显示它，然后调用此函数。然后可以立即调用 |nvim_chan_send()| 以在具有预期大小的虚拟终端中处理序列。
+
+    示例：此 `TermHl` 命令可用于显示和高亮原始 ANSI 终端代码，因此您可以将 Nvim 用作“回滚分页器”（适用于像 kitty 这样的终端）：                     *ansi-colorize* *terminal-scrollback-pager* >lua
+        vim.api.nvim_create_user_command('TermHl', function()
+          local b = vim.api.nvim_create_buf(false, true)
+          local chan = vim.api.nvim_open_term(b, {})
+          vim.api.nvim_chan_send(chan, table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), '\n'))
+          vim.api.nvim_win_set_buf(0, b)
+        end, { desc = 'Highlights ANSI termcodes in curbuf' })
+<
+
+    属性：~
+        当 |textlock| 激活时不允许
+        自 0.5.0 起
+
+    参数：~
+      • {buffer}  要使用的缓冲区（预期为空）
+      • {opts}    可选参数。
+                  • on_input: Lua 回调，用于发送的输入，即终端模式下的按键。注意：按键以原始形式发送，就像它们会发送到 pty 主端一样。例如，回车符作为 "\r" 发送，而不是 "\n"。|textlock| 适用。然而，可以在回调中直接调用 |nvim_chan_send()|。`["input", term, bufnr, data]`
+                  • force_crlf: (boolean, 默认 true) 将 "\n" 转换为 "\r\n"。
+
+    返回：~
+        通道 id，或错误时为 0
+
+nvim_paste({data}, {crlf}, {phase})                             *nvim_paste()*
+    在光标处粘贴（在任何模式下），并设置“重做”，以便点 (|.|) 将重复输入。UI 调用此函数以实现“粘贴”，但也旨在供脚本使用以输入大块、可重复的文本（与 |nvim_input()| 相对，后者受映射/事件影响，因此速度较慢）。
+
+    调用 |vim.paste()| 处理程序，该处理程序适当地处理每种模式。
+
+    错误（'nomodifiable'、`vim.paste()` 失败等）反映在 `err` 中，但不影响返回值（严格由 `vim.paste()` 决定）。错误或取消时，后续调用将被忽略（“排空”），直到下一次粘贴启动（阶段 1 或 -1）。
+
+    在映射和脚本中插入多行文本很有用。示例：
+    >lua
+        vim.keymap.set('n', 'x', function()
+          vim.api.nvim_paste([[
+            line1
+            line2
+            line3
+          ]], false, -1)
+        end, { buffer = true })
+<
+
+    属性：~
+        当 |textlock| 激活时不允许
+        自 0.4.0 起
+
+    参数：~
+      • {data}   多行输入。行在 LF ("\n") 处断开。可以是二进制的（包含 NUL 字节）。
+      • {crlf}   也在 CR 和 CRLF 处断开行。
+      • {phase}  -1：在单次调用中粘贴（即不进行流式传输）。要“流式传输”粘贴，请按以下 `phase` 值顺序调用 `nvim_paste`：
+                 • 1：开始粘贴（仅一次）
+                 • 2：继续粘贴（零次或多次）
+                 • 3：结束粘贴（仅一次）
+    返回：~
+        • true: 客户端可以继续粘贴。
+        • false: 客户端应取消粘贴。
+
+nvim_put({lines}, {type}, {after}, {follow})                      *nvim_put()*
+    在光标处放置文本，适用于任何模式。对于可重复输入，使用 |nvim_paste()|。
+
+    比较 |:put| 和 |p|，它们始终是行模式。
+
+    属性：~
+        当 |textlock| 激活时不允许
+        自 0.4.0 起
+
+    参数：~
+      • {lines}   |readfile()| 风格的行列表。|channel-lines|
+      • {type}    编辑行为：任何 |getregtype()| 结果，或：
+                  • "b" |blockwise-visual| 模式（可能包括宽度，例如 "b3"）
+                  • "c" |charwise| 模式
+                  • "l" |linewise| 模式
+                  • "" 根据内容猜测，参见 |setreg()|
+      • {after}   如果为 true，则在光标后插入（如 |p|），否则在光标前插入（如 |P|）。
+      • {follow}  如果为 true，则将光标放在插入文本的末尾。
+
+                                                    *nvim_replace_termcodes()*
+nvim_replace_termcodes({str}, {from_part}, {do_lt}, {special})
+    替换字符串中的终端代码和 |keycodes|（<CR>, <Esc>, ...）为内部表示。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {str}        要转换的字符串。
+      • {from_part}  旧版 Vim 参数。通常为 true。
+      • {do_lt}      也翻译 <lt>。如果 `special` 为 false，则忽略。
+      • {special}    替换 |keycodes|，例如 <CR> 变为 "\r" 字符。
+
+    另请参见：~
+      • replace_termcodes
+      • cpoptions
+
+                                                *nvim_select_popupmenu_item()*
+nvim_select_popupmenu_item({item}, {insert}, {finish}, {opts})
+    选择补全弹出菜单中的一项。
+
+    如果 |ins-completion| 或 |cmdline-completion| 弹出菜单未激活，此 API 调用将被静默忽略。对于使用 |ui-popupmenu| 控制弹出菜单的外部 UI 很有用。也可以在映射中使用；使用 <Cmd> |:map-cmd| 或 Lua 映射以确保映射不会结束补全模式。
+
+    属性：~
+        自 0.4.0 起
+
+    参数：~
+      • {item}    要选择的项目的索引（零基）。值为 -1 时不选择任何内容并恢复原始文本。
+      • {insert}  对于 |ins-completion|，选择是否应插入到缓冲区中。对于 |cmdline-completion| 被忽略。
+      • {finish}  完成补全并关闭弹出菜单。意味着 {insert}。
+      • {opts}    可选参数。保留供将来使用。
+
+
+nvim_strwidth({text})                                        *nvim_strwidth()*
+    计算 `text` 占用的显示单元格数量。控制字符包括 <Tab> 计为一个单元格。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {text}  一些文本
+
+    返回：~
+        单元格数量
+
+nvim__complete_set({index}, {opts})                     *nvim__complete_set()*
+    实验性：此 API 可能在未来更改。
+
+    为给定索引的补全项设置信息。如果信息文本显示在窗口中，则返回窗口和缓冲区 id，否则返回空字典。
+
+    参数：~
+      • {index}  补全候选项索引
+      • {opts}   可选参数。
+                 • info: (string) 信息文本。
+
+    返回：~
+        包含以下键的字典：
+        • winid: (number) 浮动窗口 id
+        • bufnr: (number) 浮动窗口中的缓冲区 id
+
+nvim__get_runtime({pat}, {all}, {opts})                  *nvim__get_runtime()*
+    在运行时目录中查找文件
+
+    属性：~
+        |api-fast|
+        自 0.6.0 起
+
+    参数：~
+      • {pat}   要搜索的文件模式
+      • {all}   是否返回所有匹配项或仅返回第一个
+      • {opts}  is_lua: 仅搜索 Lua 子目录
+
+    返回：~
+        找到的文件的绝对路径列表
+
+nvim__id({obj})                                                   *nvim__id()*
+    返回作为参数给定的对象。
+
+    此 API 函数用于测试。插件中不应依赖其存在。
+
+    参数：~
+      • {obj}  要返回的对象。
+
+    返回：~
+        其参数。
+
+nvim__id_array({arr})                                       *nvim__id_array()*
+    返回作为参数给定的数组。
+
+    此 API 函数用于测试。插件中不应依赖其存在。
+
+    参数：~
+      • {arr}  要返回的数组。
+
+    返回：~
+        其参数。
+
+nvim__id_dict({dct})                                         *nvim__id_dict()*
+    返回作为参数给定的字典。
+
+    此 API 函数用于测试。插件中不应依赖其存在。
+
+    参数：~
+      • {dct}  要返回的字典。
+
+    返回：~
+        其参数。
+
+nvim__id_float({flt})                                       *nvim__id_float()*
+    返回作为参数给定的浮点值。
+
+    此 API 函数用于测试。插件中不应依赖其存在。
+
+    参数：~
+      • {flt}  要返回的值。
+
+    返回：~
+        其参数。
+
+nvim__inspect_cell({grid}, {row}, {col})                *nvim__inspect_cell()*
+    注意：如果您的 UI 不使用 hlstate，则第一次不会返回 hlstate。
+
+nvim__invalidate_glyph_cache()                *nvim__invalidate_glyph_cache()*
+    用于测试。schar_cache_clear_if_full 中的条件很难达到，因此此函数可用于在测试中强制清除缓存。
+
+nvim__redraw({opts})                                          *nvim__redraw()*
+    实验性：此 API 可能在未来更改。
+
+    指示 Nvim 重绘各种组件。
+
+    属性：~
+        自 0.10.0 起
+
+    参数：~
+      • {opts}  可选参数。
+                • win: 目标特定 |window-ID|，如下所述。
+                • buf: 目标特定缓冲区编号，如下所述。
+                • flush: 使用挂起的更新更新屏幕。
+                • valid: 当存在时标记 `win`、`buf` 或所有窗口进行重绘。当 `true` 时，仅重绘更改的行（对装饰提供者有用）。当 `false` 时，强制重绘。
+                • range: 在 `buf`、`win` 中的缓冲区或当前缓冲区中重绘一个范围（对装饰提供者有用）。期望一个元组 `[first, last]`，其中包含范围的第一行和最后一行的行号，0 基结束排除 |api-indexing|。
+                • cursor: 立即更新 `win` 或当前窗口中的光标位置。
+                • statuscolumn: 重绘 `buf`、`win` 或所有窗口中的 'statuscolumn'。
+                • statusline: 重绘 `buf`、`win` 或所有窗口中的 'statusline'。
+                • winbar: 重绘 `buf`、`win` 或所有窗口中的 'winbar'。
+                • tabline: 重绘 'tabline'。
+
+    另请参见：~
+      • |:redraw|
+
+nvim__stats()                                                  *nvim__stats()*
+    获取内部统计信息。
+
+    返回：~
+        各种内部统计信息的映射。
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

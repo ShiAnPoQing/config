@@ -1,0 +1,103 @@
+nvim_get_hl({ns_id}, {opts})                                   *nvim_get_hl()*
+    获取命名空间中的所有或特定高亮组。
+
+    注意：~
+      • 当高亮定义映射中定义了 `link` 属性时，其他属性将不起作用（参见 |:hi-link|）。
+
+    属性：~
+        自 0.9.0 起
+
+    参数：~
+      • {ns_id}  获取命名空间 ns_id 的高亮组
+                 |nvim_get_namespaces()|。使用 0 获取全局高亮组
+                 |:highlight|。
+      • {opts}   选项字典：
+                 • name: (string) 按名称获取高亮定义。
+                 • id: (integer) 按 id 获取高亮定义。
+                 • link: (boolean, 默认 true) 显示链接组名称而不是有效定义 |:hi-link|。
+                 • create: (boolean, 默认 true) 当高亮组不存在时创建它。
+
+    返回：~
+        高亮组作为从组名到高亮定义映射的映射，如 |nvim_set_hl()|，或仅当按名称或 id 请求时返回单个高亮定义映射。
+
+nvim_get_hl_id_by_name({name})                      *nvim_get_hl_id_by_name()*
+    按名称获取高亮组
+
+    类似于 |hlID()|，但如果不存在则分配一个新 ID。
+
+    属性：~
+        自 0.5.0 起
+
+nvim_get_hl_ns({opts})                                      *nvim_get_hl_ns()*
+    获取活动的高亮命名空间。
+
+    属性：~
+        自 0.10.0 起
+
+    参数：~
+      • {opts}  可选参数
+                • winid: (number) 用于检索窗口高亮命名空间的 |window-ID|。当 |nvim_win_set_hl_ns()| 未为窗口调用（或使用命名空间 -1 调用）时，返回值为 -1。
+
+    返回：~
+        命名空间 id，或 -1
+
+
+nvim_set_hl({ns_id}, {name}, {val})                            *nvim_set_hl()*
+    设置高亮组。
+
+    注意：~
+      • 与 `:highlight` 命令可以更新高亮组不同，此函数完全替换定义。例如：`nvim_set_hl(0, 'Visual', {})` 将清除高亮组 'Visual'。
+      • fg 和 bg 键也接受字符串值 `"fg"` 或 `"bg"`，它们作为 Normal 组的对应前景色和背景色的别名。如果 Normal 组未定义，使用这些值将导致错误。
+      • 如果 `link` 与其他属性一起使用；只有 `link` 将生效（参见 |:hi-link|）。
+
+    属性：~
+        自 0.5.0 起
+
+    参数：~
+      • {ns_id}  此高亮的命名空间 id |nvim_create_namespace()|。使用 0 全局设置高亮组 |:highlight|。非全局命名空间的高亮默认不激活，使用 |nvim_set_hl_ns()| 或 |nvim_win_set_hl_ns()| 激活它们。
+      • {name}   高亮组名称，例如 "ErrorMsg"
+      • {val}    高亮定义映射，接受以下键：
+                 • fg: 颜色名称或 "#RRGGBB"，参见注意。
+                 • bg: 颜色名称或 "#RRGGBB"，参见注意。
+                 • sp: 颜色名称或 "#RRGGBB"
+                 • blend: 0 到 100 之间的整数
+                 • bold: 布尔值
+                 • standout: 布尔值
+                 • underline: 布尔值
+                 • undercurl: 布尔值
+                 • underdouble: 布尔值
+                 • underdotted: 布尔值
+                 • underdashed: 布尔值
+                 • strikethrough: 布尔值
+                 • italic: 布尔值
+                 • reverse: 布尔值
+                 • nocombine: 布尔值
+                 • link: 要链接到的另一个高亮组的名称，参见 |:hi-link|。
+                 • default: 不覆盖现有定义 |:hi-default|
+                 • ctermfg: 设置 cterm 颜色的前景色 |ctermfg|
+                 • ctermbg: 设置 cterm 颜色的背景色 |ctermbg|
+                 • cterm: cterm 属性映射，如 |highlight-args|。如果未设置，cterm 属性将匹配上面文档中记录的属性映射。
+                 • force: 如果为 true，则在高亮组存在时强制更新。
+
+nvim_set_hl_ns({ns_id})                                     *nvim_set_hl_ns()*
+    设置使用 |nvim_set_hl()| 定义的高亮的活动命名空间。可以为单个窗口设置，参见 |nvim_win_set_hl_ns()|。
+
+    属性：~
+        自 0.8.0 起
+
+    参数：~
+      • {ns_id}  要使用的命名空间
+
+nvim_set_hl_ns_fast({ns_id})                           *nvim_set_hl_ns_fast()*
+    在重绘时设置使用 |nvim_set_hl()| 定义的高亮的活动命名空间。
+
+    此函数旨在在重绘时调用，主要用于 |nvim_set_decoration_provider()| 的 on_win 和 on_line 回调中，允许在重绘周期中更改命名空间。
+
+    属性：~
+        |api-fast|
+        自 0.8.0 起
+    参数：~
+      • {ns_id}  要激活的命名空间
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

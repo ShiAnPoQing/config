@@ -1,0 +1,55 @@
+nvim_del_var({name})                                          *nvim_del_var()*
+    删除全局 (g:) 变量。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {name}  变量名称
+
+nvim_get_var({name})                                          *nvim_get_var()*
+    获取全局 (g:) 变量。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {name}  变量名称
+
+    返回：~
+        变量值
+
+nvim_get_vvar({name})                                        *nvim_get_vvar()*
+    获取 v: 变量。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {name}  变量名称
+
+    返回：~
+        变量值
+
+
+nvim_set_var({name}, {value})                                 *nvim_set_var()*
+    设置全局 (g:) 变量。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {name}   变量名称
+      • {value}  变量值
+
+nvim_set_vvar({name}, {value})                               *nvim_set_vvar()*
+    设置 v: 变量，如果它不是只读的。
+
+    属性：~
+        自 0.4.0 起
+
+    参数：~
+      • {name}   变量名称
+      • {value}  变量值
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

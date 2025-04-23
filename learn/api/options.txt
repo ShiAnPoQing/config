@@ -1,0 +1,85 @@
+==============================================================================
+选项函数                                                *api-options*
+
+nvim_get_all_options_info()                      *nvim_get_all_options_info()*
+    获取所有选项的选项信息。
+
+    字典以完整选项名称为键，选项元数据字典为值，详细信息参见 |nvim_get_option_info2()|。
+
+    属性：~
+        自 0.5.0 起
+
+    返回：~
+        所有选项的字典
+
+    另请参见：~
+      • |nvim_get_commands()|
+
+nvim_get_option_info2({name}, {opts})                *nvim_get_option_info2()*
+    从任意缓冲区或窗口获取一个选项的选项信息
+
+    结果字典具有以下键：
+    • name: 选项名称（如 'filetype'）
+    • shortname: 选项的缩写名称（如 'ft'）
+    • type: 选项类型（"string"、"number" 或 "boolean"）
+    • default: 选项的默认值
+    • was_set: 选项是否已设置。
+    • last_set_sid: 最后设置的脚本 id（如果有）
+    • last_set_linenr: 设置选项的行号
+    • last_set_chan: 设置选项的通道（本地为 0）
+    • scope: "global"、"win" 或 "buf" 之一
+    • global_local: 是否为 win 或 buf 选项具有全局值
+    • commalist: 逗号分隔值的列表
+    • flaglist: 单字符标志的列表
+
+    当未提供 {scope} 时，最后设置的信息适用于当前缓冲区或窗口中的本地值（如果可用），否则返回全局值信息。可以通过在 {opts} 表中显式指定 {scope} 来禁用此行为。
+
+    属性：~
+        自 0.9.0 起
+
+    参数：~
+      • {name}  选项名称
+      • {opts}  可选参数
+                • scope: "global" 或 "local" 之一。分别类似于 |:setglobal| 和 |:setlocal|。
+                • win: |window-ID|。用于获取窗口本地选项。
+                • buf: 缓冲区编号。用于获取缓冲区本地选项。意味着 {scope} 是 "local"。
+
+    返回：~
+        选项信息
+
+nvim_get_option_value({name}, {opts})                *nvim_get_option_value()*
+    获取选项的值。此函数的行为与 |:set| 匹配：如果存在，返回选项的本地值；否则，返回全局值。本地值始终对应于当前缓冲区或窗口，除非在 {opts} 中设置了 "buf" 或 "win"。
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {name}  选项名称
+      • {opts}  可选参数
+                • scope: "global" 或 "local" 之一。分别类似于 |:setglobal| 和 |:setlocal|。
+                • win: |window-ID|。用于获取窗口本地选项。
+                • buf: 缓冲区编号。用于获取缓冲区本地选项。意味着 {scope} 是 "local"。
+                • filetype: |filetype|。用于获取特定文件类型的默认选项。不能与任何其他选项一起使用。注意：这将触发 |ftplugin| 和所有 |FileType| 自动命令。
+
+    返回：~
+        选项值
+
+                                                     *nvim_set_option_value()*
+nvim_set_option_value({name}, {value}, {opts})
+    设置选项的值。此函数的行为与 |:set| 匹配：对于全局本地选项，除非使用 {scope} 另行指定，否则同时设置全局和本地值。
+
+    注意选项 {win} 和 {buf} 不能一起使用。
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {name}   选项名称
+      • {value}  新选项值
+      • {opts}   可选参数
+                 • scope: "global" 或 "local" 之一。分别类似于 |:setglobal| 和 |:setlocal|。
+                 • win: |window-ID|。用于设置窗口本地选项。
+                 • buf: 缓冲区编号。用于设置缓冲区本地选项。
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

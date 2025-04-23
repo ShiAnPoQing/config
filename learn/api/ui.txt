@@ -1,0 +1,106 @@
+==============================================================================
+UI 函数                                                          *api-ui*
+
+nvim_ui_attach({width}, {height}, {options})                *nvim_ui_attach()*
+    在通道上激活 UI 事件。
+
+    所有 UI 客户端的入口点。允许 |--embed| 继续启动。表示客户端已准备好显示 UI。将客户端添加到 UI 列表中。|nvim_list_uis()|
+
+    注意：~
+      • 如果附加了多个 UI 客户端，全局屏幕尺寸会降级到最小的客户端。例如，如果客户端 A 请求 80x40，但客户端 B 请求 200x100，则全局屏幕尺寸为 80x40。
+
+    属性：~
+        仅限 |RPC|
+        自 0.1.0 起
+
+    参数：~
+      • {width}    请求的屏幕列数
+      • {height}   请求的屏幕行数
+      • {options}  |ui-option| 映射
+
+nvim_ui_detach()                                            *nvim_ui_detach()*
+    在通道上停用 UI 事件。
+
+    从 UI 列表中移除客户端。|nvim_list_uis()|
+
+    属性：~
+        仅限 |RPC|
+        自 0.1.0 起
+
+                                                    *nvim_ui_pum_set_bounds()*
+nvim_ui_pum_set_bounds({width}, {height}, {row}, {col})
+    告诉 Nvim 弹出菜单的几何形状，以便与外部弹出菜单对齐浮动窗口。
+
+    注意，此方法不要与 |nvim_ui_pum_set_height()| 混淆，后者设置弹出菜单中可见项目的数量，而此函数设置弹出菜单的边界框，包括边框和滑块等视觉元素。
+    浮动窗口不需要使用相同的字体大小，也不需要锚定到精确的网格角，因此可以为弹出菜单几何形状设置浮点数。
+
+    属性：~
+        仅限 |RPC|
+        自 0.5.0 起
+
+    参数：~
+      • {width}   弹出菜单宽度。
+      • {height}  弹出菜单高度。
+      • {row}     弹出菜单行。
+      • {col}     弹出菜单高度。
+
+nvim_ui_pum_set_height({height})                    *nvim_ui_pum_set_height()*
+    告诉 Nvim 弹出菜单中显示的元素数量，以决定 <PageUp> 和 <PageDown> 移动。
+
+    属性：~
+        仅限 |RPC|
+        自 0.4.0 起
+
+    参数：~
+      • {height}  弹出菜单高度，必须大于零。
+
+nvim_ui_set_focus({gained})                              *nvim_ui_set_focus()*
+    告诉 nvim 服务器 GUI 是否获得或失去焦点
+
+    属性：~
+        仅限 |RPC|
+        自 0.9.0 起
+
+nvim_ui_set_option({name}, {value})                     *nvim_ui_set_option()*
+    属性：~
+        仅限 |RPC|
+        自 0.1.0 起
+
+nvim_ui_term_event({event}, {value})                    *nvim_ui_term_event()*
+    告诉 Nvim 何时发生终端事件
+
+    支持以下终端事件：
+    • "termresponse": 终端向 Nvim 发送了 OSC 或 DCS 响应序列。有效负载是接收到的响应。
+                      设置 |v:termresponse| 并触发 |TermResponse|。
+
+    属性：~
+        仅限 |RPC|
+        自 0.10.0 起
+
+    参数：~
+      • {event}  事件名称
+      • {value}  事件负载
+
+nvim_ui_try_resize({width}, {height})                   *nvim_ui_try_resize()*
+
+    属性：~
+        仅限 |RPC|
+        自 0.1.0 起
+
+                                                   *nvim_ui_try_resize_grid()*
+nvim_ui_try_resize_grid({grid}, {width}, {height})
+    告诉 Nvim 调整网格大小。
+    触发一个 grid_resize 事件，使用请求的网格大小或最大尺寸（如果超过尺寸限制）。
+
+    在无效的网格句柄上，失败并报错。
+
+    属性：~
+        仅限 |RPC|
+        自 0.4.0 起
+
+    参数：~
+      • {grid}    要更改的网格的句柄。
+      • {width}   新请求的宽度。
+      • {height}  新请求的高度。
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

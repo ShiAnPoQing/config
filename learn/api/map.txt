@@ -1,0 +1,93 @@
+nvim_del_keymap({mode}, {lhs})                             *nvim_del_keymap()*
+    取消映射给定模式的全局 |mapping|。
+
+    要取消映射缓冲区本地映射，请使用 |nvim_buf_del_keymap()|。
+
+    属性：~
+        自 0.4.0 起
+
+    另请参见：~
+      • |nvim_set_keymap()|
+
+nvim_get_keymap({mode})                                    *nvim_get_keymap()*
+    获取全局（非缓冲区本地）|mapping| 定义的列表。
+
+    属性：~
+        自 0.2.1 起
+
+    参数：~
+      • {mode}  模式简称（"n"、"i"、"v" 等）
+
+    返回：~
+        描述映射的 |maparg()| 类字典数组。 "buffer" 键始终为零。
+
+nvim_set_keymap({mode}, {lhs}, {rhs}, {opts})              *nvim_set_keymap()*
+    为给定模式设置全局 |mapping|。
+
+    要设置缓冲区本地映射，请使用 |nvim_buf_set_keymap()|。
+
+    与 |:map| 不同，前导/尾随空格被接受为 {lhs} 或 {rhs} 的一部分。空的 {rhs} 是 <Nop>。|keycodes| 像往常一样被替换。
+
+    示例：
+    >vim
+        call nvim_set_keymap('n', ' <NL>', '', {'nowait': v:true})
+<
+
+    等效于：
+    >vim
+        nmap <nowait> <Space><NL> <Nop>
+<
+
+    属性：~
+        自 0.4.0 起
+
+    参数：~
+      • {mode}  模式简称（映射命令前缀："n", "i", "v", "x", …）
+                或 "!" 表示 |:map!|，或空字符串表示 |:map|。"ia"、"ca" 或 "!a" 表示插入模式、命令行模式或两者的缩写
+      • {lhs}   映射的左侧 |{lhs}|
+      • {rhs}   映射的右侧 |{rhs}|
+      • {opts}  可选参数映射：接受所有 |:map-arguments| 作为键，除了 <buffer>，值为布尔值（默认 false）。另外：
+                • "noremap" 禁用 |recursive_mapping|，如 |:noremap|
+                • "desc" 人类可读的描述。
+                • "callback" Lua 函数代替 {rhs} 调用。
+                • "replace_keycodes"（布尔值）当 "expr" 为 true 时，替换结果字符串中的键码（参见 |nvim_replace_termcodes()|）。从 Lua "callback" 返回 nil 等效于返回空字符串。
+
+nvim_buf_del_keymap({buffer}, {mode}, {lhs})           *nvim_buf_del_keymap()*
+    取消映射给定模式的缓冲区本地 |mapping|。
+
+    属性：~
+        自 0.4.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+
+    另请参见：~
+      • |nvim_del_keymap()|
+
+nvim_buf_get_keymap({buffer}, {mode})                  *nvim_buf_get_keymap()*
+    获取缓冲区本地 |mapping| 定义的列表。
+
+    属性：~
+        自 0.2.1 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {mode}    模式缩写（"n", "i", "v", ...）
+
+    返回：~
+        描述映射的 |maparg()| 类字典的数组。"buffer" 键保存关联的缓冲区 id。
+
+                                                       *nvim_buf_set_keymap()*
+nvim_buf_set_keymap({buffer}, {mode}, {lhs}, {rhs}, {opts})
+    为给定模式设置缓冲区本地 |mapping|。
+
+    属性：~
+        自 0.4.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+
+    另请参见：~
+      • |nvim_set_keymap()|
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

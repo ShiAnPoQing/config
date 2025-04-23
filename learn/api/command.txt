@@ -1,0 +1,188 @@
+==============================================================================
+命令函数                                                *api-command*
+
+                                              *nvim_buf_create_user_command()*
+nvim_buf_create_user_command({buffer}, {name}, {command}, {opts})
+    创建缓冲区本地命令 |user-commands|。
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {buffer}   缓冲区 id，或当前缓冲区为 0。
+
+    另请参见：~
+      • nvim_create_user_command
+
+                                                 *nvim_buf_del_user_command()*
+nvim_buf_del_user_command({buffer}, {name})
+    删除缓冲区本地用户定义命令。
+
+    仅使用 |:command-buffer| 或 |nvim_buf_create_user_command()| 创建的命令可以使用此函数删除。
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0。
+      • {name}    要删除的命令名称。
+
+nvim_buf_get_commands({buffer}, {opts})              *nvim_buf_get_commands()*
+    获取缓冲区本地 |user-commands| 的映射。
+
+    属性：~
+        自 0.3.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {opts}    可选参数。目前未使用。
+
+    返回：~
+        描述命令的映射的映射。
+
+nvim_cmd({cmd}, {opts})                                           *nvim_cmd()*
+    执行 Ex 命令。
+
+    与 |nvim_command()| 不同，此命令接受结构化字典而不是字符串。这允许更轻松地构建和操作 Ex 命令。这也允许在命令参数中包含空格、在不扩展文件名的命令中扩展文件名等。命令参数也可以是数字、布尔值或字符串。
+
+    第一个参数也可以用于支持它的命令，而不是计数，以便更简单地使用 |vim.cmd()|。例如，您可以使用 `vim.cmd.bdelete{ count = 2 }`，也可以使用 `vim.cmd.bdelete(2)`。
+
+    执行错误时：失败并出现 Vimscript 错误，更新 v:errmsg。
+
+    属性：~
+        自 0.8.0 起
+
+    参数：~
+      • {cmd}   要执行的命令。必须是一个字典，可以包含与 |nvim_parse_cmd()| 返回值相同的值，除了 "addr"、"nargs" 和 "nextcmd"，如果提供则忽略。除 "cmd" 外，所有值都是可选的。
+      • {opts}  可选参数。
+                • output: (boolean, 默认 false) 是否返回命令输出。
+
+    返回：~
+        如果 `output` 为 true，则返回命令输出（非错误，非 shell |:!|），否则为空字符串。
+
+    另请参见：~
+      • |nvim_exec2()|
+      • |nvim_command()|
+
+                                                  *nvim_create_user_command()*
+nvim_create_user_command({name}, {command}, {opts})
+    创建全局 |user-commands| 命令。
+
+    有关 Lua 用法，请参见 |lua-guide-commands-create|。
+
+    示例：
+    >vim
+        :call nvim_create_user_command('SayHello', 'echo "Hello world!"', {'bang': v:true})
+        :SayHello
+        Hello world!
+<
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {name}     新用户命令的名称。必须以大写字母开头。
+      • {command}  执行此用户命令时要执行的替换命令。从 Lua 调用时，命令也可以是 Lua 函数。该函数以包含以下键的单个表参数调用：
+                   • name: (string) 命令名称
+                   • args: (string) 传递给命令的参数（如果有）<args>
+                   • fargs: (table) 按未转义的空格分割的参数（当允许多个参数时），如果有 <f-args>
+                   • nargs: (string) 参数数量 |:command-nargs|
+                   • bang: (boolean) 如果命令是带有 ! 修饰符执行的，则为 "true" <bang>
+                   • line1: (number) 命令范围的起始行 <line1>
+                   • line2: (number) 命令范围的结束行 <line2>
+                   • range: (number) 命令范围中的项目数：0、1 或 2 <range>
+                   • count: (number) 提供的计数 <count>
+                   • reg: (string) 可选寄存器（如果指定）<reg>
+                   • mods: (string) 命令修饰符（如果有）<mods>
+                   • smods: (table) 结构化格式的命令修饰符。具有与 |nvim_parse_cmd()| 的 "mods" 键相同的结构。
+      • {opts}     可选 |command-attributes|。
+                   • 将布尔属性（如 |:command-bang| 或 |:command-bar|）设置为 true（但不包括 |:command-buffer|，请改用 |nvim_buf_create_user_command()|）。
+                   • "complete" |:command-complete| 也接受一个 Lua 函数，其工作方式类似于 |:command-completion-customlist|。
+                   • 其他参数：
+                     • desc: (string) 当使用 Lua 函数作为 {command} 时，用于列出命令。
+                     • force: (boolean, 默认 true) 覆盖任何先前的定义。
+                     • preview: (function) 'inccommand' 的预览回调 |:command-preview|
+
+nvim_del_user_command({name})                        *nvim_del_user_command()*
+    删除用户定义的命令。
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {name}  要删除的命令名称。
+
+nvim_get_commands({opts})                                *nvim_get_commands()*
+    获取全局（非缓冲区本地）Ex 命令的映射。
+
+    目前仅支持 |user-commands|，不支持内置 Ex 命令。
+
+    属性：~
+        自 0.3.0 起
+
+    参数：~
+      • {opts}  可选参数。目前仅支持 {"builtin":false}
+
+    返回：~
+        描述命令的映射的映射。
+
+    另请参见：~
+      • |nvim_get_all_options_info()|
+
+nvim_parse_cmd({str}, {opts})                               *nvim_parse_cmd()*
+    解析命令行。
+
+    不检查命令参数的有效性。
+
+    属性：~
+        |api-fast|
+        自 0.8.0 起
+
+    参数：~
+      • {str}   要解析的命令行字符串。不能包含 "\n"。
+      • {opts}  可选参数。保留供将来使用。
+
+    返回：~
+        包含命令信息的字典，具有以下键：
+        • cmd: (string) 命令名称。
+        • range: (array) (可选) 命令范围 (<line1> <line2>)。如果命令不接受范围，则省略。如果未指定范围，则没有元素；如果仅指定了一个范围项，则有一个元素；如果指定了两个范围项，则有两个元素。
+        • count: (number) (可选) 命令 <count>。如果命令不能接受计数，则省略。
+        • reg: (string) (可选) 命令 <register>。如果命令不能接受寄存器，则省略。
+        • bang: (boolean) 命令是否包含 <bang> (!) 修饰符。
+        • args: (array) 命令参数。
+        • addr: (string) |:command-addr| 的值。使用短名称或 "line" 表示 -addr=lines。
+        • nargs: (string) |:command-nargs| 的值。
+        • nextcmd: (string) 如果有多个命令由 |:bar| 分隔，则为下一个命令。如果没有下一个命令，则为空。
+        • magic: (dict) 命令参数中哪些字符具有特殊含义。
+          • file: (boolean) 命令扩展文件名。这意味着字符如 "%"、"#" 和通配符会被扩展。
+          • bar: (boolean) "|" 字符被视为命令分隔符，双引号字符 (") 被视为注释的开始。
+        • mods: (dict) |:command-modifiers|。
+          • filter: (dict) |:filter|。
+            • pattern: (string) 过滤器模式。如果没有过滤器，则为空字符串。
+            • force: (boolean) 过滤器是否反转。
+          • silent: (boolean) |:silent|。
+          • emsg_silent: (boolean) |:silent!|。
+          • unsilent: (boolean) |:unsilent|。
+          • sandbox: (boolean) |:sandbox|。
+          • noautocmd: (boolean) |:noautocmd|。
+          • browse: (boolean) |:browse|。
+          • confirm: (boolean) |:confirm|。
+          • hide: (boolean) |:hide|。
+          • horizontal: (boolean) |:horizontal|。
+          • keepalt: (boolean) |:keepalt|。
+          • keepjumps: (boolean) |:keepjumps|。
+          • keepmarks: (boolean) |:keepmarks|。
+          • keeppatterns: (boolean) |:keeppatterns|。
+          • lockmarks: (boolean) |:lockmarks|。
+          • noswapfile: (boolean) |:noswapfile|。
+          • tab: (integer) |:tab|。省略时为 -1。
+          • verbose: (integer) |:verbose|。省略时为 -1。
+          • vertical: (boolean) |:vertical|。
+          • split: (string) 分割修饰符字符串，当没有分割修饰符时为空字符串。如果有分割修饰符，它可以是以下之一：
+            • "aboveleft": |:aboveleft|。
+            • "belowright": |:belowright|。
+            • "topleft": |:topleft|。
+            • "botright": |:botright|。
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

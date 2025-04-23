@@ -5,6 +5,7 @@ require("concat-mode")
 local K = require("plugin-keymap")
 K.setup()
 require("win-action").setup()
+require("register-control").setup()
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -26,19 +27,62 @@ require("lazy").setup("plugins")
 K.add({
   ["<F9>"] = {
     function()
-      require("nvim-extmark-doc").extmark_doc()
-      -- local function add_virtual_lines()
-      --   local ns_id = vim.api.nvim_create_namespace('virtual_lines')
-      --
-      --   vim.api.nvim_buf_set_extmark(0, ns_id, 2, 0, {
-      --     virt_lines = {
-      --       { { "Virtual Line 1", "Comment" } },
-      --       { { "Virtual Line 2", "String" } }
-      --     },
-      --     virt_lines_above = true
-      --   })
-      -- end
-      -- add_virtual_lines()
+      local pickers = require("telescope.pickers")
+      local finders = require("telescope.finders")
+      local conf = require("telescope.config").values
+      local actions = require("telescope.actions")
+      local action_state = require("telescope.actions.state")
+      local previewers = require("telescope.previewers")
+      local custom_picker = function(opts)
+        -- 定义要显示的数据
+        local items = {
+          { name = "选项1", description = "这是选项1的描述", content = "选项1的详细内容..." },
+          { name = "选项2", description = "这是选项2的描述", content = "选项2的详细内容..." },
+          { name = "选项3", description = "这是选项3的描述", content = "选项3的详细内容..." },
+        }
+
+        -- 创建选择器
+        pickers.new(opts, {
+          prompt_title = "自定义选择器",
+          finder = finders.new_table({
+            results = items,
+            entry_maker = function(entry)
+              return {
+                value = entry,
+                display = entry.name,
+                ordinal = entry.name,
+              }
+            end,
+          }),
+          sorter = conf.generic_sorter(opts),
+          -- 配置预览窗口
+          previewer = previewers.new_buffer_previewer({
+            title = "预览",
+            define_preview = function(self, entry)
+              local lines = {}
+              table.insert(lines, "名称: " .. entry.value.name)
+              table.insert(lines, "描述: " .. entry.value.description)
+              table.insert(lines, "")
+              table.insert(lines, "详细内容:")
+              table.insert(lines, entry.value.content)
+
+              vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+            end,
+          }),
+          -- 配置选择动作
+          attach_mappings = function(prompt_bufnr, map)
+            actions.select_default:replace(function()
+              local selection = action_state.get_selected_entry()
+              actions.close(prompt_bufnr)
+              -- 在这里处理选择结果
+              require("nvim-extmark-doc").extmark_doc()
+              print("已选择: " .. selection.value.name)
+            end)
+            return true
+          end,
+        }):find()
+      end
+      custom_picker()
     end,
     "n"
   },
@@ -62,23 +106,117 @@ K.add({
   },
   ["<F7>"] = {
     function()
-      local keys = vim.api.nvim_replace_termcodes("ekk", true, false, true)
+      -- local ns_id = vim.api.nvim_create_namespace('advanced_ui')
+      --
+      -- -- 创建可能需要特殊 UI 渲染的标记
+      -- vim.api.nvim_buf_set_extmark(0, ns_id, 0, 0, {
+      --   virt_text = { { "点击展开", "Special" } },
+      --   ui_watched = true,
+      --   -- UI 可以处理这些自定义属性
+      --   -- ui_properties = {
+      --   --   interactive = true,
+      --   --   tooltip = "点击查看更多信息",
+      --   --   custom_render = "expandable_section"
+      --   -- }
+      -- })
 
-      -- 方法 1.1：同步发送按键（直接执行）
-      vim.api.nvim_feedkeys(keys, "mt", false)
+      -- local ns_id = vim.api.nvim_create_namespace('url_demo')
+      --
+      -- -- 创建一个简单的链接
+      -- vim.api.nvim_buf_set_extmark(0, ns_id, 0, 0, {
+      --   end_col = 10,
+      --   hl_group = "Underlined", -- 添加下划线
+      --   url = "https://github.com",
+      -- })
 
-      -- local q = vim.fn.getreg("q")
-      -- vim.api.nvim_exec2(
-      --   string.format(
-      --     [[exec "normal <space>e"]], -- 注意转义 <Up>
-      --     -- q
-      --   ), {})
+      -- local ns_id = vim.api.nvim_create_namespace('line_conceal_demo')
+
+      -- -- 隐藏一行
+      -- vim.api.nvim_buf_set_extmark(0, ns_id, 1, 0, {
+      --     end_row = 1,  -- 同一行
+      --     conceal_lines = ''  -- 空字符串表示隐藏
+      -- })
+
+      -- 隐藏多行
+      -- vim.api.nvim_buf_set_extmark(0, ns_id, 3, 0, {
+      --     end_row = 5,  -- 隐藏第3行到第5行
+      --     conceal_lines = ''
+      -- })
+
+      -- local ns_id = vim.api.nvim_create_namespace('code_preview')
+      --
+      -- vim.api.nvim_buf_set_extmark(0, ns_id, 2, 0, {
+      --   virt_lines = {
+      --     -- 代码预览标题
+      --     {
+      --       { "┌", "Special" },
+      --       { "─ 代码预览 ", "Title" },
+      --       { "─────────────", "Special" }
+      --     },
+      --     -- 代码内容
+      --     {
+      --       { "│", "Special" },
+      --       { " function example() {", "Function" }
+      --     },
+      --     {
+      --       { "│", "Special" },
+      --       { "   console.log('Hello');", "String" }
+      --     },
+      --     {
+      --       { "│", "Special" },
+      --       { " }", "Function" }
+      --     },
+      --     -- 底部边框
+      --     {
+      --       { "└", "Special" },
+      --       { "─────────────────────", "Special" }
+      --     }
+      --   },
+      --   virt_lines_above = true, -- 在当前行上方显示
+      --   sign_text = "●", -- 符号文本
+      --   cursorline_hl_group = "ErrorMsg", -- 符号高亮组
+      -- })
+
+      -- local ns_id = vim.api.nvim_create_namespace('gravity_demo')
+      --
+      -- -- 在同一位置创建两个标记，一个左引力，一个右引力
+      -- vim.api.nvim_buf_set_extmark(0, ns_id, 0, 5, {
+      --   virt_text = { { "←左引力", "Comment" } },
+      --   right_gravity = false, -- 左引力
+      --   priority = 100
+      -- })
+      --
+      -- vim.api.nvim_buf_set_extmark(0, ns_id, 0, 5, {
+      --   virt_text = { { "右引力→", "Comment" } },
+      --   right_gravity = false, -- 右引力
+      --   priority = 100
+      -- })
+
+
+      -- local ns_id = vim.api.nvim_create_namespace('virtual_lines')
+      -- -- 示例2：hl_eol = true
+      -- -- vim.api.nvim_buf_set_extmark(0, ns_id, 2, 0, {
+      -- --   end_col = 22,
+      -- --   sign_text = "|",
+      -- --   hl_group = "Search",
+      -- --   right_gravity = false
+      -- -- })
+      --
+      -- vim.api.nvim_buf_set_extmark(0, ns_id, 2, 0, {
+      --   virt_lines = {
+      --     { { "VVirtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1irtual Line 1", "Comment" } },
+      --     { { "VVirtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1Virtual Line 1irtual Line 1", "String" } }
+      --   },
+      --   virt_lines_above = true,
+      --   sign_text = "|",
+      -- })
     end,
     "n",
   },
-  ["<C-F10>"] = {
+  ["<F10>"] = {
     function()
-      require("search-manual").searchManual()
+      require("nvim-extmark-doc").extmark_doc()
+      -- require("search-manual").searchManual()
     end,
     "n",
   },
@@ -113,3 +251,5 @@ K.add({
     "n"
   }
 })
+
+vim.g.netrw_browsex_viewer = "firefox" -- 使用 Firefox

@@ -54,23 +54,28 @@ Parameters: ~
       	    特别是'wrap'和'linebreak'选项不生效，所以额外屏幕行的数量将始终匹配数组的大小。
       	    但'tabstop'缓冲区选项仍用于硬制表符。
       	    默认情况下，行放置在包含标记的缓冲区行下面。
-    virt_lines_above:	
+    virt_lines_above: boolean
 	    改为在上方放置虚拟行。
-    virt_lines_leftcol:	
+    virt_lines_leftcol: boolean(default:false)	
 	    将虚拟行放在窗口最左列，绕过符号和数字列。
+	    没有符号和数字列
     virt_lines_overflow:	
 	    控制如何处理比窗口宽的虚拟行。
 	    目前采用以下值之一：
 	      "trunc":	  在右侧截断虚拟行（默认）。
+			  (始终显示在视口)
 	      "scroll":   虚拟行可以在'nowrap'时水平滚动，否则与"trunc"相同。
-	      ephemeral : 用于|nvim_set_decoration_provider()|回调。
+			  (类似正常的行)
+	      ephemeral : 用于 |nvim_set_decoration_provider()| 回调。
 			  标记只用于当前重绘周期，不会永久存储在缓冲区中。
     id: number
 	    要编辑的 extmark 的 id。
     end_row: number
 	    标记的结束行，从0开始，包含在内。
+	    绝对位置
     end_col: number
 	    标记的结束列，从0开始，不包含在内。
+	    绝对位置
     hl_group:
 	    用于文本范围的高亮组。
 	    这个和下面的高亮组可以作为字符串或整数提供，
@@ -78,6 +83,7 @@ Parameters: ~
 	    多个高亮组可以通过传递数组来堆叠（最高优先级在最后）。
     hl_eol: boolean
 	    当为 true 时，对于覆盖行尾的多行高亮，继续高亮屏幕行的其余部分（就像diff和cursorline高亮一样）。
+	    类似 cursorline
     hl_mode: table
 	    控制高亮如何与文本的高亮组合。
 	    目前只影响virt_text高亮，但在以后的版本中可能会影响hl_group。
@@ -103,22 +109,24 @@ Parameters: ~
 	    指示如果行或列值超过缓冲区末尾或行末，则不应放置extmark。
     sign_text: string
 	    长度为 1-2 的字符串，用于在符号列中显示。
-    sign_hl_group:
+    sign_hl_group: string(highlight group)
 	    用于符号列文本的高亮组。
-    number_hl_group:
+    number_hl_group: string(highlight group)
 	    用于行号列的高亮组。
-    line_hl_group:
+    line_hl_group: string(highlight group)
 	    用于整行的高亮组。
-    cursorline_hl_group:
+    cursorline_hl_group: string(highlight group)
 	    当光标在标记所在行且'cursorline'启用时，用于符号列文本的高亮组。
     conceal:
 	    应该为空或单个字符的字符串。
 	    启用类似于 |:syn-conceal| 的隐藏。
 	    当提供字符时，它用作 |:syn-cchar| 。
-            如果提供了"hl_group"，则用作cchar的高亮，否则默认为 |hl-Conceal| 。
+            如果提供了"hl_group"，则用作cchar的高亮，
+	    否则默认为 |hl-Conceal| 。
     conceal_lines:
 	    应该为空的字符串。
-	    当提供时，范围内的行完全不绘制（根据'conceallevel'）；
+	    当提供时，范围内的行完全不绘制
+	    （根据'conceallevel'）；
 	    而是绘制下一个未隐藏的行。
     spell: boolean
 	    指示是否应在此 extmark 内执行拼写检查
@@ -140,11 +148,25 @@ opt
   virt_text: table<[text, highlight]>
   virt_text_repeat_linebreak
 
+  hl_mode: table
+
+  id
+  priority: number
+  strict: boolean(default: true)
+  spell: boolean
+
 opt
   virt_text_win_col
 
   virt_text: table<[text, highlight]>
   virt_text_repeat_linebreak
+
+  hl_mode: table
+
+  id
+  priority: number
+  strict: boolean(default: true)
+  spell: boolean
 
 opt
   virt_lines: table<table<[text,highlight]>>
@@ -152,4 +174,21 @@ opt
   virt_lines_leftcol
   virt_lines_overflow
 
+  id
+  priority: number
+  strict: boolean(default: true)
+  spell: boolean
+
+opt
+  end_col: number
+  end_row: number
+  hl_eol: boolean
+  hl_group
+
+  id
+  priority: number
+  strict: boolean(default: true)
+  spell: boolean
+
  vim:tw=78:ts=8:noet:ft=help:norl:
+

@@ -1,0 +1,384 @@
+==============================================================================
+缓冲区函数                                                  *api-buffer*
+
+
+有关缓冲区的更多信息，请参见 |buffers|。
+
+未加载的缓冲区：~
+
+缓冲区可以通过 |:bunload| 命令或缓冲区的 |'bufhidden'| 选项卸载。当缓冲区被卸载时，其文件内容将从内存中释放，vim 无法对缓冲区行进行操作，直到重新加载（通常通过在新窗口中再次打开缓冲区）。API 方法如 |nvim_buf_get_lines()| 和 |nvim_buf_line_count()| 将受到影响。
+
+您可以使用 |nvim_buf_is_loaded()| 或 |nvim_buf_line_count()| 检查缓冲区是否已加载。
+
+
+nvim_buf_attach({buffer}, {send_buffer}, {opts})           *nvim_buf_attach()*
+    在通道上激活缓冲区更新事件，或作为 Lua 回调。
+
+    示例（Lua）：在全局 `events` 变量中捕获缓冲区更新（使用 "vim.print(events)" 查看其内容）：
+    >lua
+        events = {}
+        vim.api.nvim_buf_attach(0, false, {
+          on_lines = function(...)
+            table.insert(events, {...})
+          end,
+        })
+<
+
+    属性：~
+        自 0.3.0 起
+
+    参数：~
+      • {buffer}       缓冲区 id，或当前缓冲区为 0
+      • {send_buffer}  如果初始通知应包含整个缓冲区，则为 true：第一个通知将是 `nvim_buf_lines_event`。否则，第一个通知将是 `nvim_buf_changedtick_event`。不适用于 Lua 回调。
+      • {opts}         可选参数。
+                       • on_lines: 在更改时调用的 Lua 回调。
+                                  返回一个真值（不是 `false` 或 `nil`）以分离。
+                        参数：
+                         • 字符串 "lines"
+                         • 缓冲区 id
+                         • b:changedtick
+                         • 改变的第一行（从零开始）
+                         • 改变的最后一行
+                         • 更新范围的最后一行
+                         • 先前内容的字节数
+                         • 删除的代码点数（如果 `utf_sizes` 为 true）
+                         • 删除的代码单元数（如果 `utf_sizes` 为 true）
+                       • on_bytes: 在更改时调用的 Lua 回调。
+                                   与 on_lines 相比，此回调接收有关更改的更细粒度的信息。
+                                   返回一个真值（不是 `false` 或 `nil`）以分离。
+                        参数：
+                         • 字符串 "bytes"
+                         • 缓冲区 id
+                         • b:changedtick
+                         • 改变文本的起始行（从零开始）
+                         • 改变文本的起始列
+                         • 改变文本的字节偏移量（从缓冲区开始）
+                         • 改变文本的旧结束行（从起始行偏移）
+                         • 改变文本的旧结束列（如果旧结束行 = 0，从起始列偏移）
+                         • 改变文本的旧结束字节长度
+                         • 改变文本的新结束行（从起始行偏移）
+                         • 改变文本的新结束列（如果新结束行 = 0，从起始列偏移）
+                         • 改变文本的新结束字节长度
+                       • on_changedtick: 在 changedtick 增量时调用的 Lua 回调，无文本更改。参数：
+                         • 字符串 "changedtick"
+                         • 缓冲区 id
+                         • b:changedtick
+                       • on_detach: 在分离时调用的 Lua 回调。参数：
+                         • 字符串 "detach"
+                         • 缓冲区 id
+                       • on_reload: 在重载时调用的 Lua 回调。整个缓冲区内容应视为已更改。参数：
+                         • 字符串 "reload"
+                         • 缓冲区 id
+                       • utf_sizes: 包括替换区域的 UTF-32 和 UTF-16 大小，作为 `on_lines` 的参数。
+                       • preview: 也附加到命令预览（即 'inccommand'）事件。
+
+    返回：~
+        如果附加失败（无效参数或缓冲区未加载），则返回 False；否则返回 True。TODO: LUA_API_NO_EVAL
+
+    另请参见：~
+      • |nvim_buf_detach()|
+      • |api-buffer-updates-lua|
+
+nvim_buf_call({buffer}, {fun})                               *nvim_buf_call()*
+    使用缓冲区作为临时当前缓冲区调用函数。
+
+    这会暂时将当前缓冲区切换为 "buffer"。如果当前窗口已经显示 "buffer"，则不会切换窗口。如果当前标签页内的窗口（包括浮动窗口）已经显示缓冲区，则其中一个窗口将被暂时设置为当前窗口。否则，将使用一个临时的草稿窗口（历史原因称为 "autocmd 窗口"）。
+
+    这在调用仅适用于当前缓冲区/窗口的 Vimscript 函数时很有用，例如 `jobstart(…, {'term': v:true})`。
+
+    属性：~
+        仅限 Lua |vim.api|
+        自 0.5.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {fun}     在缓冲区内调用的函数（目前仅限 Lua 可调用）
+
+    返回：~
+        函数的返回值。
+
+
+nvim_buf_del_var({buffer}, {name})                        *nvim_buf_del_var()*
+    移除缓冲区范围（b:）的变量
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {name}    变量名称
+
+nvim_buf_delete({buffer}, {opts})                          *nvim_buf_delete()*
+    删除缓冲区。参见 |:bwipeout|
+
+    属性：~
+        当 |textlock| 激活或在 |cmdwin| 中时不允许
+        自 0.5.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {opts}    可选参数。键：
+                  • force: 强制删除并忽略未保存的更改。
+                  • unload: 仅卸载，不删除。参见 |:bunload|
+
+nvim_buf_detach({buffer})                                  *nvim_buf_detach()*
+    在通道上停用缓冲区更新事件。
+
+    属性：~
+        仅限 |RPC|
+        自 0.3.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+
+    返回：~
+        如果分离失败（因为缓冲区未加载），则返回 False；否则返回 True。
+
+    另请参见：~
+      • |nvim_buf_attach()|
+      • |api-lua-detach| 用于分离 Lua 回调
+
+nvim_buf_get_changedtick({buffer})                *nvim_buf_get_changedtick()*
+    获取缓冲区的更改计数
+
+    属性：~
+        自 0.2.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+
+    返回：~
+        `b:changedtick` 值。
+
+                                                        *nvim_buf_get_lines()*
+nvim_buf_get_lines({buffer}, {start}, {end}, {strict_indexing})
+    从缓冲区获取行范围。
+
+    索引是从零开始的，结束是排他的。负索引被解释为 length+1+index：-1 指的是结束后的索引。因此，要获取最后一个元素，请使用 start=-2 和 end=-1。
+
+    越界索引被限制在最近的有效值，除非设置了 `strict_indexing`。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {buffer}           缓冲区 id，或当前缓冲区为 0
+      • {start}            第一行索引
+      • {end}              最后一行索引，排除
+      • {strict_indexing}  越界是否应为错误。
+
+    返回：~
+        行数组，或未加载缓冲区的空数组。
+
+    另请参见：~
+      • |nvim_buf_get_text()|
+
+
+nvim_buf_get_name({buffer})                              *nvim_buf_get_name()*
+    获取缓冲区的完整文件名
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+
+    返回：~
+        缓冲区名称
+
+nvim_buf_get_offset({buffer}, {index})                 *nvim_buf_get_offset()*
+    返回行的字节偏移量（从零开始）。|api-indexing|
+
+    第 1 行（index=0）的偏移量为 0。UTF-8 字节被计数。EOL 是一个字节。'fileformat' 和 'fileencoding' 被忽略。最后一行之后的行索引给出缓冲区的总字节数。如果会写入，则计入最后的 EOL 字节，参见 'eol'。
+
+    与 |line2byte()| 不同，越界索引会抛出错误。未加载缓冲区返回 -1。
+    属性：~
+        自 0.3.2 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {index}   行索引
+
+    返回：~
+        整数字节偏移量，未加载缓冲区返回 -1。
+
+                                                         *nvim_buf_get_text()*
+nvim_buf_get_text({buffer}, {start_row}, {start_col}, {end_row}, {end_col},
+                  {opts})
+    从缓冲区获取一个范围（可以是部分行，与 |nvim_buf_get_lines()| 不同）。
+
+    索引是从零开始的。行索引是结束包含的，列索引是结束排除的。
+
+    当检索整行时，优先使用 |nvim_buf_get_lines()|。
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {buffer}     缓冲区 id，或当前缓冲区为 0
+      • {start_row}  第一行索引
+      • {start_col}  第一行的起始列（字节偏移）
+      • {end_row}    最后一行索引，包含
+      • {end_col}    最后一行的结束列（字节偏移），排除
+      • {opts}       可选参数。目前未使用。
+
+    返回：~
+        行数组，未加载缓冲区返回空数组。
+
+nvim_buf_get_var({buffer}, {name})                        *nvim_buf_get_var()*
+    获取缓冲区范围（b:）的变量。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {name}    变量名称
+
+    返回：~
+        变量值
+
+nvim_buf_is_loaded({buffer})                            *nvim_buf_is_loaded()*
+    检查缓冲区是否有效且已加载。有关未加载缓冲区的更多信息，请参见 |api-buffer|。
+
+    属性：~
+        自 0.3.2 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+
+    返回：~
+        如果缓冲区有效且已加载，则为 true，否则为 false。
+
+nvim_buf_is_valid({buffer})                              *nvim_buf_is_valid()*
+    检查缓冲区是否有效。
+
+    注意：~
+      • 即使缓冲区有效，它也可能已被卸载。有关未加载缓冲区的更多信息，请参见 |api-buffer|。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+
+    返回：~
+        如果缓冲区有效，则为 true，否则为 false。
+
+nvim_buf_line_count({buffer})                          *nvim_buf_line_count()*
+    返回给定缓冲区中的行数。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+
+    返回：~
+        行数，未加载缓冲区返回 0。|api-buffer|
+
+
+                                                        *nvim_buf_set_lines()*
+nvim_buf_set_lines({buffer}, {start}, {end}, {strict_indexing}, {replacement})
+    设置（替换）缓冲区中的行范围。
+
+    索引是从零开始的，结束是排他的。负索引被解释为 length+1+index：-1 指的是结束后的索引。因此，要更改或删除最后一行，请使用 start=-2 和 end=-1。
+
+    要在给定索引处插入行，请将 `start` 和 `end` 设置为相同的索引。要删除一行范围，请将 `replacement` 设置为空数组。
+
+    越界索引被限制在最近的有效值，除非设置了 `strict_indexing`。
+
+    属性：~
+        当 |textlock| 激活时不允许
+        自 0.1.0 起
+
+    参数：~
+      • {buffer}           缓冲区 id，或当前缓冲区为 0
+      • {start}            第一行索引
+      • {end}              最后一行索引，排除
+      • {strict_indexing}  越界是否应为错误。
+      • {replacement}      用作替换的行数组
+
+    另请参见：~
+      • |nvim_buf_set_text()|
+
+
+nvim_buf_set_name({buffer}, {name})                      *nvim_buf_set_name()*
+    设置缓冲区的完整文件名，如 |:file_f|
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {name}    缓冲区名称
+
+                                                         *nvim_buf_set_text()*
+nvim_buf_set_text({buffer}, {start_row}, {start_col}, {end_row}, {end_col},
+                  {replacement})
+    设置（替换）缓冲区中的范围
+
+    当仅修改行的部分时，推荐使用此方法而不是 |nvim_buf_set_lines()|，因为在未修改的部分上会保留 extmarks。
+
+    索引是从零开始的。行索引是结束包含的，列索引是结束排除的。
+
+    要在给定 `(row, column)` 位置插入文本，请使用 `start_row = end_row = row` 和 `start_col = end_col = col`。要删除范围内的文本，请使用 `replacement = {}`。
+
+    注意：~
+      • 优先使用 |nvim_buf_set_lines()|（为了性能）添加或删除整行。
+      • 优先使用 |nvim_paste()| 或 |nvim_put()| 在光标处插入（而不是替换）文本。
+
+    属性：~
+        当 |textlock| 激活时不允许
+        自 0.5.0 起
+
+    参数：~
+      • {buffer}       缓冲区 id，或当前缓冲区为 0
+      • {start_row}    第一行索引
+      • {start_col}    第一行的起始列（字节偏移）
+      • {end_row}      最后一行索引，包含
+      • {end_col}      最后一行的结束列（字节偏移），排除
+      • {replacement}  用作替换的行数组
+
+nvim_buf_set_var({buffer}, {name}, {value})               *nvim_buf_set_var()*
+    设置缓冲区范围（b:）的变量
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {name}    变量名称
+      • {value}   变量值
+
+nvim_list_bufs()                                            *nvim_list_bufs()*
+    获取当前缓冲区列表。
+
+    包括未列出的（未加载/已删除）缓冲区，如 `:ls!`。使用 |nvim_buf_is_loaded()| 检查缓冲区是否已加载。
+
+    属性：~
+        自 0.1.0 起
+
+    返回：~
+        缓冲区 id 列表
+
+nvim_create_buf({listed}, {scratch})                       *nvim_create_buf()*
+    创建一个新的、空的、未命名的缓冲区。
+
+    属性：~
+        自 0.4.0 起
+
+    参数：~
+      • {listed}   设置 'buflisted'
+      • {scratch}  创建一个“抛弃” |scratch-buffer| 用于临时工作
+                   （始终为 'nomodified'）。还在缓冲区上设置 'nomodeline'。
+
+    返回：~
+        缓冲区 id，或错误时为 0
+
+    另请参见：~
+      • buf_open_scratch
+
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

@@ -1,0 +1,214 @@
+==============================================================================
+自动命令函数                                                *api-autocmd*
+
+nvim_clear_autocmds({opts})                            *nvim_clear_autocmds()*
+    清除由 {opts} 选择的所有自动命令。要删除自动命令，请参见 |nvim_del_autocmd()|。
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {opts}  参数
+                • event: (string|table) 示例：
+                  • event: "pat1"
+                  • event: { "pat1" }
+                  • event: { "pat1", "pat2", "pat3" }
+                • pattern: (string|table)
+                  • 要精确匹配的模式或模式。
+                    • 例如，如果您将 `*.py` 作为自动命令的模式，则必须传递 `*.py` 才能清除它。`test.py` 将不匹配该模式。
+                  • 默认为清除所有模式。
+                  • 注意：不能与 {buffer} 一起使用
+                • buffer: (bufnr)
+                  • 仅清除 |autocmd-buflocal| 自动命令。
+                  • 注意：不能与 {pattern} 一起使用
+                • group: (string|int) 组名或 id。
+                  • 注意：如果未传递，将仅删除不在任何组中的自动命令。
+
+nvim_create_augroup({name}, {opts})                    *nvim_create_augroup()*
+    创建或获取自动命令组 |autocmd-groups|。
+
+    要获取现有组 id，请执行：
+    >lua
+        local id = vim.api.nvim_create_augroup('my.lsp.config', {
+            clear = false
+        })
+<
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {name}  字符串：组的名称
+      • {opts}  字典参数
+                • clear (bool) 可选：默认为 true。如果组已存在，则清除现有命令 |autocmd-groups|。
+
+    返回：~
+        创建的组的整数 id。
+
+    另请参见：~
+      • |autocmd-groups|
+
+nvim_create_autocmd({event}, {opts})                   *nvim_create_autocmd()*
+    创建一个由 `callback`（Lua 函数或 Vimscript 函数名字符串）或 `command`（Ex 命令字符串）定义的 |autocommand| 事件处理程序。
+
+    使用 Lua 回调的示例：
+    >lua
+        vim.api.nvim_create_autocmd({'BufEnter', 'BufWinEnter'}, {
+          pattern = {'*.c', '*.h'},
+          callback = function(ev)
+            print(string.format('event fired: %s', vim.inspect(ev)))
+          end
+        })
+<
+
+    使用 Ex 命令作为处理程序的示例：
+    >lua
+        vim.api.nvim_create_autocmd({'BufEnter', 'BufWinEnter'}, {
+          pattern = {'*.c', '*.h'},
+          command = "echo 'Entering a C or C++ file'",
+        })
+<
+
+    注意：`pattern` 不会自动扩展（与 |:autocmd| 不同），因此像 "$HOME" 和 "~" 这样的名称必须显式扩展：>lua
+        pattern = vim.fn.expand('~') .. '/some/path/*.py'
+<
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {event}  (string|array) 将触发处理程序（`callback` 或 `command`）的事件。
+      • {opts}   选项字典：
+                 • group (string|integer) 可选：要匹配的自动命令组名称或 id。
+                 • pattern (string|array) 可选：要字面匹配的模式 |autocmd-pattern|。
+                 • buffer (integer) 可选：缓冲区本地自动命令的缓冲区编号 |autocmd-buflocal|。不能与 {pattern} 一起使用。
+                 • desc (string) 可选：描述（用于文档和故障排除）。
+                 • callback (function|string) 可选：事件触发时调用的 Lua 函数（或 Vimscript 函数名，如果是字符串）。Lua 回调可以返回一个真值（不是 `false` 或 `nil`）以删除自动命令。接收一个参数，一个包含以下键的表：
+                                                                  *event-args*
+                   • id: (number) 自动命令 id
+                   • event: (string) 触发事件的名称 |autocmd-events|
+                   • group: (number|nil) 自动命令组 id（如果有）
+                   • file: (string) <afile>（未扩展为完整路径）
+                   • match: (string) <amatch>（扩展为完整路径）
+                   • buf: (number) <abuf>
+                   • data: (any) 从 |nvim_exec_autocmds()| 传递的任意数据 *event-data*
+                 • command (string) 可选：事件时执行的 Vim 命令。不能与 {callback} 一起使用
+                 • once (boolean) 可选：默认为 false。仅运行一次自动命令 |autocmd-once|。
+                 • nested (boolean) 可选：默认为 false。运行嵌套自动命令 |autocmd-nested|。
+
+    返回：~
+        自动命令 id（数字）
+
+    另请参见：~
+      • |autocommand|
+      • |nvim_del_autocmd()|
+
+nvim_del_augroup_by_id({id})                        *nvim_del_augroup_by_id()*
+    通过 id 删除自动命令组。
+
+    可以使用 |nvim_get_autocmds()| 获取组 id。
+
+    注意：行为与 |:augroup-delete| 不同。
+    删除组时，该组中包含的自动命令也将被删除和清除。此组将不再存在。
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {id}  整数 组的 id。
+
+    另请参见：~
+      • |nvim_del_augroup_by_name()|
+      • |nvim_create_augroup()|
+
+nvim_del_augroup_by_name({name})                  *nvim_del_augroup_by_name()*
+    通过名称删除自动命令组。
+
+    注意：行为与 |:augroup-delete| 不同。
+    删除组时，该组中包含的自动命令也将被删除和清除。
+    此组将不再存在。
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {name}  字符串 组的名称。
+
+    另请参见：~
+      • |autocmd-groups|
+
+nvim_del_autocmd({id})                                    *nvim_del_autocmd()*
+    通过 id 删除自动命令。
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {id}  整数 由 |nvim_create_autocmd()| 返回的自动命令 id
+
+nvim_exec_autocmds({event}, {opts})                     *nvim_exec_autocmds()*
+    执行与 {opts} 对应的所有 {event} 的自动命令 |autocmd-execute|。
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {event}  (String|Array) 要执行的事件
+      • {opts}   自动命令选项字典：
+                 • group (string|integer) 可选：要匹配的自动命令组名称或 id。|autocmd-groups|。
+                 • pattern (string|array) 可选：默认为 "*" |autocmd-pattern|。不能与 {buffer} 一起使用。
+                 • buffer (integer) 可选：缓冲区编号 |autocmd-buflocal|。不能与 {pattern} 一起使用。
+                 • modeline (bool) 可选：默认为 true。处理自动命令后的模式行 <nomodeline>。
+                 • data (any): 发送到自动命令回调的任意数据。有关详细信息，请参见 |nvim_create_autocmd()|。
+
+    另请参见：~
+      • |:doautocmd|
+
+nvim_get_autocmds({opts})                                *nvim_get_autocmds()*
+    获取与 {opts} 对应的所有自动命令。
+
+    这些示例将获取匹配所有给定条件的自动命令：
+    >lua
+        -- 匹配所有条件
+        autocommands = vim.api.nvim_get_autocmds({
+          group = 'MyGroup',
+          event = {'BufEnter', 'BufWinEnter'},
+          pattern = {'*.c', '*.h'}
+        })
+
+        -- 来自一个组的所有命令
+        autocommands = vim.api.nvim_get_autocmds({
+          group = 'MyGroup',
+        })
+<
+
+    注意：当提供多个模式或事件时，它将找到匹配它们任意组合的所有自动命令。
+
+    属性：~
+        自 0.7.0 起
+
+    参数：~
+      • {opts}  至少包含以下之一的字典：
+                • buffer: (integer) 缓冲区编号或缓冲区编号列表，用于缓冲区本地自动命令 |autocmd-buflocal|。
+                                    不能与 {pattern} 一起使用
+                • event: (string|table) 要匹配的事件 |autocmd-events|。
+                • id: (integer) 要匹配的自动命令 ID。
+                • group: (string|table) 要匹配的自动命令组名称或 id。
+                • pattern: (string|table) 要匹配的模式 |autocmd-pattern|。
+                                          不能与 {buffer} 一起使用
+
+    返回：~
+        匹配条件的自动命令数组，每个项目包含以下字段：
+        • buffer: (integer) 缓冲区编号。
+        • buflocal: (boolean) 如果自动命令是缓冲区本地的，则为 true。
+        • command: (string) 自动命令命令。注意：如果设置了回调，则为空。
+        • callback: (function|string|nil): 触发此自动命令时执行的 Lua 函数或 Vim 脚本函数的名称。
+        • desc: (string) 自动命令描述。
+        • event: (string) 自动命令事件。
+        • id: (integer) 自动命令 id（仅当使用 API 定义时）。
+        • group: (integer) 自动命令组 id。
+        • group_name: (string) 自动命令组名称。
+        • once: (boolean) 自动命令是否仅运行一次。
+        • pattern: (string) 自动命令模式。如果自动命令是缓冲区本地的 |autocmd-buffer-local|：
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

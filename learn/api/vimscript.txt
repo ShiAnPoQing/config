@@ -1,0 +1,129 @@
+==============================================================================
+Vimscript 函数                                            *api-vimscript*
+
+                                                   *nvim_call_dict_function()*
+nvim_call_dict_function({dict}, {fn}, {args})
+    使用给定参数调用 Vimscript |Dictionary-function|。
+
+    执行错误时：失败并出现 Vimscript 错误，更新 v:errmsg。
+
+    属性：~
+        自 0.3.0 起
+
+    参数：~
+      • {dict}  字典，或评估为 Vimscript |self| 字典的字符串
+      • {fn}    在 Vimscript 字典上定义的函数名称
+      • {args}  打包在数组中的函数参数
+
+    返回：~
+        函数调用的结果
+
+nvim_call_function({fn}, {args})                        *nvim_call_function()*
+    使用给定参数调用 Vimscript 函数。
+
+    执行错误时：失败并出现 Vimscript 错误，更新 v:errmsg。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {fn}    要调用的函数
+      • {args}  打包在数组中的函数参数
+
+    返回：~
+        函数调用的结果
+
+nvim_command({command})                                       *nvim_command()*
+    执行 Ex 命令。
+
+    执行错误时：失败并出现 Vimscript 错误，更新 v:errmsg。
+
+    更倾向于使用 |nvim_cmd()| 或 |nvim_exec2()|。要在执行之前以结构化方式修改 Ex 命令，请修改 |nvim_parse_cmd()| 的结果，然后将其传递给 |nvim_cmd()|。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {command}  Ex 命令字符串  
+nvim_eval({expr})                                                *nvim_eval()*
+    评估 Vimscript |expression|。字典和列表会递归展开。
+
+    执行错误时：失败并出现 Vimscript 错误，更新 v:errmsg。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {expr}  Vimscript 表达式字符串
+
+    返回：~
+        评估结果或展开的对象
+
+nvim_exec2({src}, {opts})                                       *nvim_exec2()*
+    执行 Vimscript（多行 Ex 命令块），类似于匿名 |:source|。
+
+    与 |nvim_command()| 不同，此函数支持 heredocs、脚本范围 (s:) 等。
+
+    执行错误时：失败并出现 Vimscript 错误，更新 v:errmsg。
+
+    属性：~
+        自 0.9.0 起
+
+    参数：~
+      • {src}   Vimscript 代码
+      • {opts}  可选参数。
+                • output: (boolean, 默认 false) 是否捕获并返回所有（非错误，非 shell |:!|）输出。
+
+    返回：~
+        包含执行信息的字典，具有以下键：
+        • output: (string|nil) 如果 `opts.output` 为 true，则为输出。
+
+    另请参见：~
+      • |execute()|
+      • |nvim_command()|
+      • |nvim_cmd()|
+
+                                                     *nvim_parse_expression()*
+nvim_parse_expression({expr}, {flags}, {highlight})
+    解析 Vimscript 表达式。
+
+    属性：~
+        |api-fast|
+        自 0.3.0 起
+
+    参数：~
+      • {expr}       要解析的表达式。始终视为单行。
+      • {flags}      标志：
+                     • "m" 如果允许多行表达式（仅解析第一个），
+                     • "E" 如果不允许 EOC 标记（决定它们是否会停止解析过程或被识别为运算符/空格，尽管也会产生错误）。
+                     • "l" 当需要以 lvalues 开始解析时，用于 ":let" 或 ":for"。常见标志集：
+                     • "m" 解析为 `":echo"`。
+                     • "E" 解析为 `"<C-r>="`。
+                     • 空字符串用于 ":call"。
+                     • "lm" 解析为 ":let"。
+      • {highlight}  如果为 true，返回值还将包含 "highlight" 键，包含 4 元组（数组）(Integer, Integer, Integer, String) 的数组，其中前三个数字定义高亮区域，表示行、起始列和结束列（后者排除：应高亮区域 [start_col, end_col)）。
+
+    返回：~
+        • AST: 顶级字典，具有以下键：
+          • "error": 字典，包含错误，仅在解析器看到错误时存在。包含以下键：
+            • "message": 字符串，printf 格式的错误消息，已翻译。必须包含一个 "%.*s"。
+            • "arg": 字符串，错误消息参数。
+          • "len": 成功解析的字节数。标志为空时，应等于 expr 字符串的长度。（“成功解析”在此处表示“参与 AST 创建”，而不是“直到第一个错误”。）
+          • "ast": AST，可能为 nil 或字典，具有以下键：
+            • "type": 节点类型，来自 ExprASTNodeType 的值名称之一，去掉 "kExprNode" 前缀。
+            • "start": 描述节点“开始”位置的对 `[line, column]`，其中“line”始终为 0（如果您将此 API 用于例如 ":let"，则不会为 0，但目前不存在）。两个元素都是整数。
+            • "len": 节点的“长度”。这和 "start" 主要用于调试目的（调试解析器和提供调试信息）。
+            • "children": 在 top/"ast" 中描述的节点列表。始终有零个、一个或两个子节点，如果节点没有子节点，则不会存在键。最大子节点数可以在 node_maxchildren 数组中找到。
+        • 本地值（仅在某些节点中存在）：
+          • "scope": 单个整数，指定 "Option" 和 "PlainIdentifier" 节点的范围。对于 "Option"，它是 ExprOptScope 值之一，对于 "PlainIdentifier"，它是 ExprVarScope 值之一。
+          • "ident": 标识符（如果有，则不带范围），存在于 "Option"、"PlainIdentifier"、"PlainKey" 和 "Environment" 节点中。
+          • "name": 整数，寄存器名称（一个字符）或 -1。仅存在于 "Register" 节点中。
+          • "cmp_type": 字符串，比较类型，来自 ExprComparisonType 的值名称之一，去掉 "kExprCmp" 前缀。仅存在于 "Comparison" 节点中。
+          • "ccs_strategy": 字符串，大小写比较策略，来自 ExprCaseCompareStrategy 的值名称之一，去掉 "kCCStrategy" 前缀。仅存在于 "Comparison" 节点中。
+          • "augmentation": 字符串，"Assignment" 节点的增强类型。分别为 "="、"+="、"-=" 或 ".=" 的空字符串、"Add"、"Subtract" 或 "Concat"。
+          • "invert": 布尔值，如果需要反转比较结果，则为 true。仅存在于 "Comparison" 节点中。
+          • "ivalue": 整数，"Integer" 节点的整数值。
+          • "fvalue": 浮点数，"Float" 节点的浮点值。
+          • "svalue": 字符串，"SingleQuotedString" 和 "DoubleQuotedString" 节点的值。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
