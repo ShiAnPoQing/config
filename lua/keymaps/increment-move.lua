@@ -43,13 +43,12 @@ local function left_move()
 
   if leftcol > 0 then
     local before_pos = vim.api.nvim_win_get_cursor(0)
-    vim.api.nvim_feedkeys("g0", "n", true)
-    vim.schedule(function()
-      local after_pos = vim.api.nvim_win_get_cursor(0)
-      if before_pos[2] == after_pos[2] then
-        vim.api.nvim_feedkeys("ze", "n", true)
-      end
-    end)
+    vim.api.nvim_feedkeys("g0", "nx", true)
+    local after_pos = vim.api.nvim_win_get_cursor(0)
+    if before_pos[2] == after_pos[2] then
+      vim.api.nvim_feedkeys("ze", "nx", true)
+      left_move()
+    end
     return
   end
 
@@ -75,17 +74,16 @@ local function right_move()
     return
   end
 
-
   local rightcol = get_rightcol(line_displaywidth)
   if rightcol > 0 then
     local before_pos = vim.api.nvim_win_get_cursor(0)
-    vim.api.nvim_feedkeys("g$", "n", true)
-    vim.schedule(function()
-      local after_pos = vim.api.nvim_win_get_cursor(0)
-      if after_pos[2] == before_pos[2] then
-        vim.api.nvim_feedkeys("zs", "n", true)
-      end
-    end)
+    vim.api.nvim_feedkeys("g$", "nx", true)
+    local after_pos = vim.api.nvim_win_get_cursor(0)
+
+    if after_pos[2] == before_pos[2] then
+      vim.api.nvim_feedkeys("zs", "nx", true)
+      right_move()
+    end
     return
   end
 

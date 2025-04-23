@@ -50,6 +50,7 @@ function M.extmark_doc()
   vim.api.nvim_buf_set_lines(buf, 0, 1, false, lines)
   vim.api.nvim_buf_set_option(buf, "filetype", "help")
   vim.api.nvim_buf_set_option(buf, "modifiable", false)
+  vim.api.nvim_buf_set_option(buf, "number", true)
   vim.api.nvim_win_set_option(win, "winhighlight", "Visual:search")
 end
 

@@ -29,9 +29,49 @@ end
 local function a_h()
   local count = vim.v.count1
   if count == 1 then
-    vim.api.nvim_feedkeys("g0", "n", false)
+    local before_pos = vim.api.nvim_win_get_cursor(0)
+    vim.api.nvim_feedkeys("g0", "nx", false)
+    local after_pos = vim.api.nvim_win_get_cursor(0)
+    if before_pos[2] == after_pos[2] then
+      vim.api.nvim_feedkeys("zeg0", "nx", false)
+    end
   else
     vim.api.nvim_feedkeys(count - 1 .. "kg0", "n", false)
+  end
+end
+
+--- @return boolean
+local function screen_right_action()
+  local before_pos = vim.api.nvim_win_get_cursor(0)
+  vim.api.nvim_feedkeys("g$", "nx", false)
+  local after_pos = vim.api.nvim_win_get_cursor(0)
+  return before_pos[2] == after_pos[2]
+end
+
+local function a_l()
+  local count = vim.v.count1
+
+  local not_changed_pos = screen_right_action()
+
+  if not_changed_pos then
+    vim.api.nvim_feedkeys("zsg$", "nx", false)
+    local line;
+    for i = 1, count do
+      local not_changed_pos = screen_right_action()
+      if not_changed_pos then
+        vim.api.nvim_feedkeys("zsg$", "nx", false)
+        if not line then
+          line = vim.api.nvim_get_current_line()
+        end
+        local pos = vim.api.nvim_win_get_cursor(0)
+
+        if pos[2] == #line then
+          break
+        end
+      end
+    end
+  else
+    vim.api.nvim_feedkeys(count .. "g$", "nx", false)
   end
 end
 
@@ -237,7 +277,10 @@ return {
   },
   -- normal mode cursor move: screen right
   -- 支持 count
-  ["al"] = { "g$", { "n", "x", "o" } },
+  ["al"] = {
+    { a_l,  "n" },
+    { "g$", { "x", "o" } }
+  },
   -- normal mode cursor move: screen bottom
   ["aj"] = { "L", { "n", "x", "o" } },
   -- normal mode cursor move: screen top
