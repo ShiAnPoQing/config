@@ -24,6 +24,9 @@ local postfix = require("luasnip.extras.postfix").postfix
 local types = require("luasnip.util.types")
 local parse = require("luasnip.util.parser").parse_snippet
 
+local utils = require("luasnip-utils")
+
+
 local snippets = {
   s("fun", {
     t("function"), i(1), t("("), i(2), t(")"),
@@ -96,8 +99,8 @@ local snippets = {
     t(" then"),
     t({ "", "  " }),
     d(2, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
-        return sn(nil, { i(1, "something") })
+      if utils.has_TM_SELECTED_TEXT(snip) then
+        return sn(nil, { i(1) })
       else
         return sn(1, {
           i(1, snip.env.TM_SELECTED_TEXT),
@@ -136,7 +139,7 @@ local snippets = {
     }),
     t({ "", "\t" }),
     d(2, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
+      if utils.has_TM_SELECTED_TEXT(snip) then
         return sn(1, { i(1, "something") })
       else
         return sn(1, i(1, snip.env.TM_SELECTED_TEXT))
@@ -151,37 +154,13 @@ local snippets = {
     t(" do"),
     t({ "", "\t" }),
     d(2, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
+      if utils.has_TM_SELECTED_TEXT(snip) then
         return sn(1, { i(1, "something") })
       else
         return sn(1, i(1, snip.env.TM_SELECTED_TEXT))
       end
     end),
     t({ "", "end" }),
-  }),
-
-  s("fff", {
-    c(1, {
-      { t("1") },
-      {
-        t("asdf"),
-        d(1, function(_, snip)
-          if next(snip.env.TM_SELECTED_TEXT) == nil then
-            return sn(1, { i(1, snip.env.TM_SELECTED_TEXT) })
-          else
-            return sn(nil, {
-              i(1, snip.env.TM_SELECTED_TEXT),
-              r(2, "asf"),
-            })
-          end
-        end, {}),
-        t("asdf"),
-      },
-    }),
-  }, {
-    stored = {
-      ["asf"] = i(1),
-    },
   }),
 
   s("repeat", {

@@ -25,39 +25,46 @@ local function space_space_h()
   end
 end
 
--- g0 默认不支持 count
-local function a_h()
-  local count = vim.v.count1
-  if count == 1 then
-    local before_pos = vim.api.nvim_win_get_cursor(0)
-    vim.api.nvim_feedkeys("g0", "nx", false)
-    local after_pos = vim.api.nvim_win_get_cursor(0)
-    if before_pos[2] == after_pos[2] then
-      vim.api.nvim_feedkeys("zeg0", "nx", false)
-    end
-  else
-    vim.api.nvim_feedkeys(count - 1 .. "kg0", "n", false)
-  end
-end
-
 --- @return boolean
-local function screen_right_action()
+local function screen_action(action)
   local before_pos = vim.api.nvim_win_get_cursor(0)
-  vim.api.nvim_feedkeys("g$", "nx", false)
+  vim.api.nvim_feedkeys(action, "nx", false)
   local after_pos = vim.api.nvim_win_get_cursor(0)
   return before_pos[2] == after_pos[2]
 end
 
+-- g0 默认不支持 count
+local function a_h()
+  local count = vim.v.count1
+  local not_changed_pos = screen_action("g0")
+
+  if not_changed_pos then
+    vim.api.nvim_feedkeys("zeg0", "nx", false)
+    for i = 1, count do
+      local not_changed_pos = screen_action("g0")
+      if not_changed_pos then
+        vim.api.nvim_feedkeys("zeg0", "nx", false)
+        local pos = vim.api.nvim_win_get_cursor(0)
+        if pos[2] == 0 then
+          print(i)
+          break
+        end
+      end
+    end
+  else
+    vim.api.nvim_feedkeys(count .. "k", "nx", false)
+  end
+end
+
 local function a_l()
   local count = vim.v.count1
-
-  local not_changed_pos = screen_right_action()
+  local not_changed_pos = screen_action("g$")
 
   if not_changed_pos then
     vim.api.nvim_feedkeys("zsg$", "nx", false)
     local line;
     for i = 1, count do
-      local not_changed_pos = screen_right_action()
+      local not_changed_pos = screen_action("g$")
       if not_changed_pos then
         vim.api.nvim_feedkeys("zsg$", "nx", false)
         if not line then
