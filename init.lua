@@ -1,7 +1,6 @@
 require("auto-command")
 require("options").setup()
 require("repeat").setup()
-require("concat-mode")
 local K = require("plugin-keymap")
 K.setup()
 require("win-action").setup()
@@ -21,9 +20,9 @@ end
 
 vim.opt.rtp:prepend(lazypath)
 
-require("globals")
 require("lazy").setup({
   { import = "plugins" },
+  { import = "custom.lazy-plugins.concat-mode" }
 })
 
 K.add({

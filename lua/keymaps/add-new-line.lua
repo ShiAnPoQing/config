@@ -9,14 +9,20 @@ return {
   },
   ["b"] = { "o", { "n", "x" } },
   ["B"] = { "O", { "n", "x" } },
+  -- no blank
+  ["<space>b"] = { "o<C-u>", { "n" } },
+  -- no blank
+  ["<space>B"] = { "O<C-u>", { "n" } },
   ["<S-CR>"] = {
     "<C-o>O",
     "i"
   },
+  -- no blank
   ["<C-CR>"] = {
     "<CR><C-U>",
     "i"
   },
+  -- no blank
   ["<C-S-CR>"] = {
     "<C-o>O<C-U>",
     "i"

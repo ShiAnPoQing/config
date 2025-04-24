@@ -124,29 +124,36 @@ function M.moveLineVisualMode(count, upOrDown)
   end
 end
 
-function M.moveLine(count, upOrDown)
+local MoveAction = {
+  ["up"] = {
+  },
+  ["down"] = {
+  }
+}
+
+function M.moveLine(count, dir)
   local pos = vim.api.nvim_win_get_cursor(0)
-  local column = pos[1]
+  local row = pos[1]
   local col = pos[2]
 
-  if upOrDown == "down" then
-    local bufLineCount = vim.api.nvim_buf_line_count(0)
-    local toColumn = math.min(column + count, bufLineCount)
+  if dir == "down" then
+    local buf_line_count = vim.api.nvim_buf_line_count(0)
+    local torow = math.min(row + count, buf_line_count)
 
-    local lines = vim.api.nvim_buf_get_lines(0, column - 1, toColumn, false)
-    local currentLine = { lines[1] }
+    local lines = vim.api.nvim_buf_get_lines(0, row - 1, torow, false)
+    local cursor_line = { lines[1] }
     local remainingLines = {}
     table.move(lines, 2, #lines, 1, remainingLines)
 
-    vim.api.nvim_buf_set_lines(0, toColumn - 1, toColumn, false, currentLine)
-    vim.api.nvim_buf_set_lines(0, column - 1, toColumn - 1, false, remainingLines)
+    vim.api.nvim_buf_set_lines(0, torow - 1, torow, false, cursor_line)
+    vim.api.nvim_buf_set_lines(0, row - 1, torow - 1, false, remainingLines)
 
-    vim.api.nvim_win_set_cursor(0, { toColumn, col })
+    vim.api.nvim_win_set_cursor(0, { torow, col })
 
-    if toColumn == bufLineCount then
+    if torow == buf_line_count then
       echoMessage({
         type = "downEnd",
-        count = toColumn - column,
+        count = torow - row,
       })
     else
       echoMessage({
@@ -158,20 +165,20 @@ function M.moveLine(count, upOrDown)
     return
   end
 
-  local toColumn = math.max(column - count, 1)
-  local lines = vim.api.nvim_buf_get_lines(0, toColumn - 1, column, false)
-  local currentLine = { lines[#lines] }
+  local torow = math.max(row - count, 1)
+  local lines = vim.api.nvim_buf_get_lines(0, torow - 1, row, false)
+  local cursor_line = { lines[#lines] }
   local remainingLines = {}
 
   table.move(lines, 1, #lines - 1, 1, remainingLines)
 
-  vim.api.nvim_buf_set_lines(0, toColumn - 1, toColumn, false, currentLine)
-  vim.api.nvim_buf_set_lines(0, toColumn, column, false, remainingLines)
+  vim.api.nvim_buf_set_lines(0, torow - 1, torow, false, cursor_line)
+  vim.api.nvim_buf_set_lines(0, torow, row, false, remainingLines)
 
-  if toColumn == 1 then
+  if torow == 1 then
     echoMessage({
       type = "upTop",
-      count = column - toColumn,
+      count = row - torow,
     })
   else
     echoMessage({
@@ -179,7 +186,8 @@ function M.moveLine(count, upOrDown)
       count = count,
     })
   end
-  vim.api.nvim_win_set_cursor(0, { toColumn, col })
+
+  vim.api.nvim_win_set_cursor(0, { torow, col })
 end
 
 return M
