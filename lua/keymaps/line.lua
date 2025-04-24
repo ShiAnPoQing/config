@@ -1,6 +1,24 @@
 return {
   ["b"] = { "o", { "n", "x" } },
   ["B"] = { "O", { "n", "x" } },
+  ["<C-CR>"] = {
+    function()
+      require("base-function").AddNewLine(1, "up")
+      require("repeat").Record(function()
+        require("base-function").AddNewLine(1, "up")
+      end)
+    end,
+    "i"
+  },
+  ["<M-CR>"] = {
+    function()
+      require("base-function").AddNewLine(1, "down")
+      require("repeat").Record(function()
+        require("base-function").AddNewLine(1, "down")
+      end)
+    end,
+    "i"
+  },
   -- add new line below cursor line, and cursor jump new line
   ["<M-b>"] = {
     function()

@@ -1,0 +1,198 @@
+字符串库假定采用单字节字符编码
+第一个字符从 1 开始计算（而不是 C 里的 0 ）。 
+索引可以是负数，它指从字符串末尾反向解析。 即，最后一个字符在 -1 位置处，等等。
+
+字符串库中的所有函数都在表 |string| 中。 
+它还将其设置为字符串元表的 |__index| 域。 
+因此，你可以以面向对象的形式使用字符串函数。
+例如：
+>lua
+    string.byte(s,i) 可以写成 s:byte(i)
+<
+
+*string.byte*
+>lua
+    -- 返回字符 s[i]， s[i+1]， ...　，s[j] 的内部数字编码。
+    string.byte (s [, i [, j]])
+    -- i 的默认值是 1 ； j 的默认值是 i。 这些索引以函数 string.sub 的规则修正。
+    -- 数字编码没有必要跨平台。
+<
+
+*string.char*
+>lua
+    string.char (···)
+    -- 接收零或更多的整数。返回和参数数量相同长度的字符串。
+    -- 其中每个字符的内部编码值等于对应的参数值。
+    -- 数字编码没有必要跨平台。
+<
+
+*string.reverse*
+>lua
+    -- 返回字符串 s 的翻转串。
+    string.reverse(s)
+<
+
+*string.len*
+>lua
+    -- 返回字符串长度
+    string.len(s)
+    -- 空串 "" 的长度为 0 
+    -- 内嵌零也统计在内，因此 "a\000bc\000" 的长度为 5 
+<
+
+*string.upper* 
+>lua
+    -- 将字符串 s 中小写字符大写返回副本
+    string.upper(s)
+    -- 对小写字符的定义取决于当前的区域设置
+<
+
+*string.lower* 
+>lua
+    -- 将字符串 s 中大写字符小写返回副本
+    string.lower(s)
+    -- 对大写字符的定义取决于当前的区域设置
+<
+
+*string.rep*
+>lua
+    -- 返回 n 个字符串 s 以字符串 sep 为分割符连在一起的字符串
+    --      默认的 sep 值为空字符串（即没有分割符）
+    --      如果 n 不是正数则返回空串
+    string.rep(s, n [, sep])
+<
+
+*string.find*
+>lua
+    -- 查找字符串 s 中匹配到的第一个 pattern 
+    string.find (s, pattern [, init [, plain]])
+    function string.find(s:string|number, pattern:string|number, init?:interger, plain?:boolean): (start, end, [match1, ...])|nil
+    -- 如果在模式中定义了捕获，捕获到的若干值也会在两个索引之后返回
+    --  1. 找到匹配，返回 s 中关于它起始位置，终点位置、以及捕获
+    --  2. 否则，返回 nil 
+
+    -- init  指明从哪里开始搜索(default: 1) 可以是负值
+    -- plain 为 true 时，关闭模式匹配机制。 
+    --      此时函数仅做直接的 “查找子串”的操作， 而 pattern 中没有字符被看作魔法字符
+    --      如果给定了 plain　，就必须写上 init 
+    end
+<
+
+*string.gsub*
+>lua
+    string.gsub (s, pattern, repl [, n])
+    -- 字符串 str（n? 前n个: 所有）匹配 pattern 替换 repl（若有替换项）
+    -- 返回[替换后的副本，匹配次数]
+    function string.gsub(
+            str: string|number,     
+                -- 字符串
+            pattern: string|number, 
+                -- 模式
+                -- 如果没有设置捕获，则捕获整个模式
+            repl:string|table|fun(match1,...): string|number|void|false|nil,
+                -- string:          替换目标
+                --                      1. 可通过 %d 引用捕获子串
+                --                      2. %0 表示整个匹配
+                --                      3. %% 转义 %
+                -- table:           使用第一个捕获在表中查找替换目标(string|number)  
+                --                  查询结果若为 string|number，作为替换目标，若为 false|nil 则不作替换
+                -- fun(match,...)   每当匹配，调用该函数，捕获子串依次传入
+                --                  返回结果若为 string|number，作为替换目标，若为 false|nil 则不作替换
+            n?: interger
+                -- n? 前 n 个匹配: 所有匹配
+            ): string, count
+                -- string => 替换后的字符串副本
+                -- count  => 匹配次数 
+    end
+<
+    
+
+*string.match*
+>lua
+    string.match (s, pattern [, init])
+    -- 字符串 str 匹配 match pattern 第一个能匹配部分
+    -- 返回匹配捕获物 (string, ...) | nil
+    function string.match(
+            str,
+                -- 字符串
+            pattern,
+                -- 模式
+                -- 如果未指定捕获，则捕获整个模式
+            init?
+                -- 从第 init 开始搜索(default: 1)
+                -- 可使用负数
+            ): (string, ...)|nil
+    end
+<
+
+*string.sub*
+>lua
+    -- 获取字符串指定长度的子串
+    string.sub (s, i [, j])
+    function string.sub(
+            str,    -- 字符串
+            start,  -- 子串从 start
+                    --      支持负数
+                        
+            end?    -- 到 end(default: -1)
+                    --      支持负数
+            ): string
+    end
+    -- 超出边界自会修正
+    -- i > j => return ""
+
+    string.sub(s, 1, j) -- #前缀串 = j
+    string.sub(s, -i)   -- #后缀串 = i
+<
+
+*string.gmatch*
+>lua
+    -- 返回一个迭代器函数。
+    -- 每次调用这个函数都会继续以 pattern 对 s 做匹配，并返回所有捕获到的值。
+    -- 如果 pattern 中没有指定捕获，则每次捕获整个 pattern。
+    string.gmatch(s, pattern)
+    -- 下面这个例子会循环迭代字符串 s 中所有的单词， 并逐行打印：
+
+     local s = "hello world from Lua"
+     for w in string.gmatch(s, "%a+") do
+       print(w)
+     end
+
+    -- 例子: 从指定的字符串中收集所有的键值对 key=value 置入一张表
+
+     local t = {}
+     local s = "from=world, to=Lua"
+     for k, v in string.gmatch(s, "(%w+)=(%w+)") do
+       t[k] = v
+     end
+
+    -- 对这个函数来说，模板前开始的 '^' 不会当成锚点。因为这样会阻止迭代。
+<
+
+*string.format*
+>lua
+    string.format (formatstring, ···)
+    -- 返回不定数量参数的格式化版本， 格式化串为第一个参数（必须是一个字符串）。
+    -- 格式化字符串遵循 ISO C 函数 sprintf 的规则。 
+    -- 不同点在于选项 *, h, L, l, n, p 不支持，另外还增加了一个选项 q。 
+    -- q 选项将一个字符串格式化为两个双引号括起，对内部字符做恰当的转义处理的字符串。
+    -- 该字符串可以安全的被 Lua 解释器读回来。 
+    -- 例如，调用
+    
+         string.format('%q', 'a string with "quotes" and \n new line')
+    -- 会产生字符串：
+    
+         "a string with \"quotes\" and \
+          new line"
+
+    -- 选项 A and a （如果有的话）， E, e, f, G, and g 都期待一个对应的数字参数。 
+    -- 选项 c, d, i, o, u, X, and x 则期待一个整数。 
+    -- 选项 q 期待一个字符串；
+    -- 选项 s 期待一个没有内嵌零的字符串。
+    --- 如果选项 s 对应的参数不是字符串，它会用和 tostring 一致的规则转换成字符串。
+<
+
+
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

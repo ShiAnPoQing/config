@@ -1,0 +1,117 @@
+*for*
+
+for 有两种形式：一种是数字形式，另一种是通用形式。
+
+================================================
+数字形式
+================================================
+
+>lua
+    for name = i, j[, step] do block end
+<
+
+>lua
+    for v = e1, e2, e3 do block end
+    
+    do
+       local var, limit, step = tonumber(e1), tonumber(e2), tonumber(e3)
+       if not (var and limit and step) then error() end
+       var = var - step
+       while true do
+         var = var + step
+         if (step >= 0 and var > limit) or (step < 0 and var < limit) then
+           break
+         end
+         local v = var
+         block
+       end
+     end
+<
+
+================================================
+通用形式
+================================================
+
+>lua
+    for name, ... in explist do block end 
+<
+
+>lua
+    for var_1, ···, var_n in explist do block end
+
+    do
+        local iter, state, var = explist
+        while true do
+            local var_1, ..., var_n = iter(state, var)
+            if var_1 == nil then
+                break
+            end
+            var = var_1
+            block
+        end
+    end
+<
+
+>lua
+    function ipairs(t)
+        return function(t, i)
+            i = i + 1
+            local v = t[i]
+            if v then
+                return i, v
+            end
+        end, 
+        t, 0
+    end
+
+    for var_1, var2 in ipairs(table) do
+        print(var_1, var2)
+    end
+
+    local iter, state, var = ipairs(table)
+    -- iter  迭代器函数
+    -- state 状态
+    -- var   迭代器初始值
+
+    while true do
+        local var1, var2 = iter(state, var)
+        if var1 == nil then
+            break
+        end
+        var=var1
+    end
+<
+
+>lua
+    -- 采用闭包
+    function ipairs(t)
+        local i = 0
+        return function()
+            i = i + 1
+            local v = t[i]
+            if v then
+                return i, v
+            end
+        end 
+    end
+
+    for var_1, var2 in ipairs(table) do
+        print(var_1, var2)
+    end
+
+    local iter, state, var = ipairs(table)
+    -- iter  迭代器函数
+    print(state) -- nil
+    print(var)   -- nil
+
+    while true do
+        local var1, var2 = iter(state, var)
+        if var1 == nil then
+            break
+        end
+        var=var1
+    end
+<
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

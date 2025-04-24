@@ -217,7 +217,9 @@ K.add({
   },
   ["<F10>"] = {
     function()
-      require("nvim-extmark-doc").extmark_doc()
+      local tb = { 2, 4, 3, 1 }
+
+      -- require("nvim-extmark-doc").extmark_doc()
       -- require("search-manual").searchManual()
     end,
     "n",

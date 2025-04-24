@@ -1,0 +1,79 @@
+*table*
+
+记住，无论何时，若一个操作需要取表的长度， 这张表必须是一个真序列，或是拥有 |__len| 元方法  
+所有的函数都忽略传入参数的那张表中的非数字键。
+
+*table.concat*
+>lua
+    table.concat(list [, sep [, i [, j]]])
+
+    -- 返回字符串，列表元素通过 sep 连接
+    -- 从 i 开始到 j 结束
+    -- sep 的默认值是空串， i 的默认值是 1 ， j 的默认值是 #list 。 
+    -- 如果 i 比 j 大，返回空串。
+    table.concat(list:table, sep?:string, i?:integer, j?:integer): string(list[i]..sep..list[i+1] ··· sep..list[j])
+<
+
+*table.insert*
+>lua
+    table.insert(list, [pos,] value)
+
+    -- insert value at pos(default=#list+1) in list
+    table.insert(list:table, pos?:integer, value:any)
+    ... value, list[pos], list[pos+1], ···, list[#list]
+    -- value 成为 pos
+<
+
+*table.remove*
+>lua
+    table.remove(list [, pos])
+
+    -- 删除并返回 list 中 pos 位置上的元素
+    -- pos 默认为 #list 
+    -- 超出边界返回 nil
+    -- 不支持负索引
+    table.remove(list:table, pos?:integer)
+<
+
+*table.move*
+>lua
+    table.move(a1, f, e, t [,a2])
+
+    -- 将元素从表 a1 移到表 a2。
+    -- a2 的默认值为 a1
+    -- 目标区间可以和源区间重叠。 
+    -- 索引 f 必须是正数。
+    table.move(a1, f, e, t [,a2])
+    a2[t],··· = a1[f],···,a1[e]
+<
+
+*table.sort*
+>lua
+    table.sort(list [, comp])
+
+
+    -- 在表内从 list[1] 到 list[#list] 原地 对其间元素按指定次序排序。
+    -- 如果没有提供 comp， 将使用标准 Lua 操作 < 作为替代品。
+    -- 排序算法并不稳定； 即当两个元素次序相等时，它们在排序后的相对位置可能会改变。
+    table.sort(list:table, comp?:fun(el2, el1):boolean)
+    -- comp 以 el2 在左, el2 在右
+<
+
+*table.unpack*
+>lua
+
+    -- 返回列表中的元素。
+    -- i 默认为 1 ，j 默认为 #list。
+    -- 等价： return list[i], list[i+1], ···, list[j]
+    table.unpack(list [, i [, j]])
+<
+
+*table.pack*
+>lua
+    -- 返回用所有参数以键 1,2, 等填充的新表， 并将 "n" 这个域设为参数的总数。 注意这张返回的表不一定是一个序列。
+    table.pack (···)
+    -- neovim 中没有此方法
+<
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
