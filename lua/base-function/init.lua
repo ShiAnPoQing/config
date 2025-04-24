@@ -36,28 +36,6 @@ function M.OmodeWordLeftMove(count)
   vim.api.nvim_feedkeys(key, "nx", true)
 end
 
-function M.AddNewLine(count, updown)
-  local begin_pos = vim.api.nvim_win_get_cursor(0)
-  local end_pos
-  local i = count
-
-  if updown == "down" then
-    while i > 0 do
-      vim.api.nvim_buf_set_lines(0, begin_pos[1], begin_pos[1], false, { "" })
-      i = i - 1
-    end
-    end_pos = { begin_pos[1] + count, begin_pos[2] }
-  elseif updown == "up" then
-    while i > 0 do
-      vim.api.nvim_buf_set_lines(0, begin_pos[1] - 1, begin_pos[1] - 1, false, { "" })
-      i = i - 1
-    end
-    end_pos = begin_pos
-  end
-
-  vim.api.nvim_win_set_cursor(0, end_pos)
-end
-
 function M.EnterInertMode(mode, left_right)
   if mode == "n" then
     local not_empty = string.find(vim.api.nvim_get_current_line(), "%S")

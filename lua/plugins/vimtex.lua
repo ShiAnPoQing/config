@@ -203,6 +203,7 @@ return {
       ["e$"] = { "<Plug>(vimtex-i$)", { "x", "o" } },
       ["ed"] = { "<Plug>(vimtex-id)", { "x", "o" } },
     })
+    vim.opt.cmdheight = 2
 
     -- vim.keymap.set("n", "cem", "<Plug>(vimtex-delim-change-math)")
     -- vim.keymap.set("n", "dem", "<Plug>(vimtex-delim-delete)")

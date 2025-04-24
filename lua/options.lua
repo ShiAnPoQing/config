@@ -8,7 +8,7 @@ function M.setup()
     title = true,
     titlestring = "MuHuiXueLuoAnPoQing -neovim",
     showmode = false,
-    cmdheight = 2,
+    cmdheight = 1,
     autoindent = true,
     cindent = true,
     smartindent = true,

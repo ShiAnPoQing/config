@@ -378,42 +378,42 @@ return {
     -- {""},
     { "<up>", "t" },
   },
-  ["<M-C-k>"] = {
-    "<C-W>k^",
-    "n"
-  },
+  -- ["<M-C-k>"] = {
+  --   "<C-W>k^",
+  --   "n"
+  -- },
   -- insert mode move: j,
   ["<M-j>"] = {
     { "<Down>", { "i", "c", "s" }, { silent = false } },
     -- { "<C-W>j^", { "n" } },
     { "<down>", "t" },
   },
-  ["<M-C-j>"] = {
-    "<C-W>j^",
-    "n"
-  },
+  -- ["<M-C-j>"] = {
+  --   "<C-W>j^",
+  --   "n"
+  -- },
   -- insert mode move: h,
   ["<M-h>"] = {
-    { "<left>", { "i", "c", "s" }, { silent = false } },
-    -- { "<C-W>h^", { "n" } },
-    { "i",      "n" },
-    { "<left>", "t" },
+    { "<left>",  { "i", "c", "s" }, { silent = false } },
+    { "<C-W>h^", { "n" } },
+    -- { "i",      "n" },
+    { "<left>",  "t" },
   },
-  ["<M-C-h>"] = {
-    "<C-W>h^",
-    "n"
-  },
+  -- ["<M-C-h>"] = {
+  --   "<C-W>h^",
+  --   "n"
+  -- },
   -- insert mode move: l,
   ["<M-l>"] = {
     { "<right>", { "i", "c", "s" }, { silent = false } },
-    { "a",       "n" },
-    -- { "<C-W>l^", { "n" } },
+    --  { "a",       "n" },
+    { "<C-W>l^", { "n" } },
     { "<right>", "t" },
   },
-  ["<M-C-l>"] = {
-    "<C-W>l^",
-    "n"
-  },
+  -- ["<M-C-l>"] = {
+  --   "<C-W>l^",
+  --   "n"
+  -- },
   -- insert mode move: exclusive words like e,
   ["<M-space><M-i>"] = {
     { "<Esc>gea", { "i" } },
