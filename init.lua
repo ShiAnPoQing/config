@@ -217,8 +217,7 @@ K.add({
   },
   ["<F10>"] = {
     function()
-      local a = vim.fn.getwinpos()
-      print(vim.inspect(a))
+      local a = vim.fn.input("dsfa")
       -- require("nvim-extmark-doc").extmark_doc()
       -- require("search-manual").searchManual()
     end,

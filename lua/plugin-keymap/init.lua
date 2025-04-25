@@ -154,18 +154,6 @@ function M.setup()
   local base_path = vim.fn.stdpath("config") .. "/lua/"
   local path = base_path .. "keymaps"
   load_keymaps(base_path, path)
-  -- local glob = vim.fn.glob(path, true, true)
-  --
-  -- for _, name in ipairs(glob) do
-  --   local module_path = name:gsub(basePath, ""):gsub("%.lua$", "")
-  --   local success, source = pcall(require, module_path)
-  --   if success and type(source) == "table" then
-  --     M.add(source)
-  --   end
-  -- end
-  --
-  --
-  -- local dirs = vim.fn.glob(current_path .. "/*", true, true)
 end
 
 return M
