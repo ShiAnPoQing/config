@@ -1,4 +1,4 @@
-local M = require("custom.plugins.delete-surround-match")
+local M = require("custom.plugins.surround.delete-surround")
 
 return {
   ["ds)"] = {
