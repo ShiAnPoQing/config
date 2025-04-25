@@ -1,0 +1,8 @@
+*Help*
+|:help|		:h[elp]		打开帮助窗口
+|:helpclose|	:helpc[lose]	关闭一个帮助窗口
+|:helpgrep|	:helpg[rep]	类似于":grep"，但搜索帮助文件
+|:helptags|	:helpt[ags]	为目录生成帮助标签
+|:lhelpgrep|	:lh[elpgrep]	类似于":helpgrep"，但使用位置列表
+
+vim:tw=78:ts=8:noet:ft=help:norl:

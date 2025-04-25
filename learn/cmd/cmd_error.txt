@@ -1,0 +1,15 @@
+*Error*
+|:cNext|	:cN[ext]	转到上一个错误
+|:cNfile|	:cNf[ile]	转到上一个文件的最后一个错误
+|:cabove|	:cabo[ve]	转到当前行上方的错误
+|:caddbuffer|	:cad[dbuffer]	从缓冲区添加错误
+|:caddexpr|	:cadde[xpr]	从表达式添加错误
+|:cafter|	:caf[ter]	转到当前光标后的错误
+|:cbefore|	:cbe[fore]	转到当前光标前的错误
+|:cbelow|	:cbel[ow]	转到当前行下方的错误
+|:cbuffer|	:cb[uffer]	解析错误消息并跳转到第一个错误
+|:cc|		:cc		转到特定错误
+|:lmake|	:lmak[e]	执行外部命令'makeprg'并解析错误消息
+|:make|		:mak[e]		执行外部命令'makeprg'并解析错误消息
+
+vim:tw=78:ts=8:noet:ft=help:norl:

@@ -1,0 +1,11 @@
+---------------------------------------------------------
+*缩写*
+---------------------------------------------------------
+|:abbreviate|	:ab[breviate]	输入缩写
+|:abclear|	:abc[lear]	移除所有缩写
+|:unabbreviate|	:una[bbreviate]	移除缩写
+|:cabclear|	:cabc[lear]	清除命令行模式的所有缩写
+|:noreabbrev|	:norea[bbrev]	输入不会被重新映射的缩写
+|:unabbreviate|	:una[bbreviate]	移除缩写
+
+vim:tw=78:ts=8:noet:ft=help:norl:

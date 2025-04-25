@@ -36,7 +36,7 @@ function M.setup()
 
     wrap = false,
 
-    scrolloff = 1,
+    scrolloff = 0,
 
     splitright = true,
     splitbelow = true,

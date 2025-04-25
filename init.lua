@@ -22,7 +22,8 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   { import = "plugins" },
-  { import = "custom.lazy-plugins.concat-mode" }
+  { import = "custom.lazy-plugins.concat-mode" },
+  { import = "custom.lazy-plugins.show-file-info" }
 })
 
 K.add({
@@ -216,8 +217,8 @@ K.add({
   },
   ["<F10>"] = {
     function()
-      local tb = { 2, 4, 3, 1 }
-
+      local a = vim.fn.getwinpos()
+      print(vim.inspect(a))
       -- require("nvim-extmark-doc").extmark_doc()
       -- require("search-manual").searchManual()
     end,

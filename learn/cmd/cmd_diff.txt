@@ -1,0 +1,10 @@
+*diff*
+|:diffupdate|	:dif[fupdate]	更新'diff'缓冲区
+|:diffget|	:diffg[et]	移除当前缓冲区中的差异
+|:diffoff|	:diffo[ff]	关闭差异模式
+|:diffpatch|	:diffp[atch]	应用补丁并显示差异
+|:diffput|	:diffpu[t]	移除其他缓冲区中的差异
+|:diffsplit|	:diffs[plit]	显示与另一个文件的差异
+|:diffthis|	:difft[his]	使当前窗口成为差异窗口
+
+vim:tw=78:ts=8:noet:ft=help:norl:

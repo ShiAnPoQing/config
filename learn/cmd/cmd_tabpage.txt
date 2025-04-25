@@ -1,0 +1,22 @@
+*标签页*
+|:tabNext|	:tabN[ext]	转到上一个标签页
+|:tabclose|	:tabc[lose]	关闭当前标签页
+|:tabdo|	:tabd[o]	在每个标签页中执行命令
+|:tabedit|	:tabe[dit]	在新标签页中编辑文件
+|:tabfind|	:tabf[ind]	在'path'中查找文件，在新标签页中编辑
+|:tabfirst|	:tabfir[st]	转到第一个标签页
+|:tablast|	:tabl[ast]	转到最后一个标签页
+|:tabmove|	:tabm[ove]	将标签页移动到其他位置
+|:tabnew|	:tabnew		在新标签页中编辑文件
+|:tabnext|	:tabn[ext]	转到下一个标签页
+|:tabonly|	:tabo[nly]	关闭除当前标签页外的所有标签页
+|:tabprevious|	:tabp[revious]	转到上一个标签页
+|:tabrewind|	:tabr[ewind]	转到第一个标签页
+|:tabs|		:tabs		列出标签页及其内容
+|:tab|		:tab		打开新窗口时创建新标签页
+|:tags|		:tags		显示标签栈的内容
+|:tag|		:ta[g]		跳转到标签
+|:tcd|		:tc[d]		为标签页更改目录
+|:tchdir|	:tch[dir]	为标签页更改目录
+
+vim:tw=78:ts=8:noet:ft=help:norl:

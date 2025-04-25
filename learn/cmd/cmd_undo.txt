@@ -1,0 +1,9 @@
+*undo*
+|:rundo|	:rund[o]	从文件读取撤销信息
+|:undo|		:u[ndo]		撤销最后的更改
+|:undojoin|	:undoj[oin]	将下一个更改与上一个撤销块连接
+|:undolist|	:undol[ist]	列出撤销树的叶子
+|:wundo|	:wu[ndo]	将撤销信息写入文件
+|:redo|		:red[o]		重做一个已撤销的更改
+
+vim:tw=78:ts=8:noet:ft=help:norl:

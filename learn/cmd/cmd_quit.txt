@@ -1,0 +1,6 @@
+*quit*
+|:quit|		:q[uit]		退出当前窗口（当只有一个窗口时退出Vim）
+|:quitall|	:quita[ll]	退出Vim
+|:qall|		:qa[ll]		退出Vim
+
+vim:tw=78:ts=8:noet:ft=help:norl:

@@ -1,0 +1,11 @@
+*spell*
+|:mkspell|	:mksp[ell]	生成.spl拼写文件
+|:spelldump|	:spelld[ump]	分割窗口并填充所有正确单词
+|:spellgood|	:spe[llgood]	为拼写添加好词
+|:spellinfo|	:spelli[nfo]	显示已加载拼写文件的信息
+|:spellrare|	:spellra[re]	为拼写添加罕见词
+|:spellrepall|	:spellr[epall]	替换所有坏词，如最后一个|z=|
+|:spellundo|	:spellu[ndo]	移除好词或坏词
+|:spellwrong|	:spellw[rong]	添加拼写错误
+
+vim:tw=78:ts=8:noet:ft=help:norl: 

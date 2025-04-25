@@ -1,0 +1,37 @@
+*menu*
+|:amenu|	:am[enu]	为所有模式输入新菜单项
+|:anoremenu|	:an[oremenu]	为所有模式输入不会被重新映射的新菜单
+|:aunmenu|	:aun[menu]	移除所有模式的菜单
+|:cmenu|	:cme[nu]	为命令行模式添加菜单
+|:cnoremenu|	:cnoreme[nu]	类似于":noremenu"，但用于命令行模式
+|:cunmenu|	:cunme[nu]	移除命令行模式的菜单
+|:emenu|	:em[enu]	按名称执行菜单
+|:imenu|	:ime[nu]	为插入模式添加菜单
+|:inoremenu|	:inoreme[nu]	类似于":noremenu"，但用于插入模式
+|:iunmenu|	:iunme[nu]	移除插入模式的菜单
+|:menu|		:me[nu]		输入新菜单项
+|:menutranslate|  :menut[ranslate] 添加菜单翻译项
+|:nmenu|	:nme[nu]	为普通模式添加菜单
+|:nnoremenu|	:nnoreme[nu]	类似于":noremenu"，但用于普通模式
+|:noremenu|	:noreme[nu]	输入不会被重新映射的菜单
+|:nunmenu|	:nunme[nu]	移除普通模式的菜单
+|:omenu|	:ome[nu]	为操作符待决模式添加菜单
+|:onoremenu|	:onoreme[nu]	类似于":noremenu"，但用于操作符待决模式
+|:ounmenu|	:ounme[nu]	移除操作符待决模式的菜单
+|:smenu|	:sme[nu]	为选择模式添加菜单
+|:snoremenu|	:snoreme[nu]	类似于":noremenu"，但用于选择模式
+|:sunmenu|	:sunme[nu]	移除选择模式的菜单
+|:tlmenu|	:tlm[enu]	为|Terminal-mode|添加菜单
+|:tlnoremenu|	:tln[oremenu]	类似于":noremenu"，但用于|Terminal-mode|
+|:tlunmenu|	:tlu[nmenu]	移除|Terminal-mode|的菜单
+|:tmenu|	:tm[enu]	定义菜单工具提示
+|:tunmenu|	:tu[nmenu]	移除菜单工具提示
+|:unmenu|	:unme[nu]	移除菜单
+|:vmenu|	:vme[nu]	为可视+选择模式添加菜单
+|:vnoremenu|	:vnoreme[nu]	类似于":noremenu"，但用于可视+选择模式
+|:vunmenu|	:vunme[nu]	移除可视+选择模式的菜单
+|:xmenu|	:xme[nu]	为可视模式添加菜单
+|:xnoremenu|	:xnoreme[nu]	类似于":noremenu"，但用于可视模式
+|:xunmenu|	:xunme[nu]	移除可视模式的菜单
+
+vim:tw=78:ts=8:noet:ft=help:norl:

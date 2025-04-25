@@ -1,0 +1,16 @@
+*python*
+
+|:py3|		:py3		执行Python 3命令
+|:python3|	:python3	与:py3相同
+|:py3do|	:py3d[o]	为每行执行Python 3命令
+|:py3file|	:py3f[ile]	执行Python 3脚本文件
+|:python|	:py[thon]	执行Python命令
+|:pydo|		:pyd[o]		为每行执行Python命令
+|:pyfile|	:pyf[ile]	执行Python脚本文件
+|:pyx|		:pyx		执行|python_x|命令
+|:pythonx|	:pythonx	与:pyx相同
+|:pyxdo|	:pyxd[o]	为每行执行|python_x|命令
+|:pyxfile|	:pyxf[ile]	执行|python_x|脚本文件
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:

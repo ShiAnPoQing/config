@@ -1,0 +1,44 @@
+*映射*
+|:cmapclear|	:cmapc[lear]	清除命令行模式的所有映射
+|:cmap|		:cm[ap]		类似于":map"，但用于命令行模式
+|:cnoremap|	:cno[remap]	类似于":noremap"，但用于命令行模式
+|:cunmap|	:cu[nmap]	类似于":unmap"，但用于命令行模式
+|:imapclear|	:imapc[lear]	类似于":mapclear"，但用于插入模式
+|:imap|		:im[ap]		类似于":map"，但用于插入模式
+|:inoremap|	:ino[remap]	类似于":noremap"，但用于插入模式
+|:iunmap|	:iu[nmap]	类似于":unmap"，但用于插入模式
+|:lmapclear|	:lmapc[lear]	类似于":mapclear!"，但包括语言参数模式
+|:lmap|		:lm[ap]		类似于":map!"，但包括语言参数模式
+|:lnoremap|	:ln[oremap]	类似于":noremap!"，但包括语言参数模式
+|:loadkeymap|	:loadk[eymap]	加载以下键映射直到EOF
+|:lunmap|	:lu[nmap]	类似于":unmap!"，但包括语言参数模式
+|:mapclear|	:mapc[lear]	清除普通和可视模式的所有映射
+|:map|		:map		显示或输入映射
+|:nmapclear|	:nmapc[lear]	清除普通模式的所有映射
+|:nmap|		:nm[ap]		类似于":map"，但用于普通模式
+|:nnoremap|	:nn[oremap]	类似于":noremap"，但用于普通模式
+|:noremap|	:no[remap]	输入不会被重新映射的映射
+|:nunmap|	:nun[map]	类似于":unmap"，但用于普通模式
+|:omapclear|	:omapc[lear]	移除操作符待决模式的所有映射
+|:omap|		:om[ap]		类似于":map"，但用于操作符待决模式
+|:onoremap|	:ono[remap]	类似于":noremap"，但用于操作符待决模式
+|:ounmap|	:ou[nmap]	类似于":unmap"，但用于操作符待决模式
+|:smapclear|	:smapc[lear]	移除选择模式的所有映射
+|:smap|		:smap		类似于":map"，但用于选择模式
+|:snoremap|	:snor[emap]	类似于":noremap"，但用于选择模式
+|:sunmap|	:sunm[ap]	类似于":unmap"，但用于选择模式
+|:tmapclear|	:tmapc[lear]	移除|Terminal-mode|的所有映射
+|:tmap|		:tma[p]		类似于":map"，但用于|Terminal-mode|
+|:tnoremap|	:tno[remap]	类似于":noremap"，但用于|Terminal-mode|
+|:tunmap|	:tunma[p]	类似于":unmap"，但用于|Terminal-mode|
+|:unmap|	:unm[ap]	移除映射
+|:vmapclear|	:vmapc[lear]	移除可视+选择模式的所有映射
+|:vmap|		:vm[ap]		类似于":map"，但用于可视+选择模式
+|:vnoremap|	:vn[oremap]	类似于":noremap"，但用于可视+选择模式
+|:vunmap|	:vu[nmap]	类似于":unmap"，但用于可视+选择模式
+|:xmapclear|	:xmapc[lear]	移除可视模式的所有映射
+|:xmap|		:xm[ap]		类似于":map"，但用于可视模式
+|:xnoremap|	:xn[oremap]	类似于":noremap"，但用于可视模式
+|:xunmap|	:xu[nmap]	类似于":unmap"，但用于可视模式
+
+vim:tw=78:ts=8:noet:ft=help:norl:

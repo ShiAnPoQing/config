@@ -1,0 +1,9 @@
+*寄存器*
+|:display|	:di[splay]	显示寄存器
+|:registers|	:reg[isters]	显示寄存器的内容
+|:@|		:@		执行寄存器的内容
+|:@@|		:@@		重复之前的":@"
+|:put|		:pu[t]		在文本中插入寄存器的内容
+|:redir|	:redi[r]	将消息重定向到文件或寄存器
+
+vim:tw=78:ts=8:noet:ft=help:norl:

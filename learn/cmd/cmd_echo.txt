@@ -1,0 +1,8 @@
+*echo*
+|:echo|		:ec[ho]		回显表达式的结果
+|:echoerr|	:echoe[rr]	类似于:echo，显示为错误并使用历史记录
+|:echohl|	:echoh[l]	设置回显命令的高亮
+|:echomsg|	:echom[sg]	与:echo相同，将消息放入历史记录
+|:echon|	:echon		与:echo相同，但没有<EOL>
+
+vim:tw=78:ts=8:noet:ft=help:norl:

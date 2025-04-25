@@ -1,0 +1,62 @@
+---------------------------------------------------------
+*快速修复窗口*
+---------------------------------------------------------
+|:cwindow|	:cw[indow]	打开或关闭快速修复窗口
+|:copen|	:cope[n]	打开快速修复窗口
+|:caddfile|	:caddf[ile]	将错误消息添加到当前快速修复列表
+|:cclose|	:ccl[ose]	关闭快速修复窗口
+|:cbottom|	:cbo[ttom]	滚动到快速修复窗口底部
+|:cdo|		:cdo		在每个有效的错误列表条目中执行命令
+|:cfdo|		:cfd[o]		在错误列表中的每个文件中执行命令
+|:cexpr|	:cex[pr]	从表达式读取错误并跳转到第一个
+|:cfile|	:cf[ile]	读取错误消息文件并跳转到第一个
+|:cfirst|	:cfir[st]	转到指定错误，默认为第一个
+|:cgetbuffer|	:cgetb[uffer]	从缓冲区获取错误
+|:cgetexpr|	:cgete[xpr]	从表达式获取错误
+|:cgetfile|	:cg[etfile]	读取错误消息文件
+|:changes|	:changes	打印更改列表
+|:checkpath|	:checkp[ath]	列出包含的文件
+|:checktime|	:checkt[ime]	检查已加载缓冲区的时间戳
+|:chistory|	:chi[story]	列出错误列表
+|:clast|	:cla[st]	转到指定错误，默认为最后一个
+|:clearjumps|	:cle[arjumps]	清除跳转列表
+|:clist|	:cl[ist]	列出所有错误
+|:cnext|	:cn[ext]	转到下一个错误
+|:cnewer|	:cnew[er]	转到较新的错误列表
+|:cnfile|	:cnf[ile]	转到下一个文件的第一个错误
+|:cnoreabbrev|	:cnorea[bbrev]	类似于":noreabbrev"，但用于命令行模式
+|:colder|	:col[der]	转到较旧的错误列表
+|:colorscheme|	:colo[rscheme]	加载特定配色方案
+|:compiler|	:comp[iler]	为特定编译器进行设置
+|:cprevious|	:cp[revious]	转到上一个错误
+|:cpfile|	:cpf[ile]	转到上一个文件的最后一个错误
+|:cquit|	:cq[uit]	以错误代码退出Vim
+|:crewind|	:cr[ewind]	转到指定错误，默认为第一个
+|:cunabbrev|	:cuna[bbrev]	类似于":unabbrev"，但用于命令行模式
+|:debug|	:deb[ug]	在调试模式下运行命令
+|:debuggreedy|	:debugg[reedy]	从普通输入读取调试模式命令
+|:defer|	:defe[r]	当前函数完成时调用函数
+|:delfunction|	:delf[unction]	删除用户函数
+|:delmarks|	:delm[arks]	删除标记
+|:digraphs|	:dig[raphs]	显示或输入双字符
+|:djump|	:dj[ump]	跳转到#define
+|:dl|		:dl		带有'l'标志的|:delete|的简写
+|:dlist|	:dli[st]	列出#define
+|:doautocmd|	:do[autocmd]	将自动命令应用于当前缓冲区
+|:doautoall|	:doautoa[ll]	为所有已加载缓冲区应用自动命令
+|:dp|		:d[elete]p	带有'p'标志的|:delete|的简写
+|:drop|		:dr[op]		跳转到编辑文件的窗口或在当前窗口中编辑文件
+|:dsearch|	:ds[earch]	列出一个#define
+|:dsplit|	:dsp[lit]	分割窗口并跳转到#define
+|:earlier|	:ea[rlier]	转到较早的更改，撤销
+|:enew|		:ene[w]		编辑新的未命名缓冲区
+|:eval|		:ev[al]		评估表达式并丢弃结果
+|:ex|		:ex		与":edit"相同
+|:exit|		:exi[t]		与":xit"相同
+|:exusage|	:exu[sage]	Ex命令概述
+|:filter|	:filt[er]	过滤后续命令的输出
+|:find|		:fin[d]		在'path'中查找文件并编辑它
+|:finish|	:fini[sh]	退出源Vim脚本
+|:first|	:fir[st]	转到参数列表中的第一个文件
+
+vim:tw=78:ts=8:noet:ft=help:norl:

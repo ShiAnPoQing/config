@@ -1,0 +1,6 @@
+*Lua*
+|:lua|		:lua		执行|Lua|命令
+|:luado|	:luad[o]	为每行执行Lua命令
+|:luafile|	:luaf[ile]	执行|Lua|脚本文件
+
+vim:tw=78:ts=8:noet:ft=help:norl:

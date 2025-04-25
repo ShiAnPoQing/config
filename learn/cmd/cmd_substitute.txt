@@ -1,0 +1,9 @@
+*substitute*
+
+|:&|		:&		重复上次":substitute"
+|:smagic|	:sm[agic]	使用'magic'进行:substitute
+|:snomagic|	:sno[magic]	使用'nomagic'进行:substitute
+|:substitute|	:s[ubstitute]	查找和替换文本
+|:~|		:~		重复最后的":substitute"
+
+vim:tw=78:ts=8:noet:ft=help:norl:
