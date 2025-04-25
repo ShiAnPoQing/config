@@ -1,0 +1,985 @@
+*index.txt*     Nvim
+
+
+		  VIM 参考手册    作者 Bram Moolenaar
+
+								*index*
+本文件包含了每种模式下所有命令的列表，每个命令都有一个标签和简短描述。这些列表按
+ASCII 值排序。
+
+要查看选项概览请参见 |option-list|。
+要查看内置函数概览请参见 |functions|。
+要查看 Vim 变量列表请参见 |vim-variable|。
+
+                                      输入 |gO| 查看目录。
+
+==============================================================================
+1. 插入模式						*insert-index*
+
+标签		字符		插入模式下的动作	~
+------------------------------------------------------------------------------ ~
+|i_CTRL-@|	CTRL-@		插入先前插入的文本并停止插入
+
+|i_CTRL-A|	CTRL-A		插入先前插入的文本
+|i_CTRL-C|	CTRL-C		退出插入模式，不检查缩写
+
+|i_CTRL-D|	CTRL-D		删除当前行的一个缩进宽度
+
+|i_CTRL-E|	CTRL-E		插入光标下方的字符
+		CTRL-F		未使用（但默认在 'cinkeys' 中用于重新缩进
+				当前行）
+|i_CTRL-G_j|	CTRL-G CTRL-J	向下一行，到开始插入的列
+|i_CTRL-G_j|	CTRL-G j	向下一行，到开始插入的列
+|i_CTRL-G_j|	CTRL-G <Down>	向下一行，到开始插入的列
+|i_CTRL-G_k|	CTRL-G CTRL-K	向上一行，到开始插入的列
+|i_CTRL-G_k|	CTRL-G k	向上一行，到开始插入的列
+|i_CTRL-G_k|	CTRL-G <Up>	向上一行，到开始插入的列
+|i_CTRL-G_u|	CTRL-G u	开始新的可撤销编辑
+|i_CTRL-G_U|	CTRL-G U	下一个光标移动不打断撤销
+    
+
+|i_<BS>|	<BS>		删除光标前的字符
+|i_CTRL-H|	CTRL-H		同 <BS>
+
+|i_digraph|	{char1}<BS>{char2}
+				输入二合字符（仅当 'digraph' 选项设置时）
+|i_<Tab>|	<Tab>		插入 <Tab> 字符
+|i_CTRL-I|	CTRL-I		同 <Tab>
+|i_CTRL-K|	CTRL-K {char1} {char2}
+				输入二合字符
+
+|i_<CR>|	<CR>		开始新行
+|i_<NL>|	<NL>		同 <CR>
+|i_CTRL-J|	CTRL-J		同 <CR>
+|i_CTRL-M|	CTRL-M		同 <CR>
+
+|i_CTRL-N|	CTRL-N		查找光标前关键字的下一个匹配
+|i_CTRL-O|	CTRL-O		执行一个命令并返回插入模式
+|i_CTRL-P|	CTRL-P		查找光标前关键字的上一个匹配
+|i_CTRL-Q|	CTRL-Q		同 CTRL-V，除非用于终端控制流
+
+|i_CTRL-SHIFT-Q|  CTRL-SHIFT-Q {char}
+				同 CTRL-Q，除非 |tui-modifyOtherKeys| 激活
+|i_CTRL-R|	CTRL-R {register}
+				插入寄存器内容
+|i_CTRL-R_CTRL-R| CTRL-R CTRL-R {register}
+				按字面插入寄存器内容
+|i_CTRL-R_CTRL-O| CTRL-R CTRL-O {register}
+				按字面插入寄存器内容且不自动缩进
+|i_CTRL-R_CTRL-P| CTRL-R CTRL-P {register}
+				按字面插入寄存器内容并修正缩进
+		CTRL-S		未使用或用于终端控制流
+|i_CTRL-T|	CTRL-T		在当前行插入一个缩进宽度
+|i_CTRL-U|	CTRL-U		删除当前行中所有输入的字符
+|i_CTRL-V|	CTRL-V {char}	按字面插入下一个非数字
+|i_CTRL-SHIFT-V|  CTRL-SHIFT-V {char}
+				同 CTRL-V，除非 |tui-modifyOtherKeys| 激活
+|i_CTRL-V_digit| CTRL-V {number} 将三位十进制数字作为单个字节插入
+|i_CTRL-W|	CTRL-W		删除光标前的单词
+|i_CTRL-X|	CTRL-X {mode}	进入 CTRL-X 子模式，参见 |i_CTRL-X_index|
+|i_CTRL-Y|	CTRL-Y		插入光标上方的字符
+|i_CTRL-[|	CTRL-[		同 <Esc>
+
+|i_<Esc>|	<Esc>		结束插入模式
+|i_CTRL-\_CTRL-N| CTRL-\ CTRL-N	进入普通模式
+|i_CTRL-\_CTRL-G| CTRL-\ CTRL-G	进入普通模式
+
+		CTRL-\ a - z	预留用于扩展
+		CTRL-\ others	未使用
+|i_CTRL-]|	CTRL-]		触发缩写
+|i_CTRL-^|	CTRL-^		切换 |:lmap| 映射的使用
+|i_CTRL-_|	CTRL-_		当设置 'allowrevins' 时：切换 'revins'
+
+		<Space> to '~'	未使用，除了 '0' 和 '^' 后跟
+				CTRL-D
+
+|i_0_CTRL-D|	0 CTRL-D	删除当前行的所有缩进
+|i_^_CTRL-D|	^ CTRL-D	删除当前行的所有缩进，在下一行恢复
+
+|i_<Del>|	<Del>		删除光标下的字符
+
+		Meta 字符 (0x80 到 0xff, 128 到 255)
+				未使用
+
+|i_<Left>|	<Left>		光标左移一个字符
+|i_<S-Left>|	<S-Left>	光标左移一个单词
+|i_<C-Left>|	<C-Left>	光标左移一个单词
+|i_<Right>|	<Right>		光标右移一个字符
+|i_<S-Right>|	<S-Right>	光标右移一个单词
+|i_<C-Right>|	<C-Right>	光标右移一个单词
+|i_<Up>|	<Up>		光标上移一行
+|i_<S-Up>|	<S-Up>		同 <PageUp>
+|i_<Down>|	<Down>		光标下移一行
+|i_<S-Down>|	<S-Down>	同 <PageDown>
+|i_<Home>|	<Home>		光标移到行首
+|i_<C-Home>|	<C-Home>	光标移到文件开头
+|i_<End>|	<End>		光标移到行尾之后
+|i_<C-End>|	<C-End>		光标移到文件末尾
+|i_<PageUp>|	<PageUp>	向后翻一屏
+|i_<PageDown>|	<PageDown>	向前翻一屏
+|i_<F1>|	<F1>		同 <Help>
+|i_<Help>|	<Help>		停止插入模式并显示帮助窗口
+|i_<Insert>|	<Insert>	切换插入/替换模式
+|i_<LeftMouse>|	<LeftMouse>	光标移到鼠标点击处
+|i_<ScrollWheelDown>|	<ScrollWheelDown>	窗口下移三行
+|i_<S-ScrollWheelDown>|	<S-ScrollWheelDown>	窗口下移一页
+|i_<ScrollWheelUp>|	<ScrollWheelUp>		窗口上移三行
+|i_<S-ScrollWheelUp>|	<S-ScrollWheelUp>	窗口上移一页
+|i_<ScrollWheelLeft>|	<ScrollWheelLeft>	窗口左移六列
+|i_<S-ScrollWheelLeft>|	<S-ScrollWheelLeft>	窗口左移一页
+|i_<ScrollWheelRight>|	<ScrollWheelRight>	窗口右移六列
+|i_<S-ScrollWheelRight>| <S-ScrollWheelRight>	窗口右移一页
+
+CTRL-X 子模式下的命令				*i_CTRL-X_index*
+
+|i_CTRL-X_CTRL-D|	CTRL-X CTRL-D	补全已定义的标识符
+|i_CTRL-X_CTRL-E|	CTRL-X CTRL-E	向上滚动
+|i_CTRL-X_CTRL-F|	CTRL-X CTRL-F	补全文件名
+|i_CTRL-X_CTRL-I|	CTRL-X CTRL-I	补全标识符
+|i_CTRL-X_CTRL-K|	CTRL-X CTRL-K	从字典补全标识符
+|i_CTRL-X_CTRL-L|	CTRL-X CTRL-L	补全整行
+|i_CTRL-X_CTRL-N|	CTRL-X CTRL-N	下一个补全
+|i_CTRL-X_CTRL-O|	CTRL-X CTRL-O	全能补全
+|i_CTRL-X_CTRL-P|	CTRL-X CTRL-P	上一个补全
+|i_CTRL-X_CTRL-S|	CTRL-X CTRL-S	拼写建议
+|i_CTRL-X_CTRL-T|	CTRL-X CTRL-T	从同义词词典补全标识符
+|i_CTRL-X_CTRL-Y|	CTRL-X CTRL-Y	向下滚动
+|i_CTRL-X_CTRL-U|	CTRL-X CTRL-U	使用 'completefunc' 补全
+|i_CTRL-X_CTRL-V|	CTRL-X CTRL-V	像在命令行中那样补全
+|i_CTRL-X_CTRL-Z|	CTRL-X CTRL-Z	停止补全，保持文本原样
+|i_CTRL-X_CTRL-]|	CTRL-X CTRL-]	补全标签
+|i_CTRL-X_s|		CTRL-X s	拼写建议
+
+补全模式下的命令 (参见 |popupmenu-keys|)
+
+|complete_CTRL-E| CTRL-E	停止补全并返回原始文本
+|complete_CTRL-Y| CTRL-Y	接受选中的匹配并停止补全
+		CTRL-L		从当前匹配中插入一个字符
+		<CR>		插入当前选中的匹配
+		<BS>		删除一个字符并重新搜索
+		CTRL-H		同 <BS>
+		<Up>		选择上一个匹配
+		<Down>		选择下一个匹配
+		<PageUp>	选择向前几个条目的匹配
+		<PageDown>	选择向后几个条目的匹配
+		other		停止补全并插入输入的字符
+
+==============================================================================
+2. 普通模式						*normal-index*
+
+CHAR	 任何非空白字符
+WORD	 一串非空白字符
+N	 在命令前输入的数字
+{motion} 光标移动命令
+Nmove	 通过 {motion} 移动的文本
+SECTION	 可能以 '}' 而不是 '{' 开始的节
+
+注意: 1 = 光标移动命令; 2 = 可以撤销/重做
+
+标签		字符	      注意 普通模式下的动作	~
+------------------------------------------------------------------------------ ~
+
+[✅] |h|		h		1  光标左移 N 个字符
+			<BS>		1  同 "h"
+			CTRL-H		1  同 "h"
+		  	<Left>		1  同 "h"
+[✅] |j|		j		1  光标下移 N 行
+		 	<NL>		1  同 "j"
+			CTRL-J		1  同 "j"
+			CTRL-N		1  同 "j"
+			<Down>		1  同 "j"
+[✅] |k|		k		1  光标上移 N 行
+			CTRL-P		1  同 "k"
+			<Up>		1  同 "k"
+[✅] |l|		l		1  光标右移 N 个字符
+		  	<Space>		1  同 "l"
+		  	<Right>		1  同 "l"
+
+[✅] |b|		b		1  光标向后移动 N 个单词
+		  	<S-Left>	1  同 "b"
+		  	<C-Left>	1  同 "b"
+[✅] |B|		B		1  光标向后移动 N 个词
+
+[✅] |E|		E		1  光标向前移动到第 N 个词尾
+[✅] |e|		e		1  光标向前移动到第 N 个单词尾
+
+[✅] |ge|		ge		1  向后移动到上一个词尾
+[✅] |gE|		gE		1  向后移动到上一个词尾
+
+[✅] |w|		w		1  光标向前移动 N 个单词
+		  	<C-Right>	1  同 "w"
+			<S-Right>	1  同 "w"
+[✅] |W|		W		1  光标向前移动 N 个词
+
+[⚠️] |{|		{		1  光标向后移动 N 个段落
+[⚠️] |}|		}		1  光标向前移动 N 个段落
+
+[✅] |g_|		g_			1  光标移到下 N-1 行的最后一个字符
+[✅] |^|		^			1  光标移到行首第一个非空白字符
+
+[✅] |$|		$		1  光标移到下 N 行的末尾
+		      <End>		1  同 "$"
+[✅] |0|		0		1  光标移到行首第一个字符
+		      <Home>		1  同 "0"
+
+[✅] |G|		G		1  光标移到第 N 行，默认为最后一行
+		      <C-End>		1  同 "G"
+[✅] |gg|		gg		1  光标移到第 N 行，默认为第一行
+			<C-Home>	1  同 "gg"
+
+[✅] |H|		H		1  光标移到距离屏幕顶部 N 行的位置
+[✅] |L|		L		1  光标移到距离屏幕底部 N 行的位置
+[✅] |g0|		g0		1  当 'wrap' 关闭时移到屏幕上当前行的最左字符；
+					   当 'wrap' 打开时移到当前屏幕行的最左字符
+[✅] |g$|		g$		1  当 'wrap' 关闭时移到屏幕上当前行的最右字符；
+					   当 'wrap' 打开时移到当前屏幕行的最右字符
+[✅] |M|		M		1  光标移到屏幕中间行
+
+[✅] |ze|		ze		   当 'wrap' 关闭时水平滚动使光标
+					   位于屏幕末尾（右侧）
+[✅] |zs|		zs		   当 'wrap' 关闭时水平滚动使光标
+					   位于屏幕开始（左侧）
+
+
+|`(|		`(		1  光标移到当前句子的开始
+|`)|		`)		1  光标移到当前句子的结尾
+|`<|		`<		1  光标移到高亮区域的开始
+|`>|		`>		1  光标移到高亮区域的结尾
+|`[|		`[		1  光标移到上次操作文本的开始或放置文本的开始
+|`]|		`]		1  光标移到上次操作文本的结尾或放置文本的结尾
+|``|		"``"		1  光标移到最近跳转前的位置
+|`{|		`{		1  光标移到当前段落的开始
+|`}|		`}		1  光标移到当前段落的结尾
+|'(|		'(		1  光标移到当前句子开始处所在行的第一个字符
+|')|		')		1  光标移到当前句子结尾处所在行的第一个字符
+|'<|		'<		1  光标移到当前缓冲区中高亮区域开始处所在行的第一个字符
+|'>|		'>		1  光标移到当前缓冲区中高亮区域结尾处所在行的第一个字符
+|'[|		'[		1  光标移到上次操作文本开始处或放置文本开始处所在行的第一个字符
+|']|		']		1  光标移到上次操作文本结尾处或放置文本结尾处所在行的第一个字符
+|'`|		"``"		1  光标移到最近跳转前的位置
+|'{|		'{		1  光标移到当前段落开始处所在行的第一个字符
+|'}|		'}		1  光标移到当前段落结尾处所在行的第一个字符
+|(|		(		1  光标向后移动 N 个句子
+|)|		)		1  光标向前移动 N 个句子
+
+mark
+
+[✅] |m|		m{A-Za-z}	   在光标位置设置标记 {A-Za-z}
+[✅] |`|		`{a-zA-Z0-9}	1  光标移到标记 {a-zA-Z0-9}
+[⚠️] |'|		'{a-zA-Z0-9}	1  光标移到标记 {a-zA-Z0-9} 所在行的第一个字符
+
+操作
+
+[✅] |d|		["x]d{motion}	2  删除 Nmove 文本 [到寄存器 x]
+[✅] |dd|		["x]dd		2  删除 N 行 [到寄存器 x]
+[✅] |D|		["x]D		2  删除光标下直到行尾的字符以及之后的 N-1 行
+					  [到寄存器 x]；同 "d$"
+
+[✅] |f|		f{char}		1  光标向右移动到第 N 次出现的 {char}
+[✅] |F|		F{char}		1  光标向左移动到第 N 次出现的 {char}
+[✅] |T|		T{char}		1  光标向左移动到第 N 次出现的 {char} 之后
+[✅] |t|		t{char}		1  光标向右移动到第 N 次出现的 {char} 之前
+
+[✅] |p|		["x]p		2  将文本 [从寄存器 x] 粘贴到光标后 N 次
+[✅] |P|		["x]P		2  将文本 [从寄存器 x] 粘贴到光标之前 N 次
+
+[✅] |r|		r{char}		2  将 N 个字符替换为 {char}
+|R|		R		2  进入替换模式：覆盖现有字符，重复输入的文本 N-1 次
+
+[✅] |n|		n		1  重复最近的 '/' 或 '?' N 次
+[✅] |N|		N		1  反向重复最近的 '/' 或 '?' N 次
+
+[⚠️][✅] |s|		["x]s		2  （替换）删除 N 个字符 [到寄存器 x] 并开始插入
+[⚠️][✅] |S|		["x]S		2  删除 N 行 [到寄存器 x] 并开始插入；同 "cc"
+[⚠️][✅] |x|		["x]x		2  删除光标下及之后的 N 个字符 [到寄存器 x]
+|<Del>|		["x]<Del>	2  同 "x"
+|X|		["x]X		2  删除光标前 N 个字符 [到寄存器 x]
+
+[✅] |y|		["x]y{motion}	   将 Nmove 文本复制 [到寄存器 x]
+[✅] |Y|		["x]Y		   复制 N 行 [到寄存器 x]；同 "yy"
+				   注意：默认映射为 "y$" |default-mappings|
+[✅] |yy|		["x]yy		   将 N 行复制 [到寄存器 x]
+
+[✅] |c|		["x]c{motion}	2  删除 Nmove 文本 [到寄存器 x] 并开始插入
+[✅] |cc|		["x]cc		2  删除 N 行 [到寄存器 x] 并开始插入
+[✅] |C|		["x]C		2  从光标位置到行尾进行更改，以及之后的 N-1 行
+				   [到寄存器 x]；同 "c$"
+
+[✅] |u|		u		2  撤销更改
+|<Undo>|	<Undo>		2  同 "u"
+
+[⚠️][✅] |o|		o		2  在光标下方开始新行并插入文本，重复 N 次
+[⚠️][✅] |O|		O		2  在光标上方开始新行并插入文本，重复 N 次
+
+		CTRL-@		   未使用
+|CTRL-A|	CTRL-A		2  将光标处/后的数字加 N
+|CTRL-B|	CTRL-B		1  向后滚动 N 屏
+|CTRL-C|	CTRL-C		   中断当前（搜索）命令
+
+|CTRL-D|	CTRL-D		   向下滚动 N 行（默认：半屏）
+|CTRL-E|	CTRL-E		   向上滚动 N 行（N 行额外）
+|CTRL-F|	CTRL-F		1  向前滚动 N 屏
+|CTRL-G|	CTRL-G		   显示当前文件名和位置
+|<Tab>|		<Tab>		1  转到跳转列表中第 N 个较新的条目
+	  	CTRL-I		1  同 <Tab>
+|<S-NL>|	<S-NL>		1  同 CTRL-F
+		CTRL-K		   未使用
+|CTRL-L|	CTRL-L		   重绘屏幕
+|<CR>|		<CR>		1  光标移到下 N 行的第一个字符
+|<S-CR>|	<S-CR>		1  同 CTRL-F
+|CTRL-M|	CTRL-M		1  同 <CR>
+|CTRL-O|	CTRL-O		1  转到跳转列表中第 N 个较旧的条目
+		CTRL-Q		   未使用，或用于终端控制流
+|CTRL-R|	CTRL-R		2  重做被 'u' 撤销的更改
+		CTRL-S		   未使用，或用于终端控制流
+|CTRL-T|	CTRL-T		   跳转到标签列表中第 N 个较旧的标签
+|CTRL-U|	CTRL-U		   向上滚动 N 行（默认：半屏）
+|CTRL-V|	CTRL-V		   开始可视块模式
+|CTRL-W|	CTRL-W {char}	   窗口命令，参见 |CTRL-W|
+|CTRL-X|	CTRL-X		2  从光标处/后的数字减去 N
+[✅] |CTRL-Y|	CTRL-Y		   向下滚动 N 行
+|CTRL-Z|	CTRL-Z		   挂起程序（或启动新 shell）
+		CTRL-[ <Esc>	   未使用
+|CTRL-\_CTRL-N|	CTRL-\ CTRL-N	   进入普通模式（无操作）
+|CTRL-\_CTRL-G|	CTRL-\ CTRL-G	   进入普通模式（无操作）
+		CTRL-\ a - z	   预留用于扩展
+		CTRL-\ others	   未使用
+|CTRL-]|	CTRL-]		   对光标下的标识符执行 :ta
+|CTRL-^|	CTRL-^		   编辑第 N 个轮换文件（等同于 ":e #N"）
+|CTRL-<Tab>|	CTRL-<Tab>	   同 `g<Tab>` : 转到最后访问的标签页
+		CTRL-_		   未使用
+
+|!|		!{motion}{filter}
+				2  通过 {filter} 命令过滤 Nmove 文本
+|!!|		!!{filter}	2  通过 {filter} 命令过滤 N 行
+|quote|		"{register}	   使用 {register} 用于下一个删除、复制或粘贴
+				   （{.%#:} 仅用于粘贴）
+|#|		#		1  反向搜索光标下标识符的第 N 次出现
+|%|		%		1  找到本行的下一个（花括号/方括号），并转到其匹配处，
+				   或转到匹配的注释括号，或转到匹配的预处理指令。
+|N%|		{count}%	1  转到文件的 N 个百分比处
+|&|		&		2  重复上次 :s
+|''|		''		1  光标移到最近跳转前所在行的第一个字符
+
+|star|		*		1  向前搜索光标下标识符的第 N 次出现
+|+|		+		1  同 <CR>
+|<S-Plus>|	<S-+>		1  同 CTRL-F
+|,|		,		1  反向重复最近的 f、t、F 或 T N 次
+|-|		-		1  光标上移 N 行到第一个字符
+|<S-Minus>|	<S-->		1  同 CTRL-B
+[✅] |.|		.		2  重复上次更改，计数替换为 N
+|/|		/{pattern}<CR>	1  向前搜索第 N 次出现的 {pattern}
+|/<CR>|		/<CR>		1  向前搜索上次搜索的 {pattern}
+|:|		:		1  开始输入 Ex 命令
+|N:|		{count}:	   开始输入 Ex 命令，范围从当前行到下 N-1 行
+|;|		;		1  重复最近的 f、t、F 或 T N 次
+|<|		<{motion}	2  将 Nmove 行向左缩进一个 'shiftwidth'
+|<<|		<<		2  将 N 行向左缩进一个 'shiftwidth'
+|=|		={motion}	2  通过 "indent" 过滤 Nmove 行
+|==|		==		2  通过 "indent" 过滤 N 行
+|>|		>{motion}	2  将 Nmove 行向右缩进一个 'shiftwidth'
+|>>|		>>		2  将 N 行向右缩进一个 'shiftwidth'
+|?|		?{pattern}<CR>	1  向后搜索第 N 次出现的 {pattern}
+|?<CR>|		?<CR>		1  向后搜索上次搜索的 {pattern}
+|@|		@{a-z}		2  执行寄存器 {a-z} 中的内容 N 次
+|@:|		@:		   重复上次 ":" 命令 N 次
+|@@|		@@		2  重复上次 @{a-z} N 次
+|A|		A		2  在行尾追加文本 N 次
+|I|		I		2  在行首第一个字符之前插入文本 N 次
+
+
+|K|		K		   使用 'keywordprg' 查找光标下的关键字
+
+|J|		J		2  连接 N 行；默认为 2 行
+
+
+|U|		U		2  撤销对一行的所有最近更改
+|V|		V		   开始行可视模式
+|ZZ|		ZZ		   如果缓冲区已更改则写入并关闭窗口
+|ZQ|		ZQ		   不写入就关闭窗口
+|[|		[{char}		   方括号命令（见下面的 |[|）
+		\		   未使用
+|]|		]{char}		   方括号命令（见下面的 |]|）
+|_|		_		1  光标移到下 N-1 行的第一个非空白字符
+|a|		a		2  在光标后追加文本 N 次
+|do|		do		2  同 ":diffget"
+|dp|		dp		2  同 ":diffput"
+|i|		i		2  在光标前插入文本 N 次
+|q|		q{0-9a-zA-Z"}	   将输入的字符记录到命名寄存器 {0-9a-zA-Z"}
+				   （大写用于追加）
+[✅] |q|		q		   （记录时）停止记录
+|Q|		Q		2  重放上次记录的寄存器
+|q:|		q:		   在命令行窗口中编辑 : 命令行
+|q/|		q/		   在命令行窗口中编辑 / 命令行
+|q?|		q?		   在命令行窗口中编辑 ? 命令行
+[✅] |v|		v		   开始字符可视模式
+[✅] |bar|		|		1  光标移到第 N 列
+|~|		~		2  当 'tildeop' 关闭时：切换光标下 N 个字符的大小写
+				   并将光标右移 N 个字符
+|~|		~{motion}	   当 'tildeop' 打开时：切换 Nmove 文本的大小写
+|<C-LeftMouse>|	<C-LeftMouse>	   对鼠标点击处的关键字执行 ":ta"
+|<C-RightMouse>| <C-RightMouse>	   同 "CTRL-T"
+|<C-Tab>|	<C-Tab>		   同 "g<Tab>"
+|N<Del>|	{count}<Del>	   从 {count} 中删除最后一位数字
+[✅] |<F1>|		<F1>		   同 <Help>
+[✅] |<Help>|	<Help>		   打开帮助窗口
+|<Insert>|	<Insert>	2  同 "i"
+|<MiddleMouse>|	<MiddleMouse>	2  在鼠标点击位置同 "gP"
+|<PageDown>|	<PageDown>	   同 CTRL-F
+|<PageUp>|	<PageUp>	   同 CTRL-B
+|<RightMouse>|	<RightMouse>	   开始可视模式，将光标移到鼠标点击位置
+|<S-Down>|	<S-Down>	1  同 CTRL-F
+|<S-LeftMouse>|	<S-LeftMouse>	   在鼠标点击位置同 "*"
+|<S-RightMouse>| <S-RightMouse>	   在鼠标点击位置同 "#"
+|<S-Up>|	<S-Up>		1  同 CTRL-B
+*<ScrollWheelDown>*	<ScrollWheelDown>	窗口下移三行
+*<S-ScrollWheelDown>*	<S-ScrollWheelDown>	窗口下移一页
+*<ScrollWheelUp>*	<ScrollWheelUp>		窗口上移三行
+*<S-ScrollWheelUp>*	<S-ScrollWheelUp>	窗口上移一页
+*<ScrollWheelLeft>*	<ScrollWheelLeft>	窗口左移六列
+*<S-ScrollWheelLeft>*	<S-ScrollWheelLeft>	窗口左移一页
+*<ScrollWheelRight>*	<ScrollWheelRight>	窗口右移六列
+*<S-ScrollWheelRight>*	<S-ScrollWheelRight>	窗口右移一页
+
+==============================================================================
+2.1 文本对象						*objects*
+
+这些可以在操作符之后或在可视模式下使用，用于选择一个对象。
+
+标签		命令		   操作符等待和可视模式下的动作	~
+------------------------------------------------------------------------------ ~
+|v_aquote|	a"		   双引号字符串
+|v_a'|		a'		   单引号字符串
+|v_a(|		a(		   同 ab
+|v_a)|		a)		   同 ab
+|v_a<|		a<		   从 '<' 到匹配的 '>' 的 "a <>"
+|v_a>|		a>		   同 a<
+|v_aB|		aB		   从 `[{` 到 `]}` 的 "一个块"（带括号）
+|v_aW|		aW		   "一个词"（带空白）
+|v_a[|		a[		   从 '[' 到匹配的 ']' 的 "a []"
+|v_a]|		a]		   同 a[
+|v_a`|		a`		   反引号字符串
+|v_ab|		ab		   从 "[(" 到 "])" 的 "一个块"（带括号）
+|v_ap|		ap		   "一个段落"（带空白）
+|v_as|		as		   "一个句子"（带空白）
+|v_at|		at		   "一个标签块"（带空白）
+|v_aw|		aw		   "一个单词"（带空白）
+|v_a{|		a{		   同 aB
+|v_a}|		a}		   同 aB
+|v_iquote|	i"		   双引号字符串内部（不含引号）
+|v_i'|		i'		   单引号字符串内部（不含引号）
+|v_i(|		i(		   同 ib
+|v_i)|		i)		   同 ib
+|v_i<|		i<		   从 '<' 到匹配的 '>' 的内部
+|v_i>|		i>		   同 i<
+|v_iB|		iB		   从 `[{` 和 `]}` 的内部块
+|v_iW|		iW		   "内部词"
+|v_i[|		i[		   从 '[' 到匹配的 ']' 的内部
+|v_i]|		i]		   同 i[
+|v_i`|		i`		   反引号字符串内部（不含反引号）
+|v_ib|		ib		   从 "[(" 到 "])" 的内部块
+|v_ip|		ip		   "内部段落"
+|v_is|		is		   "内部句子"
+|v_it|		it		   "内部标签块"
+|v_iw|		iw		   "内部单词"
+|v_i{|		i{		   同 iB
+|v_i}|		i}		   同 iB
+
+==============================================================================
+2.2 窗口命令						*CTRL-W*
+
+tag		command		   action in Normal mode	~
+------------------------------------------------------------------------------ ~
+|CTRL-W_CTRL-B|	CTRL-W CTRL-B	   同 "CTRL-W b"
+|CTRL-W_CTRL-C|	CTRL-W CTRL-C	   同 "CTRL-W c"
+|CTRL-W_CTRL-D|	CTRL-W CTRL-D	   同 "CTRL-W d"
+|CTRL-W_CTRL-F|	CTRL-W CTRL-F	   同 "CTRL-W f"
+		CTRL-W CTRL-G	   同 "CTRL-W g .."
+|CTRL-W_CTRL-I|	CTRL-W CTRL-I	   同 "CTRL-W i"
+|CTRL-W_CTRL-N|	CTRL-W CTRL-N	   同 "CTRL-W n"
+|CTRL-W_CTRL-O|	CTRL-W CTRL-O	   同 "CTRL-W o"
+|CTRL-W_CTRL-P|	CTRL-W CTRL-P	   同 "CTRL-W p"
+|CTRL-W_CTRL-Q|	CTRL-W CTRL-Q	   同 "CTRL-W q"
+|CTRL-W_CTRL-R|	CTRL-W CTRL-R	   同 "CTRL-W r"
+|CTRL-W_CTRL-S|	CTRL-W CTRL-S	   同 "CTRL-W s"
+|CTRL-W_CTRL-T|	CTRL-W CTRL-T	   同 "CTRL-W t"
+|CTRL-W_CTRL-V|	CTRL-W CTRL-V	   同 "CTRL-W v"
+|CTRL-W_CTRL-W|	CTRL-W CTRL-W	   同 "CTRL-W w"
+|CTRL-W_CTRL-X|	CTRL-W CTRL-X	   同 "CTRL-W x"
+|CTRL-W_CTRL-Z|	CTRL-W CTRL-Z	   同 "CTRL-W z"
+|CTRL-W_CTRL-]|	CTRL-W CTRL-]	   同 "CTRL-W ]"
+|CTRL-W_CTRL-^|	CTRL-W CTRL-^	   同 "CTRL-W ^"
+|CTRL-W_CTRL-_|	CTRL-W CTRL-_	   同 "CTRL-W _"
+|CTRL-W_+|	CTRL-W +	   增加当前窗口高度 N 行
+|CTRL-W_-|	CTRL-W -	   减少当前窗口高度 N 行
+|CTRL-W_<|	CTRL-W <	   减少当前窗口宽度 N 列
+|CTRL-W_=|	CTRL-W =	   使所有窗口等宽等高
+|CTRL-W_>|	CTRL-W >	   增加当前窗口宽度 N 列
+|CTRL-W_H|	CTRL-W H	   移动当前窗口到最左边
+|CTRL-W_J|	CTRL-W J	   移动当前窗口到最底部
+|CTRL-W_K|	CTRL-W K	   移动当前窗口到最顶部
+|CTRL-W_L|	CTRL-W L	   移动当前窗口到最右边
+|CTRL-W_P|	CTRL-W P	   转到预览窗口
+|CTRL-W_R|	CTRL-W R	   向上旋转窗口 N 次
+|CTRL-W_S|	CTRL-W S	   同 "CTRL-W s"
+|CTRL-W_T|	CTRL-W T	   移动当前窗口到新标签页
+|CTRL-W_W|	CTRL-W W	   转到第 N 个上一个窗口（循环）
+|CTRL-W_]|	CTRL-W ]	   分割窗口并跳转到光标下的标签
+|CTRL-W_^|	CTRL-W ^	   分割当前窗口并编辑第 N 个轮换文件
+|CTRL-W__|	CTRL-W _	   设置当前窗口高度为 N（默认：非常高）
+|CTRL-W_b|	CTRL-W b	   转到底部窗口
+|CTRL-W_c|	CTRL-W c	   关闭当前窗口（类似 |:close|）
+|CTRL-W_d|	CTRL-W d	   分割窗口并跳转到光标下的定义
+|CTRL-W_f|	CTRL-W f	   分割窗口并编辑光标下的文件名
+|CTRL-W_F|	CTRL-W F	   分割窗口并编辑光标下的文件名，
+				   并跳转到文件名后的行号。
+|CTRL-W_g_CTRL-]| CTRL-W g CTRL-]  分割窗口并对光标下的标签执行 |:tjump|
+|CTRL-W_g]|	CTRL-W g ]	   分割窗口并对光标下的标签执行 |:tselect|
+|CTRL-W_g}|	CTRL-W g }	   对光标下的标签执行 |:ptjump|
+|CTRL-W_gf|	CTRL-W g f	   在新标签页中编辑光标下的文件名
+|CTRL-W_gF|	CTRL-W g F	   在新标签页中编辑光标下的文件名
+				   并跳转到文件名后的行号
+|CTRL-W_gt|	CTRL-W g t	   同 `gt`：转到下一个标签页
+|CTRL-W_gT|	CTRL-W g T	   同 `gT`：转到上一个标签页
+|CTRL-W_g<Tab>|	CTRL-W g <Tab>	   同 |g<Tab>|：转到上次访问的标签页
+|CTRL-W_i|	CTRL-W i	   分割窗口并跳转到光标下标识符的声明
+
+[✅] |CTRL-W_h|	CTRL-W h	   转到左边第 N 个窗口（在第一个窗口处停止）
+[✅] |CTRL-W_j|	CTRL-W j	   向下转到第 N 个窗口（在最后一个窗口处停止）
+[✅] |CTRL-W_k|	CTRL-W k	   向上转到第 N 个窗口（在第一个窗口处停止）
+[✅] |CTRL-W_l|	CTRL-W l	   转到右边第 N 个窗口（在最后一个窗口处停止）
+[✅] |CTRL-W_CTRL-H|	CTRL-W CTRL-H	   同 "CTRL-W h"
+[✅] |CTRL-W_CTRL-J|	CTRL-W CTRL-J	   同 "CTRL-W j"
+[✅] |CTRL-W_CTRL-K|	CTRL-W CTRL-K	   同 "CTRL-W k"
+[✅] |CTRL-W_CTRL-L|	CTRL-W CTRL-L	   同 "CTRL-W l"
+
+|CTRL-W_n|	CTRL-W n	   打开新窗口，N 行高
+|CTRL-W_o|	CTRL-W o	   关闭除当前窗口外的所有窗口（类似 |:only|）
+|CTRL-W_p|	CTRL-W p	   转到上一个（最近访问的）窗口
+|CTRL-W_q|	CTRL-W q	   退出当前窗口（类似 |:quit|）
+|CTRL-W_r|	CTRL-W r	   向下旋转窗口 N 次
+|CTRL-W_s|	CTRL-W s	   将当前窗口分成两部分，新窗口 N 行高
+|CTRL-W_t|	CTRL-W t	   转到顶部窗口
+|CTRL-W_v|	CTRL-W v	   垂直分割当前窗口，新窗口 N 列宽
+|CTRL-W_w|	CTRL-W w	   转到第 N 个下一个窗口（循环）
+|CTRL-W_x|	CTRL-W x	   与第 N 个窗口交换（默认：下一个窗口）
+|CTRL-W_z|	CTRL-W z	   关闭预览窗口
+|CTRL-W_bar|	CTRL-W |	   设置窗口宽度为 N 列
+|CTRL-W_}|	CTRL-W }	   在预览窗口中显示光标下的标签
+|CTRL-W_<Down>|	CTRL-W <Down>	   同 "CTRL-W j"
+|CTRL-W_<Up>|	CTRL-W <Up>	   同 "CTRL-W k"
+|CTRL-W_<Left>|	CTRL-W <Left>	   同 "CTRL-W h"
+|CTRL-W_<Right>| CTRL-W <Right>	   同 "CTRL-W l"
+
+==============================================================================
+2.3 方括号命令					*[* *]*
+
+标签		字符	      注意 普通模式下的动作	~
+------------------------------------------------------------------------------ ~
+|[_CTRL-D|	[ CTRL-D	   跳转到当前和包含的文件中找到的第一个 #define，
+				   匹配光标下的单词，从当前文件开头开始搜索
+|[_CTRL-I|	[ CTRL-I	   跳转到当前和包含的文件中包含光标下单词的
+				   第一行，从当前文件开头开始搜索
+|[#|		[#		1  光标移到上一个未匹配的 #if、#else 或 #ifdef
+|['|		['		1  光标移到上一个小写标记，在第一个非空白字符处
+|[(|		[(		1  光标向后移动 N 次到未匹配的 '('
+|[star|		[*		1  同 "[/"
+|[`|		[`		1  光标移到上一个小写标记
+|[/|		[/		1  光标移到上一个 C 注释的开始处 N 次
+|[D|		[D		   列出当前和包含的文件中找到的所有定义，
+				   匹配光标下的单词，从当前文件开头开始搜索
+|[I|		[I		   列出当前和包含的文件中包含光标下单词的
+				   所有行，从当前文件开头开始搜索
+|[P|		[P		2  同 "[p"
+|[[|		[[		1  光标向后移动 N 个小节
+|[]|		[]		1  光标向后移动 N 个大节
+|[c|		[c		1  光标向后移动 N 次到更改的开始处
+|[d|		[d		   显示当前和包含的文件中找到的第一个定义，
+				   匹配光标下的单词，从当前文件开头开始搜索
+|[f|		[f		   同 "gf"
+|[i|		[i		   显示当前和包含的文件中包含光标下单词的
+				   第一行，从当前文件开头开始搜索
+|[m|		[m		1  光标向后移动 N 次到成员函数的开始处
+|[p|		[p		2  类似 "P"，但调整当前行的缩进
+|[s|		[s		1  移动到上一个拼写错误的词
+|[z|		[z		1  移动到打开折叠的开始处
+|[{|		[{		1  光标向后移动 N 次到未匹配的 '{'
+|[<MiddleMouse>| [<MiddleMouse>	2  同 "[p"
+
+|]_CTRL-D|	] CTRL-D	   跳转到当前和包含的文件中找到的第一个 #define，
+				   匹配光标下的单词，从光标位置开始搜索
+|]_CTRL-I|	] CTRL-I	   跳转到当前和包含的文件中包含光标下单词的
+				   第一行，从光标位置开始搜索
+|]#|		]#		1  光标移到下一个未匹配的 #endif 或 #else
+|]'|		]'		1  光标移到下一个小写标记，在第一个非空白字符处
+|])|		])		1  光标向前移动 N 次到未匹配的 ')'
+|]star|		]*		1  同 "]/"
+|]`|		]`		1  光标移到下一个小写标记
+|]/|		]/		1  光标移到下一个 C 注释的结尾处 N 次
+|]D|		]D		   列出当前和包含的文件中找到的所有 #defines，
+				   匹配光标下的单词，从光标位置开始搜索
+|]I|		]I		   列出当前和包含的文件中包含光标下单词的
+				   所有行，从光标位置开始搜索
+|]P|		]P		2  同 "[p"
+|][|		][		1  光标向前移动 N 个大节
+|]]|		]]		1  光标向前移动 N 个小节
+|]c|		]c		1  光标向前移动 N 次到更改的开始处
+|]d|		]d		   显示当前和包含的文件中找到的第一个定义，
+				   匹配光标下的单词，从光标位置开始搜索
+|]f|		]f		   同 "gf"
+|]i|		]i		   显示当前和包含的文件中包含光标下单词的
+				   第一行，从光标位置开始搜索
+|]m|		]m		1  光标向前移动 N 次到成员函数的结尾处
+|]p|		]p		2  类似 "p"，但调整当前行的缩进
+|]s|		]s		1  移动到下一个拼写错误的词
+|]z|		]z		1  移动到打开折叠的结尾处
+|]}|		]}		1  光标向前移动 N 次到未匹配的 '}'
+|]<MiddleMouse>| ]<MiddleMouse>	2  同 "]p"
+
+==============================================================================
+2.4 以 'g' 开头的命令						*g*
+
+标签		字符	      注意 普通模式下的动作	~
+------------------------------------------------------------------------------ ~
+|g_CTRL-G|	g CTRL-G	   显示当前光标位置的相关信息
+|g_CTRL-H|	g CTRL-H	   开始选择块模式
+|g_CTRL-]|	g CTRL-]	   对光标下的标签执行 |:tjump|
+|g#|		g#		1  类似 "#"，但不使用 "\<" 和 "\>"
+|g&|		g&		2  在所有行上重复上次的 ":s"
+|g'|		g'{mark}	1  类似 |'|，但不改变跳转列表
+|g`|		g`{mark}	1  类似 |`|，但不改变跳转列表
+|gstar|		g*		1  类似 "*"，但不使用 "\<" 和 "\>"
+|g+|		g+		   转到更新的文本状态 N 次
+|g,|		g,		1  转到更新的更改列表中的第 N 个位置
+|g-|		g-		   转到更旧的文本状态 N 次
+|g8|		g8		   打印光标下 UTF-8 字符使用的字节的十六进制值
+|g;|		g;		1  转到更改列表中更旧的第 N 个位置
+|g<|		g<		   显示上一个命令输出
+|g?|		g?		2  Rot13 编码操作符
+|g?g?|		g??		2  Rot13 编码当前行
+|g?g?|		g?g?		2  Rot13 编码当前行
+|gD|		gD		1  转到当前文件中光标下单词的定义
+|gH|		gH		   开始选择行模式
+|gI|		gI		2  类似 "I"，但总是从第 1 列开始
+|gJ|		gJ		2  连接行且不插入空格
+|gN|		gN	      1,2  使用上次使用的搜索模式查找上一个匹配
+				   并可视选择它
+|gP|		["x]gP		2  将文本 [从寄存器 x] 放在光标之前 N 次，
+				   光标停在其后
+|gQ|		gQ		   切换到带 Vim 编辑的 "Ex" 模式
+|gR|		gR		2  进入虚拟替换模式
+|gT|		gT		   转到上一个标签页
+|gU|		gU{motion}	2  使 Nmove 文本变成大写
+|gV|		gV		   在选择模式下执行映射或菜单时
+				   不重新选择上一个可视区域
+|g]|		g]		   对光标下的标签执行 :tselect
+|g^|		g^		1  当 'wrap' 关闭时移到屏幕上当前行的第一个非空白字符；
+				   当 'wrap' 打开时移到当前屏幕行的第一个非空白字符
+|ga|		ga		   打印光标下字符的 ASCII 值
+|gd|		gd		1  转到当前函数中光标下单词的定义
+
+|gf|		gf		   编辑光标下的文件名对应的文件
+|gF|		gF		   编辑光标下的文件名对应的文件并跳转到
+				   文件名后的行号。
+|gh|		gh		   开始选择模式
+|gi|		gi		2  类似 "i"，但首先移动到 |'^| 标记
+|gj|		gj		1  类似 "j"，但当 'wrap' 打开时向下移动 N 个屏幕行
+|gk|		gk		1  类似 "k"，但当 'wrap' 打开时向上移动 N 个屏幕行
+|gm|		gm		1  移动到屏幕行的中间字符
+|gM|		gM		1  移动到文本行的中间字符
+|gn|		gn	      1,2  使用上次使用的搜索模式查找下一个匹配
+				   并可视选择它
+|go|		go		1  光标移到缓冲区中的第 N 个字节
+|gp|		["x]gp		2  将文本 [从寄存器 x] 放在光标之后 N 次，
+				   光标停在其后
+|gq|		gq{motion}	2  格式化 Nmove 文本
+|gr|		gr{char}	2  虚拟替换 N 个字符为 {char}
+|gs|		gs		   休眠 N 秒（默认 1）
+|gt|		gt		   转到下一个标签页
+|gu|		gu{motion}	2  使 Nmove 文本变成小写
+|gv|		gv		   重新选择上一个可视区域
+|gw|		gw{motion}	2  格式化 Nmove 文本并保持光标位置
+|gx|		gx		   执行光标处文件路径对应的应用程序
+|g@|		g@{motion}	   调用 'operatorfunc'
+|g~|		g~{motion}	2  切换 Nmove 文本的大小写
+|g<Down>|	g<Down>		1  同 "gj"
+|g<End>|	g<End>		1  同 "g$"
+|g<Home>|	g<Home>		1  同 "g0"
+|g<LeftMouse>|	g<LeftMouse>	   同 <C-LeftMouse>
+		g<MiddleMouse>	   同 <C-MiddleMouse>
+|g<RightMouse>|	g<RightMouse>	   同 <C-RightMouse>
+|g<Tab>|	g<Tab>		   转到上次访问的标签页
+|g<Up>|		g<Up>		1  同 "gk"
+
+==============================================================================
+2.5 以 'z' 开头的命令						*z*
+
+标签		字符	      注意 普通模式下的动作	~
+------------------------------------------------------------------------------ ~
+|z<CR>|		z<CR>		   重绘，光标行置于窗口顶部，
+				   光标置于第一个非空白字符
+|zN<CR>|	z{height}<CR>	   重绘，使窗口高度为 {height} 行
+|z+|		z+		   光标移到第 N 行（默认为窗口下方的行），
+				   其他同 "z<CR>"
+|z-|		z-		   重绘，光标行置于窗口底部，
+				   光标置于第一个非空白字符
+|z.|		z.		   重绘，光标行置于窗口中央，
+				   光标置于第一个非空白字符
+|z=|		z=		   给出拼写建议
+|zA|		zA		   递归打开关闭的折叠或关闭打开的折叠
+|zC|		zC		   递归关闭折叠
+|zD|		zD		   递归删除折叠
+|zE|		zE		   清除所有折叠
+|zF|		zF		   为 N 行创建折叠
+|zG|		zG		   临时将单词标记为拼写正确
+|zH|		zH		   当 'wrap' 关闭时向右滚动半个屏幕宽度
+|zL|		zL		   当 'wrap' 关闭时向左滚动半个屏幕宽度
+|zM|		zM		   设置 'foldlevel' 为零
+|zN|		zN		   设置 'foldenable'
+|zO|		zO		   递归打开折叠
+|zR|		zR		   设置 'foldlevel' 为最深层折叠
+|zW|		zW		   临时将单词标记为拼写错误
+|zX|		zX		   重新应用 'foldlevel'
+|z^|		z^		   光标移到第 N 行（默认为窗口上方的行），
+				   其他同 "z-"
+|za|		za		   打开关闭的折叠，关闭打开的折叠
+|zb|		zb		   重绘，光标行置于窗口底部
+|zc|		zc		   关闭一个折叠
+|zd|		zd		   删除一个折叠
+|zf|		zf{motion}	   为 Nmove 文本创建折叠
+|zg|		zg		   永久将单词标记为拼写正确
+|zh|		zh		   当 'wrap' 关闭时向右滚动 N 个字符
+|zi|		zi		   切换 'foldenable'
+|zj|		zj		1  移动到下一个折叠的开始
+|zk|		zk		1  移动到上一个折叠的末尾
+|zl|		zl		   当 'wrap' 关闭时向左滚动 N 个字符
+|zm|		zm		   从 'foldlevel' 减去一
+|zn|		zn		   重置 'foldenable'
+|zo|		zo		   打开折叠
+|zp|		zp		   在块模式下粘贴，不带尾随空格
+|zP|		zP		   在块模式下粘贴，不带尾随空格
+|zr|		zr		   给 'foldlevel' 加一
+|zt|		zt		   重绘，光标行置于窗口顶部
+|zuw|		zuw		   撤销 |zw|
+|zug|		zug		   撤销 |zg|
+|zuW|		zuW		   撤销 |zW|
+|zuG|		zuG		   撤销 |zG|
+|zv|		zv		   打开足够的折叠以显示光标所在行
+|zw|		zw		   永久将单词标记为拼写错误
+|zx|		zx		   重新应用 'foldlevel' 并执行 "zv"
+|zy|		zy		   复制，不带尾随空格
+|zz|		zz		   重绘，光标行置于窗口中央
+|z<Left>|	z<Left>		   同 "zh"
+|z<Right>|	z<Right>	   同 "zl"
+
+==============================================================================
+2.6 操作符等待模式			*operator-pending-index*
+
+这些可以在操作符之后使用，但在输入 {motion} 之前。
+
+标签		字符		操作符等待模式下的动作	~
+------------------------------------------------------------------------------ ~
+|o_v|		v		强制操作符以字符方式工作
+|o_V|		V		强制操作符以行方式工作
+|o_CTRL-V|	CTRL-V		强制操作符以块方式工作
+
+==============================================================================
+3. 可视模式						*visual-index*
+
+可视模式下的大多数命令与普通模式相同。这里列出的是那些不同的命令。
+
+标签		命令	      注意 可视模式下的动作	~
+------------------------------------------------------------------------------ ~
+|v_CTRL-\_CTRL-N| CTRL-\ CTRL-N	   停止可视模式
+|v_CTRL-\_CTRL-G| CTRL-\ CTRL-G	   进入普通模式
+|v_CTRL-A|	CTRL-A		2  给高亮文本中的数字加 N
+|v_CTRL-C|	CTRL-C		   停止可视模式
+|v_CTRL-G|	CTRL-G		   在可视模式和选择模式之间切换
+|v_<BS>|	<BS>		2  选择模式：删除高亮区域
+|v_CTRL-H|	CTRL-H		2  同 <BS>
+|v_CTRL-O|	CTRL-O		   从选择模式切换到可视模式，执行一个命令
+|v_CTRL-V|	CTRL-V		   使可视模式变为块模式或停止可视模式
+|v_CTRL-X|	CTRL-X		2  从高亮文本中的数字减去 N
+|v_<Esc>|	<Esc>		   停止可视模式
+|v_CTRL-]|	CTRL-]		   跳转到高亮的标签
+|v_!|		!{filter}	2  通过外部命令 {filter} 过滤高亮的行
+|v_:|		:		   以高亮的行作为范围开始一个命令行
+|v_<|		<		2  将高亮的行向左缩进一个 'shiftwidth'
+|v_=|		=		2  通过 'equalprg' 选项给出的外部程序
+				   过滤高亮的行
+|v_>|		>		2  将高亮的行向右缩进一个 'shiftwidth'
+|v_b_A|		A		2  块模式：在所有行的高亮区域后追加相同的文本
+|v_C|		C		2  删除高亮的行并开始插入
+|v_D|		D		2  删除高亮的行
+|v_b_I|		I		2  块模式：在所有行的高亮区域前插入相同的文本
+|v_J|		J		2  连接高亮的行
+|v_K|		K		   在高亮区域上运行 'keywordprg'
+|v_O|		O		   移动到区域的另一个角落
+|v_P|		P		   用寄存器内容替换高亮区域；寄存器不变
+|v_R|		R		2  删除高亮的行并开始插入
+|v_S|		S		2  删除高亮的行并开始插入
+|v_U|		U		2  使高亮区域变成大写
+|v_V|		V		   使可视模式变为行方式或停止可视模式
+|v_X|		X		2  删除高亮的行
+|v_Y|		Y		   复制高亮的行
+|v_aquote|	a"		   扩展高亮区域，包含一个双引号字符串
+|v_a'|		a'		   扩展高亮区域，包含一个单引号字符串
+|v_a(|		a(		   同 ab
+|v_a)|		a)		   同 ab
+|v_a<|		a<		   扩展高亮区域，包含一个 <> 块
+|v_a>|		a>		   同 a<
+|v_aB|		aB		   扩展高亮区域，包含一个 {} 块（带括号）
+|v_aW|		aW		   扩展高亮区域，包含 "一个词"（带空白）
+|v_a[|		a[		   扩展高亮区域，包含一个 [] 块
+|v_a]|		a]		   同 a[
+|v_a`|		a`		   扩展高亮区域，包含一个反引号字符串
+|v_ab|		ab		   扩展高亮区域，包含一个 () 块（带括号）
+|v_ap|		ap		   扩展高亮区域，包含一个段落（带空白）
+|v_as|		as		   扩展高亮区域，包含一个句子（带空白）
+|v_at|		at		   扩展高亮区域，包含一个标签块（带空白）
+|v_aw|		aw		   扩展高亮区域，包含 "一个单词"（带空白）
+|v_a{|		a{		   同 aB
+|v_a}|		a}		   同 aB
+|v_c|		c		2  删除高亮区域并开始插入
+|v_d|		d		2  删除高亮区域
+|v_g_CTRL-A|	g CTRL-A	2  给高亮文本中的数字加 N
+|v_g_CTRL-X|	g CTRL-X	2  从高亮文本中的数字减去 N
+|v_gJ|		gJ		2  连接高亮的行且不插入空格
+|v_gq|		gq		2  格式化高亮的行
+|v_gv|		gv		   交换当前和上一个高亮区域
+|v_iquote|	i"		   扩展高亮区域，包含一个双引号字符串（不含引号）
+|v_i'|		i'		   扩展高亮区域，包含一个单引号字符串（不含引号）
+|v_i(|		i(		   同 ib
+|v_i)|		i)		   同 ib
+|v_i<|		i<		   扩展高亮区域，包含内部 <> 块
+|v_i>|		i>		   同 i<
+|v_iB|		iB		   扩展高亮区域，包含内部 {} 块
+|v_iW|		iW		   扩展高亮区域，包含 "内部词"
+|v_i[|		i[		   扩展高亮区域，包含内部 [] 块
+|v_i]|		i]		   同 i[
+|v_i`|		i`		   扩展高亮区域，包含一个反引号字符串（不含反引号）
+|v_ib|		ib		   扩展高亮区域，包含内部 () 块
+|v_ip|		ip		   扩展高亮区域，包含内部段落
+|v_is|		is		   扩展高亮区域，包含内部句子
+|v_it|		it		   扩展高亮区域，包含内部标签块
+|v_iw|		iw		   扩展高亮区域，包含 "内部单词"
+|v_i{|		i{		   同 iB
+|v_i}|		i}		   同 iB
+|v_o|		o		   移动光标到区域的另一端
+|v_p|		p		   用寄存器内容替换高亮区域；删除的文本进入未命名寄存器
+|v_r|		r		2  用一个字符替换高亮区域
+|v_s|		s		2  删除高亮区域并开始插入
+|v_u|		u		2  使高亮区域变成小写
+|v_v|		v		   使可视模式变为字符方式或停止可视模式
+|v_x|		x		2  删除高亮区域
+|v_y|		y		   复制高亮区域
+|v_~|		~		2  切换高亮区域的大小写
+==============================================================================
+4==============================================================================
+4. 命令行编辑					*ex-edit-index*
+
+通过 ':'、'!'、'/' 或 '?' 命令进入命令行。
+普通字符在当前光标位置插入。
+下面的 "补全" 指上下文相关的补全。它会根据情况补全文件名、标签、命令等。
+
+标签		命令		命令行编辑模式下的动作	~
+------------------------------------------------------------------------------ ~
+		CTRL-@		未使用
+|c_CTRL-A|	CTRL-A		在光标前的模式上执行补全并插入所有匹配
+|c_CTRL-B|	CTRL-B		光标移到命令行开头
+|c_CTRL-C|	CTRL-C		同 <Esc>
+|c_CTRL-D|	CTRL-D		列出光标前的模式的补全匹配
+|c_CTRL-E|	CTRL-E		光标移到命令行末尾
+|'cedit'|	CTRL-F		'cedit' 的默认值：打开命令行窗口；
+				否则未使用
+|c_CTRL-G|	CTRL-G		当 'incsearch' 激活时移到下一个匹配
+|c_<BS>|	<BS>		删除光标前的字符
+|c_digraph|	{char1} <BS> {char2}
+				当 'digraph' 打开时输入二合字符
+|c_CTRL-H|	CTRL-H		同 <BS>
+|c_<Tab>|	<Tab>		如果 'wildchar' 是 <Tab>：对光标前的
+				模式执行补全
+|c_<S-Tab>|	<S-Tab>		同 CTRL-P
+|c_wildchar|	'wildchar'	对光标前的模式执行补全（默认：<Tab>）
+|c_CTRL-I|	CTRL-I		同 <Tab>
+|c_<NL>|	<NL>		同 <CR>
+|c_CTRL-J|	CTRL-J		同 <CR>
+|c_CTRL-K|	CTRL-K {char1} {char2}
+				输入二合字符
+|c_CTRL-L|	CTRL-L		对光标前的模式执行补全并插入最长的公共部分
+|c_<CR>|	<CR>		执行输入的命令
+|c_CTRL-M|	CTRL-M		同 <CR>
+|c_CTRL-N|	CTRL-N		使用 'wildchar' 后有多个匹配时：
+				转到下一个匹配，否则：从历史记录调用较新的命令行
+		CTRL-O		未使用
+|c_CTRL-P|	CTRL-P		使用 'wildchar' 后有多个匹配时：
+				转到上一个匹配，否则：从历史记录调用较旧的命令行
+|c_CTRL-Q|	CTRL-Q		同 CTRL-V，除非用于终端控制流
+|c_CTRL-R|	CTRL-R {regname}
+				插入寄存器内容或光标下对象的内容，就像键入一样
+|c_CTRL-R_CTRL-R| CTRL-R CTRL-R {regname}
+|c_CTRL-R_CTRL-O| CTRL-R CTRL-O {regname}
+				按字面插入寄存器内容或光标下对象的内容
+		CTRL-S		未使用，或用于终端控制流
+|c_CTRL-T|	CTRL-T		当 'incsearch' 激活时移到上一个匹配
+|c_CTRL-U|	CTRL-U		删除所有字符
+|c_CTRL-V|	CTRL-V		按字面插入下一个非数字，插入三位十进制数字
+				作为单个字节
+|c_CTRL-W|	CTRL-W		删除光标前的单词
+		CTRL-X		未使用（保留用于补全）
+		CTRL-Y		复制（yank）无模式选择
+		CTRL-Z		未使用（保留用于挂起）
+|c_<Esc>|	<Esc>		放弃命令行而不执行
+|c_CTRL-[|	CTRL-[		同 <Esc>
+|c_CTRL-\_CTRL-N| CTRL-\ CTRL-N	进入普通模式，放弃命令行
+|c_CTRL-\_CTRL-G| CTRL-\ CTRL-G	进入普通模式，放弃命令行
+		CTRL-\ a - d	保留用于扩展
+|c_CTRL-\_e|	CTRL-\ e {expr}	用 {expr} 的结果替换命令行
+		CTRL-\ f - z	保留用于扩展
+		CTRL-\ others	未使用
+|c_CTRL-]|	CTRL-]		触发缩写
+|c_CTRL-^|	CTRL-^		切换 |:lmap| 映射的使用
+|c_<Del>|	<Del>		删除光标下的字符
+
+|c_<Left>|	<Left>		光标左移
+|c_<S-Left>|	<S-Left>	光标左移一个单词
+|c_<C-Left>|	<C-Left>	光标左移一个单词
+|c_<Right>|	<Right>		光标右移
+|c_<S-Right>|	<S-Right>	光标右移一个单词
+|c_<C-Right>|	<C-Right>	光标右移一个单词
+|c_<Up>|	<Up>		从历史记录调用匹配光标前模式的上一个命令行
+|c_<S-Up>|	<S-Up>		从历史记录调用上一个命令行
+|c_<Down>|	<Down>		从历史记录调用匹配光标前模式的下一个命令行
+|c_<S-Down>|	<S-Down>	从历史记录调用下一个命令行
+|c_<Home>|	<Home>		光标移到命令行开头
+|c_<End>|	<End>		光标移到命令行末尾
+|c_<PageDown>|	<PageDown>	同 <S-Down>
+|c_<PageUp>|	<PageUp>	同 <S-Up>
+|c_<Insert>|	<Insert>	切换插入/覆盖模式
+|c_<LeftMouse>|	<LeftMouse>	光标移到鼠标点击处
+
+通配菜单模式下的命令（见 'wildmenu'）
+
+		<Up>		移到父目录
+		<Down>		移到子菜单
+		<Left>		选择上一个匹配
+		<Right>		选择下一个匹配
+		<CR>		在菜单补全时进入子菜单
+		CTRL-E		停止补全并返回原始文本
+		CTRL-Y		接受选中的匹配并停止补全
+		other		停止补全并插入键入的字符
+
+通配菜单模式下的命令，当 'wildoptions' 设为 "pum" 时
+
+		<PageUp>	选择向前几个条目的匹配
+		<PageDown>	选择向后几个条目的匹配
+
+==============================================================================
+5. 终端模式				*terminal-mode-index*
+
+在 |terminal| 缓冲区中，除了 CTRL-\ 外的所有按键都会转发给终端任务。
+如果按下 CTRL-\，则下一个按键会被转发，除非是 CTRL-N 或 CTRL-O。
+使用 |CTRL-\_CTRL-N| 进入普通模式。
+使用 |t_CTRL-\_CTRL-O| 执行一个普通模式命令然后返回终端模式。
+
+ vim:tw=78:ts=8:noet:ft=help:norl:

@@ -1,0 +1,405 @@
+每个选项的简要说明：		*option-list*
+
+'allowrevins'	  'ari'     允许在插入模式下使用 CTRL-_
+'autowriteall'	  'awa'     类似 'autowrite'，但作用于更多命令
+'backspace'	  'bs'	    如何在行首使用退格键
+'breakat'	  'brk'     可能导致换行的字符
+'cdhome'	  'cdh'	    使用 ":cd" 时改变到主目录
+'cdpath'	  'cd'	    使用 ":cd" 搜索的目录列表
+'charconvert'	  'ccv'     字符编码转换的表达式
+'cinscopedecls'	  'cinsd'   被 'cino-g' 识别的单词
+'clipboard'	  'cb'	    将剪贴板用作未命名寄存器
+'comments'	  'com'     可以开始注释行的模式
+'cursorbind'	  'crb'     光标在窗口间同步移动
+'debug'			    设为 "msg" 可查看所有错误信息
+'delcombine'	  'deco'    单独删除组合字符
+'digraph'	  'dg'	    在插入模式下启用二合字母输入
+'display'	  'dy'	    如何显示文本的标志列表
+'eadirection'	  'ead'     'equalalways' 工作的方向
+'endofline'	  'eol'     为最后一行写入 <EOL>
+'equalprg'	  'ep'	    "=" 命令使用的外部程序
+'eventignore'	  'ei'	    忽略的自动命令事件
+'eventignorewin'  'eiw'     在窗口中忽略的自动命令事件
+'findfunc'	  'ffu'     用于 |:find| 命令的函数
+'grepprg'	  'gp'	    ":grep" 使用的程序
+'imdisable'	  'imd'     在任何模式下都不使用输入法
+'iminsert'	  'imi'     在插入模式下使用 :lmap 或输入法
+'imsearch'	  'ims'     输入搜索模式时使用 :lmap 或输入法
+'include'	  'inc'     用于查找包含文件的模式
+'includeexpr'	  'inex'    用于处理包含行的表达式
+'isfname'	  'isf'     文件名和路径名中包含的字符
+'isident'	  'isi'     标识符中包含的字符
+'iskeyword'	  'isk'     关键字中包含的字符
+'isprint'	  'isp'     可打印的字符
+'joinspaces'	  'js'	    连接命令后在句号后加两个空格
+'jumpoptions'	  'jop'     指定如何进行跳转
+'keymodel'	  'km'	    启用用键开始/停止选择
+'keywordprg'	  'kp'	    "K" 命令使用的程序
+'langmap'	  'lmap'    其他语言模式的字母字符
+'langmenu'	  'lm'	    菜单使用的语言
+'linebreak'	  'lbr'     在空白处换行
+'lines'			    显示的行数
+'linespace'	  'lsp'     字符间使用的像素行数
+'magic'			    改变搜索模式中的特殊字符
+'makeef'	  'mef'     ":make" 的错误文件名
+'makeencoding'	  'menc'    外部 make/grep 命令的编码
+'makeprg'	  'mp'	    ":make" 命令使用的程序
+'matchpairs'	  'mps'     "%" 可以匹配的字符对
+'matchtime'	  'mat'     显示匹配括号的十分之一秒数
+'maxcombine'	  'mco'     显示的最大组合字符数
+'maxfuncdepth'	  'mfd'     用户函数的最大递归深度
+'maxmempattern'   'mmp'     模式搜索使用的最大内存（以KB为单位）
+'menuitems'	  'mis'     菜单中的最大项目数
+'modeline'	  'ml'	    在文件开始或结尾识别模式行
+'modelineexpr'	  'mle'	    允许在模式行中设置表达式选项
+'modelines'	  'mls'     检查模式行的行数
+'modifiable'	  'ma'	    是否可以修改文本
+'more'			    满屏时暂停列表显示
+'nrformats'	  'nf'	    CTRL-A 命令识别的数字格式
+'operatorfunc'	  'opfunc'  |g@| 操作符调用的函数
+'packpath'	  'pp'      包使用的目录列表
+'paragraphs'	  'para'    分隔段落的 nroff 宏
+'path'		  'pa'	    "gf" 等命令搜索的目录列表
+'pyxversion'	  'pyx'	    pyx* 命令使用的 Python 版本
+'quoteescape'	  'qe'	    字符串中使用的转义字符
+'revins'	  'ri'	    插入字符时反向工作
+'rightleftcmd'	  'rlc'     对哪些命令编辑方向为从右到左
+'rulerformat'	  'ruf'     标尺的自定义格式
+'runtimepath'	  'rtp'     运行时文件使用的目录列表
+'sections'	  'sect'    分隔节的 nroff 宏
+'selection'	  'sel'     使用何种选择方式
+'selectmode'	  'slm'     何时使用选择模式而不是可视模式
+'sessionoptions'  'ssop'    |:mksession| 的选项
+'shada'		  'sd'	    启动和退出时使用 |shada| 文件
+'showcmd'	  'sc'	    在某处显示（部分）命令
+'showcmdloc'	  'sloc'    在何处显示（部分）命令
+'showmatch'	  'sm'	    插入括号时短暂跳转到匹配的括号
+'signcolumn'	  'scl'	    何时以及如何显示标记列
+'startofline'	  'sol'     命令将光标移到行首非空白字符
+'suffixes'	  'su'	    多重匹配时忽略的后缀
+'suffixesadd'	  'sua'     搜索文件时添加的后缀
+'synmaxcol'	  'smc'     寻找语法项目的最大列数
+'tildeop'	  'top'     波浪符命令 "~" 像操作符一样工作
+'verbose'	  'vbs'     显示详细信息
+'verbosefile'	  'vfile'   写入消息的文件
+'viewdir'	  'vdir'    :mkview 存储文件的目录
+'viewoptions'	  'vop'     指定 :mkview 保存什么
+'whichwrap'	  'ww'	    允许指定键跨越行边界
+'wildcharm'	  'wcm'     像 'wildchar' 但在映射中也可用
+'write'			    允许写入文件
+'writeany'	  'wa'	    写入文件时不需要 "!" 强制
+'writedelay'	  'wd'	    每个字符延迟多少毫秒（用于调试）
+
+
+窗口
+'equalalways'	  'ea'	    窗口自动调整为相同大小
+'previewheight'   'pvh'     预览窗口的高度
+'previewwindow'   'pvw'     标识预览窗口
+'rightleft'	  'rl'	    窗口为从右到左方向
+'scrollbind'	  'scb'     窗口随其他窗口一起滚动
+'splitbelow'	  'sb'	    分割窗口时新窗口在当前窗口之下
+'splitkeep'	  'spk'     决定分割窗口时的滚动行为
+'splitright'	  'spr'     新窗口放在当前窗口右边
+'title'			    让 Vim 设置窗口标题
+'titleold'		    退出时恢复的旧标题
+'titlelen'		    窗口标题使用的 'columns' 百分比
+'titlestring'		    Vim 窗口标题使用的字符串
+'winfixbuf'	  'wfb'     保持窗口聚焦于单个缓冲区
+'winfixheight'	  'wfh'     打开/关闭窗口时保持窗口高度
+'winfixwidth'	  'wfw'     打开/关闭窗口时保持窗口宽度
+'winheight'	  'wh'	    当前窗口的最小行数
+'winhighlight'	  'winhl'   窗口本地高亮
+'winminheight'	  'wmh'     任何窗口的最小行数
+'winminwidth'	  'wmw'     任何窗口的最小列数
+'winwidth'	  'wiw'     当前窗口的最小列数
+
+命令行
+'cedit'			    打开命令行窗口的按键
+'cmdheight'	  'ch'	    命令行使用的行数
+'cmdwinheight'	  'cwh'     命令行窗口的高度
+'history'	  'hi'	    记住的命令行数量
+'imcmdline'	  'imc'     开始编辑命令行时使用输入法
+'wildchar'	  'wc'	    用于通配符扩展的命令行字符
+'wildmenu'	  'wmnu'    命令行补全使用菜单
+'wildmode'	  'wim'     'wildchar' 命令行扩展的模式
+'wildoptions'	  'wop'     指定如何完成命令行补全
+
+备份文件
+'backup'	  'bk'	    覆盖文件时保留备份文件
+'backupcopy'	  'bkc'     创建备份时复制文件而不是重命名
+'backupdir'	  'bdir'    备份文件的目录列表
+'backupext'	  'bex'     备份文件使用的扩展名
+'backupskip'	  'bsk'     匹配这些模式的文件不创建备份
+'writebackup'	  'wb'	    覆盖文件前建立备份
+
+diff
+'diff'			    对当前窗口使用差异模式
+'diffexpr'	  'dex'     用于获取差异文件的表达式
+'diffopt'	  'dip'     使用差异模式的选项
+
+折叠
+'commentstring'   'cms'     注释的模板，用于折叠标记
+'foldclose'	  'fcl'     光标离开时关闭折叠
+'foldcolumn'	  'fdc'     用于指示折叠的列宽
+'foldenable'	  'fen'     设置以显示所有打开的折叠
+'foldexpr'	  'fde'     当 'foldmethod' 为 "expr" 时使用的表达式
+'foldignore'	  'fdi'     当 'foldmethod' 为 "indent" 时忽略的行
+'foldlevel'	  'fdl'     关闭级别高于此值的折叠
+'foldlevelstart'  'fdls'    开始编辑文件时的 'foldlevel'
+'foldmarker'	  'fmr'     当 'foldmethod' 为 "marker" 时使用的标记
+'foldmethod'	  'fdm'     折叠类型
+'foldminlines'	  'fml'     折叠关闭的最小行数
+'foldnestmax'	  'fdn'     最大折叠深度
+'foldopen'	  'fdo'     哪些命令会打开折叠
+'foldtext'	  'fdt'     用于显示关闭折叠的表达式
+
+补全
+'complete'	  'cpt'     指定插入模式补全的工作方式
+'completefunc'	  'cfu'     用于插入模式补全的函数
+'completeopt'	  'cot'     插入模式补全的选项
+'completeslash'	  'csl'	    补全时使用的斜杠类型，类似于 'shellslash'
+'dictionary'	  'dict'    用于关键字补全的文件名列表
+'omnifunc'	  'ofu'     文件类型特定补全的函数
+'showfulltag'	  'sft'     补全标签时显示完整的标签模式
+'thesaurus'	  'tsr'     关键字补全的同义词词典文件列表
+'thesaurusfunc'	  'tsrfu'   用于同义词补全的函数
+'wildignore'	  'wig'     匹配这些模式的文件不会被补全
+'wildignorecase'  'wic'     补全文件名时忽略大小写
+
+缩进
+'autoindent'	  'ai'	    新行采用与上一行相同的缩进
+'breakindent'	  'bri'     换行后的文本保持缩进
+'breakindentopt'  'briopt'  'breakindent' 的设置
+'cindent'	  'cin'     使用 C 程序缩进
+'cinkeys'	  'cink'    触发 'cindent' 缩进的按键
+'cinoptions'	  'cino'    如何进行 'cindent' 缩进
+'cinwords'	  'cinw'    'si' 和 'cin' 增加缩进的单词
+'copyindent'	  'ci'	    使 'autoindent' 使用已有的缩进结构
+'indentexpr'	  'inde'    用于获取行缩进的表达式
+'indentkeys'	  'indk'    触发 'indentexpr' 的按键
+'lisp'			    Lisp 的自动缩进
+'lispoptions'	  'lop'     改变 Lisp 缩进的方式
+'lispwords'	  'lw'	    改变 lisp 缩进工作方式的词
+'preserveindent'  'pi'	    重新缩进时保留缩进结构
+'shiftround'	  'sr'	    缩进舍入为 shiftwidth 的倍数
+'shiftwidth'	  'sw'	    (自动)缩进使用的步进值
+'smartindent'	  'si'	    C 程序的智能自动缩进
+
+GUI
+'guicursor'	  'gcr'     GUI：光标形状和闪烁的设置
+'guifont'	  'gfn'     GUI：使用的字体名称
+'guifontwide'	  'gfw'     双宽字符的字体名称列表
+'guioptions'	  'go'	    GUI：使用哪些组件和选项
+'guitablabel'	  'gtl'     GUI：标签页的自定义标签
+'guitabtooltip'   'gtt'     GUI：标签页的自定义工具提示
+
+鼠标
+'mouse'			    启用鼠标点击
+'mousefocus'	  'mousef'  键盘焦点跟随鼠标
+'mousehide'	  'mh'	    输入时隐藏鼠标指针
+'mousemodel'	  'mousem'  改变鼠标按钮的含义
+'mousemoveevent'  'mousemev' 用 <MouseMove> 报告鼠标移动
+'mouseshape'	  'mouses'  不同模式下鼠标指针的形状
+'mousetime'	  'mouset'  鼠标双击的最大时间间隔
+
+状态行
+'laststatus'	  'ls'	    最后窗口何时有状态行
+'ruler'		  'ru'	    在状态行显示光标位置
+'showmode'	  'smd'     在状态行显示当前模式的消息
+'statusline'	  'stl'     状态行的自定义格式
+'statuscolumn'	  'stc'	    状态列的自定义格式
+
+交换文件
+'directory'	  'dir'     交换文件的目录名列表
+'swapfile'	  'swf'     是否使用交换文件
+'updatecount'	  'uc'	    多少字符后刷新交换文件
+'updatetime'	  'ut'	    多少毫秒后刷新交换文件
+
+文件
+'autochdir'	  'acd'     自动切换到当前窗口文件所在的目录
+'autoread'	  'ar'	    当文件在 Vim 外部被修改时自动重新读取
+'autowrite'	  'aw'	    文件被修改时自动写入
+'binary'	  'bin'     以二进制模式读取/写入/编辑文件
+'bomb'			    在文件开头添加字节顺序标记(BOM)
+'browsedir'	  'bsdir'   开始浏览文件时的起始目录
+'confirm'	  'cf'	    询问如何处理未保存/只读文件
+'errorfile'	  'ef'	    QuickFix 模式的错误文件名
+'errorformat'	  'efm'     错误文件中行的描述
+'exrc'		  'ex'	    读取当前目录中的初始化文件
+'fileencoding'	  'fenc'    多字节文本的文件编码
+'fileformat'	  'ff'	    文件 I/O 使用的文件格式
+'fileencodings'   'fencs'   自动检测的字符编码
+'fileformats'	  'ffs'     自动检测的 'fileformat' 值
+'fileignorecase'  'fic'     使用文件名时忽略大小写
+'filetype'	  'ft'	    文件类型，用于自动命令
+'fixendofline'	  'fixeol'  确保文件最后一行有 <EOL>
+'endoffile'	  'eof'     在文件末尾写入 CTRL-Z
+'fsync'		  'fs'	    文件写入后是否调用 fsync()
+
+help
+'helpfile'	  'hf'	    主帮助文件的完整路径名
+'helpheight'	  'hh'	    新帮助窗口的最小高度
+'helplang'	  'hlg'     首选的帮助语言
+
+format
+'formatexpr'	  'fex'     "gq" 命令使用的表达式
+'formatlistpat'   'flp'     用于识别列表标题的模式
+'formatoptions'   'fo'	    如何进行自动格式化
+'formatprg'	  'fp'	    "gq" 命令使用的外部程序名
+'grepformat'	  'gfm'     'grepprg' 输出的格式
+
+搜索
+'regexpengine'	  're'	    使用的默认正则表达式引擎
+'hlsearch'	  'hls'     高亮显示最后搜索模式的匹配
+'incsearch'	  'is'	    输入搜索模式时显示匹配
+'redrawtime'	  'rdt'     'hlsearch' 和 |:match| 高亮的超时时间
+'gdefault'	  'gd'	    ":substitute" 的 'g' 标志默认开启
+'wrapscan'	  'ws'	    搜索在文件尾折回文件头
+
+标签文件
+'tagbsearch'	  'tbs'     在标签文件中使用二分查找
+'tagcase'	  'tc'      在标签文件中搜索时如何处理大小写
+'tagfunc'	  'tfu'	    获取标签匹配列表的函数
+'taglength'	  'tl'	    标签的有效字符数
+'tagrelative'	  'tr'	    标签文件中的文件名是相对路径
+'tags'		  'tag'     标签命令使用的文件名列表
+'tagstack'	  'tgst'    将标签压入标签栈
+
+标签页
+'showtabline'	  'stal'    何时显示标签页行
+'tabclose'	  'tcl'     关闭标签页时聚焦哪个标签页
+'tabline'	  'tal'     控制台标签页行的自定义格式
+'tabpagemax'	  'tpm'     |-p| 和 "tab all" 的最大标签页数
+
+大小写
+'casemap'	  'cmp'     指定字母大小写如何改变
+'ignorecase'	  'ic'	    搜索模式忽略大小写
+'smartcase'	  'scs'     模式中有大写字母时不忽略大小写
+'infercase'	  'inf'     关键字补全时调整匹配的大小写
+
+shell
+'shell'		  'sh'	    用于外部命令的 shell
+'shellcmdflag'	  'shcf'    执行一条命令的 shell 标志
+'shellpipe'	  'sp'	    将 ":make" 的输出放入错误文件的字符串
+'shellquote'	  'shq'     shell 命令的引号字符
+'shellredir'	  'srr'     将过滤器输出放入临时文件的字符串
+'shellslash'	  'ssl'     shell 文件名使用正斜杠
+'shelltemp'	  'stmp'    是否为 shell 命令使用临时文件
+'shellxescape'	  'sxe'     当 'shellxquote' 为 ( 时需要转义的字符
+'shellxquote'	  'sxq'     类似 'shellquote'，但包括重定向
+
+style
+'textwidth'	  'tw'	    插入文本的最大宽度
+'fillchars'	  'fcs'     用于显示特殊项目的字符
+'colorcolumn'	  'cc'	    要高亮显示的列
+'columns'	  'co'	    显示的列数
+'icon'			    让 Vim 设置窗口图标文本
+'iconstring'		    用于 Vim 图标文本的字符串
+'number'	  'nu'	    在每行前显示行号
+'numberwidth'	  'nuw'     用于行号显示的列数
+'relativenumber'  'rnu'	    在每行前显示相对行号
+'list'			    显示 <Tab> 和 <EOL>
+'listchars'	  'lcs'     list 模式下显示的字符
+'shortmess'	  'shm'     缩短消息长度的标志列表
+'showbreak'	  'sbr'     用于显示回绕行开始的字符串
+'background'	  'bg'	    "dark" 或 "light"，用于高亮颜色
+'concealcursor'	  'cocu'    是否在光标行隐藏可隐藏的文本
+'conceallevel'	  'cole'    是否显示或隐藏可隐藏的文本
+'cursorcolumn'	  'cuc'	    高亮显示光标所在屏幕列
+'cursorline'	  'cul'	    高亮显示光标所在屏幕行
+'cursorlineopt'	  'culopt'  'cursorline' 的设置
+
+滚动
+'scroll'	  'scr'     使用 CTRL-U 和 CTRL-D 滚动的行数
+'scrolljump'	  'sj'	    滚动的最小行数
+'scrolloff'	  'so'	    光标上下方最小保留的屏幕行数
+'scrollopt'	  'sbo'     'scrollbind' 的行为方式
+'sidescroll'	  'ss'	    水平滚动的最小列数
+'sidescrolloff'   'siso'    光标左右最小保留的屏幕列数
+'smoothscroll'	  'sms'     设置 'wrap' 时按屏幕行滚动
+'mousescroll'		    使用鼠标滚动时的滚动量
+'window'	  'wi'	    CTRL-F 和 CTRL-B 滚动的行数
+
+弹出窗口
+'pumheight'	  'ph'	    弹出菜单的最大项目数
+'pumwidth'	  'pw'	    弹出菜单的最小宽度
+
+拼写
+'spell'			    启用拼写检查
+'spellcapcheck'   'spc'     定位句子结尾的模式
+'spellfile'	  'spf'     |zg| 和 |zw| 存储单词的文件
+'spelllang'	  'spl'     进行拼写检查的语言
+'spelloptions'	  'spo'     拼写检查的选项
+'spellsuggest'	  'sps'     建议拼写更正的方法
+
+映射
+'keymap'	  'kmp'     键盘映射的名称
+'langremap'	  'lrm'	    是否对映射字符应用 'langmap'
+'maxmapdepth'	  'mmd'     映射的最大递归深度
+'timeout'	  'to'	    映射和键码等待超时
+'timeoutlen'	  'tm'	    超时时间（以毫秒为单位）
+'winaltkeys'	  'wak'     何时系统处理 ALT 键
+
+终端
+'term'			    终端名称
+'ttytype'	  'tty'     'term' 的别名
+'termbidi'	  'tbidi'   终端处理双向文本
+'termguicolors'	  'tgc'     在 TUI 中启用 24 位 RGB 颜色
+
+宏
+'define'	  'def'     用于查找宏定义的模式
+'lazyredraw'	  'lz'	    执行宏时不重绘
+
+wrap
+'wrap'			    长行回绕并在下一行继续
+'wrapmargin'	  'wm'	    从右边界开始自动回绕的字符数
+
+缓冲区
+'bufhidden'	  'bh'	    当缓冲区不再在窗口中显示时的处理方式
+'buflisted'	  'bl'	    是否在缓冲区列表中显示该缓冲区
+'buftype'	  'bt'	    特殊缓冲区的类型
+'hidden'	  'hid'     不卸载被 |abandon| 的缓冲区
+'modified'	  'mod'     缓冲区是否已修改
+'readonly'	  'ro'	    禁止写入缓冲区
+'switchbuf'	  'swb'     切换到其他缓冲区时的行为
+'syntax'	  'syn'     当前缓冲区要加载的语法
+'undoreload'	  'ur'	    缓冲区重载时保存用于撤销的最大行数
+'warn'			    当缓冲区已更改时警告 shell 命令
+
+响铃
+'belloff'	  'bo'	    指定不响铃的情况
+'errorbells'	  'eb'	    错误信息时响铃
+'visualbell'	  'vb'	    使用可视铃声代替蜂鸣
+
+撤销
+'undodir'	  'udir'    存储撤销文件的位置
+'undofile'	  'udf'	    在文件中保存撤销信息
+'undolevels'	  'ul'	    可以撤销的最大更改次数
+
+Tab
+'expandtab'	  'et'	    插入 <Tab> 时使用空格
+'smarttab'	  'sta'     插入 <Tab> 时使用 'shiftwidth'
+'softtabstop'	  'sts'     编辑时 <Tab> 使用的空格数
+'tabstop'	  'ts'	    文件中 <Tab> 使用的空格数
+'varsofttabstop'  'vsts'    输入 <Tab> 时使用的空格数列表
+'vartabstop'	  'vts'	    <Tab> 使用的空格数列表
+
+虚拟
+'virtualedit'	  've'	    何时使用虚拟编辑
+
+unknow
+'ambiwidth'	  'ambw'    如何处理有歧义宽度的 Unicode 字符
+'arabic'	  'arab'    将阿拉伯语设为默认第二语言
+'arabicshape'	  'arshape' 是否对阿拉伯字符进行字形重排
+'cpoptions'	  'cpo'     Vi 兼容行为的标志
+'encoding'	  'enc'     内部使用的编码
+'opendevice'	  'odev'    允许在 MS-Windows 上读/写设备
+'mkspellmem'	  'msm'     |:mkspell| 压缩树前使用的内存
+'report'		    报告已更改行数的阈值
+'secure'		    当前目录下 .vimrc 的安全模式
+'patchexpr'	  'pex'     用于给文件打补丁的表达式
+'patchmode'	  'pm'	    保留文件的最老版本
+'loadplugins'	  'lpl'     启动时加载插件脚本
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:

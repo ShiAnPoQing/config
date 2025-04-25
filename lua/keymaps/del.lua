@@ -58,7 +58,10 @@ return {
   ["<C-u>"] = { "<C-G>u<C-u>", { "i" } },
   -- del cursor right all text
   ["<M-u>"] = { "<C-o>d$", { "i" } },
-
+  ["<C-M-u>"] = {
+    "<C-G>u<C-u><C-o>d$",
+    "i"
+  },
   -- del cursor left all text(without space)
   ["<C-space><C-u>"] = { "<C-o>d^", { "i" } },
   -- del cursor right all text(without space)

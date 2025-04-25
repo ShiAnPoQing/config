@@ -130,16 +130,42 @@ function M.del(maps)
 
 end
 
-function M.setup()
-  local basePath = vim.fn.stdpath("config") .. "/lua/"
-  local path = basePath .. "keymaps/*.lua"
-  local glob = vim.fn.glob(path, true, true)
-  for _, name in ipairs(glob) do
-    local source = require(name:gsub(basePath, ""):gsub("%.lua$", ""))
-    if type(source) == "table" then
+local function load_keymaps(base_path, current_path)
+  local path = current_path .. "/*.lua"
+  local files = vim.fn.glob(path, true, true)
+
+  for _, file in ipairs(files) do
+    local module_path = file:gsub(base_path, ""):gsub("%.lua$", "")
+    local success, source = pcall(require, module_path)
+    if success and type(source) == "table" then
       M.add(source)
     end
   end
+
+  local dirs = vim.fn.glob(current_path .. "/*", true, true)
+  for _, dir in ipairs(dirs) do
+    if vim.fn.isdirectory(dir) == 1 then
+      load_keymaps(base_path, dir)
+    end
+  end
+end
+
+function M.setup()
+  local base_path = vim.fn.stdpath("config") .. "/lua/"
+  local path = base_path .. "keymaps"
+  load_keymaps(base_path, path)
+  -- local glob = vim.fn.glob(path, true, true)
+  --
+  -- for _, name in ipairs(glob) do
+  --   local module_path = name:gsub(basePath, ""):gsub("%.lua$", "")
+  --   local success, source = pcall(require, module_path)
+  --   if success and type(source) == "table" then
+  --     M.add(source)
+  --   end
+  -- end
+  --
+  --
+  -- local dirs = vim.fn.glob(current_path .. "/*", true, true)
 end
 
 return M

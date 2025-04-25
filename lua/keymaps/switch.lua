@@ -64,39 +64,39 @@ return {
     { "n" },
   },
   -- toggle comment
-  ["<C-\\>"] = {
-    {
-      function()
-        local C = require("comment")
-        local count = vim.v.count1
-        C.toggleComment("n", count)
-        require("repeat").Record(function()
-          C.toggleComment("n", count)
-        end)
-      end,
-      "n",
-    },
-    {
-      function()
-        local C = require("comment")
-        local count = vim.v.count1
-        C.toggleComment("v", count)
-        require("repeat").Record(function()
-          C.toggleComment("v", count)
-        end)
-      end,
-      "x",
-    },
-    {
-      function()
-        local C = require("comment")
-        local count = vim.v.count1
-        C.toggleComment("n", count)
-        require("repeat").Record(function()
-          C.toggleComment("n", count)
-        end)
-      end,
-      "i",
-    },
-  },
+  -- ["<C-\\>"] = {
+  --   {
+  --     function()
+  --       local C = require("comment")
+  --       local count = vim.v.count1
+  --       C.toggleComment("n", count)
+  --       require("repeat").Record(function()
+  --         C.toggleComment("n", count)
+  --       end)
+  --     end,
+  --     "n",
+  --   },
+  --   {
+  --     function()
+  --       local C = require("comment")
+  --       local count = vim.v.count1
+  --       C.toggleComment("v", count)
+  --       require("repeat").Record(function()
+  --         C.toggleComment("v", count)
+  --       end)
+  --     end,
+  --     "x",
+  --   },
+  --   {
+  --     function()
+  --       local C = require("comment")
+  --       local count = vim.v.count1
+  --       C.toggleComment("n", count)
+  --       require("repeat").Record(function()
+  --         C.toggleComment("n", count)
+  --       end)
+  --     end,
+  --     "i",
+  --   },
+  -- },
 }
