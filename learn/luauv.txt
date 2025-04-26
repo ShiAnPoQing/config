@@ -1,0 +1,3708 @@
+*luvref.txt*               Nvim
+
+
+                    LUV 参考手册
+
+                                                                        *luvref*
+本文档记录了 LibUV 库的 Lua 绑定，该库用于 Nvim 的事件循环，可通过 |vim.uv| 在 Lua 中访问
+（例如，|uv.version()| 以 `vim.uv.version()` 的形式提供）。
+
+关于本手册的信息，请参见 |luv-credits|。
+
+更多示例，请参见 https://github.com/luvit/luv/tree/master/examples。
+
+==============================================================================
+简介                                                      *luv* *luv-intro* *uv*
+
+luv (https://github.com/luvit/luv) 项目为 Lua 代码提供了多平台支持库 libuv 
+(https://github.com/libuv/libuv) 的访问接口。它最初是作为内置的 `uv` 模块为 luvit
+(https://github.com/luvit/luvit) 项目开发的，但也可以在其他 Lua 环境中使用。
+
+关于 libuv 核心库的更多信息可以在原始的 libuv 文档页面 (https://docs.libuv.org/) 找到。
+
+TCP 回显服务器示例 ~
+
+以下是一个展示 TCP 回显服务器的简单示例：
+
+    local uv = vim.uv
+
+    local server = uv.new_tcp()
+    server:bind("127.0.0.1", 1337)
+    server:listen(128, function (err)
+      assert(not err, err)
+      local client = uv.new_tcp()
+      server:accept(client)
+      client:read_start(function (err, chunk)
+        assert(not err, err)
+        if chunk then
+          client:write(chunk)
+        else
+          client:shutdown()
+          client:close()
+        end
+      end)
+    end)
+    print("TCP 服务器正在监听 127.0.0.1 端口 1337")
+    uv.run() -- 在 luvit 环境外需要显式调用 run
+<
+
+模块布局 ~
+
+luv 库包含一个单独的 Lua 模块，为简单起见在此后称为 `uv`。这个模块主要由与原始 libuv 版本
+对应名称的函数组成。例如，libuv 函数 `uv_tcp_bind` 在 luv 中的版本是 |uv.tcp_bind()|。
+目前，只有两个非函数字段存在：`uv.constants` 和 `uv.errno`，它们都是表。
+
+函数与方法 ~
+
+除了提供简单的函数外，luv 还提供了可选的面向对象风格的 API。例如，`uv.tcp_bind(server, host, port)` 
+也可以写作 `server:bind(host, port)`。注意第一个参数 `server` 变成了对象，而 `tcp_` 从函数名中
+移除。下文中会标注哪些函数存在方法形式。
+
+同步与异步函数 ~
+
+接受回调函数的函数是异步的。这些函数可能会立即向调用者返回结果以表明它们的初始状态，但它们的
+最终执行会推迟到至少下一个 libuv 循环迭代。完成后，它们的回调函数会被执行，并传入任何结果。
+
+不接受回调函数的函数是同步的。这些函数会立即向调用者返回它们的结果。
+
+某些函数（通常是文件系统和 DNS 相关的）可以表现为同步或异步。如果向这些函数提供了回调函数，
+它们就会表现为异步；如果没有提供回调函数，它们就会表现为同步。
+
+伪类型 ~
+
+定义了一些独特的类型。这些在 Lua 中并不是实际的类型，但它们在此用于便于记录一致的行为：
+- `fail`：一个可断言的 `nil, string, string` 元组（参见 |luv-error-handling|）
+- `callable`：一个 `function`；或带有 `__call` 元方法的 `table` 或 `userdata`
+- `buffer`：一个 `string` 或一个由 `string` 组成的顺序 `table`
+- `threadargs`：类型为 `nil`、`boolean`、`number`、`string` 或 `userdata` 的可变参数（`...`）；
+  参数数量限制为 9 个。
+
+==============================================================================
+目录                                                            *luv-contents*
+
+本文档主要是在 luv 的 Lua API 上下文中重述 libuv API 文档
+(https://docs.libuv.org/en/v1.x/api.html)。除非与 Lua 模块中看到的行为相关，
+否则不会记录低级实现细节和未公开的 C 函数和类型。
+
+- |luv-constants| — 常量
+- |luv-error-handling| — 错误处理
+- |luv-version-checking| — 版本检查
+- |uv_loop_t| — 事件循环
+- |uv_req_t| — 基础请求
+- |uv_handle_t| — 基础句柄
+  - |uv_timer_t| — 定时器句柄
+  - |uv_prepare_t| — 准备句柄
+  - |uv_check_t| — 检查句柄
+  - |uv_idle_t| — 空闲句柄
+  - |uv_async_t| — 异步句柄
+  - |uv_poll_t| — 轮询句柄
+  - |uv_signal_t| — 信号句柄
+  - |uv_process_t| — 进程句柄
+  - |uv_stream_t| — 流句柄
+    - |uv_tcp_t| — TCP 句柄
+    - |uv_pipe_t| — 管道句柄
+    - |uv_tty_t| — TTY 句柄
+  - |uv_udp_t| — UDP 句柄
+  - |uv_fs_event_t| — 文件系统事件句柄
+  - |uv_fs_poll_t| — 文件系统轮询句柄
+- |luv-file-system-operations| — 文件系统操作
+- |luv-thread-pool-work-scheduling| — 线程池工作调度
+- |luv-dns-utility-functions| — DNS 实用函数
+- |luv-threading-and-synchronization-utilities| — 线程和同步实用工具
+- |luv-miscellaneous-utilities| — 杂项实用工具
+- |luv-metrics-operations| — 度量操作
+
+==============================================================================
+常量                                                           *luv-constants*
+
+作为一个 Lua 库，luv 支持并鼓励使用小写字符串来表示选项。例如：
+>lua
+  -- 使用字符串输入启动信号
+  uv.signal_start("sigterm", function(signame)
+    print(signame) -- 字符串输出："sigterm"
+  end)
+<
+然而，luv 也在 `uv.constants` 的 Lua 表中表面地暴露了 libuv 常量，其中键是大写常量名，
+对应的值是 libuv 内部定义的整数。这个表中的值可能被支持作为函数参数，但它们的使用可能
+不会改变输出类型。例如：
+>lua
+  -- 使用整数输入启动信号
+  uv.signal_start(uv.constants.SIGTERM, function(signame)
+    print(signame) -- 字符串输出："sigterm"
+  end)
+<
+下面列出了 `uv.constants` 中定义的具有关联小写选项字符串的大写常量。
+
+地址族 ~
+
+- `AF_UNIX`: "unix"
+- `AF_INET`: "inet"
+- `AF_INET6`: "inet6"
+- `AF_IPX`: "ipx"
+- `AF_NETLINK`: "netlink"
+- `AF_X25`: "x25"
+- `AF_AX25`: "as25"
+- `AF_ATMPVC`: "atmpvc"
+- `AF_APPLETALK`: "appletalk"
+- `AF_PACKET`: "packet"
+
+信号 ~
+
+- `SIGHUP`: "sighup"
+- `SIGINT`: "sigint"
+- `SIGQUIT`: "sigquit"
+- `SIGILL`: "sigill"
+- `SIGTRAP`: "sigtrap"
+- `SIGABRT`: "sigabrt"
+- `SIGIOT`: "sigiot"
+- `SIGBUS`: "sigbus"
+- `SIGFPE`: "sigfpe"
+- `SIGKILL`: "sigkill"
+- `SIGUSR1`: "sigusr1"
+- `SIGSEGV`: "sigsegv"
+- `SIGUSR2`: "sigusr2"
+- `SIGPIPE`: "sigpipe"
+- `SIGALRM`: "sigalrm"
+- `SIGTERM`: "sigterm"
+- `SIGCHLD`: "sigchld"
+- `SIGSTKFLT`: "sigstkflt"
+- `SIGCONT`: "sigcont"
+- `SIGSTOP`: "sigstop"
+- `SIGTSTP`: "sigtstp"
+- `SIGBREAK`: "sigbreak"
+- `SIGTTIN`: "sigttin"
+- `SIGTTOU`: "sigttou"
+- `SIGURG`: "sigurg"
+- `SIGXCPU`: "sigxcpu"
+- `SIGXFSZ`: "sigxfsz"
+- `SIGVTALRM`: "sigvtalrm"
+- `SIGPROF`: "sigprof"
+- `SIGWINCH`: "sigwinch"
+- `SIGIO`: "sigio"
+- `SIGPOLL`: "sigpoll"
+- `SIGLOST`: "siglost"
+- `SIGPWR`: "sigpwr"
+- `SIGSYS`: "sigsys"
+
+套接字类型 ~
+
+- `SOCK_STREAM`: "stream"
+- `SOCK_DGRAM`: "dgram"
+- `SOCK_SEQPACKET`: "seqpacket"
+- `SOCK_RAW`: "raw"
+- `SOCK_RDM`: "rdm"
+
+TTY 模式 ~
+
+- `TTY_MODE_NORMAL`: "normal"
+- `TTY_MODE_RAW`: "raw"
+- `TTY_MODE_IO`: "io"
+
+==============================================================================
+错误处理                                                   *luv-error-handling*
+
+在 libuv 中，错误由负数常量表示。虽然这些常量在 `uv.errno` 表中可用，但它们不会被 luv 函数
+返回，用于处理它们的 libuv 函数也没有暴露。相反，如果遇到内部错误，失败的 luv 函数将向调用者
+返回一个可断言的 `nil, err, name` 元组：
+- `nil` 习惯上表示失败
+- `err` 是一个格式为 `{name}: {message}` 的字符串
+  - `{name}` 是由 `uv_err_name` 内部提供的错误名称
+  - `{message}` 是由 `uv_strerror` 内部提供的人类可读消息
+- `name` 是用于构造 `err` 的相同字符串
+
+这个元组在下文中被称为 `fail` 伪类型。
+
+当一个函数调用成功时，它将返回与函数操作相关的值，或者返回整数 `0` 表示成功，有时甚至
+什么都不返回。这些情况在下文中都有记录。
+
+`uv.errno`                                                              *uv.errno*
+
+以下是已知错误名称和错误字符串的列表。更多详细信息请参见 Libuv 的"错误常量"页面。
+(https://docs.libuv.org/en/v1.x/errors.html#error-constants)
+
+- `E2BIG`: 参数列表过长。
+- `EACCES`: 权限被拒绝。
+- `EADDRINUSE`: 地址已被使用。
+- `EADDRNOTAVAIL`: 地址不可用。
+- `EAFNOSUPPORT`: 不支持的地址族。
+- `EAGAIN`: 资源暂时不可用。
+- `EAI_ADDRFAMILY`: 不支持的地址族。
+- `EAI_AGAIN`: 临时失败。
+- `EAI_BADFLAGS`: 错误的 ai_flags 值。
+- `EAI_BADHINTS`: 提示值无效。
+- `EAI_CANCELED`: 请求已取消。
+- `EAI_FAIL`: 永久性失败。
+- `EAI_FAMILY`: 不支持的 ai_family。
+- `EAI_MEMORY`: 内存不足。
+- `EAI_NODATA`: 无地址。
+- `EAI_NONAME`: 未知节点或服务。
+- `EAI_OVERFLOW`: 参数缓冲区溢出。
+- `EAI_PROTOCOL`: 解析的协议未知。
+- `EAI_SERVICE`: 套接字类型不可用的服务。
+- `EAI_SOCKTYPE`: 不支持的套接字类型。
+- `EALREADY`: 连接已在进行中。
+- `EBADF`: 错误的文件描述符。
+- `EBUSY`: 资源忙或被锁定。
+- `ECANCELED`: 操作已取消。
+- `ECHARSET`: 无效的 Unicode 字符。
+- `ECONNABORTED`: 软件导致的连接中止。
+- `ECONNREFUSED`: 连接被拒绝。
+- `ECONNRESET`: 连接被对端重置。
+- `EDESTADDRREQ`: 需要目标地址。
+- `EEXIST`: 文件已存在。
+- `EFAULT`: 系统调用参数中的错误地址。
+- `EFBIG`: 文件过大。
+- `EHOSTUNREACH`: 主机不可达。
+- `EINTR`: 系统调用被中断。
+- `EINVAL`: 无效参数。
+- `EIO`: I/O 错误。
+- `EISCONN`: 套接字已连接。
+- `EISDIR`: 对目录的非法操作。
+- `ELOOP`: 遇到过多的符号链接。
+- `EMFILE`: 打开的文件过多。
+- `EMSGSIZE`: 消息过长。
+- `ENAMETOOLONG`: 名称过长。
+- `ENETDOWN`: 网络已关闭。
+- `ENETUNREACH`: 网络不可达。
+- `ENFILE`: 文件表溢出。
+- `ENOBUFS`: 无可用缓冲区空间。
+- `ENODEV`: 无此设备。
+- `ENOENT`: 无此文件或目录。
+- `ENOMEM`: 内存不足。
+- `ENONET`: 机器不在网络上。
+- `ENOPROTOOPT`: 协议不可用。
+- `ENOSPC`: 设备上无剩余空间。
+- `ENOSYS`: 功能未实现。
+- `ENOTCONN`: 套接字未连接。
+- `ENOTDIR`: 不是目录。
+- `ENOTEMPTY`: 目录非空。
+- `ENOTSOCK`: 非套接字上的套接字操作。
+- `ENOTSUP`: 套接字不支持的操作。
+- `EOVERFLOW`: 值对于定义的数据类型过大。
+- `EPERM`: 操作不允许。
+- `EPIPE`: 管道破裂。
+- `EPROTO`: 协议错误。
+- `EPROTONOSUPPORT`: 不支持的协议。
+- `EPROTOTYPE`: 套接字的协议类型错误。
+- `ERANGE`: 结果过大。
+- `EROFS`: 只读文件系统。
+- `ESHUTDOWN`: 传输端点关闭后无法发送。
+- `ESPIPE`: 无效的查找。
+- `ESRCH`: 无此进程。
+- `ETIMEDOUT`: 连接超时。
+- `ETXTBSY`: 文本文件忙。
+- `EXDEV`: 不允许跨设备链接。
+- `UNKNOWN`: 未知错误。
+- `EOF`: 文件结束。
+- `ENXIO`: 无此设备或地址。
+- `EMLINK`: 链接过多。
+- `ENOTTY`: 设备的不适当 ioctl。
+- `EFTYPE`: 不适当的文件类型或格式。
+- `EILSEQ`: 非法字节序列。
+- `ESOCKTNOSUPPORT`: 不支持的套接字类型。
+
+==============================================================================
+版本检查                                                  *luv-version-checking*
+
+uv.version()                                                      *uv.version()*
+
+                返回打包成单个整数的 libuv 版本。每个组件使用 8 位，补丁号存储在
+                最低有效的 8 位中。例如，在 libuv 1.2.3 中，这将是 0x010203。
+
+                返回：`integer`
+
+uv.version_string()                                        *uv.version_string()*
+
+                返回 libuv 版本号的字符串形式。例如，在 libuv 1.2.3 中，这将是
+                "1.2.3"。对于非发布版本，包含版本后缀。
+
+                返回：`string`
+
+==============================================================================
+`uv_loop_t` — 事件循环                                *luv-event-loop* *uv_loop_t*
+
+事件循环是 libuv 功能的核心部分。它负责轮询 I/O 并根据不同的事件源调度要运行的回调。
+
+在 luv 中，每个加载库的 Lua 状态都有一个隐式的 uv 循环。只要每个线程都有自己的 Lua 状态
+和对应的 uv 循环，你就可以在多线程环境中使用这个库。这个循环在 Lua 模块中不直接暴露给用户。
+
+uv.loop_close()                                                *uv.loop_close()*
+
+                关闭所有内部循环资源。在正常执行中，当循环被 Lua 垃圾回收时会自动
+                关闭，所以不需要显式调用 `loop_close()`。只有在循环已经完成执行且
+                所有打开的句柄和请求都已关闭后才调用此函数，否则将返回 `EBUSY`。
+
+                返回：`0` 或 `fail`
+
+uv.run([{mode}])                                                      *uv.run()*
+
+                参数：
+                - `mode`：`string` 或 `nil`（默认值：`"default"`）
+
+                此函数运行事件循环。根据指定的模式，它会有不同的行为：
+
+                  - `"default"`：运行事件循环直到没有更多活动和被引用的句柄或请求。
+                    如果调用了 |uv.stop()| 且仍有活动的句柄或请求，则返回 `true`。
+                    在所有其他情况下返回 `false`。
+
+                  - `"once"`：轮询 I/O 一次。注意，如果没有待处理的回调，此函数会
+                    阻塞。当完成时返回 `false`（没有活动的句柄或请求），或者如果
+                    预期有更多回调则返回 `true`（意味着你应该在将来某个时候再次
+                    运行事件循环）。
+
+                  - `"nowait"`：轮询 I/O 一次，但如果没有待处理的回调则不阻塞。
+                    当完成时返回 `false`（没有活动的句柄或请求），或者如果预期
+                    有更多回调则返回 `true`（意味着你应该在将来某个时候再次运行
+                    事件循环）。
+
+                返回：`boolean` 或 `fail`
+
+                注意：Luvit 会在加载用户代码后隐式调用 `uv.run()`，但如果你直接
+                使用 luv 绑定，你需要在注册初始事件回调集后调用此函数来启动事件循环。
+
+uv.loop_configure({option}, {...})                         *uv.loop_configure()*
+
+                参数：
+                - `option`：`string`
+                - `...`：取决于 `option`，见下文
+
+                设置额外的循环选项。除非另有说明，否则你通常应该在第一次调用
+                uv_run() 之前调用此函数。
+
+                支持的选项：
+
+                  - `"block_signal"`：在轮询新事件时阻塞信号。loop_configure() 的
+                    第二个参数是信号名称（小写字符串）或信号编号。此操作目前仅为
+                    `"sigprof"` 信号实现，用于在使用采样分析器时抑制不必要的唤醒。
+                    请求其他信号将以 `EINVAL` 失败。
+                  - `"metrics_idle_time"`：累积事件循环在事件提供程序中花费的空闲
+                    时间。使用 `metrics_idle_time()` 需要此选项。
+
+                此函数的有效调用示例：
+
+                    >lua
+                    uv.loop_configure("block_signal", "sigprof")
+
+<
+
+                返回：`0` 或 `fail`
+
+                注意：请准备好处理 `ENOSYS` 错误；它表示平台不支持该循环选项。
+
+uv.loop_mode()                                                  *uv.loop_mode()*
+
+                如果循环正在运行，返回一个表示正在使用的模式的字符串。如果循环
+                未运行，则返回 `nil`。
+
+                返回：`string` 或 `nil`
+
+uv.loop_alive()                                                *uv.loop_alive()*
+
+                如果循环中有被引用的活动句柄、活动请求或正在关闭的句柄，则返回
+                `true`；否则返回 `false`。
+
+                返回：`boolean` 或 `fail`
+
+uv.stop()                                                            *uv.stop()*
+
+                停止事件循环，使 |uv.run()| 尽快结束。这将不会早于下一个循环
+                迭代发生。如果在阻塞 I/O 之前调用此函数，循环在此迭代中不会
+                阻塞 I/O。
+
+                返回：无。
+
+uv.backend_fd()                                                *uv.backend_fd()*
+
+                获取后端文件描述符。仅支持 kqueue、epoll 和 event ports。
+
+                这可以与 `uv.run("nowait")` 一起使用，在一个线程中进行轮询，
+                在另一个线程中运行事件循环的回调。
+
+                返回：`integer` 或 `nil`
+
+                注意：在所有平台上，将 kqueue fd 嵌入另一个 kqueue pollset 
+                都不起作用。添加 fd 不会报错，但它永远不会生成事件。
+
+uv.backend_timeout()                                      *uv.backend_timeout()*
+
+                获取轮询超时。返回值以毫秒为单位，如果没有超时则为 -1。
+
+                返回：`integer`
+
+uv.now()                                                              *uv.now()*
+
+                返回当前时间戳（以毫秒为单位）。时间戳在事件循环滴答开始时被
+                缓存，详细信息和原理请参见 |uv.update_time()|。
+
+                时间戳从某个任意时间点开始单调递增。不要对起始点做任何假设，
+                你只会感到失望。
+
+                返回：`integer`
+
+                注意：如果你需要亚毫秒级的精度，请使用 |uv.hrtime()|。
+
+uv.update_time()                                              *uv.update_time()*
+
+                更新事件循环的"当前时间"概念。Libuv 在事件循环滴答开始时缓存
+                当前时间，以减少与时间相关的系统调用次数。
+
+                通常你不需要调用此函数，除非你有回调会阻塞事件循环较长时间，
+                这里的"较长"是主观的，但可能在毫秒或更长的数量级。
+
+                返回：无。
+
+uv.walk({callback})                                                  *uv.walk()*
+
+                参数：
+                - `callback`：`callable`
+                  - `handle`：|uv_handle_t| 子类型的 `userdata`
+
+                遍历句柄列表：`callback` 将对每个句柄执行。
+
+                返回：无。
+
+                    >lua
+                    -- uv.walk 的示例用法，用于关闭所有尚未关闭的句柄
+                    uv.walk(function (handle)
+                      if not handle:is_closing() then
+                        handle:close()
+                      end
+                    end)
+<
+
+==============================================================================
+`uv_req_t` — 基础请求                              *luv-base-request* *uv_req_t*
+
+`uv_req_t` 是所有 libuv 请求类型的基础类型。
+
+uv.cancel({req})                                                   *uv.cancel()*
+
+                > 方法形式 `req:cancel()`
+
+                参数：
+                - `req`：|uv_req_t| 子类型的 `userdata`
+
+                取消待处理的请求。如果请求正在执行或已执行完成，则失败。目前
+                仅支持取消 |uv_fs_t|、`uv_getaddrinfo_t`、`uv_getnameinfo_t` 
+                和 `uv_work_t` 请求。
+
+                返回：`0` 或 `fail`
+
+uv.req_get_type({req})                                       *uv.req_get_type()*
+
+                > 方法形式 `req:get_type()`
+
+                参数：
+                - `req`：|uv_req_t| 子类型的 `userdata`
+
+                返回给定请求的结构体名称（例如，|uv_fs_t| 的 `"fs"`）和请求
+                类型的 libuv 枚举整数（`uv_req_type`）。
+
+                返回：`string, integer`
+
+==============================================================================
+`uv_handle_t` — 基础句柄                          *luv-base-handle* *uv_handle_t*
+
+`uv_handle_t` 是所有 libuv 句柄类型的基础类型。此处定义的所有 API 函数都适用于
+任何句柄类型。
+
+uv.is_active({handle})                                          *uv.is_active()*
+
+                > 方法形式 `handle:is_active()`
+
+                参数：
+                - `handle`：|uv_handle_t| 子类型的 `userdata`
+
+                如果句柄处于活动状态返回 `true`，如果处于非活动状态返回 `false`。
+                "活动"的含义取决于句柄的类型：
+
+                  - |uv_async_t| 句柄始终处于活动状态，除非通过 |uv.close()|
+                    关闭，否则无法停用。
+
+                  - |uv_pipe_t|、|uv_tcp_t|、|uv_udp_t| 等句柄 - 基本上任何
+                    处理 I/O 的句柄 - 在执行涉及 I/O 的操作时处于活动状态，
+                    如读取、写入、连接、接受新连接等。
+
+                  - |uv_check_t|、|uv_idle_t|、|uv_timer_t| 等句柄在通过调用
+                    |uv.check_start()|、|uv.idle_start()|、|uv.timer_start()|
+                    等启动后处于活动状态，直到调用其各自的停止函数为止。
+
+                返回：`boolean` 或 `fail`
+
+uv.is_closing({handle})                                        *uv.is_closing()*
+
+                > 方法形式 `handle:is_closing()`
+
+                参数：
+                - `handle`：|uv_handle_t| 子类型的 `userdata`
+
+                如果句柄正在关闭或已关闭返回 `true`，否则返回 `false`。
+
+                返回：`boolean` 或 `fail`
+
+                注意：此函数应仅在句柄初始化和关闭回调到达之间使用。
+
+uv.close({handle} [, {callback}])                                   *uv.close()*
+
+                > 方法形式 `handle:close([callback])`
+
+                参数：
+                - `handle`：|uv_handle_t| 子类型的 `userdata`
+                - `callback`：`callable` 或 `nil`
+
+                请求关闭句柄。`callback` 将在此调用后异步调用。在释放内存之前，
+                必须对每个句柄调用此函数。
+
+                包装文件描述符的句柄会立即关闭，但 `callback` 仍会推迟到事件
+                循环的下一次迭代。这给你一个机会来释放与句柄相关的任何资源。
+
+                正在进行的请求，如 `uv_connect_t` 或 `uv_write_t`，会被取消，
+                并且它们的回调会异步调用
+
+                并返回 `ECANCELED`。
+
+                返回：无。
+
+uv.ref({handle})                                                      *uv.ref()*
+
+                > 方法形式 `handle:ref()`
+
+                参数：
+                - `handle`：|uv_handle_t| 子类型的 `userdata`
+
+                引用给定的句柄。引用是幂等的，也就是说，如果一个句柄已经被引用，
+                再次调用此函数将不会有任何效果。
+
+                返回：无。
+
+                参见 |luv-reference-counting|。
+
+uv.unref({handle})                                                  *uv.unref()*
+
+                > 方法形式 `handle:unref()`
+
+                参数：
+                - `handle`：|uv_handle_t| 子类型的 `userdata`
+
+                取消引用给定的句柄。引用是幂等的，也就是说，如果一个句柄未被引用，
+                再次调用此函数将不会有任何效果。
+
+                返回：无。
+
+参见 |luv-reference-counting|。
+
+uv.has_ref({handle})                                              *uv.has_ref()*
+
+                > 方法形式 `handle:has_ref()`
+
+                参数：
+                - `handle`：|uv_handle_t| 子类型的 `userdata`
+
+                如果句柄被引用返回 `true`，否则返回 `false`。
+
+                返回：`boolean` 或 `fail`
+
+                参见 |luv-reference-counting|。
+
+uv.send_buffer_size({handle} [, {size}])                 *uv.send_buffer_size()*
+
+                > 方法形式 `handle:send_buffer_size([size])`
+
+                参数：
+                - `handle`：|uv_handle_t| 子类型的 `userdata`
+                - `size`：`integer` 或 `nil`（默认值：`0`）
+
+                获取或设置操作系统用于套接字的发送缓冲区大小。
+
+                如果省略 `size`（或为 `0`），将返回当前发送缓冲区大小；否则，
+                将使用 `size` 设置新的发送缓冲区大小。
+
+                此函数在 Unix 上适用于 TCP、管道和 UDP 句柄，在 Windows 上适用于
+                TCP 和 UDP 句柄。
+
+                返回：
+                - `integer` 或 `fail`（如果 `size` 为 `nil` 或 `0`）
+                - `0` 或 `fail`（如果 `size` 不为 `nil` 且不为 `0`）
+
+                注意：Linux 将设置双倍大小并返回原始设置值的双倍。
+
+uv.recv_buffer_size({handle} [, {size}])                 *uv.recv_buffer_size()*
+
+                > 方法形式 `handle:recv_buffer_size([size])`
+
+                参数：
+                - `handle`：|uv_handle_t| 子类型的 `userdata`
+                - `size`：`integer` 或 `nil`（默认值：`0`）
+
+                获取或设置操作系统用于套接字的接收缓冲区大小。
+
+                如果省略 `size`（或为 `0`），将返回当前发送缓冲区大小；否则，
+                将使用 `size` 设置新的发送缓冲区大小。
+
+                此函数在 Unix 上适用于 TCP、管道和 UDP 句柄，在 Windows 上适用于
+                TCP 和 UDP 句柄。
+
+                返回：
+                - `integer` 或 `fail`（如果 `size` 为 `nil` 或 `0`）
+                - `0` 或 `fail`（如果 `size` 不为 `nil` 且不为 `0`）
+
+                注意：Linux 将设置双倍大小并返回原始设置值的双倍。
+
+uv.fileno({handle})                                                *uv.fileno()*
+
+                > 方法形式 `handle:fileno()`
+
+                参数：
+                - `handle`：|uv_handle_t| 子类型的 `userdata`
+
+                获取平台相关的文件描述符等价物。
+
+                支持以下句柄：TCP、管道、TTY、UDP 和轮询。传递任何其他句柄类型
+                将以 `EINVAL` 失败。
+
+                如果句柄还没有附加文件描述符或句柄本身已关闭，此函数将返回
+                `EBADF`。
+
+                返回：`integer` 或 `fail`
+
+                警告：使用此函数时要非常小心。libuv 假定它控制着文件描述符，
+                所以对它的任何更改都可能导致故障。
+
+uv.handle_get_type({handle})                              *uv.handle_get_type()*
+
+                > 方法形式 `handle:get_type()`
+
+                参数：
+                - `handle`：|uv_handle_t| 子类型的 `userdata`
+
+                返回给定句柄的结构体名称（例如，|uv_pipe_t| 的 `"pipe"`）和
+                句柄类型的 libuv 枚举整数（`uv_handle_type`）。
+
+                返回：`string, integer`
+
+==============================================================================
+引用计数                                                *luv-reference-counting*
+
+libuv 事件循环（如果以默认模式运行）将一直运行，直到没有活动和被引用的句柄为止。
+用户可以通过取消引用活动的句柄来强制循环提前退出，例如在调用 |uv.timer_start()|
+后调用 |uv.unref()|。
+
+句柄可以被引用或取消引用，引用计数方案不使用计数器，所以这两个操作都是幂等的。
+
+默认情况下，所有活动的句柄都被引用，有关活动涉及的更详细解释，请参见 |uv.is_active()|。
+
+==============================================================================
+`uv_timer_t` — 定时器句柄                          *luv-timer-handle* *uv_timer_t*
+
+> |uv_handle_t| 函数也适用。
+
+定时器句柄用于调度将来要调用的回调。
+
+uv.new_timer()                                                  *uv.new_timer()*
+
+                创建并初始化一个新的 |uv_timer_t|。返回包装它的 Lua userdata。
+
+                返回：`uv_timer_t userdata` 或 `fail`
+
+                    >lua
+                    -- 创建一个简单的 setTimeout 包装器
+                    local function setTimeout(timeout, callback)
+                      local timer = uv.new_timer()
+                      timer:start(timeout, 0, function ()
+                        timer:stop()
+                        timer:close()
+                        callback()
+                      end)
+                      return timer
+                    end
+
+                    -- 创建一个简单的 setInterval 包装器
+                    local function setInterval(interval, callback)
+                      local timer = uv.new_timer()
+                      timer:start(interval, interval, function ()
+                        callback()
+                      end)
+                      return timer
+                    end
+
+                    -- 以及 clearInterval
+                    local function clearInterval(timer)
+                      timer:stop()
+                      timer:close()
+                    end
+<
+
+uv.timer_start({timer}, {timeout}, {repeat}, {callback})      *uv.timer_start()*
+
+                > 方法形式 `timer:start(timeout, repeat, callback)`
+
+                参数：
+                - `timer`：`uv_timer_t userdata`
+                - `timeout`：`integer`
+                - `repeat`：`integer`
+                - `callback`：`callable`
+
+                启动定时器。`timeout` 和 `repeat` 以毫秒为单位。
+
+                如果 `timeout` 为零，回调将在下一个事件
+
+                使用给定的回调启动句柄。
+
+                返回：`0` 或 `fail`
+
+uv.idle_stop({check})                                           *uv.idle_stop()*
+
+                > 方法形式 `idle:stop()`
+
+                参数：
+                - `idle`：`uv_idle_t userdata`
+
+                停止句柄，回调将不再被调用。
+
+                返回：`0` 或 `fail`
+
+==============================================================================
+`uv_async_t` — 异步句柄                          *luv-async-handle* *uv_async_t*
+
+> |uv_handle_t| 函数也适用。
+
+异步句柄允许用户从另一个线程"唤醒"事件循环并获得回调调用。
+
+    >lua
+    local async
+    async = uv.new_async(function()
+      print("异步操作运行")
+      async:close()
+    end)
+
+    async:send()
+<
+
+uv.new_async({callback})                                        *uv.new_async()*
+
+                参数：
+                - `callback`：`callable`
+                  - `...`：从 `uv.async_send(async, ...)` 传入/传出的 `threadargs`
+
+                创建并初始化一个新的 |uv_async_t|。返回包装它的 Lua userdata。
+
+                返回：`uv_async_t userdata` 或 `fail`
+
+                注意：与其他句柄初始化函数不同，这会立即启动句柄。
+
+uv.async_send({async}, {...})                                  *uv.async_send()*
+
+                > 方法形式 `async:send(...)`
+
+                参数：
+                - `async`：`uv_async_t userdata`
+                - `...`：`threadargs`
+
+                唤醒事件循环并调用异步句柄的回调。
+
+                返回：`0` 或 `fail`
+
+                注意：从任何线程调用此函数都是安全的。回调将在循环线程上调用。
+
+                警告：libuv 会合并对 `uv.async_send(async)` 的调用，也就是说，
+                并非每次调用都会产生回调的执行。例如：如果在回调被调用之前连续
+                调用 5 次 `uv.async_send()`，回调只会被调用一次。如果在回调
+                被调用后再次调用 `uv.async_send()`，它将再次被调用。
+
+==============================================================================
+`uv_poll_t` — 轮询句柄                              *luv-poll-handle* *uv_poll_t*
+
+> |uv_handle_t| 函数也适用。
+
+轮询句柄用于监视文件描述符的可读性和可写性，类似于 poll(2) 的目的
+(https://linux.die.net/man/2/poll)。
+
+轮询句柄的目的是使依赖事件循环来发出套接字状态变化信号的外部库（如 c-ares 或
+libssh2）能够集成。不建议将 `uv_poll_t` 用于任何其他目的；|uv_tcp_t|、
+|uv_udp_t| 等提供了比 `uv_poll_t` 更快且更具可扩展性的实现，特别是在 Windows 上。
+
+轮询句柄可能偶尔会发出文件描述符可读或可写的信号，即使实际上并非如此。因此，
+用户在尝试从 fd 读取或写入时应始终准备好处理 EAGAIN 或等效情况。
+
+对同一个套接字有多个活动的轮询句柄是不行的，这可能导致 libuv 忙循环或其他故障。
+
+用户不应在活动的轮询句柄正在轮询文件描述符时关闭它。这可能导致句柄报告错误，
+但它也可能开始轮询另一个套接字。但是，在调用 |uv.poll_stop()| 或 |uv.close()|
+之后可以立即安全地关闭 fd。
+
+注意：在 Windows 上，只有套接字可以用轮询句柄进行轮询。在 Unix 上，任何被 poll(2)
+接受的文件描述符都可以使用。
+
+uv.new_poll({fd})                                                *uv.new_poll()*
+
+                参数：
+                - `fd`：`integer`
+
+                使用文件描述符初始化句柄。
+
+                文件描述符被设置为非阻塞模式。
+
+                返回：`uv_poll_t userdata` 或 `fail`
+
+uv.new_socket_poll({fd})                                  *uv.new_socket_poll()*
+
+                参数：
+                - `fd`：`integer`
+
+                使用套接字描述符初始化句柄。在 Unix 上，这与 |uv.new_poll()| 
+                相同。在 Windows 上，它接受一个 SOCKET 句柄。
+
+                套接字被设置为非阻塞模式。
+
+                返回：`uv_poll_t userdata` 或 `fail`
+
+uv.poll_start({poll}, {events}, {callback})                    *uv.poll_start()*
+
+                > 方法形式 `poll:start(events, callback)`
+
+                参数：
+                - `poll`：`uv_poll_t userdata`
+                - `events`：`string` 或 `nil`（默认值：`"rw"`）
+                - `callback`：`callable`
+                  - `err`：`nil` 或 `string`
+                  - `events`：`string` 或 `nil`
+
+                开始轮询文件描述符。`events` 可以是：`"r"`、`"w"`、`"rw"`、`"d"`、
+                `"rd"`、`"wd"`、`"rwd"`、`"p"`、`"rp"`、`"wp"`、`"rwp"`、`"dp"`、
+                `"rdp"`、`"wdp"` 或 `"rwdp"`，其中 `r` 是 `READABLE`，`w` 是 
+                `WRITABLE`，`d` 是 `DISCONNECT`，`p` 是 `PRIORITIZED`。一旦检测到
+                事件，回调将被调用，状态设置为 0，检测到的事件设置在 events 字段上。
+
+                当句柄处于活动状态时，用户不应关闭套接字。如果用户这样做，回调可能
+                会被调用并报告错误状态，但这不能保证。
+
+                返回：`0` 或 `fail`
+
+                注意：在已经活动的句柄上调用 `uv.poll_start()` 是可以的。这样做
+                将更新正在监视的事件掩码。
+
+uv.poll_stop({poll})                                            *uv.poll_stop()*
+
+                > 方法形式 `poll:stop()`
+
+                参数：
+                - `poll`：`uv_poll_t userdata`
+
+                停止轮询文件描述符，回调将不再被调用。
+
+                返回：`0` 或 `fail`
+
+==============================================================================
+`uv_signal_t` — 信号句柄                      *luv-signal-handle* *uv_signal_t*
+
+> |uv_handle_t| 函数也适用。
+
+信号句柄在每个事件循环的基础上实现 Unix 风格的信号处理。
+
+Windows 注意事项：
+
+Windows 上模拟了某些信号的接收：
+  - SIGINT 通常在用户按下 CTRL+C 时传递。但是，像在 Unix 上一样，在启用终端
+    原始模式时不会生成。
+  - SIGBREAK 在用户按下 CTRL + BREAK 时传递。
+  - SIGHUP 在用户关闭控制台窗口时生成。在 SIGHUP 时，程序有大约 10 秒的时间
+    进行清理。之后 Windows 将无条件终止它。
+  - 当 libuv 检测到控制台已调整大小时，会引发 SIGWINCH。当程序使用 uv_tty_t
+    句柄写入控制台时，libuv 会模拟 SIGWINCH。SIGWINCH 可能不会总是及时传递；
+    libuv 只会在光标移动时检测大小变化。当在原始模式下使用可读的 |uv_tty_t|
+    句柄时，调整控制台缓冲区大小也会触发 SIGWINCH 信号。
+  - 可以成功创建其他信号的观察器，但这些信号永远不会被接收。这些信号是：
+    SIGILL、SIGABRT、SIGFPE、SIGSEGV、SIGTERM 和 SIGKILL。
+  - 通过 raise() 或 abort() 以编程方式引发信号的调用不会被 libuv 检测到；
+    这些不会触发信号观察器。
+
+Unix 注意事项：
+
+  - SIGKILL 和 SIGSTOP 是不可能捕获的。
+  - 通过 libuv 处理 SIGBUS、SIGFPE、SIGILL 或 SIGSEGV 会导致未定义行为。
+  - 如果通过 abort() 生成 SIGABRT，libuv 将不会捕获它，例如通过
+        assert()。
+  - 在 Linux 上，SIGRT0 和 SIGRT1（信号 32 和 33）被 NPTL pthreads 库用于
+    管理线程。为这些信号安装观察器将导致不可预测的行为，强烈建议不要这样做。
+    libuv 的未来版本可能会直接拒绝它们。
+
+    >lua
+    -- 创建一个新的信号处理器
+    local signal = uv.new_signal()
+    -- 定义一个处理函数
+    uv.signal_start(signal, "sigint", function(signame)
+      print("收到 " .. signame .. "，正在关闭")
+      os.exit(1)
+    end)
+<
+
+uv.new_signal()                                                *uv.new_signal()*
+
+                创建并初始化一个新的 |uv_signal_t|。返回包装它的 Lua userdata。
+
+                返回：`uv_signal_t userdata` 或 `fail`
+
+uv.signal_start({signal}, {signame}, {callback})             *uv.signal_start()*
+
+                > 方法形式 `signal:start(signame, callback)`
+
+                参数：
+                - `signal`：`uv_signal_t userdata`
+                - `signame`：`string` 或 `integer`
+                - `callback`：`callable`
+                  - `signame`：`string`
+
+                使用给定的回调启动句柄，监视给定的信号。
+
+                有关支持的 `signame` 输入和输出值，请参见 |luv-constants|。
+
+                返回：`0` 或 `fail`
+                                                     *uv.signal_start_oneshot()*
+uv.signal_start_oneshot({signal}, {signame}, {callback})
+
+                > 方法形式 `signal:start_oneshot(signame, callback)`
+
+                参数：
+                - `signal`：`uv_signal_t userdata`
+                - `signame`：`string` 或 `integer`
+                - `callback`：`callable`
+                  - `signame`：`string`
+
+                功能与 |uv.signal_start()| 相同，但信号处理器在收到信号的那一刻
+                就会重置。
+
+                有关支持的 `signame` 输入和输出值，请参见 |luv-constants|。
+
+                返回：`0` 或 `fail`
+
+uv.signal_stop({signal})                                      *uv.signal_stop()*
+
+                > 方法形式 `signal:stop()`
+
+                参数：
+                - `signal`：`uv_signal_t userdata`
+
+                停止句柄，回调将不再被调用。
+
+                返回：`0` 或 `fail`
+
+==============================================================================
+`uv_process_t` — 进程句柄                      *luv-process-handle* *uv_process_t*
+
+> |uv_handle_t| 函数也适用。
+
+进程句柄将生成一个新进程，并允许用户控制它，并使用流与它建立通信通道。
+
+uv.disable_stdio_inheritance()                  *uv.disable_stdio_inheritance()*
+
+                禁用此进程从其父进程继承的文件描述符/句柄的继承。效果是此进程
+                生成的子进程不会意外继承这些句柄。
+
+                建议尽早在程序中调用此函数，在继承的文件描述符可能被关闭或复制
+                之前。
+
+                返回：无。
+
+                注意：此函数以最大努力为基础工作：不能保证 libuv 能发现所有
+                继承的文件描述符。一般来说，它在 Windows 上的效果比在 Unix 上
+                好。
+
+uv.spawn({path}, {options}, {on_exit})                              *uv.spawn()*
+
+                参数：
+                - `path`：`string`
+                - `options`：`table`（见下文）
+                - `on_exit`：`callable`
+                  - `code`：`integer`
+                  - `signal`：`integer`
+
+                初始化进程句柄并启动进程。如果进程成功生成，此函数将返回子进程
+                的句柄和 pid。
+
+                生成失败的可能原因包括（但不限于）要执行的文件不存在、没有使用
+                指定的 setuid 或 setgid 的权限，或没有足够的内存分配给新进程。
+
+                    >lua
+                    local stdin = uv.new_pipe()
+                    local stdout = uv.new_pipe()
+                    local stderr = uv.new_pipe()
+
+                    print("stdin", stdin)
+                    print("stdout", stdout)
+                    print("stderr", stderr)
+
+                    local handle, pid = uv.spawn("cat", {
+                      stdio = {stdin, stdout, stderr}
+                    }, function(code, signal) -- 退出时
+                      print("退出代码", code)
+                      print("退出信号", signal)
+                    end)
+
+                    print("进程已打开", handle, pid)
+
+                    uv.read_start(stdout, function(err, data)
+                      assert(not err, err)
+                      if data then
+                        print("stdout 块", stdout, data)
+                      else
+                        print("stdout 结束", stdout)
+                      end
+                    end)
+
+                    uv.read_start(stderr, function(err, data)
+                      assert(not err, err)
+                      if data then
+                        print("stderr 块", stderr, data)
+                      else
+                        print("stderr 结束", stderr)
+                      end
+                    end)
+
+                    uv.write(stdin, "Hello World")
+
+                    uv.shutdown(stdin, function()
+                      print("stdin 关闭", stdin)
+                      uv.close(handle, function()
+                        print("进程已关闭", handle, pid)
+                      end)
+                    end)
+<
+                                                              *uv.spawn-options*
+                `options` 表接受以下字段：
+
+                  - `options.args` - 命令行参数作为字符串列表。第一个字符串
+                    不应该是程序的路径，因为它已经通过 `path` 提供。在 Windows
+                    上，这使用 CreateProcess，它将参数连接成一个字符串。这可能
+                    会导致一些奇怪的错误（对于 Windows，请参见下面的 
+                    `options.verbatim`）。
+                  - `options.stdio` - 设置将提供给子进程的文件描述符。约定是
+                    第一个条目是 stdin、stdout 和 stderr。（注意：在 Windows 上，
+                    第三个之后的文件描述符只有在子进程使用 MSVCRT 运行时时才
+                    可用。）
+                  - `options.env` - 为新进程设置环境变量。
+                  - `options.cwd` - 设置子进程的当前工作目录。
+                  - `options.uid` - 设置子进程的用户 ID。
+                  - `options.gid` - 设置子进程的组 ID。
+                  - `options.verbatim` - 如果为 true，在将参数列表转换为命令行
+                    字符串时，不要用引号包装任何参数，也不要执行任何其他转义。
+                    此选项仅在 Windows 系统上有意义。在 Unix 上它会被静默忽略。
+                  - `options.detached` - 如果为 true，以分离状态生成子进程 - 
+                    这将使其成为进程组领导者，并将有效地使子进程在父进程退出后
+                    继续运行。注意，除非父进程在子进程的进程句柄上调用 
+                    |uv.unref()|，否则子进程仍将保持父进程的事件循环活动。
+                  - `options.hide` - 如果为 true，隐藏通常会创建的子进程控制台
+                    窗口。此选项仅在 Windows 系统上有意义。在 Unix 上它会被静默
+                    忽略。
+
+                `options.stdio` 条目可以有多种形式。
+
+                  - 如果它们是数字，那么子进程从父进程继承相同的零索引文件描述符。
+                  - 如果传入 |uv_stream_t| 句柄，那么它们被用作
+                    读写管道或继承的流，这取决于流是否有有效的文件描述符。
+                  - 包含 `nil` 占位符意味着在子进程中忽略该文件描述符。
+
+                当子进程退出时，`on_exit` 被调用，带有退出代码和信号。
+
+                返回：`uv_process_t userdata`，`integer`
+
+uv.process_kill({process}, {signame})                         *uv.process_kill()*
+
+                > 方法形式 `process:kill(signame)`
+
+                参数：
+                - `process`：`uv_process_t userdata`
+                - `signame`：`string` 或 `integer` 或 `nil`（默认值：`sigterm`）
+
+                向给定的进程句柄发送指定的信号。检查 |uv_signal_t| 的文档了解
+                信号支持，特别是在 Windows 上。
+
+                有关支持的 `signame` 输入和输出值，请参见 |luv-constants|。
+
+                返回：`0` 或 `fail`
+
+uv.kill({pid}, {signame})                                             *uv.kill()*
+
+                参数：
+                - `pid`：`integer`
+                - `signame`：`string` 或 `integer` 或 `nil`（默认值：`sigterm`）
+
+                向给定的 PID 发送指定的信号。检查 |uv_signal_t| 的文档了解信号
+                支持，特别是在 Windows 上。
+
+                有关支持的 `signame` 输入和输出值，请参见 |luv-constants|。
+
+                返回：`0` 或 `fail`
+
+uv.process_get_pid({process})                             *uv.process_get_pid()*
+
+                > 方法形式 `process:get_pid()`
+
+                参数：
+                - `process`：`uv_process_t userdata`
+
+                返回句柄的 pid。
+
+                返回：`integer`
+
+==============================================================================
+`uv_stream_t` — 流句柄                          *luv-stream-handle* *uv_stream_t*
+
+> |uv_handle_t| 函数也适用。
+
+流句柄提供了双工通信通道的抽象。`uv_stream_t` 是一个抽象类型，libuv 以 
+|uv_tcp_t|、|uv_pipe_t| 和 |uv_tty_t| 的形式提供了 3 种流实现。
+
+uv.shutdown({stream} [, {callback}])                             *uv.shutdown()*
+
+                > 方法形式 `stream:shutdown([callback])`
+
+                参数：
+                - `stream`：|uv_stream_t| 子类型的 `userdata`
+                - `callback`：`callable` 或 `nil`
+                  - `err`：`nil` 或 `string`
+
+                关闭双工流的传出（写入）端。它等待待处理的写入请求完成。关闭
+                完成后调用回调。
+
+                返回：`uv_shutdown_t userdata` 或 `fail`
+
+uv.listen({stream}, {backlog}, {callback})                         *uv.listen()*
+
+                > 方法形式 `stream:listen(backlog, callback)`
+
+                参数：
+                - `stream`：|uv_stream_t| 子类型的 `userdata`
+                - `backlog`：`integer`
+                - `callback`：`callable`
+                  - `err`：`nil` 或 `string`
+
+                开始监听传入的连接。`backlog` 表示内核可能排队的连接数，与
+                `listen(2)` 相同。当收到新的传入连接时，调用回调。
+
+                返回：`0` 或 `fail`
+
+uv.accept({stream}, {client_stream})                               *uv.accept()*
+
+                > 方法形式 `stream:accept(client_stream)`
+
+                参数：
+                - `stream`：|uv_stream_t| 子类型的 `userdata`
+                - `client_stream`：|uv_stream_t| 子类型的 `userdata`
+
+                此调用与 |uv.listen()| 一起使用以接受传入的连接。在收到回调后
+                调用此函数以接受连接。
+
+                当调用连接回调时，保证此函数第一次将成功完成。如果你尝试多次
+                使用它，它可能会失败。建议每个连接调用只调用此函数一次。
+
+                返回：`0` 或 `fail`
+
+                    >lua
+                    server:listen(128, function (err)
+                      local client = uv.new_tcp()
+                      server:accept(client)
+                    end)
+<
+
+uv.read_start({stream}, {callback})                            *uv.read_start()*
+
+                > 方法形式 `stream:read_start(callback)`
+
+                参数：
+                - `stream`：|uv_stream_t| 子类型的 `userdata`
+                - `callback`：`callable`
+                  - `err`：`nil` 或 `string`
+                  - `data`：`string` 或 `nil`
+
+                从传入流读取数据。回调将被多次调用，直到没有更多数据要读取或
+                调用了 |uv.read_stop()|。当我们到达 EOF 时，`data` 将为 `nil`。
+
+                返回：`0` 或 `fail`
+
+                    >lua
+                    stream:read_start(function (err, chunk)
+                      if err then
+                        -- 处理读取错误
+                      elseif chunk then
+                        -- 处理数据
+                      else
+                        -- 处理断开连接
+                      end
+                    end)
+<
+
+uv.read_stop({stream})                                          *uv.read_stop()*
+
+                > 方法形式 `stream:read_stop()`
+
+                参数：
+                - `stream`：|uv_stream_t| 子类型的 `userdata`
+
+                停止从流中读取数据。不再调用读取回调。
+
+                此函数是幂等的，可以在已停止的流上安全调用。
+
+                返回：`0` 或 `fail`
+
+uv.write({stream}, {data} [, {callback}])                           *uv.write()*
+
+                > 方法形式 `stream:write(data, [callback])`
+
+                参数：
+                - `stream`：|uv_stream_t| 子类型的 `userdata`
+                - `data`：`buffer`
+                - `callback`：`callable` 或 `nil`
+                  - `err`：`nil` 或 `string`
+
+                向流写入数据。
+
+                `data` 可以是 Lua 字符串或字符串表。如果传入表，C 后端将使用
+                writev 在单个系统调用中发送所有字符串。
+
+                可选的 `callback` 用于知道写入何时完成。
+
+                返回：`uv_write_t userdata` 或 `fail`
+
+uv.write2({stream}, {data}, {send_handle} [, {callback}])          *uv.write2()*
+
+                > 方法形式 `stream:write2(data, send_handle, [callback])`
+
+                参数：
+                - `stream`：|uv_stream_t| 子类型的 `userdata`
+                - `data`：`buffer`
+                - `send_handle`：|uv_stream_t| 子类型的 `userdata`
+                - `callback`：`callable` 或 `nil`
+                  - `err`：`nil` 或 `string`
+
+                扩展的写入函数，用于通过管道发送句柄。管道必须使用 `ipc` 选项
+                `true` 初始化。
+
+                返回：`uv_write_t userdata` 或 `fail`
+
+                注意：`send_handle` 必须是 TCP 套接字或管道，它是服务器或连接
+                （监听或连接状态）。绑定的套接字或管道将被假定为服务器。
+
+uv.try_write({stream}, {data})                                  *uv.try_write()*
+
+                > 方法形式 `stream:try_write(data)`
+
+                参数：
+                - `stream`：|uv_stream_t| 子类型的 `userdata`
+                - `data`：`buffer`
+
+                与 |uv.write()| 相同，但如果不能立即完成，则不会排队写入请求。
+
+                将返回写入的字节数（可能小于提供的缓冲区大小）。
+
+                返回：`integer` 或 `fail`
+
+uv.try_write2({stream}, {data}, {send_handle})                 *uv.try_write2()*
+
+                > 方法形式 `stream:try_write2(data, send_handle)`
+
+                参数：
+                - `stream`：|uv_stream_t| 子类型的 `userdata`
+                - `data`：`buffer`
+                - `send_handle`：|uv_stream_t| 子类型的 `userdata`
+
+                类似于 |uv.write2()|，但具有 |uv.try_write()| 的属性。在 Windows
+                上不支持，在那里它返回 `UV_EAGAIN`。
+
+                将返回写入的字节数（可能小于提供的缓冲区大小）。
+
+                返回：`integer` 或 `fail`
+
+uv.is_readable({stream})                                      *uv.is_readable()*
+
+                > 方法形式 `stream:is_readable()`
+
+                参数：
+                - `stream`：|uv_stream_t| 子类型的 `userdata`
+
+                如果流可读返回 `true`，否则返回 `false`。
+
+                返回：`boolean`
+
+uv.is_writable({stream})                                      *uv.is_writable()*
+
+                > 方法形式 `stream:is_writable()`
+
+                参数：
+                - `stream`：|uv_stream_t| 子类型的 `userdata`
+
+                如果流可写返回 `true`，否则返回 `false`。
+
+                返回：`boolean`
+
+uv.stream_set_blocking({stream}, {blocking})          *uv.stream_set_blocking()*
+
+                > 方法形式 `stream:set_blocking(blocking)`
+
+                参数：
+                - `stream`：|uv_stream_t| 子类型的 `userdata`
+                - `blocking`：`boolean`
+
+                为流启用或禁用阻塞模式。
+
+                当启用阻塞模式时，所有写入都同步完成。接口保持不变，例如，操作
+                的完成或失败仍将通过异步进行的回调报告。
+
+                返回：`0` 或 `fail`
+
+                警告：不建议过度依赖此 API。它在将来可能会发生重大变化。目前
+                这只在 Windows 上工作，并且只适用于 |uv_pipe_t| 句柄。此外，
+                当在已经提交写入请求后更改阻塞模式时，libuv 目前不提供任何
+                顺序保证。因此，建议在打开或创建流后立即设置阻塞模式。
+
+uv.stream_get_write_queue_size()              *uv.stream_get_write_queue_size()*
+
+                > 方法形式 `stream:get_write_queue_size()`
+
+                返回流的写入队列大小。
+
+                返回：`integer`
+
+==============================================================================
+`uv_tcp_t` — TCP 句柄                                  *luv-tcp-handle* *uv_tcp_t*
+
+> |uv_handle_t| 和 |uv_stream_t| 函数也适用。
+
+TCP 句柄用于表示 TCP 流和服务器。
+
+uv.new_tcp([{flags}])                                             *uv.new_tcp()*
+
+                参数：
+                - `flags`：`string` 或 `integer` 或 `nil`
+
+                创建并初始化一个新的 |uv_tcp_t|。返回包装它的 Lua userdata。
+
+                如果设置，`flags` 必须是有效的地址族。有关支持的地址族输入值，
+                请参见 |luv-constants|。
+
+                返回：`uv_tcp_t userdata` 或 `fail`
+
+uv.tcp_open({tcp}, {sock})                                       *uv.tcp_open()*
+
+                > 方法形式 `tcp:open(sock)`
+
+                参数：
+                - `tcp`：`uv_tcp_t userdata`
+                - `sock`：`integer`
+
+                将现有的文件描述符或 SOCKET 作为 TCP 句柄打开。
+
+                返回：`0` 或 `fail`
+
+                注意：不会检查传递的文件描述符或 SOCKET 的类型，但要求它表示
+                有效的流套接字。
+
+uv.tcp_nodelay({tcp}, {enable})                               *uv.tcp_nodelay()*
+
+                > 方法形式 `tcp:nodelay(enable)`
+
+                参数：
+                - `tcp`：`uv_tcp_t userdata`
+                - `enable`：`boolean`
+
+                启用/禁用 Nagle 算法。
+
+                返回：`0` 或 `fail`
+
+uv.tcp_keepalive({tcp}, {enable} [, {delay}])               *uv.tcp_keepalive()*
+
+                > 方法形式 `tcp:keepalive(enable, [delay])`
+
+                参数：
+                - `tcp`：`uv_tcp_t userdata`
+                - `enable`：`boolean`
+                - `delay`：`integer` 或 `nil`
+
+                启用/禁用 TCP keep-alive。`delay` 是初始延迟（以秒为单位），
+                当 enable 为 `false` 时忽略。
+
+                返回：`0` 或 `fail`
+
+uv.tcp_simultaneous_accepts({tcp}, {enable})     *uv.tcp_simultaneous_accepts()*
+
+                > 方法形式 `tcp:simultaneous_accepts(enable)`
+
+                参数：
+                - `tcp`：`uv_tcp_t userdata`
+                - `enable`：`boolean`
+
+                启用/禁用操作系统在监听新 TCP 连接时排队的同时异步接受请求。
+
+                此设置用于调整 TCP 服务器以获得所需的性能。同时接受可以显著
+                提高接受连接的速率（这就是为什么默认启用），但可能导致多进程
+                设置中的负载分配不均。
+
+                返回：`0` 或 `fail`
+
+uv.tcp_bind({tcp}, {host}, {port} [, {flags}])                   *uv.tcp_bind()*
+
+                > 方法形式 `tcp:bind(host, port, [flags])`
+
+                参数：
+                - `tcp`：`uv_tcp_t userdata`
+                - `host`：`string`
+                - `port`：`integer`
+                - `flags`：`table` 或 `nil`
+                  - `ipv6only`：`boolean`
+
+                将句柄绑定到主机和端口。`host` 应该是 IP 地址而不是域名。任何
+                `flags` 都通过一个字段 `ipv6only` 等于 `true` 或 `false` 的
+                表来设置。
+
+                当端口已被占用时，你可以预期从 `uv.tcp_bind()`、|uv.listen()|
+                或 |uv.tcp_connect()| 看到 `EADDRINUSE` 错误。也就是说，成功
+                调用此函数并不保证调用 |uv.listen()| 或 |uv.tcp_connect()| 也
+                会成功。
+
+                使用端口 `0` 让操作系统分配一个临时端口。你可以稍后使用
+                |uv.tcp_getsockname()| 查找它。
+
+                返回：`0` 或 `fail`
+
+uv.tcp_getpeername({tcp})                                 *uv.tcp_getpeername()*
+
+                > 方法形式 `tcp:getpeername()`
+
+                参数：
+                - `tcp`：`uv_tcp_t userdata`
+
+                获取连接到句柄的对端地址。
+
+                有关支持的地址 `family` 输出值，请参见 |luv-constants|。
+
+                返回：`table` 或 `fail`
+                - `ip`：`string`
+                - `family`：`string`
+                - `port`：`integer`
+
+uv.tcp_getsockname({tcp})                                 *uv.tcp_getsockname()*
+
+                > 方法形式 `tcp:getsockname()`
+
+                参数：
+                - `tcp`：`uv_tcp_t userdata`
+
+                获取句柄当前绑定的地址。
+
+                有关支持的地址 `family` 输出值，请参见 |luv-constants|。
+
+                返回：`table` 或 `fail`
+                - `ip`：`string`
+                - `family`：`string`
+                - `port`：`integer`
+
+uv.tcp_connect({tcp}, {host}, {port}, {callback})             *uv.tcp_connect()*
+
+                > 方法形式 `tcp:connect(host, port, callback)`
+
+                参数：
+                - `tcp`：`uv_tcp_t userdata`
+                - `host`：`string`
+                - `port`：`integer`
+                - `callback`：`callable`
+                   - `err`：`nil` 或 `string`
+
+                建立 IPv4 或 IPv6 TCP 连接。
+
+                返回：`uv_connect_t userdata` 或 `fail`
+
+                    >lua
+                    local client = uv.new_tcp()
+                    client:connect("127.0.0.1", 8080, function (err)
+                      -- 检查错误并继续。
+                    end)
+<
+
+uv.tcp_write_queue_size({tcp})                       *uv.tcp_write_queue_size()*
+
+                > 方法形式 `tcp:write_queue_size()`
+
+                已弃用：请改用 |uv.stream_get_write_queue_size()|。
+
+uv.tcp_close_reset([{callback}])                          *uv.tcp_close_reset()*
+
+                > 方法形式 `tcp:close_reset([callback])`
+
+                参数：
+                - `tcp`：`uv_tcp_t userdata`
+                - `callback`：`callable` 或 `nil`
+
+                通过发送 RST 包重置 TCP 连接。这是通过设置 SO_LINGER 套接字
+                选项（延迟间隔为零）然后调用 |uv.close()| 来实现的。由于一些
+                平台的不一致性，不允许混合使用 |uv.shutdown()| 和
+                `uv.tcp_close_reset()` 调用。
+
+                返回：`0` 或 `fail`
+                                                               *uv.socketpair()*
+uv.socketpair([{socktype}, [{protocol}, [{flags1}, [{flags2}]]]])
+
+                参数：
+                - `socktype`：`string`、`integer` 或 `nil`（默认值：`stream`）
+                - `protocol`：`string`、`integer` 或 `nil`（默认值：0）
+                - `flags1`：`table` 或 `nil`
+                  - `nonblock`：`boolean`（默认值：`false`）
+                - `flags2`：`table` 或 `nil`
+                  - `nonblock`：`boolean`（默认值：`false`）
+
+                创建一对具有指定属性的连接套接字。生成的句柄可以传递给
+                |uv.tcp_open()|，用于 |uv.spawn()|，或用于任何其他目的。
+
+                有关支持的 `socktype` 输入值，请参见 |luv-constants|。
+
+                当 `protocol` 设置为 0 或 nil 时，它将根据套接字的域和类型
+                自动选择。当 `protocol` 指定为字符串时，它将使用
+                `getprotobyname(3)` 函数查找（例如：`"ip"`、`"icmp"`、
+                `"tcp"`、`"udp"` 等）。
+
+                标志：
+                 - `nonblock`：打开指定的套接字句柄以用于 `OVERLAPPED` 或
+                   `FIONBIO`/`O_NONBLOCK` I/O 使用。这推荐用于 libuv 将使用
+                   的句柄，通常不推荐用于其他情况。
+
+                等同于带有 `AF_UNIX` 域的 `socketpair(2)`。
+
+                返回：`table` 或 `fail`
+                - `[1, 2]`：`integer`（文件描述符）
+
+                    >lua
+                    -- 使用 tcp 进行简单的读/写
+                    local fds = uv.socketpair(nil, nil, {nonblock=true}, {nonblock=true})
+
+                    local sock1 = uv.new_tcp()
+                    sock1:open(fds[1])
+
+                    local sock2 = uv.new_tcp()
+                    sock2:open(fds[2])
+
+                    sock1:write("hello")
+                    sock2:read_start(function(err, chunk)
+                      assert(not err, err)
+                      print(chunk)
+                    end)
+<
+
+==============================================================================
+`uv_pipe_t` — 管道句柄                              *luv-pipe-handle* *uv_pipe_t*
+
+> |uv_handle_t| 和 |uv_stream_t| 函数也适用。
+
+管道句柄在 Unix 上提供了本地域套接字的抽象，在 Windows 上提供了命名管道的
+抽象。
+
+    >lua
+    local pipe = uv.new_pipe(false)
+
+    pipe:bind('/tmp/sock.test')
+
+    pipe:listen(128, function()
+      local client = uv.new_pipe(false)
+      pipe:accept(client)
+      client:write("hello!\n")
+      client:close()
+    end)
+<
+
+uv.new_pipe([{ipc}])                                             *uv.new_pipe()*
+
+                参数：
+                - `ipc`：`boolean` 或 `nil`（默认值：`false`）
+
+                创建并初始化一个新的 |uv_pipe_t|。返回包装它的 Lua userdata。
+                `ipc` 参数是一个布尔值，表示这个管道是否将用于进程间的句柄
+                传递。
+
+                返回：`uv_pipe_t userdata` 或 `fail`
+
+uv.pipe_open({pipe}, {fd})                                      *uv.pipe_open()*
+
+                > 方法形式 `pipe:open(fd)`
+
+                参数：
+                - `pipe`：`uv_pipe_t userdata`
+                - `fd`：`integer`
+
+                将现有的文件描述符或 |uv_handle_t| 作为管道打开。
+
+                返回：`0` 或 `fail`
+
+                注意：文件描述符被设置为非阻塞模式。
+
+uv.pipe_bind({pipe}, {name})                                    *uv.pipe_bind()*
+
+                > 方法形式 `pipe:bind(name)`
+
+                参数：
+                - `pipe`：`uv_pipe_t userdata`
+                - `name`：`string`
+
+                将管道绑定到文件路径（Unix）或名称（Windows）。
+
+                返回：`0` 或 `fail`
+
+                注意：Unix 上的路径会被截断到 sizeof(sockaddr_un.sun_path)
+                字节，通常在 92 到 108 字节之间。
+
+uv.pipe_connect({pipe}, {name} [, {callback}])               *uv.pipe_connect()*
+
+                > 方法形式 `pipe:connect(name, [callback])`
+
+                参数：
+                - `pipe`：`uv_pipe_t userdata`
+                - `name`：`string`
+                - `callback`：`callable` 或 `nil`
+                  - `err`：`nil` 或 `string`
+
+                连接到 Unix 域套接字或命名管道。
+
+                返回：`uv_connect_t userdata` 或 `fail`
+
+                注意：Unix 上的路径会被截断到 sizeof(sockaddr_un.sun_path)
+                字节，通常在 92 到 108 字节之间。
+
+uv.pipe_getsockname({pipe})                              *uv.pipe_getsockname()*
+
+                > 方法形式 `pipe:getsockname()`
+
+                参数：
+                - `pipe`：`uv_pipe_t userdata`
+
+                获取 Unix 域套接字或命名管道的名称。
+
+                返回：`string` 或 `fail`
+
+uv.pipe_getpeername({pipe})                              *uv.pipe_getpeername()*
+
+                > 方法形式 `pipe:getpeername()`
+
+                参数：
+                - `pipe`：`uv_pipe_t userdata`
+
+                获取句柄连接到的 Unix 域套接字或命名管道的名称。
+
+                返回：`string` 或 `fail`
+
+uv.pipe_pending_instances({pipe}, {count})         *uv.pipe_pending_instances()*
+
+                > 方法形式 `pipe:pending_instances(count)`
+
+                参数：
+                - `pipe`：`uv_pipe_t userdata`
+                - `count`：`integer`
+
+                设置管道服务器等待连接时的待处理管道实例句柄数。
+
+                返回：无。
+
+                注意：此设置仅适用于 Windows。
+
+uv.pipe_pending_count({pipe})                          *uv.pipe_pending_count()*
+
+                > 方法形式 `pipe:pending_count()`
+
+                参数：
+                - `pipe`：`uv_pipe_t userdata`
+
+                返回命名管道的待处理管道计数。
+
+                返回：`integer`
+
+uv.pipe_pending_type({pipe})                            *uv.pipe_pending_type()*
+
+                > 方法形式 `pipe:pending_type()`
+
+                参数：
+                - `pipe`：`uv_pipe_t userdata`
+
+                用于通过 IPC 管道接收句柄。
+
+                首先 - 调用 |uv.pipe_pending_count()|，如果它 > 0，则初始化
+                由 `uv.pipe_pending_type()` 返回的给定类型的句柄，并调用
+                `uv.accept(pipe, handle)`。
+
+                返回：`string`
+
+uv.pipe_chmod({pipe}, {flags})                                 *uv.pipe_chmod()*
+
+                > 方法形式 `pipe:chmod(flags)`
+
+                参数：
+                - `pipe`：`uv_pipe_t userdata`
+                - `flags`：`string`
+
+                更改管道权限，允许由不同用户运行的进程访问它。使管道对所有用户
+                可写或可读。`flags` 可以是：`"r"`、`"w"`、`"rw"` 或 `"wr"`，
+                其中 `r` 是 `READABLE`，`w` 是 `WRITABLE`。此函数是阻塞的。
+
+                返回：`0` 或 `fail`
+
+uv.pipe({read_flags}, {write_flags})                                 *uv.pipe()*
+
+                参数：
+                - `read_flags`：`table` 或 `nil`
+                  - `nonblock`：`boolean`（默认值：`false`）
+                - `write_flags`：`table` 或 `nil`
+                  - `nonblock`：`boolean`（默认值：`false`）
+
+                创建一对连接的管道句柄。数据可以写入 `write` fd 并从 `read` fd
+                读取。生成的句柄可以传递给 `pipe_open`，用于 `spawn`，或用于
+                任何其他目的。
+
+                标志：
+                 - `nonblock`：打开指定的套接字句柄以用于 `OVERLAPPED` 或
+                   `FIONBIO`/`O_NONBLOCK` I/O 使用。这推荐用于 libuv 将使用
+                   的句柄，通常不推荐用于其他情况。
+
+                等同于设置了 `O_CLOEXEC` 标志的 `pipe(2)`。
+
+                返回：`table` 或 `fail`
+                - `read`：`integer`（文件描述符）
+                - `write`：`integer`（文件描述符）
+
+                    >lua
+                    -- 使用 pipe_open 进行简单的读/写
+                    local fds = uv.pipe({nonblock=true}, {nonblock=true})
+
+                    local read_pipe = uv.new_pipe()
+                    read_pipe:open(fds.read)
+
+                    local write_pipe = uv.new_pipe()
+                    write_pipe:open(fds.write)
+
+                    write_pipe:write("hello")
+                    read_pipe:read_start(function(err, chunk)
+                      assert(not err, err)
+                      print(chunk)
+                    end)
+<
+
+uv.pipe_bind2({pipe}, {name}, {flags})                         *uv.pipe_bind2()*
+
+                > 方法形式 `pipe:pipe_bind(name, flags)`
+
+                参数：
+                - `pipe`：`uv_pipe_t userdata`
+                - `name`：`string`
+                - `flags`：`integer` 或 `table` 或 `nil`（默认值：0）
+
+                标志：
+                 - 如果 `type(flags)` 是 `number`，它必须是 `0` 或
+                   `uv.constants.PIPE_NO_TRUNCATE`。
+                 - 如果 `type(flags)` 是 `table`，它必须是 `{}` 或
+                   `{ no_truncate = true|false }`。
+                 - 如果 `type(flags)` 是 `nil`，它使用默认值 `0`。
+                 - 对于不支持的标志，在执行绑定之前返回 `EINVAL`。
+
+                将管道绑定到文件路径（Unix）或名称（Windows）。
+
+                支持 Linux 抽象命名空间套接字。namelen 必须包含前导 '\0' 字节
+                但不包含尾随 nul 字节。
+
+                返回：`0` 或 `fail`
+
+                *注意*：
+                1. Unix 上的路径会被截断到 sizeof(sockaddr_un.sun_path) 字节，
+                   通常在 92 到 108 字节之间。
+                2. 在版本 1.46.0 中新增。
+
+uv.pipe_connect2(pipe, name, [flags], [callback])           *uv.pipe_connect2()*
+
+                > 方法形式 `pipe:connect2(name, [flags], [callback])`
+
+                参数：
+                - `pipe`：`uv_pipe_t userdata`
+                - `name`：`string`
+                - `flags`：`integer` 或 `table` 或 `nil`（默认值：0）
+                - `callback`：`callable` 或 `nil`
+                  - `err`：`nil` 或 `string`
+
+                `标志`：
+
+                - 如果 `type(flags)` 是 `number`，它必须是 `0` 或
+                  `uv.constants.PIPE_NO_TRUNCATE`。
+                - 如果 `type(flags)` 是 `table`，它必须是 `{}` 或
+                  `{ no_truncate = true|false }`。
+                - 如果 `type(flags)` 是 `nil`，它使用默认值 `0`。
+                - 对于不支持的标志，在执行绑定操作之前返回 `EINVAL`。
+
+                连接到 Unix 域套接字或命名管道。
+
+                支持 Linux 抽象命名空间套接字。namelen 必须包含前导 nul 字节
+                但不包含尾随 nul 字节。
+
+                返回：`uv_connect_t userdata` 或 `fail`
+
+                *注意*：
+                1. Unix 上的路径会被截断到 sizeof(sockaddr_un.sun_path) 字节，
+                   通常在 92 到 108 字节之间。
+                2. 在版本 1.46.0 中新增。
+
+==============================================================================
+`uv_tty_t` — TTY 句柄                                  *luv-tty-handle* *uv_tty_t*
+
+> |uv_handle_t| 和 |uv_stream_t| 函数也适用。
+
+TTY 句柄表示控制台的流。
+    >lua
+    -- 简单的回显程序
+    local stdin = uv.new_tty(0, true)
+    local stdout = uv.new_tty(1, false)
+
+    stdin:read_start(function (err, data)
+      assert(not err, err)
+      if data then
+        stdout:write(data)
+      else
+        stdin:close()
+        stdout:close()
+      end
+    end)
+<
+
+uv.new_tty({fd}, {readable})                                      *uv.new_tty()*
+
+                参数：
+                - `fd`：`integer`
+                - `readable`：`boolean`
+
+                使用给定的文件描述符初始化新的 TTY 流。通常文件描述符将是：
+
+                 - 0 - stdin
+                 - 1 - stdout
+                 - 2 - stderr
+
+                在 Unix 上，此函数将使用 ttyname_r(3) 确定终端的 fd 路径，
+                打开它，如果传递的文件描述符指向 TTY，则使用它。这让 libuv
+                可以将 tty 设置为非阻塞模式，而不影响共享 tty 的其他进程。
+
+                在不支持 ioctl TIOCGPTN 或 TIOCPTYGNAME 的系统上（例如
+                OpenBSD 和 Solaris），此函数不是线程安全的。
+
+                返回：`uv_tty_t userdata` 或 `fail`
+
+                注意：如果重新打开 TTY 失败，libuv 会回退到阻塞写入。
+
+uv.tty_set_mode({tty}, {mode})                               *uv.tty_set_mode()*
+
+                > 方法形式 `tty:set_mode(mode)`
+
+                参数：
+                - `tty`：`uv_tty_t userdata`
+                - `mode`：`string` 或 `integer`
+
+                使用指定的终端模式设置 TTY。
+
+                有关支持的 TTY 模式输入值，请参见 |luv-constants|。
+
+                返回：`0` 或 `fail`
+
+uv.tty_reset_mode()                                        *uv.tty_reset_mode()*
+
+                在程序退出时调用。将 TTY 设置重置为默认值，以供下一个进程接管。
+
+                此函数在 Unix 平台上是异步信号安全的，但如果你在 |uv.tty_set_mode()|
+                内部调用它，可能会失败并返回错误代码 `EBUSY`。
+
+                返回：`0` 或 `fail`
+
+uv.tty_get_winsize({tty})                                 *uv.tty_get_winsize()*
+
+                > 方法形式 `tty:get_winsize()`
+
+                参数：
+                - `tty`：`uv_tty_t userdata`
+
+                获取当前窗口的宽度和高度。
+
+                返回：`integer, integer` 或 `fail`
+
+uv.tty_set_vterm_state({state})                       *uv.tty_set_vterm_state()*
+
+                参数：
+                - `state`：`string`
+
+                控制控制台虚拟终端序列是由 libuv 还是控制台处理。特别适用于
+                启用 ConEmu 对 ANSI X3.64 和 Xterm 256 色的支持。否则通常会
+                自动检测 Windows10 控制台。状态应该是以下之一：`"supported"`
+                或 `"unsupported"`。
+
+                此函数仅在 Windows 系统上有意义。在 Unix 上它会被静默忽略。
+
+                返回：无
+
+uv.tty_get_vterm_state()                              *uv.tty_get_vterm_state()*
+
+                获取控制台虚拟终端序列是由 libuv 还是控制台处理的当前状态。
+                返回值是 `"supported"` 或 `"unsupported"`。
+
+                此函数在 Unix 上未实现，在那里它返回 `ENOTSUP`。
+
+                返回：`string` 或 `fail`
+
+==============================================================================
+`uv_udp_t` — UDP 句柄                                  *luv-udp-handle* *uv_udp_t*
+
+> |uv_handle_t| 函数也适用。
+
+UDP 句柄封装了客户端和服务器的 UDP 通信。
+
+uv.new_udp([{flags}])                                             *uv.new_udp()*
+
+                参数：
+                - `flags`：`table` 或 `nil`
+                  - `family`：`string` 或 `nil`
+                  - `mmsgs`：`integer` 或 `nil`（默认值：`1`）
+
+                创建并初始化一个新的 |uv_udp_t|。返回包装它的 Lua userdata。
+                实际的套接字是延迟创建的。
+
+                有关支持的地址 `family` 输入值，请参见 |luv-constants|。
+
+                当指定时，`mmsgs` 决定通过 `recvmmsg(2)` 一次能接收的消息数
+                （分配的缓冲区将被调整大小以适应指定数量的最大大小数据报）。
+                仅在支持 `recvmmsg(2)` 的平台上有效。
+
+                注意：出于向后兼容的原因，`flags` 也可以是字符串或整数。当它
+                是字符串时，它将被视为上面的 `family` 键。当它是整数时，它将
+                在调用 `uv_udp_init_ex` 时直接用作 `flags` 参数。
+
+                返回：`uv_udp_t userdata` 或 `fail`
+
+uv.udp_get_send_queue_size()                      *uv.udp_get_send_queue_size()*
+
+                > 方法形式 `udp:get_send_queue_size()`
+
+                返回句柄的发送队列大小。
+
+                返回：`integer`
+
+uv.udp_get_send_queue_count()                    *uv.udp_get_send_queue_count()*
+
+                > 方法形式 `udp:get_send_queue_count()`
+
+                返回句柄的发送队列计数。
+
+                返回：`integer`
+
+uv.udp_open({udp}, {fd})                                         *uv.udp_open()*
+
+                > 方法形式 `udp:open(fd)`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+                - `fd`：`integer`
+
+                将现有的文件描述符或 Windows SOCKET 作为 UDP 句柄打开。
+
+                仅限 Unix：sock 参数的唯一要求是它遵循数据报契约（在未连接
+                模式下工作，支持 sendmsg()/recvmsg() 等）。换句话说，其他
+                数据报类型的套接字，如原始套接字或 netlink 套接字，也可以
+                传递给此函数。
+
+                文件描述符被设置为非阻塞模式。
+
+                注意：不会检查传递的文件描述符或 SOCKET 的类型，但要求它表示
+                有效的数据报套接字。
+
+                返回：`0` 或 `fail`
+
+uv.udp_bind({udp}, {host}, {port} [, {flags}])                   *uv.udp_bind()*
+
+                > 方法形式 `udp:bind(host, port, [flags])`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+                - `host`：`string`
+                - `port`：`number`
+                - `flags`：`table` 或 `nil`
+                  - `ipv6only`：`boolean`
+                  - `reuseaddr`：`boolean`
+
+                将 UDP 句柄绑定到 IP 地址和端口。任何 `flags` 都通过一个
+                字段 `reuseaddr` 或 `ipv6only` 等于 `true` 或 `false` 的
+                表来设置。
+
+                返回：`0` 或 `fail`
+uv.udp_getsockname({udp})                                 *uv.udp_getsockname()*
+
+                > 方法形式 `udp:getsockname()`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+
+                获取 UDP 句柄的本地 IP 和端口。
+
+                返回：`table` 或 `fail`
+                - `ip`：`string`
+                - `family`：`string`
+                - `port`：`integer`
+
+uv.udp_getpeername({udp})                                 *uv.udp_getpeername()*
+
+                > 方法形式 `udp:getpeername()`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+
+                在已连接的 UDP 句柄上获取远程 IP 和端口。
+
+                返回：`table` 或 `fail`
+                - `ip`：`string`
+                - `family`：`string`
+                - `port`：`integer`
+
+                                                       *uv.udp_set_membership()*
+uv.udp_set_membership({udp}, {multicast_addr}, {interface_addr}, {membership})
+
+                > 方法形式
+                > `udp:set_membership(multicast_addr, interface_addr, membership)`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+                - `multicast_addr`：`string`
+                - `interface_addr`：`string` 或 `nil`
+                - `membership`：`string`
+
+                为多播地址设置成员资格。`multicast_addr` 是要设置成员资格的
+                多播地址。`interface_addr` 是接口地址。`membership` 可以是
+                字符串 `"leave"` 或 `"join"`。
+
+                返回：`0` 或 `fail`
+
+                                                *uv.udp_set_source_membership()*
+uv.udp_set_source_membership({udp}, {multicast_addr}, {interface_addr}, {source_addr}, {membership})
+
+                > 方法形式
+                > `udp:set_source_membership(multicast_addr, interface_addr, source_addr, membership)`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+                - `multicast_addr`：`string`
+                - `interface_addr`：`string` 或 `nil`
+                - `source_addr`：`string`
+                - `membership`：`string`
+
+                为源特定多播组设置成员资格。`multicast_addr` 是要设置成员资格
+                的多播地址。`interface_addr` 是接口地址。`source_addr` 是源
+                地址。`membership` 可以是字符串 `"leave"` 或 `"join"`。
+
+                返回：`0` 或 `fail`
+
+uv.udp_set_multicast_loop({udp}, {on})             *uv.udp_set_multicast_loop()*
+
+                > 方法形式 `udp:set_multicast_loop(on)`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+                - `on`：`boolean`
+
+                设置 IP 多播循环标志。使多播数据包回环到本地套接字。
+
+                返回：`0` 或 `fail`
+
+uv.udp_set_multicast_ttl({udp}, {ttl})              *uv.udp_set_multicast_ttl()*
+
+                > 方法形式 `udp:set_multicast_ttl(ttl)`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+                - `ttl`：`integer`
+
+                设置多播 ttl。
+
+                `ttl` 是 1 到 255 之间的整数。
+
+                返回：`0` 或 `fail`
+
+                                              *uv.udp_set_multicast_interface()*
+uv.udp_set_multicast_interface({udp}, {interface_addr})
+
+                > 方法形式 `udp:set_multicast_interface(interface_addr)`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+                - `interface_addr`：`string`
+
+                设置用于发送或接收数据的多播接口。
+
+                返回：`0` 或 `fail`
+
+uv.udp_set_broadcast({udp}, {on})                       *uv.udp_set_broadcast()*
+
+                > 方法形式 `udp:set_broadcast(on)`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+                - `on`：`boolean`
+
+                打开或关闭广播。
+
+                返回：`0` 或 `fail`
+
+uv.udp_set_ttl({udp}, {ttl})                                  *uv.udp_set_ttl()*
+
+                > 方法形式 `udp:set_ttl(ttl)`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+                - `ttl`：`integer`
+
+                设置生存时间。
+
+                `ttl` 是 1 到 255 之间的整数。
+
+                返回：`0` 或 `fail`
+
+uv.udp_send({udp}, {data}, {host}, {port}, {callback})           *uv.udp_send()*
+
+                > 方法形式 `udp:send(data, host, port, callback)`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+                - `data`：`buffer`
+                - `host`：`string`
+                - `port`：`integer`
+                - `callback`：`callable`
+                  - `err`：`nil` 或 `string`
+
+                通过 UDP 套接字发送数据。如果套接字之前没有通过 |uv.udp_bind()|
+                绑定，它将被绑定到 `0.0.0.0`（"所有接口" IPv4 地址）和一个
+                随机端口号。
+
+                返回：`uv_udp_send_t userdata` 或 `fail`
+
+uv.udp_try_send({udp}, {data}, {host}, {port})               *uv.udp_try_send()*
+
+                > 方法形式 `udp:try_send(data, host, port)`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+                - `data`：`buffer`
+                - `host`：`string`
+                - `port`：`integer`
+
+                与 |uv.udp_send()| 相同，但如果不能立即完成，则不会排队发送
+                请求。
+
+                返回：`integer` 或 `fail`
+
+uv.udp_try_send2({udp}, {messages}, {flags})                *uv.udp_try_send2()*
+
+                > 方法形式 `udp:try_send2(messages, flags)`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+                - `messages`：`table`
+                  - `[1, 2, 3, ..., n]`：`table`
+                    - `data`：`buffer`
+                    - `addr`：`table`
+                      - `ip`：`string`
+                      - `port`：`integer`
+                - `flags`：`nil`（见下文）
+                - `port`：`integer`
+
+                类似于 `uv.udp_try_send()`，但可以发送多个数据报。是 `sendmmsg(2)`
+                的轻量级抽象，对于不支持前者的平台，使用 `sendmsg(2)` 回退循环。
+                `udp` 句柄必须完全初始化，可以是通过 `uv.udp_bind` 调用，或者
+                通过其他会自动绑定的调用（`udp_send`、`udp_try_send` 等），或者
+                通过 `uv.udp_connect`。`messages` 应该是一个类数组表，如果 `udp`
+                没有通过 `udp_connect` 连接，则必须指定 `addr`。否则，`addr`
+                必须为 `nil`。
+
+                `flags` 保留用于将来的扩展，目前必须是 `nil` 或 `0` 或 `{}`。
+
+                返回成功发送的消息数。只有在第一个数据报发送失败时才会返回错误。
+
+                返回：`integer` 或 `fail`
+                >lua
+                  -- 如果没有调用 client:connect(...)
+                  local addr = { ip = "127.0.0.1", port = 1234 }
+                  client:try_send2({
+                    { data = "Message 1", addr = addr },
+                    { data = "Message 2", addr = addr },
+                  })
+                  -- 如果已经调用了 client:connect(...)
+                  client:try_send2({
+                    { data = "Message 1" },
+                    { data = "Message 2" },
+                  })
+<
+uv.udp_recv_start({udp}, {callback})                       *uv.udp_recv_start()*
+
+                > 方法形式 `udp:recv_start(callback)`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+                - `callback`：`callable`
+                  - `err`：`nil` 或 `string`
+                  - `data`：`string` 或 `nil`
+                  - `addr`：`table` 或 `nil`
+                    - `ip`：`string`
+                    - `port`：`integer`
+                    - `family`：`string`
+                  - `flags`：`table`
+                    - `partial`：`boolean` 或 `nil`
+                    - `mmsg_chunk`：`boolean` 或 `nil`
+
+                准备接收数据。如果套接字之前没有通过 |uv.udp_bind()| 绑定，
+                它将被绑定到 `0.0.0.0`（"所有接口" IPv4 地址）和一个随机
+                端口号。
+
+                查看 |luv-constants| 获取支持的地址 `family` 输出值。
+
+                返回：`0` 或 `fail`
+
+uv.udp_recv_stop({udp})                                     *uv.udp_recv_stop()*
+
+                > 方法形式 `udp:recv_stop()`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+
+                停止监听传入的数据报。
+
+                返回：`0` 或 `fail`
+
+uv.udp_connect({udp}, {host}, {port})                         *uv.udp_connect()*
+
+                > 方法形式 `udp:connect(host, port)`
+
+                参数：
+                - `udp`：`uv_udp_t userdata`
+                - `host`：`string`
+                - `port`：`integer`
+
+                将 UDP 句柄关联到远程地址和端口，这样此句柄发送的每个消息都会
+                自动发送到该目标。使用 NULL addr 调用此函数将断开句柄连接。
+                尝试在已连接的句柄上调用 `uv.udp_connect()` 将导致 `EISCONN`
+                错误。尝试断开未连接的句柄将返回 `ENOTCONN` 错误。
+
+                返回：`0` 或 `fail`
+
+==============================================================================
+`uv_fs_event_t` — 文件系统事件句柄              *luv-fs-event-handle* *uv_fs_event_t*
+
+> |uv_handle_t| 函数也适用。
+
+FS Event 句柄允许用户监视给定路径的变化，例如，如果文件被重命名或发生了
+通用更改。此句柄在每个平台上使用最适合该任务的后端。
+
+uv.new_fs_event()                                            *uv.new_fs_event()*
+
+                创建并初始化一个新的 |uv_fs_event_t|。返回包装它的 Lua
+                userdata。
+
+                返回：`uv_fs_event_t userdata` 或 `fail`
+
+uv.fs_event_start({fs_event}, {path}, {flags}, {callback}) *uv.fs_event_start()*
+
+                > 方法形式 `fs_event:start(path, flags, callback)`
+
+                参数：
+                - `fs_event`：`uv_fs_event_t userdata`
+                - `path`：`string`
+                - `flags`：`table`
+                  - `watch_entry`：`boolean` 或 `nil`（默认：`false`）
+                  - `stat`：`boolean` 或 `nil`（默认：`false`）
+                  - `recursive`：`boolean` 或 `nil`（默认：`false`）
+                - `callback`：`callable`
+                  - `err`：`nil` 或 `string`
+                  - `filename`：`string`
+                  - `events`：`table`
+                    - `change`：`boolean` 或 `nil`
+                    - `rename`：`boolean` 或 `nil`
+
+                使用给定的回调启动句柄，该回调将监视指定路径的变化。
+
+                返回：`0` 或 `fail`
+
+uv.fs_event_stop()                                          *uv.fs_event_stop()*
+
+                > 方法形式 `fs_event:stop()`
+
+                停止句柄，回调将不再被调用。
+
+                返回：`0` 或 `fail`
+
+uv.fs_event_getpath()                                    *uv.fs_event_getpath()*
+
+                > 方法形式 `fs_event:getpath()`
+
+                获取句柄正在监视的路径。
+
+                返回：`string` 或 `fail`
+
+==============================================================================
+`uv_fs_poll_t` — FS Poll 句柄                  *luv-fs-poll-handle* *uv_fs_poll_t*
+
+> |uv_handle_t| 函数也适用。
+
+FS Poll 句柄允许用户监视给定路径的变化。与 |uv_fs_event_t| 不同，fs poll 句柄使用 `stat` 来检测文件何时发生变化，所以它们可以在 fs event 句柄无法工作的文件系统上工作。
+
+uv.new_fs_poll()                                              *uv.new_fs_poll()*
+
+                创建并初始化一个新的 |uv_fs_poll_t|。返回包装它的 Lua userdata。
+
+                返回：`uv_fs_poll_t userdata` 或 `fail`
+
+uv.fs_poll_start({fs_poll}, {path}, {interval}, {callback}) *uv.fs_poll_start()*
+
+                > 方法形式 `fs_poll:start(path, interval, callback)`
+
+                参数：
+                - `fs_poll`：`uv_fs_poll_t userdata`
+                - `path`：`string`
+                - `interval`：`integer`
+                - `callback`：`callable`
+                  - `err`：`nil` 或 `string`
+                  - `prev`：`table` 或 `nil`（见 `uv.fs_stat`）
+                  - `curr`：`table` 或 `nil`（见 `uv.fs_stat`）
+
+                每隔 `interval` 毫秒检查一次 `path` 路径的文件变化。
+
+                注意：为了最大程度的可移植性，请使用多秒的间隔。在许多文件系统上，
+                亚秒级的间隔将无法检测到所有变化。
+
+                返回：`0` 或 `fail`
+
+uv.fs_poll_stop()                                            *uv.fs_poll_stop()*
+
+                > 方法形式 `fs_poll:stop()`
+
+                停止句柄，回调将不再被调用。
+
+                返回：`0` 或 `fail`
+
+uv.fs_poll_getpath()                                      *uv.fs_poll_getpath()*
+
+                > 方法形式 `fs_poll:getpath()`
+
+                获取句柄正在监视的路径。
+
+                返回：`string` 或 `fail`
+
+==============================================================================
+文件系统操作                      *luv-file-system-operations* *uv_fs_t*
+
+大多数文件系统函数可以同步或异步操作。当调用同步版本时（通过省略回调），
+函数将立即返回 FS 调用的结果。当调用异步版本时（通过提供回调），函数将
+立即返回一个 `uv_fs_t userdata` 并异步执行其回调；如果遇到错误，传递给
+回调的第一个也是唯一的参数将是 `err` 错误字符串；如果操作成功完成，第一个
+参数将是 `nil`，其余参数将是 FS 调用的结果。
+
+下面是 `readFile` 的同步和异步版本的实现示例（使用简单的错误处理）：
+
+    >lua
+    local function readFileSync(path)
+      local fd = assert(uv.fs_open(path, "r", 438))
+      local stat = assert(uv.fs_fstat(fd))
+      local data = assert(uv.fs_read(fd, stat.size, 0))
+      assert(uv.fs_close(fd))
+      return data
+    end
+
+    local data = readFileSync("main.lua")
+    print("synchronous read", data)
+<
+
+    >lua
+    local function readFile(path, callback)
+      uv.fs_open(path, "r", 438, function(err, fd)
+        assert(not err, err)
+        uv.fs_fstat(fd, function(err, stat)
+          assert(not err, err)
+          uv.fs_read(fd, stat.size, 0, function(err, data)
+            assert(not err, err)
+            uv.fs_close(fd, function(err)
+              assert(not err, err)
+              return callback(data)
+            end)
+          end)
+        end)
+      end)
+    end
+
+    readFile("main.lua", function(data)
+      print("asynchronous read", data)
+    end)
+<
+
+uv.fs_close({fd} [, {callback}])                                 *uv.fs_close()*
+
+                参数：
+                - `fd`：`integer`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `success`：`boolean` 或 `nil`
+
+                等同于 `close(2)`。
+
+                返回（同步版本）：`boolean` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_open({path}, {flags}, {mode} [, {callback}])                *uv.fs_open()*
+
+                参数：
+                - `path`：`string`
+                - `flags`：`string` 或 `integer`
+                - `mode`：`integer`（八进制 `chmod(1)` 模式，例如 
+                  `tonumber('644', 8)`）
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `fd`：`integer` 或 `nil`
+
+                等同于 `open(2)`。访问 `flags` 可以是整数或以下字符串之一：
+                `"r"`、`"rs"`、`"sr"`、`"r+"`、`"rs+"`、`"sr+"`、
+                `"w"`、`"wx"`、`"xw"`、`"w+"`、`"wx+"`、`"xw+"`、`"a"`、
+                `"ax"`、`"xa"`、`"a+"`、`"ax+"`、或 `"xa+"`。
+
+                返回（同步版本）：`integer` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+                注意：在 Windows 上，libuv 使用 `CreateFileW`，因此文件总是
+                以二进制模式打开。因此，不支持 `O_BINARY` 和 `O_TEXT` 标志。
+
+uv.fs_read({fd}, {size} [, {offset} [, {callback}]])              *uv.fs_read()*
+
+                参数：
+                - `fd`：`integer`
+                - `size`：`integer`
+                - `offset`：`integer` 或 `nil`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `data`：`string` 或 `nil`
+
+                等同于 `preadv(2)`。返回任何数据。空字符串表示文件结束（EOF）。
+
+                如果 `offset` 为 nil 或省略，将默认为 `-1`，表示"使用并更新
+                当前文件偏移量"。
+
+                注意：当 `offset` >= 0 时，当前文件偏移量不会被读取操作更新。
+
+                返回（同步版本）：`string` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_unlink({path} [, {callback}])                             *uv.fs_unlink()*
+
+                参数：
+                - `path`：`string`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `success`：`boolean` 或 `nil`
+
+                等同于 `unlink(2)`。
+
+                返回（同步版本）：`boolean` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_write({fd}, {data} [, {offset} [, {callback}]])            *uv.fs_write()*
+
+                参数：
+                - `fd`：`integer`
+                - `data`：`buffer`
+                - `offset`：`integer` 或 `nil`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `bytes`：`integer` 或 `nil`
+
+                等同于 `pwritev(2)`。返回写入的字节数。
+
+                如果 `offset` 为 nil 或省略，将默认为 `-1`，表示"使用并更新
+                当前文件偏移量"。
+
+                注意：当 `offset` >= 0 时，当前文件偏移量不会被写入操作更新。
+
+                返回（同步版本）：`integer` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_mkdir({path}, {mode} [, {callback}])                       *uv.fs_mkdir()*
+
+                参数：
+                - `path`：`string`
+                - `mode`：`integer`（八进制表示的 `chmod(1)` 模式，
+                  例如 `tonumber('755', 8)`）
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `success`：`boolean` 或 `nil`
+
+                等同于 `mkdir(2)`。
+
+                返回（同步版本）：`boolean` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_mkdtemp({template} [, {callback}])                       *uv.fs_mkdtemp()*
+
+                参数：
+                - `template`：`string`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `path`：`string` 或 `nil`
+
+                等同于 `mkdtemp(3)`。
+
+                返回（同步版本）：`string` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_mkstemp({template} [, {callback}])                       *uv.fs_mkstemp()*
+
+                参数：
+                - `template`：`string`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `fd`：`integer` 或 `nil`
+                  - `path`：`string` 或 `nil`
+
+                等同于 `mkstemp(3)`。返回临时文件句
+
+uv.fs_fchmod({fd}, {mode} [, {callback}])                       *uv.fs_fchmod()*
+
+                Parameters:
+                - `fd`: `integer`
+                - `mode`: `integer`
+                - `callback`: `callable` (async version) or `nil` (sync
+                  version)
+                  - `err`：`nil` 或 `string`
+                  - `success`：`boolean` 或 `nil`
+
+                等同于 `fchmod(2)`。
+
+                返回（同步版本）：`boolean` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_utime({path}, {atime}, {mtime} [, {callback}])             *uv.fs_utime()*
+
+                参数：
+                - `path`：`string`
+                - `atime`：`number`
+                - `mtime`：`number`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `success`：`boolean` 或 `nil`
+
+                等同于 `utime(2)`。
+
+                返回（同步版本）：`boolean` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_futime({fd}, {atime}, {mtime} [, {callback}])             *uv.fs_futime()*
+
+                参数：
+                - `fd`：`integer`
+                - `atime`：`number`
+                - `mtime`：`number`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `success`：`boolean` 或 `nil`
+
+                等同于 `futime(2)`。
+
+                返回（同步版本）：`boolean` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_lutime({path}, {atime}, {mtime} [, {callback}])           *uv.fs_lutime()*
+
+                参数：
+                - `path`：`string`
+                - `atime`：`number`
+                - `mtime`：`number`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `success`：`boolean` 或 `nil`
+
+                等同于 `lutime(2)`。
+
+                返回（同步版本）：`boolean` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_link({path}, {new_path} [, {callback}])                     *uv.fs_link()*
+
+                参数：
+                - `path`：`string`
+                - `new_path`：`string`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `success`：`boolean` 或 `nil`
+
+                等同于 `link(2)`。
+
+                返回（同步版本）：`boolean` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_symlink({path}, {new_path} [, {flags} [, {callback}]])   *uv.fs_symlink()*
+
+                参数：
+                - `path`：`string`
+                - `new_path`：`string`
+                - `flags`：`table`、`integer` 或 `nil`
+                  - `dir`：`boolean`
+                  - `junction`：`boolean`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `success`：`boolean` 或 `nil`
+
+                等同于 `symlink(2)`。如果省略 `flags` 参数，则第三个参数将被
+                视为 `callback`。
+
+                返回（同步版本）：`boolean` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_readlink({path} [, {callback}])                         *uv.fs_readlink()*
+
+                参数：
+                - `path`：`string`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `path`：`string` 或 `nil`
+
+                等同于 `readlink(2)`。
+
+                返回（同步版本）：`string` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_realpath({path} [, {callback}])                         *uv.fs_realpath()*
+
+                参数：
+                - `path`：`string`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `path`：`string` 或 `nil`
+
+                等同于 `realpath(3)`。
+
+                返回（同步版本）：`string` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_chown({path}, {uid}, {gid} [, {callback}])                 *uv.fs_chown()*
+
+                参数：
+                - `path`：`string`
+                - `uid`：`integer`
+                - `gid`：`integer`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `success`：`boolean` 或 `nil`
+
+                等同于 `chown(2)`。
+
+                返回（同步版本）：`boolean` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_fchown({fd}, {uid}, {gid} [, {callback}])                 *uv.fs_fchown()*
+
+                参数：
+                - `fd`：`integer`
+                - `uid`：`integer`
+                - `gid`：`integer`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `success`：`boolean` 或 `nil`
+
+                等同于 `fchown(2)`。
+
+                返回（同步版本）：`boolean` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_lchown({fd}, {uid}, {gid} [, {callback}])                 *uv.fs_lchown()*
+
+                参数：
+                - `fd`：`integer`
+                - `uid`：`integer`
+                - `gid`：`integer`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `success`：`boolean` 或 `nil`
+
+                等同于 `lchown(2)`。
+
+                返回（同步版本）：`boolean` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_copyfile({path}, {new_path} [, {flags} [, {callback}]]) *uv.fs_copyfile()*
+
+                参数：
+                - `path`：`string`
+                - `new_path`：`string`
+                - `flags`：`table`、`integer` 或 `nil`
+                  - `excl`：`boolean`
+                  - `ficlone`：`boolean`
+                  - `ficlone_force`：`boolean`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `success`：`boolean` 或 `nil`
+
+                将文件从 path 复制到 new_path。如果省略 `flags` 参数，则第三个
+                参数将被视为 `callback`。
+
+                返回（同步版本）：`boolean` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_opendir({path} [, {callback} [, {entries}]])             *uv.fs_opendir()*
+
+                参数：
+                - `path`：`string`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `dir`：`luv_dir_t userdata` 或 `nil`
+                - `entries`：`integer` 或 `nil`
+
+                将路径作为目录流打开。返回一个句柄，用户可以将其传递给
+                |uv.fs_readdir()|。`entries` 参数定义了每次调用 |uv.fs_readdir()|
+                时应返回的最大条目数。
+
+                返回（同步版本）：`luv_dir_t userdata` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_readdir({dir} [, {callback}])                            *uv.fs_readdir()*
+
+                > 方法形式 `dir:readdir([callback])`
+
+                参数：
+                - `dir`：`luv_dir_t userdata`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `entries`：`table` 或 `nil`（见下文）
+
+                遍历由成功的 |uv.fs_opendir()| 调用返回的目录流 `luv_dir_t`。
+                返回一个数据表的表，其中条目数 `n` 小于或等于相关联的
+                |uv.fs_opendir()| 调用中使用的 `entries` 参数。
+
+                返回（同步版本）：`table` 或 `fail`
+                - `[1, 2, 3, ..., n]`：`table`
+                  - `name`：`string`
+                  - `type`：`string`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_closedir({dir} [, {callback}])                          *uv.fs_closedir()*
+
+                > 方法形式 `dir:closedir([callback])`
+
+                参数：
+                - `dir`：`luv_dir_t userdata`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `success`：`boolean` 或 `nil`
+
+                关闭由成功的 |uv.fs_opendir()| 调用返回的目录流。
+
+                返回（同步版本）：`boolean` 或 `fail`
+
+                返回（异步版本）：`uv_fs_t userdata`
+
+uv.fs_statfs({path} [, {callback}])                             *uv.fs_statfs()*
+
+                参数：
+                - `path`：`string`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `table` 或 `nil`（见下文）
+
+                等同于 `statfs(2)`。
+
+                返回 `table` 或 `nil`
+                - `type`：`integer`
+                - `bsize`：`integer`
+                - `blocks`：`integer`
+                - `bfree`：`integer`
+                - `bavail`：`integer`
+                - `files`：`integer`
+                - `ffree`：`integer`
+
+==============================================================================
+线程池工作调度                    *luv-thread-pool-work-scheduling*
+
+Libuv 提供了一个线程池，可用于运行用户代码并在循环线程中获得通知。这个线程池
+在内部用于运行所有文件系统操作，以及 `getaddrinfo` 和 `getnameinfo` 请求。
+
+    >lua
+    local function work_callback(a, b)
+      return a + b
+    end
+
+    local function after_work_callback(c)
+      print("结果是：" .. c)
+    end
+
+    local work = uv.new_work(work_callback, after_work_callback)
+
+    work:queue(1, 2)
+
+    -- 输出："结果是：3"
+<
+
+uv.new_work({work_callback}, {after_work_callback})              *uv.new_work()*
+
+                参数：
+                - `work_callback`：`function` 或 `string`
+                  - `...`：从 `uv.queue_work(work_ctx, ...)` 传递的 `threadargs`
+                - `after_work_callback`：`function`
+                  - `...`：从 `work_callback` 返回的 `threadargs`
+
+                创建并初始化一个新的 `luv_work_ctx_t`（不是 `uv_work_t`）。
+                `work_callback` 是一个 Lua 函数或包含 Lua 代码或从函数转储的
+                字节码的字符串。返回包装它的 Lua userdata。
+
+                返回：`luv_work_ctx_t userdata`
+
+uv.queue_work({work_ctx}, {...})                               *uv.queue_work()*
+
+                > 方法形式 `work_ctx:queue(...)`
+
+                参数：
+                - `work_ctx`：`luv_work_ctx_t userdata`
+                - `...`：`threadargs`
+
+                排队一个工作请求，该请求将在线程池中的新线程中的新 Lua 状态下
+                运行 `work_callback`，并带有来自 `...` 的任何附加参数。从
+                `work_callback` 返回的值将传递给 `after_work_callback`，后者
+                在主循环线程中调用。
+
+                返回：`boolean` 或 `fail`
+
+==============================================================================
+DNS 实用函数                                *luv-dns-utility-functions*
+
+uv.getaddrinfo({host}, {service} [, {hints} [, {callback}]])  *uv.getaddrinfo()*
+
+                参数：
+                - `host`：`string` 或 `nil`
+                - `service`：`string` 或 `nil`
+                - `hints`：`table` 或 `nil`
+                  - `family`：`string` 或 `integer` 或 `nil`
+                  - `socktype`：`string` 或 `integer` 或 `nil`
+                  - `protocol`：`string` 或 `integer` 或 `nil`
+                  - `addrconfig`：`boolean` 或 `nil`
+                  - `v4mapped`：`boolean` 或 `nil`
+                  - `all`：`boolean` 或 `nil`
+                  - `numerichost`：`boolean` 或 `nil`
+                  - `passive`：`boolean` 或 `nil`
+                  - `numericserv`：`boolean` 或 `nil`
+                  - `canonname`：`boolean` 或 `nil`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `addresses`：`table` 或 `nil`（见下文）
+
+                等同于 `getaddrinfo(3)`。`node` 或 `service` 可以是 `nil`，
+                但不能同时为 `nil`。
+
+                查看 |luv-constants| 获取支持的地址 `family` 输入和输出值。
+
+                查看 |luv-constants| 获取支持的 `socktype` 输入和输出值。
+
+                当 `protocol` 设置为 `0` 或 `nil` 时，它将根据套接字的域和类型
+                自动选择。当 `protocol` 指定为字符串时，它将使用 `getprotobyname(3)`
+                函数查找。例如：`"ip"`、`"icmp"`、`"tcp"`、`"udp"` 等。
+
+                返回（同步版本）：`table` 或 `fail`
+                - `[1, 2, 3, ..., n]`：`table`
+                  - `addr`：`string`
+                  - `family`：`string`
+                  - `port`：`integer` 或 `nil`
+                  - `socktype`：`string`
+                  - `protocol`：`string`
+                  - `canonname`：`string` 或 `nil`
+
+                返回（异步版本）：`uv_getaddrinfo_t userdata` 或 `fail`
+
+uv.getnameinfo({address} [, {callback}])                      *uv.getnameinfo()*
+
+                参数：
+                - `address`：`table`
+                  - `ip`：`string` 或 `nil`
+                  - `port`：`integer` 或 `nil`
+                  - `family`：`string` 或 `integer` 或 `nil`
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `host`：`string` 或 `nil`
+                  - `service`：`string` 或 `nil`
+
+                等同于 `getnameinfo(3)`。
+
+                查看 |luv-constants| 获取支持的地址 `family` 输入值。
+
+                返回（同步版本）：`string, string` 或 `fail`
+
+                返回（异步版本）：`uv_getnameinfo_t userdata` 或 `fail`
+
+==============================================================================
+线程和同步实用工具 *luv-threading-and-synchronization-utilities*
+
+Libuv 提供了多个线程和同步原语的跨平台实现。API 主要遵循 pthreads API。
+
+uv.new_thread([{options}, ] {entry}, {...})                    *uv.new_thread()*
+
+                参数：
+                - `options`：`table` 或 `nil`
+                  - `stack_size`：`integer` 或 `nil`
+                - `entry`：`function` 或 `string`
+                - `...`：传递给 `entry` 的 `threadargs`
+
+                创建并初始化一个 `luv_thread_t`（不是 `uv_thread_t`）。
+                返回包装它的 Lua userdata 并异步执行 `entry`，`entry` 可以是
+                Lua 函数或包含 Lua 代码或从函数转储的字节码的字符串。
+                附加参数 `...` 传递给 `entry` 函数，并且可以提供可选的
+                `options` 表。目前接受的 `option` 字段是 `stack_size`。
+
+                返回：`luv_thread_t userdata` 或 `fail`
+
+                注意：不安全，请确保线程的生命周期在 Lua 状态关闭之前结束。
+
+uv.thread_equal({thread}, {other_thread})                    *uv.thread_equal()*
+
+                > 方法形式 `thread:equal(other_thread)`
+
+                参数：
+                - `thread`：`luv_thread_t userdata`
+                - `other_thread`：`luv_thread_t userdata`
+
+                返回一个布尔值，指示两个线程是否相同。此函数等同于 `__eq`
+                元方法。
+
+                返回：`boolean`
+                                                     *uv.thread_setaffinity()*
+uv.thread_setaffinity({thread}, {affinity} [, {get_old_affinity}])
+
+                > 方法形式 `thread:setaffinity(affinity, [get_old_affinity])`
+
+                参数：
+                - `thread`：`luv_thread_t userdata`
+                - `affinity`：`table`
+                  - `[1, 2, 3, ..., n]`：`boolean`
+                - `get_old_affinity`：`boolean`
+
+                设置指定线程的亲和性设置。
+
+                `affinity` 必须是一个表，其中每个键是 CPU 编号，值是布尔值，
+                表示 `thread` 是否应该有资格在该 CPU 上运行。如果 `affinity`
+                表的长度不大于或等于 |uv.cpumask_size()|，表中缺少的任何 CPU
+                编号的亲和性将被设置为 `false`。如果需要设置超过
+                |uv.cpumask_size()| 个 CPU 的亲和性，`affinity` 必须是一个
+                没有间隙的类数组表，因为如果 `#affinity` 大于
+                |uv.cpumask_size()|，它将被用作 `cpumask_size`。
+
+                如果 `get_old_affinity` 为 `true`，将返回 `thread` 的先前
+                亲和性设置。否则，在成功调用后返回 `true`。
+
+                注意：在 Windows 上设置线程亲和性不是原子操作。在 macOS 上
+                不支持。
+
+                返回：`table` 或 `boolean` 或 `fail`
+                - `[1, 2, 3, ..., n]`：`boolean`
+
+
+uv.thread_getaffinity({thread} [, {mask_size}])        *uv.thread_getaffinity()*
+
+                > 方法形式 `thread:getaffinity([mask_size])`
+
+                参数：
+                - `thread`：`luv_thread_t userdata`
+                - `mask_size`：`integer`
+
+                获取指定线程的亲和性设置。
+
+                如果提供了 `mask_size`，它必须大于或等于 `uv.cpumask_size()`。
+                如果省略 `mask_size` 参数，则将使用 `uv.cpumask_size()` 的
+                返回值。返回一个类数组表，其中每个键对应一个 CPU 编号，值是
+                布尔值，表示 `thread` 是否有资格在该 CPU 上运行。
+
+                注意：在 Windows 上获取线程亲和性不是原子操作。在 macOS 上
+                不支持。
+
+                返回：`table` 或 `fail`
+                - `[1, 2, 3, ..., n]`：`boolean`
+
+uv.thread_getcpu()                                          *uv.thread_getcpu()*
+
+                获取调用线程正在运行的 CPU 编号。
+
+                注意：第一个 CPU 将返回为数字 1，而不是 0。这允许数字与
+                `uv.thread_getaffinity` 和 `uv.thread_setaffinity` 中使用的
+                表键对应。
+
+                返回：`integer` 或 `fail`
+
+uv.thread_setpriority({thread}, {priority})            *uv.thread.setpriority()*
+
+                > 方法形式 `thread:setpriority(priority)`
+
+                参数：
+                - `thread`：`luv_thread_t userdata`
+                - `priority`：`number`
+
+                设置指定线程的调度优先级设置。在某些平台上设置特定优先级需要
+                提升权限。优先级可以设置为以下常量：
+                - `uv.constants.THREAD_PRIORITY_HIGHEST`
+                - `uv.constants.THREAD_PRIORITY_ABOVE_NORMAL`
+                - `uv.constants.THREAD_PRIORITY_NORMAL`
+                - `uv.constants.THREAD_PRIORITY_BELOW_NORMAL`
+                - `uv.constants.THREAD_PRIORITY_LOWEST`
+
+                返回：`boolean` 或 `fail`
+
+uv.thread_getpriority({thread})                        *uv.thread.getpriority()*
+
+                > 方法形式 `thread:getpriority()`
+
+                参数：
+                - `thread`：`luv_thread_t userdata`
+
+                获取线程的优先级设置。
+
+                检索指定线程的调度优先级。返回的优先级值依赖于平台。
+
+                对于 Linux，当调度策略为 SCHED_OTHER（默认）时，优先级为 0。
+
+                返回：`number` 或 `fail`
+
+uv.thread_self()                                              *uv.thread_self()*
+
+                返回调用此函数的线程的句柄。
+
+                返回：`luv_thread_t`
+
+uv.thread_join({thread})                                      *uv.thread_join()*
+
+                > 方法形式 `thread:join()`
+
+                参数：
+                - `thread`：`luv_thread_t userdata`
+
+                等待 `thread` 完成执行其入口函数。
+
+                返回：`boolean` 或 `fail`
+
+uv.thread_detach({thread})                                  *uv.thread_detach()*
+
+                > 方法形式 `thread:detach()`
+
+                参数：
+                - `thread`：`luv_thread_t userdata`
+
+                分离一个线程。分离的线程在终止时会自动释放其资源，无需应用程序
+                调用 `uv.thread_join`。
+
+                返回：`boolean` 或 `fail`
+
+uv.thread_setname({name})                                  *uv.thread_setname()*
+
+                参数：
+                - `name`：`string`
+
+                设置当前线程的名称。不同平台对线程名称的最大字符数有不同的
+                限制：Linux、IBM i（16）、macOS（64）、Windows（32767）和
+                NetBSD（32）等。如果 `name` 大于平台的限制，名称将被截断。
+
+                返回：`0` 或 `fail`
+
+uv.thread_getname({thread})                                *uv.thread_getname()*
+
+                > 方法形式 `thread:getname()`
+
+                参数：
+                - `thread`：`luv_thread_t userdata`
+
+                获取由 `thread` 指定的线程的名称。
+
+                返回：`string` 或 `fail`
+
+uv.sleep({msec})                                                    *uv.sleep()*
+
+                参数：
+                - `msec`：`integer`
+
+                暂停调用此函数的线程指定的毫秒数。
+
+                返回：无。
+
+==============================================================================
+杂项实用工具                            *luv-miscellaneous-utilities*
+
+uv.exepath()                                                      *uv.exepath()*
+
+                返回可执行文件路径。
+
+                返回：`string` 或 `fail`
+
+uv.cwd()                                                              *uv.cwd()*
+
+                返回当前工作目录。
+
+                返回：`string` 或 `fail`
+
+uv.chdir({cwd})                                                     *uv.chdir()*
+
+                参数：
+                - `cwd`：`string`
+
+                使用字符串 `cwd` 设置当前工作目录。
+
+                返回：`0` 或 `fail`
+
+uv.get_process_title()                                  *uv.get_process_title()*
+
+                返回当前进程的标题。
+
+                返回：`string` 或 `fail`
+
+uv.set_process_title({title})                           *uv.set_process_title()*
+
+                参数：
+                - `title`：`string`
+
+                使用字符串 `title` 设置当前进程的标题。
+
+                返回：`0` 或 `fail`
+
+uv.get_total_memory()                                    *uv.get_total_memory()*
+
+                返回当前系统总内存（以字节为单位）。
+
+                返回：`number`
+
+uv.get_free_memory()                                      *uv.get_free_memory()*
+
+                返回当前系统空闲内存（以字节为单位）。
+
+                返回：`number`
+
+uv.get_constrained_memory()                        *uv.get_constrained_memory()*
+
+                根据操作系统施加的限制，获取进程可用的内存量（以字节为单位）。
+                如果没有这样的限制，或限制未知，则返回 0。注意，这个值小于或
+                大于系统总内存都是正常的。
+
+                返回：`number`
+
+uv.get_available_memory()                            *uv.get_available_memory()*
+
+                获取进程仍然可用的空闲内存量（以字节为单位）。这与
+                `uv.get_free_memory()` 的不同之处在于它考虑了操作系统施加的
+                任何限制。如果没有这样的限制，或限制未知，返回的数量将与
+                `uv.get_free_memory()` 相同。
+
+                返回：`number`
+
+uv.resident_set_memory()                              *uv.resident_set_memory()*
+
+                返回当前进程的常驻集大小（RSS）。
+
+                返回：`integer` 或 `fail`
+
+uv.getrusage()                                                  *uv.getrusage()*
+
+                返回资源使用情况。
+
+                返回：`table` 或 `fail`
+                - `utime`：`table`（用户 CPU 使用时间）
+                  - `sec`：`integer`
+                  - `usec`：`integer`
+                - `stime`：`table`（系统 CPU 使用时间）
+                  - `sec`：`integer`
+                  - `usec`：`integer`
+                - `maxrss`：`integer`（最大常驻集大小）
+                - `ixrss`：`integer`（共享内存大小）
+                - `idrss`：`integer`（非共享数据大小）
+                - `isrss`：`integer`（非共享栈大小）
+                - `minflt`：`integer`（页面回收（软页面错误））
+                - `majflt`：`integer`（页面错误（硬页面错误））
+                - `nswap`：`integer`（交换次数）
+                - `inblock`：`integer`（块输入操作）
+                - `oublock`：`integer`（块输出操作）
+                - `msgsnd`：`integer`（发送的 IPC 消息）
+                - `msgrcv`：`integer`（接收的 IPC 消息）
+                - `nsignals`：`integer`（接收的信号）
+                - `nvcsw`：`integer`（自愿上下文切换）
+                - `nivcsw`：`integer`（非自愿上下文切换）
+
+uv.getrusage_thread()                                    *uv.getrusage_thread()*
+                获取调用线程的资源使用度量。
+
+                注意：不是所有平台都支持。可能返回 `ENOTSUP`。
+
+                在 macOS 和 Windows 上不是所有字段都设置（不支持的字段填充为零）。
+
+                返回：`table` 或 `fail`
+                - `utime`：`table`（用户 CPU 使用时间）
+                  - `sec`：`integer`
+                  - `usec`：`integer`
+                - `stime`：`table`（系统 CPU 使用时间）
+                  - `sec`：`integer`
+                  - `usec`：`integer`
+                - `maxrss`：`integer`（最大常驻集大小）
+                - `ixrss`：`integer`（共享内存大小）
+                - `idrss`：`integer`（非共享数据大小）
+                - `isrss`：`integer`（非共享栈大小）
+                - `minflt`：`integer`（页面回收（软页面错误））
+                - `majflt`：`integer`（页面错误（硬页面错误））
+                - `nswap`：`integer`（交换次数）
+                - `inblock`：`integer`（块输入操作）
+                - `oublock`：`integer`（块输出操作）
+                - `msgsnd`：`integer`（发送的 IPC 消息）
+                - `msgrcv`：`integer`（接收的 IPC 消息）
+                - `nsignals`：`integer`（接收的信号）
+                - `nvcsw`：`integer`（自愿上下文切换）
+                - `nivcsw`：`integer`（非自愿上下文切换）
+
+uv.available_parallelism()                          *uv.available_parallelism()*
+
+                返回程序应使用的默认并行度的估计值。始终返回非零值。
+
+                在 Linux 上，检查调用线程的 CPU 亲和性掩码，以确定它是否已被
+                固定到特定的 CPU。
+
+                在 Windows 上，对于具有超过 64 个逻辑 CPU 的系统，可能会低报
+                可用的并行度。
+
+                在其他平台上，报告操作系统认为在线的 CPU 数量。
+
+                返回：`integer`
+
+uv.cpu_info()                                                    *uv.cpu_info()*
+
+                返回系统上 CPU 的信息，为每个发现的 CPU 返回一个表的表。
+
+                返回：`table` 或 `fail`
+                - `[1, 2, 3, ..., n]`：`table`
+                  - `model`：`string`
+                  - `speed`：`number`
+                  - `times`：`table`
+                    - `user`：`number`
+                    - `nice`：`number`
+                    - `sys`：`number`
+                    - `idle`：`number`
+                    - `irq`：`number`
+
+uv.cpumask_size()                                           *uv.cpumask_size()*
+
+                返回用于进程/线程亲和性的掩码的最大大小，如果当前平台不支持
+                亲和性，则返回 `ENOTSUP`。
+
+                返回：`integer` 或 `fail`
+
+uv.getpid()                                                        *uv.getpid()*
+
+                已弃用：请改用 |uv.os_getpid()|。
+
+uv.getuid()                                                        *uv.getuid()*
+
+                返回进程的用户 ID。
+
+                返回：`integer`
+
+                注意：这不是 libuv 函数，在 Windows 上不支持。
+
+uv.getgid()                                                        *uv.getgid()*
+
+                返回进程的组 ID。
+
+
+                返回：`integer`
+
+                注意：这不是 libuv 函数，在 Windows 上不支持。
+
+uv.setuid({id})                                                    *uv.setuid()*
+
+                参数：
+                - `id`：`integer`
+
+                使用整数 `id` 设置进程的用户 ID。
+
+                返回：无。
+
+                注意：这不是 libuv 函数，在 Windows 上不支持。
+
+uv.setgid({id})                                                    *uv.setgid()*
+
+                参数：
+                - `id`：`integer`
+
+                使用整数 `id` 设置进程的组 ID。
+
+                返回：无。
+
+                注意：这不是 libuv 函数，在 Windows 上不支持。
+
+uv.hrtime()                                                        *uv.hrtime()*
+
+                返回当前的高分辨率时间（以纳秒为单位）作为数字。这是相对于
+                过去的任意时间。它与一天中的时间无关，因此不受时钟漂移的
+                影响。主要用于测量时间间隔。
+
+                返回：`number`
+
+uv.clock_gettime({clock_id})                                *uv.clock_gettime()*
+
+                参数：
+                - `clock_id`：`string`
+
+                从高分辨率实时或单调时钟源获取当前系统时间。`clock_id` 可以是
+                字符串 `"monotonic"` 或 `"realtime"`。
+
+                实时时钟从 UNIX 纪元（1970-01-01）开始计数，并受时间调整的
+                影响；它可能会在时间上倒退。
+
+                单调时钟从过去的任意点开始计数，永远不会在时间上倒退。
+
+                返回：`table` 或 `fail`
+                - `sec`：`integer`
+                - `nsec`：`integer`
+
+uv.uptime()                                                        *uv.uptime()*
+
+                返回当前系统运行时间（以秒为单位）。
+
+                返回：`number` 或 `fail`
+
+uv.print_all_handles()                                  *uv.print_all_handles()*
+
+                将与主循环关联的所有句柄打印到 stderr。格式为
+                `[flags] handle-type handle-address`。标志为 `R`（已引用），
+                `A`（活动）和 `I`（内部）。
+
+                返回：无。
+
+                注意：这在 Windows 上不可用。
+
+                警告：此函数用于临时调试，不保证 API/ABI 稳定性。
+
+uv.print_active_handles()                            *uv.print_active_handles()*
+
+                与 |uv.print_all_handles()| 相同，只是只打印活动句柄。
+
+                返回：无。
+
+                注意：这在 Windows 上不可用。
+
+                警告：此函数用于临时调试，不保证 API/ABI 稳定性。
+
+uv.guess_handle({fd})                                        *uv.guess_handle()*
+
+                参数：
+                - `fd`：`integer`
+
+                用于检测给定文件描述符 `fd` 应该使用什么类型的流。通常在
+                初始化期间用于猜测标准 I/O 流的类型。
+
+                返回：`string`
+
+uv.gettimeofday()                                            *uv.gettimeofday()*
+
+                `gettimeofday(2)` 的跨平台实现。返回 unix 时间的秒数和
+                微秒数作为一对值。
+
+                返回：`integer, integer` 或 `fail`
+
+uv.interface_addresses()                              *uv.interface_addresses()*
+
+                返回系统上网络接口的地址信息表。每个表键是接口的名称，而每个
+                关联的值是一个地址信息数组，其中字段为 `ip`、`family`、
+                `netmask`、`internal` 和 `mac`。
+
+                查看 |luv-constants| 获取支持的地址 `family` 输出值。
+
+                返回：`table`
+                - `[name(s)]`：`table`
+                  - `ip`：`string`
+                  - `family`：`string`
+                  - `netmask`：`string`
+                  - `internal`：`boolean`
+                  - `mac`：`string`
+
+uv.if_indextoname({ifindex})                               *uv.if_indextoname()*
+
+                参数：
+                - `ifindex`：`integer`
+
+                支持 IPv6 的 `if_indextoname(3)` 实现。
+
+                返回：`string` 或 `fail`
+
+uv.if_indextoiid({ifindex})                                 *uv.if_indextoiid()*
+
+                参数：
+                - `ifindex`：`integer`
+
+                检索适合在 IPv6 作用域地址中使用的网络接口标识符。在 Windows
+                上，返回数字 `ifindex` 作为字符串。在所有其他平台上，使用
+                |uv.if_indextoname()|。
+
+                返回：`string` 或 `fail`
+
+uv.loadavg()                                                      *uv.loadavg()*
+
+                返回负载平均值作为三元组。在 Windows 上不支持。
+
+                返回：`number, number, number`
+
+uv.os_uname()                                                    *uv.os_uname()*
+
+                返回系统信息。
+
+                返回：`table`
+                - `sysname`：`string`
+                - `release`：`string`
+                - `version`：`string`
+                - `machine`：`string`
+
+uv.os_gethostname()                                        *uv.os_gethostname()*
+
+                返回主机名。
+
+                返回：`string`
+
+uv.os_getenv({name} [, {size}])                                 *uv.os_getenv()*
+
+                参数：
+                - `name`：`string`
+                - `size`：`integer`（默认 = `LUAL_BUFFERSIZE`）
+
+                返回由 `name` 指定的环境变量作为字符串。内部缓冲区大小可以
+                通过定义 `size` 来设置。如果省略，使用 `LUAL_BUFFERSIZE`。
+                如果环境变量超过内部缓冲区中可用的存储空间，则返回 `ENOBUFS`。
+                如果不存在匹配的环境变量，则返回 `ENOENT`。
+
+                返回：`string` 或 `fail`
+
+                警告：此函数不是线程安全的。
+
+uv.os_setenv({name}, {value})                                   *uv.os_setenv()*
+
+                参数：
+                - `name`：`string`
+                - `value`：`string`
+
+                使用字符串 `value` 设置由 `name` 指定的环境变量。
+
+                返回：`boolean` 或 `fail`
+
+                警告：此函数不是线程安全的。
+
+uv.os_unsetenv({name})                                        *uv.os_unsetenv()*
+
+                参数：
+                - `name`：`string`
+
+                取消设置由 `name` 指定的环境变量。
+
+                返回：`boolean` 或 `fail`
+
+                警告：此函数不是线程安全的。
+
+uv.os_environ()                                                *uv.os_environ()*
+
+                返回所有环境变量作为一个动态表，名称与其对应的值相关联。
+
+                返回：`table`
+
+                警告：此函数不是线程安全的。
+
+uv.os_homedir()                                                *uv.os_homedir()*
+
+                返回：`string` 或 `fail`
+
+                警告：此函数不是线程安全的。
+
+uv.os_tmpdir()                                                  *uv.os_tmpdir()*
+
+                返回：`string` 或 `fail`
+
+                警告：此函数不是线程安全的。
+
+uv.os_get_passwd()                                          *uv.os_get_passwd()*
+
+                返回密码文件信息。
+
+                返回：`table`
+                - `username`：`string`
+                - `uid`：`integer`
+                - `gid`：`integer`
+                - `shell`：`string`
+                - `homedir`：`string`
+
+uv.os_getpid()                                                  *uv.os_getpid()*
+
+                返回当前进程 ID。
+
+                返回：`number`
+
+uv.os_getppid()                                                *uv.os_getppid()*
+
+                返回父进程 ID。
+
+                返回：`number`
+
+uv.os_getpriority({pid})                                   *uv.os_getpriority()*
+
+                参数：
+                - `pid`：`integer`
+
+                返回由 `pid` 指定的进程的调度优先级。
+
+                返回：`number` 或 `fail`
+
+uv.os_setpriority({pid}, {priority})                       *uv.os_setpriority()*
+
+                参数：
+                - `pid`：`integer`
+                - `priority`：`integer`
+
+                设置由 `pid` 指定的进程的调度优先级。`priority` 范围在 -20
+                （高优先级）和 19（低优先级）之间。
+
+                返回：`boolean` 或 `fail`
+
+uv.random({len}, {flags} [, {callback}])                           *uv.random()*
+
+                参数：
+                - `len`：`integer`
+                - `flags`：`nil`（见下文）
+                - `callback`：`callable`（异步版本）或 `nil`（同步版本）
+                  - `err`：`nil` 或 `string`
+                  - `bytes`：`string` 或 `nil`
+
+                用从系统 CSPRNG 获取的加密强度随机字节填充长度为 `len` 的
+                字符串。`flags` 保留用于将来的扩展，目前必须是 `nil` 或 `0`
+                或 `{}`。
+
+                不可能进行短读取。当可用的随机字节少于 `len` 时，将返回非零
+                错误值或将其传递给回调。如果省略回调，此函数将同步完成。
+
+                当没有足够的熵可用时，同步版本可能会无限期阻塞。当系统熵不足
+                时，异步版本可能永远不会完成。
+
+                返回（同步版本）：`string` 或 `fail`
+
+                返回（异步版本）：`0` 或 `fail`
+
+uv.translate_sys_error({errcode})                     *uv.translate_sys_error()*
+
+                参数：
+                - `errcode`：`integer`
+
+                返回与给定平台相关错误代码等效的 libuv 错误消息和错误名称
+                （都是字符串形式，见 |luv-error-handling| 中的 `err` 和
+                `name`）：在 Unix 上是 POSIX 错误代码（存储在 errno 中），
+                在 Windows 上是 Win32 错误代码（由 GetLastError() 或
+                WSAGetLastError() 返回）。
+
+                返回：`string, string` 或 `nil`
+
+==============================================================================
+度量操作                                      *luv-metrics-operations*
+
+uv.metrics_idle_time()                                  *uv.metrics_idle_time()*
+
+                检索事件循环在内核事件提供程序（例如 `epoll_wait`）中空闲的
+                时间量。此调用是线程安全的。
+
+                返回值是从 |uv_loop_t| 被配置为收集空闲时间开始，在内核事件
+                提供程序中累积的空闲时间。
+
+                注意：事件循环在调用带有 `"metrics_idle_time"` 的
+                `loop_configure` 之前不会开始累积事件提供程序的空闲时间。
+
+                返回：`number`
+
+uv.metrics_info()                                            *uv.metrics_info()*
+
+                从当前事件循环度量集获取度量表。建议在 `prepare` 回调中
+                （见 |uv.new_prepare()|，|uv.prepare_start()|）检索这些度量，
+                以确保度量计数器没有不一致。
+
+                返回：`table`
+
+                - `loop_count`：`integer`
+                - `events`：`integer`
+                - `events_waiting`：`integer`
+
+==============================================================================
+字符串操作函数                          *luv-string-manipulation*
+
+这些字符串实用程序在内部需要用于处理 Windows，并导出以允许客户端在 libuv
+API 不完整时统一处理这些数据。
+
+注意：
+1. 在 luv 版本 1.49.0 中新增。
+2. 有关 WTF-8 的信息，请参见 WTF-8 规范
+   (https://simonsapin.github.io/wtf-8/)。
+3. Luv 使用 Lua 风格的字符串，这意味着所有输入和返回值（UTF-8 或 UTF-16
+   字符串）不包含 NUL 终止符。
+
+uv.utf16_length_as_wtf8({utf16})                     *uv.utf16_length_as_wtf8()*
+
+                获取 UTF-16（或 UCS-2）字符串 `utf16` 值转换为 WTF-8 后的
+                长度（以字节为单位）。UTF-16（或 UCS-2）字符串的字节序假定
+                与平台的本机字节序相同。
+
+                参数：
+                - `utf16`：`string`
+
+                返回：`integer`
+
+uv.utf16_to_wtf8({utf16})                                   *uv.utf16_to_wtf8()*
+
+                将 UTF-16（或 UCS-2）字符串 `utf16` 转换为 UTF-8 字符串。
+                UTF-16（或 UCS-2）字符串的字节序假定与平台的本机字节序相同。
+
+                参数：
+                - `utf16`：`string`
+
+                返回：`string`
+
+uv.wtf8_length_as_utf16({wtf16})                     *uv.wtf8_length_as_utf16()*
+
+                获取 WTF-8 `wtf8` 值转换为 UTF-16（或 UCS-2）后的长度
+                （以 UTF-16 代码单元为单位）。
+
+                注意：UTF-16（或 UCS-2）字符串需要的字节数是
+                `<代码单元数> * 2`。
+
+                参数：
+                - `wtf8`：`string`
+
+                返回：`integer`
+
+uv.wtf8_to_utf16({wtf16})                                   *uv.wtf8_to_utf16()*
+
+                将 `wtf8` 中的 WTF-8 字符串转换为 UTF-16（或 UCS-2）字符串。
+                UTF-16（或 UCS-2）字符串的字节序假定与平台的本机字节序相同。
+
+                参数：
+                - `wtf8`：`string`
+
+                返回：`string`
+
+==============================================================================
+致谢                                                            *luv-credits*
+
+本文档是 LUV 文档的重新格式化版本，与 luv 仓库的 commit dcd1a1c
+（2023 年 8 月 23 日）保持同步
+https://github.com/luvit/luv/commit/dcd1a1cad5b05634a7691402d6ca2f214fb4ae76。
+
+基于 https://github.com/nanotee/luv-vimdocs，经许可使用。
+
+
+vim:tw=78:ts=8:sw=2:et:ft=help:norl:

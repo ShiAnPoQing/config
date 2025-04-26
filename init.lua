@@ -217,7 +217,63 @@ K.add({
   },
   ["<F10>"] = {
     function()
-      local a = vim.fn.input("dsfa")
+      print(vim.inspect(vim))
+      -- local count = 0
+      -- vim.api.nvim_buf_attach(0, false, {
+      --   on_lines = function(_, bufnr, changedtick, first, last_old, last_new, byte_count)
+      --     --   -- first 改变的第一行, 从 0 开始
+      --     --   -- last_old 改变的最后一行
+      --     --   -- last_new 更新范围的最后一行
+      --     --   -- byte_count 先前内容的字节数
+      --     --   -- print("改变的第一行: ", first)
+      --     --   -- print("改变的最后一行: ", last_old)
+      --     --   -- print("更新范围的最后一行", last_new)
+      --     --   -- print("byte_count: ", byte_count)
+      --     --   -- print("----------------------------------")
+      --     print("on_lines")
+      --     count = count + 1
+      --     if count == 5 then
+      --       return true
+      --     end
+      --   end,
+      --
+      --   -- on_bytes = function(_, bufnr, changedtick, first, first_col, offset, last_old, last_old_col, old_byte, last_new,
+      --   --                     last_new_col, new_byte)
+      --   --   count = count + 1
+      --   --   if count == 10 then
+      --   --     return true
+      --   --   end
+      --   --   print("改变文本的起始行（从零开始）", first)
+      --   --   print("改变文本的起始列a", first_col)
+      --   --   print("改变文本的字节偏移量（从缓冲区开始）", offset)
+      --   --   print("改变文本的旧结束行（从起始行偏移）", last_old)
+      --   --   print("改变文本的旧结束列（如果旧结束行 = 0，从起始列偏移）", last_old_col)
+      --   --   print("改变文本的旧结束字节长度", old_byte)
+      --   --   print("改变文本的新结束行（从起始行偏移）", last_new)
+      --   --   print("改变文本的新结束列（如果新结束行 = 0，从起始列偏移）", last_new_col)
+      --   --   print("改变文本的新结束字节长度", new_byte)
+      --   --   -- • on_bytes: 在更改时调用的 Lua 回调。
+      --   --   --             与 on_lines 相比，此回调接收有关更改的更细粒度的信息。
+      --   --   --             返回一个真值（不是 `false` 或 `nil`）以分离。
+      --   --   --  参数：
+      --   --   --   • 字符串 "bytes"
+      --   --   --   • 缓冲区 id
+      --   --   --   • b:changedtick
+      --   --   --   • 改变文本的起始行（从零开始）
+      --   --   --   • 改变文本的起始列
+      --   --   --   • 改变文本的字节偏移量（从缓冲区开始）
+      --   --   --   • 改变文本的旧结束行（从起始行偏移）
+      --   --   --   • 改变文本的旧结束列（如果旧结束行 = 0，从起始列偏移）
+      --   --   --   • 改变文本的旧结束字节长度
+      --   --   --   • 改变文本的新结束行（从起始行偏移）
+      --   --   --   • 改变文本的新结束列（如果新结束行 = 0，从起始列偏移）
+      --   --   --   • 改变文本的新结束字节长度
+      --   -- end,
+      --   on_detach = function()
+      --     print("分离")
+      --   end
+      -- })
+      -- vim.api.nvim_buf_detach()
       -- require("nvim-extmark-doc").extmark_doc()
       -- require("search-manual").searchManual()
     end,
@@ -272,5 +328,3 @@ K.add({
     "i"
   }
 })
-
-vim.g.netrw_browsex_viewer = "firefox" -- 使用 Firefox

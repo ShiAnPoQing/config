@@ -28,7 +28,7 @@ function M.show_file_info()
     title = { { "FileInfo", "Normal" } },
     title_pos = "center",
     style = "minimal",
-    border = require("custom.style.float.border").rounded,
+    border = require("custom.style.float.border").border2,
   }
   local buf = vim.api.nvim_create_buf(false, true)
 
