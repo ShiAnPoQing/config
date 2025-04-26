@@ -2,11 +2,11 @@ local M = {}
 
 --- @param action "left" | "right"
 function M.select_start_end_move(action)
-  local mode = vim.api.nvim_get_mode()
+  -- local mode = vim.api.nvim_get_mode()
 
-  if mode.mode == "" then
-  end
-  -- 
+  -- if mode.mode == "" then
+  -- end
+  -- -- 
 
   vim.api.nvim_exec2([[
   execute "normal! \<C-G>d"

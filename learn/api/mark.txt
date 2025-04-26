@@ -165,7 +165,8 @@ nvim_buf_get_mark({buffer}, {name})                      *nvim_buf_get_mark()*
 
                                                          *nvim_buf_set_mark()*
 nvim_buf_set_mark({buffer}, {name}, {line}, {col}, {opts})
-    在给定缓冲区中设置命名标记，所有标记都允许文件/大写、可视、最后更改等。参见 |mark-motions|。
+    在给定缓冲区中设置命名标记，所有标记都允许文件/大写、可视、最后更改等。
+    参见 |mark-motions|。
 
     标记是 (1,0) 索引的。|api-indexing|
 

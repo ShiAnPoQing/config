@@ -282,9 +282,12 @@ nvim_buf_line_count({buffer})                          *nvim_buf_line_count()*
 nvim_buf_set_lines({buffer}, {start}, {end}, {strict_indexing}, {replacement})
     设置（替换）缓冲区中的行范围。
 
-    索引是从零开始的，结束是排他的。负索引被解释为 length+1+index：-1 指的是结束后的索引。因此，要更改或删除最后一行，请使用 start=-2 和 end=-1。
+    索引是从零开始的，结束是排他的。
+    负索引被解释为 length+1+index：-1 指的是结束后的索引。
+    因此，要更改或删除最后一行，请使用 start=-2 和 end=-1。
 
-    要在给定索引处插入行，请将 `start` 和 `end` 设置为相同的索引。要删除一行范围，请将 `replacement` 设置为空数组。
+    要在给定索引处插入行，请将 `start` 和 `end` 设置为相同的索引。
+    要删除一行范围，请将 `replacement` 设置为空数组。
 
     越界索引被限制在最近的有效值，除非设置了 `strict_indexing`。
 
