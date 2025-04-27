@@ -382,6 +382,17 @@ nvim_create_buf({listed}, {scratch})                       *nvim_create_buf()*
     另请参见：~
       • buf_open_scratch
 
-
+>lua
+    -- vim.api.nvim_buf_attach(buf, false, {
+    --   on_lines = function(_, bufnr, changedtick, firstline, lastline, new_lastline, old_lastline)
+    --     print("---------------")
+    --     print("firstline:", firstline)
+    --     print("lastline:", lastline)
+    --     print("new_lastline:", new_lastline)
+    --     print("old_lastline:", old_lastline)
+    --   end,
+    -- })
+<
 
 vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
+

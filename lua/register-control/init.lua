@@ -17,6 +17,10 @@ local Float = {
   win = nil
 }
 
+local BufAttch = {
+  had_stop = nil
+}
+
 local function get_all_register()
   local registers = {
     -- '"', -- 未命名寄存器
@@ -144,27 +148,79 @@ function Extmark:update_extmarks(count, _i)
   end
 end
 
-local function buf_attach(buf, on_lines)
-  local had_stop;
+function Extmark:iter_extmarks(special, callback)
+  local break_index;
+  for index, mark in ipairs(self.extmarks) do
+    if special.condition(mark) then
+      local should_break = special.callback(mark)
+      if should_break then
+        break_index = index
+        break
+      end
+    else
+      if type(callback) == "function" then
+        callback(mark)
+      end
+    end
+  end
+
+  return break_index
+end
+
+function BufAttch:stop()
+  self.had_stop = true
+end
+
+function BufAttch:attach(buf, opt)
   vim.api.nvim_buf_attach(buf, false, {
     on_lines = function(_, bufnr, changedtick, firstline, lastline, new_lastline, byte_count)
-      if had_stop then
-        had_stop = nil
+      if self.had_stop then
+        self.had_stop = nil
         return
       end
 
-      on_lines({
-        buf = bufnr,
-        firstline = firstline,
-        lastline = lastline,
-        new_lastline = new_lastline,
-        stop = function()
-          had_stop = true
-        end
-      })
+      if new_lastline < lastline then
+        print("删除了 " .. lastline - new_lastline .. " 行")
+        opt.on_del_line(bufnr, lastline - new_lastline, firstline, lastline, new_lastline)
+        return
+      end
+
+      if lastline < new_lastline then
+        print("新增了 " .. new_lastline - lastline .. " 行")
+        opt.on_add_line(bufnr, new_lastline - lastline, lastline, new_lastline)
+        return
+      end
     end,
     on_detach = function() end
   })
+end
+
+local function on_add_line(bufnr, add_count, firstline, lastline, new_lastline)
+  local break_index = Extmark:iter_extmarks({
+    condition = function(mark)
+      return firstline > mark.firstline and firstline <= mark.lastline
+    end,
+    callback = function(mark)
+      print("在 " .. mark.name .. " 寄存器中")
+      mark.lastline = mark.lastline + add_count
+      return true
+    end
+  })
+  Extmark:update_extmarks(add_count, break_index + 1)
+end
+
+local function on_del_line(bufnr, del_count, firstline, lastline, new_lastline)
+  local break_index = Extmark:iter_extmarks({
+    condition = function(mark)
+      return lastline > mark.firstline and lastline <= mark.lastline
+    end,
+    callback = function(mark)
+      print("在 " .. mark.name .. " 寄存器中")
+      mark.lastline = mark.lastline - del_count
+      return true
+    end,
+  })
+  Extmark:update_extmarks(-del_count, break_index + 1)
 end
 
 function M.open_register()
@@ -172,65 +228,14 @@ function M.open_register()
     Float:close()
     return
   end
+  local lines = { "nihao" }
+
   Float:create_buf()
   Float:create_win()
-  local lines = { "nihao" }
   Extmark:create_extmarks(lines)
   vim.api.nvim_buf_set_lines(Float.buf, 0, 1, false, lines)
   Extmark:set_extmarks(Float.buf)
-  buf_attach(Float.buf, function(opt)
-    local new_lastline = opt.new_lastline
-    local lastline = opt.lastline
-    local firstline = opt.firstline
-
-    if new_lastline < lastline then
-      local del_count = lastline - new_lastline
-      print("删除了 " .. del_count .. " 行")
-
-      local next_index;
-      for index, mark in ipairs(Extmark.extmarks) do
-        local mark_firstline = mark.firstline
-        local mark_lastline = mark.lastline
-
-        if lastline > mark_firstline and lastline <= mark_lastline then
-          print("在" .. mark.name .. "中")
-          if del_count == mark.lastline - mark.firstline then
-            vim.schedule(function()
-              opt.stop()
-              vim.api.nvim_buf_set_lines(Float.buf, mark.firstline, mark.firstline, false, { "不可删除" })
-              Extmark:set_extmark(mark, Float.buf)
-              vim.api.nvim_win_set_cursor(Float.win, { mark.firstline + 1, 0 })
-            end)
-          end
-          mark.lastline = mark.lastline - del_count
-          next_index = index + 1
-          break
-        end
-      end
-      Extmark:update_extmarks(-del_count, next_index)
-      return
-    end
-
-    if lastline < new_lastline then
-      local add_count = new_lastline - lastline
-      print("新增了 " .. add_count .. " 行")
-
-      local next_index;
-      for index, mark in ipairs(Extmark.extmarks) do
-        local mark_firstline = mark.firstline
-        local mark_lastline = mark.lastline
-
-        if firstline > mark_firstline and firstline <= mark_lastline then
-          print("在" .. mark.name .. "中")
-          mark.lastline = mark.lastline + add_count
-          next_index = index + 1
-          break
-        end
-      end
-      Extmark:update_extmarks(add_count, next_index)
-      return
-    end
-  end)
+  BufAttch:attach(Float.buf, { on_add_line = on_add_line, on_del_line = on_del_line })
 end
 
 local function create_command()
@@ -245,20 +250,6 @@ end
 
 return M
 
-
--- vim.api.nvim_buf_attach(buf, false, {
---   on_lines = function(_, bufnr, changedtick, firstline, lastline, new_lastline, old_lastline)
---     print("---------------")
---     print("firstline:", firstline)
---     print("lastline:", lastline)
---     print("new_lastline:", new_lastline)
---     print("old_lastline:", old_lastline)
---     print("---------------")
---   end,
---   -- 如果返回 true，将分离监听器
---   on_detach = function()
---   end,
--- })
 -- for i = 1, #extmarks do
 --   local mark = extmarks[i]
 --   vim.schedule(function()
@@ -267,5 +258,14 @@ return M
 --     print(mark.name .. "中应为：", content)
 --     print("--------------")
 --     pcall(vim.fn.setreg, mark.name, content)
+--   end)
+-- end
+
+-- if del_count == mark.lastline - mark.firstline then
+--   vim.schedule(function()
+--     BufAttch:stop()
+--     vim.api.nvim_buf_set_lines(Float.buf, mark.firstline, mark.firstline, false, { "不可删除" })
+--     Extmark:set_extmark(mark, Float.buf)
+--     vim.api.nvim_win_set_cursor(Float.win, { mark.firstline + 1, 0 })
 --   end)
 -- end
