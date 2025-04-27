@@ -143,8 +143,8 @@ end
 function Extmark:update_extmarks(count, _i)
   for i = _i, #self.extmarks do
     local mark = self.extmarks[i]
-    mark.firstline = mark.firstline - count
-    mark.lastline = mark.lastline - count
+    mark.firstline = mark.firstline + count
+    mark.lastline = mark.lastline + count
   end
 end
 
