@@ -1,6 +1,6 @@
 return {
   "rmehri01/onenord.nvim",
-  lazy = true,
+  lazy = false,
   enabled = true,
   config = function()
     require("onenord").setup()

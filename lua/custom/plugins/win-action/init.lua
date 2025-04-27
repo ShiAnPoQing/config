@@ -71,7 +71,7 @@ local function setKeymapForExchange(bufnr, currentWinId)
     bufnr,
     "n",
     "<Esc>",
-    "<cmd>lua require('win-action').cancelAction(" .. bufnr .. ")<cr>",
+    "<cmd>lua require('custom.plugins.win-action').cancelAction(" .. bufnr .. ")<cr>",
     {}
   )
 
@@ -80,7 +80,7 @@ local function setKeymapForExchange(bufnr, currentWinId)
       bufnr,
       "n",
       tostring(collect.mark),
-      "<cmd>lua require('win-action').exchange("
+      "<cmd>lua require('custom.plugins.win-action').exchange("
       .. bufnr
       .. ","
       .. currentWinId
@@ -97,7 +97,7 @@ local function setKeymapForJump(bufnr)
     bufnr,
     "n",
     "<Esc>",
-    "<cmd>lua require('win-action').cancelAction(" .. bufnr .. ")<cr>",
+    "<cmd>lua require('custom.plugins.win-action').cancelAction(" .. bufnr .. ")<cr>",
     {}
   )
 
@@ -106,13 +106,13 @@ local function setKeymapForJump(bufnr)
       bufnr,
       "n",
       tostring(collect.mark),
-      "<cmd>lua require('win-action').jump(" .. bufnr .. "," .. collect.winId .. ")<CR>",
+      "<cmd>lua require('custom.plugins.win-action').jump(" .. bufnr .. "," .. collect.winId .. ")<CR>",
       {}
     )
   end
 end
 
-local function repeatStr(str, n)
+local function repeat_str(str, n)
   local result = ""
   for i = 1, n do
     result = result .. str
@@ -120,18 +120,18 @@ local function repeatStr(str, n)
   return result
 end
 
-local function createFloatWin(winId, mark, title)
-  local win_width = vim.api.nvim_win_get_width(winId)
-  local win_height = vim.api.nvim_win_get_height(winId)
+local function createFloatWin(win_id, mark, title)
+  local win_width = vim.api.nvim_win_get_width(win_id)
+  local win_height = vim.api.nvim_win_get_height(win_id)
 
   local float_bufnr = vim.api.nvim_create_buf(false, true)
 
-  local message = title .. repeatStr(" ", (win_width - 1) / 2 - 2) .. mark
+  local message = title .. repeat_str(" ", (win_width - 1) / 2 - 2) .. mark
   vim.api.nvim_buf_set_lines(float_bufnr, 0, -1, false, { message })
 
   local win_config = {
     relative = "win",  -- 相对于指定的窗口
-    win = winId,       -- 指定相对的窗口ID
+    win = win_id,      -- 指定相对的窗口ID
     width = win_width, -- 浮动窗口的宽度
     height = 1,        -- 浮动窗口的高度
     row = win_height - 1,
@@ -146,8 +146,8 @@ local function createFloatWin(winId, mark, title)
   vim.api.nvim_buf_set_option(float_bufnr, "readonly", true)
 end
 
-local function isNeoTreeBufnr(winId)
-  local bufnr = vim.api.nvim_win_get_buf(winId)
+local function isNeoTreeBufnr(win_id)
+  local bufnr = vim.api.nvim_win_get_buf(win_id)
   local filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
   if filetype == "neo-tree" then
     return true
@@ -155,7 +155,7 @@ local function isNeoTreeBufnr(winId)
   return false
 end
 
-function M.windowJump()
+function M.window_focus()
   if M.sign == true then
     local currentBuf = vim.api.nvim_get_current_buf()
     M.cancelAction(currentBuf)
@@ -165,10 +165,10 @@ function M.windowJump()
   initM()
   vim.cmd("wincmd =")
 
-  for mark, winId in ipairs(vim.api.nvim_list_wins()) do
-    if not isNeoTreeBufnr(winId) then
-      collectData(mark, winId)
-      createFloatWin(winId, mark, "跳转")
+  for mark, win_id in ipairs(vim.api.nvim_list_wins()) do
+    if not isNeoTreeBufnr(win_id) then
+      collectData(mark, win_id)
+      createFloatWin(win_id, mark, "跳转")
     end
   end
   local currentBuf = vim.api.nvim_get_current_buf()
@@ -176,7 +176,7 @@ function M.windowJump()
   createCursorCmd(currentBuf)
 end
 
-function M.windowExchange()
+function M.window_exchange()
   if M.sign == true then
     local currentBuf = vim.api.nvim_get_current_buf()
     M.cancelAction(currentBuf)
@@ -185,10 +185,10 @@ function M.windowExchange()
 
   initM()
 
-  for mark, winId in ipairs(vim.api.nvim_list_wins()) do
-    if not isNeoTreeBufnr(winId) then
-      collectData(mark, winId)
-      createFloatWin(winId, mark, "交换")
+  for mark, win_id in ipairs(vim.api.nvim_list_wins()) do
+    if not isNeoTreeBufnr(win_id) then
+      collectData(mark, win_id)
+      createFloatWin(win_id, mark, "交换")
     end
   end
 
@@ -206,20 +206,20 @@ function M.cancelAction(bufnr)
   delActionMap(bufnr)
 end
 
-function M.jump(bufnr, winId)
+function M.jump(bufnr, win_id)
   M.sign = false
 
-  actionJump(winId)
+  actionJump(win_id)
 
   clearFloatWin()
   delActionMap(bufnr)
   delEscMap(bufnr)
 end
 
-function M.exchange(bufnr, currentWinId, winId)
+function M.exchange(bufnr, currentWinId, win_id)
   M.sign = false
 
-  actionExchangeBuf(currentWinId, winId)
+  actionExchangeBuf(currentWinId, win_id)
 
   clearFloatWin()
   delActionMap(bufnr)
@@ -228,25 +228,11 @@ end
 
 function M.setup()
   vim.api.nvim_create_user_command("WindowFocus", function()
-    M.windowJump()
+    M.window_focus()
   end, {})
   vim.api.nvim_create_user_command("WindowExchange", function()
-    M.windowExchange()
+    M.window_exchange()
   end, {})
 end
 
 return M
-
---local ns = vim.api.nvim_create_namespace("test-ns")
---local opts = {
---	virt_lines = {
---		{ { "你好", "CurSearch" } },
---	},
---}
---vim.api.nvim_buf_set_extmark(0, ns, 7, 0, opts)
-
---vim.api.nvim_buf_set_keymap(0, "n", "<C-F5>", "<cmd>lua require('win-action').clear()<cr>", {})
-
---function M.clear()
---	vim.api.nvim_buf_clear_namespace(0, ns, 0, 10)
---end

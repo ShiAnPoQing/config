@@ -28,6 +28,9 @@ local utils = require("luasnip-utils")
 
 
 local snippets = {
+  s("pi", {
+    t("print(vim.inspect("), i(1), t("))")
+  }),
   s("fun", {
     t("function"), i(1), t("("), i(2), t(")"),
     t({ "", "\t" }), i(3),

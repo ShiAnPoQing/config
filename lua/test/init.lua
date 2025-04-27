@@ -102,11 +102,6 @@ function M.nvim_buf_attach()
   })
 end
 
-function M.nvim_buf_lines_event()
-  -- nvim_buf_lines_event[{buf}, {changedtick}, {firstline}, {lastline}, {linedata}, {more}]
-  -- nvim_buf_lines_event(0, false, )
-end
-
 function M.insertPre()
   vim.api.nvim_create_autocmd("InsertCharPre", {
     pattern = "*",

@@ -3,8 +3,6 @@ require("options").setup()
 require("repeat").setup()
 local K = require("plugin-keymap")
 K.setup()
-require("win-action").setup()
-require("register-control").setup()
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -21,9 +19,30 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-  { import = "plugins" },
-  { import = "custom.lazy-plugins.concat-mode" },
-  { import = "custom.lazy-plugins.show-file-info" }
+  { import = "plugins-auto" },
+  { import = "plugins.style.lualine" },
+  -- { import = "plugins.style.alpha-nvim" },
+  { import = "plugins.style.dashboard-nvim" },
+
+  { import = "plugins.style.theme.gruvbox" },
+  -- { import = "plugins.style.catppuccin" },
+  -- { import = "plugins.style.colorbuddy" },
+  -- { import = "plugins.style.everforest" },
+  -- { import = "plugins.style.gruvbox-material" },
+  -- { import = "plugins.style.melange" },
+  -- { import = "plugins.style.night-owl" },
+  -- { import = "plugins.style.nightfox" },
+  -- { import = "plugins.style.nord" },
+  -- { import = "plugins.style.nordic" },
+  -- { import = "plugins.style.onedarkpro" },
+  -- { import = "plugins.style.onenord" },
+  -- { import = "plugins.style.rose-pine-neovim" },
+  -- { import = "plugins.style.tokyonight" },
+
+  { import = "plugins.custom.concat-mode" },
+  { import = "plugins.custom.win-action" },
+  { import = "plugins.custom.register-control" },
+  { import = "plugins.custom.show-file-info" }
 })
 
 K.add({

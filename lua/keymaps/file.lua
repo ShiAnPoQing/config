@@ -9,15 +9,4 @@ return {
     '<cmd>let @+ = expand("%:p")<CR>',
     { "n" },
   },
-  -- show file info
-  [";sfi"] = {
-    function()
-      local S = require("show-file-info")
-      S.showFileInfo()
-      require("repeat").Record(function()
-        S.showFileInfo()
-      end)
-    end,
-    "n",
-  },
 }

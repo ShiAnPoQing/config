@@ -72,7 +72,7 @@ return {
   ["<leader>sl"] = {
     {
       function()
-        local S = require("sort-line")
+        local S = require("custom.plugins.sort-line")
         S.sortLineByLength("n")
         require("repeat").Record(function()
           S.sortLineByLength("n")
@@ -82,7 +82,7 @@ return {
     },
     {
       function()
-        local S = require("sort-line")
+        local S = require("custom.plugins.sort-line")
         S.sortLineByLength("v")
         require("repeat").Record(function()
           S.sortLineByLength("v")

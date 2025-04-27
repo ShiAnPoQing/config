@@ -6,6 +6,18 @@ local M = {}
 --   setreg() 设置寄存器的内容和类型
 --   reg_executing() 返回正在执行的寄存器名称
 --   reg_recording() 返回正在记录的寄存器名称
+local registers = {
+  -- '"', -- 未命名寄存器
+  -- '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',                -- 数字寄存器
+  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+  -- 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', -- 命名寄存器
+  -- '-',      -- 小删除寄存器
+  -- '*', '+', -- 系统剪贴板寄存器
+  -- '/',      -- 搜索寄存器
+  -- ':',      -- 命令行寄存器
+  -- '%', '#', -- 当前和上一个文件名
+  -- '='       -- 表达式寄存器
+}
 
 local Extmark = {
   extmarks = {},
@@ -22,19 +34,6 @@ local BufAttch = {
 }
 
 local function get_all_register()
-  local registers = {
-    -- '"', -- 未命名寄存器
-    -- '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',                -- 数字寄存器
-    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-    -- 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', -- 命名寄存器
-    -- '-',      -- 小删除寄存器
-    -- '*', '+', -- 系统剪贴板寄存器
-    -- '/',      -- 搜索寄存器
-    -- ':',      -- 命令行寄存器
-    -- '%', '#', -- 当前和上一个文件名
-    -- '='       -- 表达式寄存器
-  }
-
   local results = {}
   for _, reg in ipairs(registers) do
     local content = vim.fn.getreg(reg)
@@ -108,12 +107,18 @@ function Extmark:create_extmarks(lines)
       table.insert(lines, sub_lines[i])
     end
 
-    table.insert(self.extmarks, {
+    self.extmarks[reg.name] = {
       firstline = #lines - #sub_lines,
       lastline = #lines,
       col = 0,
       name = reg.name
-    })
+    }
+    -- table.insert(self.extmarks, {
+    --   firstline = #lines - #sub_lines,
+    --   lastline = #lines,
+    --   col = 0,
+    --   name = reg.name
+    -- })
   end
 
   return lines
@@ -130,19 +135,23 @@ function Extmark:set_extmark(mark, buf)
         { mark.name .. " 寄存器：", "CursorLineNr" }
       },
     },
-    virt_lines_above = true
+    virt_lines_above = true,
+    right_gravity = false,
+    end_right_gravity = false,
   })
 end
 
 function Extmark:set_extmarks(buf)
-  for _, mark in ipairs(self.extmarks) do
+  for _, regname in ipairs(registers) do
+    local mark = self.extmarks[regname]
     self:set_extmark(mark, buf)
   end
 end
 
 function Extmark:update_extmarks(count, _i)
-  for i = _i, #self.extmarks do
-    local mark = self.extmarks[i]
+  for i = _i, #registers do
+    local regname = registers[i]
+    local mark = self.extmarks[regname]
     mark.firstline = mark.firstline + count
     mark.lastline = mark.lastline + count
   end
@@ -150,7 +159,8 @@ end
 
 function Extmark:iter_extmarks(special, callback)
   local break_index;
-  for index, mark in ipairs(self.extmarks) do
+  for index, regname in ipairs(registers) do
+    local mark = self.extmarks[regname]
     if special.condition(mark) then
       local should_break = special.callback(mark)
       if should_break then
@@ -187,7 +197,7 @@ function BufAttch:attach(buf, opt)
 
       if lastline < new_lastline then
         print("新增了 " .. new_lastline - lastline .. " 行")
-        opt.on_add_line(bufnr, new_lastline - lastline, lastline, new_lastline)
+        opt.on_add_line(bufnr, new_lastline - lastline, firstline, lastline, new_lastline)
         return
       end
     end,
@@ -198,21 +208,30 @@ end
 local function on_add_line(bufnr, add_count, firstline, lastline, new_lastline)
   local break_index = Extmark:iter_extmarks({
     condition = function(mark)
+      print(firstline, lastline, new_lastline)
       return firstline > mark.firstline and firstline <= mark.lastline
     end,
     callback = function(mark)
       print("在 " .. mark.name .. " 寄存器中")
+      local b_reg = Extmark.extmarks["b"]
+      print(vim.inspect(b_reg))
+      vim.schedule(function()
+        local em = vim.api.nvim_buf_get_extmark_by_id(bufnr, Extmark.ns_id, b_reg.id, {})
+        print(vim.inspect(em))
+      end)
       mark.lastline = mark.lastline + add_count
       return true
     end
   })
-  Extmark:update_extmarks(add_count, break_index + 1)
+  if break_index then
+    Extmark:update_extmarks(add_count, break_index + 1)
+  end
 end
 
 local function on_del_line(bufnr, del_count, firstline, lastline, new_lastline)
   local break_index = Extmark:iter_extmarks({
     condition = function(mark)
-      return lastline > mark.firstline and lastline <= mark.lastline
+      return lastline > mark.firstline and lastline <= mark.lastline and firstline >= mark.firstline
     end,
     callback = function(mark)
       print("在 " .. mark.name .. " 寄存器中")
@@ -220,7 +239,9 @@ local function on_del_line(bufnr, del_count, firstline, lastline, new_lastline)
       return true
     end,
   })
-  Extmark:update_extmarks(-del_count, break_index + 1)
+  if break_index then
+    Extmark:update_extmarks(-del_count, break_index + 1)
+  end
 end
 
 function M.open_register()
