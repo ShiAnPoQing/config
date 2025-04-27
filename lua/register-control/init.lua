@@ -1,3 +1,4 @@
+local M = {}
 -- 寄存器：register-functions
 --   getreg() 获取寄存器的内容
 --   getreginfo() 获取寄存器的信息
@@ -6,12 +7,14 @@
 --   reg_executing() 返回正在执行的寄存器名称
 --   reg_recording() 返回正在记录的寄存器名称
 
-local M = {}
-local RegMark = {
-  ns_id = vim.api.nvim_create_namespace("register-control"),
+local Extmark = {
   extmarks = {},
-  win = nil,
-  buf = nil
+  ns_id = vim.api.nvim_create_namespace("register-control"),
+}
+
+local Float = {
+  buf = nil,
+  win = nil
 }
 
 local function get_all_register()
@@ -40,7 +43,7 @@ local function get_all_register()
   return results
 end
 
-local function create_float_win()
+local function create_float_win(buf)
   local width = vim.api.nvim_win_get_width(0)
   local height = vim.api.nvim_win_get_height(0)
 
@@ -60,28 +63,80 @@ local function create_float_win()
     border = require("custom.style.float.border").border2,
   }
 
-  local buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_name(buf, "[Registers]")
-  vim.api.nvim_buf_set_option(buf, "buftype", "acwrite")
   local win = vim.api.nvim_open_win(buf, true, opts)
 
-  local augroup = vim.api.nvim_create_augroup('RegisterBuffer' .. buf, { clear = true })
-  vim.api.nvim_create_autocmd("BufWriteCmd", {
-    buffer = buf,
-    group = augroup,
-    callback = function()
-      print("xing")
-    end
-  })
   require("utils.float.win-move").load(buf, {})
 
-  return {
-    buf = buf,
-    win = win
-  }
+  return win
 end
 
-function RegMark:update_mark_info(count, _i)
+function Float:create_buf()
+  if not self.buf then
+    self.buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_buf_set_name(self.buf, "[Registers]")
+    vim.api.nvim_buf_set_option(self.buf, "buftype", "acwrite")
+    local augroup = vim.api.nvim_create_augroup('RegisterBuffer' .. self.buf, { clear = true })
+    vim.api.nvim_create_autocmd("BufWriteCmd", {
+      buffer = self.buf,
+      group = augroup,
+      callback = function()
+        print("xing")
+      end
+    })
+  end
+end
+
+function Float:create_win()
+  self.win = create_float_win(self.buf)
+end
+
+function Float:close()
+  pcall(vim.api.nvim_win_close, self.win, false)
+  self.win = nil
+end
+
+function Extmark:create_extmarks(lines)
+  local regs = get_all_register()
+  for _, reg in pairs(regs) do
+    local sub_lines = vim.split(reg.content, "\n", { plain = true })
+
+    for i = 1, #sub_lines do
+      table.insert(lines, sub_lines[i])
+    end
+
+    table.insert(self.extmarks, {
+      firstline = #lines - #sub_lines,
+      lastline = #lines,
+      col = 0,
+      name = reg.name
+    })
+  end
+
+  return lines
+end
+
+function Extmark:set_extmark(mark, buf)
+  if mark.id then
+    vim.api.nvim_buf_del_extmark(buf, self.ns_id, mark.id)
+  end
+
+  mark.id = vim.api.nvim_buf_set_extmark(buf, self.ns_id, mark.firstline, 0, {
+    virt_lines = {
+      {
+        { mark.name .. " 寄存器：", "CursorLineNr" }
+      },
+    },
+    virt_lines_above = true
+  })
+end
+
+function Extmark:set_extmarks(buf)
+  for _, mark in ipairs(self.extmarks) do
+    self:set_extmark(mark, buf)
+  end
+end
+
+function Extmark:update_extmarks(count, _i)
   for i = _i, #self.extmarks do
     local mark = self.extmarks[i]
     mark.firstline = mark.firstline - count
@@ -112,111 +167,67 @@ local function buf_attach(buf, on_lines)
   })
 end
 
-function RegMark:set_extmarks()
-  for _, mark in ipairs(self.extmarks) do
-    self:set_extmark(mark)
-  end
-end
-
-function RegMark:set_extmark(mark)
-  if mark.id then
-    vim.api.nvim_buf_del_extmark(self.buf, self.ns_id, mark.id)
-  end
-
-  mark.id = vim.api.nvim_buf_set_extmark(self.buf, self.ns_id, mark.firstline, 0, {
-    virt_lines = {
-      {
-        { mark.name .. " 寄存器：", "CursorLineNr" }
-      },
-    },
-    virt_lines_above = true
-  })
-end
-
-function RegMark:create_reg_extmarks(lines)
-  local regs = get_all_register()
-  for _, reg in pairs(regs) do
-    local sub_lines = vim.split(reg.content, "\n", { plain = true })
-
-    for i = 1, #sub_lines do
-      table.insert(lines, sub_lines[i])
-    end
-
-    table.insert(self.extmarks, {
-      firstline = #lines - #sub_lines,
-      lastline = #lines,
-      col = 0,
-      name = reg.name
-    })
-  end
-end
-
 function M.open_register()
-  if RegMark.win then
-    pcall(vim.api.nvim_win_close, RegMark.win, false)
-    RegMark.win = nil
+  if Float.win then
+    Float:close()
     return
   end
-
-  local float = create_float_win()
-  RegMark.buf = float.buf
-  RegMark.win = float.win
-
-  local lines = { "你好" }
-  RegMark:create_reg_extmarks(lines)
-  vim.api.nvim_buf_set_lines(RegMark.buf, 0, 1, false, lines)
-  RegMark:set_extmarks()
-  buf_attach(RegMark.buf, function(opt)
+  Float:create_buf()
+  Float:create_win()
+  local lines = { "nihao" }
+  Extmark:create_extmarks(lines)
+  vim.api.nvim_buf_set_lines(Float.buf, 0, 1, false, lines)
+  Extmark:set_extmarks(Float.buf)
+  buf_attach(Float.buf, function(opt)
     local new_lastline = opt.new_lastline
     local lastline = opt.lastline
     local firstline = opt.firstline
 
     if new_lastline < lastline then
-      local count = lastline - new_lastline
-      print("删除了 " .. count .. " 行")
+      local del_count = lastline - new_lastline
+      print("删除了 " .. del_count .. " 行")
 
       local next_index;
-      for index, mark in ipairs(RegMark.extmarks) do
+      for index, mark in ipairs(Extmark.extmarks) do
         local mark_firstline = mark.firstline
         local mark_lastline = mark.lastline
 
         if lastline > mark_firstline and lastline <= mark_lastline then
           print("在" .. mark.name .. "中")
-          if count == mark.lastline - mark.firstline then
+          if del_count == mark.lastline - mark.firstline then
             vim.schedule(function()
               opt.stop()
-              vim.api.nvim_buf_set_lines(RegMark.buf, mark.firstline, mark.firstline, false, { "不可删除" })
-              RegMark:set_extmark(mark)
-              vim.api.nvim_win_set_cursor(RegMark.win, { mark.firstline + 1, 0 })
+              vim.api.nvim_buf_set_lines(Float.buf, mark.firstline, mark.firstline, false, { "不可删除" })
+              Extmark:set_extmark(mark, Float.buf)
+              vim.api.nvim_win_set_cursor(Float.win, { mark.firstline + 1, 0 })
             end)
           end
-          mark.lastline = mark.lastline - count
+          mark.lastline = mark.lastline - del_count
           next_index = index + 1
           break
         end
       end
-      RegMark:update_mark_info(-count, next_index)
-      -- print(vim.inspect(extmarks))
+      Extmark:update_extmarks(-del_count, next_index)
       return
     end
 
     if lastline < new_lastline then
-      local count = new_lastline - lastline
-      print("新增了 " .. count .. " 行")
+      local add_count = new_lastline - lastline
+      print("新增了 " .. add_count .. " 行")
 
       local next_index;
-      for index, mark in ipairs(RegMark.extmarks) do
+      for index, mark in ipairs(Extmark.extmarks) do
         local mark_firstline = mark.firstline
         local mark_lastline = mark.lastline
 
         if firstline > mark_firstline and firstline <= mark_lastline then
           print("在" .. mark.name .. "中")
-          mark.lastline = mark.lastline + count
+          mark.lastline = mark.lastline + add_count
           next_index = index + 1
           break
         end
       end
-      RegMark:update_mark_info(count, next_index)
+      Extmark:update_extmarks(add_count, next_index)
       return
     end
   end)
