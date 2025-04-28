@@ -154,7 +154,9 @@ nvim_buf_get_changedtick({buffer})                *nvim_buf_get_changedtick()*
 nvim_buf_get_lines({buffer}, {start}, {end}, {strict_indexing})
     从缓冲区获取行范围。
 
-    索引是从零开始的，结束是排他的。负索引被解释为 length+1+index：-1 指的是结束后的索引。因此，要获取最后一个元素，请使用 start=-2 和 end=-1。
+    索引是从零开始的，结束是排他的。
+    负索引被解释为 length+1+index：-1 指的是结束后的索引。
+    因此，要获取最后一个元素，请使用 start=-2 和 end=-1。
 
     越界索引被限制在最近的有效值，除非设置了 `strict_indexing`。
 

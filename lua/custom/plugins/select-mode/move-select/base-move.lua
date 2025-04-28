@@ -61,25 +61,68 @@ local function select_mode_move(action)
   vim.api.nvim_exec2([[  execute "normal! gv\<C-g>"  ]], {})
 end
 
-local function select_block_mode_move(action, start_row, start_col, end_row, end_col)
-  vim.api.nvim_exec2([[  execute "normal! \<C-g>"  ]], {})
+local function select_block_mode_move(action)
+  vim.api.nvim_exec2([[  execute "normal! \<C-g>y"  ]], {})
+  local visual_texts = vim.split(vim.fn.getreg('"'), "\n")
 
+  local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
+  local end_row, end_col = unpack(vim.api.nvim_buf_get_mark(0, ">"))
 
-  local count = end_row - start_row + 1
-  for i = 1, count do
-    vim.api.nvim_buf_set_mark(0, "<", start_row + i - 1, start_col, {})
-    vim.api.nvim_buf_set_mark(0, ">", start_row + i - 1, end_col, {})
-    vim.api.nvim_feedkeys("gvdp", "nx", false)
+  local lines = vim.api.nvim_buf_get_lines(0, start_row - 1, end_row, false)
+
+  local new_lines = {}
+  local first_col_offset
+  local last_col_offset
+
+  vim.api.nvim_win_set_cursor(0, { start_row, start_col })
+
+  for i, line in ipairs(lines) do
+    local _start_col;
+    if i == 1 then
+      _start_col = start_col
+    else
+      vim.api.nvim_feedkeys("j", "nx", false)
+      local pos = vim.api.nvim_win_get_cursor(0)
+      _start_col = pos[2]
+    end
+
+    local line_to_start = line:sub(1, _start_col)
+    local text = visual_texts[i]
+    local real_end_col = #line_to_start + vim.fn.strlen(text)
+    local line_to_end = line:sub(real_end_col + 1)
+
+    if action == "right" then
+      local line_to_end_first_char = vim.fn.strcharpart(line_to_end, 0, 1)
+      local line_to_end_without_first_char = vim.fn.strcharpart(line_to_end, 1)
+
+      table.insert(new_lines, line_to_start .. line_to_end_first_char .. text .. line_to_end_without_first_char)
+
+      if i == 1 then
+        first_col_offset = #line_to_end_first_char
+      end
+
+      if i == #lines then
+        last_col_offset = #line_to_end_first_char
+      end
+    else
+      local line_to_start_last_char = vim.fn.strcharpart(vim.fn.reverse(line_to_start), 0, 1)
+      local line_to_start_without_end_char = vim.fn.reverse(vim.fn.strcharpart(vim.fn.reverse(line_to_start), 1))
+      table.insert(new_lines, line_to_start_without_end_char .. text .. line_to_start_last_char .. line_to_end)
+
+      if i == 1 then
+        first_col_offset = - #line_to_start_last_char
+      end
+
+      if i == #lines then
+        last_col_offset = - #line_to_start_last_char
+      end
+    end
   end
-  vim.api.nvim_feedkeys("gv" .. vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
-  local last_start_row, last_start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
-  local last_end_row, last_end_col = unpack(vim.api.nvim_buf_get_mark(0, ">"))
-  print(last_start_row, last_start_col)
 
-  -- vim.api.nvim_buf_set_mark(0, "<", last_start_row - count - 1, last_start_col, {})
-  -- vim.api.nvim_buf_set_mark(0, ">", last_end_row, end_col, {})
-  --
-  -- vim.api.nvim_feedkeys("gv", "nx", false)
+  vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, new_lines)
+  vim.api.nvim_buf_set_mark(0, "<", start_row, start_col + first_col_offset, {})
+  vim.api.nvim_buf_set_mark(0, ">", end_row, end_col + last_col_offset, {})
+  vim.api.nvim_feedkeys("gv" .. vim.api.nvim_replace_termcodes("<c-g>", true, true, true), "nx", false)
 end
 
 --- @param action "left"|"right"
@@ -88,16 +131,28 @@ function M.select_move(action)
   if mode == "s" then
     select_mode_move(action)
   elseif mode == "" then
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
-    local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
-    local end_row, end_col = unpack(vim.api.nvim_buf_get_mark(0, ">"))
-
-    if start_row == end_row then
-      select_mode_move(action)
-    else
-      select_block_mode_move(action, start_row, start_col, end_row, end_col)
-    end
+    select_block_mode_move(action)
   end
 end
 
 return M
+
+-- vim.api.nvim_exec2([[  execute "normal! \<C-g>"  ]], {})
+--
+-- local count = end_row - start_row + 1
+-- for i = 1, count do
+--   vim.api.nvim_buf_set_mark(0, "<", start_row + i - 1, start_col, {})
+--   vim.api.nvim_buf_set_mark(0, ">", start_row + i - 1, end_col, {})
+--   vim.api.nvim_feedkeys("gvdp", "nx", false)
+-- end
+-- vim.api.nvim_feedkeys("gv" .. vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
+-- local last_start_row, last_start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
+-- local last_end_row, last_end_col = unpack(vim.api.nvim_buf_get_mark(0, ">"))
+-- print(last_start_row, last_start_col)
+--
+-- -- vim.api.nvim_buf_set_mark(0, "<", last_start_row - count - 1, last_start_col, {})
+-- -- vim.api.nvim_buf_set_mark(0, ">", last_end_row, end_col, {})
+-- --
+-- -- vim.api.nvim_feedkeys("gv", "nx", false)
+
+-- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)

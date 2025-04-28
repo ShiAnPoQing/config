@@ -102,7 +102,7 @@ nvim_del_mark({name})                                        *nvim_del_mark()*
 nvim_get_mark({name}, {opts})                                *nvim_get_mark()*
     返回表示大写/文件命名标记位置的 `(row, col, buffer, buffername)` 元组。“行尾”列位置返回为 |v:maxcol|（大数字）。参见 |mark-motions|。
 
-    标记是 (1,0) 索引的。|api-indexing|
+    标记是 (1,0) 索引的。
 
     注意：~
       • 小写名称（或其他缓冲区本地标记）是错误的。
@@ -144,7 +144,9 @@ nvim_buf_del_mark({buffer}, {name})                      *nvim_buf_del_mark()*
 
 
 nvim_buf_get_mark({buffer}, {name})                      *nvim_buf_get_mark()*
-    返回表示命名标记位置的 `(row,col)` 元组。"行尾" 列位置返回为 |v:maxcol|（大数字）。参见 |mark-motions|。
+    返回表示命名标记位置的 `(row,col)` 元组。
+    "行尾" 列位置返回为 |v:maxcol|（大数字）。
+    参见 |mark-motions|。
 
     标记是 (1,0) 索引的。|api-indexing|
 
@@ -157,11 +159,6 @@ nvim_buf_get_mark({buffer}, {name})                      *nvim_buf_get_mark()*
 
     返回：~
         (row, col) 元组，如果标记未设置，或是设置在另一个缓冲区中的大写/文件标记，则为 (0, 0)。
-
-    另请参见：~
-      • |nvim_buf_set_mark()|
-      • |nvim_buf_del_mark()|
-
 
                                                          *nvim_buf_set_mark()*
 nvim_buf_set_mark({buffer}, {name}, {line}, {col}, {opts})

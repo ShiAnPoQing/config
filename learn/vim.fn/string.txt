@@ -1,0 +1,40 @@
+strcharpart({src}, {start} [, {len} [, {skipcc}]]) *strcharpart()*
+  类似于 |strpart()|，但使用字符索引和长度，而不是字节索引和长度。
+  零索引
+  当 {skipcc} 省略或为零时，组成字符将单独计算。
+  当 {skipcc} 设置为 1 时，组成字符将被视为前一个基本字符的一部分，类似于 |slice()|。
+  当使用字符索引时，如果字符不存在，则将其省略并计为一个字符。例如：
+  >vim
+  echo strcharpart('abc', -1, 2)
+<
+  的结果是 'a'。
+
+  出错时返回空字符串。
+
+  参数：~
+  • {src} (`string`)
+  • {start} (`integer`)
+  • {len} (`integer?`)
+  • {skipcc} (`boolean?`)
+
+  返回：~
+  (`any`)
+
+reverse({object}) *reverse()*
+  反转 {object} 中项目的顺序。
+  {object} 可以是 |List| 、 |Blob| 或 |String|。
+  对于 List 和 Blob，项目会就地反转并返回 {object}。
+  对于 String，则返回一个新的 String。
+  如果 {object} 不是 List、Blob 或 String，则返回零。
+  如果希望 List 或 Blob 保持不变，请先复制：>vim
+  let revlist = reverse(copy(mylist))
+  <
+  
+  参数：~
+  • {object} (`T[]`)
+  
+  返回：~
+  (`T[]`)
+
+vim:tw=78:ts=8:noet:ft=help:norl:
+
