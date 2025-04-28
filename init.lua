@@ -266,14 +266,10 @@ K.add({
           --   • 改变文本的新结束字节长度
         end,
         on_lines = function(_, bufnr, changedtick, first, last_old, last_new, byte_count)
-          if first == 0 then
-            if last_old > last_new then
-              vim.schedule(function()
-                vim.api.nvim_buf_set_lines(bufnr, 1, 2, false, { "不允许删除" })
-              end)
-            end
+          if last_old > last_new then
+            print(last_old, last_new)
+            print("删除了: ", last_old - last_new)
           end
-
           --   -- first 改变的第一行, 从 0 开始
           --   -- last_old 改变的最后一行
           --   -- last_new 更新范围的最后一行
@@ -343,16 +339,22 @@ K.add({
     "i"
   },
   ["<F6>"] = { function()
-    local ns_id = vim.api.nvim_create_namespace("test")
-    vim.api.nvim_buf_set_extmark(0, ns_id, 1, 0, {
-      virt_lines = {
-        {
-          { " 寄存器", "CursorLineNr" }
-        },
-      },
-      virt_lines_above = true
-    })
-  end, "n" }
+    -- lua string 以字节为准
+    -- neovim api 以字节为准
+    -- neovim get mark ">" 以最后一个字符的起始字节为准
+
+    -- -- 当光标落在一个多字节的字符上
+    -- -- 以该字符的第一个字节为基准
+    -- local pos = vim.api.nvim_win_get_cursor(0)
+    -- print(vim.inspect(pos))
+
+    -- vim.api.nvim_buf_set_text(0, 0, 0, 10, 10)
+    -- local pos = vim.api.nvim_win_get_cursor(0)
+    -- print(vim.inspect(pos))
+    -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
+    -- local pos = vim.api.nvim_buf_get_mark(0, ">")
+    -- print(vim.inspect(pos))
+  end, { "n", "x" } }
 })
 --   on_lines = function(_, bufnr, changedtick, first, last_old, last_new, byte_count)
 --     --   -- first 改变的第一行, 从 0 开始

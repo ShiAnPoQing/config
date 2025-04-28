@@ -53,19 +53,25 @@ nvim_win_get_buf({window})                                *nvim_win_get_buf()*
         缓冲区 id
 
 nvim_win_get_cursor({window})                          *nvim_win_get_cursor()*
-    获取给定窗口的 (1,0) 索引、缓冲区相对的光标位置（显示相同缓冲区的不同窗口具有独立的光标位置）。|api-indexing|
-
-    属性：~
-        自 0.1.0 起
+    获取给定窗口的 (1,0) 索引、缓冲区相对的光标位置
+    （显示相同缓冲区的不同窗口具有独立的光标位置）
 
     参数：~
-      • {window}  |window-ID|，或当前窗口为 0
+      • {window}  |window-ID| 或当前窗口为 0
 
     返回：~
         (row, col) 元组
 
-    另请参见：~
-      • |getcurpos()|
+    (1, 0) 索引的理解：
+        行索引从1开始：1 代表光标在第一行
+        列索引从0开始：0 :|a|b|c|d|
+
+    注意：
+        当光标落在一个多字节的字符上
+        以该字符的第一个字节为基准
+        所以以该 api 获取的索引，不能直接用于 |nvim_buf_get_text|
+        否则有可能将多字节字符拆开，导致乱码
+
 
 nvim_win_get_height({window})                          *nvim_win_get_height()*
     获取窗口高度

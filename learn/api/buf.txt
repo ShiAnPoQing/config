@@ -323,7 +323,8 @@ nvim_buf_set_text({buffer}, {start_row}, {start_col}, {end_row}, {end_col},
 
     当仅修改行的部分时，推荐使用此方法而不是 |nvim_buf_set_lines()|，因为在未修改的部分上会保留 extmarks。
 
-    索引是从零开始的。行索引是结束包含的，列索引是结束排除的。
+    索引是从零开始的。
+    行索引是结束包含的，列索引是结束排除的。
 
     要在给定 `(row, column)` 位置插入文本，请使用 `start_row = end_row = row` 和 `start_col = end_col = col`。要删除范围内的文本，请使用 `replacement = {}`。
 

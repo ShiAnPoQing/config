@@ -37,11 +37,10 @@ local MoveAction = {
   }
 }
 
---- @param action "left"|"right"
-function M.select_move(action)
+
+local function select_mode_move(action)
   vim.api.nvim_exec2([[  execute "normal! \<Esc>gvy"  ]], {})
   local Action = MoveAction[action]
-
   local select = vim.fn.getreg('"')
   local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
   local _, end_col = unpack(vim.api.nvim_buf_get_mark(0, ">"))
@@ -60,6 +59,45 @@ function M.select_move(action)
   set_mark({ start_row, start_col + mark_offset }, { start_row, end_col + mark_offset })
 
   vim.api.nvim_exec2([[  execute "normal! gv\<C-g>"  ]], {})
+end
+
+local function select_block_mode_move(action, start_row, start_col, end_row, end_col)
+  vim.api.nvim_exec2([[  execute "normal! \<C-g>"  ]], {})
+
+
+  local count = end_row - start_row + 1
+  for i = 1, count do
+    vim.api.nvim_buf_set_mark(0, "<", start_row + i - 1, start_col, {})
+    vim.api.nvim_buf_set_mark(0, ">", start_row + i - 1, end_col, {})
+    vim.api.nvim_feedkeys("gvdp", "nx", false)
+  end
+  vim.api.nvim_feedkeys("gv" .. vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
+  local last_start_row, last_start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
+  local last_end_row, last_end_col = unpack(vim.api.nvim_buf_get_mark(0, ">"))
+  print(last_start_row, last_start_col)
+
+  -- vim.api.nvim_buf_set_mark(0, "<", last_start_row - count - 1, last_start_col, {})
+  -- vim.api.nvim_buf_set_mark(0, ">", last_end_row, end_col, {})
+  --
+  -- vim.api.nvim_feedkeys("gv", "nx", false)
+end
+
+--- @param action "left"|"right"
+function M.select_move(action)
+  local mode = vim.api.nvim_get_mode().mode
+  if mode == "s" then
+    select_mode_move(action)
+  elseif mode == "" then
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
+    local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
+    local end_row, end_col = unpack(vim.api.nvim_buf_get_mark(0, ">"))
+
+    if start_row == end_row then
+      select_mode_move(action)
+    else
+      select_block_mode_move(action, start_row, start_col, end_row, end_col)
+    end
+  end
 end
 
 return M

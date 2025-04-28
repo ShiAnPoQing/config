@@ -1,0 +1,20 @@
+*api-indexing*
+大多数 API 使用从 0 开始的索引，并且范围包含末尾。
+对于范围的末尾，-1 表示最后一行/列。
+
+例外：以下 API 函数使用“类似标记”的索引（行从 1 开始，列从 0 开始）：
+
+- |nvim_get_mark()|
+- |nvim_buf_get_mark()|
+- |nvim_buf_set_mark()|
+- |nvim_win_get_cursor()|
+- |nvim_win_set_cursor()|
+
+例外：以下 API 函数使用 |extmarks| 索引（索引从 0 开始，包含末尾）：
+
+- |nvim_buf_del_extmark()|
+- |nvim_buf_get_extmark_by_id()|
+- |nvim_buf_get_extmarks()|
+- |nvim_buf_set_extmark()|
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
