@@ -1,0 +1,3925 @@
+*lua.txt*    Nvim
+
+
+                            NVIM 参考手册
+
+
+Lua 引擎                                                           *lua* *Lua*
+
+                                       输入 |gO| 查看目录。
+
+==============================================================================
+简介                                                       *lua-intro*
+
+Lua 5.1 脚本引擎是内置且始终可用的。
+试试这个命令来了解底层内容： >vim
+
+    :lua vim.print(package.loaded)
+
+Nvim 包含一个 Lua 的“标准库” |lua-stdlib|。
+它补充了“编辑器标准库”（|vimscript-functions| + |Ex-commands|）和 |API|，这些都可以在 Lua 代码中使用（|lua-vimscript| |vim.api|）。
+这三个命名空间构成了 Nvim 的编程接口。
+
+Lua 插件和用户配置会像 Vimscript 一样自动发现和加载。
+实际用法见 |lua-guide|。
+
+你也可以用 shell 运行 Lua 脚本，使用 |-l| 参数： >
+    nvim -l foo.lua [args...]
+<
+                                                                  *lua-compat*
+Lua 5.1 是 Nvim Lua 的永久接口。
+插件应以 |luaref| 规定的 Lua 5.1 为目标；更高版本（本质上是不同且不兼容的方言）不被支持。
+这包括一些 Lua 5.1 解释器如 LuaJIT 支持的 `goto` 扩展。
+
+                                                                  *lua-luajit*
+虽然 Nvim 官方只要求支持 Lua 5.1，但在支持的平台上应使用 LuaJIT 或兼容分支编译以获得性能提升。
+LuaJIT 还带来如 `ffi`、 |lua-profile| 和增强标准库函数等扩展；
+这些不能假定一定可用， |init.lua| 或插件中的 Lua 代码应在使用前检查 `jit` 全局变量： >lua
+  if jit then
+    -- 针对 luajit 的代码
+  else
+    -- 针对纯 lua 5.1 的代码
+  end
+<
+一个例外是 LuaJIT 的 `bit` 扩展，它总是可用：当用 PUC Lua 编译时，Nvim 会包含一个后备实现，提供
+`require("bit")`。见 |lua-bit|。
+
+                                                                  *lua-profile*
+如果 Nvim 用 LuaJIT 编译，可以通过如下方式分析 Lua 代码： >lua
+    -- 开始分析会话:
+    require('jit.p').start('ri1', '/tmp/profile')
+
+    -- 执行任意任务（使用插件、脚本等）...
+
+    -- 停止会话。分析结果写入 /tmp/profile。
+    require('jit.p').stop()
+
+详见 https://luajit.org/ext_profiler.html 或 `p.lua` 源码： >
+    :lua vim.cmd.edit(package.searchpath('jit.p', package.path))
+
+==============================================================================
+LUA 概念与习惯用法                                         *lua-concepts*
+
+Lua 非常简单且 _一致_：虽然有些小怪癖，但一旦你习惯了这些怪癖，一切地方都一样。
+作用域（闭包）尤其一致，不像 JavaScript 或大多数其他语言。
+
+Lua 有三大基本机制——每个“编程主要方面”各一个：表、闭包和协程。
+https://www.lua.org/doc/cacm2018.pdf
+- 表是“对象”或容器数据结构：既可表示列表也可表示映射，你可以扩展它们来表示自定义数据类型，并用 |metatable|（类似 Python 的“数据模型”）改变其行为。
+- Lua 中每个作用域都是闭包：函数是闭包，模块是闭包，`do` 块（|lua-do|）也是闭包——它们都一样。
+  Lua 模块其实就是在“路径”上发现的一个大闭包（即你的模块在哪里：|package.cpath|）。
+- 有栈协程支持协作式多线程、生成器，以及 Lua 和宿主（Nvim）都能用的灵活控制。
+
+                                                          *lua-error-handling*
+Lua 函数可能因异常（意外）失败抛出 |lua-errors|，你可以用 |pcall()| 处理。
+                                                       *lua-result-or-message*
+当失败是正常且可预期时，惯用法是返回 `nil`，这表示调用者必须处理失败而不是“异常”。
+这种“结果或消息”模式表现为多返回值类型
+`any|nil,nil|string`，或用 LuaLS 表示为: >
+
+    ---@return any|nil    # 成功时的结果，失败时为 nil。
+    ---@return nil|string # 成功时为 nil，失败时为错误信息。
+<
+“结果或消息”模式示例：
+- |vim.ui.open()|
+- |io.open()|
+- |luv-error-handling|
+
+当调用者遇到失败无法继续时，惯用法是对“结果或消息”结果用 `assert()`： >lua
+
+    local value = assert(fn())
+
+建议：对以下情况使用“结果或消息”模式……
+- 失败是预期的，尤其是与外部世界通信时。例如 HTTP 请求或 LSP 请求经常因服务器问题失败，即使调用者没做错什么。
+- 返回值的函数，如 Foo:new()。
+- 有一组已知错误码可作为第三返回值时（如 |luv-error-handling|）。
+<
+                                                                    *iterator*
+迭代器就是一个可反复调用以获取集合（或其他 |iterable|）“下一个”值的函数。
+|for-in| 循环期望这种接口， |pairs()| 产生它， |vim.iter| 支持它，等等。
+https://www.lua.org/pil/7.1.html
+
+                                                                    *iterable*
+“可迭代对象”是 |vim.iter()| 可消费的任何东西：表、字典、列表、迭代器函数、实现 |__call()| 元方法的表，以及 |vim.iter()| 对象。
+
+                                                               *list-iterator*
+|lua-list| 表上的迭代器有“中间”和“结尾”，而一般迭代器可能逻辑上是无限的。
+因此某些 |vim.iter| 操作（如 |Iter:rev()|）只对类列表表有意义（定义上是有限的）。
+
+                                                           *lua-function-call*
+Lua 函数有多种调用方式。考虑如下函数： >lua
+    local foo = function(a, b)
+        print("A: ", a)
+        print("B: ", b)
+    end
+
+第一种调用方式： >lua
+    foo(1, 2)
+    -- ==== 结果 ====
+    -- A: 1
+    -- B: 2
+
+这种调用方式大多数脚本语言都很熟悉。
+在 Lua 中，缺失的参数会传递为 `nil`，多余的参数会被静默丢弃。
+例如： >lua
+    foo(1)
+    -- ==== 结果 ====
+    -- A: 1
+    -- B: nil
+<
+                                                                      *kwargs*
+调用函数时，如果参数正好是一个字符串字面量（`"foo"`）或表字面量（`{1,2,3}`），可以省略括号。
+后者常用于模拟“命名参数”（“kwargs”或“关键字参数”），类似 Python 和 C#。
+例如： >lua
+    local func_with_opts = function(opts)
+        local will_do_foo = opts.foo
+        local filename = opts.filename
+        -- ...
+    end
+
+    func_with_opts { foo = true, filename = "hello.world" }
+<
+这里只是语法糖，实际上会自动加括号。
+但视觉上，这点小糖足以接近“关键字参数”接口。
+
+                                                                   *lua-regex*
+Lua 有意不支持正则表达式，而是有有限的 |lua-patterns|，以避免扩展正则的性能陷阱。
+Lua 脚本也可用 Vim 正则，见 |vim.regex()|。
+
+示例： >lua
+
+    print(string.match("foo123bar123", "%d+"))
+    -- 123
+    print(string.match("foo123bar123", "[^%d]+"))
+    -- foo
+    print(string.match("foo123bar123", "[abc]+"))
+    -- ba
+    print(string.match("foo.bar", "%.bar"))
+    -- .bar
+
+==============================================================================
+导入 Lua 模块                                        *lua-module-load*
+
+模块会在 'runtimepath' 指定的目录下按顺序搜索。
+模块名中的每个 "." 都会被当作目录分隔符。
+例如模块 `foo.bar`，每个目录会依次搜索
+`lua/foo/bar.lua`，然后是 `lua/foo/bar/init.lua`。
+如果都找不到，再按共享库名 `lua/foo/bar.?` 搜索，其中 `?` 是 |package.cpath| 初始值中的后缀（如 `so` 或 `dll`）。
+如果还找不到，Nvim 会回退到 Lua 默认的搜索机制。
+找到的第一个脚本会被执行，`require()` 返回脚本返回的值（如果有），否则返回 `true`。
+
+每个模块第一次用 `require()` 加载后，返回值会被缓存，后续调用直接返回缓存值，不再搜索或执行脚本。更多细节见 |require()|。
+
+例如，'runtimepath' 为 `foo,bar`，|package.cpath| 启动时为
+`./?.so;./?.dll`，`require('mod')` 会按如下顺序搜索并加载第一个找到的模块（“先到先得”）： >
+    foo/lua/mod.lua
+    foo/lua/mod/init.lua
+    bar/lua/mod.lua
+    bar/lua/mod/init.lua
+    foo/lua/mod.so
+    foo/lua/mod.dll
+    bar/lua/mod.so
+    bar/lua/mod.dll
+<
+
+                                                        *lua-package-path*
+Nvim 会根据当前 'runtimepath' 自动调整 |package.path| 和 |package.cpath|。
+每次 'runtimepath' 变化时都会调整。
+`package.path` 通过在每个目录后追加 `/lua/?.lua` 和 `/lua/?/init.lua` 实现（`/` 实际上是 `package.config` 的第一个字符）。
+
+同理，'runtimepath' 目录也会被加到 |package.cpath|。
+这时会用所有唯一的、包含 `?` 的后缀。
+
+例如：
+- 1. 假设
+   - 'runtimepath' 包含 `/foo/bar,/xxx;yyy/baz,/abc`；
+   - 初始 |package.cpath|（编译时定义或由 `$LUA_CPATH` / `$LUA_INIT` 派生）为 `./?.so;/def/ghi/a?d/j/g.elf;/def/?.so`。
+- 2. 找到 `?` 后缀 `/?.so`、`/a?d/j/g.elf` 和 `/?.so`，顺序如下：从第一个包含问号的路径组件及其前的分隔符开始。
+- 3. `/def/?.so` 的后缀 `/?.so` 不唯一，因为和 |package.path| 的第一个路径（即 `./?.so`）一样。剩下 `/?.so` 和 `/a?d/j/g.elf`，顺序不变。
+- 4. 'runtimepath' 有三个路径：`/foo/bar`、`/xxx;yyy/baz` 和 `/abc`。第二个包含分号，作为路径分隔符被排除，只剩 `/foo/bar` 和 `/abc`。
+- 5. 取 4. 和 3. 的笛卡尔积，共四种组合。每种组合在路径和后缀之间插入 `/lua`，得到：
+     - `/foo/bar/lua/?.so`
+     - `/foo/bar/lua/a?d/j/g.elf`
+     - `/abc/lua/?.so`
+     - `/abc/lua/a?d/j/g.elf`
+- 6. 新路径会加到原始 |package.cpath| 前面。
+
+结果如下： >
+
+    /foo/bar,/xxx;yyy/baz,/abc ('runtimepath')
+    × ./?.so;/def/ghi/a?d/j/g.elf;/def/?.so (package.cpath)
+    = /foo/bar/lua/?.so;/foo/bar/lua/a?d/j/g.elf;/abc/lua/?.so;/abc/lua/a?d/j/g.elf;./?.so;/def/ghi/a?d/j/g.elf;/def/?.so
+
+注意：
+
+- 为追踪 'runtimepath' 更新，上次添加的路径会在下次更新时移除，所有新 'runtimepath' 派生的路径会如上所述加到前面。
+这样当路径被移除、添加或重排序时，|package.path|/|package.cpath| 也会同步变化。
+
+- 虽然会自动调整，Nvim 不会追踪 |package.path| 或 |package.cpath| 的当前值。
+如果你手动删了某些路径，可以设置 'runtimepath' 触发更新： >vim
+    let &runtimepath = &runtimepath
+<
+
+- 跳过包含分号的 'runtimepath' 路径对 |package.path| 和 |package.cpath| 都适用。
+因为有些写得不好的插件用 shell，分号会导致问题，最好不要在 'runtimepath' 里用分号。
+
+==============================================================================
+命令                                                        *lua-commands*
+
+这些命令从命令行（:lua, :luado）或文件（:luafile）在指定行 [range] 执行 Lua 代码块。
+和 Lua 一样，每个代码块有自己的作用域（闭包），只有全局变量在命令间共享。
+|lua-stdlib| 模块、用户模块和 |package.path| 上的其他内容都可用。
+
+Lua 的 print() 函数会把输出重定向到 Nvim 消息区，参数间用空格分隔，而不是 "\t"。
+
+                                                                  *:lua=* *:lua*
+:lua {chunk}
+    执行 Lua 代码块 {chunk}。
+
+    如果 {chunk} 以 "=" 开头，剩下的部分会作为表达式求值并打印。
+
+    `:lua =expr` 和 `:=expr` 等价于 `:lua print(vim.inspect(expr))`。
+
+    示例： >vim
+        :lua vim.api.nvim_command('echo "Hello, Nvim!"')
+<    查看 Lua 版本： >vim
+        :lua print(_VERSION)
+<    查看 LuaJIT 版本： >vim
+        :lua =jit.version
+<
+:{range}lua
+    把 [range] 范围内的缓冲区行作为 Lua 代码执行。
+    不同于 |:source|，总是把这些行当作 Lua 代码。
+
+    示例：选中如下代码并输入 ":lua<Enter>" 执行： >lua
+        print(string.format(
+            'unix time: %s', os.time()))
+<
+                                                                *:lua-heredoc*
+:lua << [trim] [{endmarker}]
+{script}
+{endmarker}
+    在 Vimscript 中执行 Lua 脚本 {script}。
+    可以省略 "<<" 后的 [endmarker]，用点号 "." 结束 {script}（类似 |:append|, |:insert|）。更多信息见 |:let-heredoc|。
+
+    示例： >vim
+        function! CurrentLineInfo()
+        lua << EOF
+        local linenr = vim.api.nvim_win_get_cursor(0)[1]
+        local curline = vim.api.nvim_buf_get_lines(0, linenr - 1, linenr, false)[1]
+        print(string.format('Line [%d] has %d bytes', linenr, #curline))
+        EOF
+        endfunction
+<
+    注意 `local` 变量在代码块结束时会消失，但全局变量不会。
+
+                                                                      *:luado*
+:[range]luado {body}
+    对 [range] 范围内每一行执行 Lua 代码块 "function(line, linenr) {body} end"，其中 `line` 是当前行文本（不含 <EOL>），`linenr` 是当前行号。
+    如果函数返回字符串，则该字符串会成为对应缓冲区行的新内容。
+    默认 [range] 是整个文件："1,$"。
+
+    示例： >vim
+        :luado return string.format("%s\t%d", line:reverse(), #line)
+
+        :lua require"lpeg"
+        :lua -- 平衡括号语法：
+        :lua bp = lpeg.P{ "(" * ((1 - lpeg.S"()") + lpeg.V(1))^0 * ")" }
+        :luado if bp:match(line) then return "=>\t" .. line end
+<
+                                                                    *:luafile*
+:luafile {file}
+    执行 {file} 中的 Lua 脚本。
+    整个参数作为文件名（如 |:edit|），不需要转义空格。
+    也可以用 |:source| 执行 Lua 文件。
+
+    示例： >vim
+        :luafile script.lua
+        :luafile %
+<
+
+==============================================================================
+luaeval()                                                 *lua-eval*
+
+"luaeval" 是用于将 Lua 值传递给 Nvim 的（双向）"vim.eval" 等价物。
+    它接受一个表达式字符串和一个可选参数，该参数在表达式中作为 _A 使用，并返回表达式的结果。
+    在 Lua 中语义等价于： >lua
+
+    local chunkheader = "local _A = select(1, ...) return "
+    function luaeval (expstr, arg)
+        local chunk = assert(loadstring(chunkheader .. expstr, "luaeval"))
+        return chunk(arg) -- 返回 typval
+    end
+<
+Lua 的 nil、数字、字符串、表和布尔值会被转换为各自的 Vimscript 类型。
+如果 Lua 字符串包含 NUL 字节，会被转换为 |Blob|。
+其他 Lua 类型的转换会报错。
+
+魔法全局变量 "_A" 包含传给 luaeval() 的第二个参数。
+
+示例： >vim
+    :echo luaeval('_A[1] + _A[2]', [40, 2])
+    " 42
+    :echo luaeval('string.match(_A, "[a-z]+")', 'XYXfoo123')
+    " foo
+<
+                                                         *lua-table-ambiguous*
+Lua 表既可用作字典也可用作列表，因此无法判断空表到底是列表还是字典。
+Lua 也没有整数类型。
+
+为消除歧义，定义如下：
+                                                                    *lua-list*
+0. 空表视为列表。用 |vim.empty_dict()| 表示空字典。
+1. 具有 N 个连续（无 nil 值，即“无洞”）整数键 1…N 的表是列表。见 |list-iterator|。
+                                                                    *lua-dict*
+2. 只有字符串键，且无 NUL 字节的表是字典。
+3. 有字符串键，且至少有一个键包含 NUL 字节的表也视为字典，但会被转换为 |msgpack-special-map|。
+                                                             *lua-special-tbl*
+4. 含有 `vim.type_idx` 键的表可以是字典、列表或浮点数：
+   - `{[vim.type_idx]=vim.types.float, [vim.val_idx]=1}` 会被转换为浮点数 1.0。
+        注意默认情况下整数 Lua 数会被转为 |Number|，非整数会转为 |Float|。此变体允许整数 |Float|。
+   - `{[vim.type_idx]=vim.types.dictionary}` 会被转换为空字典，`{[vim.type_idx]=vim.types.dictionary, [42]=1, a=2}` 会被转换为字典 `{'a': 42}`：非字符串键会被忽略。
+     没有 `vim.type_idx` 键且键不符合 1、2、3 的表会报错。
+   - `{[vim.type_idx]=vim.types.array}` 会被转换为空列表。以及 `{[vim.type_idx]=vim.types.array, [42]=1}`：不连续的整数键和所有非整数键都会被忽略。
+
+示例： >vim
+
+    :echo luaeval('math.pi')
+    :function Rand(x,y) " 返回 x 到 y 之间的均匀随机数
+    :  return luaeval('(_A.y-_A.x)*math.random()+_A.x', {'x':a:x,'y':a:y})
+    :  endfunction
+    :echo Rand(1,10)
+<
+注意：传给 `luaeval` 的第二个参数会从 Vimscript 转换（“编组”）到 Lua，因此对 Lua 容器的更改不会影响 Vimscript 中的值。
+返回值也总是会被转换。
+转换时， |msgpack-special-dict| 会被特殊处理。
+
+==============================================================================
+Vimscript v:lua 接口                                         *v:lua-call*
+
+在 Vimscript 中可以用特殊前缀 `v:lua` 调用全局或全局表可访问的 Lua 函数。
+表达式 >vim
+    call v:lua.func(arg1, arg2)
+等价于 Lua 代码 >lua
+    return func(...)
+参数会被转换为 Lua 值。
+表达式 >vim
+    call v:lua.somemod.func(args)
+等价于 Lua 代码 >lua
+    return somemod.func(...)
+
+Lua 模块函数可这样访问： >vim
+    call v:lua.require'mypack'.func(arg1, arg2)
+    call v:lua.require'mypack.submod'.func(arg1, arg2)
+注意：只允许单引号形式，不带括号。
+用 `require"mypack"` 或 `require('mypack')` 作为前缀无效。
+
+你可以在 'tagfunc'、'omnifunc' 等 "func" 选项中用 `v:lua`。
+例如如下 Lua 补全处理器： >lua
+
+    function mymod.omnifunc(findstart, base)
+      if findstart == 1 then
+        return 0
+      else
+        return {'stuff', 'steam', 'strange things'}
+      end
+    end
+    -- 注意：模块（"mymod"）必须是 Lua 全局变量，或用 require() 方式访问。
+    vim.bo[buf].omnifunc = 'v:lua.mymod.omnifunc'
+
+你也可以用 `v:lua` 作为 Vimscript |method| 调用 Lua 函数： >vim
+    :eval arg1->v:lua.somemod.func(arg2)
+<
+注意：Vimscript 表达式中不能单独用 `v:lua`：
+|Funcref| 不能表示 Lua 函数。
+以下写法会报错： >vim
+
+    let g:Myvar = v:lua.myfunc        " 错误
+    call SomeFunc(v:lua.mycallback)   " 错误
+    let g:foo = v:lua                 " 错误
+    let g:foo = v:['lua']             " 错误
+<
+
+==============================================================================
+Lua 标准模块                                              *lua-stdlib*
+
+Nvim 的 Lua “标准库”（stdlib）是 `vim` 模块，暴露了各种函数和子模块。
+
+它总是已加载，因此无需 `require("vim")`。
+
+你可以查看模块属性： >vim
+
+    :lua vim.print(vim)
+
+结果类似如下： >
+
+    {
+      _os_proc_children = <function 1>,
+      _os_proc_info = <function 2>,
+      ...
+      api = {
+        nvim__id = <function 5>,
+        nvim__id_array = <function 6>,
+        ...
+      },
+      deepcopy = <function 106>,
+      gsplit = <function 107>,
+      ...
+    }
+
+要查找如 "deepcopy" 函数的文档： >vim
+
+    :help vim.deepcopy()
+
+注意以下划线开头的函数（如 "_os_proc_children"）是内部/私有的，插件不得使用。
+
+------------------------------------------------------------------------------
+VIM.UV                                                   *lua-loop* *vim.uv*
+
+`vim.uv` 暴露了 Nvim 用于网络、文件系统和进程管理的 libUV 的 Lua 绑定，见 |luvref.txt|。
+特别地，它允许与 Nvim 的主 |luv-event-loop| 交互。
+
+                                                    *E5560* *lua-loop-callbacks*
+在 `vim.uv` 回调中直接调用 `vim.api` 函数（除 |api-fast| 外）会报错。
+例如，以下代码会报错： >lua
+
+    local timer = vim.uv.new_timer()
+    timer:start(1000, 0, function()
+      vim.api.nvim_command('echomsg "test"')
+    end)
+<
+要避免报错，用 |vim.schedule_wrap()| 延迟回调： >lua
+
+    local timer = vim.uv.new_timer()
+    timer:start(1000, 0, vim.schedule_wrap(function()
+      vim.api.nvim_command('echomsg "test"')
+    end))
+<
+（一次性定时器见 |vim.defer_fn()|，它会自动包裹。）
+
+示例：重复定时器
+    1. 将代码保存到文件。
+    2. 用 ":luafile %" 执行。 >lua
+
+    -- 创建一个定时器句柄（实现细节：uv_timer_t）。
+    local timer = vim.uv.new_timer()
+    local i = 0
+    -- 等待 1000ms，然后每 750ms 重复，直到 timer:close()。
+    timer:start(1000, 750, function()
+      print('timer invoked! i='..tostring(i))
+      if i > 4 then
+        timer:close()  -- 一定要关闭句柄以避免泄漏。
+      end
+      i = i + 1
+    end)
+    print('sleeping');
+<
+示例：文件变更检测                                    *watch-file*
+    1. 将代码保存到文件。
+    2. 用 ":luafile %" 执行。
+    3. 用 ":Watch %" 监视任意文件。
+    4. 尝试用其他编辑器编辑该文件。
+    5. 观察 Nvim 自动重载文件（因为 on_change() 调用了 |:checktime|）。 >lua
+
+    local w = vim.uv.new_fs_event()
+    local function on_change(err, fname, status)
+      -- 做一些工作...
+      vim.api.nvim_command('checktime')
+      -- 防抖：停止/重启。
+      w:stop()
+      watch_file(fname)
+    end
+    function watch_file(fname)
+      local fullpath = vim.api.nvim_call_function(
+        'fnamemodify', {fname, ':p'})
+      w:start(fullpath, {}, vim.schedule_wrap(function(...)
+        on_change(...) end))
+    end
+    vim.api.nvim_command(
+      "command! -nargs=1 Watch call luaeval('watch_file(_A)', expand('<args>'))")
+<
+                                                         *inotify-limitations*
+在 Linux 下你可能需要增加 `inotify` 监视和队列事件的最大数量，默认值可能太低。增加方法： >bash
+    sysctl fs.inotify.max_user_watches=494462
+<
+这会把限制提升到 494462。可将此行加入 `/etc/sysctl.conf` 以永久生效。
+
+注意每个监视都是内核中的一个结构体，因此可用内存也是 inotify 使用的瓶颈。实际上，一个监视最多占用 1KB 空间。也就是说一百万个监视会额外占用 1GB 内存。
+
+示例：TCP 回显服务器                                          *tcp-server*
+    1. 将代码保存到文件。
+    2. 用 ":luafile %" 执行。
+    3. 记下端口号。
+    4. 用任意 TCP 客户端连接（如 "nc 0.0.0.0 36795"）： >lua
+
+    local function create_server(host, port, on_connect)
+      local server = vim.uv.new_tcp()
+      server:bind(host, port)
+      server:listen(128, function(err)
+        assert(not err, err)  -- 检查错误。
+        local sock = vim.uv.new_tcp()
+        server:accept(sock)  -- 接受客户端连接。
+        on_connect(sock)  -- 开始读取消息。
+      end)
+      return server
+    end
+    local server = create_server('0.0.0.0', 0, function(sock)
+      sock:read_start(function(err, chunk)
+        assert(not err, err)  -- 检查错误。
+        if chunk then
+          sock:write(chunk)  -- 回显收到的消息。
+        else  -- EOF（流关闭）。
+          sock:close()  -- 一定要关闭句柄以避免泄漏。
+        end
+      end)
+    end)
+    print('TCP echo-server listening on port: '..server:getsockname().port)
+<
+多线程                                            *lua-loop-threading*
+
+插件可用 luv 的线程 API（如 `vim.uv.new_thread`）在独立（操作系统级）线程中工作。每个线程有独立的 Lua 解释器状态，不能访问主线程的 Lua 全局变量，也不能直接访问编辑器状态（缓冲区、窗口等）。
+
+线程中可用 `vim.*` stdlib 的子集，包括：
+
+- `vim.uv`，每个线程有独立事件循环。
+- `vim.mpack` 和 `vim.json`（适合在线程间序列化消息）
+- 线程中的 `require` 可用全局 |package.path| 的 Lua 包
+- `print()` 和 `vim.inspect`
+- `vim.diff`
+- `vim.*` 中大多数只处理纯 Lua 值的工具函数，如
+  `vim.split`, `vim.tbl_*`, `vim.list_*` 等。
+- `vim.is_thread()` 在非主线程中返回 true。
+
+==============================================================================
+VIM.HL                                                                *vim.hl*
+
+vim.hl.on_yank({opts})                                      *vim.hl.on_yank()*
+    在 |TextYankPost| 事件期间高亮被复制的文本。
+
+    在 `init.vim` 中添加如下内容： >vim
+        autocmd TextYankPost * silent! lua vim.hl.on_yank {higroup='Visual', timeout=300}
+<
+
+    参数: ~
+      • {opts}  (`table?`) 可选参数
+                • higroup 高亮组（默认 "IncSearch"）
+                • timeout 高亮消失前的时间（毫秒，默认 150）
+                • on_macro 执行宏时是否高亮（默认 false）
+                • on_visual 复制可视选择时是否高亮（默认 true）
+                • event 事件结构体（默认 vim.v.event）
+                • priority 整数优先级（默认 |vim.hl.priorities|`.user`）
+
+vim.hl.priorities                                          *vim.hl.priorities*
+    用于高亮的默认优先级表：
+    • `syntax`: `50`，标准语法高亮
+    • `treesitter`: `100`，treesitter 高亮
+    • `semantic_tokens`: `125`，LSP 语义 token 高亮
+    • `diagnostics`: `150`，代码分析如诊断
+    • `user`: `200`，用户触发的高亮，如 LSP 文档符号或 `on_yank` 自动命令
+
+                                                              *vim.hl.range()*
+vim.hl.range({bufnr}, {ns}, {higroup}, {start}, {finish}, {opts})
+    对一段文本应用高亮组。
+
+    参数: ~
+      • {bufnr}    (`integer`) 要高亮的缓冲区编号
+      • {ns}       (`integer`) 要添加高亮的命名空间
+      • {higroup}  (`string`) 用于高亮的高亮组
+      • {start}    (`integer[]|string`) 区域起点（行、列元组或 |getpos()| 可接受的字符串）
+      • {finish}   (`integer[]|string`) 区域终点（行、列元组或 |getpos()| 可接受的字符串）
+      • {opts}     (`table?`) 具有以下字段的表:
+                   • {regtype}? (`string`, 默认: `'v'` 即字符方式) 区域类型。见 |getregtype()|
+                   • {inclusive}? (`boolean`, 默认: `false`) 区域是否包含终点
+                   • {priority}? (`integer`, 默认: `vim.hl.priorities.user`) 高亮优先级
+                   • {timeout}? (`integer`, 默认: -1 不超时) 高亮消失前的时间（毫秒）
+
+==============================================================================
+VIM.DIFF                                                            *vim.diff*
+
+vim.diff({a}, {b}, {opts})                                        *vim.diff()*
+    对字符串 {a} 和 {b} 进行 diff。该函数返回的所有索引都是 1 基的。
+
+    示例: >lua
+        vim.diff('a\n', 'b\nc\n')
+        -- =>
+        -- @@ -1 +1,2 @@
+        -- -a
+        -- +b
+        -- +c
+
+        vim.diff('a\n', 'b\nc\n', {result_type = 'indices'})
+        -- =>
+        -- {
+        --   {1, 1, 1, 2}
+        -- }
+<
+
+    参数: ~
+      • {a}     (`string`) 第一个要比较的字符串
+      • {b}     (`string`) 第二个要比较的字符串
+      • {opts}  (`table?`) 可选参数:
+                • {on_hunk}?
+                  (`fun(start_a: integer, count_a: integer, start_b: integer, count_b: integer): integer?`)
+                  对 diff 的每个 hunk 调用。返回负数可取消剩余 hunk 的回调。参数:
+                  • `start_a` (`integer`): {a} 中 hunk 的起始行
+                  • `count_a` (`integer`): {a} 中 hunk 的大小
+                  • `start_b` (`integer`): {b} 中 hunk 的起始行
+                  • `count_b` (`integer`): {b} 中 hunk 的大小
+                • {result_type}? (`'unified'|'indices'`, 默认: `'unified'`)
+                  返回的 diff 形式:
+                  • `unified`: 统一格式字符串
+                  • `indices`: hunk 位置数组。注意：如果用 `on_hunk`，此选项被忽略。
+                • {linematch}? (`boolean|integer`) 对 xdiff 结果的 hunk 运行 linematch。为整数时，仅对不超过该行数的 hunk 运行 linematch。需 `result_type = indices`，否则忽略。
+                • {algorithm}? (`'myers'|'minimal'|'patience'|'histogram'`,
+                  默认: `'myers'`) diff 算法:
+                  • `myers`: 默认算法
+                  • `minimal`: 生成最小 diff，耗时更长
+                  • `patience`: patience diff 算法
+                  • `histogram`: histogram diff 算法
+                • {ctxlen}? (`integer`) 上下文长度
+                • {interhunkctxlen}? (`integer`) hunk 间上下文长度
+                • {ignore_whitespace}? (`boolean`) 忽略空白
+                • {ignore_whitespace_change}? (`boolean`) 忽略空白变化
+                • {ignore_whitespace_change_at_eol}? (`boolean`) 忽略行尾空白变化
+                • {ignore_cr_at_eol}? (`boolean`) 忽略行尾回车
+                • {ignore_blank_lines}? (`boolean`) 忽略空行
+                • {indent_heuristic}? (`boolean`) diff 库使用缩进启发式
+
+    返回: ~
+        (`string|integer[][]?`) 见 {opts.result_type}。如用 {opts.on_hunk}，则为 nil。
+
+==============================================================================
+==============================================================================
+VIM.MPACK                                                          *vim.mpack*
+
+该模块提供 Lua 对象与 msgpack 编码字符串之间的编码与解码。支持 |vim.NIL| 和 |vim.empty_dict()|。
+
+vim.mpack.decode({str})                                   *vim.mpack.decode()*
+    将 msgpack 编码的 {str} 解码（或“解包”）为 Lua 对象。
+
+    参数: ~
+      • {str}  (`string`)
+
+    返回: ~
+        (`any`)
+
+vim.mpack.encode({obj})                                   *vim.mpack.encode()*
+    将 Lua 对象 {obj} 编码（或“打包”）为 msgpack 格式的 Lua 字符串。
+
+    参数: ~
+      • {obj}  (`any`)
+
+    返回: ~
+        (`string`)
+
+==============================================================================
+VIM.JSON                                                            *vim.json*
+
+该模块提供 Lua 对象与 JSON 编码字符串之间的编码与解码。支持 |vim.NIL| 和 |vim.empty_dict()|。
+
+vim.json.decode({str}, {opts})                             *vim.json.decode()*
+    将 JSON 编码的 {str} 解码（或“解包”）为 Lua 对象。
+    • JSON "null" 会被解码为 |vim.NIL|（可通过 {opts} 控制，见下）。
+    • 空对象解码为 |vim.empty_dict()|。
+    • 空数组解码为 `{}`（空 Lua 表）。
+
+    示例: >lua
+        vim.print(vim.json.decode('{"bar":[],"foo":{},"zub":null}'))
+        -- { bar = {}, foo = vim.empty_dict(), zub = vim.NIL }
+<
+
+    参数: ~
+      • {str}   (`string`) JSON 字符串
+      • {opts}  (`table<string,any>?`) 选项表，键包括:
+                • luanil: (table) 表，键包括:
+                  • object: (boolean) 若为 true，则 JSON 对象中的 null 转为 Lua nil，否则为 |vim.NIL|。
+                  • array: (boolean) 若为 true，则 JSON 数组中的 null 转为 Lua nil，否则为 |vim.NIL|。
+
+    返回: ~
+        (`any`)
+
+vim.json.encode({obj}, {opts})                             *vim.json.encode()*
+    将 Lua 对象 {obj} 编码（或“打包”）为 JSON 格式的 Lua 字符串。
+
+    参数: ~
+      • {obj}   (`any`)
+      • {opts}  (`table<string,any>?`) 选项表，键包括:
+                • escape_slash: (boolean) (默认 false) 是否转义字符串值中的斜杠 "/"
+
+    返回: ~
+        (`string`)
+
+==============================================================================
+VIM.BASE64                                                        *vim.base64*
+
+vim.base64.decode({str})                                 *vim.base64.decode()*
+    解码 Base64 编码的字符串。
+
+    参数: ~
+      • {str}  (`string`) Base64 编码字符串
+
+    返回: ~
+        (`string`) 解码后的字符串
+
+vim.base64.encode({str})                                 *vim.base64.encode()*
+    用 Base64 编码 {str}。
+
+    参数: ~
+      • {str}  (`string`) 要编码的字符串
+
+    返回: ~
+        (`string`) 编码后的字符串
+
+==============================================================================
+VIM.SPELL                                                          *vim.spell*
+
+vim.spell.check({str})                                     *vim.spell.check()*
+    检查 {str} 是否有拼写错误。类似于 Vimscript 函数 |spellbadword()|。
+
+    注意: 该函数行为依赖于：'spelllang'、'spellfile'、'spellcapcheck' 和 'spelloptions'，这些都可以是缓冲区本地的。建议用 |nvim_buf_call()| 调用。
+
+    示例: >lua
+        vim.spell.check("the quik brown fox")
+        -- =>
+        -- {
+        --     {'quik', 'bad', 5}
+        -- }
+<
+
+    参数: ~
+      • {str}  (`string`)
+
+    返回: ~
+        (`[string, 'bad'|'rare'|'local'|'caps', integer][]`) 三元组列表:
+        • 拼写错误的单词
+        • 拼写错误类型："bad" 拼写错误 "rare" 罕见词 "local" 只在其他地区有效的词 "caps" 应大写的词
+        • 单词在 {str} 中的起始位置
+
+==============================================================================
+==============================================================================
+VIM                                                              *vim.builtin*
+
+
+vim.api.{func}({...})                                                *vim.api*
+    调用 Nvim |API| 函数 {func}，参数为 {...}。
+    示例：调用 "nvim_get_current_line()" API 函数： >lua
+        print(tostring(vim.api.nvim_get_current_line()))
+
+vim.NIL                                                              *vim.NIL*
+    在 |RPC| 及 |v:null| Vimscript 转换等场景下，表示 NIL 的特殊值。Lua 的 `nil` 不能作为 Lua 表中表示字典或数组的元素，因为会被当作缺失：`{"foo", nil}` 等价于 `{"foo"}`。
+
+vim.type_idx                                                    *vim.type_idx*
+    用于 |lua-special-tbl| 的类型索引。指定 |vim.types| 的值之一可为空表指定类型（空 Lua 表不明确是空列表还是空数组），并强制整数为 |Float|。详见 |lua-special-tbl|。
+
+vim.val_idx                                                      *vim.val_idx*
+    表示 |Float| 的表的值索引。表示浮点值 1.0 的表如下： >lua
+        {
+          [vim.type_idx] = vim.types.float,
+          [vim.val_idx] = 1.0,
+        }
+<    另见 |vim.type_idx| 和 |lua-special-tbl|。
+
+vim.types                                                          *vim.types*
+    |vim.type_idx| 可用值的表。包含两组键值对：一组将 |vim.type_idx| 可能值映射为可读字符串，另一组将可读类型名映射为 |vim.type_idx| 值。目前有 `float`、`array` 和 `dictionary`。
+
+    注意: 只能假定 `vim.types.float`、`vim.types.array` 和 `vim.types.dictionary` 满足以下两点：
+    1. 可作为表的键和值。即“值不是 `nil`”。
+    2. 对于 `vim.types` 表中的每个值，`vim.types[vim.types[value]]` 等于 `value`。
+    其它不做保证，类型值可能变化，`vim.types` 也可能包含其它类型。
+
+                                                   *log_levels* *vim.log.levels*
+日志级别为 `vim.log.levels` 中定义的值之一：
+
+    vim.log.levels.DEBUG
+    vim.log.levels.ERROR
+    vim.log.levels.INFO
+    vim.log.levels.TRACE
+    vim.log.levels.WARN
+    vim.log.levels.OFF
+
+vim.empty_dict()                                            *vim.empty_dict()*
+    创建一个特殊的空表（带有元表标记），Nvim 在将 Lua 值转换为 Vimscript 或 API 类型时会将其视为字典。Nvim 默认会把没有该元表的空表 `{}` 转为列表/数组。
+
+    注意: 如果表中有数字键，Nvim 会忽略元表标记并将字典转为列表/数组。
+
+    返回: ~
+        (`table`)
+
+vim.iconv({str}, {from}, {to})                                   *vim.iconv()*
+    结果是字符串，将 {str} 从编码 {from} 转为编码 {to}。
+    转换失败时返回 `nil`。
+    有些字符无法转换时会被替换为 "?"。
+    编码名为 iconv() 库函数可接受的名称，见 ":Man 3 iconv"。
+
+    参数: ~
+      • {str}   (`string`) 要转换的文本
+      • {from}  (`string`) {str} 的编码
+      • {to}    (`string`) 目标编码
+
+    返回: ~
+        (`string?`) 转换成功时为转换后的字符串，否则为 `nil`
+
+vim.in_fast_event()                                      *vim.in_fast_event()*
+    若代码在“快速”事件处理器中执行，则返回 true，此时大多数 API 不可用。
+    这些是低级事件（如 |lua-loop-callbacks|），Nvim 轮询输入时可被调用。
+    若为 false，大多数 API 可调用（但可能受 |textlock| 等其它限制）。
+
+vim.rpcnotify({channel}, {method}, {...})                    *vim.rpcnotify()*
+    通过 |RPC| 向 {channel} 发送 {event} 并立即返回。
+    如果 {channel} 为 0，则事件广播到所有通道。
+
+    此函数也可在快速回调 |lua-loop-callbacks| 中使用。
+
+    参数: ~
+      • {channel}  (`integer`)
+      • {method}   (`string`)
+      • {...}      (`any?`)
+
+vim.rpcrequest({channel}, {method}, {...})                  *vim.rpcrequest()*
+    通过 |RPC| 向 {channel} 发送请求调用 {method}，并阻塞直到收到响应。
+
+    注意: 返回值中的 NIL 用 |vim.NIL| 表示
+
+    参数: ~
+      • {channel}  (`integer`)
+      • {method}   (`string`)
+      • {...}      (`any?`)
+
+vim.schedule({fn})                                            *vim.schedule()*
+    安排 {fn} 很快由主事件循环调用。
+    用于避免 |textlock| 或其它临时限制。
+
+    参数: ~
+      • {fn}  (`fun()`)
+
+vim.str_utf_end({str}, {index})                            *vim.str_utf_end()*
+    获取 {index} 指向的码点（字符）最后一个字节的距离（以字节为单位）。
+
+    示例: >lua
+        -- 字符 'æ' 用 UTF-8 存储为 '\xc3\xa6'
+
+        -- 返回 0，因 index 指向字符最后一个字节
+        vim.str_utf_end('æ', 2)
+
+        -- 返回 1，因 index 指向字符倒数第二个字节
+        vim.str_utf_end('æ', 1)
+<
+
+    参数: ~
+      • {str}    (`string`)
+      • {index}  (`integer`)
+
+    返回: ~
+        (`integer`)
+
+vim.str_utf_pos({str})                                     *vim.str_utf_pos()*
+    获取给定字符串中每个 UTF-8 码点的起始字节位置列表。
+
+    内嵌 NUL 字节视为字符串终止。
+
+    参数: ~
+      • {str}  (`string`)
+
+    返回: ~
+        (`integer[]`)
+
+vim.str_utf_start({str}, {index})                        *vim.str_utf_start()*
+    获取 {index} 指向的码点（字符）起始字节的距离（以字节为单位）。
+
+    结果可加到 {index} 得到字符的起始字节。
+
+    示例: >lua
+        -- 字符 'æ' 用 UTF-8 存储为 '\xc3\xa6'
+
+        -- 返回 0，因 index 指向字符第一个字节
+        vim.str_utf_start('æ', 1)
+
+        -- 返回 -1，因 index 指向字符第二个字节
+        vim.str_utf_start('æ', 2)
+<
+
+    参数: ~
+      • {str}    (`string`)
+      • {index}  (`integer`)
+
+    返回: ~
+        (`integer`)
+
+vim.stricmp({a}, {b})                                          *vim.stricmp()*
+    不区分大小写地比较字符串。
+
+    参数: ~
+      • {a}  (`string`)
+      • {b}  (`string`)
+
+    返回: ~
+        (`0|1|-1`) 若字符串相等、{a} 大于 {b} 或 {a} 小于 {b}，分别返回 0、1、-1。
+
+vim.ui_attach({ns}, {options}, {callback})                   *vim.ui_attach()*
+    警告：此功能为实验性/不稳定。
+
+    订阅 |ui-events|，类似于 |nvim_ui_attach()|，但事件通过 Lua 回调接收。
+    用于在 Lua 中实现屏幕元素如弹出菜单或消息处理。
+
+    {options} 是一个字典，需设置一个或多个 `ext_…` |ui-option| 为 true，以启用相应 UI 元素的事件。
+
+    {callback} 接收事件名及额外参数。见 |ui-popupmenu| 及下文各节了解各事件格式。
+
+    `msg_show` 事件的回调在 |api-fast| 上下文中执行；显示消息应安排到主线程。
+
+    回调中错误过多会导致强制分离。
+
+    警告：此 API 仍为实验性。
+    不同屏幕元素的可用性会有差异。
+    特别是 `ext_messages` 行为仍会变动和改进。
+    主要用于 'cmdheight' 设为零时处理消息（同样为实验性）。
+
+    示例（弹出菜单实现框架）： >lua
+        ns = vim.api.nvim_create_namespace('my_fancy_pum')
+
+        vim.ui_attach(ns, {ext_popupmenu=true}, function(event, ...)
+          if event == 'popupmenu_show' then
+            local items, selected, row, col, grid = ...
+            print('display pum ', #items)
+          elseif event == 'popupmenu_select' then
+            local selected = ...
+            print('selected', selected)
+          elseif event == 'popupmenu_hide' then
+            print('FIN')
+          end
+        end)
+<
+
+    参数: ~
+      • {ns}        (`integer`)
+      • {options}   (`table<string, any>`)
+      • {callback}  (`fun()`)
+
+vim.ui_detach({ns})                                          *vim.ui_detach()*
+    解除之前用 |vim.ui_attach()| 附加的指定命名空间 {ns} 的回调。
+
+    参数: ~
+      • {ns}  (`integer`)
+
+vim.wait({time}, {callback}, {interval}, {fast_only})             *vim.wait()*
+    等待 {time} 毫秒，直到 {callback} 返回 `true`。
+
+    立即执行 {callback}，之后每隔约 {interval} 毫秒（默认 200）再执行一次。
+    等待期间 Nvim 仍会处理其他事件。
+
+    不能在 |api-fast| 事件中调用。
+
+    示例: >lua
+        ---
+        -- 等待 100 毫秒，允许处理其他事件
+        vim.wait(100, function() end)
+
+        ---
+        -- 等待 100 毫秒或直到全局变量被设置
+        vim.wait(100, function() return vim.g.waiting_for_var end)
+
+        ---
+        -- 等待 1 秒或直到全局变量被设置，每 ~500 毫秒检查一次
+        vim.wait(1000, function() return vim.g.waiting_for_var end, 500)
+
+        ---
+        -- 安排 100ms 后设置变量
+        vim.defer_fn(function() vim.g.timer_result = true end, 100)
+
+        -- 如果结果被阻塞会等十秒，实际上只等 100ms
+        if vim.wait(10000, function() return vim.g.timer_result end) then
+          print('只等了一小会儿！')
+        end
+<
+
+    参数: ~
+      • {time}       (`integer`) 等待的毫秒数
+      • {callback}   (`fun(): boolean?`) 可选回调。直到 {callback} 返回 true
+      • {interval}   (`integer?`) 每次轮询间隔的毫秒数（约值）
+      • {fast_only}  (`boolean?`) 若为 true，仅处理 |api-fast| 事件
+
+    返回（多值）: ~
+        (`boolean`)
+        (`-1|-2?`)
+        • 若 {callback} 在 {time} 内返回 true：`true, nil`
+        • 若 {callback} 在 {time} 内未返回 true：`false, -1`
+        • 若 {callback} 在 {time} 内被中断：`false, -2`
+        • 若 {callback} 出错，则抛出错误
+
+==============================================================================
+LUA-VIMSCRIPT 桥接                                           *lua-vimscript*
+
+Nvim Lua 提供了与 Vimscript 变量和函数、编辑器命令和选项的接口或“桥接”。
+
+通过该桥接传递的对象会被复制（编组）：没有“引用”。
+|lua-guide-variables| 例如，使用 `vim.fn.remove()` 操作 Lua 列表时，会将列表对象复制到 Vimscript，并不会修改 Lua 列表： >lua
+    local list = { 1, 2, 3 }
+    vim.fn.remove(list, 0)
+    vim.print(list)  --> "{ 1, 2, 3 }"
+<
+
+vim.call({func}, {...})                                           *vim.call()*
+    调用 |vim-function| 或 |user-function| {func}，参数为 {...}。
+    另见 |vim.fn|。
+    等价于： >lua
+        vim.fn[func]({...})
+<
+
+vim.cmd({command})
+    见 |vim.cmd()|。
+
+vim.fn.{func}({...})                                                  *vim.fn*
+    调用 |vim-function| 或 |user-function| {func}，参数为 {...}。
+    调用自动加载函数，语法如下： >lua
+        vim.fn['some#function']({...})
+<
+    与 vim.api. |nvim_call_function()| 不同，该方法直接在 Vim 对象和 Lua 对象间转换。
+
+    如果 Vim 函数返回 float，会直接表示为 Lua 数字。
+    空列表和字典都表示为空表。
+
+    注意: 返回值中的 |v:null| 用 |vim.NIL| 表示
+
+    注意: vim.fn 的键是惰性生成的，因此 `pairs(vim.fn)` 只枚举已调用过的函数。
+
+    注意: 大多数函数不能在 |api-fast| 回调中运行，少数未文档化的例外允许。
+
+                                                           *lua-vim-variables*
+Vim 编辑器的全局字典 |g:| |w:| |b:| |t:| |v:| 可通过下述 `vim.*` Lua 表方便、惯用地访问。
+这样你可以轻松地从 Lua 读写 Vimscript 全局变量。
+
+示例: >lua
+
+    vim.g.foo = 5     -- 设置 Vimscript 全局变量 g:foo
+    print(vim.g.foo)  -- 获取并打印 g:foo
+    vim.g.foo = nil   -- 删除（:unlet）该变量
+    vim.b[2].foo = 6  -- 设置缓冲区 2 的 b:foo
+<
+
+注意直接设置字典字段不会写回 Nvim。
+因为对命名空间的索引只是返回一个副本。
+必须整体写回整个字典。可用临时变量实现。
+
+示例: >lua
+
+    vim.g.my_dict.field1 = 'value'  -- 不生效
+
+    local my_dict = vim.g.my_dict   --
+    my_dict.field1 = 'value'        -- 正确做法
+    vim.g.my_dict = my_dict         --
+
+vim.g                                                                  *vim.g*
+    全局（|g:|）编辑器变量。
+    没有值的键返回 `nil`。
+
+vim.b                                                                  *vim.b*
+    当前缓冲区的缓冲区作用域（|b:|）变量。
+    无效或未设置的键返回 `nil`。可用整数索引访问指定缓冲区的变量。
+
+vim.w                                                                  *vim.w*
+    当前窗口的窗口作用域（|w:|）变量。
+    无效或未设置的键返回 `nil`。可用整数索引访问指定窗口的变量。
+
+vim.t                                                                  *vim.t*
+    当前标签页的标签页作用域（|t:|）变量。
+    无效或未设置的键返回 `nil`。可用整数索引访问指定标签页的变量。
+
+vim.v                                                                  *vim.v*
+    |v:| 变量。
+    无效或未设置的键返回 `nil`。
+
+                                                                 *lua-options*
+                                                             *lua-vim-options*
+                                                                 *lua-vim-set*
+                                                            *lua-vim-setlocal*
+
+Vim 选项可通过 |vim.o| 访问，行为类似 Vimscript 的 |:set|。
+
+    示例: ~
+
+    设置布尔选项:
+        Vimscript: `set number`
+        Lua:       `vim.o.number = true`
+
+    设置字符串值:
+        Vimscript: `set wildignore=*.o,*.a,__pycache__`
+        Lua:       `vim.o.wildignore = '*.o,*.a,__pycache__'`
+
+同理，有 |vim.bo| 和 |vim.wo| 用于设置缓冲区作用域和窗口作用域选项。
+注意这与 |local-options| 和 |:setlocal| 不同。
+还有 |vim.go| 只访问 |global-local| 选项的全局值，见 |:setglobal|。
+
+                                                               *vim.opt_local*
+                                                              *vim.opt_global*
+                                                                     *vim.opt*
+
+特殊接口 |vim.opt| 便于在 Lua 中操作列表和映射风格的选项：可将其当作 Lua 表访问，并提供面向对象的方法添加和移除条目。
+
+    示例: ~
+
+    以下设置列表风格选项的方法等价:
+        Vimscript: >vim
+            set wildignore=*.o,*.a,__pycache__
+<
+        Lua 用 `vim.o`: >lua
+            vim.o.wildignore = '*.o,*.a,__pycache__'
+<
+        Lua 用 `vim.opt`: >lua
+            vim.opt.wildignore = { '*.o', '*.a', '__pycache__' }
+<
+    模拟 |:set+=| 行为: >lua
+
+        vim.opt.wildignore:append { "*.pyc", "node_modules" }
+<
+    模拟 |:set^=| 行为: >lua
+
+        vim.opt.wildignore:prepend { "new_first_value" }
+<
+    模拟 |:set-=| 行为: >lua
+
+        vim.opt.wildignore:remove { "node_modules" }
+<
+    以下设置映射风格选项的方法等价:
+        Vimscript: >vim
+            set listchars=space:_,tab:>~
+<
+        Lua 用 `vim.o`: >lua
+            vim.o.listchars = 'space:_,tab:>~'
+<
+        Lua 用 `vim.opt`: >lua
+            vim.opt.listchars = { space = '_', tab = '>~' }
+<
+
+注意 |vim.opt| 返回的是 `Option` 对象，而不是选项值，选项值通过 |vim.opt:get()| 访问:
+
+    示例: ~
+
+    以下获取列表风格选项的方法等价:
+        Vimscript: >vim
+            echo wildignore
+<
+        Lua 用 `vim.o`: >lua
+            print(vim.o.wildignore)
+<
+        Lua 用 `vim.opt`: >lua
+            vim.print(vim.opt.wildignore:get())
+<
+
+如需模拟 |:setlocal|，用 `vim.opt_local`。
+如需模拟 |:setglobal|，用 `vim.opt_global`。
+
+Option:append({value})                                      *vim.opt:append()*
+    向字符串风格选项追加值。见 |:set+=|
+
+    这些等价: >lua
+        vim.opt.formatoptions:append('j')
+        vim.opt.formatoptions = vim.opt.formatoptions + 'j'
+<
+
+    参数: ~
+      • {value}  (`string`) 要追加的值
+
+Option:get()                                                   *vim.opt:get()*
+    返回选项的 Lua 表示。布尔、数字和字符串值会原样返回。
+
+    对于逗号分隔的列表，返回数组: >lua
+        vim.cmd [[set wildignore=*.pyc,*.o]]
+
+        vim.print(vim.opt.wildignore:get())
+        -- { "*.pyc", "*.o", }
+
+        for _, ignore_pattern in ipairs(vim.opt.wildignore:get()) do
+            print("Will ignore:", ignore_pattern)
+        end
+        -- Will ignore: *.pyc
+        -- Will ignore: *.o
+<
+
+    对于逗号分隔的映射，返回表: >lua
+        vim.cmd [[set listchars=space:_,tab:>~]]
+
+        vim.print(vim.opt.listchars:get())
+        --  { space = "_", tab = ">~", }
+
+        for char, representation in pairs(vim.opt.listchars:get()) do
+            print(char, "=>", representation)
+        end
+<
+
+    对于标志列表，返回集合: >lua
+        vim.cmd [[set formatoptions=njtcroql]]
+
+        vim.print(vim.opt.formatoptions:get())
+        -- { n = true, j = true, c = true, ... }
+
+        local format_opts = vim.opt.formatoptions:get()
+        if format_opts.j then
+            print("J is enabled!")
+        end
+<
+
+    返回: ~
+        (`string|integer|boolean?`) 选项值
+
+Option:prepend({value})                                    *vim.opt:prepend()*
+    向字符串风格选项前置值。见 |:set^=|
+
+    这些等价: >lua
+        vim.opt.wildignore:prepend('*.o')
+        vim.opt.wildignore = vim.opt.wildignore ^ '*.o'
+<
+
+    参数: ~
+      • {value}  (`string`) 要前置的值
+
+Option:remove({value})                                      *vim.opt:remove()*
+    从字符串风格选项移除值。见 |:set-=|
+
+    这些等价: >lua
+        vim.opt.wildignore:remove('*.pyc')
+        vim.opt.wildignore = vim.opt.wildignore - '*.pyc'
+<
+
+    参数: ~
+      • {value}  (`string`) 要移除的值
+
+vim.bo[{bufnr}]                                                       *vim.bo*
+    获取或设置指定缓冲区 {bufnr} 的缓冲区作用域 |options|。
+    类似 `:setlocal`。
+    省略 {bufnr} 时为当前缓冲区。
+    无效的 {bufnr} 或键会报错。
+
+    示例: >lua
+        local bufnr = vim.api.nvim_get_current_buf()
+        vim.bo[bufnr].buflisted = true    -- 等价于 vim.bo.buflisted = true
+        print(vim.bo.comments)
+        print(vim.bo.baz)                 -- 错误: 无效键
+<
+
+vim.env                                                              *vim.env*
+    编辑器会话中定义的环境变量。
+    见 |expand-env| 和 |:let-environment|。
+    无效或未设置的键返回 `nil`。
+
+    示例: >lua
+        vim.env.FOO = 'bar'
+        print(vim.env.TERM)
+<
+
+vim.go                                                                *vim.go*
+    获取或设置全局 |options|。
+    类似 `:setglobal`。无效键会报错。
+
+    注意: 与 |vim.o| 不同，此接口只访问全局选项值，主要用于 |global-local| 选项。
+
+    示例: >lua
+        vim.go.cmdheight = 4
+        print(vim.go.columns)
+        print(vim.go.bar)     -- 错误: 无效键
+<
+
+vim.o                                                                  *vim.o*
+    获取或设置 |options|。
+    行为类似 `:set`，缓冲区/窗口作用域选项作用于当前缓冲区/窗口。
+    无效键会报错。
+
+    示例: >lua
+        vim.o.cmdheight = 4
+        print(vim.o.columns)
+        print(vim.o.foo)     -- 错误: 无效键
+<
+
+vim.wo[{winid}][{bufnr}]                                              *vim.wo*
+    获取或设置指定窗口 {winid} 和缓冲区 {bufnr} 的窗口作用域 |options|。
+    设置 |global-local| 选项或指定 {bufnr} 时类似 `:setlocal`，否则类似 `:set`。
+    省略 {winid} 时为当前窗口。
+    无效的 {winid}、{bufnr} 或键会报错。
+
+    注意: 只支持 {bufnr} 为 `0`（窗口中的当前缓冲区）。
+
+    示例: >lua
+        local winid = vim.api.nvim_get_current_win()
+        vim.wo[winid].number = true    -- 等价于 vim.wo.number = true
+        print(vim.wo.foldmarker)
+        print(vim.wo.quux)             -- 错误: 无效键
+        vim.wo[winid][0].spell = false -- 类似 ':setlocal nospell'
+<
+==============================================================================
+Lua 模块: vim                                                      *lua-vim*
+
+vim.cmd({command})                                                 *vim.cmd()*
+    执行 Vimscript（|Ex-commands|）。
+
+    注意 `vim.cmd` 可用命令名索引，返回该命令的可调用函数。
+
+    示例: >lua
+        vim.cmd('echo 42')
+        vim.cmd([[
+          augroup My_group
+            autocmd!
+            autocmd FileType c setlocal cindent
+          augroup END
+        ]])
+
+        -- Ex 命令 :echo "foo"
+        -- 注意字符串字面量需用双引号
+        vim.cmd('echo "foo"')
+        vim.cmd { cmd = 'echo', args = { '"foo"' } }
+        vim.cmd.echo({ args = { '"foo"' } })
+        vim.cmd.echo('"foo"')
+
+        -- Ex 命令 :write! myfile.txt
+        vim.cmd('write! myfile.txt')
+        vim.cmd { cmd = 'write', args = { "myfile.txt" }, bang = true }
+        vim.cmd.write { args = { "myfile.txt" }, bang = true }
+        vim.cmd.write { "myfile.txt", bang = true }
+
+        -- Ex 命令 :colorscheme blue
+        vim.cmd('colorscheme blue')
+        vim.cmd.colorscheme('blue')
+<
+
+    参数: ~
+      • {command}  (`string|table`) 要执行的命令。
+      如果是字符串，则一次执行多行 Vimscript，此时等价于 |nvim_exec2()|，`opts.output` 为 false，行为同 |:source|。
+      如果是表，则执行单条命令，此时等价于 |nvim_cmd()|，`opts` 为空。
+
+    另见: ~
+      • |ex-cmd-index|
+
+vim.defer_fn({fn}, {timeout})                                 *vim.defer_fn()*
+    延迟调用 {fn}，直到 {timeout} 毫秒后。
+
+    用于实现一次性定时器，{fn} 会自动 |vim.schedule_wrap()|，因此可安全调用 API。
+
+    参数: ~
+      • {fn}       (`function`) 超时后要调用的回调
+      • {timeout}  (`integer`) 等待多少毫秒后调用
+
+    返回: ~
+        (`table`) timer luv 定时器对象
+
+                                                             *vim.deprecate()*
+vim.deprecate({name}, {alternative}, {version}, {plugin}, {backtrace})
+    向用户显示弃用信息。
+
+    参数: ~
+      • {name}         (`string`) 被弃用的特性（函数、API 等）
+      • {alternative}  (`string?`) 推荐的替代特性
+      • {version}      (`string`) 该特性将被移除的版本
+      • {plugin}       (`string?`) 拥有该特性的插件名，默认 "Nvim"
+      • {backtrace}    (`boolean?`) 是否打印回溯，默认 true
+
+    返回: ~
+        (`string?`) 弃用信息，若未显示则为 nil
+
+vim.inspect()                                                  *vim.inspect()*
+    获取给定对象的人类可读表示。
+
+    返回: ~
+        (`string`)
+
+    另见: ~
+      • |vim.print()|
+      • https://github.com/kikito/inspect.lua
+      • https://github.com/mpeterv/vinspect
+
+vim.keycode({str})                                             *vim.keycode()*
+    翻译按键码。
+
+    示例: >lua
+        local k = vim.keycode
+        vim.g.mapleader = k'<bs>'
+<
+
+    参数: ~
+      • {str}  (`string`) 要转换的字符串
+
+    返回: ~
+        (`string`)
+
+    另见: ~
+      • |nvim_replace_termcodes()|
+
+vim.lua_omnifunc({find_start})                            *vim.lua_omnifunc()*
+    用于从运行时 Lua 解释器补全 Lua 值的 omnifunc，类似于 :lua 命令的内置补全。
+
+    在 Lua 缓冲区中用 `set omnifunc=v:lua.vim.lua_omnifunc` 启用。
+
+    参数: ~
+      • {find_start}  (`1|0`)
+
+vim.notify({msg}, {level}, {opts})                              *vim.notify()*
+    向用户显示通知。
+
+    此函数可被插件重载，用自定义通知提供者（如系统通知）。默认写入 |:messages|。
+
+    参数: ~
+      • {msg}    (`string`) 要显示的通知内容
+      • {level}  (`integer?`) 取自 |vim.log.levels| 的值之一
+      • {opts}   (`table?`) 可选参数，默认未用
+
+vim.notify_once({msg}, {level}, {opts})                    *vim.notify_once()*
+    只显示一次通知。
+
+    类似 |vim.notify()|，但相同消息后续不会再显示。
+
+    参数: ~
+      • {msg}    (`string`) 要显示的通知内容
+      • {level}  (`integer?`) 取自 |vim.log.levels| 的值之一
+      • {opts}   (`table?`) 可选参数，默认未用
+
+    返回: ~
+        (`boolean`) 若消息被显示则为 true，否则为 false
+
+vim.on_key({fn}, {ns_id}, {opts})                               *vim.on_key()*
+    添加 Lua 函数 {fn}，用命名空间 id {ns_id} 作为监听器，监听每一个输入按键。
+
+    Nvim 命令行选项 |-w| 类似，但不支持回调且不能动态切换。
+
+    注意: ~
+      • {fn} 出错时会被移除。
+      • {fn} 不会递归调用，即 {fn} 自身消耗输入时不会再次被调用。
+      • {fn} 不会被 |nvim_buf_clear_namespace()| 清除。
+
+    参数: ~
+      • {fn}     (`fun(key: string, typed: string): string??`) 每个输入按键后调用的函数，{key} 为映射后按键，{typed} 为映射前按键。{typed} 可能为空（如 {key} 由非输入按键产生，或与前次相同）。若 {fn} 返回空字符串，则丢弃/忽略该按键。{fn} 为 `nil` 时，移除该命名空间的回调。
+      • {ns_id}  (`integer?`) 命名空间 ID。为 nil 或 0 时，生成并返回新的 |nvim_create_namespace()| id。
+      • {opts}   (`table?`) 可选参数
+
+    返回: ~
+        (`integer`) 与 {fn} 关联的命名空间 id。若无参数则返回所有回调数。
+
+    另见: ~
+      • |keytrans()|
+
+vim.paste({lines}, {phase})                                      *vim.paste()*
+    粘贴处理器，由 |nvim_paste()| 调用。
+
+    注意: 仅作为“钩子”提供，不要直接调用；
+    应调用 |nvim_paste()|，它会安排 redo（点重复）并调用 `vim.paste`。
+
+    示例: 粘贴时移除 ANSI 颜色码: >lua
+        vim.paste = (function(overridden)
+          return function(lines, phase)
+            for i,line in ipairs(lines) do
+              -- 移除粘贴输入中的 ANSI 颜色码
+              lines[i] = line:gsub('\27%[[0-9;mK]+', '')
+            end
+            return overridden(lines, phase)
+          end
+        end)(vim.paste)
+<
+
+    参数: ~
+      • {lines}  (`string[]`) |readfile()| 风格的行列表。|channel-lines|
+      • {phase}  (`-1|1|2|3`) -1: “非流式”粘贴：本次调用包含所有行。若为流式粘贴，`phase` 表示流状态:
+                 • 1: 开始粘贴（仅一次）
+                 • 2: 继续粘贴（零次或多次）
+                 • 3: 结束粘贴（仅一次）
+
+    返回: ~
+        (`boolean`) 若为 false，客户端应取消粘贴。
+
+    另见: ~
+      • |paste|
+
+vim.print({...})                                                 *vim.print()*
+    “美化打印”给定参数并原样返回。
+
+    示例: >lua
+        local hl_normal = vim.print(vim.api.nvim_get_hl(0, { name = 'Normal' }))
+<
+
+    参数: ~
+      • {...}  (`any`)
+
+    返回: ~
+        (`any`) 原样返回参数
+
+    另见: ~
+      • |vim.inspect()|
+      • |:=|
+
+vim.schedule_wrap({fn})                                  *vim.schedule_wrap()*
+    返回一个函数，该函数通过 |vim.schedule()| 调用 {fn}。
+
+    返回的函数会将所有参数传递给 {fn}。
+
+    示例: >lua
+        function notify_readable(_err, readable)
+          vim.notify("readable? " .. tostring(readable))
+        end
+        vim.uv.fs_access(vim.fn.stdpath("config"), "R", vim.schedule_wrap(notify_readable))
+<
+
+    参数: ~
+      • {fn}  (`function`)
+
+    返回: ~
+        (`function`)
+
+    另见: ~
+      • |lua-loop-callbacks|
+      • |vim.schedule()|
+      • |vim.in_fast_event()|
+
+                                                         *vim.str_byteindex()*
+vim.str_byteindex({s}, {encoding}, {index}, {strict_indexing})
+    将 UTF-32、UTF-16 或 UTF-8 {index} 转为字节索引。若
+    {strict_indexing} 为 false，超出范围的索引会返回字节长度而不是报错。
+
+    无效 UTF-8 和 NUL 按 |vim.str_utfindex()| 处理。{index} 在 UTF-16 序列中间时会向上取整到序列末尾。
+
+    参数: ~
+      • {s}                (`string`)
+      • {encoding}         (`"utf-8"|"utf-16"|"utf-32"`)
+      • {index}            (`integer`)
+      • {strict_indexing}  (`boolean?`) 默认: true
+
+    返回: ~
+        (`integer`)
+
+                                                          *vim.str_utfindex()*
+vim.str_utfindex({s}, {encoding}, {index}, {strict_indexing})
+    将字节索引转为 UTF-32、UTF-16 或 UTF-8 索引。若未提供 {index}，则用字符串长度。所有索引均为 0 基。
+
+    若 {strict_indexing} 为 false，超出范围的索引会返回字符串长度而不是报错。无效 UTF-8 字节和嵌入代理视为一个码点。{index} 在 UTF-8 序列中间时会向上取整到序列末尾。
+
+    参数: ~
+      • {s}                (`string`)
+      • {encoding}         (`"utf-8"|"utf-16"|"utf-32"`)
+      • {index}            (`integer?`)
+      • {strict_indexing}  (`boolean?`) 默认: true
+
+    返回: ~
+        (`integer`)
+
+vim.system({cmd}, {opts}, {on_exit})                            *vim.system()*
+    运行系统命令，若 {cmd} 无法运行则抛出错误。
+
+    示例: >lua
+        local on_exit = function(obj)
+          print(obj.code)
+          print(obj.signal)
+          print(obj.stdout)
+          print(obj.stderr)
+        end
+
+        -- 异步运行:
+        vim.system({'echo', 'hello'}, { text = true }, on_exit)
+
+        -- 同步运行:
+        local obj = vim.system({'echo', 'hello'}, { text = true }):wait()
+        -- { code = 0, signal = 0, stdout = 'hello\n', stderr = '' }
+<
+
+    详见 |uv.spawn()|。注意: 与 |uv.spawn()| 不同，vim.system 若 {cmd} 无法运行会抛错。
+
+    参数: ~
+      • {cmd}      (`string[]`) 要执行的命令
+      • {opts}     (`vim.SystemOpts?`) 选项:
+                   • cwd: (string) 设置子进程的当前工作目录
+                   • env: table<string,string> 设置新进程的环境变量。继承当前环境并设置 `NVIM` 为 |v:servername|。
+                   • clear_env: (boolean) `env` 完全定义作业环境，不合并当前环境。
+                   • stdin: (string|string[]|boolean) 若为 true，则打开 stdin 管道，可通过 SystemObj 的 `write()` 方法写入。若为字符串或字符串数组，则写入 stdin 并关闭。默认 `false`。
+                   • stdout: (boolean|function) 处理 stdout 输出。为函数时签名为 `fun(err: string, data: string)`。默认 `true`
+                   • stderr: (boolean|function) 处理 stderr 输出。为函数时签名为 `fun(err: string, data: string)`。默认 `true`
+                   • text: (boolean) 以文本方式处理 stdout 和 stderr。将 `\r\n` 替换为 `\n`。
+                   • timeout: (integer) 命令超时时间。超时后进程发送 TERM 信号（15），退出码设为 124。
+                   • detach: (boolean) 若为 true，子进程以分离状态生成——会成为进程组长，父进程退出后子进程可继续运行。但父进程需对子进程句柄调用 |uv.unref()|，否则事件循环不会退出。
+      • {on_exit}  (`fun(out: vim.SystemCompleted)?`) 子进程退出时调用。若提供，则命令异步运行。参数为 SystemCompleted 对象，见 SystemObj:wait() 返回。
+
+    返回: ~
+        (`vim.SystemObj`) 对象，字段包括:
+        • cmd (string[]) 命令及参数
+        • pid (integer) 进程 ID
+        • wait (fun(timeout: integer|nil): SystemCompleted) 等待进程完成。超时后发送 KILL 信号（9），退出码设为 124。不能在 |api-fast| 中调用。
+          • SystemCompleted 对象字段:
+            • code: (integer)
+            • signal: (integer)
+            • stdout: (string)，若 stdout 参数已传则为 nil
+            • stderr: (string)，若 stderr 参数已传则为 nil
+        • kill (fun(signal: integer|string))
+        • write (fun(data: string|nil)) 需 `stdin=true`。传 `nil` 关闭流。
+        • is_closing (fun(): boolean)
+
+==============================================================================
+Lua 模块: vim.inspector                                      *vim.inspector*
+
+vim.inspect_pos({bufnr}, {row}, {col}, {filter})           *vim.inspect_pos()*
+    获取指定缓冲区位置的所有项目。
+
+    也可用 `:Inspect!` 以美观方式打印。                   *:Inspect!*
+
+    属性: ~
+        自 0.9.0 起
+
+    参数: ~
+      • {bufnr}   (`integer?`) 默认为当前缓冲区
+      • {row}     (`integer?`) 要检查的行，0 基。默认为当前光标行
+      • {col}     (`integer?`) 要检查的列，0 基。默认为当前光标列
+      • {filter}  (`table?`) 过滤表，键值对如下:
+                  • {syntax} (`boolean`, 默认: `true`) 包含语法高亮组
+                  • {treesitter} (`boolean`, 默认: `true`) 包含 treesitter 高亮组
+                  • {extmarks} (`boolean|"all"`, 默认: true) 包含 extmarks。为 `all` 时也包含无 `hl_group` 的 extmarks
+                  • {semantic_tokens} (`boolean`, 默认: true) 包含语义 token 高亮
+
+    返回: ~
+        (`table`) 包含如下键值对的表。项目按“遍历顺序”排列:
+        • treesitter: treesitter 捕获列表
+        • syntax: 语法组列表
+        • semantic_tokens: 语义 token 列表
+        • extmarks: extmark 列表
+        • buffer: 用于获取项目的缓冲区
+        • row: 用于获取项目的行
+        • col: 用于获取项目的列
+
+vim.show_pos({bufnr}, {row}, {col}, {filter})                 *vim.show_pos()*
+    显示指定缓冲区位置的所有项目。
+
+    也可用 `:Inspect` 显示。                              *:Inspect*
+
+    示例: 绑定到 Normal 模式下的 `zS`，灵感来自 vim-scriptease: >lua
+        vim.keymap.set('n', 'zS', vim.show_pos)
+<
+
+    属性: ~
+        自 0.9.0 起
+
+    参数: ~
+      • {bufnr}   (`integer?`) 默认为当前缓冲区
+      • {row}     (`integer?`) 要检查的行，0 基。默认为当前光标行
+      • {col}     (`integer?`) 要检查的列，0 基。默认为当前光标列
+      • {filter}  (`table?`) 过滤表，字段如下:
+                  • {syntax} (`boolean`, 默认: `true`) 包含语法高亮组
+                  • {treesitter} (`boolean`, 默认: `true`) 包含 treesitter 高亮组
+                  • {extmarks} (`boolean|"all"`, 默认: true) 包含 extmarks。为 `all` 时也包含无 `hl_group` 的 extmarks
+                  • {semantic_tokens} (`boolean`, 默认: true) 包含语义 token 高亮
+
+*vim.Ringbuf*
+
+    字段: ~
+      • {clear}  (`fun()`) 见 |Ringbuf:clear()|。
+      • {push}   (`fun(item: T)`) 见 |Ringbuf:push()|。
+      • {pop}    (`fun(): T?`) 见 |Ringbuf:pop()|。
+      • {peek}   (`fun(): T?`) 见 |Ringbuf:peek()|。
+
+Ringbuf:clear()                                              *Ringbuf:clear()*
+    清空所有项目
+
+Ringbuf:peek()                                                *Ringbuf:peek()*
+    返回第一个未读项目但不移除
+
+    返回: ~
+        (`any?`)
+
+Ringbuf:pop()                                                  *Ringbuf:pop()*
+    移除并返回第一个未读项目
+
+    返回: ~
+        (`any?`)
+
+Ringbuf:push({item})                                          *Ringbuf:push()*
+    添加一个项目，若缓冲区已满则覆盖最旧项目。
+
+    参数: ~
+      • {item}  (`any`)
+
+vim.deep_equal({a}, {b})                                    *vim.deep_equal()*
+    深度比较值是否相等
+
+    表会递归比较，除非都实现了 `eq` 元方法。其它类型用 `==` 比较。
+
+    参数: ~
+      • {a}  (`any`) 第一个值
+      • {b}  (`any`) 第二个值
+
+    返回: ~
+        (`boolean`) 若值相等则为 `true`，否则为 `false`
+
+vim.deepcopy({orig}, {noref})                                 *vim.deepcopy()*
+    返回给定对象的深拷贝。
+    非表对象按普通 Lua 赋值复制，表对象递归复制。
+    函数会被简单复制，因此新表中的函数与原表相同。
+    userdata 和线程不会被复制，复制会报错。
+
+    注意: `noref=true` 对字段唯一的表性能更好，`noref=false` 对复用字段的表更快。
+
+    参数: ~
+      • {orig}   (`table`) 要复制的表
+      • {noref}  (`boolean?`) 为 false（默认）时，包含的表只复制一次，所有引用指向同一份。为 true 时，每次出现都新建一份。循环引用可能导致失败。
+
+    返回: ~
+        (`table`) 复制后的表
+
+vim.defaulttable({createfn})                              *vim.defaulttable()*
+    创建一个缺失键由 {createfn} 提供的表（类似 Python 的 "defaultdict"）。
+
+    若 {createfn} 为 `nil`，则默认为 defaulttable() 本身，因此访问嵌套键会自动创建嵌套表: >lua
+        local a = vim.defaulttable()
+        a.b.c = 1
+<
+
+    参数: ~
+      • {createfn}  (`fun(key:any):any?`) 提供缺失 `key` 的值
+
+    返回: ~
+        (`table`) 带 `__index` 元方法的空表
+
+
+vim.gsplit({s}, {sep}, {opts})                                  *vim.gsplit()*
+    获取一个 |iterator|，按分隔符惰性分割字符串（与 |vim.split()| 的“急切”分割相对）。
+
+    示例: >lua
+        for s in vim.gsplit(':aa::b:', ':', {plain=true}) do
+          print(s)
+        end
+<
+
+    若要同时获取分隔符本身，用 |string.gmatch()|。示例: >lua
+        for word, num in ('foo111bar222'):gmatch('([^0-9]*)(%d*)') do
+          print(('word: %s num: %s'):format(word, num))
+        end
+<
+
+    参数: ~
+      • {s}     (`string`) 要分割的字符串
+      • {sep}   (`string`) 分隔符或模式
+      • {opts}  (`table?`) 关键字参数 |kwargs|:
+                • {plain}? (`boolean`) 按字面量分隔（如 string.find）
+                • {trimempty}? (`boolean`) 丢弃开头和结尾的空片段
+
+    返回: ~
+        (`fun():string?`) 分割结果的迭代器
+
+    另见: ~
+      • |string.gmatch()|
+      • |vim.split()|
+      • |lua-patterns|
+      • https://www.lua.org/pil/20.2.html
+      • http://lua-users.org/wiki/StringLibraryTutorial
+
+vim.is_callable({f})                                       *vim.is_callable()*
+    若对象 `f` 可作为函数调用则返回 true。
+
+    参数: ~
+      • {f}  (`any`) 任意对象
+
+    返回: ~
+        (`boolean`) 若可调用则为 `true`，否则为 `false`
+
+vim.isarray({t})                                               *vim.isarray()*
+    测试 `t` 是否为“数组”：仅用整数索引（可不连续）的表。
+
+    若索引从 1 开始且连续，则该数组也是列表。|vim.islist()|
+
+    空表 `{}` 是数组，除非由 |vim.empty_dict()| 创建或作为字典风格 |API| 或 Vimscript 结果返回，如 |rpcrequest()| 或 |vim.fn|。
+
+    参数: ~
+      • {t}  (`table?`)
+
+    返回: ~
+        (`boolean`) 若为数组风格表则为 `true`，否则为 `false`
+
+    另见: ~
+      • https://github.com/openresty/luajit2#tableisarray
+
+vim.islist({t})                                                 *vim.islist()*
+    测试 `t` 是否为“列表”：仅用从 1 开始连续整数索引的表（|lua-length| 所称“正规数组”）。
+
+    空表 `{}` 是列表，除非由 |vim.empty_dict()| 创建或作为字典风格 |API| 或 Vimscript 结果返回，如 |rpcrequest()| 或 |vim.fn|。
+
+    参数: ~
+      • {t}  (`table?`)
+
+    返回: ~
+        (`boolean`) 若为列表风格表则为 `true`，否则为 `false`
+
+    另见: ~
+      • |vim.isarray()|
+
+vim.list_contains({t}, {value})                          *vim.list_contains()*
+    检查列表风格表（整数键无间断）是否包含 `value`。
+
+    参数: ~
+      • {t}      (`table`) 要检查的表（必须为列表风格，不做校验）
+      • {value}  (`any`) 要比较的值
+
+    返回: ~
+        (`boolean`) 若 `t` 包含 `value` 则为 `true`
+
+    另见: ~
+      • |vim.tbl_contains()| 检查一般表中的值
+
+vim.list_extend({dst}, {src}, {start}, {finish})           *vim.list_extend()*
+    用另一个列表风格表的值扩展一个列表风格表。
+
+    注意: 该操作会修改 dst！
+
+    参数: ~
+      • {dst}     (`table`) 被修改并追加的列表
+      • {src}     (`table`) 要插入值的列表
+      • {start}   (`integer?`) src 的起始索引，默认 1
+      • {finish}  (`integer?`) src 的结束索引，默认 `#src`
+
+    返回: ~
+        (`table`) dst
+
+    另见: ~
+      • |vim.tbl_extend()|
+
+vim.list_slice({list}, {start}, {finish})                   *vim.list_slice()*
+    创建一个只包含 start 到 end（含）元素的表副本
+
+    参数: ~
+      • {list}    (`any[]`) 表
+      • {start}   (`integer?`) 切片起始范围
+      • {finish}  (`integer?`) 切片结束范围
+
+    返回: ~
+        (`any[]`) 从 start 到 finish（含）的表副本
+
+vim.pesc({s})                                                     *vim.pesc()*
+    转义 |lua-patterns| 中的魔法字符。
+
+    参数: ~
+      • {s}  (`string`) 要转义的字符串
+
+    返回: ~
+        (`string`) %-转义后的模式字符串
+
+    另见: ~
+      • https://github.com/rxi/lume
+
+vim.ringbuf({size})                                            *vim.ringbuf()*
+    创建一个最大项目数受限的环形缓冲区。缓冲区满时，添加新条目会覆盖最旧条目。 >lua
+        local ringbuf = vim.ringbuf(4)
+        ringbuf:push("a")
+        ringbuf:push("b")
+        ringbuf:push("c")
+        ringbuf:push("d")
+        ringbuf:push("e")    -- 覆盖 "a"
+        print(ringbuf:pop()) -- 返回 "b"
+        print(ringbuf:pop()) -- 返回 "c"
+
+        -- 可用作迭代器。弹出剩余项目:
+        for val in ringbuf do
+          print(val)
+        end
+<
+
+    返回带以下方法的 Ringbuf 实例:
+    • |Ringbuf:push()|
+    • |Ringbuf:pop()|
+    • |Ringbuf:peek()|
+    • |Ringbuf:clear()|
+
+    参数: ~
+      • {size}  (`integer`)
+
+    返回: ~
+        (`vim.Ringbuf`) 环形缓冲区，见 |vim.Ringbuf|。
+
+vim.spairs({t})                                                 *vim.spairs()*
+    按键有序枚举表的键值对。
+
+    参数: ~
+      • {t}  (`table`) 字典风格表
+
+    返回（多值）: ~
+        (`fun(table: table<K, V>, index?: K):K, V`) |for-in| 迭代器，按排序后的键及其值
+        (`table`)
+
+    另见: ~
+      • 基于
+        https://github.com/premake/premake-core/blob/master/src/base/table.lua
+
+vim.split({s}, {sep}, {opts})                                    *vim.split()*
+    按分隔符分割字符串，返回结果表（与 |vim.gsplit()| 不同）。
+
+    示例: >lua
+        split(":aa::b:", ":")                   --> {'','aa','','b',''}
+        split("axaby", "ab?")                   --> {'','x','y'}
+        split("x*yz*o", "*", {plain=true})      --> {'x','yz','o'}
+        split("|x|y|z|", "|", {trimempty=true}) --> {'x', 'y', 'z'}
+<
+
+    参数: ~
+      • {s}     (`string`) 要分割的字符串
+      • {sep}   (`string`) 分隔符或模式
+      • {opts}  (`table?`) 关键字参数 |kwargs|:
+                • {plain}? (`boolean`) 按字面量分隔（如 string.find）
+                • {trimempty}? (`boolean`) 丢弃开头和结尾的空片段
+
+    返回: ~
+        (`string[]`) 分割结果列表
+
+    另见: ~
+      • |vim.gsplit()|
+      • |string.gmatch()|
+
+vim.startswith({s}, {prefix})                               *vim.startswith()*
+    测试 `s` 是否以 `prefix` 开头。
+
+    参数: ~
+      • {s}       (`string`) 字符串
+      • {prefix}  (`string`) 要匹配的前缀
+
+    返回: ~
+        (`boolean`) 若 `prefix` 是 `s` 的前缀则为 `true`
+
+vim.endswith({s}, {suffix})                                   *vim.endswith()*
+    测试 `s` 是否以 `suffix` 结尾。
+
+    参数: ~
+      • {s}       (`string`) 字符串
+      • {suffix}  (`string`) 要匹配的后缀
+
+    返回: ~
+        (`boolean`) 若 `suffix` 是 `s` 的后缀则为 `true`
+
+vim.tbl_contains({t}, {value}, {opts})                    *vim.tbl_contains()*
+    检查表中是否包含给定值，可直接指定值或用谓词函数检查每个值。
+
+    示例: >lua
+        vim.tbl_contains({ 'a', { 'b', 'c' } }, function(v)
+          return vim.deep_equal(v, { 'b', 'c' })
+        end, { predicate = true })
+        -- true
+<
+
+    参数: ~
+      • {t}      (`table`) 要检查的表
+      • {value}  (`any`) 要比较的值或谓词函数引用
+      • {opts}   (`table?`) 关键字参数 |kwargs|:
+                 • {predicate}? (`boolean`) `value` 为谓词函数引用（默认 false）
+
+    返回: ~
+        (`boolean`) 若 `t` 包含 `value` 则为 `true`
+
+    另见: ~
+      • |vim.list_contains()| 检查列表风格表中的值
+
+vim.tbl_count({t})                                           *vim.tbl_count()*
+    统计表 `t` 中非 nil 值的数量。 >lua
+        vim.tbl_count({ a=1, b=2 })  --> 2
+        vim.tbl_count({ 1, 2 })      --> 2
+<
+
+    参数: ~
+      • {t}  (`table`) 表
+
+    返回: ~
+        (`integer`) 表中非 nil 值的数量
+
+    另见: ~
+      • https://github.com/Tieske/Penlight/blob/master/lua/pl/tablex.lua
+
+vim.tbl_deep_extend({behavior}, {...})                 *vim.tbl_deep_extend()*
+    递归合并两个或多个表。
+
+    只有空表或非 |lua-list|（从 1 开始连续整数索引）才递归合并。
+    适合合并嵌套表（如默认和用户配置），列表会被整体覆盖而非合并。
+
+    参数: ~
+      • {behavior}  (`'error'|'keep'|'force'`) 多个表有相同键时的处理方式:
+                    • "error": 报错
+                    • "keep": 用最左边表的值
+                    • "force": 用最右边表的值
+      • {...}       (`table`) 两个或多个表
+
+    返回: ~
+        (`table`) 合并后的表
+
+    另见: ~
+      • |vim.tbl_extend()|
+
+vim.tbl_extend({behavior}, {...})                           *vim.tbl_extend()*
+    合并两个或多个表。
+
+    参数: ~
+      • {behavior}  (`'error'|'keep'|'force'`) 多个表有相同键时的处理方式:
+                    • "error": 报错
+                    • "keep": 用最左边表的值
+                    • "force": 用最右边表的值
+      • {...}       (`table`) 两个或多个表
+
+    返回: ~
+        (`table`) 合并后的表
+
+    另见: ~
+      • |extend()|
+
+vim.tbl_filter({func}, {t})                                 *vim.tbl_filter()*
+    用谓词函数过滤表
+
+    参数: ~
+      • {func}  (`function`) 函数
+      • {t}     (`table`) 表
+
+    返回: ~
+        (`any[]`) 过滤后的值表
+
+vim.tbl_get({o}, {...})                                        *vim.tbl_get()*
+    通过字符串键依次索引表（第一个参数）。若键不存在则返回 `nil`。
+
+    示例: >lua
+        vim.tbl_get({ key = { nested_key = true }}, 'key', 'nested_key') == true
+        vim.tbl_get({ key = {}}, 'key', 'nested_key') == nil
+<
+
+    参数: ~
+      • {o}    (`table`) 要索引的表
+      • {...}  (`any`) 可选键（0 个或多个，可变参数）依次索引表
+
+    返回: ~
+        (`any`) 若存在则为嵌套值，否则为 nil
+
+vim.tbl_isempty({t})                                       *vim.tbl_isempty()*
+    检查表是否为空。
+
+    参数: ~
+      • {t}  (`table`) 要检查的表
+
+    返回: ~
+        (`boolean`) 若为空则为 `true`
+
+    另见: ~
+      • https://github.com/premake/premake-core/blob/master/src/base/table.lua
+
+vim.tbl_keys({t})                                             *vim.tbl_keys()*
+    返回表中所有键的列表。返回表的键顺序不保证。
+
+    参数: ~
+      • {t}  (`table`) 表
+
+    返回: ~
+        (`any[]`) 键列表
+
+    另见: ~
+      • 来源
+        https://github.com/premake/premake-core/blob/master/src/base/table.lua
+
+vim.tbl_map({func}, {t})                                       *vim.tbl_map()*
+    对表所有值应用函数。
+
+    参数: ~
+      • {func}  (`fun(value: T): any`) 函数
+      • {t}     (`table<any, T>`) 表
+
+    返回: ~
+        (`table`) 变换后的值表
+
+vim.tbl_values({t})                                         *vim.tbl_values()*
+    返回表中所有值的列表。返回表的值顺序不保证。
+
+    参数: ~
+      • {t}  (`table`) 表
+
+    返回: ~
+        (`any[]`) 值列表
+
+vim.trim({s})                                                     *vim.trim()*
+    去除字符串两端的空白（Lua 模式 "%s"）。
+
+    参数: ~
+      • {s}  (`string`) 要去除空白的字符串
+
+    返回: ~
+        (`string`) 去除首尾空白后的字符串
+
+    另见: ~
+      • |lua-patterns|
+      • https://www.lua.org/pil/20.2.html
+                                                               *vim.validate()*
+vim.validate({name}, {value}, {validator}, {optional}, {message})
+    校验函数参数。
+
+    此函数有两种有效形式:
+    1. `vim.validate(name, value, validator[, optional][, message])`
+       校验参数 {name} 的值 {value} 是否满足 {validator}。若给定 {optional} 且为 `true`，则 {value} 可为 `nil`。若给定 {message}，则作为错误信息中的期望类型。
+       示例: >lua
+         function vim.startswith(s, prefix)
+          vim.validate('s', s, 'string')
+          vim.validate('prefix', prefix, 'string')
+          -- ...
+        end
+<
+    2. `vim.validate(spec)`（已弃用），其中 `spec` 类型为
+       `table<string,[value:any, validator: vim.validate.Validator, optional_or_msg? : boolean|string]>)`
+       校验参数规范。按字母顺序依次校验，遇到第一个失败即停止。
+       示例: >lua
+         function user.new(name, age, hobbies)
+          vim.validate{
+            name={name, 'string'},
+            age={age, 'number'},
+            hobbies={hobbies, 'table'},
+          }
+          -- ...
+        end
+<
+
+    显式参数值示例（可直接运行）: >lua
+        vim.validate('arg1', {'foo'}, 'table')
+           --> NOP (成功)
+        vim.validate('arg2', 'foo', 'string')
+           --> NOP (成功)
+
+        vim.validate('arg1', 1, 'table')
+           --> error('arg1: expected table, got number')
+
+        vim.validate('arg1', 3, function(a) return (a % 2) == 0 end, 'even number')
+           --> error('arg1: expected even number, got 3')
+<
+
+    多种类型可用列表: >lua
+        vim.validate('arg1', {'foo'}, {'table', 'string'})
+        vim.validate('arg2', 'foo', {'table', 'string'})
+        -- NOP (成功)
+
+        vim.validate('arg1', 1, {'string', 'table'})
+        -- error('arg1: expected string|table, got number')
+<
+
+    注意: ~
+      • `validator` 设为 |lua-type()| 返回值时性能最佳。
+
+    参数: ~
+      • {name}       (`string`) 参数名
+      • {value}      (`any`) 参数值
+      • {validator}  (`vim.validate.Validator`)
+                     • (`string|string[]`): 可为 |lua-type()| 返回的任意值及 'callable'：
+                       'boolean'、'callable'、'function'、'nil'、'number'、'string'、'table'、'thread'、'userdata'。
+                     • (`fun(val:any): boolean, string?`) 返回布尔值和可选字符串信息的函数。
+      • {optional}   (`boolean?`) 参数可选（可省略）
+      • {message}    (`string?`) 校验失败时的信息
+
+==============================================================================
+Lua 模块: vim.loader                                            *vim.loader*
+
+vim.loader.enable({enable})                              *vim.loader.enable()*
+    警告：此功能为实验性/不稳定。
+
+    启用或禁用实验性 Lua 模块加载器：
+
+    启用（`enable=true`）时：
+    • 覆盖 |loadfile()|
+    • 添加使用字节编译缓存的 Lua 加载器
+    • 添加 libs 加载器
+    • 移除默认 Nvim 加载器
+
+    禁用（`enable=false`）时：
+    • 移除加载器
+    • 添加默认 Nvim 加载器
+
+    参数: ~
+      • {enable}  (`boolean?`) true/nil 启用，false 禁用
+
+vim.loader.find({modname}, {opts})                         *vim.loader.find()*
+    警告：此功能为实验性/不稳定。
+
+    查找指定模块名的 Lua 模块。
+
+    参数: ~
+      • {modname}  (`string`) 模块名，或 `"*"` 查找顶级模块
+      • {opts}     (`table?`) 查找模块的选项:
+                   • {rtp}? (`boolean`, 默认: `true`) 是否在 runtimepath 查找
+                   • {paths}? (`string[]`, 默认: `{}`) 额外查找路径
+                   • {patterns}? (`string[]`, 默认: `{"/init.lua", ".lua"}`) 查找模块时用的模式。模式会加到 Lua 模块基名后。
+                   • {all}? (`boolean`, 默认: `false`) 查找所有匹配项
+
+    返回: ~
+        (`table[]`) 对象列表，字段如下:
+        • {modpath} (`string`) 模块路径
+        • {modname} (`string`) 模块名
+        • {stat}? (`uv.fs_stat.result`) 模块路径的 fs_stat。modname="*" 时不返回
+
+vim.loader.reset({path})                                  *vim.loader.reset()*
+    警告：此功能为实验性/不稳定。
+
+    重置指定路径的缓存，若 path 为 nil 则重置所有路径。
+
+    参数: ~
+      • {path}  (`string?`) 要重置的路径
+
+==============================================================================
+Lua 模块: vim.uri                                                  *vim.uri*
+
+vim.uri_decode({str})                                       *vim.uri_decode()*
+    对包含百分号转义的字符串进行 URI 解码。
+
+    参数: ~
+      • {str}  (`string`) 要解码的字符串
+
+    返回: ~
+        (`string`) 解码后的字符串
+
+vim.uri_encode({str}, {rfc})                                *vim.uri_encode()*
+    用百分号转义对字符串进行 URI 编码。
+
+    参数: ~
+      • {str}  (`string`) 要编码的字符串
+      • {rfc}  (`"rfc2396"|"rfc2732"|"rfc3986"?`)
+
+    返回: ~
+        (`string`) 编码后的字符串
+
+vim.uri_from_bufnr({bufnr})                             *vim.uri_from_bufnr()*
+    从 bufnr 获取 URI。
+
+    参数: ~
+      • {bufnr}  (`integer`)
+
+    返回: ~
+        (`string`) URI
+
+vim.uri_from_fname({path})                              *vim.uri_from_fname()*
+    从文件路径获取 URI。
+
+    参数: ~
+      • {path}  (`string`) 文件路径
+
+    返回: ~
+        (`string`) URI
+
+vim.uri_to_bufnr({uri})                                   *vim.uri_to_bufnr()*
+    获取 uri 对应的缓冲区。
+    若不存在则创建新的未加载缓冲区。
+
+    参数: ~
+      • {uri}  (`string`)
+
+    返回: ~
+        (`integer`) bufnr
+
+vim.uri_to_fname({uri})                                   *vim.uri_to_fname()*
+    从 URI 获取文件名。
+
+    参数: ~
+      • {uri}  (`string`)
+
+    返回: ~
+        (`string`) 文件名，若为非 file URI 则返回原 URI
+
+==============================================================================
+Lua 模块: vim.ui                                                    *vim.ui*
+
+vim.ui.input({opts}, {on_confirm})                            *vim.ui.input()*
+    提示用户输入，允许在 `on_confirm` 前进行任意（可能异步）操作。
+
+    示例: >lua
+        vim.ui.input({ prompt = 'Enter value for shiftwidth: ' }, function(input)
+            vim.o.shiftwidth = tonumber(input)
+        end)
+<
+
+    参数: ~
+      • {opts}        (`table?`) 额外选项。见 |input()|
+                      • prompt (string|nil) 提示文本
+                      • default (string|nil) 输入默认值
+                      • completion (string|nil) 指定输入补全类型。支持类型同用户命令的 "-complete=" 参数。见 |:command-completion|
+                      • highlight (function) 用于高亮用户输入的函数
+      • {on_confirm}  (`function`) ((input|nil) -> ()) 用户确认或取消输入后调用。`input` 为用户输入内容（可能为空字符串），取消时为 `nil`
+
+vim.ui.open({path}, {opt})                                     *vim.ui.open()*
+    用系统默认处理程序打开 `path`（macOS 用 `open`，Windows 用 `explorer.exe`，Linux 用 `xdg-open` 等），失败时返回（但不显示）错误信息。
+
+    也可用 `:Open` 调用。                                  *:Open*
+
+    会展开 "~/ " 和环境变量。
+
+    示例: >lua
+        -- 异步
+        vim.ui.open("https://neovim.io/")
+        vim.ui.open("~/path/to/file")
+        -- 用 "osurl" 命令处理路径或 URL
+        vim.ui.open("gh#neovim/neovim!29490", { cmd = { 'osurl' } })
+        -- 同步（等待进程退出）
+        local cmd, err = vim.ui.open("$VIMRUNTIME")
+        if cmd then
+          cmd:wait()
+        end
+<
+
+    参数: ~
+      • {path}  (`string`) 要打开的路径或 URL
+      • {opt}   (`{ cmd?: string[] }?`) 选项
+                • cmd string[]|nil 用于打开路径或 URL 的命令
+
+    返回（多值）: ~
+        (`vim.SystemObj?`) 命令对象，未找到时为 nil
+        (`string?`) 失败时为错误信息，成功时为 nil
+
+    另见: ~
+      • |vim.system()|
+
+vim.ui.select({items}, {opts}, {on_choice})                  *vim.ui.select()*
+    提示用户从列表中选择，允许在 `on_choice` 前进行任意（可能异步）操作。
+
+    示例: >lua
+        vim.ui.select({ 'tabs', 'spaces' }, {
+            prompt = 'Select tabs or spaces:',
+            format_item = function(item)
+                return "I'd like to choose " .. item
+            end,
+        }, function(choice)
+            if choice == 'spaces' then
+                vim.o.expandtab = true
+            else
+                vim.o.expandtab = false
+            end
+        end)
+<
+
+    参数: ~
+      • {items}      (`any[]`) 任意项目
+      • {opts}       (`table`) 额外选项
+                     • prompt (string|nil) 提示文本，默认 `Select one of:`
+                     • format_item (function item -> text) 格式化单个项目的函数，默认 `tostring`
+                     • kind (string|nil) 任意提示字符串，插件可用以推断 items 结构或 select() 调用上下文
+      • {on_choice}  (`fun(item: T?, idx: integer?)`) 用户选择后调用。`idx` 为 `items` 中项目的 1 基索引。用户取消时为 `nil`
+
+==============================================================================
+Lua 模块: vim.filetype                                        *vim.filetype*
+
+vim.filetype.add({filetypes})                             *vim.filetype.add()*
+    添加新的文件类型映射。
+
+    文件类型映射可按扩展名、文件名（“尾部”或完整路径）添加。
+    先检查完整路径，再检查文件名。若文件名无匹配，则按 |lua-patterns|（按优先级排序）依次匹配，仍无匹配则用扩展名。
+
+    文件类型可为字符串（直接用作 filetype）或函数。
+    若为函数，参数为文件完整路径和缓冲区号（及模式捕获），应返回字符串作为缓冲区 filetype。
+    可选返回第二个函数值，调用时可修改缓冲区状态（如设置特定变量），Nvim 会在设置 filetype 前调用。
+
+    文件名模式可指定优先级，优先级高的先匹配。未指定时默认 0。
+    模式可包含形如 "${SOME_VAR}" 的环境变量，会自动展开。
+    变量未设置则不匹配。
+
+    更多示例见 $VIMRUNTIME/lua/vim/filetype.lua。
+
+    示例: >lua
+        vim.filetype.add({
+          extension = {
+            foo = 'fooscript',
+            bar = function(path, bufnr)
+              if some_condition() then
+                return 'barscript', function(bufnr)
+                  -- 设置缓冲区变量
+                  vim.b[bufnr].barscript_version = 2
+                end
+              end
+              return 'bar'
+            end,
+          },
+          filename = {
+            ['.foorc'] = 'toml',
+            ['/etc/foo/config'] = 'toml',
+          },
+          pattern = {
+            ['.*/etc/foo/.*'] = 'fooscript',
+            -- 使用可选优先级
+            ['.*/etc/foo/.*%.conf'] = { 'dosini', { priority = 10 } },
+            -- 包含环境变量的模式
+            ['${XDG_CONFIG_HOME}/foo/git'] = 'git',
+            ['.*README.(%a+)'] = function(path, bufnr, ext)
+              if ext == 'md' then
+                return 'markdown'
+              elseif ext == 'rst' then
+                return 'rst'
+              end
+            end,
+          },
+        })
+<
+
+    添加内容匹配的兜底规则: >lua
+        vim.filetype.add {
+          pattern = {
+            ['.*'] = {
+              function(path, bufnr)
+                local content = vim.api.nvim_buf_get_lines(bufnr, 0, 1, false)[1] or ''
+                if vim.regex([[^#!.*\\<mine\\>]]):match_str(content) ~= nil then
+                  return 'mine'
+                elseif vim.regex([[\\<drawing\\>]]):match_str(content) ~= nil then
+                  return 'drawing'
+                end
+              end,
+              { priority = -math.huge },
+            },
+          },
+        }
+<
+
+    参数: ~
+      • {filetypes}  (`table`) 包含新文件类型映射的表（见示例）。
+                     • {pattern}? (`vim.filetype.mapping`)
+                     • {extension}? (`vim.filetype.mapping`)
+                     • {filename}? (`vim.filetype.mapping`)
+
+                                                   *vim.filetype.get_option()*
+vim.filetype.get_option({filetype}, {option})
+    获取 {filetype} 的默认选项值。
+
+    返回值为设置 'filetype' 后新缓冲区的默认值，受所有 FileType 自动命令和 ftplugin 文件影响。
+
+    示例: >lua
+        vim.filetype.get_option('vim', 'commentstring')
+<
+
+    注意: 用 |nvim_get_option_value()|，但结果有缓存。即 |ftplugin| 和 |FileType| 自动命令只触发一次，后续更改不会反映。
+
+    属性: ~
+        自 0.9.0 起
+
+    参数: ~
+      • {filetype}  (`string`) 文件类型
+      • {option}    (`string`) 选项名
+
+    返回: ~
+        (`string|boolean|integer`) 选项值
+
+vim.filetype.match({args})                              *vim.filetype.match()*
+    执行文件类型检测。
+
+    可用三种方式检测文件类型:
+    1. 用已有缓冲区
+    2. 仅用文件名
+    3. 仅用文件内容
+
+    其中 1 最准确，因用到缓冲区文件名和（可选）内容。2、3 可在无缓冲区时用，但若仅文件名（或内容）无法唯一确定文件类型，可能无法匹配。
+
+    三种方式通过参数表的不同键指定。示例: >lua
+        -- 用缓冲区号
+        vim.filetype.match({ buf = 42 })
+
+        -- 覆盖缓冲区文件名
+        vim.filetype.match({ buf = 42, filename = 'foo.c' })
+
+        -- 仅用文件名
+        vim.filetype.match({ filename = 'main.lua' })
+
+        -- 用文件内容
+        vim.filetype.match({ contents = {'#!/usr/bin/env bash'} })
+<
+
+    参数: ~
+      • {args}  (`table`) 指定匹配策略的表。可用键:
+                • {buf}? (`integer`) 用于匹配的缓冲区号。与 {contents} 互斥
+                • {filename}? (`string`) 用于匹配的文件名。指定 {buf} 时，默认为该缓冲区的文件名。文件不必实际存在。单独用时仅用文件名匹配，可能无法唯一确定文件类型。
+                • {contents}? (`string[]`) 文件内容行数组。可与 {filename} 一起用。与 {buf} 互斥。
+
+    返回（多值）: ~
+        (`string?`) 匹配到的文件类型
+        (`function?`) 调用时修改缓冲区状态的函数（如设置特定变量）。参数为缓冲区号
+
+==============================================================================
+Lua 模块: vim.keymap                                            *vim.keymap*
+
+vim.keymap.del({modes}, {lhs}, {opts})                      *vim.keymap.del()*
+    移除已有映射。示例: >lua
+        vim.keymap.del('n', 'lhs')
+
+        vim.keymap.del({'n', 'i', 'v'}, '<leader>w', { buffer = 5 })
+<
+
+    参数: ~
+      • {modes}  (`string|string[]`)
+      • {lhs}    (`string`)
+      • {opts}   (`table?`) 具有以下字段的表:
+                 • {buffer}? (`integer|boolean`) 从指定缓冲区移除映射。为 `0` 或 `true` 时用当前缓冲区。
+
+    另见: ~
+      • |vim.keymap.set()|
+
+vim.keymap.set({mode}, {lhs}, {rhs}, {opts})                *vim.keymap.set()*
+    定义 |mapping|，将 |keycodes| 映射到函数或按键。
+
+    示例: >lua
+        -- 将 "x" 映射到 Lua 函数:
+        vim.keymap.set('n', 'x', function() print("real lua function") end)
+        -- 将 "<leader>x" 映射到多模式，缓冲区本地:
+        vim.keymap.set({'n', 'v'}, '<leader>x', vim.lsp.buf.references, { buffer = true })
+        -- 将 <Tab> 映射为表达式 (|:map-<expr>|):
+        vim.keymap.set('i', '<Tab>', function()
+          return vim.fn.pumvisible() == 1 and "<C-n>" or "<Tab>"
+        end, { expr = true })
+        -- 将 "[%%" 映射为 <Plug> 映射:
+        vim.keymap.set('n', '[%%', '<Plug>(MatchitNormalMultiBackward)')
+<
+
+    参数: ~
+      • {mode}  (`string|string[]`) 模式简称（见 |nvim_set_keymap()|），或其列表
+      • {lhs}   (`string`) 映射左侧 |{lhs}|
+      • {rhs}   (`string|function`) 映射右侧 |{rhs}|，可为 Lua 函数
+      • {opts}  (`table?`) |:map-arguments| 选项表。与 |nvim_set_keymap()| {opts} 相同，区别如下:
+                • {replace_keycodes} 若 "expr" 为 `true`，则默认为 `true`
+
+                还支持:
+                • {buffer}? (`integer|boolean`) 创建缓冲区本地映射，`0` 或 `true` 为当前缓冲区
+                • {remap}? (`boolean`, 默认: `false`) 递归映射。与 {noremap} 相反
+
+    另见: ~
+      • |nvim_set_keymap()|
+      • |maparg()|
+      • |mapcheck()|
+      • |mapset()|
+
+==============================================================================
+Lua 模块: vim.fs                                                    *vim.fs*
+
+                                                             *vim.fs.exists()*
+用 |uv.fs_stat()| 检查文件类型及是否存在。
+
+示例: >lua
+  if vim.uv.fs_stat(file) then
+    vim.print("file exists")
+  end
+<
+
+
+vim.fs.abspath({path})                                      *vim.fs.abspath()*
+    将路径转换为绝对路径。
+    路径开头的 ~ 会展开为用户主目录。
+    不检查路径是否存在，不规范化路径，不解析符号链接或硬链接（包括 `.` 和 `..`），也不展开环境变量。
+    若路径已为绝对路径，则原样返回。也会将 `\` 路径分隔符转为 `/`。
+
+    参数: ~
+      • {path}  (`string`) 路径
+
+    返回: ~
+        (`string`) 绝对路径
+
+vim.fs.basename({file})                                    *vim.fs.basename()*
+    返回给定路径的基名
+
+    属性: ~
+        自 0.8.0 起
+
+    参数: ~
+      • {file}  (`string?`) 路径
+
+    返回: ~
+        (`string?`) {file} 的基名
+
+vim.fs.dir({path}, {opts})                                      *vim.fs.dir()*
+    返回 {path} 下项目的迭代器
+
+    属性: ~
+        自 0.8.0 起
+
+    参数: ~
+      • {path}  (`string`) 要遍历的目录的绝对或相对路径。路径会先规范化 |vim.fs.normalize()|。
+      • {opts}  (`table?`) 可选关键字参数:
+                • depth: integer|nil 遍历深度（默认 1）
+                • skip: (fun(dir_name: string): boolean)|nil 控制遍历的谓词。返回 false 停止当前目录搜索。仅 depth > 1 时有用
+                • follow: boolean|nil 是否跟随符号链接（默认 false）
+
+    返回: ~
+        (`Iterator`) 遍历 {path} 下项目的迭代器。每次迭代返回两个值："name" 和 "type"。"name" 为相对 {path} 的基名，"type" 为 "file"、"directory"、"link"、"fifo"、"socket"、"char"、"block"、"unknown" 之一。
+
+vim.fs.dirname({file})                                      *vim.fs.dirname()*
+    返回给定路径的父目录
+
+    属性: ~
+        自 0.8.0 起
+
+    参数: ~
+      • {file}  (`string?`) 路径
+
+    返回: ~
+        (`string?`) {file} 的父目录
+
+vim.fs.find({names}, {opts})                                   *vim.fs.find()*
+    在给定路径下查找文件或目录（或 {opts.type} 指定的其它项目）。
+
+    从 {path} 开始查找 {names}。若 {upward} 为 true，则向上遍历父目录；否则向下递归遍历。若 {stop} 非空，则到达该目录时停止，不再搜索。找到 {limit}（默认 1）个匹配项后终止。可用 {type} 限定只查找某种类型（"file"、"directory"、"link"、"socket"、"char"、"block"、"fifo"），未指定则所有匹配项都包含。
+
+    示例: >lua
+        -- 列出 runtime 目录下所有 test 目录
+        local test_dirs = vim.fs.find(
+          {'test', 'tst', 'testdir'},
+          {limit = math.huge, type = 'directory', path = './runtime/'}
+        )
+
+        -- 获取 lib/ 下所有 .cpp 或 .hpp 文件
+        local cpp_hpp = vim.fs.find(function(name, path)
+          return name:match('.*%.[ch]pp$') and path:match('[/\\]lib$')
+        end, {limit = math.huge, type = 'file'})
+<
+
+    属性: ~
+        自 0.8.0 起
+
+    参数: ~
+      • {names}  (`string|string[]|fun(name: string, path: string): boolean`)
+                 要查找的项目名。必须为基名，若为字符串或表则不支持路径和通配符。若为函数，则对每个项目调用，参数为:
+                 • name: 当前项目基名
+                 • path: 当前项目完整路径
+
+                 函数返回 true 时视为匹配。
+      • {opts}   (`table`) 可选关键字参数:
+                 • {path}? (`string`) 起始路径。省略时用 |current-directory|。
+                 • {upward}? (`boolean`, 默认: `false`) 向上遍历父目录，否则递归遍历子目录。
+                 • {stop}? (`string`) 到达该目录时停止，不再搜索。
+                 • {type}? (`string`) 只查找指定类型项目。省略时所有匹配项都包含。
+                 • {limit}? (`number`, 默认: `1`) 找到这么多匹配项后停止。用 `math.huge` 表示不限制。
+                 • {follow}? (`boolean`, 默认: `false`) 是否跟随符号链接。
+
+    返回: ~
+        (`string[]`) 所有匹配项的规范化路径 |vim.fs.normalize()|
+
+vim.fs.joinpath({...})                                     *vim.fs.joinpath()*
+    拼接部分路径（一个绝对或相对路径后跟零个或多个相对路径）。
+    斜杠会规范化：多余斜杠会被移除，Windows 下反斜杠会转为正斜杠。
+
+    示例:
+    • "foo/", "/bar" => "foo/bar"
+    • Windows: "a\foo\", "\bar" => "a/foo/bar"
+
+    属性: ~
+        自 0.10.0 起
+
+    参数: ~
+      • {...}  (`string`)
+
+    返回: ~
+        (`string`)
+
+vim.fs.normalize({path}, {opts})                          *vim.fs.normalize()*
+    将路径规范化为标准格式。路径开头的 ~ 会展开为用户主目录，环境变量也会展开。
+    "." 和 ".." 也会解析，除非路径为相对路径且解析会变为绝对路径。
+    • 仅为 "." 的相对路径:
+      • "." => "."
+      • "././" => "."
+    • ".." 导致超出当前目录
+      • "foo/../../bar" => "../bar"
+      • "../../foo" => "../../foo"
+    • 根目录下的 ".." 返回根目录。
+      • "/../../" => "/"
+
+    Windows 下，反斜杠 (\) 会转为正斜杠 (/)
+
+    示例: >lua
+        [[C:\Users\jdoe]]                         => "C:/Users/jdoe"
+        "~/src/neovim"                            => "/home/jdoe/src/neovim"
+        "$XDG_CONFIG_HOME/nvim/init.vim"          => "/Users/jdoe/.config/nvim/init.vim"
+        "~/src/nvim/api/../tui/./tui.c"           => "/home/jdoe/src/nvim/tui/tui.c"
+        "./foo/bar"                               => "foo/bar"
+        "foo/../../../bar"                        => "../../bar"
+        "/home/jdoe/../../../bar"                 => "/bar"
+        "C:foo/../../baz"                         => "C:../baz"
+        "C:/foo/../../baz"                        => "C:/baz"
+        [[\\?\UNC\server\share\foo\..\..\..\bar]] => "//?/UNC/server/share/bar"
+<
+
+    属性: ~
+        自 0.8.0 起
+
+    参数: ~
+      • {path}  (`string`) 要规范化的路径
+      • {opts}  (`table?`) 具有以下字段的表:
+                • {expand_env}? (`boolean`, 默认: `true`) 是否展开环境变量
+                • {win}? (`boolean`, 默认: Windows 为 `true`，否则为 `false`) 路径是否为 Windows 路径
+
+    返回: ~
+        (`string`) 规范化路径
+
+vim.fs.parents({start})                                     *vim.fs.parents()*
+    迭代给定路径的所有父目录。
+
+    示例: >lua
+        local root_dir
+        for dir in vim.fs.parents(vim.api.nvim_buf_get_name(0)) do
+          if vim.fn.isdirectory(dir .. "/.git") == 1 then
+            root_dir = dir
+            break
+          end
+        end
+
+        if root_dir then
+          print("Found git repository at", root_dir)
+        end
+<
+
+    属性: ~
+        自 0.8.0 起
+
+    参数: ~
+      • {start}  (`string`) 初始路径
+
+    返回（多值）: ~
+        (`fun(_, dir: string): string?`) 迭代器
+        (`nil`)
+        (`string?`)
+
+vim.fs.relpath({base}, {target}, {opts})                    *vim.fs.relpath()*
+    获取 `target` 相对于 `base` 的路径，若 `base` 不是祖先则返回 `nil`。
+
+    示例: >lua
+        vim.fs.relpath('/var', '/var/lib') -- 'lib'
+        vim.fs.relpath('/var', '/usr/bin') -- nil
+<
+
+    参数: ~
+      • {base}    (`string`)
+      • {target}  (`string`)
+      • {opts}    (`table?`) 预留将来用
+
+    返回: ~
+        (`string?`)
+
+vim.fs.rm({path}, {opts})                                        *vim.fs.rm()*
+    删除文件或目录
+
+    属性: ~
+        自 0.11.0 起
+
+    参数: ~
+      • {path}  (`string`) 要删除的路径
+      • {opts}  (`table?`) 具有以下字段的表:
+                • {recursive}? (`boolean`) 递归删除目录及其内容
+                • {force}? (`boolean`) 忽略不存在的文件和参数
+
+vim.fs.root({source}, {marker})                                *vim.fs.root()*
+    从文件路径或缓冲区开始，查找包含特定“标记”的第一个父目录。
+
+    若缓冲区未命名（无文件）或 'buftype' 非空，则从 Nvim 的 |current-directory| 开始搜索。
+
+    示例: >lua
+        -- 从 'main.py' 文件查找 Python 项目根目录
+        vim.fs.root(vim.fs.joinpath(vim.env.PWD, 'main.py'), {'pyproject.toml', 'setup.py' })
+
+        -- 查找 git 仓库根目录
+        vim.fs.root(0, '.git')
+
+        -- 查找包含任意 .csproj 扩展文件的父目录
+        vim.fs.root(0, function(name, path)
+          return name:match('%.csproj$') ~= nil
+        end)
+<
+
+    属性: ~
+        自 0.10.0 起
+
+    参数: ~
+      • {source}  (`integer|string`) 缓冲区号（0 为当前缓冲区）或文件路径（绝对或相对 |current-directory|）作为起点
+      • {marker}  (`string|string[]|fun(name: string, path: string): boolean`)
+                  标记或标记列表。若为函数，则对每个项目调用，{name} 和 {path} 匹配时返回 true
+
+    返回: ~
+        (`string?`) 包含标记的目录路径，未找到则为 nil
+
+==============================================================================
+Lua 模块: vim.glob                                                *vim.glob*
+
+vim.glob.to_lpeg({pattern})                               *vim.glob.to_lpeg()*
+    将原始 glob 解析为 |lua-lpeg| 模式。
+
+    采用 LSP 3.17.0 的 glob 语义：
+    https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#pattern
+
+    Glob 模式语法如下：
+    • `*` 匹配路径段中的一个或多个字符
+    • `?` 匹配路径段中的一个字符
+    • `**` 匹配任意数量的路径段，包括零个
+    • `{}` 分组条件（如 `*.{ts,js}` 匹配 TypeScript 和 JavaScript 文件）
+    • `[]` 声明路径段中的字符范围（如 `example.[0-9]` 匹配 `example.0`、`example.1` 等）
+    • `[!...]` 否定路径段中的字符范围（如 `example.[!0-9]` 匹配 `example.a`、`example.b`，不匹配 `example.0`）
+
+    参数: ~
+      • {pattern}  (`string`) 原始 glob 模式
+
+    返回: ~
+        (`vim.lpeg.Pattern`) |lua-lpeg| 表示的模式
+==============================================================================
+VIM.LPEG                                                            *vim.lpeg*
+
+
+LPeg 是 Lua 的基于解析表达式文法（PEG）的模式匹配库。https://bford.info/packrat/
+
+                                                   *lua-lpeg* *vim.lpeg.Pattern*
+LPeg 库以 `vim.lpeg` 形式包含（https://www.inf.puc-rio.br/~roberto/lpeg/）。
+
+此外，还可用其类正则接口 |vim.re|（https://www.inf.puc-rio.br/~roberto/lpeg/re.html）。
+
+Pattern:match({subject}, {init}, {...})                      *Pattern:match()*
+    用 `pattern` 匹配 `subject` 字符串。匹配成功时，返回 subject 中第一个匹配后字符的索引，或捕获的值（若有捕获）。可选数字参数 `init` 指定匹配起始位置。Lua 库中，负值从末尾计数。与典型模式匹配函数不同，`match` 只做锚定匹配，即只尝试匹配 subject 字符串前缀（在 `init` 位置），不会匹配任意子串。若要在字符串任意位置查找模式，需在 Lua 中写循环或写能匹配任意位置的模式。
+
+    示例: >lua
+        local pattern = lpeg.R('az') ^ 1 * -1
+        assert(pattern:match('hello') == 6)
+        assert(lpeg.match(pattern, 'hello') == 6)
+        assert(pattern:match('1 hello') == nil)
+<
+
+    参数: ~
+      • {subject}  (`string`)
+      • {init}     (`integer?`)
+      • {...}      (`any`)
+
+    返回: ~
+        (`any`) ...
+
+vim.lpeg.B({pattern})                                           *vim.lpeg.B()*
+    返回一个模式，仅当输入字符串当前位置前有 `patt` 时匹配。`patt` 必须只匹配定长字符串，且不能包含捕获。类似 and 谓词，该模式无论成功与否都不消耗输入。
+
+    参数: ~
+      • {pattern}  (`vim.lpeg.Pattern|string|integer|boolean|table`)
+
+    返回: ~
+        (`vim.lpeg.Pattern`)
+
+vim.lpeg.C({patt})                                              *vim.lpeg.C()*
+    创建简单捕获，捕获 subject 中与 `patt` 匹配的子串。捕获值为字符串。若 `patt` 有其它捕获，其值随后返回。
+
+    示例: >lua
+        local function split (s, sep)
+          sep = lpeg.P(sep)
+          local elem = lpeg.C((1 - sep) ^ 0)
+          local p = elem * (sep * elem) ^ 0
+          return lpeg.match(p, s)
+        end
+        local a, b, c = split('a,b,c', ',')
+        assert(a == 'a')
+        assert(b == 'b')
+        assert(c == 'c')
+<
+
+    参数: ~
+      • {patt}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Carg({n})                                           *vim.lpeg.Carg()*
+    创建参数捕获。该模式匹配空串，产生 lpeg.match 调用时第 n 个额外参数的值。
+
+    参数: ~
+      • {n}  (`integer`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Cb({name})                                            *vim.lpeg.Cb()*
+    创建回溯捕获。该模式匹配空串，产生最近的名为 `name` 的分组捕获的值（name 可为任意 Lua 值）。最近指最后一个完整的最外层分组捕获。完整捕获指整个模式匹配成功。最外层捕获指不在其它完整捕获内部。LPeg 不保证捕获值的复用或重新计算。
+
+    参数: ~
+      • {name}  (`any`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Cc({...})                                             *vim.lpeg.Cc()*
+    创建常量捕获。该模式匹配空串，产生所有给定值作为捕获值。
+
+    参数: ~
+      • {...}  (`any`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Cf({patt}, {func})                                    *vim.lpeg.Cf()*
+    创建折叠捕获。若 `patt` 产生捕获列表 C1 C2 ... Cn，则该捕获产生值
+    `func(...func(func(C1, C2), C3)...,Cn)`，即用函数 `func` 折叠（或归约）`patt` 的捕获。要求 `patt` 至少产生一个捕获值，作为累加器初值。（如需特定初值，可在 `patt` 前加常量捕获。）对每个后续捕获，LPeg 用累加器和捕获值调用 `func`，第一个返回值作为新累加器。最终累加器值为捕获值。
+
+    示例: >lua
+        local number = lpeg.R('09') ^ 1 / tonumber
+        local list = number * (',' * number) ^ 0
+        local function add(acc, newvalue) return acc + newvalue end
+        local sum = lpeg.Cf(list, add)
+        assert(sum:match('10,30,43') == 83)
+<
+
+    参数: ~
+      • {patt}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+      • {func}  (`fun(acc, newvalue)`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Cg({patt}, {name})                                    *vim.lpeg.Cg()*
+    创建分组捕获。将 `patt` 返回的所有值分组为一个捕获。分组可匿名（无 name）或用 name 命名（可为任意非 nil Lua 值）。
+
+    参数: ~
+      • {patt}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+      • {name}  (`string?`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Cmt({patt}, {fn})                                    *vim.lpeg.Cmt()*
+    创建匹配时捕获。与其它捕获不同，该捕获在匹配发生时立即求值（即使是更大模式的一部分最终失败）。会强制立即求值所有嵌套捕获，然后调用 `function`。该函数参数为整个 subject、当前匹配后位置（i），以及 `patt` 产生的所有捕获值。函数返回值决定匹配结果。若返回数字，匹配成功，返回值为新位置（i 到 len(s)+1）。若返回 true，匹配成功但不消耗输入（等价于返回 i）。若返回 false、nil 或无返回值，匹配失败。函数返回的额外值作为捕获值。
+
+    参数: ~
+      • {patt}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+      • {fn}    (`fun(s: string, i: integer, ...: any)`) (position:
+                boolean|integer, ...: any)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Cp()                                                  *vim.lpeg.Cp()*
+    创建位置捕获。匹配空串并捕获匹配发生的位置。捕获值为数字。
+
+    示例: >lua
+        local I = lpeg.Cp()
+        local function anywhere(p) return lpeg.P({I * p * I + 1 * lpeg.V(1)}) end
+        local match_start, match_end = anywhere('world'):match('hello world!')
+        assert(match_start == 7)
+        assert(match_end == 12)
+<
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Cs({patt})                                            *vim.lpeg.Cs()*
+    创建替换捕获。捕获 subject 中与 `patt` 匹配的子串，并做替换。对 `patt` 内有值的捕获，用捕获值（应为字符串）替换匹配子串。最终捕获值为所有替换后的字符串。
+
+    示例: >lua
+        local function gsub (s, patt, repl)
+          patt = lpeg.P(patt)
+          patt = lpeg.Cs((patt / repl + 1) ^ 0)
+          return lpeg.match(patt, s)
+        end
+        assert(gsub('Hello, xxx!', 'xxx', 'World') == 'Hello, World!')
+<
+
+    参数: ~
+      • {patt}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Ct({patt})                                            *vim.lpeg.Ct()*
+    创建表捕获。返回一个表，包含该表内所有匿名捕获的值，按整数键从 1 开始。对 `patt` 创建的每个命名捕获组，组的第一个值也会以组名为键放入表中。捕获值仅为该表。
+
+    参数: ~
+      • {patt}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.locale({tab})                                     *vim.lpeg.locale()*
+    返回一个表，包含按当前 locale 匹配某些字符类的模式。表字段有 `alnum`、`alpha`、`cntrl`、`digit`、`graph`、`lower`、`print`、`punct`、`space`、`upper`、`xdigit`，每个字段为对应的模式。每个模式匹配属于该类的单字符。若传入参数 `table`，则在该表中创建这些字段并返回。
+
+    示例: >lua
+        lpeg.locale(lpeg)
+        local space = lpeg.space ^ 0
+        local name = lpeg.C(lpeg.alpha ^ 1) * space
+        local sep = lpeg.S(',;') * space
+        local pair = lpeg.Cg(name * '=' * space * name) * sep ^ -1
+        local list = lpeg.Cf(lpeg.Ct('') * pair ^ 0, rawset)
+        local t = list:match('a=b, c = hi; next = pi')
+        assert(t.a == 'b')
+        assert(t.c == 'hi')
+        assert(t.next == 'pi')
+        local locale = lpeg.locale()
+        assert(type(locale.digit) == 'userdata')
+<
+
+    参数: ~
+      • {tab}  (`table?`)
+
+    返回: ~
+        (`vim.lpeg.Locale`)
+
+vim.lpeg.match({pattern}, {subject}, {init}, {...})         *vim.lpeg.match()*
+    用 `pattern` 匹配 `subject` 字符串。匹配成功时，返回 subject 中第一个匹配后字符的索引，或捕获的值（若有捕获）。可选数字参数 `init` 指定匹配起始位置。Lua 库中，负值从末尾计数。与典型模式匹配函数不同，`match` 只做锚定匹配，即只尝试匹配 subject 字符串前缀（在 `init` 位置），不会匹配任意子串。若要在字符串任意位置查找模式，需在 Lua 中写循环或写能匹配任意位置的模式。
+
+    示例: >lua
+        local pattern = lpeg.R('az') ^ 1 * -1
+        assert(pattern:match('hello') == 6)
+        assert(lpeg.match(pattern, 'hello') == 6)
+        assert(pattern:match('1 hello') == nil)
+<
+
+    参数: ~
+      • {pattern}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+      • {subject}  (`string`)
+      • {init}     (`integer?`)
+      • {...}      (`any`)
+
+    返回: ~
+        (`any`) ...
+
+vim.lpeg.P({value})                                             *vim.lpeg.P()*
+    将给定值转换为合适的模式。规则如下：
+    • 若参数为模式，则原样返回。
+    • 若为字符串，则转为匹配该字符串的模式。
+    • 若为非负数 n，则结果为匹配恰好 n 个字符的模式。
+    • 若为负数 -n，则结果为仅当输入剩余字符少于 n 个时匹配的模式：`lpeg.P(-n)` 等价于 `-lpeg.P(n)`（见一元负号操作）。
+    • 若为布尔值，则结果为总是成功或失败的模式（不消耗输入）。
+    • 若为表，则解释为文法（见 Grammars）。
+    • 若为函数，则返回等价于空串上的匹配时捕获的模式。
+
+    参数: ~
+      • {value}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+
+    返回: ~
+        (`vim.lpeg.Pattern`)
+
+vim.lpeg.R({...})                                               *vim.lpeg.R()*
+    返回一个模式，匹配属于给定范围之一的单字符。每个 `range` 为长度为 2 的字符串 `xy`，表示所有码值在 x 和 y 之间（含）的字符。例如，`lpeg.R('09')` 匹配任意数字，`lpeg.R('az', 'AZ')` 匹配任意 ASCII 字母。
+
+    示例: >lua
+        local pattern = lpeg.R('az') ^ 1 * -1
+        assert(pattern:match('hello') == 6)
+<
+
+    参数: ~
+      • {...}  (`string`)
+
+    返回: ~
+        (`vim.lpeg.Pattern`)
+
+vim.lpeg.S({string})                                            *vim.lpeg.S()*
+    返回一个模式，匹配出现在给定字符串中的任意单字符（S 代表 Set）。如 `lpeg.S('+-*/')` 匹配任意算术运算符。注意，若 s 为单字符（即长度为 1 的字符串），则 `lpeg.P(s)`、`lpeg.S(s)`、`lpeg.R(s..s)` 等价。`lpeg.S('')` 和 `lpeg.R()` 都是总是失败的模式。
+
+    参数: ~
+      • {string}  (`string`)
+
+    返回: ~
+        (`vim.lpeg.Pattern`)
+
+vim.lpeg.setmaxstack({max})                           *vim.lpeg.setmaxstack()*
+    设置 LPeg 用于回溯堆栈的最大大小。默认限制为 400。大多数写得好的模式只需很少的回溯层级，因此很少需要更改此限制；如需更大空间，建议先重写模式。极少数有用模式可能会溢出。递归文法、深递归 subject 也可能需要更大限制。
+
+    参数: ~
+      • {max}  (`integer`)
+
+vim.lpeg.type({value})                                       *vim.lpeg.type()*
+    若给定值为模式则返回字符串 `"pattern"`，否则返回 nil。
+
+    参数: ~
+      • {value}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+
+    返回: ~
+        (`"pattern"?`)
+
+vim.lpeg.V({v})                                                 *vim.lpeg.V()*
+    为文法创建非终结符（变量）。该操作为文法创建非终结符，所创建变量引用文法中索引为 `v` 的规则。
+
+    示例: >lua
+        local b = lpeg.P({'(' * ((1 - lpeg.S '()') + lpeg.V(1)) ^ 0 * ')'})
+        assert(b:match('((string))') == 11)
+        assert(b:match('(') == nil)
+<
+
+    参数: ~
+      • {v}  (`boolean|string|number|function|table|thread|userdata|lightuserdata`)
+
+    返回: ~
+        (`vim.lpeg.Pattern`)
+
+vim.lpeg.version()                                        *vim.lpeg.version()*
+    返回 LPeg 运行版本的字符串。
+
+    返回: ~
+        (`string`)
+
+==============================================================================
+VIM.RE                                                                *vim.re*
+
+`vim.re` 模块为 LPeg |vim.lpeg| 提供了常规正则风格语法。（与 |vim.regex| 提供的 Vim |regexp| 无关。）
+
+见 https://www.inf.puc-rio.br/~roberto/lpeg/re.html，了解原始文档、正则语法和示例。
+
+vim.re.compile({string}, {defs})                            *vim.re.compile()*
+    编译给定 {string}，返回等价的 LPeg 模式。字符串可定义表达式或文法。可选 {defs} 表提供模式可用的额外 Lua 值。
+
+    参数: ~
+      • {string}  (`string`)
+      • {defs}    (`table?`)
+
+    返回: ~
+        (`vim.lpeg.Pattern`)
+
+vim.re.find({subject}, {pattern}, {init})                      *vim.re.find()*
+    在 {subject} 中查找 {pattern}。找到时返回起止索引，否则返回 nil。
+
+    可选数字参数 {init} 指定起始位置。Lua 库中，负值从末尾计数。
+
+    参数: ~
+      • {subject}  (`string`)
+      • {pattern}  (`vim.lpeg.Pattern|string`)
+      • {init}     (`integer?`)
+
+    返回（多值）: ~
+        (`integer?`) 匹配起始索引，无匹配为 nil
+        (`integer?`) 匹配结束索引，无匹配为 nil
+
+vim.re.gsub({subject}, {pattern}, {replacement})               *vim.re.gsub()*
+    全局替换，将 {subject} 中所有 {pattern} 匹配项替换为 {replacement}。
+
+    参数: ~
+      • {subject}      (`string`)
+      • {pattern}      (`vim.lpeg.Pattern|string`)
+      • {replacement}  (`string`)
+
+    返回: ~
+        (`string`)
+
+vim.re.match({subject}, {pattern}, {init})                    *vim.re.match()*
+    用 {pattern} 匹配 {subject}，返回所有捕获。
+
+    参数: ~
+      • {subject}  (`string`)
+      • {pattern}  (`vim.lpeg.Pattern|string`)
+      • {init}     (`integer?`)
+
+    返回: ~
+        (`integer|vim.lpeg.Capture?`)
+
+    另见: ~
+      • vim.lpeg.match()
+
+vim.re.updatelocale()                                  *vim.re.updatelocale()*
+    更新预定义字符类为当前 locale。
+
+==============================================================================
+VIM.REGEX                                                          *vim.regex*
+
+可直接在 Lua 中使用 Vim 正则。目前仅支持单行匹配。
+                                                          *regex:match_line()*
+regex:match_line({bufnr}, {line_idx}, {start}, {end_})
+    匹配缓冲区 `bufnr` 中 `line_idx` 行。匹配范围为字节索引 `start` 到 `end_`，否则见 |regex:match_str()|。返回的字节索引相对 `start`。
+
+    参数: ~
+      • {bufnr}     (`integer`)
+      • {line_idx}  (`integer`)
+      • {start}     (`integer?`)
+      • {end_}      (`integer?`)
+
+    返回（多值）: ~
+        (`integer?`) 匹配起始字节索引，相对 `start`，无匹配为 nil
+        (`integer?`) 匹配结束字节索引，相对 `start`，无匹配为 nil
+
+regex:match_str({str})                                     *regex:match_str()*
+    用此正则匹配字符串 `str`。要精确匹配字符串，正则需加 "^" 和 "$"。返回匹配起止字节索引，无匹配为 nil。因任意整数为“真”，可直接用作 if 条件。
+
+    参数: ~
+      • {str}  (`string`)
+
+    返回（多值）: ~
+        (`integer?`) 匹配起始字节索引，无匹配为 nil
+        (`integer?`) 匹配结束字节索引，无匹配为 nil
+
+vim.regex({re})                                                  *vim.regex()*
+    解析 Vim 正则 `re`，返回正则对象。正则默认“magic”且区分大小写，无论 'magic' 和 'ignorecase'。可用标志控制，见 |/magic| 和 |/ignorecase|。
+
+    参数: ~
+      • {re}  (`string`)
+
+    返回: ~
+        (`vim.regex`)
+
+==============================================================================
+Lua 模块: vim.secure                                            *vim.secure*
+
+vim.secure.read({path})                                    *vim.secure.read()*
+    尝试读取 {path} 文件，若需信任则提示用户。用户选择会保存在 $XDG_STATE_HOME/nvim/trust 的信任数据库中。
+
+    属性: ~
+        自 0.9.0 起
+
+    参数: ~
+      • {path}  (`string`) 要读取的文件路径
+
+    返回: ~
+        (`string?`) 若文件存在且被信任则为内容，否则为 nil
+
+    另见: ~
+      • |:trust|
+
+vim.secure.trust({opts})                                  *vim.secure.trust()*
+    管理信任数据库。
+
+    信任数据库位于 |$XDG_STATE_HOME|/nvim/trust。
+
+    属性: ~
+        自 0.9.0 起
+
+    参数: ~
+      • {opts}  (`table`) 具有以下字段的表:
+                • {action} (`'allow'|'deny'|'remove'`) - `'allow'` 添加文件到信任数据库并信任，
+                  `'deny'` 添加文件到信任数据库并拒绝，
+                  `'remove'` 从信任数据库移除文件
+                • {path}? (`string`) 要更新的文件路径。与 {bufnr} 互斥。action 为 "allow" 时不可用。
+                • {bufnr}? (`integer`) 要更新的缓冲区号。与 {path} 互斥。
+
+    返回（多值）: ~
+        (`boolean`) 操作成功为 true
+        (`string`) 若成功为完整路径，否则为错误信息
+
+==============================================================================
+Lua 模块: vim.version                                          *vim.version*
+
+`vim.version` 模块提供符合 https://semver.org 规范的版本和范围比较函数。插件和插件管理器可用以检测当前系统可用工具和依赖。
+
+示例: >lua
+    local v = vim.version.parse(vim.fn.system({'tmux', '-V'}), {strict=false})
+    if vim.version.gt(v, {3, 2, 0}) then
+      -- ...
+    end
+<
+
+*vim.version()* 返回当前 Nvim 进程的版本。
+
+版本范围规范                                             *version-range*
+
+版本“范围规范”定义了可用 |vim.version.range()| 检查的语义版本范围。
+
+支持的范围规范如下表。注意：带后缀的版本（1.2.3-rc1）不匹配。 >
+    1.2.3             即 1.2.3
+    =1.2.3            即 1.2.3
+    >1.2.3            大于 1.2.3
+    <1.2.3            小于 1.2.3
+    >=1.2.3           至少 1.2.3
+    ~1.2.3            >=1.2.3 <1.3.0       “接近 1.2.3”
+    ^1.2.3            >=1.2.3 <2.0.0       “兼容 1.2.3”
+    ^0.2.3            >=0.2.3 <0.3.0       （0.x.x 特殊）
+    ^0.0.1            =0.0.1               （0.0.x 特殊）
+    ^1.2              >=1.2.0 <2.0.0       （如 ^1.2.0）
+    ~1.2              >=1.2.0 <1.3.0       （如 ~1.2.0）
+    ^1                >=1.0.0 <2.0.0       “兼容 1”
+    ~1                同上                 “接近 1”
+    1.x               同上
+    1.*               同上
+    1                 同上
+    *                 任意版本
+    x                 同上
+
+    1.2.3 - 2.3.4     >=1.2.3 <=2.3.4
+
+    右侧缺失：缺失部分视为 x（2.3 => 2.3.x）。
+    1.2.3 - 2.3       >=1.2.3 <2.4.0
+    1.2.3 - 2         >=1.2.3 <3.0.0
+
+    左侧缺失：缺失部分视为 0（1.2 => 1.2.0）。
+    1.2 - 2.3.0       1.2.0 - 2.3.0
+<
+vim.version.cmp({v1}, {v2})                                *vim.version.cmp()*
+    解析并比较两个版本对象（|vim.version.parse()| 的结果，或直接用 `{major, minor, patch}` 元组，如 `{1, 0, 3}`）。
+
+    示例: >lua
+        if vim.version.cmp({1,0,3}, {0,2,1}) == 0 then
+          -- ...
+        end
+        local v1 = vim.version.parse('1.0.3-pre')
+        local v2 = vim.version.parse('0.2.1')
+        if vim.version.cmp(v1, v2) == 0 then
+          -- ...
+        end
+<
+
+    注意: ~
+      • 按 semver，比较两个等价版本时会忽略构建元数据。
+
+    属性: ~
+        自 0.9.0 起
+
+    参数: ~
+      • {v1}  (`vim.Version|number[]|string`) 版本对象
+      • {v2}  (`vim.Version|number[]|string`) 要与 v1 比较的版本
+
+    返回: ~
+        (`integer`) v1 < v2 返回 -1，v1 == v2 返回 0，v1 > v2 返回 1
+
+vim.version.eq({v1}, {v2})                                  *vim.version.eq()*
+    若给定版本相等则返回 `true`。用法见 |vim.version.cmp()|。
+
+    属性: ~
+        自 0.9.0 起
+
+    参数: ~
+      • {v1}  (`vim.Version|number[]|string`)
+      • {v2}  (`vim.Version|number[]|string`)
+
+    返回: ~
+        (`boolean`)
+
+vim.version.ge({v1}, {v2})                                  *vim.version.ge()*
+    若 v1 >= v2 返回 `true`。用法见 |vim.version.cmp()|。
+
+    属性: ~
+        自 0.10.0 起
+
+    参数: ~
+      • {v1}  (`vim.Version|number[]|string`)
+      • {v2}  (`vim.Version|number[]|string`)
+
+    返回: ~
+        (`boolean`)
+
+vim.version.gt({v1}, {v2})                                  *vim.version.gt()*
+    若 v1 > v2 返回 `true`。用法见 |vim.version.cmp()|。
+
+    属性: ~
+        自 0.9.0 起
+
+    参数: ~
+      • {v1}  (`vim.Version|number[]|string`)
+      • {v2}  (`vim.Version|number[]|string`)
+
+    返回: ~
+        (`boolean`)
+
+vim.version.last({versions})                              *vim.version.last()*
+    TODO: 泛化此函数，移到 func.lua
+
+    参数: ~
+      • {versions}  (`vim.Version[]`)
+
+    返回: ~
+        (`vim.Version?`)
+
+vim.version.le({v1}, {v2})                                  *vim.version.le()*
+    若 v1 <= v2 返回 `true`。用法见 |vim.version.cmp()|。
+
+    属性: ~
+        自 0.10.0 起
+
+    参数: ~
+      • {v1}  (`vim.Version|number[]|string`)
+      • {v2}  (`vim.Version|number[]|string`)
+
+    返回: ~
+        (`boolean`)
+
+vim.version.lt({v1}, {v2})                                  *vim.version.lt()*
+    若 v1 < v2 返回 `true`。用法见 |vim.version.cmp()|。
+
+    属性: ~
+        自 0.9.0 起
+
+    参数: ~
+      • {v1}  (`vim.Version|number[]|string`)
+      • {v2}  (`vim.Version|number[]|string`)
+
+    返回: ~
+        (`boolean`)
+
+vim.version.parse({version}, {opts})                     *vim.version.parse()*
+    解析语义版本字符串，返回可与其它 `vim.version` 函数配合使用的版本对象。例如 "1.0.1-rc1+build.2" 返回: >
+        { major = 1, minor = 0, patch = 1, prerelease = "rc1", build = "build.2" }
+<
+
+    属性: ~
+        自 0.9.0 起
+
+    参数: ~
+      • {version}  (`string`) 要解析的版本字符串
+      • {opts}     (`table?`) 可选关键字参数:
+                   • strict (boolean): 默认 false。若为 true，输入不符合 semver v2.0.0 时不做强制转换。为 false 时，`parse()` 会尝试将 "1.0"、"0-x"、"tmux 3.2a" 等转换为有效版本。
+
+    返回: ~
+        (`vim.Version?`) 解析后的版本对象，输入无效时为 nil
+
+    另见: ~
+      • https://semver.org/spec/v2.0.0.html
+
+vim.version.range({spec})                                *vim.version.range()*
+    解析 semver |version-range| “规范”，返回范围对象: >
+        {
+          from: Version
+          to: Version
+          has(v: string|Version)
+        }
+<
+
+    `:has()` 检查版本是否在范围内（包含 from，不包含 to）。
+
+    示例: >lua
+        local r = vim.version.range('1.0.0 - 2.0.0')
+        print(r:has('1.9.9'))       -- true
+        print(r:has('2.0.0'))       -- false
+        print(r:has(vim.version())) -- 检查当前 Nvim 版本
+<
+
+    或用 cmp(), le(), lt(), ge(), gt(), eq() 直接与 .to/.from 比较: >lua
+        local r = vim.version.range('1.0.0 - 2.0.0') -- >=1.0, <2.0
+        print(vim.version.ge({1,0,3}, r.from) and vim.version.lt({1,0,3}, r.to))
+<
+
+    属性: ~
+        自 0.9.0 起
+
+    参数: ~
+      • {spec}  (`string`) 版本范围“规范”
+
+    返回: ~
+        (`table?`) 包含以下字段的表:
+        • {from} (`vim.Version`)
+        • {to}? (`vim.Version`)
+        • {has} (`fun(self: vim.VersionRange, version: string|vim.Version)`)
+
+    另见: ~
+      • https://github.com/npm/node-semver#ranges
+
+==============================================================================
+Lua 模块: vim.iter                                                *vim.iter*
+
+*vim.iter()* 是 |iterable| 的接口：将表或函数参数包装为 *Iter* 对象，带有方法（如 |Iter:filter()|、|Iter:map()|）可变换底层数据。这些方法可链式调用，形成迭代器“管道”：每个阶段的输出作为下阶段输入。第一个阶段取决于传给 `vim.iter()` 的类型：
+• 列表或数组（|lua-list|）只产出每个元素的值。
+  • 允许“洞”（nil 值），但会被丢弃。
+  • 用 pairs() 可将数组/列表表当作字典（保留洞和非连续整数键）：`vim.iter(pairs(…))`。
+  • 用 |Iter:enumerate()| 也传递索引到下阶段。
+    • 或用 ipairs() 初始化：`vim.iter(ipairs(…))`。
+• 非列表表（|lua-dict|）产出每个元素的键和值。
+• 函数 |iterator| 产出底层函数返回的所有值。
+• 带 |__call()| 元方法的表视为函数迭代器。
+
+迭代器管道在底层 |iterable| 耗尽时终止（对函数迭代器即返回 nil）。
+
+注意: `vim.iter()` 会扫描表以判断是列表还是字典；如要避免此开销，可用迭代器包装表，如
+`vim.iter(ipairs({…}))`，但这样不能用 |list-iterator| 操作如 |Iter:rev()|。
+
+示例: >lua
+    local it = vim.iter({ 1, 2, 3, 4, 5 })
+    it:map(function(v)
+      return v * 3
+    end)
+    it:rev()
+    it:skip(2)
+    it:totable()
+    -- { 9, 6, 3 }
+
+    -- ipairs() 是函数迭代器，返回索引 (i) 和值 (v)
+    vim.iter(ipairs({ 1, 2, 3, 4, 5 })):map(function(i, v)
+      if i > 2 then return v end
+    end):totable()
+    -- { 3, 4, 5 }
+
+    local it = vim.iter(vim.gsplit('1,2,3,4,5', ','))
+    it:map(function(s) return tonumber(s) end)
+    for i, d in it:enumerate() do
+      print(string.format("Column %d is %d", i, d))
+    end
+    -- Column 1 is 1
+    -- Column 2 is 2
+    -- Column 3 is 3
+    -- Column 4 is 4
+    -- Column 5 is 5
+
+    vim.iter({ a = 1, b = 2, c = 3, z = 26 }):any(function(k, v)
+      return k == 'z'
+    end)
+    -- true
+
+    local rb = vim.ringbuf(3)
+    rb:push("a")
+    rb:push("b")
+    vim.iter(rb):totable()
+    -- { "a", "b" }
+<
+Iter:all({pred})                                                  *Iter:all()*
+    若迭代器中所有项目都满足给定谓词，则返回 true。
+
+    参数: ~
+      • {pred}  (`fun(...):boolean`) 谓词函数。接收上阶段管道返回的所有值，返回 true 表示匹配。
+
+Iter:any({pred})                                                  *Iter:any()*
+    若迭代器中任一项目满足给定谓词，则返回 true。
+
+    参数: ~
+      • {pred}  (`fun(...):boolean`) 谓词函数。接收上阶段管道返回的所有值，返回 true 表示匹配。
+
+Iter:each({f})                                                   *Iter:each()*
+    对管道中每个项目调用一次函数，耗尽迭代器。
+
+    用于有副作用的函数。若要修改迭代器中的值，用 |Iter:map()|。
+
+    参数: ~
+      • {f}  (`fun(...)`) 对每个项目执行的函数。接收上阶段管道返回的所有值。
+
+Iter:enumerate()                                            *Iter:enumerate()*
+    为迭代器管道的每个项目产出索引（计数）和值。
+
+    对于列表表，更高效: >lua
+        vim.iter(ipairs(t))
+<
+
+    而不是: >lua
+        vim.iter(t):enumerate()
+<
+
+    示例: >lua
+
+        local it = vim.iter(vim.gsplit('abc', '')):enumerate()
+        it:next()
+        -- 1	'a'
+        it:next()
+        -- 2	'b'
+        it:next()
+        -- 3	'c'
+<
+
+    返回: ~
+        (`Iter`)
+
+Iter:filter({f})                                               *Iter:filter()*
+    过滤迭代器管道。
+
+    示例: >lua
+        local bufs = vim.iter(vim.api.nvim_list_bufs()):filter(vim.api.nvim_buf_is_loaded)
+<
+
+    参数: ~
+      • {f}  (`fun(...):boolean`) 接收上阶段管道返回的所有值，返回 false 或 nil 时移除当前元素。
+
+    返回: ~
+        (`Iter`)
+
+Iter:find({f})                                                   *Iter:find()*
+    查找迭代器中第一个满足谓词的值。
+
+    推进迭代器。未找到则返回 nil 并耗尽迭代器。
+
+    示例: >lua
+
+        local it = vim.iter({ 3, 6, 9, 12 })
+        it:find(12)
+        -- 12
+
+        local it = vim.iter({ 3, 6, 9, 12 })
+        it:find(20)
+        -- nil
+
+        local it = vim.iter({ 3, 6, 9, 12 })
+        it:find(function(v) return v % 4 == 0 end)
+        -- 12
+<
+
+    参数: ~
+      • {f}  (`any`)
+
+    返回: ~
+        (`any`)
+
+Iter:flatten({depth})                                         *Iter:flatten()*
+    扁平化 |list-iterator|，最多展开到 {depth} 层。若尝试扁平化字典风格表会报错。
+
+    示例: >lua
+        vim.iter({ 1, { 2 }, { { 3 } } }):flatten():totable()
+        -- { 1, 2, { 3 } }
+
+        vim.iter({1, { { a = 2 } }, { 3 } }):flatten():totable()
+        -- { 1, { a = 2 }, 3 }
+
+        vim.iter({ 1, { { a = 2 } }, { 3 } }):flatten(math.huge):totable()
+        -- error: attempt to flatten a dict-like table
+<
+
+    参数: ~
+      • {depth}  (`number?`) 扁平化深度（默认 1）
+
+    返回: ~
+        (`Iter`)
+
+Iter:fold({init}, {f})                                           *Iter:fold()*
+    将迭代器“归约”为单个值。         *Iter:reduce()*
+
+    示例: >lua
+        -- 创建只包含偶数值的新表
+        vim.iter({ a = 1, b = 2, c = 3, d = 4 })
+          :filter(function(k, v) return v % 2 == 0 end)
+          :fold({}, function(acc, k, v)
+            acc[k] = v
+            return acc
+          end) --> { b = 2, d = 4 }
+
+        -- 获取可迭代对象的“最大”项
+        vim.iter({ -99, -4, 3, 42, 0, 0, 7 })
+          :fold({}, function(acc, v)
+            acc.max = math.max(v, acc.max or v)
+            return acc
+          end) --> { max = 42 }
+<
+
+    参数: ~
+      • {init}  (`any`) 累加器初值
+      • {f}     (`fun(acc:A, ...):A`) 累加函数
+
+    返回: ~
+        (`any`)
+
+Iter:join({delim})                                               *Iter:join()*
+    将迭代器收集为分隔字符串。
+
+    迭代器中每个元素用 {delim} 连接为字符串。
+
+    消耗迭代器。
+
+    参数: ~
+      • {delim}  (`string`) 分隔符
+
+    返回: ~
+        (`string`)
+
+Iter:last()                                                      *Iter:last()*
+    消耗迭代器并返回最后一个项目。
+
+    示例: >lua
+
+        local it = vim.iter(vim.gsplit('abcdefg', ''))
+        it:last()
+        -- 'g'
+
+        local it = vim.iter({ 3, 6, 9, 12, 15 })
+        it:last()
+        -- 15
+<
+
+    返回: ~
+        (`any`)
+
+    另见: ~
+      • |Iter:rpeek()|
+
+Iter:map({f})                                                     *Iter:map()*
+    将迭代器管道的项目映射为 `f` 返回的值。
+
+    若 map 函数返回 nil，则该值会被过滤。
+
+    示例: >lua
+        local it = vim.iter({ 1, 2, 3, 4 }):map(function(v)
+          if v % 2 == 0 then
+            return v * 3
+          end
+        end)
+        it:totable()
+        -- { 6, 12 }
+<
+
+    参数: ~
+      • {f}  (`fun(...):...:any`) 映射函数。接收上阶段管道返回的所有值，返回一个或多个新值，供下阶段使用。返回 nil 的值会被过滤。
+
+    返回: ~
+        (`Iter`)
+
+Iter:next()                                                      *Iter:next()*
+    获取迭代器的下一个值。
+
+    示例: >lua
+
+        local it = vim.iter(string.gmatch('1 2 3', '%d+')):map(tonumber)
+        it:next()
+        -- 1
+        it:next()
+        -- 2
+        it:next()
+        -- 3
+<
+
+    返回: ~
+        (`any`)
+
+Iter:nth({n})                                                     *Iter:nth()*
+    获取迭代器的第 n 个值（并推进到该值）。
+
+    若 n 为负数，则从 |list-iterator| 末尾偏移。
+
+    示例: >lua
+        local it = vim.iter({ 3, 6, 9, 12 })
+        it:nth(2)
+        -- 6
+        it:nth(2)
+        -- 12
+
+        local it2 = vim.iter({ 3, 6, 9, 12 })
+        it2:nth(-2)
+        -- 9
+        it2:nth(-2)
+        -- 3
+<
+
+    参数: ~
+      • {n}  (`number`) 要返回的值的索引。若为负数且源为 |list-iterator|，则从末尾偏移。
+
+    返回: ~
+        (`any`)
+
+Iter:peek()                                                      *Iter:peek()*
+    获取 |list-iterator| 的下一个值但不消耗。
+
+    示例: >lua
+
+        local it = vim.iter({ 3, 6, 9, 12 })
+        it:peek()
+        -- 3
+        it:peek()
+        -- 3
+        it:next()
+        -- 3
+<
+
+    返回: ~
+        (`any`)
+
+Iter:pop()                                                        *Iter:pop()*
+    从 |list-iterator| “弹出”一个值（获取最后一个值并递减尾部）。
+
+    示例: >lua
+        local it = vim.iter({1, 2, 3, 4})
+        it:pop()
+        -- 4
+        it:pop()
+        -- 3
+<
+
+    返回: ~
+        (`any`)
+
+Iter:rev()                                                        *Iter:rev()*
+    反转 |list-iterator| 管道。
+
+    示例: >lua
+
+        local it = vim.iter({ 3, 6, 9, 12 }):rev()
+        it:totable()
+        -- { 12, 9, 6, 3 }
+<
+
+    返回: ~
+        (`Iter`)
+
+Iter:rfind({f})                                                 *Iter:rfind()*
+    从 |list-iterator| 末尾查找第一个满足谓词的值。
+
+    推进迭代器。未找到则返回 nil 并耗尽迭代器。
+
+    示例: >lua
+
+        local it = vim.iter({ 1, 2, 3, 2, 1 }):enumerate()
+        it:rfind(1)
+        -- 5	1
+        it:rfind(1)
+        -- 1	1
+<
+
+    参数: ~
+      • {f}  (`any`)
+
+    返回: ~
+        (`any`)
+
+    另见: ~
+      • |Iter:find()|
+
+Iter:rpeek()                                                    *Iter:rpeek()*
+    获取 |list-iterator| 的最后一个值但不消耗。
+
+    示例: >lua
+        local it = vim.iter({1, 2, 3, 4})
+        it:rpeek()
+        -- 4
+        it:rpeek()
+        -- 4
+        it:pop()
+        -- 4
+<
+
+    返回: ~
+        (`any`)
+
+    另见: ~
+      • |Iter:last()|
+
+Iter:rskip({n})                                                 *Iter:rskip()*
+    从 |list-iterator| 管道末尾丢弃 n 个值。
+
+    示例: >lua
+        local it = vim.iter({ 1, 2, 3, 4, 5 }):rskip(2)
+        it:next()
+        -- 1
+        it:pop()
+        -- 3
+<
+
+    参数: ~
+      • {n}  (`number`) 要跳过的值数
+
+    返回: ~
+        (`Iter`)
+
+Iter:skip({n})                                                   *Iter:skip()*
+    跳过迭代器管道的前 n 个值。
+
+    示例: >lua
+
+        local it = vim.iter({ 3, 6, 9, 12 }):skip(2)
+        it:next()
+        -- 9
+<
+
+    参数: ~
+      • {n}  (`number`) 要跳过的值数
+
+    返回: ~
+        (`Iter`)
+
+Iter:slice({first}, {last})                                     *Iter:slice()*
+    设置 |list-iterator| 管道的起止。
+
+    等价于 `:skip(first - 1):rskip(len - last + 1)`。
+
+    参数: ~
+      • {first}  (`number`)
+      • {last}   (`number`)
+
+    返回: ~
+        (`Iter`)
+
+Iter:take({n})                                                   *Iter:take()*
+    变换迭代器，仅产出前 n 个值。
+
+    示例: >lua
+        local it = vim.iter({ 1, 2, 3, 4 }):take(2)
+        it:next()
+        -- 1
+        it:next()
+        -- 2
+        it:next()
+        -- nil
+<
+
+    参数: ~
+      • {n}  (`integer`)
+
+    返回: ~
+        (`Iter`)
+
+Iter:totable()                                                *Iter:totable()*
+    将迭代器收集为表。
+
+    结果表取决于迭代器管道的初始源。数组风格表和函数迭代器会收集为数组风格表。若管道最后阶段返回多个值，每个值会作为表项。
+
+    示例: >lua
+        vim.iter(string.gmatch('100 20 50', '%d+')):map(tonumber):totable()
+        -- { 100, 20, 50 }
+
+        vim.iter({ 1, 2, 3 }):map(function(v) return v, 2 * v end):totable()
+        -- { { 1, 2 }, { 2, 4 }, { 3, 6 } }
+
+        vim.iter({ a = 1, b = 2, c = 3 }):filter(function(k, v) return v % 2 ~= 0 end):totable()
+        -- { { 'a', 1 }, { 'c', 3 } }
+<
+
+    生成的表为连续数字索引的数组风格表。要创建任意键的映射表，用
+    |Iter:fold()|。
+
+    返回: ~
+        (`table`)
+
+==============================================================================
+Lua 模块: vim.snippet                                          *vim.snippet*
+
+*vim.snippet.ActiveFilter*
+
+    字段: ~
+      • {direction}  (`vim.snippet.Direction`) 跳转方向。-1 为上一个，1 为下一个。
+
+vim.snippet.active({filter})                            *vim.snippet.active()*
+    若当前缓冲区有激活的 snippet，应用给定 filter（如有）则返回 `true`。
+
+    参数: ~
+      • {filter}  (`vim.snippet.ActiveFilter?`) 用于约束搜索的过滤器:
+                  • `direction` (vim.snippet.Direction): 跳转方向。
+                若 snippet 可按该方向跳转则返回 `true`。见 |vim.snippet.ActiveFilter|。
+
+    返回: ~
+        (`boolean`)
+
+vim.snippet.expand({input})                             *vim.snippet.expand()*
+    展开给定 snippet 文本。规范见
+    https://microsoft.github.io/language-server-protocol/specification/#snippet_syntax
+
+    Tabstop 用 |hl-SnippetTabstop| 高亮。
+
+    参数: ~
+      • {input}  (`string`)
+
+
+vim.snippet.jump({direction})                             *vim.snippet.jump()*
+    跳转到当前 snippet 的下一个（或上一个）占位符（如有）。
+
+    默认 `<Tab>` 映射为 snippet 激活时跳转。默认映射如下: >lua
+        vim.keymap.set({ 'i', 's' }, '<Tab>', function()
+           if vim.snippet.active({ direction = 1 }) then
+             return '<Cmd>lua vim.snippet.jump(1)<CR>'
+           else
+             return '<Tab>'
+           end
+         end, { descr = '...', expr = true, silent = true })
+<
+
+    参数: ~
+      • {direction}  (`vim.snippet.Direction`) 跳转方向。-1 为上一个，1 为下一个。
+
+vim.snippet.stop()                                        *vim.snippet.stop()*
+    退出当前 snippet。
+
+==============================================================================
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
