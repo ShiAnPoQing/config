@@ -339,6 +339,7 @@ K.add({
     "i"
   },
   ["<F6>"] = { function()
+    require("utils.char").char_split('niaf', 1, 2, 4, 10)
     -- lua string 以字节为准
     -- neovim api 以字节为准
     -- neovim get mark ">" 以最后一个字符的起始字节为准
