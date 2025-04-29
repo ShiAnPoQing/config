@@ -5,46 +5,24 @@ return {
   ["<C-down>"] = {
     {
       function()
-        local count = vim.v.count1
-        move_line.moveLine(count, "down")
+        move_line.moveLine("down")
         require("repeat").Record(function()
-          move_line.moveLine(count, "down")
+          move_line.moveLine("down")
         end)
       end,
-      { "n", "i" },
-    },
-    {
-      function()
-        local count = vim.v.count1
-        move_line.moveLineVisualMode(count, "down")
-        require("repeat").Record(function()
-          move_line.moveLineVisualMode(count, "down")
-        end)
-      end,
-      { "x" },
+      { "n", "i", "x" },
     },
   },
   -- move line(s): Up
   ["<C-up>"] = {
     {
       function()
-        local count = vim.v.count1
-        move_line.moveLine(count, "up")
+        move_line.moveLine("up")
         require("repeat").Record(function()
-          move_line.moveLine(count, "up")
+          move_line.moveLine("up")
         end)
       end,
-      { "n", "i" },
-    },
-    {
-      function()
-        local count = vim.v.count1
-        move_line.moveLineVisualMode(count, "up")
-        require("repeat").Record(function()
-          move_line.moveLineVisualMode(count, "up")
-        end)
-      end,
-      { "x" },
+      { "n", "i", "x" },
     },
   },
 }

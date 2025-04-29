@@ -4,9 +4,7 @@ local WordMoveAction = {
   ["left"] = {
     is_outer_boundary = function(line_to_start, line_to_end)
       if line_to_start:match("^%s*$") then
-        vim.api.nvim_exec2([[
-        execute "normal! Pgv\<C-G>"
-        ]], {})
+        vim.api.nvim_exec2([[execute "normal! Pgv\<C-G>"]], {})
         return true
       end
       return false
@@ -24,9 +22,7 @@ local WordMoveAction = {
   ["right"] = {
     is_outer_boundary = function(line_to_start, line_to_end)
       if line_to_end:match("^%s*$") then
-        vim.api.nvim_exec2([[
-        execute "normal! Pgv\<C-G>"
-        ]], {})
+        vim.api.nvim_exec2([[execute "normal! Pgv\<C-G>"]], {})
         return true
       end
       return false
@@ -43,14 +39,10 @@ local WordMoveAction = {
   }
 }
 
---- @param action "left"| "right"
-function M.select_word_move(action)
-  local Action = WordMoveAction[action]
+local function select_mode_move(dir)
+  local Action = WordMoveAction[dir]
 
-  vim.api.nvim_exec2([[
-  execute "normal! \<C-G>d"
-  ]], {})
-
+  vim.api.nvim_exec2([[execute "normal! \<C-G>d"]], {})
   local select = vim.fn.getreg('"')
   local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
 
@@ -68,9 +60,22 @@ function M.select_word_move(action)
   vim.api.nvim_buf_set_mark(0, "<", start_row, start_col + mark_offset, {})
   vim.api.nvim_buf_set_mark(0, ">", start_row, start_col + mark_offset + #select - 1, {})
 
-  vim.api.nvim_exec2([[
-  execute "normal! gv\<C-G>"
-  ]], {})
+  vim.api.nvim_exec2([[execute "normal! gv\<C-G>"]], {})
+end
+
+local function select_block_mode_move(dir)
+
+end
+
+--- @param dir "left"| "right"
+function M.select_word_move(dir)
+  local mode = vim.api.nvim_get_mode().mode
+
+  if mode == "s" then
+    select_mode_move(dir)
+  elseif mode == "" then
+    select_block_mode_move(dir)
+  end
 end
 
 return M
