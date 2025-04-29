@@ -6,23 +6,12 @@ return {
     {
       function()
         local count = vim.v.count1
-        clone.copy_line_word("up", count, "i")
+        clone.copy_line_word("up", count)
         require("repeat").Record(function()
-          clone.copy_line_word("up", count, "i")
+          clone.copy_line_word("up", count)
         end)
       end,
-      "i",
-    },
-
-    {
-      function()
-        local count = vim.v.count1
-        clone.copy_line_word("up", count, "n")
-        require("repeat").Record(function()
-          clone.copy_line_word("up", count, "n")
-        end)
-      end,
-      "n",
+      { "i", "n" },
     },
   },
   -- clone down line with word step
@@ -30,22 +19,12 @@ return {
     {
       function()
         local count = vim.v.count1
-        clone.copy_line_word("down", count, "i")
+        clone.copy_line_word("down", count)
         require("repeat").Record(function()
-          clone.copy_line_word("down", count, "i")
+          clone.copy_line_word("down", count)
         end)
       end,
-      "i",
-    },
-    {
-      function()
-        local count = vim.v.count1
-        clone.copy_line_word("down", count, "n")
-        require("repeat").Record(function()
-          clone.copy_line_word("down", count, "n")
-        end)
-      end,
-      "n",
+      { "i", "n" },
     },
   },
   -- clone up line with single letter
