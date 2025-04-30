@@ -25,8 +25,8 @@ local function execRepeat()
 end
 
 function M.Repeat()
-  if vim.v.count > 0 then
-    for i = 1, vim.v.count do
+  if vim.v.count1 > 0 then
+    for i = 1, vim.v.count1 do
       execRepeat()
     end
   else
@@ -92,7 +92,7 @@ function M.setup()
       function()
         require("repeat").Repeat()
       end,
-      "n",
+      { "n", "x" },
     },
   })
 end

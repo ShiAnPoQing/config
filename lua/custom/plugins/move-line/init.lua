@@ -18,6 +18,7 @@ function M.moveLine(dir)
       vim.api.nvim_buf_set_lines(0, row + count - 1, row + count - 1, false, lines)
     else
       count = math.min(line_count - row, count)
+      print(count)
       vim.api.nvim_buf_set_lines(0, row + count, row + count, false, lines)
       vim.api.nvim_buf_set_lines(0, row - 1, row, false, {})
     end

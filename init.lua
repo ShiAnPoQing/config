@@ -4,8 +4,8 @@ require("repeat").setup()
 local K = require("plugin-keymap")
 K.setup()
 
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
     "git",
@@ -16,7 +16,6 @@ if not vim.loop.fs_stat(lazypath) then
     lazypath,
   })
 end
-
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
@@ -43,7 +42,8 @@ require("lazy").setup({
   { import = "plugins.custom.concat-mode" },
   { import = "plugins.custom.win-action" },
   { import = "plugins.custom.register-control" },
-  { import = "plugins.custom.show-file-info" }
+  { import = "plugins.custom.show-file-info" },
+  { import = "plugins.custom.word-move" }
 })
 
 K.add({
@@ -339,24 +339,31 @@ K.add({
     "<left><C-o>y<right>",
     "i"
   },
-  ["<F6>"] = { function()
-    require("utils.char").char_split('niaf', 1, 2, 4, 10)
-    -- lua string 以字节为准
-    -- neovim api 以字节为准
-    -- neovim get mark ">" 以最后一个字符的起始字节为准
+  -- ["<F6>"] = { function()
 
-    -- -- 当光标落在一个多字节的字符上
-    -- -- 以该字符的第一个字节为基准
-    -- local pos = vim.api.nvim_win_get_cursor(0)
-    -- print(vim.inspect(pos))
+  -- require("utils.char").char_split('niaf', 1, 2, 4, 10)
+  -- lua string 以字节为准
+  -- neovim api 以字节为准
+  -- neovim get mark ">" 以最后一个字符的起始字节为准
 
-    -- vim.api.nvim_buf_set_text(0, 0, 0, 10, 10)
-    -- local pos = vim.api.nvim_win_get_cursor(0)
-    -- print(vim.inspect(pos))
-    -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
-    -- local pos = vim.api.nvim_buf_get_mark(0, ">")
-    -- print(vim.inspect(pos))
-  end, { "n", "x" } }
+  -- -- 当光标落在一个多字节的字符上
+  -- -- 以该字符的第一个字节为基准
+  -- local pos = vim.api.nvim_win_get_cursor(0)
+  -- print(vim.inspect(pos))
+
+  -- vim.api.nvim_buf_set_text(0, 0, 0, 10, 10)
+  -- local pos = vim.api.nvim_win_get_cursor(0)
+  -- print(vim.inspect(pos))
+  -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
+  -- local pos = vim.api.nvim_buf_get_mark(0, ">")
+  -- print(vim.inspect(pos))
+  -- end, { "n", "x" } }
+  ["d"] = {
+    function()
+      vim.api.nvim_feedkeys("d", "n", false)
+    end,
+    "n"
+  }
 })
 --   on_lines = function(_, bufnr, changedtick, first, last_old, last_new, byte_count)
 --     --   -- first 改变的第一行, 从 0 开始

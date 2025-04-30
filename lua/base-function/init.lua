@@ -31,11 +31,6 @@ function M.expand()
   end
 end
 
-function M.OmodeWordLeftMove(count)
-  local key = "v" .. count .. "b"
-  vim.api.nvim_feedkeys(key, "nx", true)
-end
-
 function M.EnterInertMode(mode, left_right)
   if mode == "n" then
     local not_empty = string.find(vim.api.nvim_get_current_line(), "%S")
@@ -213,38 +208,6 @@ end
 function M.cursorDownMove(count, multiple)
   count = getCount(count)
   vim.api.nvim_feedkeys(count * multiple .. "gj", "nt", true)
-end
-
-function M.normalModeWordLeftMove(count)
-  if count > 0 then
-    vim.api.nvim_feedkeys(count .. "b", "n", true)
-    return
-  end
-  vim.api.nvim_feedkeys("b", "n", true)
-end
-
-function M.normalModeWordRightMove(count)
-  if count > 0 then
-    vim.api.nvim_feedkeys(count .. "e", "n", true)
-    return
-  end
-  vim.api.nvim_feedkeys("e", "n", true)
-end
-
-function M.normalModeWORDRightMove(count)
-  if count > 0 then
-    vim.api.nvim_feedkeys(count .. "E", "n", true)
-    return
-  end
-  vim.api.nvim_feedkeys("E", "n", true)
-end
-
-function M.normalModeWORDLeftMove(count)
-  if count > 0 then
-    vim.api.nvim_feedkeys(count .. "B", "n", true)
-    return
-  end
-  vim.api.nvim_feedkeys("B", "n", true)
 end
 
 function M.rightEnterInsertMode()
