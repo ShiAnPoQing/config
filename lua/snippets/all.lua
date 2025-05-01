@@ -1064,6 +1064,7 @@ local snippets = {
     trig = "\\([a-zA-Z]+)%[%]%{%}%s",
     regTrig = true,
     wordTrig = false,
+    hidden = true
   }, {
     t("\\"),
     f(function(args, snip)
@@ -1081,6 +1082,7 @@ local snippets = {
     trig = "([a-zA-Z]+)\\",
     regTrig = true,
     wordTrig = false,
+    hidden = true
   }, {
     t("\\"),
     f(function(args, snip)
@@ -1113,6 +1115,7 @@ local snippets = {
   s({
     trig = "%.(%w)",
     regTrig = true,
+    hidden = true,
   }, {
     f(function(args, snip)
       local text = vim.fn.getreg(snip.captures[1])

@@ -420,11 +420,4 @@ K.add({
 --   vim.keymap.del("n", "gc")
 --   vim.keymap.del("n", "gx")
 -- end)
---
--- vim.keymap.set("i", "jk", "<Esc>", {})
--- vim.keymap.set("i", "kj", "<Esc>", {})
--- vim.keymap.set("i", "df", "<Esc>", {})
--- vim.keymap.set("i", "fd", "<Esc>", {})
---
--- vim.keymap.set("i", "<M-s>", "<C-left>", {})
--- vim.keymap.set("i", "<M-f>", "<C-right>", {})
+vim.keymap.del("i", "<C-i>")

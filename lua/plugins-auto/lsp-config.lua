@@ -20,7 +20,18 @@ return {
     "neovim/nvim-lspconfig",
     event = "BufReadPre",
     dependencies = {
-      "folke/neodev.nvim",
+      {
+        "folke/lazydev.nvim",
+        ft = "lua", -- only load on lua files
+        opts = {
+          library = {
+            -- See the configuration section for more details
+            -- Load luvit types when the `vim.uv` word is found
+            { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+          },
+        },
+      },
+      "saghen/blink.cmp"
     },
     opts = function()
       return {
@@ -57,12 +68,20 @@ return {
         }
       }
     end,
-    config = function()
-      require("neodev").setup({})
+    config = function(_, opts)
+      -- require("neodev").setup({})
       local lspconfig = require("lspconfig")
       local mason_registry = require("mason-registry")
       local vue_language_server =
       "C:/Users/24893/AppData/Local/nvim-data/mason/packages/vue-language-server/node_modules/@vue/language-server"
+
+
+      for server, config in pairs(opts.servers) do
+        -- passing config.capabilities to blink.cmp merges with the capabilities in your
+        -- `opts[server].capabilities, if you've defined it
+        config.capabilities = require('blink.cmp').get_lsp_capabilities(config.capabilities)
+        lspconfig[server].setup(config)
+      end
 
 
       lspconfig.clangd.setup({})

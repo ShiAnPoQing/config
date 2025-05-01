@@ -1,12 +1,15 @@
 return {
   'saghen/blink.cmp',
   -- optional: provides snippets for the snippet source
-  dependencies = { 'rafamadriz/friendly-snippets' },
+  dependencies = {
+    'rafamadriz/friendly-snippets',
+    { 'L3MON4D3/LuaSnip', version = 'v2.*' },
+  },
 
   -- use a release tag to download pre-built binaries
-  version = '1.*',
+  -- version = '1.*',
   -- AND/OR build from source, requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
-  -- build = 'cargo build --release',
+  build = 'cargo +nightly build --release',
   -- If you use nix, you can build from source using latest nightly rust with:
   -- build = 'nix run .#build-plugin',
 
@@ -34,7 +37,14 @@ return {
     },
 
     -- (Default) Only show the documentation popup when manually triggered
-    completion = { documentation = { auto_show = false } },
+    completion = {
+      documentation = { auto_show = true, auto_show_delay_ms = 500 },
+      menu = {
+        draw = {
+          columns = { { "kind_icon" }, { "label" }, { "source_name" } },
+        }
+      }
+    },
 
     -- Default list of enabled providers defined so that you can extend it
     -- elsewhere in your config, without redefining it, due to `opts_extend`
@@ -47,7 +57,49 @@ return {
     -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
     --
     -- See the fuzzy documentation for more information
-    fuzzy = { implementation = "prefer_rust_with_warning" }
+    fuzzy = { implementation = "prefer_rust_with_warning" },
+
+    snippets = { preset = 'luasnip' },
+    signature = { enabled = true },
+
+    keymap = {
+      preset = "default",
+      ['<C-c>'] = {
+        function(cmp)
+          if cmp.is_menu_visible() then
+            cmp.cancel()
+          else
+            cmp.show()
+          end
+        end,
+      },
+      ["<C-n>"] = {
+        function(cmp)
+          if cmp.is_menu_visible() then
+            cmp.select_next()
+          else
+            cmp.show()
+          end
+        end
+      },
+
+      ['<CR>'] = { 'accept', 'fallback' },
+      ['<Tab>'] = {
+        function(cmp)
+          if cmp.snippet_active() then
+            return cmp.accept()
+          else
+            return cmp.select_and_accept()
+          end
+        end,
+        'snippet_forward',
+        'fallback'
+      },
+      ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+    }
+
   },
   opts_extend = { "sources.default" }
+
+
 }

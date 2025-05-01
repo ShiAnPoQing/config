@@ -38,7 +38,6 @@ local snippets = {
   }),
   s("lc", {
     t("local "),
-    i(1),
   }),
   s("(\\)?nod", {
     d(1, function(args, snip)
