@@ -1,16 +1,15 @@
 local M = {
   currentRepeat = nil,
 }
+
 local queue = {}
-local hadStart = false
-local hadFixed = false
+local hadStart = false;
+local hadFixed = false;
 
 local function processQueue()
-  if queue then
-    for index, value in ipairs(queue) do
-      local callback = queue[index]
-      callback()
-    end
+  if not queue then return end
+  for _, callback in ipairs(queue) do
+    callback()
   end
 end
 
@@ -35,18 +34,17 @@ function M.Repeat()
 end
 
 function M.Record(callback)
-  if not hadFixed then
-    M.currentRepeat = callback
+  if hadFixed then return end
 
-    if hadStart then
-      table.insert(queue, callback)
-    else
-      queue = nil
-    end
+  M.currentRepeat = callback
+  if hadStart then
+    table.insert(queue, callback)
+  else
+    queue = nil
   end
 end
 
-function M.RepeatTriggerFixed()
+function M.RepeatToggleFixed()
   if hadFixed then
     print("取消 Reqeat 固定")
     hadFixed = false
@@ -83,7 +81,7 @@ function M.setup()
     },
     [";rf"] = {
       function()
-        M.RepeatTriggerFixed()
+        M.RepeatToggleFixed()
       end,
       "n",
     },

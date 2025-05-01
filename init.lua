@@ -358,9 +358,9 @@ K.add({
   -- local pos = vim.api.nvim_buf_get_mark(0, ">")
   -- print(vim.inspect(pos))
   -- end, { "n", "x" } }
-  ["d"] = {
+  ["<F6>"] = {
     function()
-      vim.api.nvim_feedkeys("d", "n", false)
+      -- vim.api.nvim_feedkeys("d", "n", false)
     end,
     "n"
   }
@@ -381,3 +381,50 @@ K.add({
 --       return true
 --     end
 --   end,
+
+
+
+--
+-- vim.keymap.set("n", "i", "k", {})
+-- vim.keymap.set("n", "j", "h", {})
+-- vim.keymap.set("n", "k", "j", {})
+--
+-- vim.keymap.set("i", "<M-i>", "<up>", {})
+-- vim.keymap.set("i", "<M-j>", "<left>", {})
+-- vim.keymap.set("i", "<M-k>", "<down>", {})
+-- vim.keymap.set("i", "<M-l>", "<right>", {})
+--
+-- vim.keymap.set("n", "I", "3k", {})
+-- vim.keymap.set("n", "J", "3h", {})
+-- vim.keymap.set("n", "K", "3j", {})
+-- vim.keymap.set("n", "L", "3l", {})
+--
+--
+-- vim.keymap.set("n", "s", "b", {})
+-- vim.keymap.set("n", "f", "e", {})
+--
+-- vim.keymap.set("n", "e", "(", {})
+-- vim.keymap.set("n", "d", ")", {})
+--
+-- vim.keymap.set("n", "w", "i", {})
+-- vim.keymap.set("n", "e", "a", {})
+--
+-- vim.schedule(function()
+--   vim.keymap.del("n", "g%")
+--   vim.keymap.del("n", "gO")
+--   vim.keymap.del("n", "gri")
+--   vim.keymap.del("n", "grr")
+--   vim.keymap.del("n", "gra")
+--   vim.keymap.del("n", "grn")
+--   vim.keymap.del("n", "gcc")
+--   vim.keymap.del("n", "gc")
+--   vim.keymap.del("n", "gx")
+-- end)
+--
+-- vim.keymap.set("i", "jk", "<Esc>", {})
+-- vim.keymap.set("i", "kj", "<Esc>", {})
+-- vim.keymap.set("i", "df", "<Esc>", {})
+-- vim.keymap.set("i", "fd", "<Esc>", {})
+--
+-- vim.keymap.set("i", "<M-s>", "<C-left>", {})
+-- vim.keymap.set("i", "<M-f>", "<C-right>", {})
