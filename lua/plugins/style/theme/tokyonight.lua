@@ -15,7 +15,7 @@
 
 return {
   "folke/tokyonight.nvim",
-  lazy = true,
+  lazy = false,
   priority = 1000,
   config = function()
     local transparent = true -- set to true if you would like to enable transparency

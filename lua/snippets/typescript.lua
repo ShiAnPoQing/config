@@ -24,6 +24,8 @@ local postfix = require("luasnip.extras.postfix").postfix
 local types = require("luasnip.util.types")
 local parse = require("luasnip.util.parser").parse_snippet
 
+local utils = require("luasnip-utils")
+
 local snippets = {
   s("cs", {
     t('<div class="'),
@@ -38,7 +40,7 @@ local snippets = {
   s(
     "sT",
     d(1, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
+      if utils.has_TM_SELECTED_TEXT(snip) then
         return sn(1, {
           t({ "setTimeout(() => {", "" }),
           i(1),
@@ -157,7 +159,7 @@ local snippets = {
   s(
     "csl",
     d(1, function(_, snip)
-      if next(snip.env.TM_SELECTED_TEXT) == nil then
+      if utils.has_TM_SELECTED_TEXT(snip) then
         return sn(1, { t("console.log("), i(1), t(")") })
       else
         return sn(1, {

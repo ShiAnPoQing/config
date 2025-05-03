@@ -1,18 +1,35 @@
 local M = {}
+local Float = require("custom.plugins.repeat.float")
 
---- @class RepeatOpt
---- @field callback fun()nil;
---- @field type "normal"|"operator"
+local RepeatKeymapQueue = {}
 
---- @param opt RepeatOpt
-function M.Repeat(opt)
+--- @class RepeatNeed
+--- @field keymap string
+--- @field callback fun():nil
+--- @field type string
+
+--- @param need RepeatNeed
+function M.Repeat(need)
+  table.insert(RepeatKeymapQueue, need.keymap)
+end
+
+function M.RecordStart()
+  local win, buf = Float.createFloat()
+end
+
+function M.RecordEnd()
 
 end
 
+function M.setup()
+  vim.api.nvim_create_user_command("RepeatHistory", function()
+  end, {})
+  vim.api.nvim_create_user_command("RepeatStart", function()
+    M.RecordStart()
+  end, {})
+  vim.api.nvim_create_user_command("RepeatEnd", function()
+    M.RecordEnd()
+  end, {})
+end
+
 return M
-
-
---- n d i/o
---- n i/o
---- x i/o
---- i i/o

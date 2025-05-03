@@ -4,7 +4,6 @@ require("repeat").setup()
 local K = require("plugin-keymap")
 K.setup()
 
-
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -19,31 +18,44 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-  { import = "plugins-auto" },
-  { import = "plugins.style.lualine" },
+  require("plugins-auto.luasnip"),
+  require("plugins-auto.blank-cmp"),
+  require("plugins-auto.neo-tree"),
+  require("plugins-auto.lsp-config"),
+  require("plugins-auto.autopairs"),
+  require("plugins-auto.conform"),
+  require("plugins-auto.markdown-preview"),
+  require("plugins-auto.telescope"),
+  require("plugins-auto.toggle-term"),
+  require("plugins-auto.vimtex"),
+  require("plugins-auto.winshift"),
+  require("plugins-auto.yazi"),
+  require("plugins-auto.zen-mode"),
+  require("plugins.style.lualine"),
+  require("plugins-auto.harpoon"),
+  require("plugins-auto.grug-far"),
+
+  require("plugins.style.dashboard-nvim"),
   -- { import = "plugins.style.alpha-nvim" },
-  { import = "plugins.style.dashboard-nvim" },
-
-  { import = "plugins.style.theme.gruvbox" },
-  -- { import = "plugins.style.catppuccin" },
-  -- { import = "plugins.style.colorbuddy" },
-  -- { import = "plugins.style.everforest" },
-  -- { import = "plugins.style.gruvbox-material" },
-  -- { import = "plugins.style.melange" },
-  -- { import = "plugins.style.night-owl" },
-  -- { import = "plugins.style.nightfox" },
-  -- { import = "plugins.style.nord" },
-  -- { import = "plugins.style.nordic" },
-  -- { import = "plugins.style.onedarkpro" },
-  -- { import = "plugins.style.onenord" },
-  -- { import = "plugins.style.rose-pine-neovim" },
-  -- { import = "plugins.style.tokyonight" },
-
-  { import = "plugins.custom.concat-mode" },
-  { import = "plugins.custom.win-action" },
-  { import = "plugins.custom.register-control" },
-  { import = "plugins.custom.show-file-info" },
-  { import = "plugins.custom.word-move" }
+  require("plugins.style.theme.gruvbox"),
+  -- require("plugins.style.theme.tokyonight"),
+  -- require("plugins.style.theme.catppuccin"),
+  -- require("plugins.style.theme.colorbuddy"),
+  -- require("plugins.style.theme.everforest"),
+  -- require("plugins.style.theme.gruvbox-material"),
+  -- require("plugins.style.theme.melange"),
+  -- require("plugins.style.theme.night-owl"),
+  -- require("plugins.style.theme.nightfox"),
+  -- require("plugins.style.theme.nord"),
+  -- require("plugins.style.theme.nordic"),
+  -- require("plugins.style.theme.onedarkpro"),
+  -- require("plugins.style.theme.onenord"),
+  -- require("plugins.style.theme.rose-pine-neovim"),
+  require("plugins.custom.register-control"),
+  require("plugins.custom.concat-mode"),
+  require("plugins.custom.win-action"),
+  require("plugins.custom.show-file-info"),
+  require("plugins.custom.word-move")
 })
 
 K.add({
@@ -360,10 +372,15 @@ K.add({
   -- end, { "n", "x" } }
   ["<F6>"] = {
     function()
-      -- vim.api.nvim_feedkeys("d", "n", false)
+      local luasnip = require("luasnip")
+      if luasnip.expand_or_locally_jumpable() then
+        luasnip.expand_or_jump()
+        --vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-expand-or-jump", true, true, true), "")
+      end
     end,
-    "n"
-  }
+    "i"
+  },
+  ["<C-i>"] = { "<C-i>", "n" }
 })
 --   on_lines = function(_, bufnr, changedtick, first, last_old, last_new, byte_count)
 --     --   -- first 改变的第一行, 从 0 开始
@@ -384,40 +401,25 @@ K.add({
 
 
 
---
--- vim.keymap.set("n", "i", "k", {})
--- vim.keymap.set("n", "j", "h", {})
--- vim.keymap.set("n", "k", "j", {})
---
--- vim.keymap.set("i", "<M-i>", "<up>", {})
--- vim.keymap.set("i", "<M-j>", "<left>", {})
--- vim.keymap.set("i", "<M-k>", "<down>", {})
--- vim.keymap.set("i", "<M-l>", "<right>", {})
---
--- vim.keymap.set("n", "I", "3k", {})
--- vim.keymap.set("n", "J", "3h", {})
--- vim.keymap.set("n", "K", "3j", {})
--- vim.keymap.set("n", "L", "3l", {})
---
---
--- vim.keymap.set("n", "s", "b", {})
--- vim.keymap.set("n", "f", "e", {})
---
--- vim.keymap.set("n", "e", "(", {})
--- vim.keymap.set("n", "d", ")", {})
---
--- vim.keymap.set("n", "w", "i", {})
--- vim.keymap.set("n", "e", "a", {})
---
--- vim.schedule(function()
---   vim.keymap.del("n", "g%")
---   vim.keymap.del("n", "gO")
---   vim.keymap.del("n", "gri")
---   vim.keymap.del("n", "grr")
---   vim.keymap.del("n", "gra")
---   vim.keymap.del("n", "grn")
---   vim.keymap.del("n", "gcc")
---   vim.keymap.del("n", "gc")
---   vim.keymap.del("n", "gx")
--- end)
-vim.keymap.del("i", "<C-i>")
+-- vim.keymap.del("i", "<C-i>")
+
+
+--[[
+
+3de 2e 5i asfdsafasfas jk
+
+e => motion
+d => operator
+
+Record({
+  count = 3,
+  callback = function()
+  end,
+  keymap = "d"
+})
+
+3d
+
+
+
+--]]

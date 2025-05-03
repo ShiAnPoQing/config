@@ -1,81 +1,5 @@
 local M = {}
 
-local snippets = {
-  ["name"] = {
-    text = {
-      "nihao",
-      "jiayou",
-    },
-    jump = {
-      pos1 = { 1, 3 },
-      pos2 = { 1, 4 },
-    },
-  },
-}
-
-function M.expand()
-  local cursor_pos = vim.api.nvim_win_get_cursor(0)
-  local key =
-      vim.api.nvim_buf_get_text(0, cursor_pos[1] - 1, 0, cursor_pos[1] - 1, cursor_pos[2], {})[1]:match("%w+$")
-
-  if snippets[key] ~= nil then
-    local data = snippets[key]
-    vim.api.nvim_buf_set_text(
-      0,
-      cursor_pos[1] - 1,
-      cursor_pos[2] - #key,
-      cursor_pos[1] - 1,
-      cursor_pos[2],
-      data.text
-    )
-  end
-end
-
-function M.EnterInertMode(mode, left_right)
-  if mode == "n" then
-    local not_empty = string.find(vim.api.nvim_get_current_line(), "%S")
-    if left_right == "left" then
-      if not_empty then
-        vim.api.nvim_feedkeys("I", "nx!", true)
-      else
-        local escapekey = vim.api.nvim_replace_termcodes("<C-F>", true, true, true)
-        vim.api.nvim_feedkeys("I" .. escapekey, "nx!", true)
-      end
-    else
-      if not_empty then
-        vim.api.nvim_feedkeys("A", "nx!", true)
-      else
-        local escapekey = vim.api.nvim_replace_termcodes("<C-F>", true, true, true)
-        vim.api.nvim_feedkeys("A" .. escapekey, "nx!", true)
-      end
-    end
-  elseif mode == "v" then
-    local modeinfo = vim.api.nvim_get_mode()
-    local mode = modeinfo["mode"]
-    if mode == "" then
-      if left_right == "left" then
-        vim.api.nvim_feedkeys("I", "nx!", true)
-      else
-        vim.api.nvim_feedkeys("A", "nx!", true)
-      end
-    elseif mode ~= "" then
-      local escapekey = vim.api.nvim_replace_termcodes("<C-v>", true, true, true)
-      if left_right == "left" then
-        vim.api.nvim_feedkeys(escapekey .. "I", "nx!", true)
-      else
-        vim.api.nvim_feedkeys(escapekey .. "A", "nx!", true)
-      end
-    end
-  elseif mode == "s" then
-    local escapekey = vim.api.nvim_replace_termcodes("<C-g><C-v>", true, true, true)
-    if left_right == "left" then
-      vim.api.nvim_feedkeys(escapekey .. "I", "nx!", true)
-    else
-      vim.api.nvim_feedkeys(escapekey .. "A", "nx!", true)
-    end
-  end
-end
-
 function M.FilpLeftAndRight(LR, count)
   local col_1 = vim.api.nvim_win_get_cursor(0)[2]
 
@@ -208,14 +132,6 @@ end
 function M.cursorDownMove(count, multiple)
   count = getCount(count)
   vim.api.nvim_feedkeys(count * multiple .. "gj", "nt", true)
-end
-
-function M.rightEnterInsertMode()
-  vim.api.nvim_feedkeys("a", "n", true)
-end
-
-function M.leftEnterInsertMode()
-  vim.api.nvim_feedkeys("i", "n", true)
 end
 
 return M

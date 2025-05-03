@@ -1,62 +1,114 @@
+local utils = require("utils.mark")
+
+local function w()
+  local count = vim.v.count1
+  vim.api.nvim_feedkeys(count .. "i", "n", false)
+end
+
+local function e()
+  local count = vim.v.count1
+  vim.api.nvim_feedkeys(count .. "a", "n", false)
+end
+
+local function normal_mode_start_end_enter_insert_mode(dir)
+  local count = vim.v.count1
+  if dir == "left" then
+    vim.api.nvim_feedkeys(count .. "I", "n", false)
+  else
+    vim.api.nvim_feedkeys(count .. "A", "n", false)
+  end
+end
+
+local function visual_mode_start_end_enter_insert_mode(dir)
+  local count = vim.v.count1
+  local mode = vim.api.nvim_get_mode().mode
+
+  if mode == "V" or mode == "v" then
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, true, true), "nx", true)
+    local start_row, start_col, end_row, end_col = utils.get_visual_mark(true)
+
+    if dir == "left" then
+      vim.api.nvim_win_set_cursor(0, { start_row, start_col })
+      vim.schedule(function()
+        vim.api.nvim_feedkeys(count .. "i", "n", false)
+      end)
+    else
+      vim.api.nvim_win_set_cursor(0, { end_row, end_col })
+      vim.schedule(function()
+        vim.api.nvim_feedkeys(count .. "a", "n", false)
+      end)
+    end
+  elseif mode == "" then
+    if dir == "left" then
+      vim.api.nvim_feedkeys(count .. "I", "n", false)
+    else
+      vim.api.nvim_feedkeys(count .. "A", "n", false)
+    end
+  elseif mode == "s" or mode == "" then
+    local key = vim.api.nvim_replace_termcodes("<C-g>", true, true, true)
+    vim.api.nvim_feedkeys(key, "nx", true)
+    visual_mode_start_end_enter_insert_mode(dir)
+  end
+end
+
+local function W()
+  local mode = vim.api.nvim_get_mode().mode
+  local count = vim.v.count1
+
+  if mode == "n" then
+    vim.api.nvim_feedkeys(count .. "I", "n", false)
+  elseif mode == "V" or mode == "v" then
+    local esc = vim.api.nvim_replace_termcodes("<Esc>", true, true, true)
+    vim.api.nvim_feedkeys(esc .. count .. "I", "n", true)
+  end
+end
+
+local function E()
+  local mode = vim.api.nvim_get_mode().mode
+  local count = vim.v.count1
+
+  if mode == "n" then
+    vim.api.nvim_feedkeys(count .. "A", "n", false)
+  elseif mode == "V" or mode == "v" then
+    local esc = vim.api.nvim_replace_termcodes("<Esc>", true, true, true)
+    vim.api.nvim_feedkeys(esc .. count .. "A", "n", true)
+  elseif mode == "" then
+  end
+end
+
 return {
-  -- ["e"] = { "a", { "n" } },
-  -- ["w"] = { "i", { "n" } },
-  ["w"] = {
-    function()
-      require("base-function").leftEnterInsertMode()
-    end,
-    "n",
-    { desc = "left enter insert mode" },
-  },
-  ["e"] = {
-    function()
-      require("base-function").rightEnterInsertMode()
-    end,
-    "n",
-    { desc = "right enter insert mode" },
-  },
-  ["W"] = { "I", { "n", "x" } },
-  ["E"] = { "A", { "n", "x" } },
+  ["w"] = { w, "n", { desc = "left enter insert mode" }, },
+  ["e"] = { e, "n", { desc = "right enter insert mode" }, },
+  ["W"] = { W, { "n", "x" }, { desc = "start enter insert mode" }, },
+  ["E"] = { E, { "n", "x" }, { desc = "end enter insert mode" }, },
   -- normal mode cursor move: Home(without space)
   ["<space>w"] = {
     {
       function()
-        return require("base-function").EnterInertMode("n", "left")
+        normal_mode_start_end_enter_insert_mode("left")
       end,
-      { "n" },
+      "n",
     },
     {
       function()
-        return require("base-function").EnterInertMode("v", "left")
+        visual_mode_start_end_enter_insert_mode("left")
       end,
-      { "x" },
-    },
-    {
-      function()
-        return require("base-function").EnterInertMode("s", "left")
-      end,
-      { "s" },
+      { "x", "s" },
     },
   },
   -- normal mode cursor move: End(without space)
   ["<space>e"] = {
     {
       function()
-        return require("base-function").EnterInertMode("n", "right")
+        normal_mode_start_end_enter_insert_mode("right")
       end,
-      { "n" },
+      "n",
     },
     {
       function()
-        return require("base-function").EnterInertMode("v", "right")
+        visual_mode_start_end_enter_insert_mode("right")
       end,
-      { "x" },
-    },
-    {
-      function()
-        return require("base-function").EnterInertMode("s", "right")
-      end,
-      { "s" },
+      { "x", "s" },
     },
   },
   -- ["<space><space>w"] = { "0i", { "n" } },

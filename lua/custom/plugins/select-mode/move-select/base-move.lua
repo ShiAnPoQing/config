@@ -32,7 +32,7 @@ local function line_split(line, col, text)
   return line_to_start, line_to_end
 end
 
-local function select_more_line(dir, text, start_row, start_col, end_row, end_col)
+local function select_more_line(dir, text, start_row, start_col, end_row, end_col, cursor_pos)
   local lines = vim.api.nvim_buf_get_lines(0, start_row - 1, end_row, false)
   local texts = vim.fn.split(text, "\n")
   local last_text = texts[#texts]
@@ -44,11 +44,13 @@ local function select_more_line(dir, text, start_row, start_col, end_row, end_co
   local new_line, col_offset = get_new_line(dir, line_to_start, line_to_end, text)
 
   vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, vim.fn.split(new_line, "\n"))
-  utils.set_visual_mark(start_row, start_col + col_offset, end_row, end_col + col_offset)
-  vim.api.nvim_feedkeys("gv" .. vim.api.nvim_replace_termcodes("<c-g>", true, true, true), "nx", false)
+  utils.set_visual_mark(start_row, start_col + col_offset, end_row, end_col)
+  local exchange_cursor_key = cursor_pos[2] == start_col and "o" or ""
+  vim.api.nvim_feedkeys("gv" .. exchange_cursor_key .. vim.api.nvim_replace_termcodes("<c-g>", true, true, true), "n",
+    false)
 end
 
-local function select_one_line(dir, text, start_row, start_col, end_row, end_col)
+local function select_one_line(dir, text, start_row, start_col, end_row, end_col, cursor_pos)
   local line = vim.api.nvim_buf_get_lines(0, start_row - 1, end_row, false)[1]
   local line_to_start, line_to_end = line_split(line, start_col, text)
 
@@ -56,17 +58,21 @@ local function select_one_line(dir, text, start_row, start_col, end_row, end_col
 
   vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, { new_line })
   utils.set_visual_mark(start_row, start_col + col_offset, end_row, end_col + col_offset)
-  vim.api.nvim_feedkeys("gv" .. vim.api.nvim_replace_termcodes("<c-g>", true, true, true), "nx", false)
+  local exchange_cursor_key = cursor_pos[2] == start_col and "o" or ""
+  vim.api.nvim_feedkeys("gv" .. exchange_cursor_key .. vim.api.nvim_replace_termcodes("<c-g>", true, true, true), "n",
+    false)
 end
 
 local function select_mode_move(dir)
+  local cursor_pos = vim.api.nvim_win_get_cursor(0)
   vim.api.nvim_exec2([[execute "normal! \<C-g>y"]], {})
   local visual_text = vim.fn.getreg('"')
   local start_row, start_col, end_row, end_col = utils.get_visual_mark(true)
+
   if end_row > start_row then
-    select_more_line(dir, visual_text, start_row, start_col, end_row, end_col)
+    select_more_line(dir, visual_text, start_row, start_col, end_row, end_col, cursor_pos)
   else
-    select_one_line(dir, visual_text, start_row, start_col, end_row, end_col)
+    select_one_line(dir, visual_text, start_row, start_col, end_row, end_col, cursor_pos)
   end
 end
 
