@@ -372,15 +372,10 @@ K.add({
   -- end, { "n", "x" } }
   ["<F6>"] = {
     function()
-      local luasnip = require("luasnip")
-      if luasnip.expand_or_locally_jumpable() then
-        luasnip.expand_or_jump()
-        --vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-expand-or-jump", true, true, true), "")
-      end
     end,
-    "i"
+    "n"
   },
-  ["<C-i>"] = { "<C-i>", "n" }
+  ["<C-i>"] = { "<C-i>", "n" },
 })
 --   on_lines = function(_, bufnr, changedtick, first, last_old, last_new, byte_count)
 --     --   -- first 改变的第一行, 从 0 开始

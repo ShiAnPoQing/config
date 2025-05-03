@@ -1,12 +1,6 @@
 local add_new_line = require("custom.plugins.add-new-line")
 
 return {
-  ["<F5>"] = {
-    function()
-      add_new_line.add_new_line("down", { disable_cursor_follow = true })
-    end,
-    "n"
-  },
   ["b"] = { "o", { "n", "x" } },
   ["B"] = { "O", { "n", "x" } },
   -- no blank

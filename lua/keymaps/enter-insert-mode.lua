@@ -12,10 +12,20 @@ end
 
 local function normal_mode_start_end_enter_insert_mode(dir)
   local count = vim.v.count1
+  local line = vim.api.nvim_get_current_line()
+
   if dir == "left" then
-    vim.api.nvim_feedkeys(count .. "I", "n", false)
+    if #line == 0 then
+      vim.api.nvim_feedkeys(count .. "I" .. vim.api.nvim_replace_termcodes("<C-f>", true, true, true), "n", false)
+    else
+      vim.api.nvim_feedkeys(count .. "I", "n", false)
+    end
   else
-    vim.api.nvim_feedkeys(count .. "A", "n", false)
+    if #line == 0 then
+      vim.api.nvim_feedkeys(count .. "A" .. vim.api.nvim_replace_termcodes("<C-f>", true, true, true), "n", false)
+    else
+      vim.api.nvim_feedkeys(count .. "A", "n", false)
+    end
   end
 end
 

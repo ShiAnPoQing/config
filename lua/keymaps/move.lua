@@ -26,59 +26,70 @@ local function space_space_h()
 end
 
 --- @return boolean
-local function screen_action(action)
-  local before_pos = vim.api.nvim_win_get_cursor(0)
-  vim.api.nvim_feedkeys(action, "nx", false)
-  local after_pos = vim.api.nvim_win_get_cursor(0)
-  return before_pos[2] == after_pos[2]
+local function on_screen_col_border(key)
+  local before_col = vim.fn.virtcol(".")
+  vim.api.nvim_feedkeys(key, "nx", false)
+  local after_col = vim.fn.virtcol(".")
+  return before_col == after_col
+end
+
+local function on_screen_row_border(key)
+  local before_row = vim.api.nvim_win_get_cursor(0)[1]
+  vim.api.nvim_feedkeys(key, "nx", false)
+  local after_row = vim.api.nvim_win_get_cursor(0)[1]
+  return before_row == after_row
 end
 
 -- g0 默认不支持 count
 local function a_h()
   local count = vim.v.count1
-  local not_changed_pos = screen_action("g0")
-
-  if not_changed_pos then
-    vim.api.nvim_feedkeys("zeg0", "nx", false)
-    for i = 1, count do
-      local not_changed_pos = screen_action("g0")
-      if not_changed_pos then
-        vim.api.nvim_feedkeys("zeg0", "nx", false)
-        local pos = vim.api.nvim_win_get_cursor(0)
-        if pos[2] == 0 then
-          print(i)
-          break
-        end
+  for i = 1, count do
+    if on_screen_col_border("g0") then
+      vim.api.nvim_feedkeys("zeg0", "nx", false)
+      if vim.api.nvim_win_get_cursor(0)[2] == 0 then
+        break
+      end
+    else
+      if count > 1 then
+        vim.api.nvim_feedkeys(count - 1 .. "k", "nx", false)
       end
     end
-  else
-    vim.api.nvim_feedkeys(count .. "k", "nx", false)
   end
 end
 
 local function a_l()
   local count = vim.v.count1
-  local not_changed_pos = screen_action("g$")
-
-  if not_changed_pos then
-    vim.api.nvim_feedkeys("zsg$", "nx", false)
-    local line;
-    for i = 1, count do
-      local not_changed_pos = screen_action("g$")
-      if not_changed_pos then
-        vim.api.nvim_feedkeys("zsg$", "nx", false)
-        if not line then
-          line = vim.api.nvim_get_current_line()
-        end
-        local pos = vim.api.nvim_win_get_cursor(0)
-
-        if pos[2] == #line then
-          break
-        end
-      end
+  for i = 1, count do
+    if on_screen_col_border("g$") then
+      vim.api.nvim_feedkeys("zsg$", "nx", false)
+    else
+      vim.api.nvim_feedkeys(count .. "g$", "nx", false)
     end
-  else
-    vim.api.nvim_feedkeys(count .. "g$", "nx", false)
+  end
+end
+
+local function a_j()
+  local count = vim.v.count1
+  for i = 1, count do
+    if on_screen_row_border("L") then
+      vim.api.nvim_feedkeys("ztL", "nx", false)
+    else
+      vim.api.nvim_feedkeys(count .. "L", "nx", false)
+    end
+  end
+end
+
+local function a_k()
+  local count = vim.v.count1
+  for i = 1, count do
+    if on_screen_row_border("H") then
+      vim.api.nvim_feedkeys("zbH", "nx", false)
+      if vim.api.nvim_win_get_cursor(0)[1] == 1 then
+        break
+      end
+    else
+      vim.api.nvim_feedkeys(count .. "H", "nx", false)
+    end
   end
 end
 
@@ -98,6 +109,56 @@ local function space_j_Omode()
       [[exec "normal! v%d\<Down>g_"]], -- 注意转义 <Up>
       count
     ), {})
+end
+
+local function aam()
+  local win_info = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+  local screen_width = win_info.width - win_info.textoff
+  local screent_cursor_rol = vim.fn.virtcol(".") - win_info.leftcol
+  local offset = math.ceil(screen_width / 2) - screent_cursor_rol + 1
+
+  if offset > 0 then
+    vim.api.nvim_feedkeys(offset .. "zh", "n", false)
+  elseif offset < 0 then
+    vim.api.nvim_feedkeys(-offset .. "zl", "n", false)
+  end
+end
+
+local function cursor_move_relative_screen_center(LR)
+  -- local win_info = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+  -- local screen_width = win_info.width - win_info.textoff
+  --
+  -- local screent_cursor_rol = vim.fn.virtcol(".") - win_info.leftcol
+  -- local cursor_pos = vim.api.nvim_win_get_cursor(0)
+
+  local line = vim.api.nvim_get_current_line()
+  local line_display_width = vim.fn.strdisplaywidth(line)
+  local win_info = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+  local screent_virtcol = vim.fn.virtcol(".") - win_info.leftcol
+  local screen_line_display_width = line_display_width - win_info.leftcol
+
+  if LR == "left" then
+    if screent_virtcol <= screen_line_display_width then
+      local cursor_pos = vim.api.nvim_win_get_cursor(0)
+      vim.api.nvim_feedkeys("g0", "nx", false)
+      local cursor_at_screen_left_col = vim.api.nvim_win_get_cursor(0)[2]
+      local col = math.ceil((cursor_pos[2] - cursor_at_screen_left_col) / 2) + cursor_at_screen_left_col
+      vim.api.nvim_win_set_cursor(0, { cursor_pos[1], col })
+    else
+      local virt_offset_col = screent_virtcol - screen_line_display_width
+      local half = math.ceil((screen_line_display_width + virt_offset_col) / 2)
+      if half > screen_line_display_width then
+        vim.api.nvim_feedkeys(half .. "h", "nx", false)
+      else
+
+      end
+    end
+  else
+    -- local col = math.ceil(screent_cursor_rol / 2)
+    -- vim.api.nvim_win_set_cursor(0, { cursor_pos[1], col })
+    -- local col = math.ceil((screen_width - screent_cursor_rol) / 2) + screent_cursor_rol
+    -- vim.api.nvim_win_set_cursor(0, { cursor_pos[1], col })
+  end
 end
 
 
@@ -289,14 +350,22 @@ return {
     { "g$", { "x", "o" } }
   },
   -- normal mode cursor move: screen bottom
-  ["aj"] = { "L", { "n", "x", "o" } },
+  ["aj"] = {
+    { a_j, "n" },
+    { "L", { "x", "o" } },
+  },
   -- normal mode cursor move: screen top
-  ["ak"] = { "H", { "n", "x", "o" } },
+  ["ak"] = {
+    { a_k, "n" },
+    { "H", { "x", "o" } }
+  },
   -- normal mode cursor move: screen center
   ["am"] = { "gm", { "n", "x", "o" } },
   -- normal mode cursor move: screen center col
   ["an"] = { "M", { "n", "x", "o" } },
   -- jump the middle of cursor to left
+  ["<C-m>"] = { function() cursor_move_relative_screen_center("left") end, "n" },
+  ["<M-m>"] = { function() cursor_move_relative_screen_center("right") end, "n" },
   ["<space>am"] = {
     function()
       local count = vim.v.count1
@@ -351,6 +420,9 @@ return {
   ["aaj"] = { "zb", { "n", "x" } },
   -- normal mode view move: cursor line position at screen center col
   ["aan"] = { "zz", { "n", "x" } },
+  ["aam"] = { function()
+    aam()
+  end, { "n" } },
 
   -- normal mode view move: cursor word position at screen right
   ["<M-1><M-1><M-l>"] = { "<C-o>zs", { "i" } },

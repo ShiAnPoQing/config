@@ -29,27 +29,8 @@ return {
     { "<C-b>4<C-e>",      "x" },
   },
 
-  ["<C-S-l>"] = {
-    function()
-      local count = vim.v.count1
-      require("base-function").FilpLeftAndRight("right", count)
-      require("repeat").Record(function()
-        require("base-function").FilpLeftAndRight("right", count)
-      end)
-    end,
-    { "n", "i", "x" },
-  },
-
-  ["<C-S-h>"] = {
-    function()
-      local count = vim.v.count1
-      require("base-function").FilpLeftAndRight("left", count)
-      require("repeat").Record(function()
-        require("base-function").FilpLeftAndRight("left", count)
-      end)
-    end,
-    { "n", "i", "x" },
-  },
+  ["<C-S-l>"] = { "zLgm", { "n", "i", "x" }, },
+  ["<C-S-h>"] = { "zHgm", { "n", "i", "x" }, },
   ["<S-ScrollWheelDown>"] = {
     { "zs",      { "n" } },
     { "<C-o>zs", { "i" } },
