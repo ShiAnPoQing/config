@@ -4,6 +4,7 @@ require("repeat").setup()
 local K = require("plugin-keymap")
 K.setup()
 
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -18,6 +19,8 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
+  require("plugins-auto.hop"),
+  require("plugins-auto.flash"),
   require("plugins-auto.luasnip"),
   require("plugins-auto.blank-cmp"),
   require("plugins-auto.neo-tree"),
@@ -372,6 +375,8 @@ K.add({
   -- end, { "n", "x" } }
   ["<F6>"] = {
     function()
+      local a = 2
+      print(a % 1 ~= 0)
     end,
     "n"
   },
@@ -393,28 +398,3 @@ K.add({
 --       return true
 --     end
 --   end,
-
-
-
--- vim.keymap.del("i", "<C-i>")
-
-
---[[
-
-3de 2e 5i asfdsafasfas jk
-
-e => motion
-d => operator
-
-Record({
-  count = 3,
-  callback = function()
-  end,
-  keymap = "d"
-})
-
-3d
-
-
-
---]]

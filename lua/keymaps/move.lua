@@ -364,8 +364,8 @@ return {
   -- normal mode cursor move: screen center col
   ["an"] = { "M", { "n", "x", "o" } },
   -- jump the middle of cursor to left
-  ["<C-m>"] = { function() cursor_move_relative_screen_center("left") end, "n" },
-  ["<M-m>"] = { function() cursor_move_relative_screen_center("right") end, "n" },
+  ["<C-m>"] = { function() require("custom.plugins.move-col-center").move_col_center("left") end, "n" },
+  ["<M-m>"] = { function() require("custom.plugins.move-col-center").move_col_center("right") end, "n" },
   ["<space>am"] = {
     function()
       local count = vim.v.count1

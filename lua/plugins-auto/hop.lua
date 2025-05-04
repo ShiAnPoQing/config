@@ -4,7 +4,4 @@ return {
   opts = {
     keys = 'etovxqpdygfblzhckisuran'
   },
-  config = function()
-
-  end
 }
