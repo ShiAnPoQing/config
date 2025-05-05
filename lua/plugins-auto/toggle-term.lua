@@ -7,7 +7,7 @@ return {
       close_on_exit = true,
       shell = vim.o.shell,
       -- direction = 'vertical' | 'horizontal' | 'tab' | 'float'
-      direction = "float",
+      direction = "horizontal",
     })
   end,
 }

@@ -303,7 +303,14 @@ K.add({
   -- print(vim.inspect(pos))
   -- end, { "n", "x" } }
   ["<F6>"] = {
-    "<C-Y><C-Y><C-Y><C-Y><C-Y><C-Y>",
+    function()
+      -- vim.api.nvim_buf_del_keymap(0, "i", "jj")
+      -- vim.api.nvim_buf_del_keymap(0, "i", "jk")
+      -- vim.api.nvim_buf_del_keymap(0, "i", "kj")
+      -- vim.api.nvim_buf_del_keymap(0, "i", "kk")
+      vim.cmd("Yazi toggle")
+      -- return "<cmd>Yazi toggle<cr>"
+    end,
     "n"
   },
   ["<C-i>"] = { "<C-i>", "n" },
