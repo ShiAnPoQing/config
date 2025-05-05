@@ -51,3 +51,5 @@ require("lazy").setup({
   require("plugins.custom.word-move"),
   require("plugins.custom.easy-word-motion")
 })
+
+require("test")

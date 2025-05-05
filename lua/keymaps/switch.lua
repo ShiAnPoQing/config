@@ -1,5 +1,9 @@
 local color_column = ""
 
+local function switch(option)
+  vim.opt[option] = not vim.opt[option]:get()
+end
+
 return {
   [";nb"] = {
     function()
@@ -45,21 +49,21 @@ return {
   },
   [";ig"] = {
     function()
-      require("switch-function").switch("ignorecase")
+      switch("ignorecase")
     end,
     { "n" },
   },
   -- toggle list icon
   [";li"] = {
     function()
-      require("switch-function").switch("list")
+      switch("list")
     end,
     { "n" },
   },
   -- toggle hlsearch highlight
   [";hl"] = {
     function()
-      require("switch-function").switch("hlsearch")
+      switch("hlsearch")
     end,
     { "n" },
   },

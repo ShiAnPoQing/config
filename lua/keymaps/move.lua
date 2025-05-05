@@ -124,41 +124,32 @@ local function aam()
   end
 end
 
-local function cursor_move_relative_screen_center(LR)
-  -- local win_info = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
-  -- local screen_width = win_info.width - win_info.textoff
-  --
-  -- local screent_cursor_rol = vim.fn.virtcol(".") - win_info.leftcol
-  -- local cursor_pos = vim.api.nvim_win_get_cursor(0)
-
-  local line = vim.api.nvim_get_current_line()
-  local line_display_width = vim.fn.strdisplaywidth(line)
-  local win_info = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
-  local screent_virtcol = vim.fn.virtcol(".") - win_info.leftcol
-  local screen_line_display_width = line_display_width - win_info.leftcol
-
-  if LR == "left" then
-    if screent_virtcol <= screen_line_display_width then
-      local cursor_pos = vim.api.nvim_win_get_cursor(0)
-      vim.api.nvim_feedkeys("g0", "nx", false)
-      local cursor_at_screen_left_col = vim.api.nvim_win_get_cursor(0)[2]
-      local col = math.ceil((cursor_pos[2] - cursor_at_screen_left_col) / 2) + cursor_at_screen_left_col
-      vim.api.nvim_win_set_cursor(0, { cursor_pos[1], col })
-    else
-      local virt_offset_col = screent_virtcol - screen_line_display_width
-      local half = math.ceil((screen_line_display_width + virt_offset_col) / 2)
-      if half > screen_line_display_width then
-        vim.api.nvim_feedkeys(half .. "h", "nx", false)
-      else
-
-      end
-    end
-  else
-    -- local col = math.ceil(screent_cursor_rol / 2)
-    -- vim.api.nvim_win_set_cursor(0, { cursor_pos[1], col })
-    -- local col = math.ceil((screen_width - screent_cursor_rol) / 2) + screent_cursor_rol
-    -- vim.api.nvim_win_set_cursor(0, { cursor_pos[1], col })
+local function getCount(count)
+  if count == 0 then
+    count = count + 1
   end
+
+  return count
+end
+
+local function cursorLeftMove(count, multiple)
+  count = getCount(count)
+  vim.api.nvim_feedkeys(count * multiple .. "h", "nt", true)
+end
+
+local function cursorRightMove(count, multiple)
+  count = getCount(count)
+  vim.api.nvim_feedkeys(count * multiple .. "l", "nt", true)
+end
+
+local function cursorUpMove(count, multiple)
+  count = getCount(count)
+  vim.api.nvim_feedkeys(count * multiple .. "gk", "nt", true)
+end
+
+local function cursorDownMove(count, multiple)
+  count = getCount(count)
+  vim.api.nvim_feedkeys(count * multiple .. "gj", "nt", true)
 end
 
 
@@ -166,9 +157,9 @@ return {
   ["h"] = {
     function()
       local count = vim.v.count
-      require("base-function").cursorLeftMove(count, 1)
+      cursorLeftMove(count, 1)
       require("repeat").Record(function()
-        require("base-function").cursorLeftMove(count, 1)
+        cursorLeftMove(count, 1)
       end)
     end,
     "n",
@@ -178,9 +169,9 @@ return {
   ["j"] = {
     function()
       local count = vim.v.count
-      require("base-function").cursorDownMove(count, 1)
+      cursorDownMove(count, 1)
       require("repeat").Record(function()
-        require("base-function").cursorDownMove(count, 1)
+        cursorDownMove(count, 1)
       end)
     end,
     "n",
@@ -190,9 +181,9 @@ return {
   ["k"] = {
     function()
       local count = vim.v.count
-      require("base-function").cursorUpMove(count, 1)
+      cursorUpMove(count, 1)
       require("repeat").Record(function()
-        require("base-function").cursorUpMove(count, 1)
+        cursorUpMove(count, 1)
       end)
     end,
     "n",
@@ -201,9 +192,9 @@ return {
   ["l"] = {
     function()
       local count = vim.v.count
-      require("base-function").cursorRightMove(count, 1)
+      cursorRightMove(count, 1)
       require("repeat").Record(function()
-        require("base-function").cursorRightMove(count, 1)
+        cursorRightMove(count, 1)
       end)
     end,
     "n",
@@ -213,9 +204,9 @@ return {
     {
       function()
         local count = vim.v.count
-        require("base-function").cursorLeftMove(count, 3)
+        cursorLeftMove(count, 3)
         require("repeat").Record(function()
-          require("base-function").cursorLeftMove(count, 3)
+          cursorLeftMove(count, 3)
         end)
       end,
       "n",
@@ -231,9 +222,9 @@ return {
     {
       function()
         local count = vim.v.count
-        require("base-function").cursorDownMove(count, 3)
+        cursorDownMove(count, 3)
         require("repeat").Record(function()
-          require("base-function").cursorDownMove(count, 3)
+          cursorDownMove(count, 3)
         end)
       end,
       "n",
@@ -249,9 +240,9 @@ return {
     {
       function()
         local count = vim.v.count
-        require("base-function").cursorUpMove(count, 3)
+        cursorUpMove(count, 3)
         require("repeat").Record(function()
-          require("base-function").cursorUpMove(count, 3)
+          cursorUpMove(count, 3)
         end)
       end,
       "n",
@@ -267,9 +258,9 @@ return {
     {
       function()
         local count = vim.v.count
-        require("base-function").cursorRightMove(count, 3)
+        cursorRightMove(count, 3)
         require("repeat").Record(function()
-          require("base-function").cursorRightMove(count, 3)
+          cursorRightMove(count, 3)
         end)
       end,
       "n",
