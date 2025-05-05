@@ -40,8 +40,8 @@ require("lazy").setup({
 
   require("plugins.style.dashboard-nvim"),
   -- { import = "plugins.style.alpha-nvim" },
-  require("plugins.style.theme.gruvbox"),
-  -- require("plugins.style.theme.tokyonight"),
+  -- require("plugins.style.theme.gruvbox"),
+  require("plugins.style.theme.tokyonight"),
   -- require("plugins.style.theme.catppuccin"),
   -- require("plugins.style.theme.colorbuddy"),
   -- require("plugins.style.theme.everforest"),
