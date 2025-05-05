@@ -24,9 +24,10 @@ return {
 
   -- 粘贴模式
   ["<C-v>"] = {
-    { '<C-G>u<C-R>"',  { "i" } },
-    { '<C-R>"',        { "c" }, { silent = false } },
-    { "<C-\\><C-N>pi", "t" },
+    -- { '<C-G>u<C-R>"',  { "i" } },
+    { '<C-G>u<C-R><C-o>"', { "i" } },
+    { '<C-R>"',            { "c" }, { silent = false } },
+    { "<C-\\><C-N>pi",     "t" },
   },
 
   --map('c', '<C-v>', '<C-R>\'', Opts)
@@ -37,6 +38,7 @@ return {
 
   -- Map('c', '<C-space><C-v>', '<C-G>u<C-R><C-o>a', Opts)
   ["<M-space><M-v>"] = { "<C-G>u<C-R>'", { "i" } },
+
 
   -- 粘贴模式
   ["<M-space><M-space><M-p>"] = {

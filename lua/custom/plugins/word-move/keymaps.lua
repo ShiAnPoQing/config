@@ -1,6 +1,30 @@
 local W = require("custom.plugins.word-move")
 
 return {
+  ["<M-o>"] = {
+    W.o,
+    "o"
+  },
+  ["<M-i>"] = {
+    W.i,
+    "o"
+  },
+  ["<M-space><M-o>"] = {
+    W.space_o,
+    "o"
+  },
+  ["<M-space><M-i>"] = {
+    W.space_i,
+    "o"
+  },
+  ["<M-space><M-O>"] = {
+    W.space_O,
+    "o"
+  },
+  ["<M-space><M-I>"] = {
+    W.space_I,
+    "o"
+  },
   ["i"] = {
     W.i,
     { "n", "x", "o" }

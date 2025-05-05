@@ -1,98 +1,604 @@
-tag		command		action in Command-line editing mode	~
------------------------------------------------------------------------------- ~
-		CTRL-@		not used
-|c_CTRL-A|	CTRL-A		do completion on the pattern in front of the
-				cursor and insert all matches
-|c_CTRL-B|	CTRL-B		cursor to begin of command-line
-|c_CTRL-C|	CTRL-C		same as <Esc>
-|c_CTRL-D|	CTRL-D		list completions that match the pattern in
-				front of the cursor
-|c_CTRL-E|	CTRL-E		cursor to end of command-line
-|'cedit'|	CTRL-F		default value for 'cedit': opens the
-				command-line window; otherwise not used
-|c_CTRL-G|	CTRL-G		next match when 'incsearch' is active
-|c_<BS>|	<BS>		delete the character in front of the cursor
-|c_digraph|	{char1} <BS> {char2}
-				enter digraph when 'digraph' is on
-|c_CTRL-H|	CTRL-H		same as <BS>
-|c_<Tab>|	<Tab>		if 'wildchar' is <Tab>: Do completion on
-				the pattern in front of the cursor
-|c_<S-Tab>|	<S-Tab>		same as CTRL-P
-|c_wildchar|	'wildchar'	Do completion on the pattern in front of the
-				cursor (default: <Tab>)
-|c_CTRL-I|	CTRL-I		same as <Tab>
-|c_<NL>|	<NL>		same as <CR>
-|c_CTRL-J|	CTRL-J		same as <CR>
-|c_CTRL-K|	CTRL-K {char1} {char2}
-				enter digraph
-|c_CTRL-L|	CTRL-L		do completion on the pattern in front of the
-				cursor and insert the longest common part
-|c_<CR>|	<CR>		execute entered command
-|c_CTRL-M|	CTRL-M		same as <CR>
-|c_CTRL-N|	CTRL-N		after using 'wildchar' with multiple matches:
-				go to next match, otherwise: recall older
-				command-line from history.
-		CTRL-O		not used
-|c_CTRL-P|	CTRL-P		after using 'wildchar' with multiple matches:
-				go to previous match, otherwise: recall older
-				command-line from history.
-|c_CTRL-Q|	CTRL-Q		same as CTRL-V, unless it's used for terminal
-				control flow
-|c_CTRL-R|	CTRL-R {regname}
-				insert the contents of a register or object
-				under the cursor as if typed
-|c_CTRL-R_CTRL-R| CTRL-R CTRL-R {regname}
-|c_CTRL-R_CTRL-O| CTRL-R CTRL-O {regname}
-				insert the contents of a register or object
-				under the cursor literally
-		CTRL-S		not used, or used for terminal control flow
-|c_CTRL-T|	CTRL-T		previous match when 'incsearch' is active
-|c_CTRL-U|	CTRL-U		remove all characters
-|c_CTRL-V|	CTRL-V		insert next non-digit literally, insert three
-				digit decimal number as a single byte.
-|c_CTRL-W|	CTRL-W		delete the word in front of the cursor
-		CTRL-X		not used (reserved for completion)
-		CTRL-Y		copy (yank) modeless selection
-		CTRL-Z		not used (reserved for suspend)
-|c_CTRL-[|	CTRL-[		same as <Esc>
-|c_CTRL-\_CTRL-N| CTRL-\ CTRL-N	go to Normal mode, abandon command-line
-|c_CTRL-\_CTRL-G| CTRL-\ CTRL-G	go to Normal mode, abandon command-line
-		CTRL-\ a - d	reserved for extensions
-|c_CTRL-\_e|	CTRL-\ e {expr} replace the command line with the result of
-				{expr}
-		CTRL-\ f - z	reserved for extensions
-		CTRL-\ others	not used
-|c_CTRL-]|	CTRL-]		trigger abbreviation
-|c_CTRL-^|	CTRL-^		toggle use of |:lmap| mappings
-|c_<Del>|	<Del>		delete the character under the cursor
+*terminal.txt*   Nvim
 
-|c_<S-Left>|	<S-Left>	cursor one word left
-|c_<C-Left>|	<C-Left>	cursor one word left
-|c_<S-Right>|	<S-Right>	cursor one word right
-|c_<C-Right>|	<C-Right>	cursor one word right
-|c_<Up>|	<Up>		recall previous command-line from history that
-				matches pattern in front of the cursor
-|c_<S-Up>|	<S-Up>		recall previous command-line from history
-|c_<Down>|	<Down>		recall next command-line from history that
-				matches pattern in front of the cursor
-|c_<S-Down>|	<S-Down>	recall next command-line from history
-|c_<PageDown>|	<PageDown>	same as <S-Down>
-|c_<PageUp>|	<PageUp>	same as <S-Up>
-|c_<Insert>|	<Insert>	toggle insert/overstrike mode
-|c_<LeftMouse>|	<LeftMouse>	cursor at mouse click
 
-commands in wildmenu mode (see 'wildmenu')
+		 NVIM 参考手册    作者：Thiago de Arruda
 
-		<Up>		move up to parent
-		<Down>		move down to submenu
-		<Left>		select the previous match
-		<Right>		select the next match
-		<CR>		move into submenu when doing menu completion
-		CTRL-E		stop completion and go back to original text
-		CTRL-Y		accept selected match and stop completion
-		other		stop completion and insert the typed character
 
-commands in wildmenu mode with 'wildoptions' set to "pum"
+终端模拟器				*terminal* *terminal-emulator*
 
-		<PageUp>	select a match several entries back
-		<PageDown>	select a match several entries forward
+Nvim 嵌入了一个基于 libvterm 的 VT220/xterm 终端模拟器。终端作为特殊的 'buftype' 呈现，
+随着从连接程序接收到的数据异步更新。
+
+终端缓冲区的行为类似于普通缓冲区，除了：
+- 使用 'modifiable' 时，可以编辑但不能删除行。
+- 'scrollback' 控制保留多少行。
+- 如果光标在最后一行，输出会被跟随（"尾随"）。
+- 'modified' 是默认值。您可以设置 'nomodified' 以避免在关闭终端缓冲区时出现警告。
+- 'bufhidden' 默认为 "hide"。
+
+				      输入 |gO| 查看目录表。
+
+==============================================================================
+启动						*terminal-start*
+
+创建终端缓冲区有几种方式：
+
+- 运行 |:terminal| 命令。
+- 调用 |nvim_open_term()| 或 `jobstart(…, {'term': v:true})`。
+- 编辑 "term://" 缓冲区。例如：>vim
+    :edit term://bash
+    :vsplit term://top
+
+<    注意：要从自动命令中打开 "term://" 缓冲区，需要 |autocmd-nested|
+    修饰符。>vim
+        autocmd VimEnter * ++nested split term://sh
+<    （这仅供参考；请改用 |:terminal|。）
+
+当终端启动时，缓冲区内容会更新，缓冲区会以 `term://{cwd}//{pid}:{cmd}` 的形式命名。
+这种命名方案被 |:mksession| 用来恢复终端缓冲区（通过重新启动 {cmd}）。
+
+终端环境的初始化方式与 |jobstart-env| 相同。
+
+==============================================================================
+输入						*terminal-input*
+
+要发送输入，使用 |i|、|I|、|a|、|A| 或 |:startinsert| 进入 |Terminal-mode|。
+在此模式下，除了 <C-\> 之外的所有按键都会发送到底层程序。如果按下 <C-\>，
+下一个按键会被发送，除非它是 <C-N> 或 <C-O>。
+使用 <C-\><C-N> 返回普通模式。|CTRL-\_CTRL-N|
+使用 <C-\><C-O> 执行一个普通模式命令，然后返回终端模式。*t_CTRL-\_CTRL-O*
+
+终端模式强制设置以下本地选项：
+
+    'cursorlineopt' = number
+    'nocursorcolumn'
+    'scrolloff' = 0
+    'sidescrolloff' = 0
+
+终端模式有自己的 |:tnoremap| 命名空间用于映射，这可以用于自动化任何终端交互。
+
+要将 <Esc> 映射为退出终端模式：>vim
+    :tnoremap <Esc> <C-\><C-n>
+
+要在终端模式中模拟 |i_CTRL-R|：>vim
+    :tnoremap <expr> <C-R> '<C-\><C-N>"'.nr2char(getchar()).'pi'
+
+要在任何模式下使用 `ALT+{h,j,k,l}` 导航窗口：>vim
+    :tnoremap <A-h> <C-\><C-N><C-w>h
+    :tnoremap <A-j> <C-\><C-N><C-w>j
+    :tnoremap <A-k> <C-\><C-N><C-w>k
+    :tnoremap <A-l> <C-\><C-N><C-w>l
+    :inoremap <A-h> <C-\><C-N><C-w>h
+    :inoremap <A-j> <C-\><C-N><C-w>j
+    :inoremap <A-k> <C-\><C-N><C-w>k
+    :inoremap <A-l> <C-\><C-N><C-w>l
+    :nnoremap <A-h> <C-w>h
+    :nnoremap <A-j> <C-w>j
+    :nnoremap <A-k> <C-w>k
+    :nnoremap <A-l> <C-w>l
+
+您也可以创建类似于终端模式映射的菜单，但必须使用 |:tlmenu| 而不是 |:tmenu|。
+
+鼠标输入有以下行为：
+
+- 如果程序启用了鼠标事件，相应的事件将被转发到程序。
+- 如果鼠标事件被禁用（默认），终端焦点将丢失，事件将像在普通缓冲区中一样处理。
+- 如果点击另一个窗口，终端焦点将丢失，nvim 将跳转到被点击的窗口
+- 如果鼠标位于另一个窗口时使用鼠标滚轮，终端不会失去焦点，悬停的窗口将被滚动。
+
+==============================================================================
+配置					*terminal-config*
+
+选项：		'modified'、'scrollback'
+事件：			|TermOpen|、|TermEnter|、|TermLeave|、|TermClose|
+高亮组：	|hl-TermCursor|
+
+终端为某些选项设置本地默认值，这些可能与您的全局配置不同。
+
+- 'list' 被禁用
+- 'wrap' 被禁用
+- 'number' 被禁用
+- 'relativenumber' 被禁用
+- 'signcolumn' 设置为 "no"
+- 'foldcolumn' 设置为 "0"
+
+您可以使用 TermOpen 自动命令更改默认值：>vim
+    au TermOpen * setlocal list
+
+终端颜色 ~
+
+`{g,b}:terminal_color_x` 变量控制终端调色板，其中 `x` 是 0 到 15 之间的颜色索引。
+这些变量在 |TermOpen| 期间被读取。值必须是颜色名称或十六进制字符串。
+示例：>vim
+    let g:terminal_color_4 = '#ff0000'
+    let g:terminal_color_5 = 'green'
+仅适用于 RGB UI（参见 'termguicolors'）；对于 256 色终端，颜色索引只是被转发。
+
+编辑器高亮（|syntax-highlighting|、|highlight-groups| 等）具有更高的优先级：
+它在终端颜色解析后应用。
+
+------------------------------------------------------------------------------
+事件						*terminal-events*
+
+在 :terminal 缓冲区中运行的应用程序可以发送请求，Nvim 通过 |TermRequest| 事件暴露这些请求。
+
+OSC 7：更改工作目录			*terminal-osc7*
+
+要处理从 :terminal 进程发出的 OSC 7，这段代码将 :cd 到请求中指示的目录。>lua
+
+  vim.api.nvim_create_autocmd({ 'TermRequest' }, {
+    desc = '处理 OSC 7 目录更改请求',
+    callback = function(ev)
+      if string.sub(ev.data.sequence, 1, 4) == '\x1b]7;' then
+        local dir = string.gsub(ev.data.sequence, '\x1b]7;file://[^/]*', '')
+        if vim.fn.isdirectory(dir) == 0 then
+          vim.notify('无效目录：'..dir)
+          return
+        end
+        vim.api.nvim_buf_set_var(ev.buf, 'osc7_dir', dir)
+        if vim.o.autochdir and vim.api.nvim_get_current_buf() == ev.buf then
+          vim.cmd.cd(dir)
+        end
+      end
+    end
+  })
+  vim.api.nvim_create_autocmd({ 'BufEnter', 'WinEnter', 'DirChanged' }, {
+    callback = function(ev)
+      if vim.b.osc7_dir and vim.fn.isdirectory(vim.b.osc7_dir) == 1 then
+        vim.cmd.cd(vim.b.osc7_dir)
+      end
+    end
+  })
+
+要尝试它，选择上面的代码并用 `:'<,'>lua`（或 `g==`）执行它，然后在 :terminal 缓冲区中运行这个命令：>
+
+    printf "\033]7;file://./foo/bar\033\\"
+
+OSC 52：写入系统剪贴板		*terminal-osc52*
+
+:terminal 缓冲区中的应用程序可以通过发出 OSC 52 序列写入系统剪贴板。示例：>
+
+    printf '\033]52;;%s\033\\' "$(echo -n 'Hello world' | base64)"
+
+Nvim 使用配置的 |clipboard| 提供程序写入系统剪贴板。不支持使用 OSC 52 从系统剪贴板读取，
+因为这允许 :terminal 中的任何任意程序读取用户的剪贴板。
+
+从 :terminal 缓冲区发送的 OSC 52 序列不会触发 |TermRequest| 事件。该事件由 Nvim 直接处理，
+不会转发给插件。
+
+OSC 133：shell 集成			*terminal-osc133* *shell-prompt*
+
+Shell 可以发出语义转义序列（OSC 133）来标记每个提示符的开始和结束。提示符的开始由序列
+`OSC 133 ; A ST` 标记，结束由 `OSC 133 ; B ST` 标记。
+
+您可以配置您的 shell "rc"（例如 ~/.bashrc）来发出 OSC 133 序列，或者您的终端可能会尝试为您
+这样做（假设您的 shell 配置不干扰）。
+
+- fish: https://fishshell.com/docs/current/relnotes.html#improved-terminal-support
+- kitty: https://sw.kovidgoyal.net/kitty/shell-integration/
+- powershell: https://learn.microsoft.com/en-us/windows/terminal/tutorials/shell-integration#powershell-pwshexe
+- vscode: https://code.visualstudio.com/docs/terminal/shell-integration
+
+要配置 bash 来标记每个提示符的开始，设置 $PROMPT_COMMAND：>bash
+
+    # 提示符开始：
+    PROMPT_COMMAND='printf "\033]133;A\007"'
+<
+                                                *terminal_]]* *terminal_[[*
+如果您的 shell 如上所述发出 OSC 133，|]]| 和 |[[| 动作将跳转到下一个/上一个提示符。
+
+						*shell-prompt-signs*
+要从 |TermRequest| 处理程序中用标记注释每个终端提示符，调用 |nvim_buf_set_extmark()|：>lua
+
+    vim.api.nvim_create_autocmd('TermOpen', {
+      command = 'setlocal signcolumn=auto',
+    })
+    local ns = vim.api.nvim_create_namespace('my.terminal.prompt')
+    vim.api.nvim_create_autocmd('TermRequest', {
+      callback = function(args)
+        if string.match(args.data.sequence, '^\027]133;A') then
+          local lnum = args.data.cursor[1]
+          vim.api.nvim_buf_set_extmark(args.buf, ns, lnum - 1, 0, {
+            sign_text = '▶',
+            sign_hl_group = 'SpecialChar',
+          })
+        end
+      end,
+    })
+<
+
+==============================================================================
+状态变量				*terminal-status*
+
+终端缓冲区维护一些缓冲区本地变量和选项。这些值在 TermOpen 之前初始化，
+因此您可以在本地 'statusline' 中使用它们。示例：>vim
+    :autocmd TermOpen * setlocal statusline=%{b:term_title}
+
+- *b:term_title*  终端标题（用户可写），通常显示在图形终端模拟器的窗口标题或标签标题中。
+  终端程序可以通过发出转义序列来设置它。
+- |'channel'|  终端 PTY |job-id|。可用于 |chansend()| 向终端发送输入。
+- |TermClose| 事件在 |v:event| 的 "status" 字段中给出终端作业退出代码。
+  例如，这个自动命令将终端的退出代码输出到 |:messages|：>vim
+    autocmd TermClose * echom '终端退出状态 '..v:event.status
+
+使用 |jobwait()| 检查终端作业是否已完成：>vim
+    let running = jobwait([&channel], 0)[0] == -1
+<
+==============================================================================
+:Termdebug 插件	*terminal-debug* *terminal-debugger* *package-termdebug*
+
+终端调试插件可用于使用 gdb 调试程序并在 Vim 窗口中查看源代码。
+由于这完全包含在 Vim 内部，这也适用于通过 ssh 连接远程工作。
+
+启动 ~
+							*termdebug-starting*
+使用此命令加载插件：>vim
+	packadd termdebug
+从 |vimrc| 文件加载插件时，添加 "!" 属性：>vim
+	packadd! termdebug
+<							*:Termdebug*
+要开始调试，使用 `:Termdebug` 或 `:TermdebugCommand` 后跟命令名称，例如：>vim
+	:Termdebug vim
+
+这将打开两个窗口：
+
+gdb 窗口	执行 "gdb vim" 的终端窗口。在这里您可以直接与 gdb 交互。
+
+程序窗口	执行程序的终端窗口。当在 gdb 中使用 "run" 时，程序 I/O 将在此窗口中发生，
+	这样它就不会干扰控制 gdb。
+
+当前窗口用于显示源代码。当 gdb 暂停时，如果可能，将显示源文件位置。
+使用标记来高亮显示当前位置，使用高亮组 debugPC。
+
+如果当前窗口中的缓冲区被修改，将打开另一个窗口来显示当前 gdb 位置。
+
+将焦点放在执行程序的终端上以与其交互。这与在终端窗口中运行的任何命令的工作方式相同。
+
+当调试器结束时，通常通过在 gdb 窗口中输入 "quit"，两个打开的窗口将关闭。
+
+一次只能有一个调试器处于活动状态。
+							*:TermdebugCommand*
+如果您想给正在调试的命令提供特定命令，可以使用 `:TermdebugCommand` 命令后跟命令名称和
+其他参数。>vim
+	:TermdebugCommand vim --clean -c ':set nu'
+
+`:Termdebug` 和 `:TermdebugCommand` 都支持可选的 "!" 参数，以立即启动命令，
+而不会在 gdb 窗口暂停（并且光标将在被调试的窗口中）。例如：>vim
+	:TermdebugCommand! vim --clean
+
+要将 gdb 附加到已经运行的可执行文件或使用核心文件，请传递额外参数。例如：>vim
+	:Termdebug vim core
+	:Termdebug vim 98343
+
+如果没有给出参数，您将进入 gdb 窗口，在其中需要使用例如 gdb `file` 命令指定要运行的命令。
+
+
+示例会话 ~
+							*termdebug-example*
+在 Vim "src" 目录中启动并构建 Vim：>
+	% make
+启动 Vim：>
+	% ./vim
+加载 termdebug 插件并开始调试 Vim：>vim
+	:packadd termdebug
+	:Termdebug vim
+您现在应该有三个窗口：
+    source  - 您开始的地方
+    gdb	    - 您可以在这里输入 gdb 命令
+    program - 执行程序将使用此窗口
+
+将焦点放在 gdb 窗口并输入：>
+	break ex_help
+	run
+Vim 将在程序窗口中开始运行。将焦点放在那里并输入：>vim
+	:help gui
+Gdb 将运行到 ex_help 断点。源窗口现在显示 ex_cmds.c 文件。
+断点设置的位置将出现红色 "1 " 标记。调试器停止的行被高亮显示。
+您现在可以逐步执行程序。当调试器执行源代码行时，您将看到高亮显示移动。
+
+运行 ":Next" 几次直到 for 循环被高亮显示。将光标放在 "eap->arg" 的末尾，
+然后调用 ":Eval"。您将看到以下显示：
+	"eap->arg": 0x555555e68855 "gui" ~
+这样您可以检查局部变量的值。您也可以将焦点放在 gdb 窗口并使用 "print" 命令，例如：>
+	print *eap
+如果鼠标指针移动正常工作，当鼠标悬停在被 gdb 评估的文本上时，Vim 也会显示一个气球。
+您也可以使用 "K" 映射，它将使用 Nvim 浮动窗口显示结果。
+
+现在回到源窗口并将光标放在 for 循环后的第一行，然后输入：>
+	:Break
+您将看到一个 "1" 标记出现，这表示新的断点。现在运行 ":Cont" 命令，
+代码将执行到断点。
+
+您可以在 gdb 窗口中输入更高级的命令。例如，输入：>
+	watch curbuf
+现在运行 ":Cont"（或在 gdb 窗口中输入 "cont"）。执行现在将继续，
+直到 "curbuf" 的值改变，这在 do_ecmd() 中发生。要再次删除这个监视点，
+在 gdb 窗口中输入：>
+	delete 3
+
+您可以通过在 gdb 窗口中输入以下内容查看堆栈：>
+	where
+通过堆栈帧移动，例如：>
+	frame 3
+源窗口将显示代码，在调用更深层次的位置。
+
+
+逐步执行代码 ~
+							*termdebug-stepping*
+将焦点放在 gdb 窗口以在那里输入命令。一些常用的命令是：
+- CTRL-C	中断程序
+- next		执行当前行并停在下一行
+- step		执行当前行并停在下一个语句，进入函数
+- until		执行直到超过当前光标行或超过指定位置或当前堆栈帧返回
+- finish	执行直到离开当前函数
+- where		显示堆栈
+- frame N	转到第 N 个堆栈帧
+- continue	继续执行
+
+						*:Run* *:Arguments*
+在显示源代码的窗口中，这些命令可用于控制 gdb：
+ `:Run` [args]	    使用 [args] 或之前的参数运行程序
+ `:Arguments` {args}  为下一个 `:Run` 设置参数
+
+ *:Break*	在光标位置设置断点
+ :Break {position}
+		在指定位置设置断点
+ *:Tbreak*	在光标位置设置临时断点
+ :Tbreak {position}
+		在指定位置设置临时断点
+ *:Clear*	删除光标位置的断点
+
+ *:Step*	执行 gdb "step" 命令
+ *:Over*	执行 gdb "next" 命令（`:Next` 是 Vim 命令）
+ *:Until*	执行 gdb "until" 命令
+ *:Finish*	执行 gdb "finish" 命令
+ *:Continue*	执行 gdb "continue" 命令
+ *:Stop*	中断程序
+
+如果 gdb 停在源代码行，并且当前没有窗口显示源代码，将为源代码创建一个新窗口。
+如果源代码窗口中的缓冲区已被修改且无法放弃，也会发生这种情况。
+
+Gdb 给每个断点一个编号。在 Vim 中，编号显示在标记列中，带有红色背景。
+您可以使用这些 gdb 命令：
+- info break	列出断点
+- delete N	删除断点 N
+如果光标在带有断点的行中，您也可以使用 `:Clear` 命令，
+或使用"清除断点"右键菜单项。
+
+
+检查变量 ~
+					*termdebug-variables* *:Evaluate*
+ `:Evaluate`	    评估光标下的表达式
+ `K`		   相同（参见 |termdebug_map_K| 禁用）
+ `:Evaluate` {expr}  评估 {expr}
+ `:'<,'>Evaluate`    评估可视选择的文本
+
+这与在 gdb 窗口中使用 "print" 类似。
+您通常可以将 `:Evaluate` 缩短为 `:Ev`。
+结果显示在浮动窗口中。
+您可以通过再次运行 `:Evaluate`（或 `K`）将光标移动到此窗口。
+
+
+导航堆栈帧 ~
+				*termdebug-frames* *:Frame* *:Up* *:Down*
+ `:Frame` [frame]	选择帧 [frame]，这是一个帧号、地址或函数名（默认：当前帧）
+ `:Up` [count]		向上移动 [count] 帧（默认：1；调用当前帧的帧）
+ `+`			相同（参见 |termdebug_map_plus| 禁用）
+ `:Down` [count]	向下移动 [count] 帧（默认：1；被当前帧调用的帧）
+ `-`			相同（参见 |termdebug_map_minus| 禁用）
+
+
+其他命令 ~
+							*termdebug-commands*
+ *:Gdb*	    跳转到 gdb 窗口
+ *:Program*   跳转到运行程序的窗口
+ *:Source*    跳转到源代码窗口，如果没有则创建它
+ *:Asm*	    跳转到反汇编窗口，如果没有则创建它
+ *:Var*	    跳转到局部和参数变量窗口，如果没有则创建它。
+	    每当程序停止时，此窗口都会更新
+
+事件 ~
+							*termdebug-events*
+可以使用四个自动命令：>vim
+	au User TermdebugStartPre  echomsg '调试开始'
+	au User TermdebugStartPost echomsg '调试已开始'
+	au User TermdebugStopPre   echomsg '调试停止'
+	au User TermdebugStopPost  echomsg '调试已停止'
+<
+						*TermdebugStartPre*
+TermdebugStartPre		在开始调试之前。
+				如果调试器已经在运行或无法执行调试器命令，
+				则不会触发。
+						*TermdebugStartPost*
+TermdebugStartPost		在调试初始化之后。
+				如果向 `:Termdebug` 或 `:TermdebugCommand` 传递了 "!" 参数，
+				则在 gdb 中运行提供的命令之前触发事件。
+						*TermdebugStopPre*
+TermdebugStopPre		在调试结束之前，当 gdb 终止时，
+				很可能是在 gdb 窗口中发出 "quit" 命令之后。
+						*TermdebugStopPost*
+TermdebugStopPost		在调试结束后，gdb 相关窗口关闭，
+				调试缓冲区被清除，并恢复调试前的状态。
+
+
+自定义 ~
+				*termdebug-customizing* *g:termdebug_config*
+过去使用几个全局变量进行配置。这些已被弃用，建议使用 g:termdebug_config 字典。
+当 g:termdebug_config 存在时，其他全局变量将不会被使用。
+推荐的方式是从空字典开始：>vim
+	let g:termdebug_config = {}
+
+然后您可以按照下面提到的方式向字典添加条目。为了完整性，提到了已弃用的全局变量名。
+如果您正在切换到使用 g:termdebug_config，您可以找到旧变量名并接管其值，然后删除已弃用的变量。
+
+
+提示模式 ~
+						*termdebug-prompt*
+在 MS-Windows 上，gdb 将在 'buftype' 设置为 "prompt" 的缓冲区中运行。
+这工作方式略有不同：
+- gdb 窗口在输入命令时处于插入模式。使用 <Esc> 进入普通模式，
+  然后您可以在缓冲区中移动、复制/粘贴等。使用任何开始插入模式的命令
+  （如 `a` 或 `i`）返回编辑 gdb 命令。
+- 将打开一个单独的 :terminal 窗口来运行被调试的程序。
+
+						*termdebug_use_prompt*
+可以使用提示模式：>vim
+	let g:termdebug_config['use_prompt'] = 1
+如果没有 g:termdebug_config，您可以使用：>vim
+	let g:termdebug_use_prompt = 1
+<
+映射 ~
+termdebug 插件启用了一些默认映射。一旦 termdebug 会话结束，
+所有这些映射都会重置为原始值。
+
+					*termdebug_map_K* *termdebug-mappings*
+K 键通常映射到 |:Evaluate|，除非已经存在缓冲区本地（|:map-local|）映射到 K。
+如果您不想要这个，请使用：>vim
+	let g:termdebug_config['map_K'] = 0
+如果没有 g:termdebug_config，您可以使用：>vim
+	let g:termdebug_map_K = 0
+<
+						*termdebug_map_minus*
+- 键通常映射到 |:Down|，除非已经存在缓冲区本地映射到 - 键。
+如果您不想要这个，请使用：>vim
+	let g:termdebug_config['map_minus'] = 0
+<
+						*termdebug_map_plus*
++ 键通常映射到 |:Up|，除非已经存在缓冲区本地映射到 + 键。
+如果您不想要这个，请使用：>vim
+	let g:termdebug_config['map_plus'] = 0
+<
+						*termdebug_disasm_window*
+如果您想默认显示 Asm 窗口，将 "disasm_window" 标志设置为 1。
+可以使用 "disasm_window_height" 条目设置窗口高度：>vim
+	let g:termdebug_config['disasm_window'] = 1
+	let g:termdebug_config['disasm_window_height'] = 15
+如果没有 g:termdebug_config，您可以使用：>vim
+	let g:termdebug_disasm_window = 15
+任何大于 1 的值都会将 Asm 窗口高度设置为该值。
+如果当前窗口有足够的水平空间，它将垂直分割，Asm 窗口将与源代码窗口并排显示
+（并且不会使用高度选项）。
+
+						*termdebug_variables_window*
+如果您想默认显示 Var 窗口，将 "variables_window" 标志设置为 1。
+可以使用 "variables_window_height" 条目设置窗口高度：>vim
+	let g:termdebug_config['variables_window'] = 1
+	let g:termdebug_config['variables_window_height'] = 15
+如果没有 g:termdebug_config，您可以使用：>vim
+	let g:termdebug_variables_window = 15
+任何大于 1 的值都会将 Var 窗口高度设置为该值。
+如果当前窗口有足够的水平空间，它将垂直分割，Var 窗口将与源代码窗口并排显示
+（并且不会使用高度选项）。
+
+
+通信 ~
+						*termdebug-communication*
+还有另一个隐藏的缓冲区，用于 Vim 与 gdb 通信。缓冲区名称是 "gdb communication"。
+不要删除此缓冲区，它会破坏调试器。
+
+Gdb 有一些奇怪的行为，插件尽其所能解决这些问题。例如，在 gdb 窗口中输入 "continue" 后，
+可以使用 CTRL-C 中断运行的程序。但在使用 MI 命令 "-exec-continue" 后，
+按 CTRL-C 不会中断。因此，您会看到 `:Continue` 命令使用 "continue"，
+而不是使用通信通道。
+
+
+GDB 命令 ~
+							*g:termdebugger*
+要更改 gdb 命令的名称，在调用 `:Termdebug` 之前设置 g:termdebug_config 中的 "debugger" 条目
+或 "g:termdebugger" 变量：>vim
+	let g:termdebug_config['command'] = "mygdb"
+如果没有 g:termdebug_config，您可以使用：>vim
+	let g:termdebugger = "mygdb"
+
+如果命令需要参数，使用列表：>vim
+	let g:termdebug_config['command'] = ['rr', 'replay', '--']
+如果没有 g:termdebug_config，您可以使用：>vim
+	let g:termdebugger = ['rr', 'replay', '--']
+
+如果您是鼠标用户，您也可以定义使用右键点击的映射来执行终端命令，
+如评估光标下的变量：>vim
+	nnoremap <RightMouse> :Evaluate<CR>
+或设置/取消断点：>vim
+	nnoremap <RightMouse> :Break<CR>
+
+
+将添加几个参数以使 gdb 对调试器工作良好。
+如果您想修改它们，添加一个函数来过滤参数列表：>vim
+	let g:termdebug_config['command_filter'] = MyDebugFilter
+
+如果您不想添加参数，但需要设置 "pty"，使用函数添加必要的参数：>vim
+	let g:termdebug_config['command_add_args'] = MyAddArguments
+该函数将使用到目前为止的参数列表和第二个参数（pty 的名称）调用。
+							*gdb-version*
+只有完全兼容 gdb 的调试器才能工作。Vim 使用 GDB/MI 接口。
+"new-ui" 命令需要 gdb 7.12 或更高版本。如果您收到此错误：
+	Undefined command: "new-ui". Try "help".~
+那么您的 gdb 版本太旧。
+
+
+颜色 ~
+					*hl-debugPC* *hl-debugBreakpoint*
+可以使用这些高亮组调整标记的颜色：
+- debugPC		当前位置
+- debugBreakpoint	断点
+
+默认值如下，当 'background' 为 "light" 时：
+  hi debugPC term=reverse ctermbg=lightblue guibg=lightblue
+  hi debugBreakpoint term=reverse ctermbg=red guibg=red
+
+当 'background' 为 "dark" 时：
+  hi debugPC term=reverse ctermbg=darkblue guibg=darkblue
+  hi debugBreakpoint term=reverse ctermbg=red guibg=red
+
+
+快捷键 ~
+							*termdebug_shortcuts*
+您可以使用 TermDebugSendCommand() 函数定义自己的快捷键（映射）来控制 gdb，
+这些快捷键可以在任何窗口中工作。示例：>vim
+	map ,w :call TermDebugSendCommand('where')<CR>
+参数是 gdb 命令。
+
+
+弹出菜单 ~
+							*termdebug_popup*
+默认情况下，Termdebug 插件将 'mousemodel' 设置为 "popup_setpos" 并添加这些条目到弹出菜单：
+	设置断点		`:Break`
+	清除断点		`:Clear`
+	评估		`:Evaluate`
+如果您不想要这个，则禁用它：>vim
+	let g:termdebug_config['popup'] = 0
+如果没有 g:termdebug_config，您可以使用：>vim
+	let g:termdebug_popup = 0
+
+
+更改默认标记 ~
+							*termdebug_signs*
+Termdebug 使用断点 ID 的十六进制数在标记列中表示断点。
+如果它大于 "0xFF"，那么它将显示为 "F+"，因为我们真的只有两个屏幕单元格用于标记。
+您也可以使用十进制断点标记，在这种情况下，ID 大于 99 的将显示为 "9+"。
+
+如果您想自定义断点标记以在标记列中显示 `>>`：>vim
+	let g:termdebug_config['sign'] = '>>'
+如果您想使用十进制（基数 10）断点标记：>vim
+	let g:termdebug_config['sign_decimal'] = 1
+如果变量 g:termdebug_config 还不存在，您可以使用：>vim
+	let g:termdebug_config = {'sign': '>>'}
+同样，要启用十进制标记：>vim
+	let g:termdebug_config = {'sign_decimal': 1}
+
+
+Vim 窗口宽度 ~
+							*termdebug_wide*
+要在调试开始时更改 Vim 窗口的宽度并使用垂直分割：>vim
+	let g:termdebug_config['wide'] = 163
+如果没有 g:termdebug_config，您可以使用：>vim
+	let g:termdebug_wide = 163
+
+这将在使用 `:Termdebug` 时将 'columns' 设置为 163。退出调试器时会恢复该值。
+
+如果设置了 wide 值且 'columns' 已经是更大的值，则将使用垂直分割而不修改 'columns'。
+
+将 wide 值设置为 1 以使用垂直分割而不更改 'columns'。这在 Vim 无法调整终端大小时很有用。
+
+
+ vim:tw=78:ts=8:noet:ft=help:norl:

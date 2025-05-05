@@ -1443,7 +1443,10 @@ vim.on_key({fn}, {ns_id}, {opts})                               *vim.on_key()*
       • {fn} 不会被 |nvim_buf_clear_namespace()| 清除。
 
     参数: ~
-      • {fn}     (`fun(key: string, typed: string): string??`) 每个输入按键后调用的函数，{key} 为映射后按键，{typed} 为映射前按键。{typed} 可能为空（如 {key} 由非输入按键产生，或与前次相同）。若 {fn} 返回空字符串，则丢弃/忽略该按键。{fn} 为 `nil` 时，移除该命名空间的回调。
+      • {fn}     (`fun(key: string, typed: string): string??`) 每个输入按键后调用的函数，{key} 为映射后按键，{typed} 为映射前按键。
+                {typed} 可能为空（如 {key} 由非输入按键产生，或与前次相同）。
+                若 {fn} 返回空字符串，则丢弃/忽略该按键。
+                {fn} 为 `nil` 时，移除该命名空间的回调。
       • {ns_id}  (`integer?`) 命名空间 ID。为 nil 或 0 时，生成并返回新的 |nvim_create_namespace()| id。
       • {opts}   (`table?`) 可选参数
 

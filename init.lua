@@ -4,7 +4,6 @@ require("repeat").setup()
 local K = require("plugin-keymap")
 K.setup()
 
-
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -21,27 +20,28 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   require("plugins-auto.hop"),
   require("plugins-auto.flash"),
-  require("plugins-auto.luasnip"),
-  require("plugins-auto.blank-cmp"),
-  require("plugins-auto.neo-tree"),
-  require("plugins-auto.lsp-config"),
-  require("plugins-auto.autopairs"),
-  require("plugins-auto.conform"),
+  require("plugins.snippet.luasnip"),
+  require("plugins.cmp.blank-cmp"),
+  require("plugins.lsp.lsp-config"),
+  require("plugins.format.conform"),
+  require("plugins.treesitter.treesitter"),
   require("plugins-auto.markdown-preview"),
   require("plugins-auto.telescope"),
   require("plugins-auto.toggle-term"),
-  require("plugins-auto.vimtex"),
+  require("plugins.tex.vimtex"),
   require("plugins-auto.winshift"),
+  require("plugins-auto.neo-tree"),
   require("plugins-auto.yazi"),
-  require("plugins-auto.zen-mode"),
+  require("plugins.misc.autopairs"),
+  require("plugins.misc.zen-mode"),
   require("plugins.style.lualine"),
   require("plugins-auto.harpoon"),
   require("plugins-auto.grug-far"),
 
   require("plugins.style.dashboard-nvim"),
   -- { import = "plugins.style.alpha-nvim" },
-  -- require("plugins.style.theme.gruvbox"),
-  require("plugins.style.theme.tokyonight"),
+  require("plugins.style.theme.gruvbox"),
+  -- require("plugins.style.theme.tokyonight"),
   -- require("plugins.style.theme.catppuccin"),
   -- require("plugins.style.theme.colorbuddy"),
   -- require("plugins.style.theme.everforest"),
@@ -58,7 +58,8 @@ require("lazy").setup({
   require("plugins.custom.concat-mode"),
   require("plugins.custom.win-action"),
   require("plugins.custom.show-file-info"),
-  require("plugins.custom.word-move")
+  require("plugins.custom.word-move"),
+  require("plugins.custom.easy-word-motion")
 })
 
 K.add({
@@ -344,16 +345,6 @@ K.add({
     "v0c",
     "n"
   },
-  ["<M-d>"] = {
-    { "<nop>", "n" }
-  },
-  ["<C-d>"] = {
-    { "<C-O>d", "i" }
-  },
-  ["<M-y>"] = {
-    "<left><C-o>y<right>",
-    "i"
-  },
   -- ["<F6>"] = { function()
 
   -- require("utils.char").char_split('niaf', 1, 2, 4, 10)
@@ -374,10 +365,7 @@ K.add({
   -- print(vim.inspect(pos))
   -- end, { "n", "x" } }
   ["<F6>"] = {
-    function()
-      local a = 2
-      print(a % 1 ~= 0)
-    end,
+    "<C-Y><C-Y><C-Y><C-Y><C-Y><C-Y>",
     "n"
   },
   ["<C-i>"] = { "<C-i>", "n" },

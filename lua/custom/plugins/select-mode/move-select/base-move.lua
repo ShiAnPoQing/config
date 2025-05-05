@@ -83,7 +83,7 @@ local function select_lines_iter(lines, callback)
 end
 
 local function select_block_mode_move(dir)
-  vim.api.nvim_exec2([[  execute "normal! \<C-g>y"  ]], {})
+  vim.api.nvim_exec2([[execute "normal! \<C-g>y"]], {})
   local visual_texts = vim.split(vim.fn.getreg('"'), "\n")
 
   local start_row, start_col, end_row, end_col = utils.get_visual_mark(true)
