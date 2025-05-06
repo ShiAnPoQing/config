@@ -5,12 +5,15 @@ local M = {}
 local Line = {}
 local Text = {}
 
-local function select()
-  vim.api.nvim_feedkeys("gv" .. vim.api.nvim_replace_termcodes("<C-v><C-g>", true, true, true), "nx", false)
-end
-
 local left = setmetatable({}, { __index = Line })
 local right = setmetatable({}, { __index = Line })
+
+local function select(cursor_pos, start_col)
+  local ctrl_v = vim.api.nvim_replace_termcodes("<C-v>", true, true, true)
+  local ctrl_g = vim.api.nvim_replace_termcodes("<C-g>", true, true, true)
+  local key = cursor_pos[2] == start_col and "o" or ""
+  vim.api.nvim_feedkeys("gv" .. ctrl_v .. key .. ctrl_g, "nx", false)
+end
 
 function left:get_char(part, col)
   local source = part.select_text_left_line
@@ -119,10 +122,10 @@ function Line:merger_lines()
   self:line_concat()
 end
 
-function Line:set_lines(start_row, start_col, end_row, end_col)
+function Line:set_lines(start_row, start_col, end_row, end_col, cursor_pos)
   if self.stop == true then
     utils.set_visual_mark(start_row, start_col, end_row, end_col)
-    select()
+    select(cursor_pos, start_col)
     return
   end
 
@@ -131,7 +134,7 @@ function Line:set_lines(start_row, start_col, end_row, end_col)
   local start_col_offset, end_col_offset = self.Action:get_mark_offset()
   utils.set_visual_mark(start_row, start_col + start_col_offset, end_row,
     end_col + end_col_offset)
-  select()
+  select(cursor_pos, start_col)
 end
 
 function Text:init()
@@ -183,7 +186,8 @@ function Text:check_balance(select_text)
 end
 
 --- @param dir "left"|"right"
-local function select_block_mode_move(dir)
+function M.select_block_mode_move(dir)
+  local cursor_pos = vim.api.nvim_win_get_cursor(0)
   vim.api.nvim_exec2([[execute "normal! \<C-g>y"]], {})
   local start_row, start_col, end_row, end_col = utils.get_visual_mark(true)
   Text:init()
@@ -195,18 +199,7 @@ local function select_block_mode_move(dir)
     Line:set_line_right_part(i, select_text)
   end, end_row, end_col)
   Line:merger_lines()
-  Line:set_lines(start_row, start_col, end_row, end_col)
-end
-
---- @param dir "left"|"right"
-function M.select_move(dir)
-  local mode = vim.api.nvim_get_mode().mode
-
-  if mode == "s" then
-    -- select_mode_move(dir)
-  elseif mode == "" then
-    select_block_mode_move(dir)
-  end
+  Line:set_lines(start_row, start_col, end_row, end_col, cursor_pos)
 end
 
 return M
