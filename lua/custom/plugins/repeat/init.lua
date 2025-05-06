@@ -1,5 +1,6 @@
 local M = {}
 local Float = require("custom.plugins.repeat.float")
+local Record = require("custom.plugins.repeat.record")
 
 local RepeatKeymapQueue = {}
 
@@ -14,6 +15,8 @@ function M.Repeat(need)
 end
 
 function M.RecordStart()
+  if M.state then return end
+  Record.start()
   local win, buf = Float.createFloat()
 end
 

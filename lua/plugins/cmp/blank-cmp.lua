@@ -22,7 +22,7 @@ return {
         selection = { preselect = false, auto_insert = true }
       },
       ghost_text = {
-        enabled = true,
+        enabled = false,
         show_with_selection = true,
         show_without_selection = true,
         show_with_menu = true,
@@ -40,7 +40,7 @@ return {
             auto_insert = true,
           },
         },
-        ghost_text = { enabled = true }
+        ghost_text = { enabled = false }
       },
     },
     sources = {

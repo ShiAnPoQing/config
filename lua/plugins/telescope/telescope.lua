@@ -62,7 +62,13 @@ return {
         },
         ["<leader>ff"] = { builtin.find_files, "n", { desc = "[F]ind [F]iles" } },
         ["<leader>fg"] = { builtin.live_grep, "n", { desc = "[F]ind [G]rep" } },
-        ["<leader>fb"] = { builtin.buffers, "n", { desc = "[F]ind [B]uffers" } },
+        ["<leader>fb"] = {
+          function()
+            builtin.buffers({
+              { only_cwd = vim.fn.haslocaldir() == 1 }
+            })
+          end
+          , "n", { desc = "[F]ind [B]uffers" } },
         ["<leader>fh"] = { builtin.help_tags, "n" },
         ["<leader>fq"] = { builtin.quickfix, "n" },
         ["<leader>fsh"] = { builtin.search_history, "n" },

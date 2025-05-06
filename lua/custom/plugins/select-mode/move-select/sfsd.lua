@@ -1,6 +1,10 @@
 local utils = require("utils.mark")
 
 local M = {}
+local Dir = {
+  LEFT = "left",
+  RIGHT = "right"
+}
 
 local Line = {}
 local Text = {}
@@ -12,35 +16,19 @@ end
 local left = setmetatable({}, { __index = Line })
 local right = setmetatable({}, { __index = Line })
 
-function left:get_char(part, col)
-  local source = part.select_text_left_line
-  return vim.fn.strcharpart(source, vim.fn.strcharlen(source) - col)
+function left:get_char()
+
 end
 
-function right:get_char(part, col)
-  local source = part.select_text_right_line
-  return vim.fn.strcharpart(source, 0, col)
-end
-
-function left:get_new_line(part)
-  local select_text_left_line_char_len = vim.fn.strcharlen(part.select_text_left_line)
-  local char_len = vim.fn.strcharlen(part.char)
-  return vim.fn.strcharpart(part.select_text_left_line, 0, select_text_left_line_char_len - char_len) ..
-      part.select_text .. part.char .. part.select_text_right_line
-end
-
-function right:get_new_line(part)
-  return part.select_text_left_line ..
-      part.char .. part.select_text .. vim.fn.strcharpart(part.select_text_right_line, vim.fn.strcharlen(part.char))
-end
-
-function left:get_mark_offset()
-  return - #self.line_parts[1].char, - #self.line_parts[#self.line_parts].char
-end
-
-function right:get_mark_offset()
-  return #self.line_parts[1].char, #self.line_parts[#self.line_parts].char
-end
+-- function right:get_char()
+--   local char;
+--
+--   if self.dir == Dir.RIGHT then
+--     local char = vim.fn.strcharpart(source_line, 0, col)
+--   else
+--     char = vim.fn.strcharpart(source_line, vim.fn.strcharlen(source_line) - col)
+--   end
+-- end
 
 function Line:init(dir, start_row, end_row)
   self.lines = vim.api.nvim_buf_get_lines(0, start_row, end_row, false)
@@ -49,11 +37,8 @@ function Line:init(dir, start_row, end_row)
   self.char_display_width = 0
   self.revise_char_count = 0
   self.stop = nil
-  if dir == "right" then
-    self.Action = right
-  else
-    self.Action = left
-  end
+  self.dir = dir
+  self.Action = self.Action
 end
 
 function Line:set_line_left_part(i, col)
@@ -78,7 +63,11 @@ function Line:revise_chars()
   self.revise_char_count = 0
   for _, part in ipairs(self.line_parts) do
     if self.stop == true then break end
-    self:revise_char(1, part)
+    if self.dir == Dir.RIGHT then
+      self:revise_char(1, part.select_text_right_line, part)
+    else
+      self:revise_char(1, part.select_text_left_line, part)
+    end
   end
 
   if self.revise_char_count < #self.line_parts then
@@ -86,8 +75,14 @@ function Line:revise_chars()
   end
 end
 
-function Line:revise_char(col, line_part)
-  local char = self.Action:get_char(line_part, col)
+function Line:revise_char(col, source_line, line_part)
+  local char;
+
+  if self.dir == Dir.RIGHT then
+    char = vim.fn.strcharpart(source_line, 0, col)
+  else
+    char = vim.fn.strcharpart(source_line, vim.fn.strcharlen(source_line) - col)
+  end
 
   if vim.fn.strcharlen(char) < col and self.revise_char_count ~= #self.line_parts then
     self.stop = true
@@ -102,7 +97,7 @@ function Line:revise_char(col, line_part)
     line_part.char = char
     self.revise_char_count = self.revise_char_count + 1
   elseif char_display_width < self.char_display_width then
-    self:revise_char(col + 1, line_part)
+    self:revise_char(col + 1, source_line, line_part)
   end
 end
 
@@ -110,7 +105,18 @@ function Line:line_concat()
   if self.stop == true then return end
 
   for _, part in ipairs(self.line_parts) do
-    table.insert(self.new_lines, Line.Action:get_new_line(part))
+    local new_line
+    if self.dir == Dir.RIGHT then
+      new_line = part.select_text_left_line ..
+          part.char .. part.select_text .. vim.fn.strcharpart(part.select_text_right_line, vim.fn.strcharlen(part.char))
+    else
+      local select_text_left_line_char_len = vim.fn.strcharlen(part.select_text_left_line)
+      local char_len = vim.fn.strcharlen(part.char)
+      new_line = vim.fn.strcharpart(part.select_text_left_line, 0, select_text_left_line_char_len - char_len) ..
+          part.select_text .. part.char .. part.select_text_right_line
+    end
+
+    table.insert(self.new_lines, new_line)
   end
 end
 
@@ -128,10 +134,15 @@ function Line:set_lines(start_row, start_col, end_row, end_col)
 
   vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, self.new_lines)
 
-  local start_col_offset, end_col_offset = self.Action:get_mark_offset()
-  utils.set_visual_mark(start_row, start_col + start_col_offset, end_row,
-    end_col + end_col_offset)
-  select()
+  if self.dir == Dir.RIGHT then
+    utils.set_visual_mark(start_row, start_col + #self.line_parts[1].char, end_row,
+      end_col + #self.line_parts[#self.line_parts].char)
+    select()
+  else
+    utils.set_visual_mark(start_row, start_col - #self.line_parts[1].char, end_row,
+      end_col - #self.line_parts[#self.line_parts].char)
+    select()
+  end
 end
 
 function Text:init()

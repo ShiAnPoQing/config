@@ -1,7 +1,7 @@
 return {
   ["<F6>"] = {
     function()
-      local c = vim.fn.getcharstr()
+      local c = vim.regex("\\k\\+")
       print(c)
     end,
     "n"

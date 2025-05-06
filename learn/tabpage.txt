@@ -1,0 +1,455 @@
+*tabpage.txt*   Nvim
+
+
+		  VIM 参考手册    作者：Bram Moolenaar
+
+
+使用多个标签页编辑窗口。				*tab-page* *tabpage*
+
+这里解释了为使用多个标签页而添加的命令。此外，还解释了
+在与多个标签页结合使用时工作方式不同的命令。
+
+                                      输入 |gO| 查看目录。
+
+==============================================================================
+1. 简介						*tab-page-intro*
+
+标签页包含一个或多个窗口。你可以轻松地在标签页之间切换，
+这样你就可以处理不同的事情。
+
+通常你会在Vim窗口顶部看到标签列表，每个标签页一个。
+使用鼠标点击标签可以跳转到该标签页。还有其他在标签页之间
+移动的方法，见下文。
+
+大多数命令只在当前标签页中工作。这包括 |CTRL-W| 命令、
+|:windo|、|:all| 和 |:ball|（当不使用 |:tab| 修饰符时）。
+下面提到了能够感知当前标签页之外的其他标签页的命令。
+
+标签页也是临时编辑缓冲区而不改变当前窗口布局的好方法。
+打开一个新标签页，做你想做的事，然后关闭标签页。
+
+							*tab-ID* *tabid* *tabpageid*
+每个标签页都有一个唯一的标识符，称为标签ID。这个标识符
+在Vim会话中不会改变——即使重新排列标签页。
+|nvim_get_current_tabpage()| 返回标签ID，|nvim_list_tabpages()|
+按显示顺序列出标签ID。此外，标签从左到右编号，从1开始：
+这是 |tabpagenr()| 返回的标签编号。但是，当标签页被打开、
+关闭或重新排列时，标签编号可能会改变。
+|nvim_tabpage_get_number()| 将标签ID转换为标签编号。
+
+
+==============================================================================
+2. 命令						*tab-page-commands*
+
+打开新标签页：
+
+启动Vim时，"vim -p filename ..." 在每个文件参数中打开一个
+单独的标签页（最多到 'tabpagemax'）。参见 |-p|
+
+在非GUI标签页行中双击鼠标会打开一个新的空标签页。
+它被放置在点击位置的左侧。第一次点击可能会先选择另一个
+标签页，导致额外的屏幕更新。
+
+这在一些GUI版本中也有效，特别是Win32。但只有在点击标签
+右侧时才有效。
+
+在GUI标签页行中，你可以使用鼠标右键打开菜单。
+|tabline-menu|。
+
+相关的自动命令参见 |tabnew-autocmd|。
+
+:[count]tabe[dit]				*:tabe* *:tabedit* *:tabnew*
+:[count]tabnew
+		在当前标签页之后打开一个带空窗口的新标签页。
+		如果给出[count]，新标签页将出现在标签页[count]之后，
+		否则新标签页将出现在当前标签页之后。>
+		    :tabnew     " 在当前标签页之后打开标签页
+		    :.tabnew    " 同上
+		    :+tabnew    " 在下一个标签页之后打开标签页
+				" 注意：比:tabnew多一个
+		    :-tabnew    " 在当前标签页之前打开标签页
+		    :0tabnew    " 在第一个标签页之前打开标签页
+		    :$tabnew    " 在最后一个标签页之后打开标签页
+
+:[count]tabe[dit] [++opt] [+cmd] {file}
+:[count]tabnew [++opt] [+cmd] {file}
+		打开一个新标签页并编辑{file}，就像使用 |:edit|。
+		对于[count]参见上面的 |:tabnew|。
+
+:[count]tabf[ind] [++opt] [+cmd] {file}			*:tabf* *:tabfind*
+		打开一个新标签页并在'path'中编辑{file}，就像使用
+		|:find|。对于[count]参见上面的 |:tabnew|。
+
+:[count]tab {cmd}					*:tab*
+		执行{cmd}，当它打开新窗口时改为打开新标签页。
+		不适用于 |:diffsplit|、|:diffpatch|、|:execute|
+		和 |:normal|。
+		如果给出[count]，新标签页将出现在标签页[count]之后，
+		否则新标签页将出现在当前标签页之后。
+		示例：>
+		    :tab split	    " 在新标签页中打开当前缓冲区
+		    :tab help gt    " 打开带有"gt"帮助的标签页
+		    :.tab help gt   " 同上
+		    :+tab help	    " 在下一个标签页之后打开带有帮助的标签页
+		    :-tab help	    " 在当前标签页之前打开带有帮助的标签页
+		    :0tab help	    " 在第一个标签页之前打开带有帮助的标签页
+		    :$tab help	    " 在最后一个标签页之后打开带有帮助的标签页
+
+CTRL-W gf	打开新标签页并编辑光标下的文件名。
+		参见 |CTRL-W_gf|。
+
+CTRL-W gF	打开新标签页并编辑光标下的文件名，
+		并跳转到文件名后的行号。
+		参见 |CTRL-W_gF|。
+
+关闭标签页：
+
+关闭标签页的最后一个窗口也会关闭标签页，除非只有一个标签页。
+
+使用鼠标：如果显示标签页行，你可以点击右上角的"X"来关闭
+当前标签页。自定义 |'tabline'| 可能显示其他内容。
+
+							*:tabc* *:tabclose*
+:tabc[lose][!]	关闭当前标签页。
+		在以下情况下此命令会失败：
+		- 屏幕上只有一个标签页。		*E784*
+		- 当'hidden'未设置，未使用[!]，缓冲区有更改，
+		  且此缓冲区没有其他窗口。
+		缓冲区的更改不会被写入，也不会丢失，所以这是一个
+		"安全"的命令。>
+                    :tabclose   " 关闭当前标签页
+
+:{count}tabc[lose][!]
+:tabc[lose][!] {count}
+		关闭标签页{count}。与上面的`:tabclose`失败方式相同。>
+		    :-tabclose	    " 关闭前一个标签页
+		    :+tabclose	    " 关闭下一个标签页
+		    :1tabclose	    " 关闭第一个标签页
+		    :$tabclose	    " 关闭最后一个标签页
+		    :tabclose -2    " 关闭倒数第二个标签页
+		    :tabclose +	    " 关闭下一个标签页
+		    :tabclose 3	    " 关闭第三个标签页
+		    :tabclose $	    " 关闭最后一个标签页
+		    :tabclose #     " 关闭最后访问的标签页
+
+当标签页关闭时，下一个标签页将成为当前标签页。这种行为
+可以使用'tabclose'选项自定义。
+
+							*:tabo* *:tabonly*
+:tabo[nly][!]	关闭所有其他标签页。
+		当'hidden'选项设置时，关闭窗口中的所有缓冲区
+		变为隐藏。
+		当'hidden'未设置，且'autowrite'选项设置时，
+		修改的缓冲区会被写入。否则，具有修改缓冲区的
+		窗口不会被移除，除非给出[!]，然后它们变为隐藏。
+		但修改的缓冲区永远不会被放弃，所以更改不会丢失。>
+		    :tabonly " 关闭除当前标签页外的所有标签页
+
+:tabo[nly][!] {count}
+		关闭除{count}之外的所有标签页。>
+		    :.tabonly	    " 同上
+		    :-tabonly	    " 关闭除前一个标签页外的所有标签页
+		    :+tabonly	    " 关闭除下一个标签页外的所有标签页
+		    :1tabonly	    " 关闭除第一个标签页外的所有标签页
+		    :$tabonly	    " 关闭除最后一个标签页外的所有标签页
+		    :tabonly -	    " 关闭除前一个标签页外的所有标签页
+		    :tabonly +2     " 关闭除下两个标签页外的所有标签页
+		    :tabonly 1	    " 关闭除第一个标签页外的所有标签页
+		    :tabonly $	    " 关闭除最后一个标签页外的所有标签页
+		    :tabonly #	    " 关闭除最后访问的标签页外的所有标签页
+切换到另一个标签页：
+
+使用鼠标：如果显示标签页行，你可以点击标签页标签来
+切换到该标签页。点击没有标签的位置会转到下一个标签页。
+|'tabline'|
+
+:tabn[ext]				*:tabn* *:tabnext* *gt*
+<C-PageDown>				*CTRL-<PageDown>* *<C-PageDown>*
+gt					*i_CTRL-<PageDown>* *i_<C-PageDown>*
+		转到下一个标签页。从最后一个环绕到第一个。
+
+:{count}tabn[ext]
+:tabn[ext] {count}
+		转到标签页{count}。第一个标签页编号为1。>
+		    :-tabnext	" 转到前一个标签页
+		    :+tabnext	" 转到下一个标签页
+		    :+2tabnext	" 转到下两个标签页
+		    :1tabnext	" 转到第一个标签页
+		    :$tabnext	" 转到最后一个标签页
+		    :tabnext $	" 同上
+		    :tabnext #	" 转到最后访问的标签页
+		    :tabnext -	" 转到前一个标签页
+		    :tabnext -1	" 同上
+		    :tabnext +	" 转到下一个标签页
+		    :tabnext +1	" 同上
+
+{count}<C-PageDown>
+{count}gt	转到标签页{count}。第一个标签页编号为1。
+
+:tabp[revious]				*:tabp* *:tabprevious* *gT* *:tabN*
+:tabN[ext]				*:tabNext* *CTRL-<PageUp>*
+<C-PageUp>			 *<C-PageUp>* *i_CTRL-<PageUp>* *i_<C-PageUp>*
+gT		转到前一个标签页。从第一个环绕到最后一个。
+
+:tabp[revious] {count}
+:tabN[ext] {count}
+{count}<C-PageUp>
+{count}gT	向后转{count}个标签页。从第一个环绕到最后一个。
+		注意{count}的使用与|:tabnext|不同，在那里它
+		被用作标签页编号。
+
+:tabr[ewind]			*:tabfir* *:tabfirst* *:tabr* *:tabrewind*
+:tabfir[st]	转到第一个标签页。
+
+							*:tabl* *:tablast*
+:tabl[ast]	转到最后一个标签页。
+
+<C-Tab>						*CTRL-<Tab>* *<C-Tab>*
+g<Tab>						*g<Tab>* *CTRL-W_g<Tab>*
+CTRL-W g<Tab>	转到最后访问的标签页。
+
+其他命令：
+							*:tabs*
+:tabs	列出标签页和它们包含的窗口。
+	显示">"表示当前窗口。
+	显示"+"表示修改的缓冲区。
+	例如：
+		标签页 1 ~
+		  + tabpage.txt ~
+		    ex_docmd.c ~
+		标签页 2 ~
+		>   main.c ~
+
+
+重新排序标签页：
+
+:tabm[ove] [N]						*:tabm* *:tabmove*
+:[N]tabm[ove]
+		将当前标签页移动到标签页N之后。使用零使当前
+		标签页成为第一个。N在移动前计数，因此如果
+		第二个标签是当前标签，`:tabmove 1`和`:tabmove 2`
+		没有效果。
+		没有N时标签页成为最后一个。>
+		    :.tabmove	" 不做任何事
+		    :-tabmove	" 将标签页向左移动
+		    :+tabmove	" 将标签页向右移动
+		    :0tabmove	" 将标签页移动到第一个
+		    :tabmove 0	" 同上
+		    :tabmove	" 将标签页移动到最后一个
+		    :$tabmove	" 同上
+		    :tabmove $	" 同上
+		    :tabmove #	" 将标签页移动到最后访问的标签页之后
+
+:tabm[ove] +[N]
+:tabm[ove] -[N]
+		将当前标签页向右（使用+）或向左（使用-）移动N个位置。>
+		    :tabmove -	" 将标签页向左移动
+		    :tabmove -1	" 同上
+		    :tabmove +	" 将标签页向右移动
+		    :tabmove +1	" 同上
+
+
+注意虽然可以通过使用:Ntabmove将标签移动到第N个标签之后。
+并通过使用:+Ntabmove将其移动N个位置。关于在此上下文中
++N的含义的说明，参见|[range]|。
+
+
+遍历标签页：
+
+							*:tabd* *:tabdo*
+:[range]tabd[o] {cmd}
+		在每个标签页中执行{cmd}，如果给出[range]，
+		则仅在标签页编号在[range]中的标签页中执行。
+		它的工作方式类似于这样做：>
+			:tabfirst
+			:{cmd}
+			:tabnext
+			:{cmd}
+			等等。
+<		这只在每个标签页的当前窗口中操作。
+		当在一个标签页上检测到错误时，不会访问
+		进一步的标签页。
+		最后一个标签页（或发生错误的标签页）成为
+		当前标签页。
+		{cmd}可以包含'|'来连接几个命令。
+		{cmd}不能打开或关闭标签页或重新排序它们。
+		也参见|:windo|、|:argdo|、|:bufdo|、|:cdo|、
+		|:ldo|、|:cfdo|和|:lfdo|。
+
+==============================================================================
+3. 其他项目						*tab-page-other*
+
+							*tabline-menu*
+GUI标签页行有一个弹出菜单。通过右键点击访问。
+条目是：
+	Close		关闭鼠标指针下的标签页。如果鼠标指针下
+			没有标签，则关闭当前标签页。
+	New Tab		打开一个标签页，编辑空缓冲区。它出现在
+			鼠标指针的左侧。
+	Open Tab...	类似"New Tab"，另外使用文件选择器来
+			选择要编辑的文件。
+
+差异模式在每个标签页中工作。你可以在一个标签页中
+查看几个文件之间的差异。其他标签页可以显示其他
+文件之间的差异。
+
+以"t:"开头的变量是标签页局部的。|tabpage-variable|
+
+目前只有一个标签页局部选项：'cmdheight'。
+
+						*tabnew-autocmd*
+TabLeave和TabEnter自动命令事件可用于在从一个标签页
+切换到另一个标签页时执行某些操作。确切的顺序取决于
+你在做什么。创建新标签页时，这就像你在同一缓冲区上
+创建新窗口然后编辑另一个缓冲区一样。因此":tabnew"
+触发：
+	WinLeave		离开当前窗口
+	TabLeave		离开当前标签页
+	WinEnter		进入新标签页中的窗口
+	TabEnter		进入新标签页
+	BufLeave		离开当前缓冲区
+	BufEnter		进入新的空缓冲区
+
+切换到另一个标签页时的顺序是：
+	BufLeave
+	WinLeave
+	TabLeave
+	WinEnter
+	TabEnter
+	BufEnter
+
+进入新标签页（|:tabnew|）时，TabNew在TabEnter之前
+和WinEnter之后触发。
+
+==============================================================================
+4. 设置'tabline'					*setting-tabline*
+
+'tabline'选项指定标签页标签行的外观。仅在没有GUI标签行时使用。
+
+你可以使用'showtabline'选项来指定何时显示标签页标签行：
+从不、当有多个标签页时或总是。
+
+标签页行的高亮使用TabLine、TabLineSel和TabLineFill组设置。
+|hl-TabLine| |hl-TabLineSel| |hl-TabLineFill|
+
+对于有修改窗口的标签页会显示"+"。标签页中的窗口数也会显示。
+因此"3+"表示三个窗口，其中一个有修改的缓冲区。
+
+'tabline'选项允许你定义你喜欢的标签页标签方式。这不容易，
+因此这里将给出一个示例。
+
+基础知识参见'statusline'选项。相同的项目可以在'tabline'
+选项中使用。此外，|tabpagebuflist()|、|tabpagenr()|和
+|tabpagewinnr()|函数很有用。
+
+由于标签标签的数量会变化，你需要为整个选项使用表达式。
+类似这样：>
+	:set tabline=%!MyTabLine()
+
+然后定义MyTabLine()函数来列出所有标签页标签。一个方便
+的方法是将它分成两部分：首先遍历所有标签页并为它们
+定义标签。然后获取每个标签页的标签。>
+
+	function MyTabLine()
+	  let s = ''
+	  for i in range(tabpagenr('$'))
+	    " 选择高亮
+	    if i + 1 == tabpagenr()
+	      let s ..= '%#TabLineSel#'
+	    else
+	      let s ..= '%#TabLine#'
+	    endif
+
+	    " 设置标签页编号（用于鼠标点击）
+	    let s ..= '%' .. (i + 1) .. 'T'
+
+	    " 标签由MyTabLabel()生成
+	    let s ..= ' %{MyTabLabel(' .. (i + 1) .. ')} '
+	  endfor
+
+	  " 在最后一个标签后填充TabLineFill并重置标签页编号
+	  let s ..= '%#TabLineFill#%T'
+
+	  " 右对齐标签以关闭当前标签页
+	  if tabpagenr('$') > 1
+	    let s ..= '%=%#TabLine#%999Xclose'
+	  endif
+
+	  return s
+	endfunction
+
+现在为每个标签页调用MyTabLabel()函数来获取其标签。>
+
+	function MyTabLabel(n)
+	  let buflist = tabpagebuflist(a:n)
+	  let winnr = tabpagewinnr(a:n)
+	  return bufname(buflist[winnr - 1])
+	endfunction
+
+这只是一个简单的示例，结果是一个类似于默认的标签页行，
+但不添加修改缓冲区的"+"或截断名称。当没有足够的空间时，
+你会想要以聪明的方式减少标签的宽度。检查'columns'选项
+以了解可用空间。
+
+==============================================================================
+5. 设置'guitablabel'				*setting-guitablabel*
+
+当显示GUI标签页行时，'guitablabel'可用于指定为每个标签页
+显示的标签。与'tabline'不同，后者一次指定整个标签页行，
+'guitablabel'用于每个标签单独使用。
+
+'guitabtooltip'非常相似，用于同一标签的工具提示。这只在
+鼠标指针悬停在标签上时出现，因此它通常更长。但只在一些
+系统上支持。
+
+参见'statusline'选项了解值的格式。
+
+"%N"项目可用于当前标签页编号。当评估选项时，|v:lnum|
+变量也设置为这个数字。
+使用文件名的项目引用标签页的当前窗口。
+
+注意语法高亮不用于此选项。%T和%X项目也被忽略。
+
+一个简单的示例，在标签中放置标签页编号和缓冲区名称：>
+	:set guitablabel=%N\ %f
+
+一个类似于默认'guitablabel'的示例：显示标签页中的窗口数
+和修改缓冲区的'+'：>
+
+	function GuiTabLabel()
+	  let label = ''
+	  let bufnrlist = tabpagebuflist(v:lnum)
+
+	  " 如果标签页中的一个缓冲区被修改，添加'+'
+	  for bufnr in bufnrlist
+	    if getbufvar(bufnr, "&modified")
+	      let label = '+'
+	      break
+	    endif
+	  endfor
+
+	  " 如果标签页中有多个窗口，添加窗口数
+	  let wincount = tabpagewinnr(v:lnum, '$')
+	  if wincount > 1
+	    let label ..= wincount
+	  endif
+	  if label != ''
+	    let label ..= ' '
+	  endif
+
+	  " 添加缓冲区名称
+	  return label .. bufname(bufnrlist[tabpagewinnr(v:lnum) - 1])
+	endfunction
+
+	set guitablabel=%{GuiTabLabel()}
+
+注意函数必须在设置选项之前定义，否则你会得到函数未知的
+错误消息。
+
+如果你想回退到默认标签，返回空字符串。
+
+如果你想为标签页显示特定内容，你可能想使用标签页局部变量。
+|t:var|
+
+
+ vim:tw=78:ts=8:noet:ft=help:norl:
