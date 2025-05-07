@@ -1,9 +1,9 @@
 local utils = require("utils.mark")
+local Select = require("custom.plugins.move-select.utils.select-block-mode")
 
 local M = {}
 
 local Line = {}
-local Text = {}
 
 local left = setmetatable({}, { __index = Line })
 local right = setmetatable({}, { __index = Line })
@@ -22,7 +22,13 @@ end
 
 function right:get_char(part, col)
   local source = part.select_text_right_line
-  return vim.fn.strcharpart(source, 0, col)
+  local char = vim.fn.strcharpart(source, 0, col)
+
+  local char_len = vim.fn.strcharlen(char)
+  if char_len < col and self.revise_char_count ~= #self.line_parts then
+    char = char .. string.rep(" ", col - char_len)
+  end
+  return char
 end
 
 function left:get_new_line(part)
@@ -92,11 +98,6 @@ end
 function Line:revise_char(col, line_part)
   local char = self.Action:get_char(line_part, col)
 
-  if vim.fn.strcharlen(char) < col and self.revise_char_count ~= #self.line_parts then
-    self.stop = true
-    return
-  end
-
   local char_display_width = vim.fn.strdisplaywidth(char)
   if char_display_width > self.char_display_width then
     self.char_display_width = char_display_width
@@ -137,67 +138,29 @@ function Line:set_lines(start_row, start_col, end_row, end_col, cursor_pos)
   select(cursor_pos, start_col)
 end
 
-function Text:init()
-  self.texts = vim.split(vim.fn.getreg('"'), "\n")
-  self.text_display_width = nil
-end
-
-function Text:revise_start(callback, start_row, start_col)
-  vim.api.nvim_win_set_cursor(0, { start_row, start_col })
-  vim.api.nvim_feedkeys("k", "nx", false)
-  for i = 1, #self.texts do
-    local text = self.texts[i]
-    vim.api.nvim_feedkeys("jvy", "nx", false)
-    local real_first_char = vim.fn.getreg('"')
-    self.texts[i] = real_first_char .. vim.fn.strcharpart(text, 1)
-    callback(i, vim.api.nvim_win_get_cursor(0)[2])
-  end
-end
-
-function Text:revise_end(callback, end_row, end_col)
-  vim.api.nvim_win_set_cursor(0, { end_row, end_col })
-  vim.api.nvim_feedkeys("j", "nx", false)
-  local end_poss = {}
-  for i = 1, #self.texts do
-    vim.api.nvim_feedkeys("k", "nx", false)
-    table.insert(end_poss, 1, vim.api.nvim_win_get_cursor(0))
-  end
-
-  for i = 1, #self.texts do
-    local text = self.texts[i]
-    vim.api.nvim_win_set_cursor(0, end_poss[i])
-    vim.api.nvim_feedkeys("vy", "nx", false)
-    local real_end_char = vim.fn.getreg('"')
-    local select_text = vim.fn.strcharpart(text, 0, vim.fn.strcharlen(text) - 1) .. real_end_char
-    self.texts[i] = select_text
-    callback(i, select_text)
-    self:check_balance(select_text)
-  end
-end
-
-function Text:check_balance(select_text)
-  if self.text_display_width ~= nil then
-    if self.text_display_width ~= vim.fn.strdisplaywidth(select_text) then
-      Line.stop = true
-    end
-  else
-    self.text_display_width = vim.fn.strdisplaywidth(select_text)
-  end
-end
-
 --- @param dir "left"|"right"
 function M.select_block_mode_move(dir)
   local cursor_pos = vim.api.nvim_win_get_cursor(0)
   vim.api.nvim_exec2([[execute "normal! \<C-g>y"]], {})
   local start_row, start_col, end_row, end_col = utils.get_visual_mark(true)
-  Text:init()
+
+  Select:init()
   Line:init(dir, start_row - 1, end_row)
-  Text:revise_start(function(i, col)
+
+  Select:select_text_iter(function(i, col)
+    Select:revise_select_start_char(i)
     Line:set_line_left_part(i, col)
-  end, start_row, start_col)
-  Text:revise_end(function(i, select_text)
-    Line:set_line_right_part(i, select_text)
-  end, end_row, end_col)
+  end, function(i)
+    Select:revise_select_end_char(i)
+    Line:set_line_right_part(i, Select.texts[i])
+  end, start_row, start_col, end_row, end_col)
+
+  if Select.balance == false then
+    utils.set_visual_mark(start_row, start_col, end_row, end_col)
+    select(cursor_pos, start_col)
+    return
+  end
+
   Line:merger_lines()
   Line:set_lines(start_row, start_col, end_row, end_col, cursor_pos)
 end

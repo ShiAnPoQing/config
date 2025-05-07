@@ -1,9 +1,14 @@
+local utils = require("utils.mark")
+
+
 return {
   ["<F6>"] = {
     function()
-      local c = vim.regex("\\k\\+")
-      print(c)
+      vim.api.nvim_exec2([[
+      execute "normal! \<Esc>"
+      ]], {})
+      print(utils.get_visual_mark(true))
     end,
-    "n"
+    "x"
   },
 }
