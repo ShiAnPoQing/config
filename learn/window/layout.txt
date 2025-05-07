@@ -1,0 +1,21 @@
+win_splitmove() 将窗口移动到另一个窗口的拆分
+winlayout() 获取选项卡页面中的窗口布局
+
+|:split|	:sp[lit]	分割当前窗口
+|:vsplit|	:vs[plit]	垂直分割当前窗口
+
+|:new|		:new		创建新的空窗口
+|:vnew|		:vne[w]		创建新的空窗口，垂直分割
+
+|:aboveleft|	:abo[veleft]	使分割窗口出现在左侧或上方
+|:leftabove|	:lefta[bove]	使分割窗口出现在左侧或上方
+|:belowright|	:bel[owright]	使分割窗口出现在右侧或下方
+|:rightbelow|	:rightb[elow]	使分割窗口出现在右侧或下方
+
+|:topleft|	:to[pleft]	使分割窗口出现在顶部或最左侧
+|:botright|	:bo[tright]	使分割窗口出现在底部或最右侧
+
+|:wincmd|	:winc[md]	执行窗口（CTRL-W）命令
+
+vim:tw=78:ts=8:noet:ft=help:norl:
+

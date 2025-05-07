@@ -303,7 +303,7 @@ Blob操作：blob-functions
   swapfilelist() 'directory'中现有交换文件的列表
   swapinfo() 交换文件的信息
   swapname() 获取缓冲区的交换文件路径
-  命令行：command-line-functions
+命令行：command-line-functions
   getcmdcomplpat() 获取当前命令行的补全模式
   getcmdcompltype() 获取当前命令行补全的类型
   getcmdline() 获取当前命令行输入

@@ -133,7 +133,6 @@ local function ctrl_right_move_word()
   vim.api.nvim_win_set_cursor(0, { row, new_col })
 end
 
-
 return {
   ["<C-right>"] = {
     ctrl_right_move_word,

@@ -4,8 +4,10 @@
 |:vertical|	:vert[ical]	使后续命令垂直分割
 |:topleft|	:to[pleft]	使分割窗口出现在顶部或最左侧
 |:vsplit|	:vs[plit]	垂直分割当前窗口
+|:split|	:sp[lit]	分割当前窗口
 |:windo|	:wind[o]	在每个窗口中执行命令
 |:aboveleft|	:abo[veleft]	使分割窗口出现在左侧或上方
+|:leftabove|	:lefta[bove]	使分割窗口出现在左侧或上方
 |:all|		:al[l]		为参数列表中的每个文件打开一个窗口
 |:belowright|	:bel[owright]	使分割窗口出现在右侧或下方
 |:botright|	:bo[tright]	使分割窗口出现在底部或最右侧
@@ -31,12 +33,10 @@
 |:sfirst|	:sfir[st]	分割窗口并转到参数列表中的第一个文件
 |:spelldump|	:spelld[ump]	分割窗口并填充所有正确单词
 |:slast|	:sla[st]	分割窗口并转到参数列表中的最后一个文件
-|:split|	:sp[lit]	分割当前窗口
 |:snext|	:sn[ext]	分割窗口并转到参数列表中的下一个文件
 |:only|		:on[ly]		关闭除当前窗口外的所有窗口
 |:lwindow|	:lw[indow]	打开或关闭位置窗口
 |:lopen|	:lop[en]	打开位置窗口
-|:leftabove|	:lefta[bove]	使分割窗口出现在左侧或上方
 |:isplit|	:isp[lit]	分割窗口并跳转到标识符的定义
 |:sNext|	:sN[ext]	分割窗口并转到参数列表中的上一个文件
 |:resize|	:res[ize]	更改当前窗口高度

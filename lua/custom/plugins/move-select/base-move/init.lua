@@ -1,5 +1,5 @@
-local select_block_mode = require("custom.plugins.select-mode.move-select.base-move.select-block-mode")
-local select_mode = require("custom.plugins.select-mode.move-select.base-move.select-mode")
+local select_block_mode = require("custom.plugins.move-select.base-move.select-block-mode")
+local select_mode = require("custom.plugins.move-select.base-move.select-mode")
 
 local M = {}
 

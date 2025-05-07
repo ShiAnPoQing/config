@@ -1,4 +1,4 @@
-local select_move = require("custom.plugins.select-mode.move-select")
+local select_move = require("custom.plugins.move-select")
 
 return {
   ["<C-space><C-l>"] = {

@@ -199,6 +199,7 @@ end
 --- @param action "up"|"down"|"left"|"right"
 function M.win_exchange(action)
   local current_win_id = vim.api.nvim_get_current_win()
+  local cursor_pos = vim.api.nvim_win_get_cursor(current_win_id)
   local current_win_pos = get_win_pos(current_win_id)
 
   if isExcludeFileType(current_win_id) then
@@ -224,6 +225,8 @@ function M.win_exchange(action)
   if final_win_pos and not isExcludeFileType(final_win_pos.win) then
     require("windows-layout.exchange").exchange(current_win_id, final_win_pos.win)
     require("windows-layout.history").push_into_history(current_win_id, final_win_pos.win)
+    print("xing")
+    vim.api.nvim_win_set_cursor(final_win_pos.win, cursor_pos)
   end
 end
 
