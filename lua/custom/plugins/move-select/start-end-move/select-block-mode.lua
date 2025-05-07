@@ -15,7 +15,8 @@ function Line:init(start_row, end_row)
   self.new_lines = {}
   self.line_parts = {}
   self.revise_char_count = 0
-  self.char_display_width = 0
+  self.line_max_display_width = 0
+  self.longest_line_index = nil
 end
 
 function Line:set_line_left_part(i, col)
@@ -33,30 +34,25 @@ function Line:set_line_right_part(i, select_text)
   line_part.select_text_right_line = line:sub(#line_part.select_text_left_line + vim.fn.strlen(select_text) + 1)
 end
 
-function Line:merger_lines()
-  self:revise_chars()
-  self:line_concat()
-end
+function Line:lines_concat()
+  local longest = self.line_parts[self.longest_line_index]
 
-function Line:revise_chars()
-  self.revise_char_count = 0
-
-  for _, part in ipairs(self.line_parts) do
-    self:revise_char(1, part)
-  end
-
-  if self.revise_char_count < #self.line_parts then
-    self:revise_chars()
+  for _, line_part in ipairs(self.line_parts) do
+    local need_blank_count = vim.fn.strdisplaywidth(longest.select_text_right_line) -
+        vim.fn.strdisplaywidth(line_part.select_text_right_line)
+    if need_blank_count > 0 then
+      line_part.select_text_right_line = line_part.select_text_right_line .. string.rep(" ", need_blank_count)
+    end
+    table.insert(self.new_lines,
+      line_part.select_text_left_line .. line_part.select_text_right_line .. line_part.select_text)
   end
 end
 
-function Line:revise_char(col, line_part)
-
-end
-
-function Line:line_concat()
-  for _, part in ipairs(self.line_parts) do
-
+function Line:find_longest_line(i)
+  local line_display_width = vim.fn.strdisplaywidth(self.lines[i])
+  if line_display_width > self.line_max_display_width then
+    self.line_max_display_width = line_display_width
+    self.longest_line_index = i
   end
 end
 
@@ -127,6 +123,7 @@ function M.select_block_mode_move(dir)
   move_to_select_text_start_col(function(i, col)
     Select:revise_select_start_char(i)
     Line:set_line_left_part(i, col)
+    Line:find_longest_line(i)
   end, start_row, start_col, end_row - start_row + 1)
 
   move_to_select_text_end_col(function(i)
@@ -139,9 +136,14 @@ function M.select_block_mode_move(dir)
     select(cursor_pos, start_col)
     return
   end
-  print(vim.inspect(Select.texts))
 
-  Line:merger_lines()
+  Line:lines_concat()
+  vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, Line.new_lines)
+  local start_col_offset = #Line.line_parts[1].select_text_right_line
+  local end_col_offset = #Line.line_parts[#Line.line_parts].select_text_right_line
+  utils.set_visual_mark(start_row, start_col + start_col_offset, end_row,
+    end_col + end_col_offset)
+  select(cursor_pos, start_col)
 end
 
 return M
