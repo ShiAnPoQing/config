@@ -23,19 +23,16 @@ local function get_new_line(dir, line_to_start, line_to_end, text)
 end
 
 local function reverse_cursor(cursor_pos, start_col)
-  local exchange_cursor_key = cursor_pos[2] == start_col and "o" or ""
-  vim.api.nvim_feedkeys("gv" .. exchange_cursor_key .. vim.api.nvim_replace_termcodes("<c-g>", true, true, true), "n",
+  local key = cursor_pos[2] == start_col and "o" or ""
+  vim.api.nvim_feedkeys("gv" .. key .. vim.api.nvim_replace_termcodes("<c-g>", true, true, true), "n",
     false)
 end
 
 local function select_one_line(dir, text, start_row, start_col, end_row, end_col, cursor_pos)
   local line = vim.api.nvim_buf_get_lines(0, start_row - 1, end_row, false)[1]
-
   local line_to_start = line:sub(1, start_col)
   local line_to_end = line:sub(#line_to_start + vim.fn.strlen(text) + 1)
-
   local new_line, col_offset = get_new_line(dir, line_to_start, line_to_end, text)
-
   vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, { new_line })
   utils.set_visual_mark(start_row, start_col + col_offset, end_row, end_col + col_offset)
   reverse_cursor(cursor_pos, start_col)
@@ -45,12 +42,9 @@ local function select_more_line(dir, text, start_row, start_col, end_row, end_co
   local lines = vim.api.nvim_buf_get_lines(0, start_row - 1, end_row, false)
   local texts = vim.fn.split(text, "\n")
   local last_text = texts[#texts]
-
   local line_to_start = lines[1]:sub(1, start_col)
   local line_to_end = lines[#lines]:sub(vim.fn.strlen(last_text) + 1)
-
   local new_line, col_offset = get_new_line(dir, line_to_start, line_to_end, text)
-
   vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, vim.fn.split(new_line, "\n"))
   utils.set_visual_mark(start_row, start_col + col_offset, end_row, end_col)
   reverse_cursor(cursor_pos, start_col)

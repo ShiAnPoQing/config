@@ -162,7 +162,18 @@ function M.select_block_mode_move(dir)
   end
 
   Line:merger_lines()
-  Line:set_lines(start_row, start_col, end_row, end_col, cursor_pos)
+  if Line.stop == true then
+    utils.set_visual_mark(start_row, start_col, end_row, end_col)
+    select(cursor_pos, start_col)
+    return
+  end
+
+  vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, Line.new_lines)
+
+  local start_col_offset, end_col_offset = Line.Action:get_mark_offset()
+  utils.set_visual_mark(start_row, start_col + start_col_offset, end_row,
+    end_col + end_col_offset)
+  select(cursor_pos, start_col)
 end
 
 return M
