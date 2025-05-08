@@ -7,7 +7,7 @@ return {
       function()
         line_break.line_break(vim.v.count1)
       end,
-      "n",
+      { "n",        "x" },
       { expr = true },
     },
     -- {
