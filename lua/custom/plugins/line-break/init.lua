@@ -1,98 +1,69 @@
-local R = require("repeat")
 local M = {}
 
-function M.LineBreak(count, mode, textobj)
-  R.Record(function()
-    M.LineBreak(count, mode, textobj)
-  end)
-  M.linebreak = {}
-  M.linebreak.mode = mode
-  if mode ~= "v" then
-    M.linebreak.begin_pos = vim.api.nvim_win_get_cursor(0)
-  end
+local function _line_break(cursor_pos, virtcol)
+  return function(type)
+    if cursor_pos[2] == 0 then return end
+    if type ~= "line" then return end
+    local start_mark = vim.api.nvim_buf_get_mark(0, "[")
+    local end_mark = vim.api.nvim_buf_get_mark(0, "]")
+    local lines = vim.api.nvim_buf_get_lines(0, start_mark[1] - 1, end_mark[1], false)
 
-  if M.linebreak_operate_begin == nil then
-    _G.my_linebreak = function(type)
-      local begin_line_number
-      local end_line_number
+    local line_break_display_width
 
-      if M.linebreak.mode == "v" then
-        vim.cmd([[
-        exe "norm! " .. "\<ESc>"
-        ]])
-      end
-
-      if type == "line" then
-        begin_line_number = vim.api.nvim_buf_get_mark(0, "[")
-        end_line_number = vim.api.nvim_buf_get_mark(0, "]")
-      elseif type == "char" then
-        begin_line_number = vim.api.nvim_buf_get_mark(0, "[")
-        end_line_number = vim.api.nvim_buf_get_mark(0, "]")
-      elseif type == "block" then
-        begin_line_number = vim.api.nvim_buf_get_mark(0, "[")
-        end_line_number = vim.api.nvim_buf_get_mark(0, "]")
-      end
-
-      local begin_pos
-
-      if M.linebreak.mode ~= "v" then
-        begin_pos = { begin_line_number[1], M.linebreak.begin_pos[2] }
-      else
-        begin_pos = begin_line_number
-      end
-
-      if begin_pos[2] == 0 then
+    local function line_break(line, cursor)
+      if cursor[2] >= #line then
+        vim.api.nvim_feedkeys("j", "nx", false)
         return
       end
 
-      local loop_end = 0
+      local line_left = line:sub(1, cursor[2])
+      local line_left_display_width = vim.fn.strdisplaywidth(line_left)
+      local line_right = vim.fn.strcharpart(line, vim.fn.strcharlen(line_left))
 
-      vim.api.nvim_win_set_cursor(0, begin_pos)
-
-      local i = 0
-      local max = 0
-
-      while true do
-        max = max + 1
-
-        if max > 300 then
-          break
-        end
-
-        local begin_pos = vim.api.nvim_win_get_cursor(0)
-        local current_line = vim.api.nvim_get_current_line()
-        local line_len = string.len(current_line)
-
-        if begin_pos[1] == end_line_number[1] + i then
-          loop_end = 1
-        end
-
-        if line_len > begin_pos[2] then
-          -- 特殊键必须使用双引号
-          vim.cmd([[
-          exec 'norm! i' .. "\<CR>"
-          ]])
-
-          vim.api.nvim_win_set_cursor(0, begin_pos)
-
-          vim.cmd("norm! j")
-
-          i = i + 1
-        else
-          vim.cmd("norm! j")
-          if loop_end == 1 then
-            break
-          end
-        end
+      if line_break_display_width == nil then
+        line_break_display_width = vim.fn.strdisplaywidth(line_left)
       end
+
+      local move;
+      if line_left_display_width < line_break_display_width then
+        line_left = line_left .. vim.fn.strcharpart(line_right, 0, 1)
+        line_right = vim.fn.strcharpart(line_right, 1)
+        move = "right"
+      elseif line_left_display_width > line_break_display_width then
+        line_left = vim.fn.strcharpart(line_left, 0, vim.fn.strcharlen(line_left) - 1)
+        line_right = vim.fn.strcharpart(line_left, vim.fn.strcharlen(line_left) - 1) .. line_right
+        move = "left"
+      end
+
+      vim.api.nvim_buf_set_lines(0, cursor[1] - 1, cursor[1], false, { line_left, line_right })
+      vim.api.nvim_win_set_cursor(0, cursor)
+
+      if move == "right" then
+        vim.api.nvim_feedkeys("l", "nx", false)
+      elseif move == "left" then
+        vim.api.nvim_feedkeys("h", "nx", false)
+      end
+
+      vim.api.nvim_feedkeys("j", "nx", false)
+
+      line_break(line_right, vim.api.nvim_win_get_cursor(0))
     end
 
-    vim.opt.operatorfunc = "v:lua.my_linebreak"
-    vim.api.nvim_feedkeys("g@", "n", false)
-    M.linebreak_operate_begin = 0
-  else
-    vim.api.nvim_feedkeys("g@", "n", false)
+    for index, line in ipairs(lines) do
+      if index > 1 then
+        line_break(line, vim.api.nvim_win_get_cursor(0))
+      else
+        line_break(line, cursor_pos)
+      end
+    end
   end
+end
+
+function M.line_break(count)
+  local mode = vim.api.nvim_get_mode().mode
+  _G.custom_line_break = _line_break(vim.api.nvim_win_get_cursor(0), vim.fn.virtcol("."))
+  vim.opt.operatorfunc = "v:lua.custom_line_break"
+  vim.api.nvim_feedkeys("g@", "n", false)
 end
 
 return M

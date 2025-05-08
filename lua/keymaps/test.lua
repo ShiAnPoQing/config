@@ -4,11 +4,14 @@ local utils = require("utils.mark")
 return {
   ["<F6>"] = {
     function()
-      vim.api.nvim_exec2([[
-      execute "normal! \<Esc>"
-      ]], {})
-      print(utils.get_visual_mark(true))
+      -- vim.api.nvim_feedkeys("diw", "n", false)
+      return "diw"
     end,
-    "x"
+    "n",
+    -- { expr = true }
   },
+  ["<CR>"] = {
+    "<nop>",
+    "n"
+  }
 }

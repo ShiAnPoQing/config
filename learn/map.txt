@@ -4,32 +4,29 @@
 		  VIM REFERENCE MANUAL    by Bram Moolenaar
 
 
-Key mapping, abbreviations and user-defined commands.
+键映射、缩写和用户自定义命令。
 
-This subject is introduced in sections |05.3|, |24.7| and |40.1| of the user
-manual.
+这个主题在用户手册的 |05.3|、|24.7| 和 |40.1| 节中介绍。
 
-                                      Type |gO| to see the table of contents.
+                                      输入 |gO| 查看目录。
 
 ==============================================================================
-1. Key mapping				*keybind* *key-mapping* *mapping*
+1. 键映射				*keybind* *key-mapping* *mapping*
 
-Key mapping is used to change the meaning of typed keys.  The most common use
-is to define a sequence of commands for a function key.  Example: >
+键映射用于改变输入键的含义。最常见的用途是为功能键定义一系列命令。例如：>
 
 	:map <F2> a<C-R>=strftime("%c")<CR><Esc>
 
-This appends the current date and time after the cursor (in <> notation |<>|).
+这会在光标后追加当前日期和时间（使用 <> 表示法 |<>|）。
 
 
-1.1 MAP COMMANDS					*:map-commands*
+1.1 映射命令					*:map-commands*
 
-There are commands to enter new mappings, remove mappings and list mappings.
-See |map-overview| for the various forms of "map" and their relationships with
-modes.
+有命令用于输入新映射、删除映射和列出映射。
+有关各种形式的"map"及其与模式的关系，请参见 |map-overview|。
 
-{lhs}	means left-hand-side	*{lhs}*
-{rhs}	means right-hand-side	*{rhs}*
+{lhs}	表示左侧	*{lhs}*
+{rhs}	表示右侧	*{rhs}*
 
 :map	{lhs} {rhs}		|mapmode-nvo|		*:map*
 :nm[ap]	{lhs} {rhs}		|mapmode-n|		*:nm* *:nmap*
@@ -42,13 +39,12 @@ modes.
 :lm[ap]	{lhs} {rhs}		|mapmode-l|		*:lm* *:lma* *:lmap*
 :cm[ap]	{lhs} {rhs}		|mapmode-c|		*:cm* *:cmap*
 :tma[p]	{lhs} {rhs}		|mapmode-t|		*:tma* *:tmap*
-			Map the key sequence {lhs} to {rhs} for the modes
-			where the map command applies.  The result, including
-			{rhs}, is then further scanned for mappings.  This
-			allows for nested and recursive use of mappings.
-			Note: Trailing spaces are included in the {rhs},
-			because space is a valid Normal mode command.
-			See |map-trailing-white|.
+			将键序列 {lhs} 映射到 {rhs}，适用于该映射命令
+			所对应的模式。结果（包括 {rhs}）会被进一步扫描
+			以查找映射。这允许嵌套和递归使用映射。
+			注意：{rhs} 中的尾随空格会被包含，因为空格是
+			有效的普通模式命令。
+			参见 |map-trailing-white|。
 
 						*:nore* *:norem*
 :no[remap]  {lhs} {rhs}		|mapmode-nvo|	*:no*  *:noremap* *:nor*
@@ -62,16 +58,13 @@ modes.
 :ln[oremap] {lhs} {rhs}		|mapmode-l|	*:ln*  *:lnoremap*
 :cno[remap] {lhs} {rhs}		|mapmode-c|	*:cno* *:cnor* *:cnoremap*
 :tno[remap] {lhs} {rhs}		|mapmode-t|	*:tno* *:tnoremap*
-			Map the key sequence {lhs} to {rhs} for the modes
-			where the map command applies.  Disallow mapping of
-			{rhs}, to avoid nested and recursive mappings.  Often
-			used to redefine a command.
-			Note: Keys in {rhs} also won't trigger abbreviation,
-			with the exception of |i_CTRL-]| and |c_CTRL-]|.
-			Note: When <Plug> appears in the {rhs} this part is
-			always applied even if remapping is disallowed.
-
-
+			将键序列 {lhs} 映射到 {rhs}，适用于该映射命令
+			所对应的模式。禁止 {rhs} 的映射，以避免嵌套和
+			递归映射。通常用于重新定义命令。
+			注意：{rhs} 中的键也不会触发缩写，除了
+			|i_CTRL-]| 和 |c_CTRL-]|。
+			注意：当 <Plug> 出现在 {rhs} 中时，即使禁止了
+			重映射，这部分也会始终被应用。
 :unm[ap]  {lhs}			|mapmode-nvo|		*:unm*  *:unmap*
 :nun[map] {lhs}			|mapmode-n|		*:nun*  *:nunmap*
 :vu[nmap] {lhs}			|mapmode-v|		*:vu*   *:vunmap*
@@ -83,13 +76,12 @@ modes.
 :lu[nmap] {lhs}			|mapmode-l|		*:lu*   *:lunmap*
 :cu[nmap] {lhs}			|mapmode-c|		*:cu*   *:cun* *:cunmap*
 :tunma[p] {lhs}			|mapmode-t|		*:tunma* *:tunmap*
-			Remove the mapping of {lhs} for the modes where the
-			map command applies.  The mapping may remain defined
-			for other modes where it applies.
-			It also works when {lhs} matches the {rhs} of a
-			mapping. This is for when an abbreviation applied.
-			Note: Trailing spaces are included in the {lhs}.
-			See |map-trailing-white|.
+			删除 {lhs} 的映射，适用于该映射命令所对应的模式。
+			该映射可能仍然在其他适用的模式中定义。
+			当 {lhs} 匹配映射的 {rhs} 时也有效。这适用于
+			缩写被应用的情况。
+			注意：{lhs} 中的尾随空格会被包含。
+			参见 |map-trailing-white|。
 
 :mapc[lear]			|mapmode-nvo|		*:mapc*   *:mapclear*
 :nmapc[lear]			|mapmode-n|		*:nmapc*  *:nmapclear*
@@ -102,11 +94,10 @@ modes.
 :lmapc[lear]			|mapmode-l|		*:lmapc*  *:lmapclear*
 :cmapc[lear]			|mapmode-c|		*:cmapc*  *:cmapclear*
 :tmapc[lear]			|mapmode-t|		*:tmapc*  *:tmapclear*
-			Remove ALL mappings for the modes where the map
-			command applies.
-			Use the <buffer> argument to remove buffer-local
-			mappings |:map-<buffer>|
-			Warning: This also removes the |default-mappings|.
+			删除该映射命令所对应模式的所有映射。
+			使用 <buffer> 参数可以删除缓冲区局部映射
+			|:map-<buffer>|
+			警告：这也会删除 |default-mappings|。
 
 :map				|mapmode-nvo|
 :nm[ap]				|mapmode-n|
@@ -119,9 +110,9 @@ modes.
 :lm[ap]				|mapmode-l|
 :cm[ap]				|mapmode-c|
 :tma[p]				|mapmode-t|
-			List all key mappings for the modes where the map
-			command applies.  Note that ":map" and ":map!" are
-			used most often, because they include the other modes.
+			列出该映射命令所对应模式的所有键映射。
+			注意：":map" 和 ":map!" 最常用，因为它们包含
+			其他模式。
 
 :map    {lhs}			|mapmode-nvo|		*:map_l*
 :nm[ap] {lhs}			|mapmode-n|		*:nmap_l*
@@ -134,176 +125,143 @@ modes.
 :lm[ap] {lhs}			|mapmode-l|		*:lmap_l*
 :cm[ap] {lhs}			|mapmode-c|		*:cmap_l*
 :tma[p] {lhs}			|mapmode-t|		*:tmap_l*
-			List the key mappings for the key sequences starting
-			with {lhs} in the modes where the map command applies.
-
-These commands are used to map a key or key sequence to a string of
-characters.  You can use this to put command sequences under function keys,
-translate one key into another, etc.  See |:mkexrc| for how to save and
-restore the current mappings.
+			列出以 {lhs} 开头的键序列的映射，适用于该映射
+			命令所对应的模式。
+这些命令用于将键或键序列映射到一串字符。你可以用它来将命令序列放在功能键下，
+将一个键转换为另一个键，等等。有关如何保存和恢复当前映射，请参见 |:mkexrc|。
 
 							*map-ambiguous*
-When two mappings start with the same sequence of characters, they are
-ambiguous.  Example: >
+当两个映射以相同的字符序列开始时，它们是模糊的。例如：>
 	:imap aa foo
 	:imap aaa bar
-When Vim has read "aa", it will need to get another character to be able to
-decide if "aa" or "aaa" should be mapped.  This means that after typing "aa"
-that mapping won't get expanded yet, Vim is waiting for another character.
-If you type a space, then "foo" will get inserted, plus the space.  If you
-type "a", then "bar" will get inserted.
+当 Vim 读取了 "aa" 后，它需要获取另一个字符才能决定是使用 "aa" 还是 "aaa" 的映射。
+这意味着在输入 "aa" 后，该映射不会立即展开，Vim 正在等待另一个字符。
+如果你输入空格，那么 "foo" 会被插入，再加上空格。如果你输入 "a"，
+那么 "bar" 会被插入。
 
-Trailing white space ~
+尾随空格 ~
 							*map-trailing-white*
-This unmap command does NOT work: >
+这个取消映射命令不起作用：>
 	:map @@ foo
 	:unmap @@ | print
 
-Because it tries to unmap "@@ ", including the white space before the command
-separator "|".  Other examples with trailing white space: >
+因为它试图取消映射 "@@ "，包括命令分隔符 "|" 之前的空格。
+其他带有尾随空格的例子：>
 	unmap @@ 
 	unmap @@     " comment
 
-An error will be issued, which is very hard to identify, because the ending
-whitespace character in `unmap @@ ` is not visible.
+会发出错误，这个错误很难识别，因为 `unmap @@ ` 中的尾随空格字符是不可见的。
 
-A generic solution is to put the command separator "|" right after the mapped
-keys.  After that white space and a comment may follow: >
+一个通用的解决方案是在映射键之后立即放置命令分隔符 "|"。
+之后可以跟空格和注释：>
 	unmap @@|    " comment
 
 
-1.2 SPECIAL ARGUMENTS					*:map-arguments*
+1.2 特殊参数					*:map-arguments*
 
-"<buffer>", "<nowait>", "<silent>", "<script>", "<expr>" and
-"<unique>" can be used in any order.  They must appear right after the
-command, before any other arguments.
+"<buffer>"、"<nowait>"、"<silent>"、"<script>"、"<expr>" 和
+"<unique>" 可以按任何顺序使用。它们必须出现在命令之后，在任何其他参数之前。
 
 					*:map-local* *:map-<buffer>* *:map-buffer*
 					*E224* *E225*
-If the first argument to one of these commands is "<buffer>" the mapping will
-be effective in the current buffer only.  Example: >
+如果这些命令的第一个参数是 "<buffer>"，那么映射将只在当前缓冲区中有效。
+例如：>
 	:map <buffer>  ,w  /[.,;]<CR>
-Then you can map ",w" to something else in another buffer: >
+然后你可以在另一个缓冲区中将 ",w" 映射为其他内容：>
 	:map <buffer>  ,w  /[#&!]<CR>
-The local buffer mappings are used before the global ones.  See <nowait> below
-to make a short local mapping not taking effect when a longer global one
-exists.
-The "<buffer>" argument can also be used to clear mappings: >
+局部缓冲区映射会在全局映射之前使用。参见下面的 <nowait> 来使短局部映射
+在存在更长的全局映射时不生效。
+"<buffer>" 参数也可以用于清除映射：>
 	:unmap <buffer> ,w
 	:mapclear <buffer>
-Local mappings are also cleared when a buffer is deleted, but not when it is
-unloaded.  Just like local option values.
-Also see |map-precedence|.
+当缓冲区被删除时，局部映射也会被清除，但在缓冲区被卸载时不会。
+这与局部选项值类似。
+另请参见 |map-precedence|。
 
 						*:map-<nowait>* *:map-nowait*
-When defining a buffer-local mapping for "," there may be a global mapping
-that starts with ",".  Then you need to type another character for Vim to know
-whether to use the "," mapping or the longer one.  To avoid this add the
-<nowait> argument.  Then the mapping will be used when it matches, Vim does
-not wait for more characters to be typed.  However, if the characters were
-already typed they are used.
-Note that this works when the <nowait> mapping fully matches and is found
-before any partial matches.  This works when:
-- There is only one matching buffer-local mapping, since these are always
-  found before global mappings.
-- There is another buffer-local mapping that partly matches, but it is
-  defined earlier (last defined mapping is found first).
-
+当为 "," 定义缓冲区局部映射时，可能存在以 "," 开头的全局映射。
+然后你需要输入另一个字符让 Vim 知道是使用 "," 映射还是更长的映射。
+要避免这种情况，添加 <nowait> 参数。然后当映射匹配时就会立即使用，
+Vim 不会等待输入更多字符。但是，如果字符已经被输入，它们会被使用。
+注意，这只有在 <nowait> 映射完全匹配并且在任何部分匹配之前找到时才有效。
+这在以下情况下有效：
+- 只有一个匹配的缓冲区局部映射，因为这些总是在全局映射之前找到。
+- 存在另一个部分匹配的缓冲区局部映射，但它定义得更早（最后定义的映射最先找到）。
 						*:map-<silent>* *:map-silent*
-To define a mapping which will not be echoed on the command line, add
-"<silent>" as the first argument.  Example: >
+要定义一个不会在命令行上回显的映射，添加 "<silent>" 作为第一个参数。
+例如：>
 	:map <silent> ,h /Header<CR>
-The search string will not be echoed when using this mapping.  Messages from
-the executed command are still given though.  To shut them up too, add a
-":silent" in the executed command: >
+使用此映射时不会回显搜索字符串。不过，执行的命令的消息仍然会显示。
+要完全静音，在执行的命令中添加 ":silent"：>
 	:map <silent> ,h :exe ":silent normal /Header\r"<CR>
-Note that the effect of a command might also be silenced, e.g., when the
-mapping selects another entry for command line completion it won't be
-displayed.
-Prompts will still be given, e.g., for inputdialog().
-Using "<silent>" for an abbreviation is possible, but will cause redrawing of
-the command line to fail.
+注意，命令的效果也可能被静音，例如，当映射选择命令行补全的另一个条目时，
+它不会被显示。
+提示仍然会显示，例如，对于 inputdialog()。
+在缩写中使用 "<silent>" 是可能的，但会导致命令行重绘失败。
 
 						*:map-<script>* *:map-script*
-If the first argument to one of these commands is "<script>" and it is used to
-define a new mapping or abbreviation, the mapping will only remap characters
-in the {rhs} using mappings that were defined local to a script, starting with
-"<SID>".  This can be used to avoid that mappings from outside a script
-interfere (e.g., when CTRL-V is remapped in mswin.vim), but do use other
-mappings defined in the script.
-Note: ":map <script>" and ":noremap <script>" do the same thing.  The
-"<script>" overrules the command name.  Using ":noremap <script>" is
-preferred, because it's clearer that remapping is (mostly) disabled.
+如果这些命令的第一个参数是 "<script>" 并且它用于定义新的映射或缩写，
+那么映射将只使用在脚本中局部定义的映射来重映射 {rhs} 中的字符，
+这些映射以 "<SID>" 开头。这可以用于避免脚本外部的映射干扰
+（例如，当 CTRL-V 在 mswin.vim 中被重映射时），但会使用脚本中定义的其他映射。
+注意：":map <script>" 和 ":noremap <script>" 做同样的事情。
+"<script>" 会覆盖命令名称。建议使用 ":noremap <script>"，因为它更清楚地表明
+重映射被（大部分）禁用。
 
 				*:map-<unique>* *:map-unique* *E226* *E227*
-If the first argument to one of these commands is "<unique>" and it is used to
-define a new mapping or abbreviation, the command will fail if the mapping or
-abbreviation already exists.  Example: >
+如果这些命令的第一个参数是 "<unique>" 并且它用于定义新的映射或缩写，
+当映射或缩写已经存在时，命令将失败。例如：>
 	:map <unique> ,w  /[#&!]<CR>
-When defining a local mapping, there will also be a check if a global map
-already exists which is equal.
-Example of what will fail: >
+当定义局部映射时，也会检查是否存在相等的全局映射。
+会失败的例子：>
 	:map ,w  /[#&!]<CR>
 	:map <buffer> <unique> ,w  /[.,;]<CR>
-If you want to map a key and then have it do what it was originally mapped to,
-have a look at |maparg()|.
+如果你想映射一个键然后让它执行它原本映射的内容，请查看 |maparg()|。
 
 						*:map-<expr>* *:map-expression*
-If the first argument to one of these commands is "<expr>" and it is used to
-define a new mapping or abbreviation, the argument is an expression.  The
-expression is evaluated to obtain the {rhs} that is used.  Example: >
+如果这些命令的第一个参数是 "<expr>" 并且它用于定义新的映射或缩写，
+那么参数是一个表达式。表达式会被求值以获得要使用的 {rhs}。
+例如：>
 	:inoremap <expr> . <SID>InsertDot()
-The result of the s:InsertDot() function will be inserted.  It could check the
-text before the cursor and start omni completion when some condition is met.
-Using a script-local function is preferred, to avoid polluting the global
-namespace.  Use <SID> in the RHS so that the script that the mapping was
-defined in can be found.
+将插入 s:InsertDot() 函数的结果。它可以检查光标前的文本，并在满足某些条件时
+开始全能补全。建议使用脚本局部函数，以避免污染全局命名空间。
+在 RHS 中使用 <SID>，以便可以找到定义映射的脚本。
+对于缩写，|v:char| 被设置为触发缩写的字符。你可以用它来决定如何展开 {lhs}。
+你不应该插入或更改 v:char。
 
-For abbreviations |v:char| is set to the character that was typed to trigger
-the abbreviation.  You can use this to decide how to expand the {lhs}.  You
-should not either insert or change the v:char.
+如果你想让映射不执行任何操作，可以让表达式求值为空字符串。
+如果某些更改需要 Vim 通过主循环（例如更新显示），返回 "\<Ignore>"。
+这与 "nothing" 类似，但会让 Vim 从等待输入的循环中返回。
 
-In case you want the mapping to not do anything, you can have the expression
-evaluate to an empty string.  If something changed that requires Vim to
-go through the main loop (e.g. to update the display), return "\<Ignore>".
-This is similar to "nothing" but makes Vim return from the loop that waits for
-input.
-
-Keep in mind that the expression may be evaluated when looking for
-typeahead, before the previous command has been executed.  For example: >
+请记住，表达式可能在查找预输入时被求值，在前一个命令执行之前。
+例如：>
 	func StoreColumn()
 	  let g:column = col('.')
 	  return 'x'
 	endfunc
 	nnoremap <expr> x StoreColumn()
 	nmap ! f!x
-You will notice that g:column has the value from before executing "f!",
-because "x" is evaluated before "f!" is executed.
-This can be solved by inserting <Ignore> before the character that is
-expression-mapped: >
+你会注意到 g:column 的值来自执行 "f!" 之前，因为 "x" 在 "f!" 执行之前被求值。
+这可以通过在表达式映射的字符前插入 <Ignore> 来解决：>
 	nmap ! f!<Ignore>x
 
-Be very careful about side effects!  The expression is evaluated while
-obtaining characters, you may very well make the command dysfunctional.
-Therefore the following is blocked for <expr> mappings:
-- Changing the buffer text |textlock|.
-- Editing another buffer.
-- The |:normal| command.
-- Moving the cursor is allowed, but it is restored afterwards.
-- If the cmdline is changed, the old text and cursor position are restored.
-If you want the mapping to do any of these let the returned characters do
-that, or use a |<Cmd>| mapping instead.
+要非常小心副作用！表达式在获取字符时被求值，你可能会使命令功能失常。
+因此，以下操作在 <expr> 映射中被阻止：
+- 更改缓冲区文本 |textlock|。
+- 编辑另一个缓冲区。
+- |:normal| 命令。
+- 允许移动光标，但之后会恢复。
+- 如果命令行被更改，旧文本和光标位置会被恢复。
+如果你想让映射执行这些操作中的任何一个，让返回的字符来做，或者使用 |<Cmd>| 映射代替。
 
-You can use getchar(), it consumes typeahead if there is any. E.g., if you
-have these mappings: >
+你可以使用 getchar()，如果有预输入它会消耗掉。例如，如果你有这些映射：>
   inoremap <expr> <C-L> nr2char(getchar())
   inoremap <expr> <C-L>x "foo"
-If you now type CTRL-L nothing happens yet, Vim needs the next character to
-decide what mapping to use.  If you type 'x' the second mapping is used and
-"foo" is inserted.  If you type any other key the first mapping is used,
-getchar() gets the typed key and returns it.
+如果你现在输入 CTRL-L，还不会发生任何事情，Vim 需要下一个字符来决定使用哪个映射。
+如果你输入 'x'，会使用第二个映射并插入 "foo"。如果你输入任何其他键，
+会使用第一个映射，getchar() 获取输入的键并返回它。
 
-Here is an example that inserts a list number that increases: >
+这里是一个插入递增列表编号的例子：>
 	let counter = 0
 	inoremap <expr> <C-L> ListItem()
 	inoremap <expr> <C-R> ListReset()
@@ -318,408 +276,346 @@ Here is an example that inserts a list number that increases: >
 	  return ''
 	endfunc
 
-CTRL-L inserts the next number, CTRL-R resets the count.  CTRL-R returns an
-empty string, so that nothing is inserted.
+CTRL-L 插入下一个数字，CTRL-R 重置计数。CTRL-R 返回空字符串，所以不会插入任何内容。
 
-Note that using 0x80 as a single byte before other text does not work, it will
-be seen as a special key.
+注意，在其他文本之前使用 0x80 作为单个字节不起作用，它会被视为特殊键。
 
 						*<Cmd>* *:map-cmd*
-The <Cmd> pseudokey begins a "command mapping", which executes the command
-directly without changing modes.  Where you might use ":...<CR>" in the
-{rhs} of a mapping, you can instead use "<Cmd>...<CR>".
-Example: >
+<Cmd> 伪键开始一个"命令映射"，它直接执行命令而不改变模式。
+在映射的 {rhs} 中使用 ":...<CR>" 的地方，你可以改用 "<Cmd>...<CR>"。
+例如：>
 	noremap x <Cmd>echo mode(1)<CR>
 <
-This is more flexible than `:<C-U>` in Visual and Operator-pending mode, or
-`<C-O>:` in Insert mode, because the commands are executed directly in the
-current mode, instead of always going to Normal mode.  Visual mode is
-preserved, so tricks with |gv| are not needed.  Commands can be invoked
-directly in Command-line mode (which would otherwise require timer hacks).
-Example of using <Cmd> halfway Insert mode: >
+这比在可视和操作符待定模式中使用 `:<C-U>` 或在插入模式中使用 `<C-O>:` 更灵活，
+因为命令直接在当前模式中执行，而不是总是进入普通模式。可视模式被保留，
+所以不需要使用 |gv| 的技巧。命令可以直接在命令行模式中调用（否则需要计时器技巧）。
+在插入模式中间使用 <Cmd> 的例子：>
 	nnoremap <F3> aText <Cmd>echo mode(1)<CR> Added<Esc>
 
-Unlike <expr> mappings, there are no special restrictions on the <Cmd>
-command: it is executed as if an (unrestricted) |autocommand| was invoked
-or an async event was processed.
+与 <expr> 映射不同，<Cmd> 命令没有特殊限制：它就像调用了一个（无限制的）
+|autocommand| 或处理了一个异步事件一样执行。
 
-Note:
-- Because <Cmd> avoids mode-changes (unlike ":") it does not trigger
-  |CmdlineEnter| and |CmdlineLeave| events. This helps performance.
-- For the same reason, |keycodes| like <C-R><C-W> are interpreted as plain,
-  unmapped keys.
-- The command is not echo'ed, no need for <silent>.
-- The {rhs} is not subject to abbreviations nor to other mappings, even if the
-  mapping is recursive.
-- In Visual mode you can use `line('v')` and `col('v')` to get one end of the
-  Visual area, the cursor is at the other end.
+注意：
+- 因为 <Cmd> 避免了模式更改（与 ":" 不同），它不会触发 |CmdlineEnter| 和
+  |CmdlineLeave| 事件。这有助于提高性能。
+- 出于同样的原因，|keycodes| 如 <C-R><C-W> 被解释为普通的、未映射的键。
+- 命令不会被回显，不需要 <silent>。
+- {rhs} 不受缩写影响，也不受其他映射影响，即使映射是递归的。
+- 在可视模式中，你可以使用 `line('v')` 和 `col('v')` 来获取可视区域的一端，
+  光标在另一端。
 
 							*E1255* *E1136*
-<Cmd> commands must terminate, that is, they must be followed by <CR> in the
-{rhs} of the mapping definition.  |Command-line| mode is never entered.  To use
-a literal <CR> in the {rhs}, use |<lt>|.
-
-
-1.3 MAPPING AND MODES					*:map-modes*
+<Cmd> 命令必须终止，也就是说，它们必须在映射定义的 {rhs} 中后跟 <CR>。
+永远不会进入 |Command-line| 模式。要在 {rhs} 中使用字面 <CR>，使用 |<lt>|。
+1.3 映射和模式					*:map-modes*
 		*mapmode-nvo* *mapmode-n* *mapmode-v* *mapmode-o* *mapmode-t*
 
-There are seven sets of mappings
-- For Normal mode: When typing commands.
-- For Visual mode: When typing commands while the Visual area is highlighted.
-- For Select mode: like Visual mode but typing text replaces the selection.
-- For Operator-pending mode: When an operator is pending (after "d", "y", "c",
-  etc.).  See below: |omap-info|.
-- For Insert mode.  These are also used in Replace mode.
-- For Command-line mode: When entering a ":" or "/" command.
-- For Terminal mode: When typing in a |:terminal| buffer.
+有七组映射
+- 普通模式：输入命令时。
+- 可视模式：在可视区域高亮时输入命令。
+- 选择模式：类似可视模式，但输入文本会替换选择。
+- 操作符待定模式：当操作符待定时（在 "d"、"y"、"c" 等之后）。
+  参见下面：|omap-info|。
+- 插入模式。这些也用于替换模式。
+- 命令行模式：输入 ":" 或 "/" 命令时。
+- 终端模式：在 |:terminal| 缓冲区中输入时。
 
-Special case: While typing a count for a command in Normal mode, mapping zero
-is disabled.  This makes it possible to map zero without making it impossible
-to type a count with a zero.
+特殊情况：在普通模式中输入命令计数时，零的映射被禁用。这使得可以映射零，
+而不会使输入带零的计数变得不可能。
 
 						*map-overview* *map-modes*
-Overview of which map command works in which mode.  More details below.
-     COMMANDS                    MODES ~
-:map   :noremap  :unmap     Normal, Visual, Select, Operator-pending
-:nmap  :nnoremap :nunmap    Normal
-:vmap  :vnoremap :vunmap    Visual and Select
-:smap  :snoremap :sunmap    Select
-:xmap  :xnoremap :xunmap    Visual
-:omap  :onoremap :ounmap    Operator-pending
-:map!  :noremap! :unmap!    Insert and Command-line
-:imap  :inoremap :iunmap    Insert
-:lmap  :lnoremap :lunmap    Insert, Command-line, Lang-Arg
-:cmap  :cnoremap :cunmap    Command-line
-:tmap  :tnoremap :tunmap    Terminal
+概述哪些映射命令在哪些模式中工作。更多细节见下文。
+     命令                    模式 ~
+:map   :noremap  :unmap     普通、可视、选择、操作符待定
+:nmap  :nnoremap :nunmap    普通
+:vmap  :vnoremap :vunmap    可视和选择
+:smap  :snoremap :sunmap    选择
+:xmap  :xnoremap :xunmap    可视
+:omap  :onoremap :ounmap    操作符待定
+:map!  :noremap! :unmap!    插入和命令行
+:imap  :inoremap :iunmap    插入
+:lmap  :lnoremap :lunmap    插入、命令行、语言参数
+:cmap  :cnoremap :cunmap    命令行
+:tmap  :tnoremap :tunmap    终端
 
-Same information in a table:
+表格中的相同信息：
 							*map-table*
-         Mode  | Norm | Ins | Cmd | Vis | Sel | Opr | Term | Lang | ~
-Command        +------+-----+-----+-----+-----+-----+------+------+ ~
-[nore]map      | yes  |  -  |  -  | yes | yes | yes |  -   |  -   |
-n[nore]map     | yes  |  -  |  -  |  -  |  -  |  -  |  -   |  -   |
-[nore]map!     |  -   | yes | yes |  -  |  -  |  -  |  -   |  -   |
-i[nore]map     |  -   | yes |  -  |  -  |  -  |  -  |  -   |  -   |
-c[nore]map     |  -   |  -  | yes |  -  |  -  |  -  |  -   |  -   |
-v[nore]map     |  -   |  -  |  -  | yes | yes |  -  |  -   |  -   |
-x[nore]map     |  -   |  -  |  -  | yes |  -  |  -  |  -   |  -   |
-s[nore]map     |  -   |  -  |  -  |  -  | yes |  -  |  -   |  -   |
-o[nore]map     |  -   |  -  |  -  |  -  |  -  | yes |  -   |  -   |
-t[nore]map     |  -   |  -  |  -  |  -  |  -  |  -  | yes  |  -   |
-l[nore]map     |  -   | yes | yes |  -  |  -  |  -  |  -   | yes  |
+         模式  | 普通 | 插入 | 命令行 | 可视 | 选择 | 操作符 | 终端 | 语言 | ~
+命令          +------+-----+-----+-----+-----+-----+------+------+ ~
+[nore]map      | 是   |  -  |  -  | 是  | 是  | 是  |  -   |  -   |
+n[nore]map     | 是   |  -  |  -  |  -  |  -  |  -  |  -   |  -   |
+[nore]map!     |  -   | 是  | 是  |  -  |  -  |  -  |  -   |  -   |
+i[nore]map     |  -   | 是  |  -  |  -  |  -  |  -  |  -   |  -   |
+c[nore]map     |  -   |  -  | 是  |  -  |  -  |  -  |  -   |  -   |
+v[nore]map     |  -   |  -  |  -  | 是  | 是  |  -  |  -   |  -   |
+x[nore]map     |  -   |  -  |  -  | 是  |  -  |  -  |  -   |  -   |
+s[nore]map     |  -   |  -  |  -  |  -  | 是  |  -  |  -   |  -   |
+o[nore]map     |  -   |  -  |  -  |  -  |  -  | 是  |  -   |  -   |
+t[nore]map     |  -   |  -  |  -  |  -  |  -  |  -  | 是   |  -   |
+l[nore]map     |  -   | 是  | 是  |  -  |  -  |  -  |  -   | 是   |
 
 
-    COMMANDS				      MODES ~
-				       Normal  Visual+Select  Operator-pending ~
-:map   :noremap   :unmap   :mapclear	 yes	    yes		   yes
-:nmap  :nnoremap  :nunmap  :nmapclear	 yes	     -		    -
-:vmap  :vnoremap  :vunmap  :vmapclear	  -	    yes		    -
-:omap  :onoremap  :ounmap  :omapclear	  -	     -		   yes
+    命令				      模式 ~
+				       普通  可视+选择  操作符待定 ~
+:map   :noremap   :unmap   :mapclear	 是	    是		  是
+:nmap  :nnoremap  :nunmap  :nmapclear	 是	     -		    -
+:vmap  :vnoremap  :vunmap  :vmapclear	  -	    是		    -
+:omap  :onoremap  :ounmap  :omapclear	  -	     -		  是
 
-:nunmap can also be used outside of a monastery.
+:nunmap 也可以在修道院外使用。
 						*mapmode-x* *mapmode-s*
-Some commands work both in Visual and Select mode, some in only one.  Note
-that quite often "Visual" is mentioned where both Visual and Select mode
-apply. |Select-mode-mapping|
-NOTE: Mapping a printable character in Select mode may confuse the user.  It's
-better to explicitly use :xmap and :smap for printable characters.  Or use
-:sunmap after defining the mapping.
+一些命令在可视和选择模式中都工作，一些只在其中一个模式中工作。注意，
+提到"可视"时通常也适用于可视和选择模式。|Select-mode-mapping|
+注意：在选择模式中映射可打印字符可能会让用户感到困惑。最好明确使用 :xmap
+和 :smap 来映射可打印字符。或者在定义映射后使用 :sunmap。
 
-    COMMANDS				      MODES ~
-					  Visual    Select ~
-:vmap  :vnoremap  :vunmap  :vmapclear	    yes      yes
-:xmap  :xnoremap  :xunmap  :xmapclear	    yes       -
-:smap  :snoremap  :sunmap  :smapclear	    -	     yes
+    命令				      模式 ~
+					  可视    选择 ~
+:vmap  :vnoremap  :vunmap  :vmapclear	    是      是
+:xmap  :xnoremap  :xunmap  :xmapclear	    是       -
+:smap  :snoremap  :sunmap  :smapclear	     -      是
 
 			*mapmode-ic* *mapmode-i* *mapmode-c* *mapmode-l*
-Some commands work both in Insert mode and Command-line mode, some not:
+一些命令在插入模式和命令行模式中都工作，一些不是：
 
-    COMMANDS				      MODES ~
-					  Insert  Command-line	Lang-Arg ~
-:map!  :noremap!  :unmap!  :mapclear!	    yes	       yes	   -
-:imap  :inoremap  :iunmap  :imapclear	    yes		-	   -
-:cmap  :cnoremap  :cunmap  :cmapclear	     -	       yes	   -
-:lmap  :lnoremap  :lunmap  :lmapclear	    yes*       yes*	  yes*
+    命令				      模式 ~
+					  插入  命令行	语言参数 ~
+:map!  :noremap!  :unmap!  :mapclear!	    是	      是	   -
+:imap  :inoremap  :iunmap  :imapclear	    是		-	   -
+:cmap  :cnoremap  :cunmap  :cmapclear	     -	      是	   -
+:lmap  :lnoremap  :lunmap  :lmapclear	    是*      是*	 是*
 
-* If 'iminsert' is 1, see |language-mapping| below.
-
-The original Vi did not have separate mappings for
-Normal/Visual/Operator-pending mode and for Insert/Command-line mode.
-Therefore the ":map" and ":map!" commands enter and display mappings for
-several modes.  In Vim you can use the ":nmap", ":vmap", ":omap", ":cmap" and
-":imap" commands to enter mappings for each mode separately.
+* 如果 'iminsert' 是 1，参见下面的 |language-mapping|。
+原始的 Vi 没有为普通/可视/操作符待定模式和插入/命令行模式设置单独的映射。
+因此 ":map" 和 ":map!" 命令会为多个模式输入和显示映射。在 Vim 中，
+你可以使用 ":nmap"、":vmap"、":omap"、":cmap" 和 ":imap" 命令来为每个模式
+单独输入映射。
 
 							*omap-info*
-Operator-pending mappings can be used to define a movement command that can be
-used with any operator.  Simple example: >
+操作符待定映射可用于定义可以与任何操作符一起使用的移动命令。
+简单示例：>
 	:omap { w
-makes "y{" work like "yw" and "d{" like "dw".
+使 "y{" 像 "yw" 一样工作，"d{" 像 "dw" 一样工作。
 
-To ignore the starting cursor position and select different text, you can have
-the omap start Visual mode to select the text to be operated upon.  Example
-that operates on a function name in the current line: >
+要忽略起始光标位置并选择不同的文本，你可以让 omap 启动可视模式来选择
+要操作的文本。在当前行操作函数名的示例：>
 	onoremap <silent> F :<C-U>normal! 0f(hviw<CR>
-The CTRL-U (<C-U>) is used to remove the range that Vim may insert.  The
-Normal mode commands find the first '(' character and select the first word
-before it.  That usually is the function name.
+CTRL-U (<C-U>) 用于删除 Vim 可能插入的范围。普通模式命令找到第一个 '('
+字符并选择它前面的第一个词。这通常是函数名。
 
-To enter a mapping for Normal and Visual mode, but not Operator-pending mode,
-first define it for all three modes, then unmap it for
-Operator-pending mode: >
+要为普通和可视模式输入映射，但不包括操作符待定模式，首先为所有三个模式
+定义它，然后为操作符待定模式取消映射：>
 	:map    xx something-difficult
 	:ounmap xx
 
-Likewise for a mapping for Visual and Operator-pending mode or Normal and
-Operator-pending mode.
+同样适用于可视和操作符待定模式或普通和操作符待定模式的映射。
 
 						*language-mapping*
-":lmap" defines a mapping that applies to:
-- Insert mode
-- Command-line mode
-- when entering a search pattern
-- the argument of the commands that accept a text character, such as "r" and
-  "f"
-- for the input() line
-Generally: Whenever a character is to be typed that is part of the text in the
-buffer, not a Vim command character.  "Lang-Arg" isn't really another mode,
-it's just used here for this situation.
-   The simplest way to load a set of related language mappings is by using the
-'keymap' option.  See |45.5|.
-   In Insert mode and in Command-line mode the mappings can be disabled with
-the CTRL-^ command |i_CTRL-^| |c_CTRL-^|. These commands change the value of
-the 'iminsert' option.  When starting to enter a normal command line (not a
-search pattern) the mappings are disabled until a CTRL-^ is typed.  The state
-last used is remembered for Insert mode and Search patterns separately.  The
-state for Insert mode is also used when typing a character as an argument to
-command like "f" or "t".
-   Language mappings will never be applied to already mapped characters.  They
-are only used for typed characters.  This assumes that the language mapping
-was already done when typing the mapping. Correspondingly, language mappings
-are applied when recording macros, rather than when applying them.
+":lmap" 定义了一个适用于以下情况的映射：
+- 插入模式
+- 命令行模式
+- 输入搜索模式时
+- 接受文本字符的命令的参数，如 "r" 和 "f"
+- 对于 input() 行
+一般来说：每当要输入一个作为缓冲区文本一部分的字符，而不是 Vim 命令字符时。
+"语言参数"并不是真正的另一个模式，它只是在这里用于这种情况。
+   加载一组相关语言映射的最简单方法是使用 'keymap' 选项。参见 |45.5|。
+   在插入模式和命令行模式中，可以使用 CTRL-^ 命令禁用映射
+|i_CTRL-^| |c_CTRL-^|。这些命令会改变 'iminsert' 选项的值。
+当开始输入普通命令行（不是搜索模式）时，映射会被禁用，直到输入 CTRL-^。
+最后使用的状态会分别记住插入模式和搜索模式。插入模式的状态也用于
+在输入作为命令（如 "f" 或 "t"）参数的字符时。
+   语言映射永远不会应用于已经映射的字符。它们只用于输入的字符。
+这假设在输入映射时已经完成了语言映射。相应地，语言映射在录制宏时应用，
+而不是在应用宏时。
 
+1.4 列出映射					*map-listing*
 
-1.4 LISTING MAPPINGS					*map-listing*
+列出映射时，前两列中的字符是：
 
-When listing mappings the characters in the first two columns are:
+      字符	模式	~
+     <Space>	普通、可视、选择和操作符待定
+	n	普通
+	v	可视和选择
+	s	选择
+	x	可视
+	o	操作符待定
+	!	插入和命令行
+	i	插入
+	l	":lmap" 映射用于插入、命令行和语言参数
+	c	命令行
+	t	终端作业
 
-      CHAR	MODE	~
-     <Space>	Normal, Visual, Select and Operator-pending
-	n	Normal
-	v	Visual and Select
-	s	Select
-	x	Visual
-	o	Operator-pending
-	!	Insert and Command-line
-	i	Insert
-	l	":lmap" mappings for Insert, Command-line and Lang-Arg
-	c	Command-line
-	t	Terminal-Job
+在 {rhs} 之前可能会出现一个特殊字符：
+	*	表示它不可重映射
+	&	表示只有脚本局部映射可重映射
+	@	表示缓冲区局部映射
 
-Just before the {rhs} a special character can appear:
-	*	indicates that it is not remappable
-	&	indicates that only script-local mappings are remappable
-	@	indicates a buffer-local mapping
+从 {lhs} 之后的第一个非空白到行尾（或 '|'）的所有内容都被视为 {rhs} 的一部分。
+这允许 {rhs} 以空格结尾。
 
-Everything from the first non-blank after {lhs} up to the end of the line
-(or '|') is considered to be part of {rhs}.  This allows the {rhs} to end
-with a space.
+注意：在可视模式中使用映射时，你可以使用 "'<" 标记，它是当前缓冲区中
+最后选择的可视区域的开始 |'<|。
 
-Note: When using mappings for Visual mode, you can use the "'<" mark, which
-is the start of the last selected Visual area in the current buffer |'<|.
-
-The |:filter| command can be used to select what mappings to list.  The
-pattern is matched against the {lhs} and {rhs} in the raw form.  If a
-description was added using |nvim_set_keymap()| or |nvim_buf_set_keymap()|
-then the pattern is also matched against it.
+|:filter| 命令可用于选择要列出哪些映射。模式与 {lhs} 和 {rhs} 的原始形式匹配。
+如果使用 |nvim_set_keymap()| 或 |nvim_buf_set_keymap()| 添加了描述，
+那么模式也会与它匹配。
 
 							*:map-verbose*
-When 'verbose' is non-zero, listing a key map will also display where it was
-last defined.  Example: >
+当 'verbose' 非零时，列出键映射也会显示它最后在哪里定义。
+例如：>
 
 	:verbose map <C-W>*
 	n  <C-W>*      * <C-W><C-S>*
 		Last set from ~/.config/nvim/init.vim
 
-See |:verbose-cmd| for more information.
+有关更多信息，请参见 |:verbose-cmd|。
+1.5 映射特殊键				*:map-special-keys*
+
+要映射功能键，使用它的内部代码。要输入这样的映射，输入 CTRL-K 然后
+按功能键，或使用 "<F2>"、"<F10>"、"<Up>"、"<S-Down>"、"<S-F7>" 等形式
+（参见键表示法表 |key-notation|，从 <Up> 开始的所有键都可以使用）。
 
 
-1.5 MAPPING SPECIAL KEYS				*:map-special-keys*
-
-To map a function key, use the internal code for it.  To enter such a mapping
-type CTRL-K and then hit the function key, or use the form "<F2>", "<F10>",
-"<Up>", "<S-Down>", "<S-F7>", etc. (see table of keys |key-notation|, all keys
-from <Up> can be used).
-
-
-1.6 SPECIAL CHARACTERS					*:map-special-chars*
+1.6 特殊字符					*:map-special-chars*
 						*map_backslash* *map-backslash*
-Note that only CTRL-V is mentioned here as a special character for mappings
-and abbreviations.  When 'cpoptions' does not contain 'B', a backslash can
-also be used like CTRL-V.  The <> notation can be fully used then |<>|.  But
-you cannot use "<C-V>" like CTRL-V to escape the special meaning of what
-follows.
+注意，这里只提到 CTRL-V 作为映射和缩写的特殊字符。当 'cpoptions' 不包含 'B' 时，
+反斜杠也可以像 CTRL-V 一样使用。然后可以完全使用 <> 表示法 |<>|。
+但是你不能使用 "<C-V>" 像 CTRL-V 那样来转义后面内容的特殊含义。
 
-To map a backslash, or use a backslash literally in the {rhs}, the special
-sequence "<Bslash>" can be used.  This avoids the need to double backslashes
-when using nested mappings.
+要映射反斜杠，或在 {rhs} 中字面使用反斜杠，可以使用特殊序列 "<Bslash>"。
+这避免了在使用嵌套映射时需要双反斜杠。
 
 						*map_CTRL-C* *map-CTRL-C*
-Using CTRL-C in the {lhs} is possible, but it will only work when Vim is
-waiting for a key, not when Vim is busy with something.  When Vim is busy
-CTRL-C interrupts/breaks the command.
-When using the GUI version on MS-Windows CTRL-C can be mapped to allow a Copy
-command to the clipboard.  Use CTRL-Break to interrupt Vim.
+在 {lhs} 中使用 CTRL-C 是可能的，但它只会在 Vim 等待按键时工作，
+而不是在 Vim 忙于其他事情时。当 Vim 忙时 CTRL-C 会中断/打断命令。
+在 MS-Windows 的 GUI 版本中使用 CTRL-C 可以映射到允许复制命令到剪贴板。
+使用 CTRL-Break 来中断 Vim。
 
 					*map_space_in_lhs* *map-space_in_lhs*
-To include a space in {lhs} precede it with a CTRL-V (type two CTRL-Vs for
-each space).
+要在 {lhs} 中包含空格，在它前面加上 CTRL-V（每个空格输入两个 CTRL-V）。
 					*map_space_in_rhs* *map-space_in_rhs*
-If you want a {rhs} that starts with a space, use "<Space>".  To be fully Vi
-compatible (but unreadable) don't use the |<>| notation, precede {rhs} with a
-single CTRL-V (you have to type CTRL-V two times).
+如果你想要一个以空格开头的 {rhs}，使用 "<Space>"。为了完全兼容 Vi
+（但不可读），不要使用 |<>| 表示法，在 {rhs} 前加一个 CTRL-V
+（你必须输入 CTRL-V 两次）。
 						*map_empty_rhs* *map-empty-rhs*
-You can create an empty {rhs} by typing nothing after a single CTRL-V (you
-have to type CTRL-V two times).  Unfortunately, you cannot do this in a vimrc
-file.
+你可以通过输入一个 CTRL-V 后不输入任何内容来创建空的 {rhs}
+（你必须输入 CTRL-V 两次）。不幸的是，你不能在 vimrc 文件中这样做。
 							|<Nop>|
-An easier way to get a mapping that doesn't produce anything, is to use
-"<Nop>" for the {rhs}.  For example, to disable function key 8: >
+获取一个不产生任何内容的映射的更容易方法是使用 "<Nop>" 作为 {rhs}。
+例如，禁用功能键 8：>
 	:map  <F8>  <Nop>
 	:map! <F8>  <Nop>
 <
 							*map-multibyte*
-It is possible to map multibyte characters, but only the whole character.  You
-cannot map the first byte only.  This was done to prevent problems in this
-scenario: >
+可以映射多字节字符，但只能是整个字符。你不能只映射第一个字节。
+这样做是为了防止这种情况下的问题：>
 	:set encoding=latin1
 	:imap <M-C> foo
 	:set encoding=utf-8
-The mapping for <M-C> is defined with the latin1 encoding, resulting in a 0xc3
-byte.  If you type the character á (0xe1 <M-a>) in UTF-8 encoding this is the
-two bytes 0xc3 0xa1.  You don't want the 0xc3 byte to be mapped then or
-otherwise it would be impossible to type the á character.
+<M-C> 的映射是用 latin1 编码定义的，结果是 0xc3 字节。如果你在 UTF-8 编码中
+输入字符 á (0xe1 <M-a>)，这是两个字节 0xc3 0xa1。你不想让 0xc3 字节被映射，
+否则就不可能输入 á 字符。
 
 					*<Leader>* *mapleader*
-To define a mapping which uses the "g:mapleader" variable, the special string
-"<Leader>" can be used.  It is replaced with the string value of
-"g:mapleader".  If "g:mapleader" is not set or empty, a backslash is used
-instead.  Example: >
+要定义一个使用 "g:mapleader" 变量的映射，可以使用特殊字符串 "<Leader>"。
+它会被 "g:mapleader" 的字符串值替换。如果 "g:mapleader" 未设置或为空，
+则使用反斜杠代替。例如：>
 	map <Leader>A  oanother line<Esc>
-Works like: >
+工作方式如下：>
 	map \A  oanother line<Esc>
-But after: >
+但在之后：>
 	let mapleader = ","
-It works like: >
+它工作方式如下：>
 	map ,A  oanother line<Esc>
 
-Note that the value of "g:mapleader" is used at the moment the mapping is
-defined.  Changing "g:mapleader" after that has no effect for already defined
-mappings.
+注意，"g:mapleader" 的值在定义映射时使用。之后更改 "g:mapleader" 对
+已经定义的映射没有影响。
 
 					*<LocalLeader>* *maplocalleader*
-<LocalLeader> is just like <Leader>, except that it uses "maplocalleader"
-instead of "mapleader".  <LocalLeader> is to be used for mappings which are
-local to a buffer.  Example: >
+<LocalLeader> 与 <Leader> 类似，只是它使用 "maplocalleader" 而不是 "mapleader"。
+<LocalLeader> 用于对缓冲区局部的映射。例如：>
       :map <buffer> <LocalLeader>A  oanother line<Esc>
 <
-In a global plugin <Leader> should be used and in a filetype plugin
-<LocalLeader>.  "mapleader" and "maplocalleader" can be equal.  Although, if
-you make them different, there is a smaller chance of mappings from global
-plugins to clash with mappings for filetype plugins.  For example, you could
-keep "mapleader" at the default backslash, and set "maplocalleader" to an
-underscore.
-
+在全局插件中应该使用 <Leader>，在文件类型插件中使用 <LocalLeader>。
+"mapleader" 和 "maplocalleader" 可以相等。但是，如果你让它们不同，
+全局插件的映射与文件类型插件的映射发生冲突的机会就更小。
+例如，你可以保持 "mapleader" 为默认的反斜杠，并将 "maplocalleader" 设置为下划线。
 							*map-<SID>*
-In a script the special key name "<SID>" can be used to define a mapping
-that's local to the script.  See |<SID>| for details.
+在脚本中，特殊键名 "<SID>" 可用于定义对脚本局部的映射。有关详细信息，
+请参见 |<SID>|。
 
 							*<Plug>*
-The special key name "<Plug>" can be used for an internal mapping, which is
-not to be matched with any key sequence.  This is useful in plugins
-|using-<Plug>|.
+特殊键名 "<Plug>" 可用于内部映射，它不会与任何键序列匹配。这在插件中很有用
+|using-<Plug>|。
 
 							*<MouseMove>*
-The special key name "<MouseMove>" can be used to handle mouse movement.  It
-needs to be enabled with 'mousemoveevent'.
-The |getmousepos()| function can be used to obtain the mouse position.
+特殊键名 "<MouseMove>" 可用于处理鼠标移动。它需要通过 'mousemoveevent' 启用。
+|getmousepos()| 函数可用于获取鼠标位置。
 
 							*<Char>* *<Char->*
-To map a character by its decimal, octal or hexadecimal number the <Char>
-construct can be used:
-	<Char-123>	character 123
-	<Char-033>	character 27
-	<Char-0x7f>	character 127
-	<S-Char-114>    character 114 ('r') shifted ('R')
-This is useful to specify a (multibyte) character in a 'keymap' file.
-Upper and lowercase differences are ignored.
+要通过其十进制、八进制或十六进制数字映射字符，可以使用 <Char> 构造：
+	<Char-123>	字符 123
+	<Char-033>	字符 27
+	<Char-0x7f>	字符 127
+	<S-Char-114>   字符 114 ('r') 带 shift ('R')
+这在 'keymap' 文件中指定（多字节）字符时很有用。
+忽略大小写差异。
 
 							*map-comments*
-It is not possible to put a comment after these commands, because the `"`
-character is considered to be part of the {lhs} or {rhs}. However, one can
-use `|"`, since this starts a new, empty command with a comment.
+不可能在这些命令后放置注释，因为 `"` 字符被视为 {lhs} 或 {rhs} 的一部分。
+但是，可以使用 `|"`，因为它开始一个新的、空的命令并带有注释。
 
 							*map_bar* *map-bar*
-Since the '|' character is used to separate a map command from the next
-command, you will have to do something special to include  a '|' in {rhs}.
-There are three methods:
-   use	     works when			   example	~
-   <Bar>     always			   :map _l :!ls <Bar> more^M
-   \|	     'b' is not in 'cpoptions'	   :map _l :!ls \| more^M
-   ^V|	     always			   :map _l :!ls ^V| more^M
+由于 '|' 字符用于分隔映射命令和下一个命令，你需要在 {rhs} 中包含 '|' 时
+做一些特殊处理。有三种方法：
+   使用	     在以下情况工作		  示例	~
+   <Bar>     总是			   :map _l :!ls <Bar> more^M
+   \|	     'b' 不在 'cpoptions' 中	   :map _l :!ls \| more^M
+   ^V|	    总是			   :map _l :!ls ^V| more^M
 
-(here ^V stands for CTRL-V; to get one CTRL-V you have to type it twice; you
-cannot use the <> notation "<C-V>" here).
+（这里 ^V 代表 CTRL-V；要得到一个 CTRL-V 你必须输入它两次；你不能在这里
+使用 <> 表示法 "<C-V>"）。
 
-All three work when you use the default setting for 'cpoptions'.
+当使用 'cpoptions' 的默认设置时，这三种方法都有效。
 
-When 'b' is present in 'cpoptions', "\|" will be recognized as a mapping
-ending in a '\' and then another command.  This is Vi compatible, but
-illogical when compared to other commands.
+当 'cpoptions' 中包含 'b' 时，"\|" 将被识别为以 '\' 结尾的映射，
+然后是另一个命令。这与 Vi 兼容，但与其他命令相比不合逻辑。
 
 						*map_return* *map-return*
-When you have a mapping that contains an Ex command, you need to put a line
-terminator after it to have it executed.  The use of <CR> is recommended for
-this (see |<>|).  Example: >
+当你有一个包含 Ex 命令的映射时，你需要在它后面放一个行终止符来执行它。
+建议为此使用 <CR>（参见 |<>|）。例如：>
    :map  _ls  :!ls -l %:S<CR>:echo "the end"<CR>
 
-To avoid mapping of the characters you type in insert or Command-line mode,
-type a CTRL-V first.
+要避免在插入或命令行模式中映射你输入的字符，先输入一个 CTRL-V。
 							*map-error*
-Note that when an error is encountered (that causes an error message or might
-cause a beep) the rest of the mapping is not executed.  This is Vi-compatible.
+注意，当遇到错误（导致错误消息或可能发出蜂鸣声）时，映射的其余部分不会执行。
+这与 Vi 兼容。
 
-Note that the second character (argument) of the commands @zZtTfF[]rm'`"v
-and CTRL-X is not mapped.  This was done to be able to use all the named
-registers and marks, even when the command with the same name has been
-mapped.
+注意，命令 @zZtTfF[]rm'`"v 和 CTRL-X 的第二个字符（参数）不会被映射。
+这样做是为了能够使用所有命名寄存器和标记，即使同名的命令已被映射。
 
 
-1.7 WHAT KEYS TO MAP					*map-which-keys*
+1.7 映射哪些键					*map-which-keys*
 
-If you are going to map something, you will need to choose which key(s) to use
-for the {lhs}.  You will have to avoid keys that are used for Vim commands,
-otherwise you would not be able to use those commands anymore.  Here are a few
-suggestions:
-- Function keys <F2>, <F3>, etc..  Also the shifted function keys <S-F1>,
-  <S-F2>, etc.  Note that <F1> is already used for the help command.
-- Meta-keys (with the ALT key pressed).  Depending on your keyboard accented
-  characters may be used as well. |:map-alt-keys|
-- Use the '_' or ',' character and then any other character.  The "_" and ","
-  commands do exist in Vim (see |_| and |,|), but you probably never use them.
-- Use a key that is a synonym for another command.  For example: CTRL-P and
-  CTRL-N.  Use an extra character to allow more mappings.
-- The key defined by <Leader> and one or more other keys.  This is especially
-  useful in scripts. |mapleader|
+如果你要映射某些内容，你需要选择用于 {lhs} 的键。你必须避免使用
+用于 Vim 命令的键，否则你将无法再使用这些命令。这里有一些建议：
+- 功能键 <F2>、<F3> 等。还有带 shift 的功能键 <S-F1>、<S-F2> 等。
+  注意 <F1> 已经用于帮助命令。
+- Meta 键（按下 ALT 键时）。根据你的键盘，也可能使用重音字符。
+  |:map-alt-keys|
+- 使用 '_' 或 ',' 字符，然后是任何其他字符。'_' 和 ',' 命令确实存在于
+  Vim 中（参见 |_| 和 |,|），但你可能从未使用过它们。
+- 使用作为另一个命令同义词的键。例如：CTRL-P 和 CTRL-N。
+  使用额外的字符以允许更多映射。
+- 由 <Leader> 定义的一个或多个其他键。这在脚本中特别有用。|mapleader|
 
-See the file "index" for keys that are not used and thus can be mapped without
-losing any builtin function.  You can also use ":help {key}^D" to find out if
-a key is used for some command.  ({key} is the specific key you want to find
-out about, ^D is CTRL-D).
+参见 "index" 文件了解未使用的键，因此可以映射它们而不会失去任何内置功能。
+你也可以使用 ":help {key}^D" 来查找某个键是否用于某些命令。
+（{key} 是你想查找的特定键，^D 是 CTRL-D）。
+1.8 示例						*map-examples*
 
-
-1.8 EXAMPLES						*map-examples*
-
-A few examples (as you type them: for "<CR>" you type four characters). >
+几个例子（当你输入它们时：对于 "<CR>" 你输入四个字符）。>
 
    :map <F3>  o#include
    :map <M-g> /foo<CR>cwbar<Esc>
@@ -727,162 +623,135 @@ A few examples (as you type them: for "<CR>" you type four characters). >
    :map! qq   quadrillion questions
 
 
-Multiplying a count
+乘以计数
 
-When you type a count before triggering a mapping, it's like the count was
-typed before the {lhs}.  For example, with this mapping: >
+当你在触发映射之前输入计数时，就像计数是在 {lhs} 之前输入的一样。
+例如，使用这个映射：>
    :map <F4>  3w
-Typing 2<F4> will result in "23w". Thus not moving 2 * 3 words but 23 words.
-If you want to multiply counts use the expression register: >
+输入 2<F4> 将导致 "23w"。因此不是移动 2 * 3 个词，而是 23 个词。
+如果你想乘以计数，使用表达式寄存器：>
    :map <F4>  @='3w'<CR>
-The part between quotes is the expression being executed. |@=|
+引号之间的部分是正在执行的表达式。|@=|
 
 
-1.9 USING MAPPINGS					*map-typing*
+1.9 使用映射					*map-typing*
 
-Vim will compare what you type with the start of a mapped sequence.  If there
-is an incomplete match, it will get more characters until there either is a
-complete match or until there is no match at all.  Example: If you map! "qq",
-the first 'q' will not appear on the screen until you type another
-character.  This is because Vim cannot know if the next character will be a
-'q' or not.  If the 'timeout' option is on (which is the default) Vim will
-only wait for one second (or as long as specified with the 'timeoutlen'
-option).  After that it assumes that the 'q' is to be interpreted as such.  If
-you type slowly, or your system is slow, reset the 'timeout' option.  Then you
-might want to set the 'ttimeout' option.
+Vim 会将你输入的内容与映射序列的开始进行比较。如果有不完整的匹配，
+它会获取更多字符，直到有完全匹配或根本没有匹配。例如：如果你映射！"qq"，
+第一个 'q' 不会出现在屏幕上，直到你输入另一个字符。这是因为 Vim 无法知道
+下一个字符是否会是 'q'。如果 'timeout' 选项开启（这是默认值），Vim 只会
+等待一秒钟（或 'timeoutlen' 选项指定的时间）。之后它假设 'q' 应该被解释为
+这样的。如果你输入速度慢，或者你的系统慢，重置 'timeout' 选项。
+然后你可能想要设置 'ttimeout' 选项。
 
 							*map-precedence*
-Buffer-local mappings (defined using |:map-<buffer>|) take precedence over
-global mappings.  When a buffer-local mapping is the same as a global mapping,
-Vim will use the buffer-local mapping.  In addition, Vim will use a complete
-mapping immediately if it was defined with <nowait>, even if a longer mapping
-has the same prefix.  For example, given the following two mappings: >
+缓冲区局部映射（使用 |:map-<buffer>| 定义）优先于全局映射。当缓冲区局部映射
+与全局映射相同时，Vim 将使用缓冲区局部映射。此外，如果使用 <nowait> 定义，
+Vim 将立即使用完全匹配的映射，即使有更长的映射具有相同的前缀。
+例如，给定以下两个映射：>
     :map <buffer> <nowait> \a   :echo "Local \a"<CR>
     :map                   \abc :echo "Global \abc"<CR>
-When typing \a the buffer-local mapping will be used immediately.  Vim will
-not wait for more characters to see if the user might be typing \abc.
+当输入 \a 时，将立即使用缓冲区局部映射。Vim 不会等待更多字符来查看用户
+是否可能输入 \abc。
 
 							*map-keys-fails*
-There are situations where key codes might not be recognized:
-- Vim can only read part of the key code.  Mostly this is only the first
-  character.  This happens on some Unix versions in an xterm.
-- The key code is after character(s) that are mapped.  E.g., "<F1><F1>" or
-  "g<F1>".
+在以下情况下可能无法识别键码：
+- Vim 只能读取键码的一部分。大多数情况下这只是第一个字符。
+  这发生在某些 Unix 版本的 xterm 中。
+- 键码在已映射的字符之后。例如，"<F1><F1>" 或 "g<F1>"。
 
-The result is that the key code is not recognized in this situation, and the
-mapping fails.  There are two actions needed to avoid this problem:
+结果是键码在这种情况下不被识别，映射失败。要避免这个问题需要两个操作：
 
-- Remove the 'K' flag from 'cpoptions'.  This will make Vim wait for the rest
-  of the characters of the function key.
-- When using <F1> to <F4> the actual key code generated may correspond to
-  <xF1> to <xF4>.  There are mappings from <xF1> to <F1>, <xF2> to <F2>, etc.,
-  but these are not recognized after another half a mapping.  Make sure the
-  key codes for <F1> to <F4> are correct: >
+- 从 'cpoptions' 中删除 'K' 标志。这将使 Vim 等待功能键的其余字符。
+- 当使用 <F1> 到 <F4> 时，实际生成的键码可能对应于 <xF1> 到 <xF4>。
+  有从 <xF1> 到 <F1>、<xF2> 到 <F2> 等的映射，但这些在另一个半映射之后
+  不被识别。确保 <F1> 到 <F4> 的键码正确：>
 	:set <F1>=<type CTRL-V><type F1>
-< Type the <F1> as four characters.  The part after the "=" must be done with
-  the actual keys, not the literal text.
-Another solution is to use the actual key code in the mapping for the second
-special key: >
+< 将 <F1> 输入为四个字符。"=" 后面的部分必须用实际键输入，而不是字面文本。
+另一个解决方案是在第二个特殊键的映射中使用实际键码：>
 	:map <F1><Esc>OP :echo "yes"<CR>
-Don't type a real <Esc>, Vim will recognize the key code and replace it with
-<F1> anyway.
+不要输入真正的 <Esc>，Vim 会识别键码并用 <F1> 替换它。
 
 						*recursive_mapping*
-If you include the {lhs} in the {rhs} you have a recursive mapping.  When
-{lhs} is typed, it will be replaced with {rhs}.  When the {lhs} which is
-included in {rhs} is encountered it will be replaced with {rhs}, and so on.
-This makes it possible to repeat a command an infinite number of times.  The
-only problem is that the only way to stop this is by causing an error.  The
-macros to solve a maze uses this, look there for an example.  There is one
-exception: If the {rhs} starts with {lhs}, the first character is not mapped
-again (this is Vi compatible).
-For example: >
+如果你在 {rhs} 中包含 {lhs}，你就有递归映射。当输入 {lhs} 时，
+它会被 {rhs} 替换。当在 {rhs} 中包含的 {lhs} 被遇到时，它会被 {rhs} 替换，
+依此类推。这使得可以无限次重复命令。唯一的问题是停止这个的唯一方法是
+通过导致错误。解决迷宫的宏使用这个，在那里查找示例。有一个例外：
+如果 {rhs} 以 {lhs} 开头，第一个字符不会被再次映射（这与 Vi 兼容）。
+例如：>
    :map ab abcd
-will execute the "a" command and insert "bcd" in the text.  The "ab" in the
-{rhs} will not be mapped again.
-
-If you want to exchange the meaning of two keys you should use the :noremap
-command.  For example: >
+将执行 "a" 命令并在文本中插入 "bcd"。{rhs} 中的 "ab" 不会被再次映射。
+如果你想交换两个键的含义，你应该使用 :noremap 命令。例如：>
    :noremap k j
    :noremap j k
-This will exchange the cursor up and down commands.
+这将交换光标上下移动命令。
 
-With the normal :map command mapping takes place until the text is found not
-to be a part of a {lhs}.  For example, if you use: >
+使用普通的 :map 命令，映射会一直进行，直到找到不是 {lhs} 部分的文本。
+例如，如果你使用：>
    :map x y
    :map y x
-Vim will replace x with y, and then y with x, etc.  When this has happened
-'maxmapdepth' times (default 1000), Vim will give the error message
-"recursive mapping".
+Vim 会将 x 替换为 y，然后将 y 替换为 x，依此类推。当这种情况发生了
+'maxmapdepth' 次（默认 1000）时，Vim 将给出错误消息"recursive mapping"。
 
 							*:map-undo*
-If you include an undo command inside a mapped sequence, this will bring the
-text back in the state before executing the macro.  This is compatible with
-the original Vi, as long as there is only one undo command in the mapped
-sequence (having two undo commands in a mapped sequence did not make sense
-in the original Vi, you would get back the text before the first undo).
+如果你在映射序列中包含撤销命令，这将使文本回到执行宏之前的状态。
+这与原始 Vi 兼容，只要映射序列中只有一个撤销命令（在原始 Vi 中，
+在映射序列中有两个撤销命令没有意义，你会得到第一个撤销之前的文本）。
 
 
-1.10 MAPPING ALT-KEYS					*:map-alt-keys*
+1.10 映射 ALT 键					*:map-alt-keys*
 
-For a readable mapping command the <A-k> form can be used.  Note that <A-k>
-and <A-K> are different, the latter will use an upper case letter.  Actually,
-<A-K> and <A-S-K> are the same.  Instead of "A" you can use "M".  If you have
-an actual Meta modifier key, please see |:map-meta-keys|.
+对于可读的映射命令，可以使用 <A-k> 形式。注意 <A-k> 和 <A-K> 是不同的，
+后者将使用大写字母。实际上，<A-K> 和 <A-S-K> 是相同的。你可以用 "M" 代替 "A"。
+如果你有实际的 Meta 修饰键，请参见 |:map-meta-keys|。
 
-In the GUI Nvim handles the |ALT| key itself, thus mapping keys with ALT
-should always work.  But in a terminal Nvim gets a sequence of bytes and has
-to figure out whether ALT was pressed.  Terminals may use ESC to indicate that
-ALT was pressed.  If ESC is followed by a {key} within 'ttimeoutlen'
-milliseconds, the ESC is interpreted as:
+在 GUI Nvim 中，Nvim 自己处理 |ALT| 键，因此映射带 ALT 的键应该总是有效。
+但在终端中，Nvim 获取字节序列并必须判断是否按下了 ALT。终端可能使用 ESC
+来表示按下了 ALT。如果在 'ttimeoutlen' 毫秒内 ESC 后面跟着 {key}，
+ESC 被解释为：
         <ALT-{key}>
-otherwise it is interpreted as two key presses:
+否则它被解释为两次按键：
         <ESC> {key}
 
-1.11 MAPPING META-KEYS					*:map-meta-keys*
+1.11 映射 META 键					*:map-meta-keys*
 
-Mapping keys with the Meta modifier works very similar to using the Alt key.
-What key on your keyboard produces the Meta modifier depends on your keyboard
-and configuration.
+映射带 Meta 修饰符的键与使用 Alt 键非常相似。键盘上的哪个键产生 Meta 修饰符
+取决于你的键盘和配置。
 
-Note that mapping <M-a> actually is for using the Alt key.  That can be
-confusing!  It cannot be changed, it would not be backwards compatible.
+注意，映射 <M-a> 实际上是为了使用 Alt 键。这可能令人困惑！它不能改变，
+否则将不向后兼容。
 
-For the Meta modifier the "T" character is used.  For example, to map Meta-b
-in Insert mode: >
+对于 Meta 修饰符，使用 "T" 字符。例如，要在插入模式中映射 Meta-b：>
 	:imap <T-b> terrible
 
-1.12 MAPPING SUPER-KEYS or COMMAND-KEYS		*:map-super-keys* *:map-cmd-key*
+1.12 映射 SUPER 键或 COMMAND 键		*:map-super-keys* *:map-cmd-key*
 
-The Super / Command modifier is available if the terminal or GUI supports it.
-The character "D" is used for the Super / Command modifier.
+如果终端或 GUI 支持，可以使用 Super / Command 修饰符。
+使用 "D" 字符表示 Super / Command 修饰符。
 
-For example, to map Command-b in Insert mode: >
+例如，要在插入模式中映射 Command-b：>
 	:imap <D-b> barritone
 
-1.13 MAPPING AN OPERATOR				*:map-operator*
+1.13 映射操作符				*:map-operator*
 
-An operator is used before a {motion} command.  To define your own operator
-you must create a mapping that first sets the 'operatorfunc' option and then
-invoke the |g@| operator.  After the user types the {motion} command the
-specified function will be called.
+操作符用于 {motion} 命令之前。要定义你自己的操作符，你必须创建一个映射，
+首先设置 'operatorfunc' 选项，然后调用 |g@| 操作符。在用户输入 {motion} 命令后，
+指定的函数将被调用。
 
 							*g@* *E774* *E775*
-g@{motion}		Call the function set by the 'operatorfunc' option.
-			The '[ mark is positioned at the start of the text
-			moved over by {motion}, the '] mark on the last
-			character of the text.
-			The function is called with one String argument:
-			    "line"	{motion} was |linewise|
-			    "char"	{motion} was |charwise|
-			    "block"	{motion} was |blockwise-visual|
-			The type can be forced, see |forced-motion|.
-
-Here is an example that counts the number of spaces with <F4>: >
+g@{motion}		调用由 'operatorfunc' 选项设置的函数。
+			'[ 标记位于 {motion} 移动的文本的开始，
+			'] 标记位于文本的最后一个字符。
+			函数被调用时带有一个字符串参数：
+			    "line"	{motion} 是 |linewise|
+			    "char"	{motion} 是 |charwise|
+			    "block"	{motion} 是 |blockwise-visual|
+			可以强制类型，参见 |forced-motion|。
+			这里是一个用 <F4> 计算空格数量的例子：>
 
 	nnoremap <expr> <F4> CountSpaces()
 	xnoremap <expr> <F4> CountSpaces()
-	" doubling <F4> works on a line
+	" 双击 <F4> 在一行上工作
 	nnoremap <expr> <F4><F4> CountSpaces() .. '_'
 
 	function CountSpaces(context = {}, type = '') abort
@@ -938,23 +807,18 @@ Here is an example that counts the number of spaces with <F4>: >
 	  endtry
 	endfunction
 
-An <expr> mapping is used to be able to fetch any prefixed count and register.
-This also avoids using a command line, which would trigger CmdlineEnter and
-CmdlineLeave autocommands.
+使用 <expr> 映射是为了能够获取任何前缀计数和寄存器。这也避免了使用命令行，
+这会触发 CmdlineEnter 和 CmdlineLeave 自动命令。
 
-Note that the 'selection' option is temporarily set to "inclusive" to be able
-to yank exactly the right text by using Visual mode from the '[ to the ']
-mark.
+注意，'selection' 选项被临时设置为 "inclusive"，以便能够通过使用从 '[ 到 ']
+标记的可视模式来准确地复制正确的文本。
 
-Also note that the 'clipboard' option is temporarily emptied to avoid
-clobbering the `"*` or `"+` registers, if its value contains the item `unnamed`
-or `unnamedplus`.
+还要注意，'clipboard' 选项被临时清空，以避免破坏 `"*` 或 `"+` 寄存器，
+如果它的值包含 `unnamed` 或 `unnamedplus` 项。
 
-The `mode()` function will return the state as it will be after applying the
-operator.
+`mode()` 函数将返回应用操作符后的状态。
 
-Here is an example for using a lambda function to create a normal-mode
-operator to add quotes around text in the current line: >
+这里是一个使用 lambda 函数创建普通模式操作符来在当前行中的文本周围添加引号的例子：>
 
 	nnoremap <F4> <Cmd>let &opfunc='{t ->
 				\ getline(".")
@@ -965,459 +829,521 @@ operator to add quotes around text in the current line: >
 				\ ->setline(".")}'<CR>g@
 
 ==============================================================================
-2. Abbreviations		*abbreviation* *abbreviations* *Abbreviations*
+2. 缩写		*abbreviation* *abbreviations* *Abbreviations*
 
-Abbreviations are used in Insert mode, Replace mode and Command-line mode.
-If you enter a word that is an abbreviation, it is replaced with the word it
-stands for.  This can be used to save typing for often used long words.  And
-you can use it to automatically correct obvious spelling errors.
-Examples:
+缩写用于插入模式、替换模式和命令行模式。如果你输入一个单词是缩写，
+它会被它代表的单词替换。这可以用于节省经常使用的长单词的输入。
+你也可以用它来自动纠正明显的拼写错误。
+例子：
 
 	:iab ms Microsoft
 	:iab tihs this
+有三种类型的缩写：
 
-There are three types of abbreviations:
+full-id	   "full-id" 类型完全由关键字字符组成（字母和来自 'iskeyword' 选项的字符）。
+	   这是最常见的缩写。
 
-full-id	  The "full-id" type consists entirely of keyword characters (letters
-	  and characters from 'iskeyword' option).  This is the most common
-	  abbreviation.
+	   例子："foo"、"g3"、"-1"
 
-	  Examples: "foo", "g3", "-1"
+end-id	  "end-id" 类型以关键字字符结尾，但所有其他字符都不是关键字字符。
 
-end-id	  The "end-id" type ends in a keyword character, but all the other
-	  characters are not keyword characters.
+	   例子："#i"、"..f"、"$/7"
 
-	  Examples: "#i", "..f", "$/7"
+non-id	  "non-id" 类型以非关键字字符结尾，其他字符可以是任何类型，不包括空格和制表符。
 
-non-id	  The "non-id" type ends in a non-keyword character, the other
-	  characters may be of any type, excluding space and tab.
+	   例子："def#"、"4/7$"
 
-	  Examples: "def#", "4/7$"
+不能作为缩写的字符串的例子："a.b"、"#def"、"a b"、"_$r"
 
-Examples of strings that cannot be abbreviations: "a.b", "#def", "a b", "_$r"
+缩写只有在输入非关键字字符时才会被识别。这也包括结束插入模式的 <Esc> 
+或结束命令的 <CR>。结束缩写的非关键字字符会在展开的缩写后插入。
+一个例外是字符 <C-]>，它用于展开缩写而不插入任何额外字符。
 
-An abbreviation is only recognized when you type a non-keyword character.
-This can also be the <Esc> that ends Insert mode or the <CR> that ends a
-command.  The non-keyword character which ends the abbreviation is inserted
-after the expanded abbreviation.  An exception to this is the character <C-]>,
-which is used to expand an abbreviation without inserting any extra
-characters.
-
-Example: >
+例子：>
    :ab hh	hello
-<	    "hh<Space>" is expanded to "hello<Space>"
-	    "hh<C-]>" is expanded to "hello"
+<	    "hh<Space>" 展开为 "hello<Space>"
+	    "hh<C-]>" 展开为 "hello"
 
-The characters before the cursor must match the abbreviation.  Each type has
-an additional rule:
+光标前的字符必须匹配缩写。每种类型都有一个额外的规则：
 
-full-id	  In front of the match is a non-keyword character, or this is where
-	  the line or insertion starts.  Exception: When the abbreviation is
-	  only one character, it is not recognized if there is a non-keyword
-	  character in front of it, other than a space or a tab. However, for
-	  the command line "'<,'>" (or any other marks) is ignored, as if the
-	  command line starts after it.
+full-id	  在匹配前是一个非关键字字符，或者这是行或插入开始的地方。
+	   例外：当缩写只有一个字符时，如果前面有非关键字字符（除了空格或制表符），
+	   它不会被识别。但是，对于命令行 "'<,'>"（或任何其他标记）会被忽略，
+	   就好像命令行在它之后开始。
 
-end-id	  In front of the match is a keyword character, or a space or a tab,
-	  or this is where the line or insertion starts.
+end-id	  在匹配前是一个关键字字符，或空格或制表符，或者这是行或插入开始的地方。
 
-non-id	  In front of the match is a space, tab or the start of the line or
-	  the insertion.
+non-id	  在匹配前是空格、制表符或行或插入的开始。
 
-Examples: ({CURSOR} is where you type a non-keyword character) >
+例子：（{CURSOR} 是你输入非关键字字符的地方）>
    :ab foo   four old otters
-<		" foo{CURSOR}"	  is expanded to " four old otters"
-		" foobar{CURSOR}" is not expanded
-		"barfoo{CURSOR}"  is not expanded
+<		" foo{CURSOR}"	  展开为 " four old otters"
+		" foobar{CURSOR}" 不展开
+		"barfoo{CURSOR}"  不展开
 >
    :ab #i #include
-<		"#i{CURSOR}"	  is expanded to "#include"
-		">#i{CURSOR}"	  is not expanded
+<		"#i{CURSOR}"	  展开为 "#include"
+		">#i{CURSOR}"	  不展开
 >
    :ab ;; <endofline>
-<		"test;;"	  is not expanded
-		"test ;;"	  is expanded to "test <endofline>"
+<		"test;;"	  不展开
+		"test ;;"	  展开为 "test <endofline>"
+要在插入模式中避免缩写：在会触发缩写的字符前输入 CTRL-V。
+例如 CTRL-V <Space>。或者输入部分缩写，用 <Esc> 退出插入模式，
+用 "a" 重新进入插入模式并输入剩余部分。
 
-To avoid the abbreviation in Insert mode: Type CTRL-V before the character
-that would trigger the abbreviation.  E.g. CTRL-V <Space>.  Or type part of
-the abbreviation, exit insert mode with <Esc>, re-enter insert mode with "a"
-and type the rest.
+要在命令行模式中避免缩写：在缩写中的某处输入两次 CTRL-V 以避免它被替换。
+否则，CTRL-V 在普通字符前大多会被忽略。
 
-To avoid the abbreviation in Command-line mode: Type CTRL-V twice somewhere in
-the abbreviation to avoid it to be replaced.  A CTRL-V in front of a normal
-character is mostly ignored otherwise.
-
-It is possible to move the cursor after an abbreviation: >
+可以在缩写后移动光标：>
    :iab if if ()<Left>
 
-You can even do more complicated things.  For example, to consume the space
-typed after an abbreviation: >
+你甚至可以做更复杂的事情。例如，要消耗在缩写后输入的空格：>
    func Eatchar(pat)
       let c = nr2char(getchar(0))
       return (c =~ a:pat) ? '' : c
    endfunc
    iabbr <silent> if if ()<Left><C-R>=Eatchar('\s')<CR>
 
-There are no default abbreviations.
+没有默认的缩写。
 
-Abbreviations are never recursive.  You can use ":ab f f-o-o" without any
-problem.  But abbreviations can be mapped.
+缩写永远不会递归。你可以使用 ":ab f f-o-o" 而不会有任何问题。
+但是缩写可以被映射。
 
 				*:abbreviate-local* *:abbreviate-<buffer>*
-Just like mappings, abbreviations can be local to a buffer.  This is mostly
-used in a |filetype-plugin| file.  Example for a C plugin file: >
+就像映射一样，缩写可以是缓冲区本地的。这主要用于 |filetype-plugin| 文件。
+C 插件文件的例子：>
 	:abb <buffer> FF  for (i = 0; i < ; ++i)
 <
 						*:ab* *:abbreviate*
-:ab[breviate]		list all abbreviations.  The character in the first
-			column indicates the mode where the abbreviation is
-			used: 'i' for insert mode, 'c' for Command-line
-			mode, '!' for both.  These are the same as for
-			mappings, see |map-listing|.
+:ab[breviate]		列出所有缩写。第一列中的字符表示使用缩写的模式：
+			'i' 表示插入模式，'c' 表示命令行模式，'!' 表示两者。
+			这些与映射相同，参见 |map-listing|。
 
 						*:abbreviate-verbose*
-When 'verbose' is non-zero, listing an abbreviation will also display where it
-was last defined.  Example: >
+当 'verbose' 非零时，列出缩写也会显示它最后定义的位置。例子：>
 
 	:verbose abbreviate
 	!  teh		 the
 		Last set from /home/abcd/vim/abbr.vim
 
-See |:verbose-cmd| for more information.
+有关更多信息，参见 |:verbose-cmd|。
 
-:ab[breviate] {lhs}	list the abbreviations that start with {lhs}
-			You may need to insert a CTRL-V (type it twice) to
-			avoid that a typed {lhs} is expanded, since
-			command-line abbreviations apply here.
+:ab[breviate] {lhs}	列出以 {lhs} 开头的缩写
+			你可能需要插入一个 CTRL-V（输入两次）来避免
+			输入的 {lhs} 被展开，因为命令行缩写在这里也适用。
 
 :ab[breviate] [<expr>] [<buffer>] {lhs} {rhs}
-			add abbreviation for {lhs} to {rhs}.  If {lhs} already
-			existed it is replaced with the new {rhs}.  {rhs} may
-			contain spaces.
-			See |:map-<expr>| for the optional <expr> argument.
-			See |:map-<buffer>| for the optional <buffer> argument.
-
+			为 {lhs} 添加缩写到 {rhs}。如果 {lhs} 已经存在，
+			它会被新的 {rhs} 替换。{rhs} 可能包含空格。
+			有关可选的 <expr> 参数，参见 |:map-<expr>|。
+			有关可选的 <buffer> 参数，参见 |:map-<buffer>|。
 						*:una* *:unabbreviate*
 :una[bbreviate] [<buffer>] {lhs}
-			Remove abbreviation for {lhs} from the list.  If none
-			is found, remove abbreviations in which {lhs} matches
-			with the {rhs}.  This is done so that you can even
-			remove abbreviations after expansion.  To avoid
-			expansion insert a CTRL-V (type it twice).
+			从列表中删除 {lhs} 的缩写。如果没有找到，
+			则删除 {lhs} 与 {rhs} 匹配的缩写。这样做是为了
+			让你甚至可以在展开后删除缩写。为了避免展开，
+			插入一个 CTRL-V（输入两次）。
 
 						*:norea* *:noreabbrev*
 :norea[bbrev] [<expr>] [<buffer>] [lhs] [rhs]
-			same as ":ab", but no remapping for this {rhs}
+			与 ":ab" 相同，但不对这个 {rhs} 进行重映射
 
 						*:ca* *:cab* *:cabbrev*
 :ca[bbrev] [<expr>] [<buffer>] [lhs] [rhs]
-			same as ":ab", but for Command-line mode only.
+			与 ":ab" 相同，但仅用于命令行模式。
 
 						*:cuna* *:cunabbrev*
 :cuna[bbrev] [<buffer>] {lhs}
-			Same as ":una", but for Command-line mode only.
+			与 ":una" 相同，但仅用于命令行模式。
 
 						*:cnorea* *:cnoreabbrev*
 :cnorea[bbrev] [<expr>] [<buffer>] [lhs] [rhs]
-			same as ":ab", but for Command-line mode only and no
-			remapping for this {rhs}
+			与 ":ab" 相同，但仅用于命令行模式且不对这个 {rhs} 进行重映射
 
 						*:ia* *:iabbrev*
 :ia[bbrev] [<expr>] [<buffer>] [lhs] [rhs]
-			same as ":ab", but for Insert mode only.
+			与 ":ab" 相同，但仅用于插入模式。
 
 						*:iuna* *:iunabbrev*
 :iuna[bbrev] [<buffer>] {lhs}
-			Same as ":una", but for insert mode only.
+			与 ":una" 相同，但仅用于插入模式。
 
 						*:inorea* *:inoreabbrev*
 :inorea[bbrev] [<expr>] [<buffer>] [lhs] [rhs]
-			same as ":ab", but for Insert mode only and no
-			remapping for this {rhs}
+			与 ":ab" 相同，但仅用于插入模式且不对这个 {rhs} 进行重映射
 
 							*:abc* *:abclear*
-:abc[lear] [<buffer>]	Remove all abbreviations.
+:abc[lear] [<buffer>]	删除所有缩写。
 
 							*:iabc* *:iabclear*
-:iabc[lear] [<buffer>]	Remove all abbreviations for Insert mode.
+:iabc[lear] [<buffer>]	删除插入模式的所有缩写。
 
 							*:cabc* *:cabclear*
-:cabc[lear] [<buffer>]	Remove all abbreviations for Command-line mode.
+:cabc[lear] [<buffer>]	删除命令行模式的所有缩写。
 
 							*using_CTRL-V*
-It is possible to use special characters in the rhs of an abbreviation.
-CTRL-V has to be used to avoid the special meaning of most non printable
-characters.  How many CTRL-Vs need to be typed depends on how you enter the
-abbreviation.  This also applies to mappings.  Let's use an example here.
+可以在缩写的 rhs 中使用特殊字符。必须使用 CTRL-V 来避免大多数非打印字符的特殊含义。
+需要输入多少个 CTRL-V 取决于你如何输入缩写。这也适用于映射。让我们在这里用一个例子。
 
-Suppose you want to abbreviate "esc" to enter an <Esc> character.  When you
-type the ":ab" command in Vim, you have to enter this: (here ^V is a CTRL-V
-and ^[ is <Esc>)
+假设你想将 "esc" 缩写为输入 <Esc> 字符。当你在 Vim 中输入 ":ab" 命令时，
+你必须输入这个：（这里 ^V 是 CTRL-V，^[ 是 <Esc>）
 
-You type:   ab esc ^V^V^V^V^V^[
+你输入：   ab esc ^V^V^V^V^V^[
 
-	All keyboard input is subjected to ^V quote interpretation, so
-	the first, third, and fifth ^V  characters simply allow the second,
-	and fourth ^Vs, and the ^[, to be entered into the command-line.
+	所有键盘输入都经过 ^V 引号解释，所以
+	第一个、第三个和第五个 ^V 字符只是允许第二个、
+	第四个 ^V 和 ^[ 被输入到命令行中。
 
-You see:    ab esc ^V^V^[
+你看到：    ab esc ^V^V^[
 
-	The command-line contains two actual ^Vs before the ^[.  This is
-	how it should appear in your vimrc file, if you choose to go that
-	route.  The first ^V is there to quote the second ^V; the :ab
-	command uses ^V as its own quote character, so you can include quoted
-	whitespace or the | character in the abbreviation.  The :ab command
-	doesn't do anything special with the ^[ character, so it doesn't need
-	to be quoted.  (Although quoting isn't harmful; that's why typing 7
-	[but not 8!] ^Vs works.)
+	命令行包含两个实际的 ^V，后面是 ^[。这应该
+	出现在你的 vimrc 文件中，如果你选择这样做的话。
+	第一个 ^V 是用来引用第二个 ^V；:ab 命令使用 ^V 作为
+	它自己的引号字符，这样你可以在缩写中包含引用的
+	空格或 | 字符。:ab 命令对 ^[ 字符不做任何特殊处理，
+	所以它不需要被引用。（虽然引用没有害处；这就是为什么
+	输入 7 个 [但不是 8 个！] ^V 可以工作。）
 
-Stored as:  esc     ^V^[
+存储为：  esc     ^V^[
 
-	After parsing, the abbreviation's short form ("esc") and long form
-	(the two characters "^V^[") are stored in the abbreviation table.
-	If you give the :ab command with no arguments, this is how the
-	abbreviation will be displayed.
+	解析后，缩写的短形式（"esc"）和长形式
+	（两个字符 "^V^["）被存储在缩写表中。
+	如果你不带参数给出 :ab 命令，这就是缩写
+	将如何显示。
 
-	Later, when the abbreviation is expanded because the user typed in
-	the word "esc", the long form is subjected to the same type of
-	^V interpretation as keyboard input.  So the ^V protects the ^[
-	character from being interpreted as the "exit Insert mode" character.
-	Instead, the ^[ is inserted into the text.
+	后来，当缩写因为用户输入了单词 "esc" 而被展开时，
+	长形式会经过与键盘输入相同类型的 ^V 解释。
+	所以 ^V 保护 ^[ 字符不被解释为"退出插入模式"字符。
+	相反，^[ 被插入到文本中。
 
-Expands to: ^[
+展开为： ^[
 
-[example given by Steve Kirkendall]
-
+[例子由 Steve Kirkendall 提供]
 ==============================================================================
-3. Local mappings and functions				*script-local*
+3. 本地映射和函数				*script-local*
 
-When using several Vim script files, there is the danger that mappings and
-functions used in one script use the same name as in other scripts.  To avoid
-this, they can be made local to the script.
+当使用多个 Vim 脚本文件时，存在一个脚本中使用的映射和函数与
+其他脚本中使用相同名称的危险。为了避免这种情况，可以将它们设为脚本本地。
 
 						*<SID>* *<SNR>* *E81*
-The string "<SID>" can be used in a mapping or menu.  This is useful if you
-have a script-local function that you want to call from a mapping in the same
-script.
-   When executing the map command, Vim will replace "<SID>" with the special
-key code <SNR>, followed by a number that's unique for the script, and an
-underscore.  Example: >
+字符串 "<SID>" 可以在映射或菜单中使用。这在你有想要从同一脚本中的
+映射调用的脚本本地函数时很有用。
+   当执行 map 命令时，Vim 会将 "<SID>" 替换为特殊键码 <SNR>，
+后面跟着一个对脚本唯一的数字，和一个下划线。例子：>
 	:map <SID>Add
-would define a mapping "<SNR>23_Add".
+将定义一个映射 "<SNR>23_Add"。
 
-When defining a function in a script, "s:" can be prepended to the name to
-make it local to the script.  But when a mapping is executed from outside of
-the script, it doesn't know in which script the function was defined.  To
-avoid this problem, use "<SID>" instead of "s:".  The same translation is done
-as for mappings.  This makes it possible to define a call to the function in
-a mapping.
+当在脚本中定义函数时，可以在名称前加上 "s:" 使其成为脚本本地。
+但是当从脚本外部执行映射时，它不知道函数是在哪个脚本中定义的。
+为了避免这个问题，使用 "<SID>" 而不是 "s:"。进行与映射相同的转换。
+这使得可以在映射中定义对函数的调用。
 
-When a local function is executed, it runs in the context of the script it was
-defined in.  This means that new functions and mappings it defines can also
-use "s:" or "<SID>" and it will use the same unique number as when the
-function itself was defined.  Also, the "s:var" local script variables can be
-used.
+当执行本地函数时，它在定义它的脚本的上下文中运行。这意味着它定义的
+新函数和映射也可以使用 "s:" 或 "<SID>"，它将使用与函数本身定义时
+相同的唯一数字。此外，可以使用 "s:var" 本地脚本变量。
 
-When executing an autocommand or a user command, it will run in the context of
-the script it was defined in.  This makes it possible that the command calls a
-local function or uses a local mapping.
+当执行自动命令或用户命令时，它将在定义它的脚本的上下文中运行。
+这使得命令可以调用本地函数或使用本地映射。
 
-In case the value is used in a context where <SID> cannot be correctly
-expanded, use the expand() function: >
+如果值在 <SID> 无法正确展开的上下文中使用，使用 expand() 函数：>
 	let &includexpr = expand('<SID>') .. 'My_includeexpr()'
 
-Otherwise, using "<SID>" outside of a script context is an error.
+否则，在脚本上下文之外使用 "<SID>" 是错误的。
 
-If you need to get the script number to use in a complicated script, you can
-use this function: >
+如果你需要获取脚本编号以在复杂脚本中使用，你可以使用这个函数：>
 	func s:ScriptNumber()
 	  return matchstr(expand('<SID>'), '<SNR>\zs\d\+\ze_')
 	endfunc
 
-The "<SNR>" will be shown when listing functions and mappings.  This is useful
-to find out what they are defined to.
+"<SNR>" 将在列出函数和映射时显示。这对于找出它们定义为什么很有用。
 
-The |:scriptnames| command can be used to see which scripts have been sourced
-and what their <SNR> number is.
+|:scriptnames| 命令可用于查看哪些脚本已被加载以及它们的 <SNR> 编号是什么。
 
 ==============================================================================
-4. User-defined commands				*user-commands*
+4. 用户定义的命令				*user-commands*
 
-It is possible to define your own Ex commands.  A user-defined command can act
-just like a built-in command (it can have a range or arguments, arguments can
-be completed as filenames or buffer names, etc), except that when the command
-is executed, it is transformed into a normal Ex command and then executed.
+可以定义自己的 Ex 命令。用户定义的命令可以像内置命令一样工作
+（它可以有范围或参数，参数可以作为文件名或缓冲区名完成，等等），
+除了当命令被执行时，它被转换为普通的 Ex 命令然后执行。
 
-For starters: See section |40.2| in the user manual.
+入门：参见用户手册中的 |40.2| 节。
 
 					*E183* *E841* *user-cmd-ambiguous*
-All user defined commands must start with an uppercase letter, to avoid
-confusion with builtin commands.  Exceptions are these builtin commands:
+所有用户定义的命令必须以大写字母开头，以避免与内置命令混淆。
+这些内置命令除外：
 	:Next
-They cannot be used for a user defined command.
+它们不能用于用户定义的命令。
 
-The other characters of the user command can be uppercase letters, lowercase
-letters or digits.  When using digits, note that other commands that take a
-numeric argument may become ambiguous.  For example, the command ":Cc2" could
-be the user command ":Cc2" without an argument, or the command ":Cc" with
-argument "2".  It is advised to put a space between the command name and the
-argument to avoid these problems.
+用户命令的其他字符可以是大写字母、小写字母或数字。使用数字时，
+注意其他接受数字参数的命令可能会变得模糊。例如，命令 ":Cc2" 可能是
+没有参数的用户命令 ":Cc2"，或者是带参数 "2" 的命令 ":Cc"。
+建议在命令名和参数之间放一个空格以避免这些问题。
+使用用户定义的命令时，命令可以被缩写。但是，如果缩写不唯一，
+将发出错误。此外，内置命令将始终优先。
 
-When using a user-defined command, the command can be abbreviated.  However, if
-an abbreviation is not unique, an error will be issued.  Furthermore, a
-built-in command will always take precedence.
-
-Example: >
+例子：>
 	:command Rename ...
 	:command Renumber ...
-	:Rena				" Means "Rename"
-	:Renu				" Means "Renumber"
-	:Ren				" Error - ambiguous
+	:Rena				" 表示 "Rename"
+	:Renu				" 表示 "Renumber"
+	:Ren				" 错误 - 模糊
 	:command Paste ...
 
-It is recommended that full names for user-defined commands are used in
-scripts.
+建议在脚本中使用用户定义命令的完整名称。
 
 :com[mand]						*:com* *:command*
-			List all user-defined commands.  When listing commands,
-			the characters in the first columns are:
-			    !	Command has the -bang attribute
-			    "	Command has the -register attribute
-			    |   Command has the -bar attribute
-			    b	Command is local to current buffer
-			(see below for details on attributes)
-			The list can be filtered on command name with
-			|:filter|, e.g., to list all commands with "Pyth" in
-			the name: >
+			列出所有用户定义的命令。列出命令时，
+			第一列中的字符是：
+			    !	命令有 -bang 属性
+			    "	命令有 -register 属性
+			    |   命令有 -bar 属性
+			    b	命令是当前缓冲区的本地命令
+			（有关属性的详细信息，请参见下文）
+			可以使用 |:filter| 按命令名过滤列表，
+			例如，列出名称中包含 "Pyth" 的所有命令：>
 				filter Pyth command
 
-:com[mand] {cmd}	List the user-defined commands that start with {cmd}
+:com[mand] {cmd}	列出以 {cmd} 开头的用户定义的命令
 
 							*:command-verbose*
-When 'verbose' is non-zero, listing a command will also display where it was
-last defined and any completion argument. Example: >
+当 'verbose' 非零时，列出命令也会显示它最后定义的位置和任何完成参数。
+例子：>
 
     :verbose command TOhtml
 <	Name	    Args Range Complete  Definition ~
 	TOhtml	    0	 %		 :call Convert2HTML(<line1>, <line2>) ~
 	    Last set from /usr/share/vim/vim-7.0/plugin/tohtml.vim ~
 
-See |:verbose-cmd| for more information.
+有关更多信息，参见 |:verbose-cmd|。
 
 							*E174* *E182*
 :com[mand][!] [{attr}...] {cmd} {repl}
-			Define a user command.  The name of the command is
-			{cmd} and its replacement text is {repl}.  The
-			command's attributes (see below) are {attr}.  If the
-			command already exists, an error is reported, unless a
-			! is specified, in which case the command is
-			redefined.  There is one exception: When sourcing a
-			script again, a command that was previously defined in
-			that script will be silently replaced.
+			定义用户命令。命令的名称是 {cmd}，其替换文本是 {repl}。
+			命令的属性（见下文）是 {attr}。如果命令已经存在，
+			将报告错误，除非指定了 !，在这种情况下命令将被重新定义。
+			有一个例外：当再次加载脚本时，之前在该脚本中定义的
+			命令将被静默替换。
 
 
 :delc[ommand] {cmd}				*:delc* *:delcommand* *E184*
-			Delete the user-defined command {cmd}.
+			删除用户定义的命令 {cmd}。
 
 :delc[ommand] -buffer {cmd}					*E1237*
-			Delete the user-defined command {cmd} that was defined
-			for the current buffer.
+			删除为当前缓冲区定义的用户定义的命令 {cmd}。
 
 :comc[lear]						*:comc* *:comclear*
-			Delete all user-defined commands.
-
-
-Command attributes ~
+			删除所有用户定义的命令。
+命令属性 ~
 							*command-attributes*
-Nvim 对待用户定义的命令就像对待任何其他 Ex 命令一样。
-它们可以有参数，也可以指定范围。
-参数可以作为文件名、缓冲区等完成。
-具体如何工作取决于命令的属性，这些属性在定义命令时指定。
+Nvim 将用户定义的命令视为任何其他 Ex 命令。它们可以有参数，或指定范围。
+参数可以作为文件名、缓冲区等进行补全。具体工作方式取决于命令的属性，
+这些属性在定义命令时指定。
 
-在脚本中定义用户命令时，它将能够调用脚本本地的函数并使用脚本本地的映射。
-当用户调用用户命令时，它将在定义它的脚本的上下文中运行。
-如果在命令中使用 |<SID>|，这一点很重要。
+当在脚本中定义用户命令时，它将能够调用脚本本地的函数和使用脚本本地的映射。
+当用户调用用户命令时，它将在定义它的脚本的上下文中运行。如果命令中使用了
+|<SID>|，这一点很重要。
 
-有许多属性，分为四类：参数处理、完成行为、范围处理和特殊情况。
-下面按类别描述了这些属性。
-
+有许多属性，分为四类：参数处理、补全行为、范围处理和特殊情况。
+这些属性按类别描述如下。
 
 
-对于“custom”参数，不需要根据 ArgLead 中的（隐式模式）过滤候选项。
-Vim 将在函数返回后使用其正则表达式引擎过滤候选项，这在大多数情况下可能更有效。
-如果'wildoptions' 包含“fuzzy”，则将使用|fuzzy-matching| 过滤候选项。
-对于“customlist”参数，Vim 将不会过滤返回的完成候选项，而用户提供的函数应该过滤候选项。
+参数处理 ~
+						*E175* *E176* *:command-nargs*
+默认情况下，用户定义的命令不接受参数（如果提供了任何参数，将报告错误）。
+但是，可以使用 -nargs 属性指定命令可以接受参数。有效的情况是：
 
-The following example lists user names to a Finger command >
+	-nargs=0    不允许参数（默认）
+	-nargs=1    需要恰好一个参数，包括空格
+	-nargs=*    允许任意数量的参数（0、1 或多个），
+		    由空白字符分隔
+	-nargs=?    允许 0 或 1 个参数
+	-nargs=+    必须提供参数，但允许任意数量
+
+在这种情况下，参数被认为是由（未转义的）空格或制表符分隔的，
+除了当只有一个参数时，空白字符是参数的一部分。
+
+注意，参数作为文本使用，而不是作为表达式。具体来说，
+"s:var" 将使用命令定义所在脚本中的脚本本地变量，而不是调用它的地方！
+例子：
+    script1.vim: >
+	:let s:error = "None"
+	:command -nargs=1 Error echoerr <args>
+<   script2.vim: >
+	:source script1.vim
+	:let s:error = "Wrong!"
+	:Error s:error
+执行 script2.vim 将导致 "None" 被回显。这不是你想要的！
+调用函数可能是一个替代方案。
+
+补全行为 ~
+				*:command-completion* *E179* *E180* *E181*
+				*:command-complete*
+默认情况下，用户定义命令的参数不进行补全。但是，通过指定以下属性之一，
+可以启用参数补全：
+
+	-complete=arglist	参数列表中的文件名
+	-complete=augroup	自动命令组
+	-complete=breakpoint	|:breakadd| 子选项
+	-complete=buffer	缓冲区名称
+	-complete=color	颜色方案
+	-complete=command	Ex 命令（和参数）
+	-complete=compiler	编译器
+	-complete=diff_buffer	差异缓冲区名称
+	-complete=dir	目录名称
+	-complete=dir_in_path	|'cdpath'| 中的目录名称
+	-complete=environment	环境变量名称
+	-complete=event	自动命令事件
+	-complete=expression	Vim 表达式
+	-complete=file	文件和目录名称
+	-complete=file_in_path	|'path'| 中的文件和目录名称
+	-complete=filetype	文件类型名称 |'filetype'|
+	-complete=function	函数名
+	-complete=help	帮助主题
+	-complete=highlight	高亮组
+	-complete=history	|:history| 子选项
+	-complete=keymap	键盘映射
+	-complete=locale	区域设置名称（locale -a 的输出）
+	-complete=lua	Lua 表达式 |:lua|
+	-complete=mapclear	缓冲区参数
+	-complete=mapping	映射名称
+	-complete=menu	菜单
+	-complete=messages	|:messages| 子选项
+	-complete=option	选项
+	-complete=packadd	可选包 |pack-add| 名称
+	-complete=runtime	|'runtimepath'| 中的文件和目录名称
+	-complete=scriptnames	已加载的脚本名称
+	-complete=shellcmd	Shell 命令
+	-complete=shellcmdline	第一个是 shell 命令，后续的是文件名。
+			与 |:!cmd| 相同的行为
+	-complete=sign	|:sign| 子选项
+	-complete=syntax	语法文件名 |'syntax'|
+	-complete=syntime	|:syntime| 子选项
+	-complete=tag	标签
+	-complete=tag_listfiles	标签，当按下 CTRL-D 时显示文件名
+	-complete=user	用户名
+	-complete=var	用户变量
+	-complete=custom,{func} 自定义补全，通过 {func} 定义
+	-complete=customlist,{func} 自定义补全，通过 {func} 定义
+如果你在没有任何可补全内容的情况下指定补全（-nargs=0，默认值），
+那么你会得到错误 *E1208*。
+注意：某些补全方法可能会展开环境变量。
+
+
+自定义补全 ~
+				*:command-completion-custom*
+				*:command-completion-customlist* *E467* *E468*
+可以通过 "custom,{func}" 或 "customlist,{func}" 补全参数定义自定义补全方案。
+{func} 部分应该是一个具有以下签名的函数：>
+
+	:function {func}(ArgLead, CmdLine, CursorPos)
+
+函数不需要使用所有这些参数。函数应该将补全候选项作为返回值提供。
+
+对于 "custom" 参数，函数应该在新行分隔的字符串中每行返回一个补全候选项。
+
+对于 "customlist" 参数，函数应该将补全候选项作为 Vim 列表返回。
+列表中的非字符串项将被忽略。
+
+函数参数是：
+	ArgLead		当前正在补全的参数的前导部分
+	CmdLine		整个命令行
+	CursorPos	其中的光标位置（字节索引）
+函数可以使用这些来确定上下文。对于 "custom" 参数，
+不需要根据 ArgLead 中的（隐式模式）过滤候选项。
+Vim 将在函数返回后使用其正则表达式引擎过滤候选项，
+这在大多数情况下可能更有效。如果 'wildoptions' 包含 "fuzzy"，
+则候选项将使用 |fuzzy-matching| 进行过滤。
+对于 "customlist" 参数，Vim 不会过滤返回的补全候选项，
+用户提供的函数应该过滤候选项。
+
+以下示例列出了 Finger 命令的用户名：>
     :com -complete=custom,ListUsers -nargs=1 Finger !finger <args>
     :fun ListUsers(A,L,P)
     :    return system("cut -d: -f1 /etc/passwd")
     :endfun
 
-The following example completes filenames from the directories specified in
-the 'path' option: >
+以下示例从 'path' 选项指定的目录中补全文件名：>
     :com -nargs=1 -bang -complete=customlist,EditFileComplete
 			\ EditFile edit<bang> <args>
     :fun EditFileComplete(A,L,P)
     :    return split(globpath(&path, a:A), "\n")
     :endfun
 <
-This example does not work for file names with spaces!
+这个例子对带空格的文件名不起作用！
 
 
+范围处理 ~
+				*E177* *E178* *:command-range* *:command-count*
+默认情况下，用户定义的命令不接受行号范围。但是，可以指定命令接受范围
+（-range 属性），或者它接受任意计数值，要么在行号位置（-range=N，
+像 |:split| 命令），要么作为 "count" 参数（-count=N，像 |:Next| 命令）。
+然后计数将在参数中通过 |<count>| 可用。
 
--range    允许的范围，默认为当前行
--range=%  允许的范围，默认为整个文件 (1,$)
--range=N  在行号位置指定的计数（默认为 N）（如 |:split|）；允许零行号。
--count=N  在行号位置或作为初始参数指定的计数（默认为 N）（如 |:Next|）。
--count    作用类似于 -count=0
+可能的属性是：
 
-请注意，-range=N 和 -count=N 是互斥的 - 只能指定一个。
+	-range	    允许范围，默认为当前行
+	-range=%    允许范围，默认为整个文件（1,$）
+	-range=N    一个计数（默认 N），在行号位置指定（像 |:split|）；
+		    允许零行号。
+	-count=N    一个计数（默认 N），可以在行号位置指定，
+		    或作为初始参数（像 |:Next|）。
+	-count	    像 -count=0 一样工作
 
+注意 -range=N 和 -count=N 是互斥的 - 只应指定一个。
 
+                                                  *:command-addr*
+范围中的特殊字符如 `.`、`$` 或 `%`（默认对应当前行、最后一行和整个缓冲区）
+可能与参数、（已加载的）缓冲区、窗口或标签页相关。
 
+可能的值是（第二列是列出时使用的短名称）：
+    -addr=lines			行范围（这是 -range 的默认值）
+    -addr=arguments	  arg	参数范围
+    -addr=buffers	  buf	缓冲区范围（也包括未加载的缓冲区）
+    -addr=loaded_buffers  load	已加载缓冲区范围
+    -addr=windows	  win	窗口范围
+    -addr=tabs		  tab	标签页范围
+    -addr=quickfix	  qf	quickfix 条目范围
+    -addr=other		  ?	其他类型的范围；可以像 "lines" 一样使用 "."、"$" 和 "%"
+				（这是 -count 的默认值）
 增量预览 ~
-*:command-preview* {nvim-api}
-命令可以通过定义预览处理程序（仅限 Lua，请参阅 |nvim_create_user_command()|）
-显示“inccommand”（键入时）预览。
+                                                  *:command-preview* {nvim-api}
+命令可以通过定义预览处理程序来显示 'inccommand'（输入时）预览
+（仅从 Lua，参见 |nvim_create_user_command()|）。
 
-在执行预览回调之前，Nvim 将暂时禁用“cursorline”和“cursorcolumn”，以避免突出显示问题。
+在执行预览回调之前，Nvim 将临时禁用 'cursorline' 和 'cursorcolumn'
+以避免高亮问题。
 
-预览回调必须是具有以下签名的 Lua 函数：>
+预览回调必须是一个具有以下签名的 Lua 函数：>
 
-function cmdpreview(opts, ns, buf)
+    function cmdpreview(opts, ns, buf)
 <
-其中“opts”的形式与 |nvim_create_user_command()| 的形式相同
-回调，“ns”是突出显示的预览命名空间 ID，“buf”是预览例程将直接修改以显示预览结果的缓冲区（对于“inccommand=split”，或对于“inccommand=nosplit”为 nil）。
+其中 "opts" 与给 |nvim_create_user_command()| 回调的形式相同，
+"ns" 是高亮的预览命名空间 ID，"buf" 是你的预览例程将直接修改
+以显示预览结果的缓冲区（对于 "inccommand=split"，或对于
+"inccommand=nosplit" 为 nil）。
 
-您的命令预览例程必须实现此协议：
+你的命令预览例程必须实现这个协议：
 
-1. 根据预览的需要修改目标缓冲区（请参阅
-|nvim_buf_set_text()| 和 |nvim_buf_set_lines()|）。
+1. 根据需要修改目标缓冲区以进行预览（参见 |nvim_buf_set_text()|
+   和 |nvim_buf_set_lines()|）。
+2. 如果提供了预览缓冲区，向预览缓冲区添加必要的文本。
+3. 向目标缓冲区添加所需的高亮。如果提供了预览缓冲区，
+   也向预览缓冲区添加所需的高亮。所有高亮必须添加到作为参数
+   提供给预览回调的预览命名空间（参见 |vim.hl.range()| 和
+   |nvim_buf_set_extmark()| 了解如何向命名空间添加高亮）。
+4. 返回一个整数（0、1、2），控制 Nvim 的行为如下：
+   0：不显示预览。
+   1：显示预览但不显示预览窗口（即使设置了 "inccommand=split"）。
+   2：显示预览并打开预览窗口（如果设置了 "inccommand=split"）。
+      对于 "inccommand=nosplit"，这与 1 相同。
 
-2. 如果提供了预览缓冲区，则将必要的文本添加到预览缓冲区。
+预览结束后，Nvim 会丢弃预览期间对所有缓冲区的所有更改，
+并清除预览命名空间中的所有高亮。
 
-3. 将所需的突出显示添加到目标缓冲区。
-如果提供了预览缓冲区，则还将所需的突出显示添加到预览缓冲区。
-所有突出显示都必须添加到预览命名空间，该命名空间作为预览回调的参数提供（有关如何将突出显示添加到命名空间的帮助，请参阅 |vim.hl.range()| 和
-|nvim_buf_set_extmark()|）。
-
-4. 返回一个整数（0、1、2），控制 Nvim 的行为方式如下：
-
-0：不显示预览。
-
-1：显示预览时不显示预览窗口（即使使用“inccommand=split”）。
-
-2：显示预览并打开预览窗口（如果“inccommand=split”）。
-对于“inccommand=nosplit”，这与 1 相同。
-
-预览结束后，Nvim 会丢弃预览期间对所有缓冲区所做的所有更改
-并清除预览命名空间中的所有高亮显示。
-
-以下是一个用于修剪行尾空格的命令示例，该命令支持增量命令预览：
->
-	-- If invoked as a preview callback, performs 'inccommand' preview by
-	-- highlighting trailing whitespace in the current buffer.
+这是一个支持增量命令预览的修剪行尾空格的命令示例：>
+	-- 如果作为预览回调调用，通过高亮当前缓冲区中的尾随空格
+	-- 执行 'inccommand' 预览。
 	local function trim_space_preview(opts, preview_ns, preview_buf)
 	  vim.cmd('hi clear Whitespace')
 	  local line1 = opts.line1
@@ -1430,7 +1356,7 @@ function cmdpreview(opts, ns, buf)
 	    local start_idx, end_idx = string.find(line, '%s+$')
 
 	    if start_idx then
-	      -- Highlight the match
+	      -- 高亮匹配
 	      vim.hl.range(
 	        buf,
 	        preview_ns,
@@ -1439,8 +1365,7 @@ function cmdpreview(opts, ns, buf)
 	        {line1 + i - 2, end_idx},
 	      )
 
-	      -- Add lines and set highlights in the preview buffer
-	      -- if inccommand=split
+	      -- 如果 inccommand=split，向预览缓冲区添加行并设置高亮
 	      if preview_buf then
 	        local prefix = string.format('|%d| ', line1 + i - 1)
 
@@ -1463,11 +1388,11 @@ function cmdpreview(opts, ns, buf)
 	    end
 	  end
 
-	  -- Return the value of the preview type
+	  -- 返回预览类型的值
 	  return 2
 	end
 
-	-- Trims all trailing whitespace in the current buffer.
+	-- 修剪当前缓冲区中的所有尾随空格。
 	local function trim_space(opts)
 	  local line1 = opts.line1
 	  local line2 = opts.line2
@@ -1481,66 +1406,64 @@ function cmdpreview(opts, ns, buf)
 	  vim.api.nvim_buf_set_lines(buf, line1 - 1, line2, false, new_lines)
 	end
 
-	-- Create the user command
+	-- 创建用户命令
 	vim.api.nvim_create_user_command(
 	  'TrimTrailingWhitespace',
 	  trim_space,
 	  { nargs = '?', range = '%', addr = 'lines', preview = trim_space_preview }
 	)
-<
-
-
-Special cases ~
+特殊情况 ~
 					*:command-bang* *:command-bar*
 					*:command-register* *:command-buffer*
 					*:command-keepscript*
 还有一些特殊情况：
 
--bang       命令可以采用 ! 修饰符（如 :q 或 :w）
--bar        命令后可以跟一个“|”和另一个命令。
-            那么命令参数中不允许出现“|”。
-            还会检查是否以“”开头注释。
--register   命令的第一个参数可以是可选的寄存器名称（如 :del、:put、:yank）。
--buffer     命令仅在当前缓冲区中可用。
--keepscript 不要使用定义用户命令的位置来显示详细消息，而要使用调用用户命令的位置。
+	-bang	    命令可以接受 ! 修饰符（如 :q 或 :w）
+	-bar	    命令后面可以跟 "|" 和另一个命令。
+		    然后不允许在命令参数中使用 "|"。
+		    还检查 " 来开始注释。
+	-register   命令的第一个参数可以是可选的寄存器名称
+		   （如 :del、:put、:yank）。
+	-buffer	    命令仅在当前缓冲区中可用。
+	-keepscript 不要使用用户命令定义的位置来显示详细消息，
+		   使用用户命令调用的位置。
 
-对于 -count 和 -register 属性，如果提供了可选参数，则该参数将从参数列表中删除，
-并单独提供给替换文本。
-请注意，这些参数可以缩写，但这是已弃用的功能。对新脚本使用全名。
+对于 -count 和 -register 属性，如果提供了可选参数，
+它会被从参数列表中移除，并单独提供给替换文本。
+注意，这些参数可以缩写，但这是一个已弃用的功能。
+对于新脚本，请使用完整名称。
 
 
 替换文本 ~
 
-使用 <...> 符号扫描用户定义命令的替换文本 {repl} 以查找特殊转义序列。
-转义序列将替换为输入的命令行中的值，所有其他文本将保持不变。
-结果字符串将作为 Ex 命令执行。要避免替换请使用 <lt> 代替初始 <。
-因此，要包含“<bang>”，请按字面意思使用“<lt>bang>”。
+用户定义命令的替换文本 {repl} 会被扫描特殊转义序列，使用 <...> 表示法。
+转义序列会被替换为从输入的命令行中获取的值，所有其他文本会被原样复制。
+结果字符串会作为 Ex 命令执行。要避免替换，使用 <lt> 代替初始的 <。
+因此，要字面包含 "<bang>"，使用 "<lt>bang>"。
 
-The valid escape sequences are
+有效的转义序列是
 
 						*<line1>*
-	<line1>	The starting line of the command range.
+	<line1>	命令范围的起始行。
 						*<line2>*
-	<line2>	The final line of the command range.
+	<line2>	命令范围的结束行。
 						*<range>*
-	<range> The number of items in the command range: 0, 1 or 2
+	<range> 命令范围中的项目数：0、1 或 2
 						*<count>*
-	<count>	Any count supplied (as described for the '-range'
-		and '-count' attributes).
+	<count>	提供的任何计数（如 -range 和 -count 属性所述）。
 						*<bang>*
-	<bang>	(See the '-bang' attribute) Expands to a ! if the
-		command was executed with a ! modifier, otherwise
-		expands to nothing.
+	<bang>	（参见 -bang 属性）如果命令执行时带有 ! 修饰符，
+		则展开为 !，否则展开为空。
 					*<mods>* *<q-mods>* *:command-modifiers*
-	<mods>  The command modifiers, if specified. Otherwise, expands to
-		nothing. Supported modifiers are |:aboveleft|, |:belowright|,
-		|:botright|, |:browse|, |:confirm|, |:hide|, |:horizontal|,
-		|:keepalt|, |:keepjumps|, |:keepmarks|, |:keeppatterns|,
-		|:leftabove|, |:lockmarks|, |:noautocmd|, |:noswapfile|,
-		|:rightbelow|, |:sandbox|, |:silent|, |:tab|, |:topleft|,
-		|:unsilent|, |:verbose|, and |:vertical|.
-		Note that |:filter| is not supported.
-		Examples: >
+	<mods>  如果指定了命令修饰符。否则，展开为空。支持的修饰符是
+		|:aboveleft|、|:belowright|、|:botright|、|:browse|、
+		|:confirm|、|:hide|、|:horizontal|、|:keepalt|、
+		|:keepjumps|、|:keepmarks|、|:keeppatterns|、
+		|:leftabove|、|:lockmarks|、|:noautocmd|、|:noswapfile|、
+		|:rightbelow|、|:sandbox|、|:silent|、|:tab|、
+		|:topleft|、|:unsilent|、|:verbose| 和 |:vertical|。
+		注意不支持 |:filter|。
+		例子：>
 		    command! -nargs=+ -complete=file MyEdit
 				\ for f in expand(<q-args>, 0, 1) |
 				\ exe '<mods> split ' .. f |
@@ -1555,29 +1478,29 @@ The valid escape sequences are
 				\ call SpecialEdit(<q-args>, <q-mods>)
 <
 						*<reg>* *<register>*
-	<reg>	(See the '-register' attribute) The optional register,
-		if specified.  Otherwise, expands to nothing.  <register>
-		is a synonym for this.
+	<reg>	（参见 -register 属性）如果指定了可选的寄存器。
+		否则，展开为空。<register> 是这个的同义词。
 						*<args>*
-	<args>	The command arguments, exactly as supplied (but as
-		noted above, any count or register can consume some
-		of the arguments, which are then not part of <args>).
-	<lt>	A single '<' (Less-Than) character.  This is needed if you
-		want to get a literal copy of one of these escape sequences
-		into the expansion - for example, to get <bang>, use
-		<lt>bang>.
-
+	<args>	命令参数，完全按照提供的方式（但如上所述，
+		任何计数或寄存器可能会消耗一些参数，
+		这些参数就不是 <args> 的一部分）。
+	<lt>	单个 '<'（小于）字符。如果你想要在展开中
+		获得这些转义序列之一的字面副本，这是必需的 -
+		例如，要获得 <bang>，使用 <lt>bang>。
 							*<q-args>*
-如果转义序列的前两个字符是“q-”（例如，
-<q-args>），则该值将以某种方式引用，使其成为表达式中使用的有效值。这会将参数用作一个单一值。
-当没有参数时，<q-args> 为空字符串。请参阅下面的
-|q-args-example|。
+如果转义序列的前两个字符是 "q-"（例如，<q-args>），
+则该值会被引用，使其成为在表达式中使用的有效值。
+这使用参数作为单个值。当没有参数时 <q-args> 是空字符串。
+参见下面的 |q-args-example|。
 							*<f-args>*
-为了允许命令将其参数传递给用户定义的函数，有一种特殊形式 <f-args>（“函数参数”）。这会在空格和制表符处拆分命令参数，单独引用每个参数，并且 <f-args> 序列将替换为以逗号分隔的引用参数列表。
-请参见下面的 Mycmd 示例。如果没有给出参数，则删除 <f-args>。
-要将空格嵌入到 <f-args> 的参数中，请在前面添加一个反斜杠。
-<f-args> 将每对反斜杠 (\\) 替换为一个反斜杠。
-反斜杠后跟空格或反斜杠以外的字符将保持不变。另请参见下面的 |f-args-example|。概述：
+为了允许命令将其参数传递给用户定义的函数，有一个特殊形式 <f-args>
+（"function args"）。这会在空格和制表符处分割命令参数，
+单独引用每个参数，<f-args> 序列会被替换为逗号分隔的引用参数列表。
+参见下面的 Mycmd 例子。如果没有给出参数，<f-args> 会被移除。
+   要在 <f-args> 的参数中嵌入空白字符，在前面加上反斜杠。
+<f-args> 将每对反斜杠（\\）替换为一个反斜杠。反斜杠后跟
+非空白字符或非反斜杠的字符保持不变。另见下面的 |f-args-example|。
+概述：
 
 	command		   <f-args> ~
 	XX ab		   "ab"
@@ -1593,36 +1516,35 @@ The valid escape sequences are
 	XX		   [nothing]
 
 
-Note that if the "no arguments" situation is to be handled, you have to make
-sure that the function can be called without arguments.
+注意，如果要处理"无参数"的情况，你必须确保函数可以在没有参数的情况下调用。
 
-Examples for user commands: >
+用户命令的例子：>
 
-   " Delete everything after here to the end
+   " 删除从这里到末尾的所有内容
    :com Ddel +,$d
 
-   " Rename the current buffer
+   " 重命名当前缓冲区
    :com -nargs=1 -bang -complete=file Ren f <args>|w<bang>
 
-   " Replace a range with the contents of a file
-   " (Enter this all as one line)
+   " 用文件内容替换范围
+   " （将所有这些作为一行输入）
    :com -range -nargs=1 -complete=file
 	 Replace <line1>-pu_|<line1>,<line2>d|r <args>|<line1>d
 
-   " Count the number of lines in the range
+   " 计算范围内的行数
    :com! -range -nargs=0 Lines  echo <line2> - <line1> + 1 "lines"
 
 <						*f-args-example*
-Call a user function (example of <f-args>) >
+调用用户函数（<f-args> 的例子）>
    :com -nargs=* Mycmd call Myfunc(<f-args>)
 
-When executed as: >
+当执行：>
 	:Mycmd arg1 arg2
-This will invoke: >
+这将调用：>
 	:call Myfunc("arg1","arg2")
 
 <						*q-args-example*
-A more substantial example: >
+一个更实质性的例子：>
    :function Allargs(command)
    :   let i = 0
    :   while i < argc()
@@ -1635,9 +1557,10 @@ A more substantial example: >
    :endfunction
    :command -nargs=+ -complete=command Allargs call Allargs(<q-args>)
 
-命令 Allargs 将任何 Vim 命令作为参数，并在参数列表中的所有文件上执行该命令。使用示例（请注意使用“e”标志忽略错误和使用“update”命令写入修改后的缓冲区）：>
+Allargs 命令接受任何 Vim 命令（s）作为参数，并在参数列表中的所有文件上执行它。
+使用例子（注意使用 "e" 标志忽略错误和使用 "update" 命令写入修改的缓冲区）：>
 	:Allargs %s/foo/bar/ge|update
-This will invoke: >
+这将调用：>
 	:call Allargs("%s/foo/bar/ge|update")
 <
 

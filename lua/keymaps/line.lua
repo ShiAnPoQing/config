@@ -43,32 +43,32 @@ return {
     },
   },
   -- Line Break
-  ["<space><CR>"] = {
-    {
-      function()
-        local L = require("line-break")
-        local count = vim.v.count1
-        L.LineBreak(count, "n", "al")
-        require("repeat").Record(function()
-          L.LineBreak(count, "n", "al")
-        end)
-      end,
-      { "n" },
-      { expr = true },
-    },
-    {
-      function()
-        local L = require("line-break")
-        local count = vim.v.count1
-        L.LineBreak(count, "v", "al")
-        require("repeat").Record(function()
-          L.LineBreak(count, "v", "al")
-        end)
-      end,
-      { "x" },
-      { expr = true },
-    },
-  },
+  -- ["<space><CR>"] = {
+  --   {
+  --     function()
+  --       local L = require("line-break")
+  --       local count = vim.v.count1
+  --       L.LineBreak(count, "n", "al")
+  --       require("repeat").Record(function()
+  --         L.LineBreak(count, "n", "al")
+  --       end)
+  --     end,
+  --     { "n" },
+  --     { expr = true },
+  --   },
+  --   {
+  --     function()
+  --       local L = require("line-break")
+  --       local count = vim.v.count1
+  --       L.LineBreak(count, "v", "al")
+  --       require("repeat").Record(function()
+  --         L.LineBreak(count, "v", "al")
+  --       end)
+  --     end,
+  --     { "x" },
+  --     { expr = true },
+  --   },
+  -- },
   ["<leader>sl"] = {
     {
       function()
