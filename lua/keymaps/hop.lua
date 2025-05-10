@@ -1,11 +1,11 @@
 return {
-  ["ao"] = {
+  [";o"] = {
     function()
       require("hop").hint_words({ direction = 2, hint_position = 3 })
     end,
     "n"
   },
-  ["aao"] = {
+  ["ao"] = {
     function()
       require("hop").hint_words({ direction = 1, hint_position = 3 })
     end,
@@ -17,13 +17,13 @@ return {
     end,
     "n"
   },
-  ["ai"] = {
+  [";i"] = {
     function()
       require("hop").hint_words({ direction = 2, hint_position = 1 })
     end,
     "n"
   },
-  ["aai"] = {
+  ["ai"] = {
     function()
       require("hop").hint_words({ direction = 1, hint_position = 1 })
     end,

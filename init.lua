@@ -27,6 +27,7 @@ require("lazy").setup({
   require("plugins.misc.colorizer"),
   require("plugins.misc.todo-comments"),
   require("plugins.misc.hop"),
+  require("plugins.misc.undotree"),
   require("plugins.style.lualine"),
   require("plugins.style.dashboard-nvim"),
   -- { import = "plugins.style.alpha-nvim" },

@@ -28,7 +28,6 @@ function M.line_concat()
   end
 
   vim.opt.operatorfunc = "v:lua.custom_line_concat"
-  -- vim.api.nvim_feedkeys("g@", "n", false)
 end
 
 return M
