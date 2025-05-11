@@ -3,7 +3,6 @@ require("repeat").setup()
 require("plugin-keymap").setup()
 
 require("lazy-setup")
-
 require("lazy").setup({
   require("plugins.snippet.luasnip"),
   require("plugins.cmp.blank-cmp"),

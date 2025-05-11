@@ -1,12 +1,12 @@
 -- ^ 默认不支持 count
-local function space_h()
-  local count = vim.v.count1
-  if count == 1 then
-    vim.api.nvim_feedkeys("^", "n", false)
-  else
-    vim.api.nvim_feedkeys(count - 1 .. "-", "n", false)
-  end
-end
+-- local function space_h()
+--   local count = vim.v.count1
+--   if count == 1 then
+--     vim.api.nvim_feedkeys("^", "n", false)
+--   else
+--     vim.api.nvim_feedkeys(count - 1 .. "-", "n", false)
+--   end
+-- end
 
 local function space_h_omode()
   vim.api.nvim_exec2(
@@ -279,7 +279,12 @@ return {
 
   -- 支持 count 可以向上
   ["<space>h"] = {
-    { space_h,       "n" },
+    {
+      function()
+        require("custom.plugins.move.start-end-move").start_end_move("left")
+      end,
+      "n"
+    },
     { "^",           "x" },
     { space_h_omode, "o" }
   },
@@ -294,7 +299,13 @@ return {
   },
   -- 支持 count 可以向下
   ["<space>l"] = {
-    { "g_", { "x", "o", "n" } }
+    {
+      function()
+        require("custom.plugins.move.start-end-move").start_end_move("right")
+      end,
+      "n"
+    },
+    { "g_", { "x", "o" } }
   },
   ["<space><M-l>"] = {
     "A",
@@ -566,5 +577,4 @@ return {
   },
   -- insert mode move: Down Home,
   ["<M-space><M-space><M-j>"] = { "<Down><Home>", { "i" } },
-
 }
