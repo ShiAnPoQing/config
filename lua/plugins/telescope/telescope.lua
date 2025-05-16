@@ -55,6 +55,7 @@ return {
           function()
             builtin.current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
               previewer = false,
+              height = 10
             }))
           end,
           "n",

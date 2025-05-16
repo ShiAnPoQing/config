@@ -1,13 +1,3 @@
--- ^ 默认不支持 count
--- local function space_h()
---   local count = vim.v.count1
---   if count == 1 then
---     vim.api.nvim_feedkeys("^", "n", false)
---   else
---     vim.api.nvim_feedkeys(count - 1 .. "-", "n", false)
---   end
--- end
-
 local function space_h_omode()
   vim.api.nvim_exec2(
     string.format(
@@ -287,6 +277,12 @@ return {
     },
     { "^",           "x" },
     { space_h_omode, "o" }
+  },
+  ["0<space>h"] = {
+    function()
+      require("custom.plugins.move.start-end-move").start_end_move_general("left")
+    end,
+    "n"
   },
   ["<space><M-h>"] = {
     "I",
