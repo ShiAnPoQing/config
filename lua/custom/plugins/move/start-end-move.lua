@@ -1,102 +1,193 @@
 local M = {}
 
-local jump_keys = "abcdefghijklmnopqrstuvwxyz"
+local Key = {}
 
-local function get_jump_key(used_keys)
-  if used_keys.count == 26 then
-    return nil
+local function on_key(keymap)
+  vim.schedule(function()
+    local char = vim.fn.nr2char(vim.fn.getchar())
+    local child_keymap = keymap.child[char]
+    if child_keymap then
+      child_keymap.callback()
+    end
+  end)
+end
+
+local function clean_mark()
+
+end
+
+function Key:init()
+  self.keymap = {
+    count = 0,
+    child = {}
+  }
+  self.more_keymap = {}
+  self.keys = "abcdefghijklmnopqrstuvwxyz"
+end
+
+function Key:collect_more_keys(line_count)
+  local count = 0
+  if line_count > 26 then
+    count = math.ceil((line_count - 26) / 26)
   end
 
-  local random = math.random(26)
-  local key = jump_keys:sub(random, random)
-
-  if used_keys[key] == nil then
-    used_keys[key] = true
-    used_keys.count = used_keys.count + 1
-    return key
-  else
-    return get_jump_key(used_keys)
+  for i = 1, count do
+    local keymap = Key:get_keymap(self.keymap)
+    keymap.ns_id = vim.api.nvim_create_namespace(keymap.key .. "-custom")
+    keymap.callback = function()
+      on_key(keymap)
+      clean_mark()
+    end
+    table.insert(Key.more_keymap, keymap)
   end
 end
 
-local function set_extmark(LR, cursor, count)
-  local ns_id = vim.api.nvim_create_namespace("custom-start-end-move-extmark")
-  local col = 0
+function Key:one_keys(topline, botline, cursor_row)
+  local ns_id = vim.api.nvim_create_namespace("normal-custom")
+  local count = 0
 
-  if LR == "right" then
-    local win = vim.api.nvim_get_current_win()
-    local wininfo = vim.fn.getwininfo(win)[1]
-    local viewport_width = wininfo.width - wininfo.textoff
-    col = viewport_width - 1
+  local not_key_can_be_use = function()
+    if self.keymap.count == 26 then
+      self.up_break = cursor_row - count
+      self.down_break = cursor_row + count
+    end
   end
-  vim.api.nvim_buf_set_extmark(0, ns_id, cursor[1] - count - 1, 0, {
-    virt_text = { { "k", "HopNextKey" } },
-    virt_text_win_col = col
-  })
-  vim.api.nvim_buf_set_extmark(0, ns_id, cursor[1] + count - 1, 0, {
-    virt_text = { { "j", "HopNextKey" } },
-    virt_text_win_col = col
-  })
 
-  return function()
-    vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+  while true do
+    if self.up_break ~= nil and self.down_break ~= nil then
+      break
+    end
+
+    if not self.up_break then
+      if cursor_row - count > topline - 1 then
+        local keymap = self:get_keymap(self.keymap)
+        vim.api.nvim_buf_set_extmark(0, ns_id, cursor_row - 1 - count, 0, {
+          virt_text = { { keymap.key, "HopNextKey" } },
+          virt_text_win_col = 0
+        })
+        keymap.ns_id = ns_id
+        keymap.jump_count = count
+        keymap.callback = function()
+          if keymap.jump_count > 0 then
+            vim.api.nvim_feedkeys(keymap.jump_count .. "k", "nx", false)
+          end
+        end
+        not_key_can_be_use()
+      else
+        self.up_break = cursor_row - count
+      end
+    end
+
+    if not self.down_break then
+      if cursor_row + count < botline then
+        local keymap = self:get_keymap(self.keymap)
+        vim.api.nvim_buf_set_extmark(0, ns_id, cursor_row + count, 0, {
+          virt_text = { { keymap.key, "HopNextKey" } },
+          virt_text_win_col = 0
+        })
+        keymap.ns_id = ns_id
+        keymap.jump_count = count
+        keymap.callback = function()
+          vim.api.nvim_feedkeys(keymap.jump_count + 1 .. "j", "nx", false)
+        end
+        not_key_can_be_use()
+      else
+        self.down_break = cursor_row + count
+      end
+    end
+    count = count + 1
+  end
+end
+
+function Key:more_keys(topline, botline, cursor_row)
+  if Key.up_break > 2 then
+    for i = topline, Key.up_break - 1 do
+      local keymap, child_keymap = self:get_more_key_keymap()
+      child_keymap.jump_count = cursor_row - i
+      child_keymap.callback = function()
+        if child_keymap.jump_count > 0 then
+          vim.api.nvim_feedkeys(child_keymap.jump_count .. "k", "nx", false)
+        end
+      end
+
+      vim.api.nvim_buf_set_extmark(0, keymap.ns_id, i - 1, 0, {
+        virt_text = { { keymap.key, "HopNextKey" } },
+        virt_text_win_col = 0
+      })
+
+      vim.api.nvim_buf_set_extmark(0, child_keymap.ns_id, i - 1, 0, {
+        virt_text = { { child_keymap.key, "HopNextKey" } },
+        virt_text_win_col = 1
+      })
+    end
+  end
+
+  if Key.down_break <= botline then
+    for i = Key.down_break + 2, botline do
+      local keymap, child_keymap = self:get_more_key_keymap()
+      vim.api.nvim_buf_set_extmark(0, keymap.ns_id, i - 1, 0, {
+        virt_text = { { keymap.key, "HopNextKey" } },
+        virt_text_win_col = 0
+      })
+      vim.api.nvim_buf_set_extmark(0, child_keymap.ns_id, i - 1, 0, {
+        virt_text = { { child_keymap.key, "HopNextKey" } },
+        virt_text_win_col = 1
+      })
+      child_keymap.jump_count = i - cursor_row
+      child_keymap.callback = function()
+        if child_keymap.jump_count > 0 then
+          vim.api.nvim_feedkeys(child_keymap.jump_count .. "j", "nx", false)
+        end
+      end
+    end
+  end
+end
+
+function Key:get_more_key_keymap()
+  local parent_keymap = self.more_keymap[1]
+  if not parent_keymap then
+    return {}, {}
+  end
+
+  local keymap = self:get_keymap(parent_keymap)
+  keymap.ns_id = vim.api.nvim_create_namespace(parent_keymap.key .. keymap.key .. "-custom")
+
+  if parent_keymap.count == 26 then
+    table.remove(self.more_keymap, 1)
+  end
+
+  return parent_keymap, keymap
+end
+
+-- @param keymap table
+function Key:get_keymap(keymap)
+  if keymap.count == 26 then
+    return {}
+  end
+
+  local random = math.random(26)
+  local key = self.keys:sub(random, random)
+  local child = keymap.child
+
+  if child[key] == nil then
+    child[key] = {
+      count = 0,
+      key = key,
+      child = {}
+    }
+    keymap.count = keymap.count + 1
+    return child[key]
+  else
+    return self:get_keymap(keymap)
   end
 end
 
 --- @param LR "left"|"right"
 function M.start_end_move(LR)
-  local count = vim.v.count1
 
-  if LR == "left" then
-    if count == 1 then
-      local cursor1 = vim.api.nvim_win_get_cursor(0)
-      vim.api.nvim_feedkeys("^", "nx", false)
-      local cursor2 = vim.api.nvim_win_get_cursor(0)
-      if cursor1[2] == cursor2[2] then
-        vim.api.nvim_feedkeys("0", "nx", false)
-      end
-    else
-      local cursor = vim.api.nvim_win_get_cursor(0)
-      local clear_namespace = set_extmark(LR, cursor, count)
-      vim.schedule(function()
-        local char = vim.fn.nr2char(vim.fn.getchar())
-        if char == "j" then
-          vim.api.nvim_feedkeys(count .. "+", "n", false)
-        elseif char == "k" then
-          vim.api.nvim_feedkeys(count .. "-", "n", false)
-        end
-        clear_namespace()
-      end)
-    end
-  else
-    if count == 1 then
-      local cursor1 = vim.api.nvim_win_get_cursor(0)
-      vim.api.nvim_feedkeys(count .. "g_", "nx", false)
-      local cursor2 = vim.api.nvim_win_get_cursor(0)
-      if cursor1[2] == cursor2[2] then
-        vim.api.nvim_feedkeys("$", "nx", false)
-      end
-    else
-      local cursor = vim.api.nvim_win_get_cursor(0)
-      local clear_namespace = set_extmark(LR, cursor, count)
-      vim.schedule(function()
-        local char = vim.fn.nr2char(vim.fn.getchar())
-        if char == "j" then
-          vim.api.nvim_feedkeys(count + 1 .. "g_", "n", false)
-        elseif char == "k" then
-          local up = vim.api.nvim_replace_termcodes("<up>", true, true, true)
-          vim.api.nvim_feedkeys(count .. up .. "g_", "n", false)
-        end
-        clear_namespace()
-      end)
-    end
-  end
 end
 
---- @param LR "left"|"right"
-function M.start_end_move_general(LR)
-  local ns_id = vim.api.nvim_create_namespace("test")
-  local used_keys = { count = 0 }
+function M.start_end_move_general()
   local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
   local topline = wininfo.topline
   local botline = wininfo.botline
@@ -104,141 +195,17 @@ function M.start_end_move_general(LR)
   local cursor = vim.api.nvim_win_get_cursor(0)
   local cursor_row = cursor[1]
 
-  local line_count = botline - topline + 1
+  Key:init()
+  Key:collect_more_keys(botline - topline + 1)
+  Key:one_keys(topline, botline, cursor_row)
+  Key:more_keys(topline, botline, cursor_row)
 
-  local a = 0
-  if line_count > 26 then
-    a = math.ceil((line_count - 26) / 26)
-  end
-  local test = {}
-
-  for i = 1, a do
-    local key = get_jump_key(used_keys)
-    table.insert(test, key)
-  end
-  print(vim.inspect(test))
-
-  local count = 0
-  while true do
-    if cursor_row - count > topline - 1 then
-      local key = get_jump_key(used_keys)
-      if key == nil then break end
-      vim.api.nvim_buf_set_extmark(0, ns_id, cursor_row - 1 - count, 0, {
-        virt_text = { { key, "HopNextKey" } },
-        virt_text_win_col = 0
-      })
-    else
-      break
-    end
-
-    if cursor_row + count < botline then
-      local key = get_jump_key(used_keys)
-      if key == nil then break end
-      vim.api.nvim_buf_set_extmark(0, ns_id, cursor_row + count, 0, {
-        virt_text = { { key, "HopNextKey" } },
-        virt_text_win_col = 0
-      })
-    else
-      break
-    end
-    count = count + 1
-  end
-
-
-
+  local ns_id = vim.api.nvim_create_namespace("line-custom")
   vim.api.nvim_buf_set_extmark(0, ns_id, topline - 1, 0, {
     end_row = botline,
     hl_group = "HopUnmatched"
   })
+  on_key(Key.keymap)
 end
 
 return M
-
-
-
--- local ns_id = vim.api.nvim_create_namespace("test")
--- local used_keys = { count = 0 }
--- local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
--- local topline = wininfo.topline
--- local botline = wininfo.botline
---
--- local cursor = vim.api.nvim_win_get_cursor(0)
--- local cursor_row = cursor[1]
---
--- local line_count = botline - topline + 1
---
--- if line_count > 26 then
---   local key_count = math.ceil((line_count - 26) / 26)
---   local w = cursor_row - 13 - topline
---   local e = botline - cursor_row - 12
---   if w > 0 and e <= 0 then
---     local left_line_count = botline - 26
---     print("上方剩余: ", left_line_count)
---     for i = botline - 26 + 1, botline do
---       vim.api.nvim_buf_set_extmark(0, ns_id, i - 1, 0, {
---         virt_text = { { get_jump_key(used_keys), "HopNextKey" } },
---         virt_text_win_col = 0
---       })
---     end
---   elseif w <= 0 and e > 0 then
---     local left_line_count = botline - 26
---     print("下方剩余： ", left_line_count)
---     for i = topline, topline + 26 - 1 do
---       vim.api.nvim_buf_set_extmark(0, ns_id, i - 1, 0, {
---         virt_text = { { get_jump_key(used_keys), "HopNextKey" } },
---         virt_text_win_col = 0
---       })
---     end
---   elseif w > 0 and e > 0 then
---     local left_line_count = botline - 26
---     print("上下均有剩余： ", left_line_count)
---   end
--- else
---   for i = topline, botline do
---     vim.api.nvim_buf_set_extmark(0, ns_id, i - 1, 0, {
---       virt_text = { { get_jump_key(used_keys), "HopNextKey" } },
---       virt_text_win_col = 0
---     })
---   end
--- end
---
--- --
--- -- -- if line_count > 26 then
--- -- local a = 0
--- -- local b = 0
--- -- local w = cursor_row - 13 - topline
--- -- local e = botline - cursor_row - 12
--- --
--- -- if w > 0 and e > 0 then
--- --   print("上方剩余，下方剩余")
--- --   for i = topline + w, topline + w + 26 - 1 do
--- --     vim.api.nvim_buf_set_extmark(0, ns_id, i - 1, 0, {
--- --       virt_text = { { get_jump_key(used_keys), "HopNextKey" } },
--- --       virt_text_win_col = 0
--- --     })
--- --   end
--- -- elseif w > 0 and e <= 0 then
--- --   print("上方剩余，下方不够")
--- --   for i = botline - 26 + 1, botline do
--- --     vim.api.nvim_buf_set_extmark(0, ns_id, i - 1, 0, {
--- --       virt_text = { { get_jump_key(used_keys), "HopNextKey" } },
--- --       virt_text_win_col = 0
--- --     })
--- --   end
--- -- elseif w <= 0 and e > 0 then
--- --   print("上方不够，下方剩余")
--- --   for i = topline, topline + 26 - 1 do
--- --     vim.api.nvim_buf_set_extmark(0, ns_id, i - 1, 0, {
--- --       virt_text = { { get_jump_key(used_keys), "HopNextKey" } },
--- --       virt_text_win_col = 0
--- --     })
--- --   end
--- -- elseif w <= 0 and e <= 0 then
--- --   print("上方不够，下方不够")
--- --   for i = topline, botline do
--- --     vim.api.nvim_buf_set_extmark(0, ns_id, i - 1, 0, {
--- --       virt_text = { { get_jump_key(used_keys), "HopNextKey" } },
--- --       virt_text_win_col = 0
--- --     })
--- --   end
--- -- end
