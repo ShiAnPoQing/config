@@ -15,19 +15,6 @@ local function get_viewport_width(wininfo)
   return viewport_width - 1
 end
 
-function Left:get_extmark_col(offset)
-  return 0
-end
-
-function Right:get_extmark_col(offset)
-  local viewport_width = get_viewport_width(self.wininfo)
-  if offset then
-    return viewport_width + offset
-  end
-
-  return viewport_width
-end
-
 -- @param keymap table
 local function get_keymap(keymap)
   if keymap.count == 26 then
@@ -73,6 +60,7 @@ end
 function Key:on_key(keymap)
   vim.schedule(function()
     local char = vim.fn.nr2char(vim.fn.getchar())
+
     local child_keymap = keymap.child[char]
     if child_keymap then
       if child_keymap.callback then
@@ -112,6 +100,19 @@ local function fill_one_keymap(keymap, extmark)
       virt_text_win_col = extmark.virt_text_win_col
     })
   end
+end
+
+function Left:get_extmark_col(offset)
+  return 0
+end
+
+function Right:get_extmark_col(offset)
+  local viewport_width = get_viewport_width(self.wininfo)
+  if offset then
+    return viewport_width + offset
+  end
+
+  return viewport_width
 end
 
 function Key:clean_mark(all)
