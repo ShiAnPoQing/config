@@ -284,6 +284,12 @@ return {
     end,
     "n"
   },
+  ["0<space>l"] = {
+    function()
+      require("custom.plugins.move.start-end-move").start_end_move_general("right")
+    end,
+    "n"
+  },
   ["<space><M-h>"] = {
     "I",
     "n"
