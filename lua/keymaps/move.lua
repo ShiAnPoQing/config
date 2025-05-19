@@ -190,6 +190,18 @@ return {
     "n",
     { desc = "right move" },
   },
+  ["0j"] = {
+    function()
+      require("custom.plugins.move.base-move").magic_up_down("down")
+    end,
+    "n",
+  },
+  ["0k"] = {
+    function()
+      require("custom.plugins.move.base-move").magic_up_down("up")
+    end,
+    "n"
+  },
   ["H"] = {
     {
       function()

@@ -15,6 +15,7 @@ local function get_viewport_width(wininfo)
   return viewport_width - 1
 end
 
+
 -- @param keymap table
 local function get_keymap(keymap)
   if keymap.count == 26 then
@@ -125,6 +126,7 @@ function Key:clean_mark(all)
 end
 
 function Key:init(line_count, LR, wininfo)
+  self.keys = "abcdefghijklmnopqrstuvwxyz"
   self.keymap = {
     count = 0,
     child = {},
@@ -133,7 +135,6 @@ function Key:init(line_count, LR, wininfo)
   self.up_break = nil
   self.down_break = nil
   self.more_keymap = {}
-  self.keys = "abcdefghijklmnopqrstuvwxyz"
   self:collect_more_keys(line_count)
   if LR == "left" then
     self.Action = Left
@@ -219,18 +220,17 @@ end
 
 function Key:get_more_key_keymap(i)
   local parent = self.more_keymap[1]
-  if not parent then
-    return {}, {}
-  end
-  if parent.count == 26 then
-    table.remove(self.more_keymap, 1)
-  end
   local keymap = get_keymap(parent)
   fill_one_keymap(keymap, {
     ns_id = parent.ns_id,
     line = i - 1,
     virt_text_win_col = self.Action:get_extmark_col()
   })
+
+  if parent.count == 26 then
+    table.remove(self.more_keymap, 1)
+  end
+
   return parent, keymap
 end
 
