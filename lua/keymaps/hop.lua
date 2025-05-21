@@ -3,72 +3,72 @@ return {
     function()
       require("hop").hint_words({ direction = 2, hint_position = 3 })
     end,
-    "n"
+    { "n", "x" }
   },
   ["aok"] = {
     function()
       require("hop").hint_words({ direction = 1, hint_position = 3 })
     end,
-    "n"
+    { "n", "x" }
   },
   ["<space><space>o"] = {
     function()
       require("hop").hint_words({ hint_position = 3 })
     end,
-    "n"
+    { "n", "x" }
   },
   ["aij"] = {
     function()
       require("hop").hint_words({ direction = 2, hint_position = 1 })
     end,
-    "n"
+    { "n", "x" }
   },
   ["aik"] = {
     function()
       require("hop").hint_words({ direction = 1, hint_position = 1 })
     end,
-    "n"
+    { "n", "x" }
   },
   ["<space><space>i"] = {
     function()
       require("hop").hint_words({ hint_position = 1 })
     end,
-    "n"
+    { "n", "x" }
   },
   ["ail"] = {
     function()
       require("hop").hint_words({ hint_position = 1, current_line_only = true, direction = 2 })
     end,
-    "n"
+    { "n", "x" }
   },
   ["aih"] = {
     function()
       require("hop").hint_words({ hint_position = 1, current_line_only = true, direction = 1 })
     end,
-    "n"
+    { "n", "x" }
   },
   ["aol"] = {
     function()
       require("hop").hint_words({ hint_position = 3, current_line_only = true, direction = 2 })
     end,
-    "n"
+    { "n", "x" }
   },
   ["aoh"] = {
     function()
       require("hop").hint_words({ hint_position = 3, current_line_only = true, direction = 1 })
     end,
-    "n"
+    { "n", "x" }
   },
   ["aoo"] = {
     function()
       require("hop").hint_words({ hint_position = 3 })
     end,
-    "n"
+    { "n", "x" }
   },
   ["aii"] = {
     function()
       require("hop").hint_words({ hint_position = 1 })
     end,
-    "n"
+    { "n", "x" }
   }
 }

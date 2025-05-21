@@ -28,10 +28,10 @@ require("lazy").setup({
   require("plugins.misc.todo-comments"),
   require("plugins.misc.hop"),
   require("plugins.misc.undotree"),
+
   require("plugins.style.lualine"),
   require("plugins.style.dashboard-nvim"),
-  -- { import = "plugins.style.alpha-nvim" },
-  --
+  -- require"plugins.style.alpha-nvim",
   require("plugins.style.theme.material"),
   -- require("plugins.style.theme.gruvbox"),
   -- require("plugins.style.theme.tokyonight"),
@@ -52,7 +52,7 @@ require("lazy").setup({
   require("plugins.custom.win-action"),
   require("plugins.custom.show-file-info"),
   require("plugins.custom.word-move"),
-  require("plugins.custom.easy-word-motion")
+  -- require("plugins.custom.easy-word-motion")
 })
 
 require("test")

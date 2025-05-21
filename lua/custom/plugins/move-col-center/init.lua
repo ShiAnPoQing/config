@@ -67,7 +67,7 @@ end
 
 function left:virt_move(move_count)
   if self.remain > 0 then
-    vim.api.nvim_feedkeys(move_count - self.remain .. "l", "nx", false)
+    vim.api.nvim_feedkeys(self.remain .. "l", "nx", false)
   end
 end
 
@@ -124,13 +124,13 @@ function right:move_center()
 end
 
 function Action:init()
-  Action.wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
-  Action.cursor = vim.api.nvim_win_get_cursor(0)
-  Action.count = vim.v.count1
-  Action.virtcol = vim.fn.virtcol(".")
-  Action.line = vim.api.nvim_get_current_line()
-  Action.left = left
-  Action.right = right
+  self.wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+  self.cursor = vim.api.nvim_win_get_cursor(0)
+  self.count = vim.v.count1
+  self.virtcol = vim.fn.virtcol(".")
+  self.line = vim.api.nvim_get_current_line()
+  self.left = left
+  self.right = right
 end
 
 --- @param LR "left"|"right"

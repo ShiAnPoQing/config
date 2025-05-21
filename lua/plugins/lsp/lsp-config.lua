@@ -64,7 +64,7 @@ return {
           enabled = true,
         },
         servers = {
-          tailwindcss = {}
+          -- tailwindcss = {}
         }
       }
     end,
@@ -148,7 +148,7 @@ return {
           },
         },
       })
-      lspconfig.tailwindcss.setup {}
+      -- lspconfig.tailwindcss.setup {}
       vim.keymap.set("n", ";k", vim.lsp.buf.hover, {})
     end,
   },
