@@ -9,11 +9,6 @@ local Right = {
   key = "g_"
 }
 
-local function get_viewport_width(wininfo)
-  local viewport_width = wininfo.width - wininfo.textoff
-  return viewport_width - 1
-end
-
 -- @param keymap table
 local function get_keymap(keymap)
   if keymap.count == 26 then
@@ -276,6 +271,34 @@ function M.start_end_move(LR)
       if cursor1[2] == cursor2[2] then
         vim.api.nvim_feedkeys("0", "nx", false)
       end
+    else
+      local cursor = vim.api.nvim_win_get_cursor(0)
+      local virt_col = vim.fn.virtcol(".")
+      local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+      local ns_id = vim.api.nvim_create_namespace("test")
+
+      local up_line_start = cursor[1] - count - 1
+      local up_line = vim.api.nvim_buf_get_lines(0, up_line_start, up_line_start + 1, false)[1]
+
+      vim.api.nvim_buf_set_extmark(0, ns_id, up_line_start, 0, {
+        virt_text = { { "k", "HopNextKey" } },
+        virt_text_win_col = virt_col
+      })
+
+      local down_line_start = cursor[1] + count - 1
+      local down_line = vim.api.nvim_buf_get_lines(0, down_line_start, down_line_start + 1, false)[1]
+      vim.api.nvim_buf_set_extmark(0, ns_id, cursor[1] + count - 1, 0, {
+        virt_text = { { "j", "HopNextKey" } },
+        virt_text_win_col = virt_col
+      })
+      vim.cmd.redraw()
+      local char = vim.fn.nr2char(vim.fn.getchar())
+      if char == "j" then
+        vim.api.nvim_feedkeys(count .. "j^", "nx", false)
+      elseif char == "k" then
+        vim.api.nvim_feedkeys(count .. "k^", "nx", false)
+      end
+      vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
     end
   else
     if count == 1 then
@@ -285,12 +308,14 @@ function M.start_end_move(LR)
       if cursor1[2] == cursor2[2] then
         vim.api.nvim_feedkeys("$", "nx", false)
       end
+    else
+
     end
   end
 end
 
 --- @param LR "left" | "right"
-function M.start_end_move_general(LR)
+function M.move_start_end(LR)
   local cursor = vim.api.nvim_win_get_cursor(0)
   local cursor_row = cursor[1]
   local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]

@@ -192,13 +192,13 @@ return {
   },
   ["0j"] = {
     function()
-      require("custom.plugins.move.base-move").magic_up_down("down")
+      require("custom.plugins.move").magic.move_up_down("down")
     end,
     { "n", "x" },
   },
   ["0k"] = {
     function()
-      require("custom.plugins.move.base-move").magic_up_down("up")
+      require("custom.plugins.move").magic.move_up_down("up")
     end,
     { "n", "x" }
   },
@@ -283,7 +283,7 @@ return {
   ["<space>h"] = {
     {
       function()
-        require("custom.plugins.move.start-end-move").start_end_move("left")
+        require("custom.plugins.move").move_start_end("left")
       end,
       "n"
     },
@@ -292,13 +292,13 @@ return {
   },
   ["0<space>h"] = {
     function()
-      require("custom.plugins.move.start-end-move").start_end_move_general("left")
+      require("custom.plugins.move").magic.move_start_end("left")
     end,
     "n"
   },
   ["0<space>l"] = {
     function()
-      require("custom.plugins.move.start-end-move").start_end_move_general("right")
+      require("custom.plugins.move").magic.move_start_end("right")
     end,
     "n"
   },
@@ -315,7 +315,7 @@ return {
   ["<space>l"] = {
     {
       function()
-        require("custom.plugins.move.start-end-move").start_end_move("right")
+        require("custom.plugins.move").move_start_end("right")
       end,
       "n"
     },

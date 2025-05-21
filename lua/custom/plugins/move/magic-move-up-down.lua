@@ -267,7 +267,7 @@ function Key:clean_mark()
 end
 
 --- @param UD UD
-function M.magic_up_down(UD)
+function M.move_up_down(UD)
   local cursor = vim.api.nvim_win_get_cursor(0)
   local cursor_row = cursor[1]
   local virt_col = vim.fn.virtcol(".")
