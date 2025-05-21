@@ -14,6 +14,7 @@ require("lazy").setup({
   require("plugins.markdown.markdown-preview"),
   require("plugins.filemanager.neo-tree"),
   require("plugins.filemanager.yazi"),
+  require("plugins.code.aerial"),
 
   require("plugins-auto.toggle-term"),
   require("plugins-auto.flash"),

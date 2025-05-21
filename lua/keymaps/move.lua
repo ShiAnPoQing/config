@@ -194,13 +194,13 @@ return {
     function()
       require("custom.plugins.move.base-move").magic_up_down("down")
     end,
-    "n",
+    { "n", "x" },
   },
   ["0k"] = {
     function()
       require("custom.plugins.move.base-move").magic_up_down("up")
     end,
-    "n"
+    { "n", "x" }
   },
   ["H"] = {
     {

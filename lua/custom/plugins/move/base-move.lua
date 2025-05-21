@@ -16,6 +16,7 @@ local function get_keymap(keymap)
   local random = math.random(26)
   local key = Key.keys:sub(random, random)
   local child = keymap.child
+
   local map = {
     count = 0,
     key = key,
@@ -31,16 +32,24 @@ local function get_keymap(keymap)
   end
 end
 
-local function fill_more_keymap(keymap)
+local function reset_more_key_extmark(keymap)
+  keymap.ns_id = vim.api.nvim_create_namespace(keymap.key .. "-custom")
+  for key, value in pairs(keymap.child) do
+    value.reset_mark()
+  end
+  vim.cmd.redraw()
+end
+
+local function fill_keymap_more_key(keymap)
   keymap.ns_id = vim.api.nvim_create_namespace(keymap.key .. "-custom")
   keymap.callback = function()
-    -- Key:clean_mark()
-    -- reset_keymap_mark(keymap)
-    -- Key:on_key(keymap)
+    Key:clean_mark()
+    reset_more_key_extmark(keymap)
+    Key:on_key(keymap)
   end
 end
 
-local function fill_one_keymap(keymap, extmark)
+local function fill_keymap_one_key(keymap, extmark)
   keymap.jump_number = extmark.line + 1
   keymap.reset_mark = function()
     vim.api.nvim_buf_set_extmark(0, extmark.ns_id, extmark.line, 0, {
@@ -67,6 +76,18 @@ local function more_key_set_extmark(param)
   })
 end
 
+local function jump_key_target(keymap)
+  if not keymap then return end
+
+  if keymap.callback then
+    keymap.callback()
+  end
+
+  if keymap.jump_number then
+    vim.api.nvim_feedkeys(keymap.jump_number .. "G", "nx", false)
+  end
+end
+
 function Up:init()
   self.up_break = nil
 end
@@ -75,7 +96,15 @@ function Down:init()
   self.down_break = nil
 end
 
-function Up:one_keys(topline, botline, cursor_row, cursor_virt_col)
+function Up:get_line_count()
+  return
+end
+
+function Down:get_line_count()
+
+end
+
+function Up:one_keys(cursor_row)
   local count = 0
 
   while true do
@@ -84,8 +113,8 @@ function Up:one_keys(topline, botline, cursor_row, cursor_virt_col)
     end
 
     if not self.up_break then
-      if cursor_row - count > topline then
-        one_key_set_extmark(self.keymap, cursor_row - count - 1 - 1, cursor_virt_col)
+      if cursor_row - count > self.topline then
+        one_key_set_extmark(self.keymap, cursor_row - count - 1 - 1, self.virt_col)
         if self.keymap.count == 26 then
           self.up_break = cursor_row - count
         end
@@ -98,7 +127,7 @@ function Up:one_keys(topline, botline, cursor_row, cursor_virt_col)
   end
 end
 
-function Down:one_keys(topline, botline, cursor_row, cursor_virt_col)
+function Down:one_keys(cursor_row)
   local count = 0
 
   while true do
@@ -107,8 +136,8 @@ function Down:one_keys(topline, botline, cursor_row, cursor_virt_col)
     end
 
     if not self.down_break then
-      if cursor_row + count < botline then
-        one_key_set_extmark(self.keymap, cursor_row + count, cursor_virt_col)
+      if cursor_row + count < self.botline then
+        one_key_set_extmark(self.keymap, cursor_row + count, self.virt_col)
         if self.keymap.count == 26 then
           self.down_break = cursor_row + count
         end
@@ -120,37 +149,37 @@ function Down:one_keys(topline, botline, cursor_row, cursor_virt_col)
   end
 end
 
-function Up:more_keys(topline, botline, cursor_virt_col)
-  if self.up_break > 1 then
-    for i = topline, self.up_break - 1 do
+function Up:more_keys()
+  if self.up_break > 2 then
+    for i = self.topline, self.up_break - 2 do
       local keymap, child_keymap = self:get_more_key_keymap(i)
       more_key_set_extmark({
         ns_id = keymap.ns_id,
         line = i - 1,
         virt_text = { { keymap.key, "HopNextKey1" }, { child_keymap.key, "HopNextKey2" } },
-        virt_text_win_col = cursor_virt_col
+        virt_text_win_col = self.virt_col
       })
     end
   end
 end
 
-function Down:more_keys(topline, botline, cursor_virt_col)
-  if self.down_break <= botline then
-    for i = self.down_break + 1, botline do
+function Down:more_keys()
+  if self.down_break <= self.botline then
+    for i = self.down_break + 2, self.botline do
       local keymap, child_keymap = self:get_more_key_keymap(i)
       more_key_set_extmark({
         ns_id = keymap.ns_id,
         line = i - 1,
         virt_text = { { keymap.key, "HopNextKey1" }, { child_keymap.key, "HopNextKey2" } },
-        virt_text_win_col = cursor_virt_col
+        virt_text_win_col = self.virt_col
       })
     end
   end
 end
 
-function Line:init(topline, botline)
+function Line:init()
   self.ns_id = nil
-  Line:set_hl(topline, botline)
+  Line:set_hl(Key.topline, Key.botline)
 end
 
 function Line:set_hl(topline, botline)
@@ -166,7 +195,7 @@ function Line:del_hl()
 end
 
 --- @param UD UD
-function Key:init(UD, line_count)
+function Key:init(UD, topline, botline, cursor_row, virt_col)
   self.keys = "abcdefghijklmnopqrstuvwxyz"
   self.keymap = {
     count = 0,
@@ -174,15 +203,20 @@ function Key:init(UD, line_count)
     ns_id = vim.api.nvim_create_namespace("base-custom")
   }
   self.more_keymap = {}
+  self.virt_col = virt_col
 
   if UD == "up" then
+    self.topline = topline
+    self.botline = cursor_row - 1
     self.Action = Up
   else
+    self.topline = cursor_row + 1
+    self.botline = botline
     self.Action = Down
   end
 
   self.Action:init()
-  self:collect_more_keys(line_count)
+  self:collect_more_keys()
 end
 
 function Key:get_more_key_keymap(i)
@@ -192,22 +226,23 @@ function Key:get_more_key_keymap(i)
   if parent.count == 26 then
     table.remove(self.more_keymap, 1)
   end
-  -- fill_one_keymap(keymap, {
-  --   ns_id = parent.ns_id,
-  --   line = i - 1,
-  --   virt_text_win_col = self.Action:get_extmark_col()
-  -- })
+  fill_keymap_one_key(keymap, {
+    ns_id = parent.ns_id,
+    line = i - 1,
+    virt_text_win_col = self.virt_col
+  })
   return parent, keymap
 end
 
-function Key:collect_more_keys(line_count)
+function Key:collect_more_keys()
   local count = 0
+  local line_count = self.botline - self.topline + 1
   if line_count > 26 then
     count = math.ceil((line_count - 26) / 26)
   end
   for i = 1, count do
     local keymap = get_keymap(self.keymap)
-    fill_more_keymap(keymap)
+    fill_keymap_more_key(keymap)
     table.insert(self.more_keymap, keymap)
   end
 end
@@ -215,16 +250,7 @@ end
 function Key:on_key(keymap)
   vim.schedule(function()
     local char = vim.fn.nr2char(vim.fn.getchar())
-
-    local child_keymap = keymap.child[char]
-    if child_keymap then
-      if child_keymap.callback then
-        child_keymap.callback()
-      end
-      if child_keymap.jump_number then
-        vim.api.nvim_feedkeys(child_keymap.jump_number .. "G", "nx", false)
-      end
-    end
+    jump_key_target(keymap.child[char])
     self:clean_mark()
     Line:del_hl()
   end)
@@ -232,6 +258,7 @@ end
 
 function Key:clean_mark()
   vim.api.nvim_buf_clear_namespace(0, self.keymap.ns_id, 0, -1)
+
   for k, value in pairs(self.keymap.child) do
     if value.ns_id then
       vim.api.nvim_buf_clear_namespace(0, value.ns_id, 0, -1)
@@ -248,10 +275,10 @@ function M.magic_up_down(UD)
   local topline = wininfo.topline
   local botline = wininfo.botline
 
-  Key:init(UD, botline - topline + 1)
-  Line:init(topline, botline)
-  Key.Action:one_keys(topline, botline, cursor_row, virt_col - 1)
-  Key.Action:more_keys(topline, botline, virt_col - 1)
+  Key:init(UD, topline, botline, cursor_row, virt_col - 1)
+  Line:init()
+  Key.Action:one_keys(cursor_row)
+  Key.Action:more_keys()
   Key:on_key(Key.keymap)
 end
 

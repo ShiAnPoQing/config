@@ -2,7 +2,6 @@ local M = {}
 
 local Key = {}
 local Line = {}
-
 local Left = {
   key = "^"
 }
@@ -14,7 +13,6 @@ local function get_viewport_width(wininfo)
   local viewport_width = wininfo.width - wininfo.textoff
   return viewport_width - 1
 end
-
 
 -- @param keymap table
 local function get_keymap(keymap)
@@ -54,7 +52,7 @@ local function one_key_set_extmark(parent, line, Action)
   keymap.jump_number = line + 1
   vim.api.nvim_buf_set_extmark(0, parent.ns_id, line, 0, {
     virt_text = { { keymap.key, "HopNextKey" } },
-    virt_text_win_col = Action:get_extmark_col()
+    virt_text_win_col = Action:get_extmark_col(line)
   })
 end
 
@@ -103,20 +101,35 @@ local function fill_one_keymap(keymap, extmark)
   end
 end
 
-function Left:get_extmark_col(offset)
-  return 0
+function Left:get_extmark_col(line_number, is_two_keys)
+  local leftcol = self.wininfo.leftcol
+  local line = vim.api.nvim_buf_get_lines(0, line_number, line_number + 1, false)[1]
+  local pattern = vim.regex('^\\s*\\S')
+  local _, end_ = pattern:match_str(line and line or "")
+  end_ = end_ and end_ - leftcol - 1 or 0 - leftcol - 1
+  return math.max(end_, 0)
 end
 
-function Right:get_extmark_col(offset)
-  local viewport_width = get_viewport_width(self.wininfo)
-  if offset then
-    return viewport_width + offset
+function Right:get_extmark_col(line_number, is_two_keys)
+  local wininfo = self.wininfo
+  local leftcol = wininfo.leftcol
+  local width = wininfo.width - wininfo.textoff
+  local line = vim.api.nvim_buf_get_lines(0, line_number, line_number + 1, false)[1]
+  local pattern = vim.regex('\\S\\s*$')
+  local start, _ = pattern:match_str(line and line or "")
+  start = start and start - leftcol or 0 - leftcol
+
+  if start >= width then
+    start = width - 1
+    if is_two_keys then
+      start = start - 1
+    end
   end
 
-  return viewport_width
+  return math.max(start, 0)
 end
 
-function Key:clean_mark(all)
+function Key:clean_mark()
   vim.api.nvim_buf_clear_namespace(0, self.keymap.ns_id, 0, -1)
   for k, value in pairs(self.keymap.child) do
     if value.ns_id then
@@ -200,7 +213,7 @@ function Key:more_keys(topline, botline)
         ns_id = keymap.ns_id,
         line = i - 1,
         virt_text = { { keymap.key, "HopNextKey1" }, { child_keymap.key, "HopNextKey2" } },
-        virt_text_win_col = self.Action:get_extmark_col(-1)
+        virt_text_win_col = self.Action:get_extmark_col(i - 1, true)
       })
     end
   end
@@ -212,7 +225,7 @@ function Key:more_keys(topline, botline)
         ns_id = keymap.ns_id,
         line = i - 1,
         virt_text = { { keymap.key, "HopNextKey1" }, { child_keymap.key, "HopNextKey2" } },
-        virt_text_win_col = self.Action:get_extmark_col(-1)
+        virt_text_win_col = self.Action:get_extmark_col(i - 1, true)
       })
     end
   end
@@ -224,7 +237,7 @@ function Key:get_more_key_keymap(i)
   fill_one_keymap(keymap, {
     ns_id = parent.ns_id,
     line = i - 1,
-    virt_text_win_col = self.Action:get_extmark_col()
+    virt_text_win_col = self.Action:get_extmark_col(i - 1)
   })
 
   if parent.count == 26 then
