@@ -16,7 +16,7 @@
   "mason-lspconfig.nvim": { "branch": "main", "commit": "d39a75bbce4b8aad5d627191ea915179c77c100f" },
   "mason-tool-installer.nvim": { "branch": "main", "commit": "aafae207d5a2a28c59c9d478d8581c2739135d09" },
   "mason.nvim": { "branch": "main", "commit": "7c7318e8bae7e3536ef6b9e86b9e38e74f2e125e" },
-  "material.nvim": { "branch": "main", "commit": "96285a62923ea8e38aea7b603099752da2a97e97" },
+  "moonfly": { "branch": "master", "commit": "e356d55cedb24a6c4251d83ce28e0e2010e99d2f" },
   "neo-tree.nvim": { "branch": "v3.x", "commit": "f481de16a0eb59c985abac8985e3f2e2f75b4875" },
   "nui.nvim": { "branch": "main", "commit": "f535005e6ad1016383f24e39559833759453564e" },
   "nvim-autopairs": { "branch": "master", "commit": "4d74e75913832866aa7de35e4202463ddf6efd1b" },

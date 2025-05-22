@@ -378,7 +378,21 @@ return {
   -- normal mode cursor move: screen center
   ["am"] = { "gm", { "n", "x", "o" } },
   -- normal mode cursor move: screen center col
-  ["an"] = { "M", { "n", "x", "o" } },
+  ["an"] = {
+    {
+      function()
+        require('custom.plugins.move.move-vertical-center').move_vertical_center()
+      end,
+      "n"
+    },
+    { "M", { "x", "o" } }
+  },
+  ["0an"] = {
+    function()
+      require("custom.plugins.move.magic-move-vertical-center").move_vertical_center()
+    end,
+    "n"
+  },
   -- jump the middle of cursor to left
   ["<C-m>"] = { function() require("custom.plugins.move-col-center").move_col_center("left") end, "n" },
   ["<M-m>"] = { function() require("custom.plugins.move-col-center").move_col_center("right") end, "n" },
