@@ -59,6 +59,7 @@ function Key:init(opt)
   self.rightcol = opt.rightcol
   self.center_line = opt.center_line
   self.cursor_virt_win_col = opt.cursor_virt_win_col
+  self.leftcol = opt.leftcol
 end
 
 local function reset_keymap_mark(keymap)
@@ -179,7 +180,7 @@ end
 
 function Key:two_key_left_right_set_extmark(i)
   local keymap, child_keymap = self:get_two_key_keymap(i)
-  child_keymap.target_key = i .. "|"
+  child_keymap.target_key = i + self.leftcol .. "|"
   child_keymap.reset_mark = function()
     vim.api.nvim_buf_set_extmark(0, keymap.ns_id, self.center_line - 1, 0, {
       virt_text = { { child_keymap.key, "HopNextKey2" } },
@@ -271,7 +272,8 @@ function M.move_vertical_center()
     topline = topline,
     botline = botline,
     rightcol = rightcol,
-    cursor_virt_win_col = cursor_virt_win_col
+    cursor_virt_win_col = cursor_virt_win_col,
+    leftcol = leftcol
   })
   Key:collect_two_keys()
   Key:one_key()

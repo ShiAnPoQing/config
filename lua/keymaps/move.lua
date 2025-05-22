@@ -373,6 +373,12 @@ return {
   -- normal mode cursor move: screen top
   ["ak"] = {
     { a_k, "n" },
+    {
+      function()
+        require('custom.plugins.move.move-viewport-top').move_viewport_top()
+      end,
+      "n"
+    },
     { "H", { "x", "o" } }
   },
   -- normal mode cursor move: screen center
@@ -381,7 +387,16 @@ return {
   ["an"] = {
     {
       function()
-        require('custom.plugins.move.move-vertical-center').move_vertical_center()
+        require('custom.plugins.move.move-viewport-vertical-center').move_vertical_center()
+      end,
+      "n"
+    },
+    { "M", { "x", "o" } }
+  },
+  ["1an"] = {
+    {
+      function()
+        require('custom.plugins.move.move-viewport-vertical-center').move_vertical_center({ one_count = true })
       end,
       "n"
     },
@@ -389,7 +404,7 @@ return {
   },
   ["0an"] = {
     function()
-      require("custom.plugins.move.magic-move-vertical-center").move_vertical_center()
+      require("custom.plugins.move.magic-move-viewport-vertical-center").move_vertical_center()
     end,
     "n"
   },

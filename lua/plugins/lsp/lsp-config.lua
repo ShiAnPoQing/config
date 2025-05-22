@@ -22,11 +22,9 @@ return {
     dependencies = {
       {
         "folke/lazydev.nvim",
-        ft = "lua", -- only load on lua files
+        ft = "lua",
         opts = {
           library = {
-            -- See the configuration section for more details
-            -- Load luvit types when the `vim.uv` word is found
             { path = "${3rd}/luv/library", words = { "vim%.uv" } },
           },
         },
@@ -38,18 +36,19 @@ return {
         diagnostics = {
           underline = true,
           update_in_insert = false,
-          virtual_text = {
-            spacing = 4,
-            source = "if_many",
-            prefix = "●",
-            -- this will set set the prefix to a function that returns the diagnostics icon based on the severity
-            -- this only works on a recent 0.10.0 build. Will be set to "●" when not supported
-            -- prefix = "icons",
-          },
+          virtual_text = true,
+
+          --   spacing = 4,
+          --   source = "if_many",
+          --   prefix = "●",
+          --   -- this will set set the prefix to a function that returns the diagnostics icon based on the severity
+          --   -- this only works on a recent 0.10.0 build. Will be set to "●" when not supported
+          --   -- prefix = "icons",
+          -- },
           severity_sort = true,
           signs = {
             text = {
-              [vim.diagnostic.severity.ERROR] = " ",
+              [vim.diagnostic.severity.ERROR] = "asdf ",
               [vim.diagnostic.severity.WARN] = " ",
               [vim.diagnostic.severity.HINT] = " ",
               [vim.diagnostic.severity.INFO] = " ",
@@ -64,39 +63,64 @@ return {
           enabled = true,
         },
         servers = {
-          -- tailwindcss = {}
+          lua_ls = {
+            settings = {
+              Lua = {
+                diagnostics = {
+                  enabled = true,
+                  globals = { "vim" },
+                },
+                completion = {
+                  callSnippet = "Replace",
+                },
+                codeLens = {
+                  enable = true,
+                },
+                hint = {
+                  enable = true,
+                },
+              },
+            },
+          }
         }
       }
     end,
     config = function(_, opts)
-      -- require("neodev").setup({})
       local lspconfig = require("lspconfig")
-      local mason_registry = require("mason-registry")
-      local vue_language_server =
-      "C:/Users/24893/AppData/Local/nvim-data/mason/packages/vue-language-server/node_modules/@vue/language-server"
-
+      vim.diagnostic.config({
+        virtual_text = {
+          spacing = 4,
+          source = "if_many",
+          prefix = "●",
+        },
+        signs = {
+          text = {
+            [vim.diagnostic.severity.ERROR] = " ",
+            [vim.diagnostic.severity.WARN] = " ",
+            [vim.diagnostic.severity.HINT] = " ",
+            [vim.diagnostic.severity.INFO] = " ",
+          },
+        },
+      })
 
       for server, config in pairs(opts.servers) do
-        -- passing config.capabilities to blink.cmp merges with the capabilities in your
-        -- `opts[server].capabilities, if you've defined it
         config.capabilities = require('blink.cmp').get_lsp_capabilities(config.capabilities)
         lspconfig[server].setup(config)
       end
 
-
       lspconfig.clangd.setup({})
       -- lspconfig.volar.setup {}
       lspconfig.ts_ls.setup({
-        init_options = {
-          plugins = {
-            {
-              name = "@vue/typescript-plugin",
-              location = vue_language_server,
-              languages = { "vue", "javascript", "typescript" }
-            }
-          },
-          filetypes = { "vue", "typescript", "javascript", "javascriptreact", "typescriptreact" }
-        },
+        -- init_options = {
+        --   plugins = {
+        --     {
+        --       name = "@vue/typescript-plugin",
+        --       location = vue_language_server,
+        --       languages = { "vue", "javascript", "typescript" }
+        --     }
+        --   },
+        --   filetypes = { "vue", "typescript", "javascript", "javascriptreact", "typescriptreact" }
+        -- },
         on_attach = function(client, bufnr)
           -- if client.supports_method("textDocument/codeLens", { bufnr = bufnr }) then
           -- 	vim.lsp.codelens.refresh()
@@ -130,24 +154,24 @@ return {
       lspconfig.html.setup({})
       lspconfig.texlab.setup({})
       lspconfig.jsonls.setup({})
-      lspconfig.lua_ls.setup({
-        settings = {
-          Lua = {
-            diagnostics = {
-              globals = { "vim" },
-            },
-            completion = {
-              callSnippet = "Replace",
-            },
-            codeLens = {
-              enable = true,
-            },
-            hint = {
-              enable = true,
-            },
-          },
-        },
-      })
+      -- lspconfig.lua_ls.setup({
+      --   -- settings = {
+      --   --   Lua = {
+      --   --     diagnostics = {
+      --   --       globals = { "vim" },
+      --   --     },
+      --   --     completion = {
+      --   --       callSnippet = "Replace",
+      --   --     },
+      --   --     codeLens = {
+      --   --       enable = true,
+      --   --     },
+      --   --     hint = {
+      --   --       enable = true,
+      --   --     },
+      --   --   },
+      --   -- },
+      -- })
       -- lspconfig.tailwindcss.setup {}
       vim.keymap.set("n", ";k", vim.lsp.buf.hover, {})
     end,
