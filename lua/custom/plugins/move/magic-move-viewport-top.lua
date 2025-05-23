@@ -59,7 +59,16 @@ function Key:init(opt)
   self.topline = opt.topline
   self.botline = opt.botline
   self.rightcol = opt.rightcol
+  self.leftcol = opt.leftcol
   self.cursor_virt_win_col = opt.cursor_virt_win_col
+end
+
+local function reset_keymap_mark(keymap)
+  keymap.ns_id = vim.api.nvim_create_namespace(keymap.key .. "-custom")
+  for key, value in pairs(keymap.child) do
+    value.reset_mark()
+  end
+  vim.cmd.redraw()
 end
 
 function Key:collect_two_keys()
@@ -75,10 +84,18 @@ function Key:collect_two_keys()
     keymap.ns_id = vim.api.nvim_create_namespace(keymap.key .. "-custom")
     keymap.callback = function()
       self:clean_mark()
-      -- reset_keymap_mark(keymap)
+      reset_keymap_mark(keymap)
       self:on_key(keymap)
     end
     table.insert(self.two_key_list, keymap)
+  end
+end
+
+function Key:keys_exhaustion(count)
+  if self.keymap.count == 26 then
+    self.down_break = self.topline + count
+    self.left_break = self.cursor_virt_win_col - count
+    self.right_break = self.cursor_virt_win_col + count
   end
 end
 
@@ -99,6 +116,7 @@ function Key:one_key()
           virt_text = { { _keymap.key, "HopNextKey" } },
           virt_text_win_col = self.cursor_virt_win_col - 1
         })
+        Key:keys_exhaustion(count)
       else
         self.down_break = self.topline + count
       end
@@ -106,7 +124,14 @@ function Key:one_key()
 
     if not self.left_break then
       if self.cursor_virt_win_col - count - 1 > 0 then
-
+        local _keymap = get_keymap(self.keymap)
+        local virt_win_col = self.cursor_virt_win_col - count - 2
+        _keymap.target_key = virt_win_col + 1 .. "|"
+        vim.api.nvim_buf_set_extmark(0, self.keymap.ns_id, self.topline - 1, 0, {
+          virt_text = { { _keymap.key, "HopNextKey" } },
+          virt_text_win_col = virt_win_col
+        })
+        Key:keys_exhaustion(count)
       else
         self.left_break = self.cursor_virt_win_col - count
       end
@@ -114,6 +139,14 @@ function Key:one_key()
 
     if not self.right_break then
       if self.cursor_virt_win_col + count < self.rightcol then
+        local virt_win_col = self.cursor_virt_win_col + count
+        local _keymap = get_keymap(self.keymap)
+        _keymap.target_key = virt_win_col + 1 .. "|"
+        vim.api.nvim_buf_set_extmark(0, self.keymap.ns_id, self.topline - 1, 0, {
+          virt_text = { { _keymap.key, "HopNextKey" } },
+          virt_text_win_col = virt_win_col
+        })
+        Key:keys_exhaustion(count)
       else
         self.right_break = self.cursor_virt_win_col + count
       end
@@ -124,7 +157,64 @@ function Key:one_key()
 end
 
 function Key:two_key()
+  if self.down_break <= self.botline then
+    for i = self.down_break, self.botline do
+      self:two_key_up_down_set_extmark(i)
+    end
+  end
 
+  if self.left_break > 1 then
+    for i = 1, self.left_break - 2 do
+      self:two_key_left_right_set_extmark(i)
+    end
+  end
+
+  if self.right_break <= self.rightcol then
+    for i = self.right_break + 1, self.rightcol do
+      self:two_key_left_right_set_extmark(i)
+    end
+  end
+end
+
+function Key:get_two_key_keymap(i)
+  local parent = self.two_key_list[1]
+  local keymap = get_keymap(parent)
+
+  if parent.count == 26 then
+    table.remove(self.two_key_list, 1)
+  end
+
+  return parent, keymap
+end
+
+function Key:two_key_left_right_set_extmark(i)
+  local keymap, child_keymap = self:get_two_key_keymap(i)
+  child_keymap.target_key = i + self.leftcol .. "|"
+  child_keymap.reset_mark = function()
+    vim.api.nvim_buf_set_extmark(0, keymap.ns_id, self.topline - 1, 0, {
+      virt_text = { { child_keymap.key, "HopNextKey2" } },
+      virt_text_win_col = i - 1
+    })
+  end
+  vim.api.nvim_buf_set_extmark(0, keymap.ns_id, self.topline - 1, 0, {
+    virt_text = { { keymap.key, "HopNextKey1" } },
+    virt_text_win_col = i - 1
+  })
+end
+
+function Key:two_key_up_down_set_extmark(i)
+  local keymap, child_keymap = self:get_two_key_keymap(i)
+  child_keymap.target_key = i .. "G"
+  child_keymap.reset_mark = function()
+    vim.api.nvim_buf_set_extmark(0, keymap.ns_id, i - 1, 0, {
+      virt_text = { { child_keymap.key, "HopNextKey2" } },
+      virt_text_win_col = self.cursor_virt_win_col - 1
+    })
+  end
+  vim.api.nvim_buf_set_extmark(0, keymap.ns_id, i - 1, 0, {
+    virt_text = { { keymap.key, "HopNextKey1" }, { child_keymap.key, "HopNextKey2" } },
+    virt_text_win_col = self.cursor_virt_win_col - 1
+  })
 end
 
 function Key:clean_mark()
@@ -167,6 +257,7 @@ function M.move_viewport_top()
     topline = topline,
     botline = botline,
     rightcol = rightcol,
+    leftcol = leftcol,
     cursor_virt_win_col = cursor_virt_win_col
   })
   Key:collect_two_keys()

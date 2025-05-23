@@ -381,6 +381,14 @@ return {
     },
     { "H", { "x", "o" } }
   },
+  ["0ak"] = {
+    {
+      function()
+        require("custom.plugins.move.magic-move-viewport-top").move_viewport_top()
+      end,
+      "n"
+    }
+  },
   -- normal mode cursor move: screen center
   ["am"] = { "gm", { "n", "x", "o" } },
   -- normal mode cursor move: screen center col
@@ -620,4 +628,12 @@ return {
   },
   -- insert mode move: Down Home,
   ["<M-space><M-space><M-j>"] = { "<Down><Home>", { "i" } },
+
+
+  ["0m"] = {
+    function()
+      require("custom.plugins.move.magic-move").move()
+    end,
+    "n"
+  }
 }

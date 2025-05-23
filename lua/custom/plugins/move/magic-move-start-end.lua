@@ -276,7 +276,6 @@ function M.start_end_move(LR)
       local virt_col = vim.fn.virtcol(".")
       local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
       local ns_id = vim.api.nvim_create_namespace("test")
-
       local up_line_start = cursor[1] - count - 1
       local up_line = vim.api.nvim_buf_get_lines(0, up_line_start, up_line_start + 1, false)[1]
 

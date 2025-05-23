@@ -206,10 +206,10 @@ return {
     })
     vim.opt.cmdheight = 2
 
-    -- vim.keymap.set("n", "cem", "<Plug>(vimtex-delim-change-math)")
-    -- vim.keymap.set("n", "dem", "<Plug>(vimtex-delim-delete)")
-    -- vim.keymap.set("n", "tem", "<Plug>(vimtex-delim-toggle-modifier)")
-    -- vim.keymap.set("n", "teM", "<Plug>(vimtex-delim-toggle-modifier-reverse)")
+    vim.keymap.set("n", "cem", "<Plug>(vimtex-delim-change-math)")
+    vim.keymap.set("n", "dem", "<Plug>(vimtex-delim-delete)")
+    vim.keymap.set("n", "tem", "<Plug>(vimtex-delim-toggle-modifier)")
+    vim.keymap.set("n", "teM", "<Plug>(vimtex-delim-toggle-modifier-reverse)")
 
     -- vim.g.tex_syntax_disabled = {
     --   'BoxVerb',
