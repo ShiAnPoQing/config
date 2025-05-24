@@ -242,6 +242,7 @@ function Key:on_key(keymap)
       end
     end
     self:clean_mark()
+    Line:del_hl()
   end)
 end
 

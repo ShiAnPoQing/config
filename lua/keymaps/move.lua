@@ -359,16 +359,40 @@ return {
     { a_h,  "n" },
     { "g0", { "x", "o" } }
   },
+  ["0ah"] = {
+    {
+      function()
+        require("custom.plugins.move.magic-move-viewport-left").move_viewport_left()
+      end,
+      "n"
+    }
+  },
   -- normal mode cursor move: screen right
   -- 支持 count
   ["al"] = {
     { a_l,  "n" },
     { "g$", { "x", "o" } }
   },
+  ["0al"] = {
+    {
+      function()
+        require("custom.plugins.move.magic-move-viewport-right").move_viewport_right()
+      end,
+      "n"
+    }
+  },
   -- normal mode cursor move: screen bottom
   ["aj"] = {
     { a_j, "n" },
     { "L", { "x", "o" } },
+  },
+  ["0aj"] = {
+    {
+      function()
+        require("custom.plugins.move.magic-move-viewport-bottom").move_viewport_bottom()
+      end,
+      "n"
+    },
   },
   -- normal mode cursor move: screen top
   ["ak"] = {

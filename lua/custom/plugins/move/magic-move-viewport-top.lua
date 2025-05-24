@@ -27,7 +27,6 @@ local function get_keymap(keymap)
   end
 end
 
-
 function Line:init(topline, botline)
   self.ns_id = nil
   Line:set_hl(topline, botline)
@@ -73,11 +72,10 @@ end
 
 function Key:collect_two_keys()
   local line_count = self.botline - self.topline + 1
-  local two_keys = math.ceil((line_count + self.rightcol - 1 - 26) / 26)
-
-  if (line_count + self.rightcol - 1 - 26) % 26 == 0 then
-    two_keys = two_keys + 1
-  end
+  local remain = line_count + self.rightcol - 1 - 26
+  local quotient = math.floor(remain / 26)
+  local remainder = remain - (quotient * 26)
+  local two_keys = math.ceil((remainder + quotient) / 26) + quotient
 
   for i = 1, two_keys do
     local keymap = get_keymap(self.keymap)
@@ -164,7 +162,7 @@ function Key:two_key()
   end
 
   if self.left_break > 1 then
-    for i = 1, self.left_break - 2 do
+    for i = 1, self.left_break - 1 do
       self:two_key_left_right_set_extmark(i)
     end
   end
@@ -239,6 +237,7 @@ function Key:on_key(keymap)
       end
     end
     self:clean_mark()
+    Line:del_hl()
   end)
 end
 
