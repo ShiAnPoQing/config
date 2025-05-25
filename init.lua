@@ -14,6 +14,7 @@ require("lazy").setup({
   require("plugins.filemanager.neo-tree"),
   require("plugins.filemanager.yazi"),
   require("plugins.code.aerial"),
+  require("plugins.tmux.vim-tmux-navigator"),
 
   require("plugins-auto.toggle-term"),
   require("plugins-auto.flash"),
