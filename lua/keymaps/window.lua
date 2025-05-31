@@ -14,10 +14,26 @@ return {
     "n",
   },
   -- resize window
-  ["<M-down>"] = { ":resize +3<CR>", { "n" } },
-  ["<M-up>"] = { ":resize -3<CR>", { "n" } },
-  ["<M-right>"] = { ":vertical resize -3<CR>", { "n" } },
-  ["<M-left>"] = { ":vertical resize +3<CR>", { "n" }, { silent = true } },
+  ["<M-down>"] = {
+    function()
+      require("custom.plugins.resize-win").resize_win({ direction = "down" })
+    end, { "n" }
+  },
+  ["<M-up>"] = {
+    function()
+      require("custom.plugins.resize-win").resize_win({ direction = "up" })
+    end, { "n" }
+  },
+  ["<M-right>"] = {
+    function()
+      require("custom.plugins.resize-win").resize_win({ direction = "right" })
+    end, { "n" }
+  },
+  ["<M-left>"] = {
+    function()
+      require("custom.plugins.resize-win").resize_win({ direction = "left" })
+    end, { "n" }
+  },
 
   -- vsplit current file left-right
   ["<M-v>"] = {

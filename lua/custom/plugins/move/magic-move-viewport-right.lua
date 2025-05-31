@@ -213,7 +213,7 @@ function Key:two_key()
     for i = 1, self.left_break - 1 do
       local line = self.cursor_row - 1
       local keymap, child_keymap = self:get_two_key_keymap({
-        target_key = i + self.leftcol .. "G",
+        target_key = i + self.leftcol .. "|",
         line = line,
         virt_text_win_col = i - 1
       })
