@@ -53,7 +53,7 @@ return {
     snippets = { preset = 'luasnip' },
     signature = { enabled = true },
     keymap = {
-      preset = "default",
+      preset = "none",
       ['<C-c>'] = {
         function(cmp)
           if cmp.is_menu_visible() then

@@ -76,43 +76,46 @@ local snippets = {
       })
     end)
   ),
-  -- 临时
   s("fun", {
-    t("function"),
-    n(1, " ", ""),
-    i(1, "name"),
-    t("("),
-    i(2),
-    t(") {"),
-    t({ "", "\t" }),
-    i(3, "return"),
-    d(4, function(args)
-      if args[1][1]:match("return") then
-        return sn(nil, {
-          t(" "),
-          i(1),
-          t({ "", "}" }),
-          i(2),
-          i(3, n(1, "A", "B")),
-        })
-      else
-        return sn(nil, {
-          t({ "", "}" }),
-          i(1),
-        })
-      end
-    end, 3),
-  }, {
-    callbacks = {
-      [1] = {
-        [events.leave] = function(node, args)
-          if node:get_text()[1]:match("name") then
-            node:set_text({ "" })
-          end
-        end,
-      },
-    },
+    t("function "), i(1), t("("), i(2), t(") {"), t({ "", "\t" }), i(3, "return"), t({ "", "}" }), i(4)
   }),
+  -- 临时
+  -- s("fun", {
+  --   t("function"),
+  --   n(1, " ", ""),
+  --   i(1, "name"),
+  --   t("("),
+  --   i(2),
+  --   t(") {"),
+  --   t({ "", "\t" }),
+  --   i(3, "return"),
+  --   d(4, function(args)
+  --     if args[1][1]:match("return") then
+  --       return sn(nil, {
+  --         t(" "),
+  --         i(1),
+  --         t({ "", "}" }),
+  --         i(2),
+  --         i(3, n(1, "A", "B")),
+  --       })
+  --     else
+  --       return sn(nil, {
+  --         t({ "", "}" }),
+  --         i(1),
+  --       })
+  --     end
+  --   end, 3),
+  -- }, {
+  --   callbacks = {
+  --     [1] = {
+  --       [events.leave] = function(node, args)
+  --         if node:get_text()[1]:match("name") then
+  --           node:set_text({ "" })
+  --         end
+  --       end,
+  --     },
+  --   },
+  -- }),
 
   s("exp", {
     t("export "),

@@ -23,10 +23,11 @@ local function ctrl_space_ctrl_i()
     vim.api.nvim_feedkeys("a", "n", false)
   end)
 end
-
 return {
   ["<S-BS>"] = { "<Del>", { "i" } },
+  ["<F32>"] = { "<Del>", { "i" } },
   ["<C-BS>"] = { "<Left><C-o>diw", { "i" } },
+  ["<F31>"] = { "<Left><C-o>diw", { "i" } },
   ["<M-BS>"] = { "<C-o>diw", { "i" } },
   ["<C-i>"] = { "<Esc>ldbi", "i", { noremap = true } },
   ["<C-o>"] = { "<C-o>de", "i", { noremap = true } },

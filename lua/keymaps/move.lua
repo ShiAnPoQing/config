@@ -669,5 +669,5 @@ return {
       require("custom.plugins.move.magic-move").move()
     end,
     "n"
-  }
+  },
 }

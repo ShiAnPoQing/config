@@ -11,6 +11,7 @@ require("lazy").setup({
   require("plugins.telescope.telescope"),
   require("plugins.tex.vimtex"),
   require("plugins.markdown.markdown-preview"),
+  require("plugins.markdown.render-markdown"),
   require("plugins.filemanager.neo-tree"),
   require("plugins.filemanager.yazi"),
   require("plugins.code.aerial"),
@@ -23,6 +24,7 @@ require("lazy").setup({
   require("plugins-auto.grug-far"),
 
   require("plugins.misc.autopairs"),
+  -- require("plugins.misc.augment"),
   require("plugins.misc.zen-mode"),
   require("plugins.misc.colorizer"),
   require("plugins.misc.todo-comments"),
@@ -33,7 +35,7 @@ require("lazy").setup({
   require("plugins.style.dashboard-nvim"),
   -- require"plugins.style.alpha-nvim",
   -- require("plugins.style.theme.material"),
-  -- require("plugins.style.theme.moonfly"),
+  --  require("plugins.style.theme.moonfly"),
   -- require("plugins.style.theme.gruvbox"),
   require("plugins.style.theme.tokyonight"),
   -- require("plugins.style.theme.catppuccin"),
@@ -57,3 +59,7 @@ require("lazy").setup({
 })
 
 require("test")
+
+vim.cmd([[
+let g:augment_workspace_folders = ['~/Learn']
+]])
