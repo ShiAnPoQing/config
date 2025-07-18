@@ -7,7 +7,7 @@ return {
     -- load the colorscheme here
     require("night-owl").setup({
       -- transparent_background = false,
-      transparent_background = true,
+      -- transparent_background = true,
     })
     vim.cmd.colorscheme("night-owl")
     vim.api.nvim_set_hl(0, "SignColumn", { fg = "white", bg = "NONE" })

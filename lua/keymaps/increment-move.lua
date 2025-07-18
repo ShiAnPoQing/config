@@ -119,24 +119,24 @@ local function increment_move(action)
 end
 
 return {
-  ["sl"] = {
-    function()
-      increment_move("right")
-      require("repeat").Record(function()
-        increment_move("right")
-      end)
-    end,
-    "n"
-  },
-  ["sh"] = {
-    function()
-      increment_move("left")
-      require("repeat").Record(function()
-        increment_move("left")
-      end)
-    end,
-    "n"
-  }
+  -- ["sl"] = {
+  --   function()
+  --     increment_move("right")
+  --     require("repeat").Record(function()
+  --       increment_move("right")
+  --     end)
+  --   end,
+  --   "n"
+  -- },
+  -- ["sh"] = {
+  --   function()
+  --     increment_move("left")
+  --     require("repeat").Record(function()
+  --       increment_move("left")
+  --     end)
+  --   end,
+  --   "n"
+  -- }
 }
 
 -- local line = vim.api.nvim_get_current_line()

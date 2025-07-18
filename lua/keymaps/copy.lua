@@ -1,13 +1,29 @@
 return {
   ["Y"] = { "y$", { "n" } },
   -- yank/paste/del A register text
-  ["<space>y"] = { '"ay', { "n", "x" } },
-  ["<space>p"] = { '"ap', { "n", "x" } },
-  ["<space>P"] = { '"aP', { "n" } },
+  -- ["<space>y"] = { '"ay', { "n", "x" } },
+  ["<space>y"] = {
+    function()
+      require("custom.plugins.copy-register").copy_register("y")
+    end,
+    { "n", "x" } },
+  ["<space>Y"] = {
+    function()
+      require("custom.plugins.copy-register").copy_register("Y")
+    end
+    , { "n", "x" } },
+  ["<space>p"] = {
+    function()
+      require("custom.plugins.paste-register").paste_register("p")
+    end, { "n", "x" } },
+  ["<space>P"] = { function()
+    require("custom.plugins.copy-register").paste_register("P")
+  end, { "n" } },
   ["<space>d"] = { '"ad', { "n", "x" } },
 
   -- yank/paste/del Outer register text
   ["<space><space>y"] = { '"+y', { "n", "x" } },
+  ["<space><space>Y"] = { '"+Y', { "n", "x" } },
   ["<space><space>p"] = { '"+p', { "n", "x" } },
   ["<space><space>P"] = { '"+P', { "n", "x" } },
   ["<space><space>d"] = { '"+d', { "n", "x" } },
@@ -24,10 +40,10 @@ return {
 
   -- 粘贴模式
   ["<C-v>"] = {
-    -- { '<C-G>u<C-R>"',  { "i" } },
-    { '<C-G>u<C-R><C-o>"', { "i" } },
-    { '<C-R>"',            { "c" }, { silent = false } },
-    { "<C-\\><C-N>pi",     "t" },
+    { '<C-G>u<C-R>"',  { "i" } },
+    -- { '<C-G>u<C-R><C-o>"', { "i" } },
+    { '<C-R>"',        { "c" }, { silent = false } },
+    { "<C-\\><C-N>pi", "t" },
   },
 
   --map('c', '<C-v>', '<C-R>\'', Opts)
@@ -36,9 +52,6 @@ return {
     { "<C-R>a",            { "c" }, { silent = false } },
   },
 
-  -- Map('c', '<C-space><C-v>', '<C-G>u<C-R><C-o>a', Opts)
-  ["<M-space><M-v>"] = { "<C-G>u<C-R>'", { "i" } },
-
 
   -- 粘贴模式
   ["<M-space><M-space><M-p>"] = {
@@ -46,7 +59,15 @@ return {
     { "<C-R>+",            "c",    { silent = false } },
   },
 
+  -- Map('c', '<C-space><C-v>', '<C-G>u<C-R><C-o>a', Opts)
+  ["<M-space><M-v>"] = { "<C-G>u<C-R>'", { "i" } },
   --map('c', '<C-space><C-space><C-v>', '<C-G>u<C-R><C-o>*', Opts)
   -- 非粘贴模式
   ["<M-space><M-space><M-v>"] = { "<C-G>u<C-R>*", { "i" } },
+
+  -- Map('c', '<C-space><C-v>', '<C-G>u<C-R><C-o>a', Opts)
+  ["<C-space><C-v>"] = { "<C-G>u<C-R>'", { "i" } },
+  --map('c', '<C-space><C-space><C-v>', '<C-G>u<C-R><C-o>*', Opts)
+  -- 非粘贴模式
+  ["<C-space><C-space><C-v>"] = { "<C-G>u<C-R>*", { "i" } },
 }

@@ -72,6 +72,15 @@ return {
           end
         end
       },
+      ["<C-p>"] = {
+        function(cmp)
+          if cmp.is_menu_visible() then
+            cmp.select_prev()
+          else
+            cmp.show()
+          end
+        end
+      },
       ['<CR>'] = { 'accept', 'fallback' },
       ['<Tab>'] = {
         "select_and_accept",

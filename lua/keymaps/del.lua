@@ -11,23 +11,30 @@ local function ctrl_space_ctrl_i()
     local start_row = start_pos[1]
     local start_col = start_pos[2]
 
-    if end_col == start_col then
+    if (start_row == end_row) then
+      vim.api.nvim_buf_set_text(0, start_row - 1, start_col + 1, start_row - 1, end_col + 1, { "" })
       vim.api.nvim_feedkeys("a", "n", false)
       return
     end
-    if start_col == 0 then
-      vim.api.nvim_buf_set_text(0, start_row - 1, 0, start_row - 1, end_col + 1, { "" })
-    else
-      vim.api.nvim_buf_set_text(0, start_row - 1, start_col + 1, end_row - 1, end_col + 1, { "" })
+
+    if (end_col ~= 0) then
+      vim.api.nvim_buf_set_text(0, end_row - 1, 0, end_row - 1, end_col + 1, { "" })
     end
-    vim.api.nvim_feedkeys("a", "n", false)
+
+    if (start_col > 0) then
+      vim.api.nvim_feedkeys("a", "n", false)
+    else
+      vim.api.nvim_feedkeys("i", "n", false)
+    end
   end)
 end
+
 return {
-  ["<S-BS>"] = { "<Del>", { "i" } },
-  ["<F32>"] = { "<Del>", { "i" } },
-  ["<C-BS>"] = { "<Left><C-o>diw", { "i" } },
-  ["<F31>"] = { "<Left><C-o>diw", { "i" } },
+  ["<S-BS>"] = {
+    { "<Del>", { "i" } },
+    { "lxh",   "n" }
+  },
+  ["<C-BS>"] = { "<Left><C-o>diw", { "i" }, },
   ["<M-BS>"] = { "<C-o>diw", { "i" } },
   ["<C-i>"] = { "<Esc>ldbi", "i", { noremap = true } },
   ["<C-o>"] = { "<C-o>de", "i", { noremap = true } },

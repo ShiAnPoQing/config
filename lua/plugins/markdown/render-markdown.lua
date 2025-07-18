@@ -14,6 +14,7 @@ return {
   config = function()
     require('render-markdown').setup({
       completions = { blink = { enabled = true } },
+      enabled = false
     })
   end
 }

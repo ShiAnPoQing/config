@@ -154,6 +154,7 @@ function M.setup()
   local base_path = vim.fn.stdpath("config") .. "/lua/"
   local path = base_path .. "keymaps"
   load_keymaps(base_path, path)
+  return M
 end
 
 return M

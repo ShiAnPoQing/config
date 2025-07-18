@@ -29,12 +29,28 @@ return {
   },
   -- clone up line with single letter
   ["<M-w>"] = {
-    "<C-y>",
-    "i",
+    {
+      "<C-y>",
+      "i",
+    },
+    {
+      function()
+
+      end,
+      "n"
+    }
   },
   -- clone down line with single letter
   ["<M-e>"] = {
-    "<C-e>",
-    "i",
+    {
+      "<C-e>",
+      "i",
+    },
+    {
+      function()
+
+      end,
+      "n"
+    }
   },
 }
