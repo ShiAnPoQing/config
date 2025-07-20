@@ -1,26 +1,36 @@
 return {
   ["Y"] = { "y$", { "n" } },
-  -- yank/paste/del A register text
-  -- ["<space>y"] = { '"ay', { "n", "x" } },
+  -- yank/paste/del register
   ["<space>y"] = {
     function()
       require("custom.plugins.copy-register").copy_register("y")
     end,
-    { "n", "x" } },
+    { "n", "x" }
+  },
   ["<space>Y"] = {
     function()
       require("custom.plugins.copy-register").copy_register("Y")
-    end
-    , { "n", "x" } },
+    end,
+    { "n", "x" }
+  },
   ["<space>p"] = {
     function()
       require("custom.plugins.paste-register").paste_register("p")
-    end, { "n", "x" } },
-  ["<space>P"] = { function()
-    require("custom.plugins.copy-register").paste_register("P")
-  end, { "n" } },
-  ["<space>d"] = { '"ad', { "n", "x" } },
-
+    end,
+    { "n", "x" }
+  },
+  ["<space>P"] = {
+    function()
+      require("custom.plugins.copy-register").paste_register("P")
+    end,
+    { "n" }
+  },
+  ["<space>d"] = {
+    function()
+      require("custom.plugins.del-register").del_register("d")
+    end,
+    { "n", "x" }
+  },
   -- yank/paste/del Outer register text
   ["<space><space>y"] = { '"+y', { "n", "x" } },
   ["<space><space>Y"] = { '"+Y', { "n", "x" } },
@@ -51,7 +61,6 @@ return {
     { "<C-G>u<C-R><C-o>a", { "i" } },
     { "<C-R>a",            { "c" }, { silent = false } },
   },
-
 
   -- 粘贴模式
   ["<M-space><M-space><M-p>"] = {

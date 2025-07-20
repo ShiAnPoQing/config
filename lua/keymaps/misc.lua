@@ -160,7 +160,7 @@ return {
   -- virtualedit = "none"
   ["<space><space>v"] = {
     function()
-      vim.opt.virtualedit = "none"
+      vim.opt.virtualedit = ""
       vim.api.nvim_exec2([[
       execute "normal! $\<C-v>"
       ]], {})
