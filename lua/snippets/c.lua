@@ -26,11 +26,6 @@ local parse = require("luasnip.util.parser").parse_snippet
 local ms = ls.multi_snippet
 local k = require("luasnip.nodes.key_indexer").new_key
 
--- int main() {
---
---   return 0;
--- }
-
 return {
   s("mn", {
     t({ "int main() {", "  " }),

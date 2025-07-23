@@ -92,7 +92,7 @@ return {
               includeInlayFunctionLikeReturnTypeHints = true,
               includeInlayEnumMemberValueHints = true,
             },
-            referencesCodeLens = { enabled = true },
+            referencesCodeLens = { enabled = false },
             implementationsCodeLens = { enabled = true },
           },
         },

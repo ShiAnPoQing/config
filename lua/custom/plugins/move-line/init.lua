@@ -30,6 +30,7 @@ function M.moveLine(dir)
     local start_row, start_col, end_row, end_col = utils.get_visual_mark(true)
     local lines = vim.api.nvim_buf_get_lines(0, start_row - 1, end_row, false)
 
+
     if dir == "up" then
       count = -math.min(start_row - 1, count)
       vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, {})
@@ -40,9 +41,15 @@ function M.moveLine(dir)
       vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, {})
     end
 
-    utils.set_visual_mark(start_row + count, start_col, end_row + count, end_col)
-    vim.api.nvim_feedkeys("gv", "nx", false)
-    vim.api.nvim_win_set_cursor(0, { row + count, col })
+    if row == start_row then
+      utils.set_visual_mark(end_row + count, end_col, start_row + count, start_col)
+      vim.api.nvim_feedkeys("gv", "nx", false)
+      vim.api.nvim_win_set_cursor(0, { row + count, col })
+    else
+      utils.set_visual_mark(start_row + count, start_col, end_row + count, end_col)
+      vim.api.nvim_feedkeys("gv", "nx", false)
+      vim.api.nvim_win_set_cursor(0, { row + count, col })
+    end
   end
 end
 

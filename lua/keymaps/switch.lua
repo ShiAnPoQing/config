@@ -5,6 +5,16 @@ local function switch(option)
 end
 
 return {
+  ["<space><space>-"] = {
+    function()
+      if vim.opt["wrap"]:get() then
+        vim.opt.wrap = false
+      else
+        vim.opt.wrap = true
+      end
+    end,
+    "n",
+  },
   [";nb"] = {
     function()
       if vim.opt["number"]:get() then

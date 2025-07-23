@@ -86,12 +86,12 @@ function M.setup()
       "n",
     },
     -- repeat
-    ["."] = {
-      function()
-        require("repeat").Repeat()
-      end,
-      { "n", "x" },
-    },
+    -- ["."] = {
+    --   function()
+    --     require("repeat").Repeat()
+    --   end,
+    --   { "n", "x" },
+    -- },
   })
 end
 

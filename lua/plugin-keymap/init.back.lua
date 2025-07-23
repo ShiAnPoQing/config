@@ -23,13 +23,6 @@
 
 local M = {}
 
-local filetype_set_keymaps = {
-  typescript = {},
-  javascript = {},
-  lua = {},
-  typescriptreact = {}
-}
-
 --- @alias ModeType string|table
 
 --- @class KeymapConfig
@@ -56,22 +49,11 @@ end
 --- @param keymap KeymapConfig
 local function setKeymap(keymap)
   local ok, v = pcall(function(mode, lhs, rhs, opts)
-    if opts.filetype ~= nil then
-      if filetype_set_keymaps[opts.filetype] then
-        table.insert(filetype_set_keymaps[opts.filetype], function(buffer)
-          opts.filetype = nil
-          opts.buffer = buffer
-          vim.keymap.set(mode, lhs, rhs, opts)
-        end)
-        return
-      end
-    end
-
     vim.keymap.set(mode, lhs, rhs, opts)
   end, keymap.mode, keymap.lhs, keymap.rhs, keymap.opts)
 
   if not ok then
-    vim.notify("keymap 格式设置有误！" .. keymap.lhs, vim.log.levels.ERROR)
+    vim.api.nvim_err_writeln("keymap 格式设置有误！" .. keymap.lhs)
   end
 end
 
@@ -98,8 +80,6 @@ end
 local function parseModeObj(modeObj, keymap, parseModes)
   local mode = modeObj[1]
   keymap.opts = vim.tbl_extend("keep", modeObj[2] or {}, keymap.opts)
-
-
   if not hadKeymapSet(mode, keymap) then
     parseModes(mode, keymap)
   end
@@ -138,7 +118,6 @@ function M.add(maps)
     local mode = value[2]
     local opts = value[3] or {}
 
-
     if (isMoreRhs(rhs)) then
       addMoreRhsKeymap(lhs, value)
     else
@@ -171,25 +150,10 @@ local function load_keymaps(base_path, current_path)
   end
 end
 
-local function load_filetype_keymaps()
-  vim.api.nvim_create_autocmd("FileType", {
-    pattern = { "javascript", "typescript", "lua", "typescriptreact" },
-    callback = function(args)
-      local ft = vim.bo[args.buf].filetype
-      if filetype_set_keymaps[ft] ~= nil then
-        for _, setkeymap in ipairs(filetype_set_keymaps[ft]) do
-          setkeymap(args.buf)
-        end
-      end
-    end,
-  })
-end
-
 function M.setup()
   local base_path = vim.fn.stdpath("config") .. "/lua/"
   local path = base_path .. "keymaps"
   load_keymaps(base_path, path)
-  load_filetype_keymaps()
   return M
 end
 

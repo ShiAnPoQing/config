@@ -131,12 +131,6 @@ return {
 
   ["<space>u"] = { "U", "n" },
   ["U"] = { "<C-R>", "n" },
-  ["<space><space>-"] = {
-    function()
-      require("switch-function").switch("wrap")
-    end,
-    { "n" },
-  },
   -- gh: normal mode into select mode
   -- normal mode into select block mode
   ["<space>gh"] = { "g<C-h>", { "n" } },

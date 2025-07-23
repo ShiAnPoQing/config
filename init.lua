@@ -40,9 +40,9 @@ require("lazy").setup({
   require("plugins.style.dashboard-nvim"),
   -- require"plugins.style.alpha-nvim",
   -- require("plugins.style.theme.material"),
-  --  require("plugins.style.theme.moonfly"),
+  require("plugins.style.theme.moonfly"),
   -- require("plugins.style.theme.gruvbox"),
-  require("plugins.style.theme.kanagawa"),
+  -- require("plugins.style.theme.kanagawa"),
   -- require("plugins.style.theme.tokyonight"),
   -- require("plugins.style.theme.catppuccin"),
   -- require("plugins.style.theme.colorbuddy"),
@@ -50,7 +50,7 @@ require("lazy").setup({
   -- require("plugins.style.theme.gruvbox-material"),
   -- require("plugins.style.theme.melange"),
   -- require("plugins.style.theme.night-owl"),
-  -- require("plugins.styletheme.nightfox"),
+  -- require("plugins.style.theme.nightfox"),
   -- require("plugins.style.theme.nord"),
   -- require("plugins.style.theme.nordic"),
   -- require("plugins.style.theme.onedarkpro"),
@@ -61,7 +61,6 @@ require("lazy").setup({
   require("plugins.custom.win-action"),
   require("plugins.custom.show-file-info"),
   require("plugins.custom.word-move"),
-  -- require("plugins.custom.easy-word-motion")
 })
 
 
@@ -72,9 +71,17 @@ Keymap.add({
     { "<Del>", { "i" } },
     { "lxh",   "n" }
   },
+
   ["<F31>"] = { "<Left><C-o>diw", { "i" } },
+  [";x"] = {
+    function()
+      require("test.test").test()
+    end,
+    "n",
+    { filetype = "javascript" }
+  }
 })
 
 vim.cmd([[
-let g:augment_workspace_folders = ['~/Learn']
+  let g:augment_workspace_folders = ['~/Learn']
 ]])

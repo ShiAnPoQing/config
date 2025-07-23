@@ -5,6 +5,8 @@ return {
     -- { 'L3MON4D3/LuaSnip', version = 'v2.*' },
   },
   build = 'cargo +nightly build --release',
+
+  event = { "InsertEnter", "CmdlineEnter" },
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
   opts = {

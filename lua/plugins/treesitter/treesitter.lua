@@ -54,37 +54,48 @@ return {
           lookahead = true,
 
           keymaps = {
-            -- You can use the capture groups defined in textobjects.scm
-            ["wf"] = "@function.outer",
-            ["ef"] = "@function.inner",
-            -- You can optionally set descriptions to the mappings (used in the desc parameter of
-            -- nvim_buf_set_keymap) which plugins like which-key display
-            ["ec"] = { query = "@class.inner", desc = "Select inner part of a interface" },
-            ["wc"] = { query = "@class.outer", desc = "Select outer part of a interface" },
-            -- You can also use captures from other query groups like `locals.scm`
-            ["ws"] = { query = "@scope", query_group = "locals", desc = "Select language scope" },
+            [";fo"] = "@function.outer",
+            [";fi"] = "@function.inner",
+            [";fp"] = "@parameter.inner",
+            --
+            [";fci"] = "@call.inner",
+            [";fco"] = "@call.outer",
+
+            [";ai"] = "@attribute.inner",
+            [";ao"] = "@attribute.outer",
+
+            [";ri"] = "@return.inner",
+            [";ro"] = "@return.outer",
+
+            [";rgi"] = "@regex.inner",
+            [";rgo"] = "@regex.outer",
+
+            [";ci"] = "@comment.inner",
+            [";co"] = "@comment.outer",
+
+            [";li"] = "@loop.inner",
+            [";lo"] = "@loop.outer",
+            [";ki"] = "@conditional.inner",
+            [";ko"] = "@conditional.outer",
+
+            [";bi"] = "@block.inner",
+            [";bo"] = "@block.outer",
+
+            [";ws"] = "@class.inner",
+            [";es"] = "@class.outer",
+
+            -- [";el"] = "@assignment.inner",
+            -- [";eh"] = "@assignment.lhs",
+            -- [";ee"] = "@assignment.outer",
+            [";sm"] = "@statement.outer",
+
+            [";nm"] = "@number.inner",
           },
-          -- You can choose the select mode (default is charwise 'v')
-          --
-          -- Can also be a function which gets passed a table with the keys
-          -- * query_string: eg '@function.inner'
-          -- * method: eg 'v' or 'o'
-          -- and should return the mode ('v', 'V', or '<c-v>') or a table
-          -- mapping query_strings to modes.
           selection_modes = {
             ["@parameter.outer"] = "v", -- charwise
             ["@function.outer"] = "V",  -- linewise
             ["@class.outer"] = "<c-v>", -- blockwise
           },
-          -- If you set this to `true` (default is `false`) then any textobject is
-          -- extended to include preceding or succeeding whitespace. Succeeding
-          -- whitespace has priority in order to act similarly to eg the built-in
-          -- `ap`.
-          --
-          -- Can also be a function which gets passed a table with the keys
-          -- * query_string: eg '@function.inner'
-          -- * selection_mode: eg 'v'
-          -- and should return true or false
           include_surrounding_whitespace = true,
         },
       },
@@ -106,3 +117,38 @@ return {
     -- })
   end,
 }
+
+--[[
+| 捕获组             | 说明（选中内容）                         |
+| ------------------ | ---------------------------------------- |
+| @assignment.inner  | 赋值语句的右侧（被赋值的值）             |
+| @assignment.rhs    | 赋值语句的右侧（同 inner，右值）         |
+| @assignment.lhs    | 赋值语句的左侧（被赋值的变量）           |
+| @assignment.outer  | 整个赋值语句                             |
+| @attribute.inner   | 属性内容（如 Python 装饰器的内容）       |
+| @attribute.outer   | 整个属性（如装饰器整行）                 |
+| @block.inner       | 代码块内部（不含大括号/缩进）            |
+| @block.outer       | 整个代码块（含大括号/缩进）              |
+| @call.inner        | 函数调用参数部分                         |
+| @call.outer        | 整个函数调用（含函数名和括号）           |
+| @class.inner       | 类体内部（不含 class 关键字和花括号）    |
+| @class.outer       | 整个类定义（含 class 关键字和花括号）    |
+| @comment.inner     | 注释内容（不含注释符号）                 |
+| @comment.outer     | 整个注释（含注释符号）                   |
+| @conditional.inner | 条件语句体（如 if/else 内部）            |
+| @conditional.outer | 整个条件语句（如 if/else 整体）          |
+| @frame.inner       | 框架结构内部（如 LaTeX 的 frame）        |
+| @frame.outer       | 整个框架结构                             |
+| @function.inner    | 函数体内部（不含 function 关键字和括号） |
+| @function.outer    | 整个函数定义（含 function 关键字和括号） |
+| @loop.inner        | 循环体内部（如 for/while 内部）          |
+| @loop.outer        | 整个循环结构（如 for/while 整体）        |
+| @number.inner      | 数字文本对象                             |
+| @parameter.inner   | 参数内容（如函数参数）                   |
+| @regex.inner       | 正则表达式内容                           |
+| @regex.outer       | 整个正则表达式                           |
+| @return.inner      | return 语句的返回值部分                  |
+| @return.outer      | 整个 return 语句                         |
+| @scopename.inner   | 作用域名称（如函数名、类名等）           |
+| @statement.outer   | 整个语句（如一行代码）                   |
+--]]
