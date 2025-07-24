@@ -6,6 +6,7 @@ require("lazy").setup({
   require("plugins.snippet.luasnip"),
   require("plugins.cmp.blank-cmp"),
   require("plugins.lsp.lsp-config"),
+  require("plugins.lsp.tiny-inline-diagnostic"),
   require("plugins.format.conform"),
   require("plugins.treesitter.treesitter"),
   -- require("plugins.treesitter.nvim-treesitter-context"),

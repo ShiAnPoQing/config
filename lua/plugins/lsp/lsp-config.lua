@@ -35,11 +35,12 @@ return {
       local lspconfig = require("lspconfig")
 
       vim.diagnostic.config({
-        virtual_text = {
-          spacing = 4,
-          source = "if_many",
-          prefix = "●",
-        },
+        -- virtual_text = {
+        --   spacing = 4,
+        --   source = "if_many",
+        --   prefix = "●",
+        -- },
+        virtual_text = false,
         signs = {
           text = {
             [vim.diagnostic.severity.ERROR] = " ",

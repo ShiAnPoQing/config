@@ -15,6 +15,17 @@ return {
     end,
     "n",
   },
+  [";sh"] = {
+    function()
+      local value = vim.opt["signcolumn"]:get()
+      if string.sub(value, 1, 1) == "y" then
+        vim.opt["signcolumn"] = "no"
+      else
+        vim.opt["signcolumn"] = "yes:1"
+      end
+    end,
+    "n"
+  },
   [";nb"] = {
     function()
       if vim.opt["number"]:get() then
@@ -25,7 +36,7 @@ return {
     end,
     "n"
   },
-  [";rb"] = {
+  [";rnb"] = {
     function()
       if vim.opt["relativenumber"]:get() then
         vim.opt.relativenumber = false
@@ -35,7 +46,7 @@ return {
     end,
     "n"
   },
-  [";tb"] = {
+  [";tnb"] = {
     function()
       if vim.opt["relativenumber"]:get() or vim.opt.number:get() then
         vim.opt.relativenumber = false

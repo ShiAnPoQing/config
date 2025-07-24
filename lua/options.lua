@@ -55,8 +55,8 @@ function M.setup()
     autoread = true,
 
     foldcolumn = "0",
-    signcolumn = "no",
-    -- signcolumn = "yes:1",
+    -- signcolumn = "no",
+    signcolumn = "yes:1",
     -- signcolumn = "yes:2",
     laststatus = 3,
 
