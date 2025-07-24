@@ -12,6 +12,26 @@ local function create_treesitter_textobject_keymap(opts)
   }
 end
 
+local function create_js_treesitter_textobject_keymap(query)
+  return {
+    create_treesitter_textobject_keymap({
+      language = "tsx",
+      query = query,
+      filetype = "typescriptreact"
+    }),
+    create_treesitter_textobject_keymap({
+      language = "typescript",
+      query = query,
+      filetype = "typescript"
+    }),
+    create_treesitter_textobject_keymap({
+      language = "javascript",
+      query = query,
+      filetype = "typescript"
+    })
+  }
+end
+
 return {
   -- textobject
   ["ww"] = { "aw", { "x", "o" } },
@@ -58,90 +78,14 @@ return {
   ["wt"] = { "at", { "x", "o" } },
   ["et"] = { "it", { "x", "o" } },
 
-  ["<leader>fn"] = {
-    create_treesitter_textobject_keymap({
-      language = "tsx",
-      query = "function_name",
-      filetype = "typescriptreact"
-    }),
-    create_treesitter_textobject_keymap({
-      language = "typescript",
-      query = "function_name",
-      filetype = "typescript"
-    }),
-    create_treesitter_textobject_keymap({
-      language = "javascript",
-      query = "function_name",
-      filetype = "typescript"
-    })
-  },
-  ["<leader>eh"] = {
-    create_treesitter_textobject_keymap({
-      language = "tsx",
-      query = "variable_name",
-      filetype = "typescriptreact"
-    }),
-    create_treesitter_textobject_keymap({
-      language = "typescript",
-      query = "variable_name",
-      filetype = "typescript"
-    }),
-    create_treesitter_textobject_keymap({
-      language = "javascript",
-      query = "variable_name",
-      filetype = "typescript"
-    })
-  },
-  ["<leader>el"] = {
-    create_treesitter_textobject_keymap({
-      language = "tsx",
-      query = "variable_value",
-      filetype = "typescriptreact"
-    }),
-    create_treesitter_textobject_keymap({
-      language = "typescript",
-      query = "variable_value",
-      filetype = "typescript"
-    }),
-    create_treesitter_textobject_keymap({
-      language = "javascript",
-      query = "variable_value",
-      filetype = "typescript"
-    })
-  },
+  ["<space>fn"] = create_js_treesitter_textobject_keymap("function_name"),
+  ["<space>eh"] = create_js_treesitter_textobject_keymap("variable_name"),
+  ["<spae>el"] = create_js_treesitter_textobject_keymap("variable_value"),
+  ["<leader>ims"] = create_js_treesitter_textobject_keymap("import_source"),
+  ["<leader>imn"] = create_js_treesitter_textobject_keymap("import_clause"),
 
-  ["<leader>is"] = {
-    create_treesitter_textobject_keymap({
-      language = "tsx",
-      query = "import_source",
-      filetype = "typescriptreact"
-    }),
-    create_treesitter_textobject_keymap({
-      language = "typescript",
-      query = "import_source",
-      filetype = "typescript"
-    }),
-    create_treesitter_textobject_keymap({
-      language = "javascript",
-      query = "import_source",
-      filetype = "typescript"
-    })
-  },
-  ["<leader>in"] = {
-    create_treesitter_textobject_keymap({
-      language = "tsx",
-      query = "import_clause",
-      filetype = "typescriptreact"
-    }),
-    create_treesitter_textobject_keymap({
-      language = "typescript",
-      query = "import_clause",
-      filetype = "typescript"
-    }),
-    create_treesitter_textobject_keymap({
-      language = "javascript",
-      query = "import_clause",
-      filetype = "typescript"
-    })
-  }
+  ["<space>tn"] = create_js_treesitter_textobject_keymap("type_name"),
+  ["<space>tv"] = create_js_treesitter_textobject_keymap("type_value"),
+  ["<space>tin"] = create_js_treesitter_textobject_keymap("interface_name"),
+  ["<space>tiv"] = create_js_treesitter_textobject_keymap("interface_body"),
 }

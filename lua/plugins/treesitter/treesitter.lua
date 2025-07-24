@@ -54,35 +54,35 @@ return {
           lookahead = true,
 
           keymaps = {
-            [";fo"] = "@function.outer",
-            [";fi"] = "@function.inner",
-            [";fp"] = "@parameter.inner",
+            ["<space>fo"] = "@function.outer",
+            ["<space>fi"] = "@function.inner",
+            ["<space>fp"] = "@parameter.inner",
             --
-            [";fci"] = "@call.inner",
-            [";fco"] = "@call.outer",
+            ["<space>fci"] = "@call.inner",
+            ["<space>fco"] = "@call.outer",
 
-            [";ai"] = "@attribute.inner",
-            [";ao"] = "@attribute.outer",
+            ["<space>ai"] = "@attribute.inner",
+            ["<space>ao"] = "@attribute.outer",
 
-            [";ri"] = "@return.inner",
-            [";ro"] = "@return.outer",
+            ["<space>ri"] = "@return.inner",
+            ["<space>ro"] = "@return.outer",
 
-            [";rgi"] = "@regex.inner",
-            [";rgo"] = "@regex.outer",
+            ["<space>rgi"] = "@regex.inner",
+            ["<space>rgo"] = "@regex.outer",
 
-            [";ci"] = "@comment.inner",
-            [";co"] = "@comment.outer",
+            ["<space>ci"] = "@comment.inner",
+            ["<space>co"] = "@comment.outer",
 
             [";li"] = "@loop.inner",
             [";lo"] = "@loop.outer",
             [";ki"] = "@conditional.inner",
             [";ko"] = "@conditional.outer",
 
-            [";bi"] = "@block.inner",
-            [";bo"] = "@block.outer",
+            ["<space>bi"] = "@block.inner",
+            ["<space>bo"] = "@block.outer",
 
-            [";ws"] = "@class.inner",
-            [";es"] = "@class.outer",
+            ["<space>csi"] = "@class.inner",
+            ["<space>cso"] = "@class.outer",
 
             -- [";el"] = "@assignment.inner",
             -- [";eh"] = "@assignment.lhs",
