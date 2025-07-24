@@ -1,3 +1,0 @@
-function tsejK() {
-  return
-}
