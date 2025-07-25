@@ -1,7 +1,6 @@
-local M = {}
-function M.setup()
-  local default_options = {
-    clipboard = "unnamedplus",
+return {
+  normal = {
+    clipboard = { "unnamedplus" },
     termguicolors = true,
     history = 500,
     showcmd = true,
@@ -29,47 +28,31 @@ function M.setup()
     showtabline = 0,
 
     linebreak = false,
-
     ruler = true,
-
-    virtualedit = "all",
-
+    virtualedit = { "all" },
     wrap = false,
-
     scrolloff = 0,
-
     splitright = true,
     splitbelow = true,
-
     -- cursorline = true,
-
     swapfile = false,
     undofile = true,
-
     timeout = false,
-
     --imdisable = true,
-
     autochdir = true,
-
     autoread = true,
-
     foldcolumn = "0",
     -- signcolumn = "no",
     signcolumn = "yes:1",
     -- signcolumn = "yes:2",
     laststatus = 3,
-
     shiftwidth = 2,
     tabstop = 2,
     expandtab = true,
     softtabstop = 2,
     smarttab = true,
-
-    display = "truncate",
-
+    display = { "truncate" },
     conceallevel = 0,
-
     -- colorcolumn = "72",
     -- textwidth = 80,
     list = false,
@@ -86,24 +69,24 @@ function M.setup()
       horiz = "",
     },
     -- formatoptions = { "o/qwjb" },
-    formatoptions = "jcroql/",
+    formatoptions = {
+      j = true,
+      c = true,
+      r = true,
+      o = true,
+      q = true,
+      l = true,
+      ["/"] = true,
+    },
     foldmethod = "indent",
-    foldexpr = "nvim_treesitter#foldexpr()",
+    -- foldexpr = "nvim_treesitter#foldexpr()",
     foldenable = false,
-    pumheight = 8
-  }
-
-  --vim.opt.whichwrap:append
-  vim.opt.matchpairs:append("<:>")
-  vim.opt.matchpairs:append("《:》")
-  vim.opt.matchpairs:append("【:】")
-  vim.opt.matchpairs:append("（:）")
-
-  vim.g.mapleader = ";"
-
-  for k, v in pairs(default_options) do
-    vim.opt[k] = v
-  end
-end
-
-return M
+    pumheight = 8,
+    append = {
+      matchpairs = { "【:】", "<:>", "《:》", "（:）" }
+    }
+  },
+  -- javascript = {
+  --   termguicolors = false
+  -- }
+}

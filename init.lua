@@ -1,4 +1,11 @@
-require("options").setup()
+vim.g.mapleader = ";"
+require("plugin-options").setup({
+  paths = {
+    "options/options",
+    "options/typescript",
+    "options/markdown",
+  }
+})
 require("repeat").setup()
 local Keymap = require("plugin-keymap").setup()
 require("lazy-setup")
@@ -72,7 +79,6 @@ Keymap.add({
     { "<Del>", { "i" } },
     { "lxh",   "n" }
   },
-
   ["<F31>"] = { "<Left><C-o>diw", { "i" } },
   [";x"] = {
     function()

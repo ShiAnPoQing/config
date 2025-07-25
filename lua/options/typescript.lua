@@ -1,0 +1,5 @@
+return {
+  typescript = {
+    number = false,
+  }
+}
