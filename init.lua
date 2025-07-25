@@ -86,6 +86,12 @@ Keymap.add({
     end,
     "n",
     { filetype = "javascript" }
+  },
+  [";;cf"] = {
+    function()
+      require("test.typescript_exchange_function").test()
+    end,
+    "n"
   }
 })
 

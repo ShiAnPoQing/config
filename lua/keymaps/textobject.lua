@@ -27,7 +27,7 @@ local function create_js_treesitter_textobject_keymap(query)
     create_treesitter_textobject_keymap({
       language = "javascript",
       query = query,
-      filetype = "typescript"
+      filetype = "javascript"
     })
   }
 end
@@ -87,4 +87,5 @@ return {
   ["<space>tv"] = create_js_treesitter_textobject_keymap("type_value"),
   ["<space>tin"] = create_js_treesitter_textobject_keymap("interface_name"),
   ["<space>tiv"] = create_js_treesitter_textobject_keymap("interface_body"),
+  ["<space>af"] = create_js_treesitter_textobject_keymap("arrow_function")
 }
