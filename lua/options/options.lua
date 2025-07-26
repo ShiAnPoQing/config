@@ -36,6 +36,7 @@ return {
     splitbelow = true,
     -- cursorline = true,
     swapfile = false,
+    backup = false,
     undofile = true,
     timeout = false,
     --imdisable = true,
@@ -46,11 +47,13 @@ return {
     signcolumn = "yes:1",
     -- signcolumn = "yes:2",
     laststatus = 3,
-    shiftwidth = 2,
+
     tabstop = 2,
-    expandtab = true,
     softtabstop = 2,
+    shiftwidth = 2,
+    expandtab = true,
     smarttab = true,
+
     display = { "truncate" },
     conceallevel = 0,
     -- colorcolumn = "72",

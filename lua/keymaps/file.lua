@@ -1,11 +1,11 @@
 return {
   -- copy file name
-  ["<leader>cf"] = {
+  ["<leader>yfn"] = {
     '<cmd>let @+ = expand("%")<CR>',
     { "n" },
   },
   -- copy file path
-  ["<leader>cp"] = {
+  ["<leader>yfp"] = {
     '<cmd>let @+ = expand("%:p")<CR>',
     { "n" },
   },

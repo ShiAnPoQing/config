@@ -1,4 +1,5 @@
 vim.g.mapleader = ";"
+
 require("plugin-options").setup({
   paths = {
     "options/options",
@@ -17,7 +18,8 @@ require("lazy").setup({
   require("plugins.format.conform"),
   require("plugins.treesitter.treesitter"),
   -- require("plugins.treesitter.nvim-treesitter-context"),
-  require("plugins.telescope.telescope"),
+  -- require("plugins.telescope.telescope"),
+  require("plugins.fzf.fzf-lua"),
   require("plugins.tex.vimtex"),
   require("plugins.markdown.markdown-preview"),
   require("plugins.markdown.render-markdown"),
@@ -29,7 +31,7 @@ require("lazy").setup({
   require("plugins-auto.toggle-term"),
   require("plugins-auto.flash"),
   require("plugins-auto.winshift"),
-  require("plugins-auto.harpoon"),
+  -- require("plugins-auto.harpoon"),
   require("plugins-auto.grug-far"),
   require("plugins-auto.oil-nvim"),
 
@@ -41,6 +43,7 @@ require("lazy").setup({
   require("plugins.misc.todo-comments"),
   require("plugins.misc.hop"),
   require("plugins.misc.undotree"),
+  require("plugins.misc.numb"),
 
   require("plugins.git.gitsigns"),
 
