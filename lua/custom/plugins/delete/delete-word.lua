@@ -61,10 +61,14 @@ function Keyword:init(opt)
 	self.keyword_count = 0
 	self.matches = {}
 	self.keyword_ns_id = vim.api.nvim_create_namespace("custom-keyword-highlight")
-	if opt.regex_type == "word" then
+	if opt.regex_type == "word_inner" then
 		self.regex = vim.regex("\\k\\+")
-	elseif opt.regex_type == "WORD" then
+	elseif opt.regex_type == "word_outer" then
 		self.regex = vim.regex("\\k\\+\\s\\+")
+	elseif opt.regex_type == "WORD_inner" then
+		self.regex = vim.regex("\\S\\+\\s\\+")
+	elseif opt.regex_type == "WORD_outer" then
+		self.regex = vim.regex("\\S\\+")
 	else
 		self.regex = vim.regex("")
 	end
@@ -75,11 +79,6 @@ function Keyword:init(opt)
 	self.rightcol = opt.rightcol
 	self.up_break = nil
 	self.down_break = nil
-end
-
-function Keyword:set_keyword_hl(row, start_col, end_col)
-	local bufnr = vim.api.nvim_get_current_buf()
-	vim.hl.range(bufnr, self.keyword_ns_id, "Visual", { row, start_col }, { row, end_col })
 end
 
 function Keyword:clean_keyword_hl()
@@ -112,25 +111,50 @@ function Keyword:set_keyword_target(callback)
 			break
 		end
 
-		if self.cursor_row - count > self.topline then
-			local match = self.matches[self.cursor_row - count - self.topline]
-			for index, value in ipairs(match) do
-				callback(self.cursor_row - count - 2, value.keyword_start, value.keyword_end)
+		if self.cursor_row - count >= self.topline then
+			local match = self.matches[self.cursor_row - count - self.topline + 1]
+			for _, value in ipairs(match) do
+				callback(self.cursor_row - count - 1, value.keyword_start, value.keyword_end)
 			end
 		else
 			self.up_break = true
 		end
 
-		if self.cursor_row + count <= self.botline then
-			local match = self.matches[self.cursor_row + count - self.topline + 1]
-			for index, value in ipairs(match) do
-				callback(self.cursor_row + count - 1, value.keyword_start, value.keyword_end)
+		if self.cursor_row + count < self.botline then
+			local match = self.matches[self.cursor_row + count - self.topline + 2]
+			for _, value in ipairs(match) do
+				callback(self.cursor_row + count, value.keyword_start, value.keyword_end)
 			end
 		else
 			self.down_break = true
 		end
 
 		count = count + 1
+	end
+end
+
+function Keyword:get_keyword(i, leftcol, rightcol)
+	table.insert(self.matches, {})
+	local start_pos = 0
+	while true do
+		local start, end_ = self.regex:match_line(0, i - 1, start_pos)
+		if not start then
+			break
+		end
+
+		local keyword_start = start + start_pos
+		local keyword_end = end_ + start_pos
+		if keyword_start < leftcol or keyword_end > rightcol then
+			return
+		end
+		self:collect_keyword(i, keyword_start, keyword_end)
+		start_pos = start_pos + end_
+	end
+end
+
+function Keyword:match_keyword()
+	for i = self.topline, self.botline do
+		Keyword:get_keyword(i, self.leftcol, self.rightcol)
 	end
 end
 
@@ -177,6 +201,10 @@ function Key:process_one_key(line, start_col, end_col)
 	vim.api.nvim_buf_set_extmark(0, self.one_key.ns_id, line, start_col, {
 		virt_text_pos = "overlay",
 		virt_text = { { key, "MyNextKey" } },
+	})
+	vim.api.nvim_buf_set_extmark(0, self.one_key.ns_id, line, start_col, {
+		end_col = end_col,
+		hl_group = "Visual",
 	})
 end
 
@@ -235,6 +263,10 @@ function Key:process_two_key(line, start_col, end_col)
 					virt_text_pos = "overlay",
 					virt_text = { { key, "MyNextKey" } },
 				})
+				vim.api.nvim_buf_set_extmark(0, current.child_ns_id, line, start_col, {
+					end_col = end_col,
+					hl_group = "Visual",
+				})
 			end,
 		}
 		current.used_key_count = current.used_key_count + 1
@@ -253,6 +285,10 @@ function Key:process_two_key(line, start_col, end_col)
 				virt_text = { { key, "MyNextKey2" } },
 			})
 		end
+		vim.api.nvim_buf_set_extmark(0, current.child_ns_id, line, start_col, {
+			end_col = end_col,
+			hl_group = "Visual",
+		})
 	end
 end
 
@@ -275,29 +311,38 @@ function Key:get(line, start_col, end_col)
 	end
 end
 
-function Keyword:get_keyword(i, leftcol, rightcol)
-	table.insert(self.matches, {})
-	local start_pos = 0
-	while true do
-		local start, end_ = self.regex:match_line(0, i - 1, start_pos)
-		if not start then
-			break
-		end
-
-		local keyword_start = start + start_pos
-		local keyword_end = end_ + start_pos
-		if keyword_start < leftcol or keyword_end > rightcol then
+function Key:on_key()
+	vim.schedule(function()
+		local char = vim.fn.nr2char(vim.fn.getchar())
+		if self.on_keys[char] == nil then
+			self:clear_ns_id()
+			Keyword:clean_keyword_hl()
 			return
 		end
-		self:collect_keyword(i, keyword_start, keyword_end)
-		self:set_keyword_hl(i - 1, keyword_start, keyword_end)
-		start_pos = start_pos + end_
-	end
+		self.on_keys[char].callback()
+	end)
 end
 
-function Keyword:match_keyword()
-	for i = self.topline, self.botline do
-		Keyword:get_keyword(i, self.leftcol, self.rightcol)
+function Key:create_ns_id(name)
+	local ns_id = vim.api.nvim_create_namespace(name)
+	table.insert(self.ns_ids, ns_id)
+	return ns_id
+end
+
+function Key:clear_ns_id(opts)
+	opts = opts or {}
+
+	if opts.filter_id == nil then
+		for _, ns_id in ipairs(self.ns_ids) do
+			vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+		end
+		return
+	end
+
+	for _, ns_id in ipairs(self.ns_ids) do
+		if ns_id ~= opts.filter_id then
+			vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+		end
 	end
 end
 
@@ -339,41 +384,6 @@ function M.magic_delete_word(opts)
 	end)
 	Key.on_keys = vim.tbl_extend("force", {}, Key.one_key.keys, Key.two_key.keys, Key.three_key.keys)
 	Key:on_key()
-end
-
-function Key:on_key()
-	vim.schedule(function()
-		local char = vim.fn.nr2char(vim.fn.getchar())
-		if self.on_keys[char] == nil then
-			self:clear_ns_id()
-			Keyword:clean_keyword_hl()
-			return
-		end
-		self.on_keys[char].callback()
-	end)
-end
-
-function Key:create_ns_id(name)
-	local ns_id = vim.api.nvim_create_namespace(name)
-	table.insert(self.ns_ids, ns_id)
-	return ns_id
-end
-
-function Key:clear_ns_id(opts)
-	opts = opts or {}
-
-	if opts.filter_id == nil then
-		for _, ns_id in ipairs(self.ns_ids) do
-			vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
-		end
-		return
-	end
-
-	for _, ns_id in ipairs(self.ns_ids) do
-		if ns_id ~= opts.filter_id then
-			vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
-		end
-	end
 end
 
 return M
