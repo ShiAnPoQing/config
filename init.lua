@@ -46,6 +46,8 @@ require("lazy").setup({
 	require("plugins.misc.hop"),
 	require("plugins.misc.undotree"),
 	require("plugins.misc.numb"),
+	require("plugins.misc.nvim-possession"),
+	require("plugins.misc.harpoon"),
 
 	require("plugins.git.gitsigns"),
 
@@ -70,7 +72,6 @@ require("lazy").setup({
 	-- require("plugins.style.theme.onenord"),
 	-- require("plugins.style.theme.rose-pine-neovim"),
 
-	-- require("plugins.custom.concat-mode"),
 	require("plugins.custom.win-action"),
 	require("plugins.custom.show-file-info"),
 	require("plugins.custom.word-move"),
@@ -107,6 +108,24 @@ Keymap.add({
 	["<C-Space><C-K>"] = {
 		"<C-K>",
 		"i",
+	},
+	[";;a"] = {
+		function()
+			require("utils.get-window-size").get_window_size()
+		end,
+		"n",
+	},
+	[";;b"] = {
+		function()
+			local current_win = vim.api.nvim_get_current_win()
+			local size = require("utils.get-window-size").get_window_size(current_win)
+			local width = size.width + 5
+			require("utils.set-window-size").set_window_size({
+				win_id = current_win,
+				width = width,
+			})
+		end,
+		"n",
 	},
 })
 

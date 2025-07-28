@@ -1,18 +1,18 @@
 return {
-	-- exchange window
-	["<M-x>"] = {
-		function()
-			require("custom.plugins.win-action").window_exchange()
-		end,
-		"n",
-	},
-	-- jump window
-	["<M-g>"] = {
-		function()
-			require("custom.plugins.win-action").window_focus()
-		end,
-		"n",
-	},
+	-- -- exchange window
+	-- ["<M-x>"] = {
+	-- 	function()
+	-- 		require("custom.plugins.win-action").window_exchange()
+	-- 	end,
+	-- 	"n",
+	-- },
+	-- -- jump window
+	-- ["<M-g>"] = {
+	-- 	function()
+	-- 		require("custom.plugins.win-action").window_focus()
+	-- 	end,
+	-- 	"n",
+	-- },
 	-- resize window
 	["<M-down>"] = {
 		function()
@@ -78,40 +78,40 @@ return {
 	},
 	["<M-S-l>"] = {
 		function()
-			require("windows-layout").win_exchange("right")
+			require("custom.plugins.window-exchange").win_exchange("right")
 		end,
 		"n",
 	},
 	["<M-S-h>"] = {
 		function()
-			require("windows-layout").win_exchange("left")
+			require("custom.plugins.window-exchange").win_exchange("left")
 		end,
 		"n",
 	},
 	["<M-S-j>"] = {
 		function()
-			require("windows-layout").win_exchange("down")
+			require("custom.plugins.window-exchange").win_exchange("down")
 		end,
 		"n",
 	},
 	["<M-S-k>"] = {
 		function()
-			require("windows-layout").win_exchange("up")
+			require("custom.plugins.window-exchange").win_exchange("up")
 		end,
 		"n",
 	},
-	["<M-S-P>"] = {
-		function()
-			require("windows-layout").exchange_pre()
-		end,
-		"n",
-	},
-	["<M-S-N>"] = {
-		function()
-			require("windows-layout").exchange_next()
-		end,
-		"n",
-	},
+	-- ["<M-S-P>"] = {
+	-- 	function()
+	-- 		require("windows-layout").exchange_pre()
+	-- 	end,
+	-- 	"n",
+	-- },
+	-- ["<M-S-N>"] = {
+	-- 	function()
+	-- 		require("windows-layout").exchange_next()
+	-- 	end,
+	-- 	"n",
+	-- },
 	["<M-q>"] = {
 		"<C-w>q",
 		"n",
