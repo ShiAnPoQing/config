@@ -72,7 +72,7 @@ require("lazy").setup({
 	-- require("plugins.style.theme.onenord"),
 	-- require("plugins.style.theme.rose-pine-neovim"),
 
-	require("plugins.custom.win-action"),
+	-- require("plugins.custom.win-action"),
 	require("plugins.custom.show-file-info"),
 	require("plugins.custom.word-move"),
 })
