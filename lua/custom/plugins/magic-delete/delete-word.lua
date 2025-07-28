@@ -28,7 +28,7 @@ local function get_random_key(is_ok)
 	return key
 end
 
-local a = { "one_key", "two_key", "three_key" }
+local key_types = { "one_key", "two_key", "three_key" }
 
 local function compute_key(total)
 	local function run(i)
@@ -41,8 +41,8 @@ local function compute_key(total)
 			local remainder = remain - (quotient * min)
 			local more_keys = math.ceil((remainder + quotient) / min) + quotient
 			return {
-				[a[i]] = 26 - more_keys,
-				[a[i + 1]] = more_keys,
+				[key_types[i]] = 26 - more_keys,
+				[key_types[i + 1]] = more_keys,
 			}
 		elseif total > max then
 			return run(i + 1)
@@ -355,6 +355,7 @@ function M.magic_delete_word(opts)
 	local cursor = vim.api.nvim_win_get_cursor(0)
 
 	local visual_hl = vim.api.nvim_get_hl(0, { name = "Visual" })
+
 	vim.api.nvim_set_hl(0, "MyNextKey", {
 		fg = "#ff007c",
 		bg = visual_hl.bg,

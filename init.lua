@@ -29,11 +29,11 @@ require("lazy").setup({
 	require("plugins.code.aerial"),
 	require("plugins.code.windsurf"),
 	require("plugins.code.typescript-tool"),
+	require("plugins.code.twilight"),
 	require("plugins.tmux.vim-tmux-navigator"),
 	require("plugins.window.winshift"),
 
 	-- require("plugins-auto.harpoon"),
-
 	require("plugins.misc.toggle-term"),
 	require("plugins.misc.grug-far"),
 	require("plugins.misc.flash"),
@@ -69,7 +69,7 @@ require("lazy").setup({
 	-- require("plugins.style.theme.onedarkpro"),
 	-- require("plugins.style.theme.onenord"),
 	-- require("plugins.style.theme.rose-pine-neovim"),
-	-- require("plugins.custom.register-control"),
+
 	-- require("plugins.custom.concat-mode"),
 	require("plugins.custom.win-action"),
 	require("plugins.custom.show-file-info"),
@@ -103,6 +103,10 @@ Keymap.add({
 			require("test.typescript_exchange_function").test()
 		end,
 		"n",
+	},
+	["<C-Space><C-K>"] = {
+		"<C-K>",
+		"i",
 	},
 })
 
