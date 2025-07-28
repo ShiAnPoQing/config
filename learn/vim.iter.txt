@@ -1,0 +1,456 @@
+==============================================================================
+Lua 模块: vim.iter                                                *vim.iter*
+
+*vim.iter()* 是 |iterable| 的接口：将表或函数参数包装为 *Iter* 对象，带有方法（如 |Iter:filter()|、|Iter:map()|）可变换底层数据。这些方法可链式调用，形成迭代器“管道”：每个阶段的输出作为下阶段输入。第一个阶段取决于传给 `vim.iter()` 的类型：
+• 列表或数组（|lua-list|）只产出每个元素的值。
+  • 允许“洞”（nil 值），但会被丢弃。
+  • 用 pairs() 可将数组/列表表当作字典（保留洞和非连续整数键）：`vim.iter(pairs(…))`。
+  • 用 |Iter:enumerate()| 也传递索引到下阶段。
+    • 或用 ipairs() 初始化：`vim.iter(ipairs(…))`。
+• 非列表表（|lua-dict|）产出每个元素的键和值。
+• 函数 |iterator| 产出底层函数返回的所有值。
+• 带 |__call()| 元方法的表视为函数迭代器。
+
+迭代器管道在底层 |iterable| 耗尽时终止（对函数迭代器即返回 nil）。
+
+注意: `vim.iter()` 会扫描表以判断是列表还是字典；如要避免此开销，可用迭代器包装表，如
+`vim.iter(ipairs({…}))`，但这样不能用 |list-iterator| 操作如 |Iter:rev()|。
+
+示例: >lua
+    local it = vim.iter({ 1, 2, 3, 4, 5 })
+    it:map(function(v)
+      return v * 3
+    end)
+    it:rev()
+    it:skip(2)
+    it:totable()
+    -- { 9, 6, 3 }
+
+    -- ipairs() 是函数迭代器，返回索引 (i) 和值 (v)
+    vim.iter(ipairs({ 1, 2, 3, 4, 5 })):map(function(i, v)
+      if i > 2 then return v end
+    end):totable()
+    -- { 3, 4, 5 }
+
+    local it = vim.iter(vim.gsplit('1,2,3,4,5', ','))
+    it:map(function(s) return tonumber(s) end)
+    for i, d in it:enumerate() do
+      print(string.format("Column %d is %d", i, d))
+    end
+    -- Column 1 is 1
+    -- Column 2 is 2
+    -- Column 3 is 3
+    -- Column 4 is 4
+    -- Column 5 is 5
+
+    vim.iter({ a = 1, b = 2, c = 3, z = 26 }):any(function(k, v)
+      return k == 'z'
+    end)
+    -- true
+
+    local rb = vim.ringbuf(3)
+    rb:push("a")
+    rb:push("b")
+    vim.iter(rb):totable()
+    -- { "a", "b" }
+<
+Iter:all({pred})                                                  *Iter:all()*
+    若迭代器中所有项目都满足给定谓词，则返回 true。
+
+    参数: ~
+      • {pred}  (`fun(...):boolean`) 谓词函数。接收上阶段管道返回的所有值，返回 true 表示匹配。
+
+Iter:any({pred})                                                  *Iter:any()*
+    若迭代器中任一项目满足给定谓词，则返回 true。
+
+    参数: ~
+      • {pred}  (`fun(...):boolean`) 谓词函数。接收上阶段管道返回的所有值，返回 true 表示匹配。
+
+Iter:each({f})                                                   *Iter:each()*
+    对管道中每个项目调用一次函数，耗尽迭代器。
+
+    用于有副作用的函数。若要修改迭代器中的值，用 |Iter:map()|。
+
+    参数: ~
+      • {f}  (`fun(...)`) 对每个项目执行的函数。接收上阶段管道返回的所有值。
+
+Iter:enumerate()                                            *Iter:enumerate()*
+    为迭代器管道的每个项目产出索引（计数）和值。
+
+    对于列表表，更高效: >lua
+        vim.iter(ipairs(t))
+<
+
+    而不是: >lua
+        vim.iter(t):enumerate()
+<
+
+    示例: >lua
+
+        local it = vim.iter(vim.gsplit('abc', '')):enumerate()
+        it:next()
+        -- 1	'a'
+        it:next()
+        -- 2	'b'
+        it:next()
+        -- 3	'c'
+<
+
+    返回: ~
+        (`Iter`)
+
+Iter:filter({f})                                               *Iter:filter()*
+    过滤迭代器管道。
+
+    示例: >lua
+        local bufs = vim.iter(vim.api.nvim_list_bufs()):filter(vim.api.nvim_buf_is_loaded)
+<
+
+    参数: ~
+      • {f}  (`fun(...):boolean`) 接收上阶段管道返回的所有值，返回 false 或 nil 时移除当前元素。
+
+    返回: ~
+        (`Iter`)
+
+Iter:find({f})                                                   *Iter:find()*
+    查找迭代器中第一个满足谓词的值。
+
+    推进迭代器。未找到则返回 nil 并耗尽迭代器。
+
+    示例: >lua
+
+        local it = vim.iter({ 3, 6, 9, 12 })
+        it:find(12)
+        -- 12
+
+        local it = vim.iter({ 3, 6, 9, 12 })
+        it:find(20)
+        -- nil
+
+        local it = vim.iter({ 3, 6, 9, 12 })
+        it:find(function(v) return v % 4 == 0 end)
+        -- 12
+<
+
+    参数: ~
+      • {f}  (`any`)
+
+    返回: ~
+        (`any`)
+
+Iter:flatten({depth})                                         *Iter:flatten()*
+    扁平化 |list-iterator|，最多展开到 {depth} 层。若尝试扁平化字典风格表会报错。
+
+    示例: >lua
+        vim.iter({ 1, { 2 }, { { 3 } } }):flatten():totable()
+        -- { 1, 2, { 3 } }
+
+        vim.iter({1, { { a = 2 } }, { 3 } }):flatten():totable()
+        -- { 1, { a = 2 }, 3 }
+
+        vim.iter({ 1, { { a = 2 } }, { 3 } }):flatten(math.huge):totable()
+        -- error: attempt to flatten a dict-like table
+<
+
+    参数: ~
+      • {depth}  (`number?`) 扁平化深度（默认 1）
+
+    返回: ~
+        (`Iter`)
+
+Iter:fold({init}, {f})                                           *Iter:fold()*
+    将迭代器“归约”为单个值。         *Iter:reduce()*
+
+    示例: >lua
+        -- 创建只包含偶数值的新表
+        vim.iter({ a = 1, b = 2, c = 3, d = 4 })
+          :filter(function(k, v) return v % 2 == 0 end)
+          :fold({}, function(acc, k, v)
+            acc[k] = v
+            return acc
+          end) --> { b = 2, d = 4 }
+
+        -- 获取可迭代对象的“最大”项
+        vim.iter({ -99, -4, 3, 42, 0, 0, 7 })
+          :fold({}, function(acc, v)
+            acc.max = math.max(v, acc.max or v)
+            return acc
+          end) --> { max = 42 }
+<
+
+    参数: ~
+      • {init}  (`any`) 累加器初值
+      • {f}     (`fun(acc:A, ...):A`) 累加函数
+
+    返回: ~
+        (`any`)
+
+Iter:join({delim})                                               *Iter:join()*
+    将迭代器收集为分隔字符串。
+
+    迭代器中每个元素用 {delim} 连接为字符串。
+
+    消耗迭代器。
+
+    参数: ~
+      • {delim}  (`string`) 分隔符
+
+    返回: ~
+        (`string`)
+
+Iter:last()                                                      *Iter:last()*
+    消耗迭代器并返回最后一个项目。
+
+    示例: >lua
+
+        local it = vim.iter(vim.gsplit('abcdefg', ''))
+        it:last()
+        -- 'g'
+
+        local it = vim.iter({ 3, 6, 9, 12, 15 })
+        it:last()
+        -- 15
+<
+
+    返回: ~
+        (`any`)
+
+    另见: ~
+      • |Iter:rpeek()|
+
+Iter:map({f})                                                     *Iter:map()*
+    将迭代器管道的项目映射为 `f` 返回的值。
+
+    若 map 函数返回 nil，则该值会被过滤。
+
+    示例: >lua
+        local it = vim.iter({ 1, 2, 3, 4 }):map(function(v)
+          if v % 2 == 0 then
+            return v * 3
+          end
+        end)
+        it:totable()
+        -- { 6, 12 }
+<
+
+    参数: ~
+      • {f}  (`fun(...):...:any`) 映射函数。接收上阶段管道返回的所有值，返回一个或多个新值，供下阶段使用。返回 nil 的值会被过滤。
+
+    返回: ~
+        (`Iter`)
+
+Iter:next()                                                      *Iter:next()*
+    获取迭代器的下一个值。
+
+    示例: >lua
+
+        local it = vim.iter(string.gmatch('1 2 3', '%d+')):map(tonumber)
+        it:next()
+        -- 1
+        it:next()
+        -- 2
+        it:next()
+        -- 3
+<
+
+    返回: ~
+        (`any`)
+
+Iter:nth({n})                                                     *Iter:nth()*
+    获取迭代器的第 n 个值（并推进到该值）。
+
+    若 n 为负数，则从 |list-iterator| 末尾偏移。
+
+    示例: >lua
+        local it = vim.iter({ 3, 6, 9, 12 })
+        it:nth(2)
+        -- 6
+        it:nth(2)
+        -- 12
+
+        local it2 = vim.iter({ 3, 6, 9, 12 })
+        it2:nth(-2)
+        -- 9
+        it2:nth(-2)
+        -- 3
+<
+
+    参数: ~
+      • {n}  (`number`) 要返回的值的索引。若为负数且源为 |list-iterator|，则从末尾偏移。
+
+    返回: ~
+        (`any`)
+
+Iter:peek()                                                      *Iter:peek()*
+    获取 |list-iterator| 的下一个值但不消耗。
+
+    示例: >lua
+
+        local it = vim.iter({ 3, 6, 9, 12 })
+        it:peek()
+        -- 3
+        it:peek()
+        -- 3
+        it:next()
+        -- 3
+<
+
+    返回: ~
+        (`any`)
+
+Iter:pop()                                                        *Iter:pop()*
+    从 |list-iterator| “弹出”一个值（获取最后一个值并递减尾部）。
+
+    示例: >lua
+        local it = vim.iter({1, 2, 3, 4})
+        it:pop()
+        -- 4
+        it:pop()
+        -- 3
+<
+
+    返回: ~
+        (`any`)
+
+Iter:rev()                                                        *Iter:rev()*
+    反转 |list-iterator| 管道。
+
+    示例: >lua
+
+        local it = vim.iter({ 3, 6, 9, 12 }):rev()
+        it:totable()
+        -- { 12, 9, 6, 3 }
+<
+
+    返回: ~
+        (`Iter`)
+
+Iter:rfind({f})                                                 *Iter:rfind()*
+    从 |list-iterator| 末尾查找第一个满足谓词的值。
+
+    推进迭代器。未找到则返回 nil 并耗尽迭代器。
+
+    示例: >lua
+
+        local it = vim.iter({ 1, 2, 3, 2, 1 }):enumerate()
+        it:rfind(1)
+        -- 5	1
+        it:rfind(1)
+        -- 1	1
+<
+
+    参数: ~
+      • {f}  (`any`)
+
+    返回: ~
+        (`any`)
+
+    另见: ~
+      • |Iter:find()|
+
+Iter:rpeek()                                                    *Iter:rpeek()*
+    获取 |list-iterator| 的最后一个值但不消耗。
+
+    示例: >lua
+        local it = vim.iter({1, 2, 3, 4})
+        it:rpeek()
+        -- 4
+        it:rpeek()
+        -- 4
+        it:pop()
+        -- 4
+<
+
+    返回: ~
+        (`any`)
+
+    另见: ~
+      • |Iter:last()|
+
+Iter:rskip({n})                                                 *Iter:rskip()*
+    从 |list-iterator| 管道末尾丢弃 n 个值。
+
+    示例: >lua
+        local it = vim.iter({ 1, 2, 3, 4, 5 }):rskip(2)
+        it:next()
+        -- 1
+        it:pop()
+        -- 3
+<
+
+    参数: ~
+      • {n}  (`number`) 要跳过的值数
+
+    返回: ~
+        (`Iter`)
+
+Iter:skip({n})                                                   *Iter:skip()*
+    跳过迭代器管道的前 n 个值。
+
+    示例: >lua
+
+        local it = vim.iter({ 3, 6, 9, 12 }):skip(2)
+        it:next()
+        -- 9
+<
+
+    参数: ~
+      • {n}  (`number`) 要跳过的值数
+
+    返回: ~
+        (`Iter`)
+
+Iter:slice({first}, {last})                                     *Iter:slice()*
+    设置 |list-iterator| 管道的起止。
+
+    等价于 `:skip(first - 1):rskip(len - last + 1)`。
+
+    参数: ~
+      • {first}  (`number`)
+      • {last}   (`number`)
+
+    返回: ~
+        (`Iter`)
+
+Iter:take({n})                                                   *Iter:take()*
+    变换迭代器，仅产出前 n 个值。
+
+    示例: >lua
+        local it = vim.iter({ 1, 2, 3, 4 }):take(2)
+        it:next()
+        -- 1
+        it:next()
+        -- 2
+        it:next()
+        -- nil
+<
+
+    参数: ~
+      • {n}  (`integer`)
+
+    返回: ~
+        (`Iter`)
+
+Iter:totable()                                                *Iter:totable()*
+    将迭代器收集为表。
+
+    结果表取决于迭代器管道的初始源。数组风格表和函数迭代器会收集为数组风格表。若管道最后阶段返回多个值，每个值会作为表项。
+
+    示例: >lua
+        vim.iter(string.gmatch('100 20 50', '%d+')):map(tonumber):totable()
+        -- { 100, 20, 50 }
+
+        vim.iter({ 1, 2, 3 }):map(function(v) return v, 2 * v end):totable()
+        -- { { 1, 2 }, { 2, 4 }, { 3, 6 } }
+
+        vim.iter({ a = 1, b = 2, c = 3 }):filter(function(k, v) return v % 2 ~= 0 end):totable()
+        -- { { 'a', 1 }, { 'c', 3 } }
+<
+
+    生成的表为连续数字索引的数组风格表。要创建任意键的映射表，用
+    |Iter:fold()|。
+
+    返回: ~
+        (`table`)
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

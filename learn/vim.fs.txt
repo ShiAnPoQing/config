@@ -1,0 +1,247 @@
+==============================================================================
+Lua 模块: vim.fs                                                    *vim.fs*
+
+                                                             *vim.fs.exists()*
+用 |uv.fs_stat()| 检查文件类型及是否存在。
+
+示例: >lua
+  if vim.uv.fs_stat(file) then
+    vim.print("file exists")
+  end
+<
+
+
+vim.fs.abspath({path})                                      *vim.fs.abspath()*
+    将路径转换为绝对路径。
+    路径开头的 ~ 会展开为用户主目录。
+    不检查路径是否存在，不规范化路径，不解析符号链接或硬链接（包括 `.` 和 `..`），也不展开环境变量。
+    若路径已为绝对路径，则原样返回。也会将 `\` 路径分隔符转为 `/`。
+
+    参数: ~
+      • {path}  (`string`) 路径
+
+    返回: ~
+        (`string`) 绝对路径
+
+vim.fs.basename({file})                                    *vim.fs.basename()*
+    返回给定路径的基名
+
+    属性: ~
+        自 0.8.0 起
+
+    参数: ~
+      • {file}  (`string?`) 路径
+
+    返回: ~
+        (`string?`) {file} 的基名
+
+vim.fs.dir({path}, {opts})                                      *vim.fs.dir()*
+    返回 {path} 下项目的迭代器
+
+    属性: ~
+        自 0.8.0 起
+
+    参数: ~
+      • {path}  (`string`) 要遍历的目录的绝对或相对路径。路径会先规范化 |vim.fs.normalize()|。
+      • {opts}  (`table?`) 可选关键字参数:
+                • depth: integer|nil 遍历深度（默认 1）
+                • skip: (fun(dir_name: string): boolean)|nil 控制遍历的谓词。返回 false 停止当前目录搜索。仅 depth > 1 时有用
+                • follow: boolean|nil 是否跟随符号链接（默认 false）
+
+    返回: ~
+        (`Iterator`) 遍历 {path} 下项目的迭代器。每次迭代返回两个值："name" 和 "type"。"name" 为相对 {path} 的基名，"type" 为 "file"、"directory"、"link"、"fifo"、"socket"、"char"、"block"、"unknown" 之一。
+
+vim.fs.dirname({file})                                      *vim.fs.dirname()*
+    返回给定路径的父目录
+
+    属性: ~
+        自 0.8.0 起
+
+    参数: ~
+      • {file}  (`string?`) 路径
+
+    返回: ~
+        (`string?`) {file} 的父目录
+
+vim.fs.find({names}, {opts})                                   *vim.fs.find()*
+    在给定路径下查找文件或目录（或 {opts.type} 指定的其它项目）。
+
+    从 {path} 开始查找 {names}。若 {upward} 为 true，则向上遍历父目录；否则向下递归遍历。若 {stop} 非空，则到达该目录时停止，不再搜索。找到 {limit}（默认 1）个匹配项后终止。可用 {type} 限定只查找某种类型（"file"、"directory"、"link"、"socket"、"char"、"block"、"fifo"），未指定则所有匹配项都包含。
+
+    示例: >lua
+        -- 列出 runtime 目录下所有 test 目录
+        local test_dirs = vim.fs.find(
+          {'test', 'tst', 'testdir'},
+          {limit = math.huge, type = 'directory', path = './runtime/'}
+        )
+
+        -- 获取 lib/ 下所有 .cpp 或 .hpp 文件
+        local cpp_hpp = vim.fs.find(function(name, path)
+          return name:match('.*%.[ch]pp$') and path:match('[/\\]lib$')
+        end, {limit = math.huge, type = 'file'})
+<
+
+    属性: ~
+        自 0.8.0 起
+
+    参数: ~
+      • {names}  (`string|string[]|fun(name: string, path: string): boolean`)
+                 要查找的项目名。必须为基名，若为字符串或表则不支持路径和通配符。若为函数，则对每个项目调用，参数为:
+                 • name: 当前项目基名
+                 • path: 当前项目完整路径
+
+                 函数返回 true 时视为匹配。
+      • {opts}   (`table`) 可选关键字参数:
+                 • {path}? (`string`) 起始路径。省略时用 |current-directory|。
+                 • {upward}? (`boolean`, 默认: `false`) 向上遍历父目录，否则递归遍历子目录。
+                 • {stop}? (`string`) 到达该目录时停止，不再搜索。
+                 • {type}? (`string`) 只查找指定类型项目。省略时所有匹配项都包含。
+                 • {limit}? (`number`, 默认: `1`) 找到这么多匹配项后停止。用 `math.huge` 表示不限制。
+                 • {follow}? (`boolean`, 默认: `false`) 是否跟随符号链接。
+
+    返回: ~
+        (`string[]`) 所有匹配项的规范化路径 |vim.fs.normalize()|
+
+vim.fs.joinpath({...})                                     *vim.fs.joinpath()*
+    拼接部分路径（一个绝对或相对路径后跟零个或多个相对路径）。
+    斜杠会规范化：多余斜杠会被移除，Windows 下反斜杠会转为正斜杠。
+
+    示例:
+    • "foo/", "/bar" => "foo/bar"
+    • Windows: "a\foo\", "\bar" => "a/foo/bar"
+
+    属性: ~
+        自 0.10.0 起
+
+    参数: ~
+      • {...}  (`string`)
+
+    返回: ~
+        (`string`)
+
+vim.fs.normalize({path}, {opts})                          *vim.fs.normalize()*
+    将路径规范化为标准格式。路径开头的 ~ 会展开为用户主目录，环境变量也会展开。
+    "." 和 ".." 也会解析，除非路径为相对路径且解析会变为绝对路径。
+    • 仅为 "." 的相对路径:
+      • "." => "."
+      • "././" => "."
+    • ".." 导致超出当前目录
+      • "foo/../../bar" => "../bar"
+      • "../../foo" => "../../foo"
+    • 根目录下的 ".." 返回根目录。
+      • "/../../" => "/"
+
+    Windows 下，反斜杠 (\) 会转为正斜杠 (/)
+
+    示例: >lua
+        [[C:\Users\jdoe]]                         => "C:/Users/jdoe"
+        "~/src/neovim"                            => "/home/jdoe/src/neovim"
+        "$XDG_CONFIG_HOME/nvim/init.vim"          => "/Users/jdoe/.config/nvim/init.vim"
+        "~/src/nvim/api/../tui/./tui.c"           => "/home/jdoe/src/nvim/tui/tui.c"
+        "./foo/bar"                               => "foo/bar"
+        "foo/../../../bar"                        => "../../bar"
+        "/home/jdoe/../../../bar"                 => "/bar"
+        "C:foo/../../baz"                         => "C:../baz"
+        "C:/foo/../../baz"                        => "C:/baz"
+        [[\\?\UNC\server\share\foo\..\..\..\bar]] => "//?/UNC/server/share/bar"
+<
+
+    属性: ~
+        自 0.8.0 起
+
+    参数: ~
+      • {path}  (`string`) 要规范化的路径
+      • {opts}  (`table?`) 具有以下字段的表:
+                • {expand_env}? (`boolean`, 默认: `true`) 是否展开环境变量
+                • {win}? (`boolean`, 默认: Windows 为 `true`，否则为 `false`) 路径是否为 Windows 路径
+
+    返回: ~
+        (`string`) 规范化路径
+
+vim.fs.parents({start})                                     *vim.fs.parents()*
+    迭代给定路径的所有父目录。
+
+    示例: >lua
+        local root_dir
+        for dir in vim.fs.parents(vim.api.nvim_buf_get_name(0)) do
+          if vim.fn.isdirectory(dir .. "/.git") == 1 then
+            root_dir = dir
+            break
+          end
+        end
+
+        if root_dir then
+          print("Found git repository at", root_dir)
+        end
+<
+
+    属性: ~
+        自 0.8.0 起
+
+    参数: ~
+      • {start}  (`string`) 初始路径
+
+    返回（多值）: ~
+        (`fun(_, dir: string): string?`) 迭代器
+        (`nil`)
+        (`string?`)
+
+vim.fs.relpath({base}, {target}, {opts})                    *vim.fs.relpath()*
+    获取 `target` 相对于 `base` 的路径，若 `base` 不是祖先则返回 `nil`。
+
+    示例: >lua
+        vim.fs.relpath('/var', '/var/lib') -- 'lib'
+        vim.fs.relpath('/var', '/usr/bin') -- nil
+<
+
+    参数: ~
+      • {base}    (`string`)
+      • {target}  (`string`)
+      • {opts}    (`table?`) 预留将来用
+
+    返回: ~
+        (`string?`)
+
+vim.fs.rm({path}, {opts})                                        *vim.fs.rm()*
+    删除文件或目录
+
+    属性: ~
+        自 0.11.0 起
+
+    参数: ~
+      • {path}  (`string`) 要删除的路径
+      • {opts}  (`table?`) 具有以下字段的表:
+                • {recursive}? (`boolean`) 递归删除目录及其内容
+                • {force}? (`boolean`) 忽略不存在的文件和参数
+
+vim.fs.root({source}, {marker})                                *vim.fs.root()*
+    从文件路径或缓冲区开始，查找包含特定“标记”的第一个父目录。
+
+    若缓冲区未命名（无文件）或 'buftype' 非空，则从 Nvim 的 |current-directory| 开始搜索。
+
+    示例: >lua
+        -- 从 'main.py' 文件查找 Python 项目根目录
+        vim.fs.root(vim.fs.joinpath(vim.env.PWD, 'main.py'), {'pyproject.toml', 'setup.py' })
+
+        -- 查找 git 仓库根目录
+        vim.fs.root(0, '.git')
+
+        -- 查找包含任意 .csproj 扩展文件的父目录
+        vim.fs.root(0, function(name, path)
+          return name:match('%.csproj$') ~= nil
+        end)
+<
+
+    属性: ~
+        自 0.10.0 起
+
+    参数: ~
+      • {source}  (`integer|string`) 缓冲区号（0 为当前缓冲区）或文件路径（绝对或相对 |current-directory|）作为起点
+      • {marker}  (`string|string[]|fun(name: string, path: string): boolean`)
+                  标记或标记列表。若为函数，则对每个项目调用，{name} 和 {path} 匹配时返回 true
+
+    返回: ~
+        (`string?`) 包含标记的目录路径，未找到则为 nil
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

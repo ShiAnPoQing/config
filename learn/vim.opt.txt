@@ -1,0 +1,218 @@
+                                                                 *lua-options*
+                                                             *lua-vim-options*
+                                                                 *lua-vim-set*
+                                                            *lua-vim-setlocal*
+
+Vim 选项可通过 |vim.o| 访问，行为类似 Vimscript 的 |:set|。
+
+    示例: ~
+
+    设置布尔选项:
+        Vimscript: `set number`
+        Lua:       `vim.o.number = true`
+
+    设置字符串值:
+        Vimscript: `set wildignore=*.o,*.a,__pycache__`
+        Lua:       `vim.o.wildignore = '*.o,*.a,__pycache__'`
+
+同理，有 |vim.bo| 和 |vim.wo| 用于设置缓冲区作用域和窗口作用域选项。
+注意这与 |local-options| 和 |:setlocal| 不同。
+还有 |vim.go| 只访问 |global-local| 选项的全局值，见 |:setglobal|。
+
+                                                               *vim.opt_local*
+                                                              *vim.opt_global*
+                                                                     *vim.opt*
+
+特殊接口 |vim.opt| 便于在 Lua 中操作列表和映射风格的选项：可将其当作 Lua 表访问，并提供面向对象的方法添加和移除条目。
+
+    示例: ~
+
+    以下设置列表风格选项的方法等价:
+        Vimscript: >vim
+            set wildignore=*.o,*.a,__pycache__
+<
+        Lua 用 `vim.o`: >lua
+            vim.o.wildignore = '*.o,*.a,__pycache__'
+<
+        Lua 用 `vim.opt`: >lua
+            vim.opt.wildignore = { '*.o', '*.a', '__pycache__' }
+<
+    模拟 |:set+=| 行为: >lua
+
+        vim.opt.wildignore:append { "*.pyc", "node_modules" }
+<
+    模拟 |:set^=| 行为: >lua
+
+        vim.opt.wildignore:prepend { "new_first_value" }
+<
+    模拟 |:set-=| 行为: >lua
+
+        vim.opt.wildignore:remove { "node_modules" }
+<
+    以下设置映射风格选项的方法等价:
+        Vimscript: >vim
+            set listchars=space:_,tab:>~
+<
+        Lua 用 `vim.o`: >lua
+            vim.o.listchars = 'space:_,tab:>~'
+<
+        Lua 用 `vim.opt`: >lua
+            vim.opt.listchars = { space = '_', tab = '>~' }
+<
+
+注意 |vim.opt| 返回的是 `Option` 对象，而不是选项值，选项值通过 |vim.opt:get()| 访问:
+
+    示例: ~
+
+    以下获取列表风格选项的方法等价:
+        Vimscript: >vim
+            echo wildignore
+<
+        Lua 用 `vim.o`: >lua
+            print(vim.o.wildignore)
+<
+        Lua 用 `vim.opt`: >lua
+            vim.print(vim.opt.wildignore:get())
+<
+
+如需模拟 |:setlocal|，用 `vim.opt_local`。
+如需模拟 |:setglobal|，用 `vim.opt_global`。
+
+Option:append({value})                                      *vim.opt:append()*
+    向字符串风格选项追加值。见 |:set+=|
+
+    这些等价: >lua
+        vim.opt.formatoptions:append('j')
+        vim.opt.formatoptions = vim.opt.formatoptions + 'j'
+<
+
+    参数: ~
+      • {value}  (`string`) 要追加的值
+
+Option:get()                                                   *vim.opt:get()*
+    返回选项的 Lua 表示。布尔、数字和字符串值会原样返回。
+
+    对于逗号分隔的列表，返回数组: >lua
+        vim.cmd [[set wildignore=*.pyc,*.o]]
+
+        vim.print(vim.opt.wildignore:get())
+        -- { "*.pyc", "*.o", }
+
+        for _, ignore_pattern in ipairs(vim.opt.wildignore:get()) do
+            print("Will ignore:", ignore_pattern)
+        end
+        -- Will ignore: *.pyc
+        -- Will ignore: *.o
+<
+
+    对于逗号分隔的映射，返回表: >lua
+        vim.cmd [[set listchars=space:_,tab:>~]]
+
+        vim.print(vim.opt.listchars:get())
+        --  { space = "_", tab = ">~", }
+
+        for char, representation in pairs(vim.opt.listchars:get()) do
+            print(char, "=>", representation)
+        end
+<
+
+    对于标志列表，返回集合: >lua
+        vim.cmd [[set formatoptions=njtcroql]]
+
+        vim.print(vim.opt.formatoptions:get())
+        -- { n = true, j = true, c = true, ... }
+
+        local format_opts = vim.opt.formatoptions:get()
+        if format_opts.j then
+            print("J is enabled!")
+        end
+<
+
+    返回: ~
+        (`string|integer|boolean?`) 选项值
+
+Option:prepend({value})                                    *vim.opt:prepend()*
+    向字符串风格选项前置值。见 |:set^=|
+
+    这些等价: >lua
+        vim.opt.wildignore:prepend('*.o')
+        vim.opt.wildignore = vim.opt.wildignore ^ '*.o'
+<
+
+    参数: ~
+      • {value}  (`string`) 要前置的值
+
+Option:remove({value})                                      *vim.opt:remove()*
+    从字符串风格选项移除值。见 |:set-=|
+
+    这些等价: >lua
+        vim.opt.wildignore:remove('*.pyc')
+        vim.opt.wildignore = vim.opt.wildignore - '*.pyc'
+<
+
+    参数: ~
+      • {value}  (`string`) 要移除的值
+
+vim.bo[{bufnr}]                                                       *vim.bo*
+    获取或设置指定缓冲区 {bufnr} 的缓冲区作用域 |options|。
+    类似 `:setlocal`。
+    省略 {bufnr} 时为当前缓冲区。
+    无效的 {bufnr} 或键会报错。
+
+    示例: >lua
+        local bufnr = vim.api.nvim_get_current_buf()
+        vim.bo[bufnr].buflisted = true    -- 等价于 vim.bo.buflisted = true
+        print(vim.bo.comments)
+        print(vim.bo.baz)                 -- 错误: 无效键
+<
+
+vim.env                                                              *vim.env*
+    编辑器会话中定义的环境变量。
+    见 |expand-env| 和 |:let-environment|。
+    无效或未设置的键返回 `nil`。
+
+    示例: >lua
+        vim.env.FOO = 'bar'
+        print(vim.env.TERM)
+<
+
+vim.go                                                                *vim.go*
+    获取或设置全局 |options|。
+    类似 `:setglobal`。无效键会报错。
+
+    注意: 与 |vim.o| 不同，此接口只访问全局选项值，主要用于 |global-local| 选项。
+
+    示例: >lua
+        vim.go.cmdheight = 4
+        print(vim.go.columns)
+        print(vim.go.bar)     -- 错误: 无效键
+<
+
+vim.o                                                                  *vim.o*
+    获取或设置 |options|。
+    行为类似 `:set`，缓冲区/窗口作用域选项作用于当前缓冲区/窗口。
+    无效键会报错。
+
+    示例: >lua
+        vim.o.cmdheight = 4
+        print(vim.o.columns)
+        print(vim.o.foo)     -- 错误: 无效键
+<
+
+vim.wo[{winid}][{bufnr}]                                              *vim.wo*
+    获取或设置指定窗口 {winid} 和缓冲区 {bufnr} 的窗口作用域 |options|。
+    设置 |global-local| 选项或指定 {bufnr} 时类似 `:setlocal`，否则类似 `:set`。
+    省略 {winid} 时为当前窗口。
+    无效的 {winid}、{bufnr} 或键会报错。
+
+    注意: 只支持 {bufnr} 为 `0`（窗口中的当前缓冲区）。
+
+    示例: >lua
+        local winid = vim.api.nvim_get_current_win()
+        vim.wo[winid].number = true    -- 等价于 vim.wo.number = true
+        print(vim.wo.foldmarker)
+        print(vim.wo.quux)             -- 错误: 无效键
+        vim.wo[winid][0].spell = false -- 类似 ':setlocal nospell'
+<
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

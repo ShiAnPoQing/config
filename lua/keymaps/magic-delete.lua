@@ -1,5 +1,5 @@
 return {
-	["0dew"] = {
+	["0dwi"] = {
 		function()
 			require("custom.plugins.delete.delete-word").magic_delete_word({
 				keyword = "word_inner",
@@ -7,7 +7,7 @@ return {
 		end,
 		"n",
 	},
-	["0dww"] = {
+	["0dwo"] = {
 		function()
 			require("custom.plugins.delete.delete-word").magic_delete_word({
 				keyword = "word_outer",
@@ -15,7 +15,7 @@ return {
 		end,
 		"n",
 	},
-	["0dwW"] = {
+	["0dWo"] = {
 		function()
 			require("custom.plugins.delete.delete-word").magic_delete_word({
 				keyword = "WORD_outer",
@@ -23,7 +23,7 @@ return {
 		end,
 		"n",
 	},
-	["0deW"] = {
+	["0dWi"] = {
 		function()
 			require("custom.plugins.delete.delete-word").magic_delete_word({
 				keyword = "WORD_inner",

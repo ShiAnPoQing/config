@@ -1,0 +1,54 @@
+==============================================================================
+Lua 模块: vim.keymap                                            *vim.keymap*
+
+vim.keymap.del({modes}, {lhs}, {opts})                      *vim.keymap.del()*
+    移除已有映射。示例: >lua
+        vim.keymap.del('n', 'lhs')
+
+        vim.keymap.del({'n', 'i', 'v'}, '<leader>w', { buffer = 5 })
+<
+
+    参数: ~
+      • {modes}  (`string|string[]`)
+      • {lhs}    (`string`)
+      • {opts}   (`table?`) 具有以下字段的表:
+                 • {buffer}? (`integer|boolean`) 从指定缓冲区移除映射。为 `0` 或 `true` 时用当前缓冲区。
+
+    另见: ~
+      • |vim.keymap.set()|
+
+vim.keymap.set({mode}, {lhs}, {rhs}, {opts})                *vim.keymap.set()*
+    定义 |mapping|，将 |keycodes| 映射到函数或按键。
+
+    示例: >lua
+        -- 将 "x" 映射到 Lua 函数:
+        vim.keymap.set('n', 'x', function() print("real lua function") end)
+        -- 将 "<leader>x" 映射到多模式，缓冲区本地:
+        vim.keymap.set({'n', 'v'}, '<leader>x', vim.lsp.buf.references, { buffer = true })
+        -- 将 <Tab> 映射为表达式 (|:map-<expr>|):
+        vim.keymap.set('i', '<Tab>', function()
+          return vim.fn.pumvisible() == 1 and "<C-n>" or "<Tab>"
+        end, { expr = true })
+        -- 将 "[%%" 映射为 <Plug> 映射:
+        vim.keymap.set('n', '[%%', '<Plug>(MatchitNormalMultiBackward)')
+<
+
+    参数: ~
+      • {mode}  (`string|string[]`) 模式简称（见 |nvim_set_keymap()|），或其列表
+      • {lhs}   (`string`) 映射左侧 |{lhs}|
+      • {rhs}   (`string|function`) 映射右侧 |{rhs}|，可为 Lua 函数
+      • {opts}  (`table?`) |:map-arguments| 选项表。与 |nvim_set_keymap()| {opts} 相同，区别如下:
+                • {replace_keycodes} 若 "expr" 为 `true`，则默认为 `true`
+
+                还支持:
+                • {buffer}? (`integer|boolean`) 创建缓冲区本地映射，`0` 或 `true` 为当前缓冲区
+                • {remap}? (`boolean`, 默认: `false`) 递归映射。与 {noremap} 相反
+
+    另见: ~
+      • |nvim_set_keymap()|
+      • |maparg()|
+      • |mapcheck()|
+      • |mapset()|
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

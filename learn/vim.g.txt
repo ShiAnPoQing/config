@@ -1,0 +1,46 @@
+                                                           *lua-vim-variables*
+Vim 编辑器的全局字典 |g:| |w:| |b:| |t:| |v:| 可通过下述 `vim.*` Lua 表方便、惯用地访问。
+这样你可以轻松地从 Lua 读写 Vimscript 全局变量。
+
+示例: >lua
+
+    vim.g.foo = 5     -- 设置 Vimscript 全局变量 g:foo
+    print(vim.g.foo)  -- 获取并打印 g:foo
+    vim.g.foo = nil   -- 删除（:unlet）该变量
+    vim.b[2].foo = 6  -- 设置缓冲区 2 的 b:foo
+<
+
+注意直接设置字典字段不会写回 Nvim。
+因为对命名空间的索引只是返回一个副本。
+必须整体写回整个字典。可用临时变量实现。
+
+示例: >lua
+
+    vim.g.my_dict.field1 = 'value'  -- 不生效
+
+    local my_dict = vim.g.my_dict   --
+    my_dict.field1 = 'value'        -- 正确做法
+    vim.g.my_dict = my_dict         --
+
+vim.g                                                                  *vim.g*
+    全局（|g:|）编辑器变量。
+    没有值的键返回 `nil`。
+
+vim.b                                                                  *vim.b*
+    当前缓冲区的缓冲区作用域（|b:|）变量。
+    无效或未设置的键返回 `nil`。可用整数索引访问指定缓冲区的变量。
+
+vim.w                                                                  *vim.w*
+    当前窗口的窗口作用域（|w:|）变量。
+    无效或未设置的键返回 `nil`。可用整数索引访问指定窗口的变量。
+
+vim.t                                                                  *vim.t*
+    当前标签页的标签页作用域（|t:|）变量。
+    无效或未设置的键返回 `nil`。可用整数索引访问指定标签页的变量。
+
+vim.v                                                                  *vim.v*
+    |v:| 变量。
+    无效或未设置的键返回 `nil`。
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

@@ -1,0 +1,51 @@
+==============================================================================
+Lua 模块: vim.snippet                                          *vim.snippet*
+
+*vim.snippet.ActiveFilter*
+
+    字段: ~
+      • {direction}  (`vim.snippet.Direction`) 跳转方向。-1 为上一个，1 为下一个。
+
+vim.snippet.active({filter})                            *vim.snippet.active()*
+    若当前缓冲区有激活的 snippet，应用给定 filter（如有）则返回 `true`。
+
+    参数: ~
+      • {filter}  (`vim.snippet.ActiveFilter?`) 用于约束搜索的过滤器:
+                  • `direction` (vim.snippet.Direction): 跳转方向。
+                若 snippet 可按该方向跳转则返回 `true`。见 |vim.snippet.ActiveFilter|。
+
+    返回: ~
+        (`boolean`)
+
+vim.snippet.expand({input})                             *vim.snippet.expand()*
+    展开给定 snippet 文本。规范见
+    https://microsoft.github.io/language-server-protocol/specification/#snippet_syntax
+
+    Tabstop 用 |hl-SnippetTabstop| 高亮。
+
+    参数: ~
+      • {input}  (`string`)
+
+
+vim.snippet.jump({direction})                             *vim.snippet.jump()*
+    跳转到当前 snippet 的下一个（或上一个）占位符（如有）。
+
+    默认 `<Tab>` 映射为 snippet 激活时跳转。默认映射如下: >lua
+        vim.keymap.set({ 'i', 's' }, '<Tab>', function()
+           if vim.snippet.active({ direction = 1 }) then
+             return '<Cmd>lua vim.snippet.jump(1)<CR>'
+           else
+             return '<Tab>'
+           end
+         end, { descr = '...', expr = true, silent = true })
+<
+
+    参数: ~
+      • {direction}  (`vim.snippet.Direction`) 跳转方向。-1 为上一个，1 为下一个。
+
+vim.snippet.stop()                                        *vim.snippet.stop()*
+    退出当前 snippet。
+
+==============================================================================
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
+

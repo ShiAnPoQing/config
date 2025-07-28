@@ -1,0 +1,38 @@
+==============================================================================
+VIM.REGEX                                                          *vim.regex*
+
+可直接在 Lua 中使用 Vim 正则。目前仅支持单行匹配。
+                                                          *regex:match_line()*
+regex:match_line({bufnr}, {line_idx}, {start}, {end_})
+    匹配缓冲区 `bufnr` 中 `line_idx` 行。匹配范围为字节索引 `start` 到 `end_`，否则见 |regex:match_str()|。返回的字节索引相对 `start`。
+
+    参数: ~
+      • {bufnr}     (`integer`)
+      • {line_idx}  (`integer`)
+      • {start}     (`integer?`)
+      • {end_}      (`integer?`)
+
+    返回（多值）: ~
+        (`integer?`) 匹配起始字节索引，相对 `start`，无匹配为 nil
+        (`integer?`) 匹配结束字节索引，相对 `start`，无匹配为 nil
+
+regex:match_str({str})                                     *regex:match_str()*
+    用此正则匹配字符串 `str`。要精确匹配字符串，正则需加 "^" 和 "$"。返回匹配起止字节索引，无匹配为 nil。因任意整数为“真”，可直接用作 if 条件。
+
+    参数: ~
+      • {str}  (`string`)
+
+    返回（多值）: ~
+        (`integer?`) 匹配起始字节索引，无匹配为 nil
+        (`integer?`) 匹配结束字节索引，无匹配为 nil
+
+vim.regex({re})                                                  *vim.regex()*
+    解析 Vim 正则 `re`，返回正则对象。正则默认“magic”且区分大小写，无论 'magic' 和 'ignorecase'。可用标志控制，见 |/magic| 和 |/ignorecase|。
+
+    参数: ~
+      • {re}  (`string`)
+
+    返回: ~
+        (`vim.regex`)
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

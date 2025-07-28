@@ -1,0 +1,186 @@
+vim.str_utf_end({str}, {index})                            *vim.str_utf_end()*
+    获取 {index} 指向的码点（字符）最后一个字节的距离（以字节为单位）。
+
+    示例: >lua
+        -- 字符 'æ' 用 UTF-8 存储为 '\xc3\xa6'
+
+        -- 返回 0，因 index 指向字符最后一个字节
+        vim.str_utf_end('æ', 2)
+
+        -- 返回 1，因 index 指向字符倒数第二个字节
+        vim.str_utf_end('æ', 1)
+<
+
+    参数: ~
+      • {str}    (`string`)
+      • {index}  (`integer`)
+
+    返回: ~
+        (`integer`)
+
+vim.str_utf_pos({str})                                     *vim.str_utf_pos()*
+    获取给定字符串中每个 UTF-8 码点的起始字节位置列表。
+
+    内嵌 NUL 字节视为字符串终止。
+
+    参数: ~
+      • {str}  (`string`)
+
+    返回: ~
+        (`integer[]`)
+
+vim.str_utf_start({str}, {index})                        *vim.str_utf_start()*
+    获取 {index} 指向的码点（字符）起始字节的距离（以字节为单位）。
+
+    结果可加到 {index} 得到字符的起始字节。
+
+    示例: >lua
+        -- 字符 'æ' 用 UTF-8 存储为 '\xc3\xa6'
+
+        -- 返回 0，因 index 指向字符第一个字节
+        vim.str_utf_start('æ', 1)
+
+        -- 返回 -1，因 index 指向字符第二个字节
+        vim.str_utf_start('æ', 2)
+<
+
+    参数: ~
+      • {str}    (`string`)
+      • {index}  (`integer`)
+
+    返回: ~
+        (`integer`)
+
+vim.stricmp({a}, {b})                                          *vim.stricmp()*
+    不区分大小写地比较字符串。
+
+    参数: ~
+      • {a}  (`string`)
+      • {b}  (`string`)
+
+    返回: ~
+        (`0|1|-1`) 若字符串相等、{a} 大于 {b} 或 {a} 小于 {b}，分别返回 0、1、-1。
+
+                                                         *vim.str_byteindex()*
+vim.str_byteindex({s}, {encoding}, {index}, {strict_indexing})
+    将 UTF-32、UTF-16 或 UTF-8 {index} 转为字节索引。若
+    {strict_indexing} 为 false，超出范围的索引会返回字节长度而不是报错。
+
+    无效 UTF-8 和 NUL 按 |vim.str_utfindex()| 处理。{index} 在 UTF-16 序列中间时会向上取整到序列末尾。
+
+    参数: ~
+      • {s}                (`string`)
+      • {encoding}         (`"utf-8"|"utf-16"|"utf-32"`)
+      • {index}            (`integer`)
+      • {strict_indexing}  (`boolean?`) 默认: true
+
+    返回: ~
+        (`integer`)
+
+                                                          *vim.str_utfindex()*
+vim.str_utfindex({s}, {encoding}, {index}, {strict_indexing})
+    将字节索引转为 UTF-32、UTF-16 或 UTF-8 索引。若未提供 {index}，则用字符串长度。所有索引均为 0 基。
+
+    若 {strict_indexing} 为 false，超出范围的索引会返回字符串长度而不是报错。无效 UTF-8 字节和嵌入代理视为一个码点。{index} 在 UTF-8 序列中间时会向上取整到序列末尾。
+
+    参数: ~
+      • {s}                (`string`)
+      • {encoding}         (`"utf-8"|"utf-16"|"utf-32"`)
+      • {index}            (`integer?`)
+      • {strict_indexing}  (`boolean?`) 默认: true
+
+    返回: ~
+        (`integer`)
+
+
+vim.split({s}, {sep}, {opts})                                    *vim.split()*
+    按分隔符分割字符串，返回结果表（与 |vim.gsplit()| 不同）。
+
+    示例: >lua
+        split(":aa::b:", ":")                   --> {'','aa','','b',''}
+        split("axaby", "ab?")                   --> {'','x','y'}
+        split("x*yz*o", "*", {plain=true})      --> {'x','yz','o'}
+        split("|x|y|z|", "|", {trimempty=true}) --> {'x', 'y', 'z'}
+<
+
+    参数: ~
+      • {s}     (`string`) 要分割的字符串
+      • {sep}   (`string`) 分隔符或模式
+      • {opts}  (`table?`) 关键字参数 |kwargs|:
+                • {plain}? (`boolean`) 按字面量分隔（如 string.find）
+                • {trimempty}? (`boolean`) 丢弃开头和结尾的空片段
+
+    返回: ~
+        (`string[]`) 分割结果列表
+
+    另见: ~
+      • |vim.gsplit()|
+      • |string.gmatch()|
+
+vim.startswith({s}, {prefix})                               *vim.startswith()*
+    测试 `s` 是否以 `prefix` 开头。
+
+    参数: ~
+      • {s}       (`string`) 字符串
+      • {prefix}  (`string`) 要匹配的前缀
+
+    返回: ~
+        (`boolean`) 若 `prefix` 是 `s` 的前缀则为 `true`
+
+vim.endswith({s}, {suffix})                                   *vim.endswith()*
+    测试 `s` 是否以 `suffix` 结尾。
+
+    参数: ~
+      • {s}       (`string`) 字符串
+      • {suffix}  (`string`) 要匹配的后缀
+
+    返回: ~
+        (`boolean`) 若 `suffix` 是 `s` 的后缀则为 `true`
+
+vim.trim({s})                                                     *vim.trim()*
+    去除字符串两端的空白（Lua 模式 "%s"）。
+
+    参数: ~
+      • {s}  (`string`) 要去除空白的字符串
+
+    返回: ~
+        (`string`) 去除首尾空白后的字符串
+
+    另见: ~
+      • |lua-patterns|
+      • https://www.lua.org/pil/20.2.html
+
+vim.gsplit({s}, {sep}, {opts})                                  *vim.gsplit()*
+    获取一个 |iterator|，按分隔符惰性分割字符串（与 |vim.split()| 的“急切”分割相对）。
+
+    示例: >lua
+        for s in vim.gsplit(':aa::b:', ':', {plain=true}) do
+          print(s)
+        end
+<
+
+    若要同时获取分隔符本身，用 |string.gmatch()|。示例: >lua
+        for word, num in ('foo111bar222'):gmatch('([^0-9]*)(%d*)') do
+          print(('word: %s num: %s'):format(word, num))
+        end
+<
+
+    参数: ~
+      • {s}     (`string`) 要分割的字符串
+      • {sep}   (`string`) 分隔符或模式
+      • {opts}  (`table?`) 关键字参数 |kwargs|:
+                • {plain}? (`boolean`) 按字面量分隔（如 string.find）
+                • {trimempty}? (`boolean`) 丢弃开头和结尾的空片段
+
+    返回: ~
+        (`fun():string?`) 分割结果的迭代器
+
+    另见: ~
+      • |string.gmatch()|
+      • |vim.split()|
+      • |lua-patterns|
+      • https://www.lua.org/pil/20.2.html
+      • http://lua-users.org/wiki/StringLibraryTutorial
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

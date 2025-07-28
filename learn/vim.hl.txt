@@ -1,0 +1,45 @@
+==============================================================================
+VIM.HL                                                                *vim.hl*
+
+vim.hl.on_yank({opts})                                      *vim.hl.on_yank()*
+    在 |TextYankPost| 事件期间高亮被复制的文本。
+
+    在 `init.vim` 中添加如下内容： >vim
+        autocmd TextYankPost * silent! lua vim.hl.on_yank {higroup='Visual', timeout=300}
+<
+
+    参数: ~
+      • {opts}  (`table?`) 可选参数
+                • higroup 高亮组（默认 "IncSearch"）
+                • timeout 高亮消失前的时间（毫秒，默认 150）
+                • on_macro 执行宏时是否高亮（默认 false）
+                • on_visual 复制可视选择时是否高亮（默认 true）
+                • event 事件结构体（默认 vim.v.event）
+                • priority 整数优先级（默认 |vim.hl.priorities|`.user`）
+
+vim.hl.priorities                                          *vim.hl.priorities*
+    用于高亮的默认优先级表：
+    • `syntax`: `50`，标准语法高亮
+    • `treesitter`: `100`，treesitter 高亮
+    • `semantic_tokens`: `125`，LSP 语义 token 高亮
+    • `diagnostics`: `150`，代码分析如诊断
+    • `user`: `200`，用户触发的高亮，如 LSP 文档符号或 `on_yank` 自动命令
+
+                                                              *vim.hl.range()*
+vim.hl.range({bufnr}, {ns}, {higroup}, {start}, {finish}, {opts})
+    对一段文本应用高亮组。
+
+    参数: ~
+      • {bufnr}    (`integer`) 要高亮的缓冲区编号
+      • {ns}       (`integer`) 要添加高亮的命名空间
+      • {higroup}  (`string`) 用于高亮的高亮组
+      • {start}    (`integer[]|string`) 区域起点（行、列元组或 |getpos()| 可接受的字符串）
+      • {finish}   (`integer[]|string`) 区域终点（行、列元组或 |getpos()| 可接受的字符串）
+      • {opts}     (`table?`) 具有以下字段的表:
+                   • {regtype}? (`string`, 默认: `'v'` 即字符方式) 区域类型。见 |getregtype()|
+                   • {inclusive}? (`boolean`, 默认: `false`) 区域是否包含终点
+                   • {priority}? (`integer`, 默认: `vim.hl.priorities.user`) 高亮优先级
+                   • {timeout}? (`integer`, 默认: -1 不超时) 高亮消失前的时间（毫秒）
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

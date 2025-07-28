@@ -1,0 +1,60 @@
+vim.ringbuf({size})                                            *vim.ringbuf()*
+    创建一个最大项目数受限的环形缓冲区。缓冲区满时，添加新条目会覆盖最旧条目。 >lua
+        local ringbuf = vim.ringbuf(4)
+        ringbuf:push("a")
+        ringbuf:push("b")
+        ringbuf:push("c")
+        ringbuf:push("d")
+        ringbuf:push("e")    -- 覆盖 "a"
+        print(ringbuf:pop()) -- 返回 "b"
+        print(ringbuf:pop()) -- 返回 "c"
+
+        -- 可用作迭代器。弹出剩余项目:
+        for val in ringbuf do
+          print(val)
+        end
+<
+
+    返回带以下方法的 Ringbuf 实例:
+    • |Ringbuf:push()|
+    • |Ringbuf:pop()|
+    • |Ringbuf:peek()|
+    • |Ringbuf:clear()|
+
+    参数: ~
+      • {size}  (`integer`)
+
+    返回: ~
+        (`vim.Ringbuf`) 环形缓冲区，见 |vim.Ringbuf|。
+
+*vim.Ringbuf*
+
+    字段: ~
+      • {clear}  (`fun()`) 见 |Ringbuf:clear()|。
+      • {push}   (`fun(item: T)`) 见 |Ringbuf:push()|。
+      • {pop}    (`fun(): T?`) 见 |Ringbuf:pop()|。
+      • {peek}   (`fun(): T?`) 见 |Ringbuf:peek()|。
+
+Ringbuf:clear()                                              *Ringbuf:clear()*
+    清空所有项目
+
+Ringbuf:peek()                                                *Ringbuf:peek()*
+    返回第一个未读项目但不移除
+
+    返回: ~
+        (`any?`)
+
+Ringbuf:pop()                                                  *Ringbuf:pop()*
+    移除并返回第一个未读项目
+
+    返回: ~
+        (`any?`)
+
+Ringbuf:push({item})                                          *Ringbuf:push()*
+    添加一个项目，若缓冲区已满则覆盖最旧项目。
+
+    参数: ~
+      • {item}  (`any`)
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

@@ -1,0 +1,38 @@
+==============================================================================
+VIM.JSON                                                            *vim.json*
+
+该模块提供 Lua 对象与 JSON 编码字符串之间的编码与解码。支持 |vim.NIL| 和 |vim.empty_dict()|。
+
+vim.json.decode({str}, {opts})                             *vim.json.decode()*
+    将 JSON 编码的 {str} 解码（或“解包”）为 Lua 对象。
+    • JSON "null" 会被解码为 |vim.NIL|（可通过 {opts} 控制，见下）。
+    • 空对象解码为 |vim.empty_dict()|。
+    • 空数组解码为 `{}`（空 Lua 表）。
+
+    示例: >lua
+        vim.print(vim.json.decode('{"bar":[],"foo":{},"zub":null}'))
+        -- { bar = {}, foo = vim.empty_dict(), zub = vim.NIL }
+<
+
+    参数: ~
+      • {str}   (`string`) JSON 字符串
+      • {opts}  (`table<string,any>?`) 选项表，键包括:
+                • luanil: (table) 表，键包括:
+                  • object: (boolean) 若为 true，则 JSON 对象中的 null 转为 Lua nil，否则为 |vim.NIL|。
+                  • array: (boolean) 若为 true，则 JSON 数组中的 null 转为 Lua nil，否则为 |vim.NIL|。
+
+    返回: ~
+        (`any`)
+
+vim.json.encode({obj}, {opts})                             *vim.json.encode()*
+    将 Lua 对象 {obj} 编码（或“打包”）为 JSON 格式的 Lua 字符串。
+
+    参数: ~
+      • {obj}   (`any`)
+      • {opts}  (`table<string,any>?`) 选项表，键包括:
+                • escape_slash: (boolean) (默认 false) 是否转义字符串值中的斜杠 "/"
+
+    返回: ~
+        (`string`)
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

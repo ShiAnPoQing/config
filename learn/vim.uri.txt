@@ -1,0 +1,59 @@
+==============================================================================
+Lua 模块: vim.uri                                                  *vim.uri*
+
+vim.uri_decode({str})                                       *vim.uri_decode()*
+    对包含百分号转义的字符串进行 URI 解码。
+
+    参数: ~
+      • {str}  (`string`) 要解码的字符串
+
+    返回: ~
+        (`string`) 解码后的字符串
+
+vim.uri_encode({str}, {rfc})                                *vim.uri_encode()*
+    用百分号转义对字符串进行 URI 编码。
+
+    参数: ~
+      • {str}  (`string`) 要编码的字符串
+      • {rfc}  (`"rfc2396"|"rfc2732"|"rfc3986"?`)
+
+    返回: ~
+        (`string`) 编码后的字符串
+
+vim.uri_from_bufnr({bufnr})                             *vim.uri_from_bufnr()*
+    从 bufnr 获取 URI。
+
+    参数: ~
+      • {bufnr}  (`integer`)
+
+    返回: ~
+        (`string`) URI
+
+vim.uri_from_fname({path})                              *vim.uri_from_fname()*
+    从文件路径获取 URI。
+
+    参数: ~
+      • {path}  (`string`) 文件路径
+
+    返回: ~
+        (`string`) URI
+
+vim.uri_to_bufnr({uri})                                   *vim.uri_to_bufnr()*
+    获取 uri 对应的缓冲区。
+    若不存在则创建新的未加载缓冲区。
+
+    参数: ~
+      • {uri}  (`string`)
+
+    返回: ~
+        (`integer`) bufnr
+
+vim.uri_to_fname({uri})                                   *vim.uri_to_fname()*
+    从 URI 获取文件名。
+
+    参数: ~
+      • {uri}  (`string`)
+
+    返回: ~
+        (`string`) 文件名，若为非 file URI 则返回原 URI
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

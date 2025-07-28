@@ -1,0 +1,136 @@
+==============================================================================
+Lua 模块: vim.filetype                                        *vim.filetype*
+
+vim.filetype.add({filetypes})                             *vim.filetype.add()*
+    添加新的文件类型映射。
+
+    文件类型映射可按扩展名、文件名（“尾部”或完整路径）添加。
+    先检查完整路径，再检查文件名。若文件名无匹配，则按 |lua-patterns|（按优先级排序）依次匹配，仍无匹配则用扩展名。
+
+    文件类型可为字符串（直接用作 filetype）或函数。
+    若为函数，参数为文件完整路径和缓冲区号（及模式捕获），应返回字符串作为缓冲区 filetype。
+    可选返回第二个函数值，调用时可修改缓冲区状态（如设置特定变量），Nvim 会在设置 filetype 前调用。
+
+    文件名模式可指定优先级，优先级高的先匹配。未指定时默认 0。
+    模式可包含形如 "${SOME_VAR}" 的环境变量，会自动展开。
+    变量未设置则不匹配。
+
+    更多示例见 $VIMRUNTIME/lua/vim/filetype.lua。
+
+    示例: >lua
+        vim.filetype.add({
+          extension = {
+            foo = 'fooscript',
+            bar = function(path, bufnr)
+              if some_condition() then
+                return 'barscript', function(bufnr)
+                  -- 设置缓冲区变量
+                  vim.b[bufnr].barscript_version = 2
+                end
+              end
+              return 'bar'
+            end,
+          },
+          filename = {
+            ['.foorc'] = 'toml',
+            ['/etc/foo/config'] = 'toml',
+          },
+          pattern = {
+            ['.*/etc/foo/.*'] = 'fooscript',
+            -- 使用可选优先级
+            ['.*/etc/foo/.*%.conf'] = { 'dosini', { priority = 10 } },
+            -- 包含环境变量的模式
+            ['${XDG_CONFIG_HOME}/foo/git'] = 'git',
+            ['.*README.(%a+)'] = function(path, bufnr, ext)
+              if ext == 'md' then
+                return 'markdown'
+              elseif ext == 'rst' then
+                return 'rst'
+              end
+            end,
+          },
+        })
+<
+
+    添加内容匹配的兜底规则: >lua
+        vim.filetype.add {
+          pattern = {
+            ['.*'] = {
+              function(path, bufnr)
+                local content = vim.api.nvim_buf_get_lines(bufnr, 0, 1, false)[1] or ''
+                if vim.regex([[^#!.*\\<mine\\>]]):match_str(content) ~= nil then
+                  return 'mine'
+                elseif vim.regex([[\\<drawing\\>]]):match_str(content) ~= nil then
+                  return 'drawing'
+                end
+              end,
+              { priority = -math.huge },
+            },
+          },
+        }
+<
+
+    参数: ~
+      • {filetypes}  (`table`) 包含新文件类型映射的表（见示例）。
+                     • {pattern}? (`vim.filetype.mapping`)
+                     • {extension}? (`vim.filetype.mapping`)
+                     • {filename}? (`vim.filetype.mapping`)
+
+                                                   *vim.filetype.get_option()*
+vim.filetype.get_option({filetype}, {option})
+    获取 {filetype} 的默认选项值。
+
+    返回值为设置 'filetype' 后新缓冲区的默认值，受所有 FileType 自动命令和 ftplugin 文件影响。
+
+    示例: >lua
+        vim.filetype.get_option('vim', 'commentstring')
+<
+
+    注意: 用 |nvim_get_option_value()|，但结果有缓存。即 |ftplugin| 和 |FileType| 自动命令只触发一次，后续更改不会反映。
+
+    属性: ~
+        自 0.9.0 起
+
+    参数: ~
+      • {filetype}  (`string`) 文件类型
+      • {option}    (`string`) 选项名
+
+    返回: ~
+        (`string|boolean|integer`) 选项值
+
+vim.filetype.match({args})                              *vim.filetype.match()*
+    执行文件类型检测。
+
+    可用三种方式检测文件类型:
+    1. 用已有缓冲区
+    2. 仅用文件名
+    3. 仅用文件内容
+
+    其中 1 最准确，因用到缓冲区文件名和（可选）内容。2、3 可在无缓冲区时用，但若仅文件名（或内容）无法唯一确定文件类型，可能无法匹配。
+
+    三种方式通过参数表的不同键指定。示例: >lua
+        -- 用缓冲区号
+        vim.filetype.match({ buf = 42 })
+
+        -- 覆盖缓冲区文件名
+        vim.filetype.match({ buf = 42, filename = 'foo.c' })
+
+        -- 仅用文件名
+        vim.filetype.match({ filename = 'main.lua' })
+
+        -- 用文件内容
+        vim.filetype.match({ contents = {'#!/usr/bin/env bash'} })
+<
+
+    参数: ~
+      • {args}  (`table`) 指定匹配策略的表。可用键:
+                • {buf}? (`integer`) 用于匹配的缓冲区号。与 {contents} 互斥
+                • {filename}? (`string`) 用于匹配的文件名。指定 {buf} 时，默认为该缓冲区的文件名。文件不必实际存在。单独用时仅用文件名匹配，可能无法唯一确定文件类型。
+                • {contents}? (`string[]`) 文件内容行数组。可与 {filename} 一起用。与 {buf} 互斥。
+
+    返回（多值）: ~
+        (`string?`) 匹配到的文件类型
+        (`function?`) 调用时修改缓冲区状态的函数（如设置特定变量）。参数为缓冲区号
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

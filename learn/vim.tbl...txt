@@ -1,0 +1,142 @@
+vim.tbl_contains({t}, {value}, {opts})                    *vim.tbl_contains()*
+    检查表中是否包含给定值，可直接指定值或用谓词函数检查每个值。
+
+    示例: >lua
+        vim.tbl_contains({ 'a', { 'b', 'c' } }, function(v)
+          return vim.deep_equal(v, { 'b', 'c' })
+        end, { predicate = true })
+        -- true
+<
+
+    参数: ~
+      • {t}      (`table`) 要检查的表
+      • {value}  (`any`) 要比较的值或谓词函数引用
+      • {opts}   (`table?`) 关键字参数 |kwargs|:
+                 • {predicate}? (`boolean`) `value` 为谓词函数引用（默认 false）
+
+    返回: ~
+        (`boolean`) 若 `t` 包含 `value` 则为 `true`
+
+    另见: ~
+      • |vim.list_contains()| 检查列表风格表中的值
+
+vim.tbl_count({t})                                           *vim.tbl_count()*
+    统计表 `t` 中非 nil 值的数量。 >lua
+        vim.tbl_count({ a=1, b=2 })  --> 2
+        vim.tbl_count({ 1, 2 })      --> 2
+<
+
+    参数: ~
+      • {t}  (`table`) 表
+
+    返回: ~
+        (`integer`) 表中非 nil 值的数量
+
+    另见: ~
+      • https://github.com/Tieske/Penlight/blob/master/lua/pl/tablex.lua
+
+vim.tbl_deep_extend({behavior}, {...})                 *vim.tbl_deep_extend()*
+    递归合并两个或多个表。
+
+    只有空表或非 |lua-list|（从 1 开始连续整数索引）才递归合并。
+    适合合并嵌套表（如默认和用户配置），列表会被整体覆盖而非合并。
+
+    参数: ~
+      • {behavior}  (`'error'|'keep'|'force'`) 多个表有相同键时的处理方式:
+                    • "error": 报错
+                    • "keep": 用最左边表的值
+                    • "force": 用最右边表的值
+      • {...}       (`table`) 两个或多个表
+
+    返回: ~
+        (`table`) 合并后的表
+
+    另见: ~
+      • |vim.tbl_extend()|
+
+vim.tbl_extend({behavior}, {...})                           *vim.tbl_extend()*
+    合并两个或多个表。
+
+    参数: ~
+      • {behavior}  (`'error'|'keep'|'force'`) 多个表有相同键时的处理方式:
+                    • "error": 报错
+                    • "keep": 用最左边表的值
+                    • "force": 用最右边表的值
+      • {...}       (`table`) 两个或多个表
+
+    返回: ~
+        (`table`) 合并后的表
+
+    另见: ~
+      • |extend()|
+
+vim.tbl_filter({func}, {t})                                 *vim.tbl_filter()*
+    用谓词函数过滤表
+
+    参数: ~
+      • {func}  (`function`) 函数
+      • {t}     (`table`) 表
+
+    返回: ~
+        (`any[]`) 过滤后的值表
+
+vim.tbl_get({o}, {...})                                        *vim.tbl_get()*
+    通过字符串键依次索引表（第一个参数）。若键不存在则返回 `nil`。
+
+    示例: >lua
+        vim.tbl_get({ key = { nested_key = true }}, 'key', 'nested_key') == true
+        vim.tbl_get({ key = {}}, 'key', 'nested_key') == nil
+<
+
+    参数: ~
+      • {o}    (`table`) 要索引的表
+      • {...}  (`any`) 可选键（0 个或多个，可变参数）依次索引表
+
+    返回: ~
+        (`any`) 若存在则为嵌套值，否则为 nil
+
+vim.tbl_isempty({t})                                       *vim.tbl_isempty()*
+    检查表是否为空。
+
+    参数: ~
+      • {t}  (`table`) 要检查的表
+
+    返回: ~
+        (`boolean`) 若为空则为 `true`
+
+    另见: ~
+      • https://github.com/premake/premake-core/blob/master/src/base/table.lua
+
+vim.tbl_keys({t})                                             *vim.tbl_keys()*
+    返回表中所有键的列表。返回表的键顺序不保证。
+
+    参数: ~
+      • {t}  (`table`) 表
+
+    返回: ~
+        (`any[]`) 键列表
+
+    另见: ~
+      • 来源
+        https://github.com/premake/premake-core/blob/master/src/base/table.lua
+
+vim.tbl_map({func}, {t})                                       *vim.tbl_map()*
+    对表所有值应用函数。
+
+    参数: ~
+      • {func}  (`fun(value: T): any`) 函数
+      • {t}     (`table<any, T>`) 表
+
+    返回: ~
+        (`table`) 变换后的值表
+
+vim.tbl_values({t})                                         *vim.tbl_values()*
+    返回表中所有值的列表。返回表的值顺序不保证。
+
+    参数: ~
+      • {t}  (`table`) 表
+
+    返回: ~
+        (`any[]`) 值列表
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

@@ -1,0 +1,61 @@
+==============================================================================
+VIM.RE                                                                *vim.re*
+
+`vim.re` 模块为 LPeg |vim.lpeg| 提供了常规正则风格语法。（与 |vim.regex| 提供的 Vim |regexp| 无关。）
+
+见 https://www.inf.puc-rio.br/~roberto/lpeg/re.html，了解原始文档、正则语法和示例。
+
+vim.re.compile({string}, {defs})                            *vim.re.compile()*
+    编译给定 {string}，返回等价的 LPeg 模式。字符串可定义表达式或文法。可选 {defs} 表提供模式可用的额外 Lua 值。
+
+    参数: ~
+      • {string}  (`string`)
+      • {defs}    (`table?`)
+
+    返回: ~
+        (`vim.lpeg.Pattern`)
+
+vim.re.find({subject}, {pattern}, {init})                      *vim.re.find()*
+    在 {subject} 中查找 {pattern}。找到时返回起止索引，否则返回 nil。
+
+    可选数字参数 {init} 指定起始位置。Lua 库中，负值从末尾计数。
+
+    参数: ~
+      • {subject}  (`string`)
+      • {pattern}  (`vim.lpeg.Pattern|string`)
+      • {init}     (`integer?`)
+
+    返回（多值）: ~
+        (`integer?`) 匹配起始索引，无匹配为 nil
+        (`integer?`) 匹配结束索引，无匹配为 nil
+
+vim.re.gsub({subject}, {pattern}, {replacement})               *vim.re.gsub()*
+    全局替换，将 {subject} 中所有 {pattern} 匹配项替换为 {replacement}。
+
+    参数: ~
+      • {subject}      (`string`)
+      • {pattern}      (`vim.lpeg.Pattern|string`)
+      • {replacement}  (`string`)
+
+    返回: ~
+        (`string`)
+
+vim.re.match({subject}, {pattern}, {init})                    *vim.re.match()*
+    用 {pattern} 匹配 {subject}，返回所有捕获。
+
+    参数: ~
+      • {subject}  (`string`)
+      • {pattern}  (`vim.lpeg.Pattern|string`)
+      • {init}     (`integer?`)
+
+    返回: ~
+        (`integer|vim.lpeg.Capture?`)
+
+    另见: ~
+      • vim.lpeg.match()
+
+vim.re.updatelocale()                                  *vim.re.updatelocale()*
+    更新预定义字符类为当前 locale。
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

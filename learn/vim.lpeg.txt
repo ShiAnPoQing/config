@@ -1,0 +1,287 @@
+==============================================================================
+VIM.LPEG                                                            *vim.lpeg*
+
+
+LPeg 是 Lua 的基于解析表达式文法（PEG）的模式匹配库。https://bford.info/packrat/
+
+                                                   *lua-lpeg* *vim.lpeg.Pattern*
+LPeg 库以 `vim.lpeg` 形式包含（https://www.inf.puc-rio.br/~roberto/lpeg/）。
+
+此外，还可用其类正则接口 |vim.re|（https://www.inf.puc-rio.br/~roberto/lpeg/re.html）。
+
+Pattern:match({subject}, {init}, {...})                      *Pattern:match()*
+    用 `pattern` 匹配 `subject` 字符串。匹配成功时，返回 subject 中第一个匹配后字符的索引，或捕获的值（若有捕获）。可选数字参数 `init` 指定匹配起始位置。Lua 库中，负值从末尾计数。与典型模式匹配函数不同，`match` 只做锚定匹配，即只尝试匹配 subject 字符串前缀（在 `init` 位置），不会匹配任意子串。若要在字符串任意位置查找模式，需在 Lua 中写循环或写能匹配任意位置的模式。
+
+    示例: >lua
+        local pattern = lpeg.R('az') ^ 1 * -1
+        assert(pattern:match('hello') == 6)
+        assert(lpeg.match(pattern, 'hello') == 6)
+        assert(pattern:match('1 hello') == nil)
+<
+
+    参数: ~
+      • {subject}  (`string`)
+      • {init}     (`integer?`)
+      • {...}      (`any`)
+
+    返回: ~
+        (`any`) ...
+
+vim.lpeg.B({pattern})                                           *vim.lpeg.B()*
+    返回一个模式，仅当输入字符串当前位置前有 `patt` 时匹配。`patt` 必须只匹配定长字符串，且不能包含捕获。类似 and 谓词，该模式无论成功与否都不消耗输入。
+
+    参数: ~
+      • {pattern}  (`vim.lpeg.Pattern|string|integer|boolean|table`)
+
+    返回: ~
+        (`vim.lpeg.Pattern`)
+
+vim.lpeg.C({patt})                                              *vim.lpeg.C()*
+    创建简单捕获，捕获 subject 中与 `patt` 匹配的子串。捕获值为字符串。若 `patt` 有其它捕获，其值随后返回。
+
+    示例: >lua
+        local function split (s, sep)
+          sep = lpeg.P(sep)
+          local elem = lpeg.C((1 - sep) ^ 0)
+          local p = elem * (sep * elem) ^ 0
+          return lpeg.match(p, s)
+        end
+        local a, b, c = split('a,b,c', ',')
+        assert(a == 'a')
+        assert(b == 'b')
+        assert(c == 'c')
+<
+
+    参数: ~
+      • {patt}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Carg({n})                                           *vim.lpeg.Carg()*
+    创建参数捕获。该模式匹配空串，产生 lpeg.match 调用时第 n 个额外参数的值。
+
+    参数: ~
+      • {n}  (`integer`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Cb({name})                                            *vim.lpeg.Cb()*
+    创建回溯捕获。该模式匹配空串，产生最近的名为 `name` 的分组捕获的值（name 可为任意 Lua 值）。最近指最后一个完整的最外层分组捕获。完整捕获指整个模式匹配成功。最外层捕获指不在其它完整捕获内部。LPeg 不保证捕获值的复用或重新计算。
+
+    参数: ~
+      • {name}  (`any`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Cc({...})                                             *vim.lpeg.Cc()*
+    创建常量捕获。该模式匹配空串，产生所有给定值作为捕获值。
+
+    参数: ~
+      • {...}  (`any`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Cf({patt}, {func})                                    *vim.lpeg.Cf()*
+    创建折叠捕获。若 `patt` 产生捕获列表 C1 C2 ... Cn，则该捕获产生值
+    `func(...func(func(C1, C2), C3)...,Cn)`，即用函数 `func` 折叠（或归约）`patt` 的捕获。要求 `patt` 至少产生一个捕获值，作为累加器初值。（如需特定初值，可在 `patt` 前加常量捕获。）对每个后续捕获，LPeg 用累加器和捕获值调用 `func`，第一个返回值作为新累加器。最终累加器值为捕获值。
+
+    示例: >lua
+        local number = lpeg.R('09') ^ 1 / tonumber
+        local list = number * (',' * number) ^ 0
+        local function add(acc, newvalue) return acc + newvalue end
+        local sum = lpeg.Cf(list, add)
+        assert(sum:match('10,30,43') == 83)
+<
+
+    参数: ~
+      • {patt}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+      • {func}  (`fun(acc, newvalue)`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Cg({patt}, {name})                                    *vim.lpeg.Cg()*
+    创建分组捕获。将 `patt` 返回的所有值分组为一个捕获。分组可匿名（无 name）或用 name 命名（可为任意非 nil Lua 值）。
+
+    参数: ~
+      • {patt}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+      • {name}  (`string?`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Cmt({patt}, {fn})                                    *vim.lpeg.Cmt()*
+    创建匹配时捕获。与其它捕获不同，该捕获在匹配发生时立即求值（即使是更大模式的一部分最终失败）。会强制立即求值所有嵌套捕获，然后调用 `function`。该函数参数为整个 subject、当前匹配后位置（i），以及 `patt` 产生的所有捕获值。函数返回值决定匹配结果。若返回数字，匹配成功，返回值为新位置（i 到 len(s)+1）。若返回 true，匹配成功但不消耗输入（等价于返回 i）。若返回 false、nil 或无返回值，匹配失败。函数返回的额外值作为捕获值。
+
+    参数: ~
+      • {patt}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+      • {fn}    (`fun(s: string, i: integer, ...: any)`) (position:
+                boolean|integer, ...: any)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Cp()                                                  *vim.lpeg.Cp()*
+    创建位置捕获。匹配空串并捕获匹配发生的位置。捕获值为数字。
+
+    示例: >lua
+        local I = lpeg.Cp()
+        local function anywhere(p) return lpeg.P({I * p * I + 1 * lpeg.V(1)}) end
+        local match_start, match_end = anywhere('world'):match('hello world!')
+        assert(match_start == 7)
+        assert(match_end == 12)
+<
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Cs({patt})                                            *vim.lpeg.Cs()*
+    创建替换捕获。捕获 subject 中与 `patt` 匹配的子串，并做替换。对 `patt` 内有值的捕获，用捕获值（应为字符串）替换匹配子串。最终捕获值为所有替换后的字符串。
+
+    示例: >lua
+        local function gsub (s, patt, repl)
+          patt = lpeg.P(patt)
+          patt = lpeg.Cs((patt / repl + 1) ^ 0)
+          return lpeg.match(patt, s)
+        end
+        assert(gsub('Hello, xxx!', 'xxx', 'World') == 'Hello, World!')
+<
+
+    参数: ~
+      • {patt}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.Ct({patt})                                            *vim.lpeg.Ct()*
+    创建表捕获。返回一个表，包含该表内所有匿名捕获的值，按整数键从 1 开始。对 `patt` 创建的每个命名捕获组，组的第一个值也会以组名为键放入表中。捕获值仅为该表。
+
+    参数: ~
+      • {patt}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+
+    返回: ~
+        (`vim.lpeg.Capture`)
+
+vim.lpeg.locale({tab})                                     *vim.lpeg.locale()*
+    返回一个表，包含按当前 locale 匹配某些字符类的模式。表字段有 `alnum`、`alpha`、`cntrl`、`digit`、`graph`、`lower`、`print`、`punct`、`space`、`upper`、`xdigit`，每个字段为对应的模式。每个模式匹配属于该类的单字符。若传入参数 `table`，则在该表中创建这些字段并返回。
+
+    示例: >lua
+        lpeg.locale(lpeg)
+        local space = lpeg.space ^ 0
+        local name = lpeg.C(lpeg.alpha ^ 1) * space
+        local sep = lpeg.S(',;') * space
+        local pair = lpeg.Cg(name * '=' * space * name) * sep ^ -1
+        local list = lpeg.Cf(lpeg.Ct('') * pair ^ 0, rawset)
+        local t = list:match('a=b, c = hi; next = pi')
+        assert(t.a == 'b')
+        assert(t.c == 'hi')
+        assert(t.next == 'pi')
+        local locale = lpeg.locale()
+        assert(type(locale.digit) == 'userdata')
+<
+
+    参数: ~
+      • {tab}  (`table?`)
+
+    返回: ~
+        (`vim.lpeg.Locale`)
+
+vim.lpeg.match({pattern}, {subject}, {init}, {...})         *vim.lpeg.match()*
+    用 `pattern` 匹配 `subject` 字符串。匹配成功时，返回 subject 中第一个匹配后字符的索引，或捕获的值（若有捕获）。可选数字参数 `init` 指定匹配起始位置。Lua 库中，负值从末尾计数。与典型模式匹配函数不同，`match` 只做锚定匹配，即只尝试匹配 subject 字符串前缀（在 `init` 位置），不会匹配任意子串。若要在字符串任意位置查找模式，需在 Lua 中写循环或写能匹配任意位置的模式。
+
+    示例: >lua
+        local pattern = lpeg.R('az') ^ 1 * -1
+        assert(pattern:match('hello') == 6)
+        assert(lpeg.match(pattern, 'hello') == 6)
+        assert(pattern:match('1 hello') == nil)
+<
+
+    参数: ~
+      • {pattern}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+      • {subject}  (`string`)
+      • {init}     (`integer?`)
+      • {...}      (`any`)
+
+    返回: ~
+        (`any`) ...
+
+vim.lpeg.P({value})                                             *vim.lpeg.P()*
+    将给定值转换为合适的模式。规则如下：
+    • 若参数为模式，则原样返回。
+    • 若为字符串，则转为匹配该字符串的模式。
+    • 若为非负数 n，则结果为匹配恰好 n 个字符的模式。
+    • 若为负数 -n，则结果为仅当输入剩余字符少于 n 个时匹配的模式：`lpeg.P(-n)` 等价于 `-lpeg.P(n)`（见一元负号操作）。
+    • 若为布尔值，则结果为总是成功或失败的模式（不消耗输入）。
+    • 若为表，则解释为文法（见 Grammars）。
+    • 若为函数，则返回等价于空串上的匹配时捕获的模式。
+
+    参数: ~
+      • {value}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+
+    返回: ~
+        (`vim.lpeg.Pattern`)
+
+vim.lpeg.R({...})                                               *vim.lpeg.R()*
+    返回一个模式，匹配属于给定范围之一的单字符。每个 `range` 为长度为 2 的字符串 `xy`，表示所有码值在 x 和 y 之间（含）的字符。例如，`lpeg.R('09')` 匹配任意数字，`lpeg.R('az', 'AZ')` 匹配任意 ASCII 字母。
+
+    示例: >lua
+        local pattern = lpeg.R('az') ^ 1 * -1
+        assert(pattern:match('hello') == 6)
+<
+
+    参数: ~
+      • {...}  (`string`)
+
+    返回: ~
+        (`vim.lpeg.Pattern`)
+
+vim.lpeg.S({string})                                            *vim.lpeg.S()*
+    返回一个模式，匹配出现在给定字符串中的任意单字符（S 代表 Set）。如 `lpeg.S('+-*/')` 匹配任意算术运算符。注意，若 s 为单字符（即长度为 1 的字符串），则 `lpeg.P(s)`、`lpeg.S(s)`、`lpeg.R(s..s)` 等价。`lpeg.S('')` 和 `lpeg.R()` 都是总是失败的模式。
+
+    参数: ~
+      • {string}  (`string`)
+
+    返回: ~
+        (`vim.lpeg.Pattern`)
+
+vim.lpeg.setmaxstack({max})                           *vim.lpeg.setmaxstack()*
+    设置 LPeg 用于回溯堆栈的最大大小。默认限制为 400。大多数写得好的模式只需很少的回溯层级，因此很少需要更改此限制；如需更大空间，建议先重写模式。极少数有用模式可能会溢出。递归文法、深递归 subject 也可能需要更大限制。
+
+    参数: ~
+      • {max}  (`integer`)
+
+vim.lpeg.type({value})                                       *vim.lpeg.type()*
+    若给定值为模式则返回字符串 `"pattern"`，否则返回 nil。
+
+    参数: ~
+      • {value}  (`vim.lpeg.Pattern|string|integer|boolean|table|function`)
+
+    返回: ~
+        (`"pattern"?`)
+
+vim.lpeg.V({v})                                                 *vim.lpeg.V()*
+    为文法创建非终结符（变量）。该操作为文法创建非终结符，所创建变量引用文法中索引为 `v` 的规则。
+
+    示例: >lua
+        local b = lpeg.P({'(' * ((1 - lpeg.S '()') + lpeg.V(1)) ^ 0 * ')'})
+        assert(b:match('((string))') == 11)
+        assert(b:match('(') == nil)
+<
+
+    参数: ~
+      • {v}  (`boolean|string|number|function|table|thread|userdata|lightuserdata`)
+
+    返回: ~
+        (`vim.lpeg.Pattern`)
+
+vim.lpeg.version()                                        *vim.lpeg.version()*
+    返回 LPeg 运行版本的字符串。
+
+    返回: ~
+        (`string`)
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

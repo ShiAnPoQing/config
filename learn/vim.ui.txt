@@ -1,0 +1,80 @@
+==============================================================================
+Lua 模块: vim.ui                                                    *vim.ui*
+
+vim.ui.input({opts}, {on_confirm})                            *vim.ui.input()*
+    提示用户输入，允许在 `on_confirm` 前进行任意（可能异步）操作。
+
+    示例: >lua
+        vim.ui.input({ prompt = 'Enter value for shiftwidth: ' }, function(input)
+            vim.o.shiftwidth = tonumber(input)
+        end)
+<
+
+    参数: ~
+      • {opts}        (`table?`) 额外选项。见 |input()|
+                      • prompt (string|nil) 提示文本
+                      • default (string|nil) 输入默认值
+                      • completion (string|nil) 指定输入补全类型。支持类型同用户命令的 "-complete=" 参数。见 |:command-completion|
+                      • highlight (function) 用于高亮用户输入的函数
+      • {on_confirm}  (`function`) ((input|nil) -> ()) 用户确认或取消输入后调用。`input` 为用户输入内容（可能为空字符串），取消时为 `nil`
+
+vim.ui.open({path}, {opt})                                     *vim.ui.open()*
+    用系统默认处理程序打开 `path`（macOS 用 `open`，Windows 用 `explorer.exe`，Linux 用 `xdg-open` 等），失败时返回（但不显示）错误信息。
+
+    也可用 `:Open` 调用。                                  *:Open*
+
+    会展开 "~/ " 和环境变量。
+
+    示例: >lua
+        -- 异步
+        vim.ui.open("https://neovim.io/")
+        vim.ui.open("~/path/to/file")
+        -- 用 "osurl" 命令处理路径或 URL
+        vim.ui.open("gh#neovim/neovim!29490", { cmd = { 'osurl' } })
+        -- 同步（等待进程退出）
+        local cmd, err = vim.ui.open("$VIMRUNTIME")
+        if cmd then
+          cmd:wait()
+        end
+<
+
+    参数: ~
+      • {path}  (`string`) 要打开的路径或 URL
+      • {opt}   (`{ cmd?: string[] }?`) 选项
+                • cmd string[]|nil 用于打开路径或 URL 的命令
+
+    返回（多值）: ~
+        (`vim.SystemObj?`) 命令对象，未找到时为 nil
+        (`string?`) 失败时为错误信息，成功时为 nil
+
+    另见: ~
+      • |vim.system()|
+
+vim.ui.select({items}, {opts}, {on_choice})                  *vim.ui.select()*
+    提示用户从列表中选择，允许在 `on_choice` 前进行任意（可能异步）操作。
+
+    示例: >lua
+        vim.ui.select({ 'tabs', 'spaces' }, {
+            prompt = 'Select tabs or spaces:',
+            format_item = function(item)
+                return "I'd like to choose " .. item
+            end,
+        }, function(choice)
+            if choice == 'spaces' then
+                vim.o.expandtab = true
+            else
+                vim.o.expandtab = false
+            end
+        end)
+<
+
+    参数: ~
+      • {items}      (`any[]`) 任意项目
+      • {opts}       (`table`) 额外选项
+                     • prompt (string|nil) 提示文本，默认 `Select one of:`
+                     • format_item (function item -> text) 格式化单个项目的函数，默认 `tostring`
+                     • kind (string|nil) 任意提示字符串，插件可用以推断 items 结构或 select() 调用上下文
+      • {on_choice}  (`fun(item: T?, idx: integer?)`) 用户选择后调用。`idx` 为 `items` 中项目的 1 基索引。用户取消时为 `nil`
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

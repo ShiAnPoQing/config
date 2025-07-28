@@ -1,0 +1,50 @@
+==============================================================================
+Lua 模块: vim.loader                                            *vim.loader*
+
+vim.loader.enable({enable})                              *vim.loader.enable()*
+    警告：此功能为实验性/不稳定。
+
+    启用或禁用实验性 Lua 模块加载器：
+
+    启用（`enable=true`）时：
+    • 覆盖 |loadfile()|
+    • 添加使用字节编译缓存的 Lua 加载器
+    • 添加 libs 加载器
+    • 移除默认 Nvim 加载器
+
+    禁用（`enable=false`）时：
+    • 移除加载器
+    • 添加默认 Nvim 加载器
+
+    参数: ~
+      • {enable}  (`boolean?`) true/nil 启用，false 禁用
+
+vim.loader.find({modname}, {opts})                         *vim.loader.find()*
+    警告：此功能为实验性/不稳定。
+
+    查找指定模块名的 Lua 模块。
+
+    参数: ~
+      • {modname}  (`string`) 模块名，或 `"*"` 查找顶级模块
+      • {opts}     (`table?`) 查找模块的选项:
+                   • {rtp}? (`boolean`, 默认: `true`) 是否在 runtimepath 查找
+                   • {paths}? (`string[]`, 默认: `{}`) 额外查找路径
+                   • {patterns}? (`string[]`, 默认: `{"/init.lua", ".lua"}`) 查找模块时用的模式。模式会加到 Lua 模块基名后。
+                   • {all}? (`boolean`, 默认: `false`) 查找所有匹配项
+
+    返回: ~
+        (`table[]`) 对象列表，字段如下:
+        • {modpath} (`string`) 模块路径
+        • {modname} (`string`) 模块名
+        • {stat}? (`uv.fs_stat.result`) 模块路径的 fs_stat。modname="*" 时不返回
+
+vim.loader.reset({path})                                  *vim.loader.reset()*
+    警告：此功能为实验性/不稳定。
+
+    重置指定路径的缓存，若 path 为 nil 则重置所有路径。
+
+    参数: ~
+      • {path}  (`string?`) 要重置的路径
+
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
