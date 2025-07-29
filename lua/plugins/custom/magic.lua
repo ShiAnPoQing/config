@@ -183,6 +183,30 @@ return {
 				require("custom.plugins.magic.magic-move").magic_line_move("down")
 			end,
 		},
+		{
+			"0o",
+			function()
+				require("custom.plugins.magic.magic-move").magic_word_move({ position = 2, type = "word" })
+			end,
+		},
+		{
+			"0i",
+			function()
+				require("custom.plugins.magic.magic-move").magic_word_move({ position = 1, type = "word" })
+			end,
+		},
+		{
+			"0O",
+			function()
+				require("custom.plugins.magic.magic-move").magic_word_move({ position = 2, type = "WORD" })
+			end,
+		},
+		{
+			"0I",
+			function()
+				require("custom.plugins.magic.magic-move").magic_word_move({ position = 1, type = "WORD" })
+			end,
+		},
 	},
 	config = function(opt)
 		require("custom.plugins.magic").setup()

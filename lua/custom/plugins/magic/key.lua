@@ -13,9 +13,21 @@ local function get_random_key(is_ok)
 	return key
 end
 
-function M:init()
+--- @class KeyOpts
+--- @field clean fun()
+
+--- @param opts KeyOpts
+function M:init(opts)
 	self.ns_ids = {}
 	self.on_keys = nil
+	self.clean = function()
+		opts.clean()
+		for key, value in pairs(self) do
+			if type(value) ~= "function" then
+				self[key] = nil
+			end
+		end
+	end
 	self.one_key = {
 		available_key_count = 0,
 		used_key_count = 0,
@@ -118,6 +130,7 @@ function M:register_one_key(opts, callback)
 		callback = function()
 			self:clear_ns_id()
 			callback()
+			self:clean()
 		end,
 	}
 	self.one_key.used_key_count = self.one_key.used_key_count + 1
@@ -169,6 +182,7 @@ function M:register_two_key(opts, callback)
 			callback = function()
 				self:clear_ns_id()
 				callback()
+				self:clean()
 			end,
 			reset_mark = function()
 				opts.reset_extmark({ ns_id = current.child_ns_id, key = key })
@@ -181,21 +195,21 @@ end
 
 function M:register_three_key(opts) end
 
-function M:on_key(callback)
+function M:on_key()
 	vim.schedule(function()
 		local char = vim.fn.nr2char(vim.fn.getchar())
 		if self.on_keys[char] == nil then
 			self:clear_ns_id()
-			callback()
+			self.clean()
 			return
 		end
 		self.on_keys[char].callback()
 	end)
 end
 
-function M:ready_on_key(callback)
+function M:ready_on_key()
 	self.on_keys = vim.tbl_extend("force", {}, self.one_key.keys, self.two_key.keys, self.three_key.keys)
-	self:on_key(callback)
+	self:on_key()
 end
 
 function M:create_ns_id(name)
@@ -217,14 +231,6 @@ function M:clear_ns_id(opts)
 	for _, ns_id in ipairs(self.ns_ids) do
 		if ns_id ~= opts.filter_id then
 			vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
-		end
-	end
-end
-
-function M:clean()
-	for key, value in pairs(self) do
-		if type(value) ~= "function" then
-			self[key] = nil
 		end
 	end
 end

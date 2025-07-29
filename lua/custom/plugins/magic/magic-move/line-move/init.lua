@@ -18,12 +18,11 @@ function M.magic_line_move(dir)
 		endline = botline
 	end
 
-	local clean = function()
-		Line_hl:del_hl()
-		Key:clean()
-	end
-
-	Key:init()
+	Key:init({
+		clean = function()
+			Line_hl:del_hl()
+		end,
+	})
 	Line_hl:init(startline, endline)
 	Key:compute_key(endline - startline + 1)
 
@@ -31,7 +30,6 @@ function M.magic_line_move(dir)
 		Key:register({
 			callback = function()
 				vim.api.nvim_win_set_cursor(0, { line, cursor[2] })
-				clean()
 			end,
 			one_key = {
 				set_extmark = function(opts)
@@ -62,9 +60,7 @@ function M.magic_line_move(dir)
 		})
 	end
 
-	Key:ready_on_key(function()
-		clean()
-	end)
+	Key:ready_on_key()
 end
 
 return M

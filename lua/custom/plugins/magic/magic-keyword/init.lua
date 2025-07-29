@@ -1,7 +1,7 @@
 local M = {}
 
 local Key = require("custom.plugins.magic.key")
-local Keyword = require("custom.plugins.magic.magic-keyword.keyword")
+local Keyword = require("custom.plugins.magic.keyword")
 local Line_hl = require("custom.plugins.magic.line-highlight")
 
 --- @class MagicKeyword
@@ -16,13 +16,14 @@ function M.magic_keyword(opts)
 	local leftcol = wininfo.leftcol
 	local rightcol = leftcol + wininfo.width - wininfo.textoff
 	local cursor = vim.api.nvim_win_get_cursor(0)
-	local clean = function()
-		Line_hl:del_hl()
-		Key:clean()
-		Keyword:clean()
-	end
 
-	Key:init()
+	Key:init({
+		clean = function()
+			Line_hl:del_hl()
+			Keyword:clean()
+		end,
+	})
+
 	Keyword:init({
 		cursor = cursor,
 		topline = topline,
@@ -39,7 +40,6 @@ function M.magic_keyword(opts)
 		Key:register({
 			callback = function()
 				opts.callback(line, start_col, end_col)
-				clean()
 			end,
 			one_key = {
 				set_extmark = function(opts)
@@ -84,9 +84,7 @@ function M.magic_keyword(opts)
 		})
 	end)
 
-	Key:ready_on_key(function()
-		clean()
-	end)
+	Key:ready_on_key()
 end
 
 return M
