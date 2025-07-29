@@ -14,8 +14,10 @@ function M:set_hl()
 end
 
 function M:del_hl()
-	vim.api.nvim_buf_clear_namespace(0, self.ns_id, 0, -1)
-	self.ns_id = nil
+	if self.ns_id ~= nil then
+		vim.api.nvim_buf_clear_namespace(0, self.ns_id, 0, -1)
+		self.ns_id = nil
+	end
 end
 
 return M

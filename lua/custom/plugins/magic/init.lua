@@ -6,26 +6,31 @@ local function set_hl_group()
 
 	vim.api.nvim_set_hl(0, "CustomMagicNextKey", {
 		fg = "#ff007c",
-		bg = visual_hl.bg,
 	})
 	vim.api.nvim_set_hl(0, "CustomMagicNextKey1", {
 		fg = "#00dfff",
-		bg = visual_hl.bg,
 	})
 	vim.api.nvim_set_hl(0, "CustomMagicNextKey2", {
 		fg = "#2b8db3",
-		bg = visual_hl.bg,
 	})
 	vim.api.nvim_set_hl(0, "CustomMagicUnmatched", {
 		fg = "#666666",
 	})
+	vim.api.nvim_set_hl(0, "CustomMagicNextKeyInVisual", {
+		fg = "#ff007c",
+		bg = visual_hl.bg,
+	})
+	vim.api.nvim_set_hl(0, "CustomMagicNextKey1InVisual", {
+		fg = "#00dfff",
+		bg = visual_hl.bg,
+	})
+	vim.api.nvim_set_hl(0, "CustomMagicNextKey2InVisual", {
+		fg = "#2b8db3",
+		bg = visual_hl.bg,
+	})
 end
 
-function M.setup()
-	set_hl_group()
-end
-
-function M.magic_visual_word(opt)
+function M.magic_visual_keyword(opt)
 	magic_keyword.magic_keyword({
 		keyword = opt.keyword,
 		callback = function(line, start_col, end_col)
@@ -35,7 +40,7 @@ function M.magic_visual_word(opt)
 	})
 end
 
-function M.magic_yank_word(opt)
+function M.magic_yank_keyword(opt)
 	magic_keyword.magic_keyword({
 		keyword = opt.keyword,
 		callback = function(line, start_col, end_col)
@@ -44,7 +49,7 @@ function M.magic_yank_word(opt)
 	})
 end
 
-function M.magic_delete_word(opt)
+function M.magic_delete_keyword(opt)
 	magic_keyword.magic_keyword({
 		keyword = opt.keyword,
 		callback = function(line, start_col, end_col)
@@ -53,7 +58,7 @@ function M.magic_delete_word(opt)
 	})
 end
 
-function M.magic_change_word(opt)
+function M.magic_change_keyword(opt)
 	magic_keyword.magic_keyword({
 		keyword = opt.keyword,
 		callback = function(line, start_col, end_col)
@@ -61,6 +66,10 @@ function M.magic_change_word(opt)
 			vim.api.nvim_feedkeys("gvc", "n", true)
 		end,
 	})
+end
+
+function M.setup()
+	set_hl_group()
 end
 
 return M
