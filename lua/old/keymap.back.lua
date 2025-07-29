@@ -559,7 +559,6 @@
 --    -- select mode delete select text
 --    ["<BS>"] = { "<C-g>s", "s" },
 
-
 -- vnoremap("<A-j>", ":m '>+1<CR>gv=gv")
 -- vnoremap("<A-k>", ":m '<-2<CR>gv=gv")
 

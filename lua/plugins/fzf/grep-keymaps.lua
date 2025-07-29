@@ -4,21 +4,21 @@ return {
     function()
       require("fzf-lua").grep()
     end,
-    desc = "Grep"
+    desc = "Grep",
   },
   {
     "<leader>gw",
     function()
       require("fzf-lua").grep_cword()
     end,
-    desc = "Grep cword"
+    desc = "Grep cword",
   },
   {
     "<leader>gW",
     function()
       require("fzf-lua").grep_cWORD()
     end,
-    desc = "Grep CWORD"
+    desc = "Grep CWORD",
   },
   {
     "<leader>gv",
@@ -26,7 +26,7 @@ return {
       require("fzf-lua").grep_visual()
     end,
     desc = "Grep Visual",
-    mode = "x"
+    mode = "x",
   },
   {
     "<leader>gp",

@@ -12,5 +12,5 @@ return {
       require("fzf-lua").complete_file()
     end,
     desc = "Complete File",
-  }
+  },
 }

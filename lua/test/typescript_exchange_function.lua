@@ -50,8 +50,14 @@ end
 
 local function name_function_to_name_arrow_function(buf, start_row, start_col, end_row, end_col, node)
   local data = get_function_parts(node, buf)
-  set_text(buf, start_row, start_col, end_row, end_col,
-    "const " .. data["name"] .. " = " .. data["parameters"] .. " => " .. data["body"])
+  set_text(
+    buf,
+    start_row,
+    start_col,
+    end_row,
+    end_col,
+    "const " .. data["name"] .. " = " .. data["parameters"] .. " => " .. data["body"]
+  )
 end
 
 function M.test()

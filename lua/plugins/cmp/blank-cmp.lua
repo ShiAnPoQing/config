@@ -1,30 +1,30 @@
 return {
-  'saghen/blink.cmp',
+  "saghen/blink.cmp",
   dependencies = {
     -- 'rafamadriz/friendly-snippets',
     -- { 'L3MON4D3/LuaSnip', version = 'v2.*' },
   },
-  build = 'cargo +nightly build --release',
+  build = "cargo +nightly build --release",
 
   event = { "InsertEnter", "CmdlineEnter" },
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
   opts = {
     appearance = {
-      nerd_font_variant = 'mono'
+      nerd_font_variant = "mono",
     },
     completion = {
       documentation = { auto_show = true, auto_show_delay_ms = 500 },
       menu = {
         draw = {
           columns = { { "kind_icon" }, { "label" }, { "source_name" } },
-        }
+        },
       },
       list = {
         selection = {
           preselect = false,
-          auto_insert = true
-        }
+          auto_insert = true,
+        },
       },
       ghost_text = {
         enabled = false,
@@ -45,18 +45,18 @@ return {
             auto_insert = true,
           },
         },
-        ghost_text = { enabled = false }
+        ghost_text = { enabled = false },
       },
     },
     sources = {
-      default = { 'snippets', 'lsp', 'path', 'buffer' },
+      default = { "snippets", "lsp", "path", "buffer" },
     },
     fuzzy = { implementation = "prefer_rust_with_warning" },
-    snippets = { preset = 'luasnip' },
+    snippets = { preset = "luasnip" },
     signature = { enabled = true },
     keymap = {
       preset = "none",
-      ['<C-c>'] = {
+      ["<C-c>"] = {
         function(cmp)
           if cmp.is_menu_visible() then
             cmp.cancel()
@@ -72,7 +72,7 @@ return {
           else
             cmp.show()
           end
-        end
+        end,
       },
       ["<C-p>"] = {
         function(cmp)
@@ -81,23 +81,22 @@ return {
           else
             cmp.show()
           end
-        end
+        end,
       },
-      ['<CR>'] = { 'accept', 'fallback' },
-      ['<Tab>'] = {
+      ["<CR>"] = { "accept", "fallback" },
+      ["<Tab>"] = {
         "select_and_accept",
         "snippet_forward",
-        "fallback"
+        "fallback",
       },
-      ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
-    }
-
+      ["<S-Tab>"] = { "snippet_backward", "fallback" },
+    },
   },
   opts_extend = { "sources.default" },
   init = function()
-    vim.api.nvim_set_hl(0, 'BlinkCmpSource', {
-      fg = '#50417D', -- 前景色
-      bold = true,    -- 粗体
+    vim.api.nvim_set_hl(0, "BlinkCmpSource", {
+      fg = "#50417D", -- 前景色
+      bold = true, -- 粗体
     })
-  end
+  end,
 }

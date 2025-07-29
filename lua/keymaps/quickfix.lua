@@ -24,11 +24,11 @@ return {
         end
       end
       if qf_exists == true then
-        vim.cmd "cclose"
+        vim.cmd("cclose")
         return
       end
       if not vim.tbl_isempty(vim.fn.getqflist()) then
-        vim.cmd "copen"
+        vim.cmd("copen")
       end
     end,
     "n",

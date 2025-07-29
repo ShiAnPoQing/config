@@ -3,7 +3,7 @@ return {
   dependencies = { "nvim-lua/plenary.nvim" },
   config = function()
     require("todo-comments").setup({
-      signs = true,      -- show icons in the signs column
+      signs = true, -- show icons in the signs column
       sign_priority = 8, -- sign priority
       -- keywords recognized as todo comments
       keywords = {
@@ -28,20 +28,20 @@ return {
           require("todo-comments").jump_next()
         end,
         "n",
-        { desc = "Next todo comment" }
+        { desc = "Next todo comment" },
       },
       ["[t"] = {
         function()
           require("todo-comments").jump_prev()
         end,
         "n",
-        { desc = "Previous todo comment" }
+        { desc = "Previous todo comment" },
       },
       ["<leader>fm"] = {
         "<cmd>TodoTelescope<cr>",
         "n",
-        { desc = "TodoTelescope" }
-      }
+        { desc = "TodoTelescope" },
+      },
     })
 
     -- You can also specify a list of valid jump keywords

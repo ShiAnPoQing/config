@@ -9,7 +9,7 @@ return {
     function()
       vim.opt.cursorline = not vim.opt.cursorline:get()
     end,
-    "n"
+    "n",
   },
   ["<space><space>-"] = {
     function()
@@ -30,7 +30,7 @@ return {
         vim.opt["signcolumn"] = "yes:1"
       end
     end,
-    "n"
+    "n",
   },
   [";nb"] = {
     function()
@@ -40,7 +40,7 @@ return {
         vim.opt.number = true
       end
     end,
-    "n"
+    "n",
   },
   [";rnb"] = {
     function()
@@ -50,7 +50,7 @@ return {
         vim.opt.relativenumber = true
       end
     end,
-    "n"
+    "n",
   },
   [";tnb"] = {
     function()
@@ -65,14 +65,14 @@ return {
         vim.opt.number = true
       end
     end,
-    "n"
+    "n",
   },
   [";cl"] = {
     function()
       color_column = color_column == "72" and "" or "72"
       vim.opt.colorcolumn = color_column
     end,
-    'n'
+    "n",
   },
   [";ig"] = {
     function()

@@ -9,7 +9,19 @@ local M = {}
 local registers = {
   -- '"', -- 未命名寄存器
   -- '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',                -- 数字寄存器
-  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+  "a",
+  "b",
+  "c",
+  "d",
+  "e",
+  "f",
+  "g",
+  "h",
+  "i",
+  "j",
+  "k",
+  "l",
+  "m",
   -- 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', -- 命名寄存器
   -- '-',      -- 小删除寄存器
   -- '*', '+', -- 系统剪贴板寄存器
@@ -26,11 +38,11 @@ local Extmark = {
 
 local Float = {
   buf = nil,
-  win = nil
+  win = nil,
 }
 
 local BufAttch = {
-  had_stop = nil
+  had_stop = nil,
 }
 
 local function get_all_register()
@@ -39,7 +51,7 @@ local function get_all_register()
     local content = vim.fn.getreg(reg)
     table.insert(results, {
       name = reg,
-      content = content
+      content = content,
     })
   end
 
@@ -78,13 +90,13 @@ function Float:create_buf()
     self.buf = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_buf_set_name(self.buf, "[Registers]")
     vim.api.nvim_buf_set_option(self.buf, "buftype", "acwrite")
-    local augroup = vim.api.nvim_create_augroup('RegisterBuffer' .. self.buf, { clear = true })
+    local augroup = vim.api.nvim_create_augroup("RegisterBuffer" .. self.buf, { clear = true })
     vim.api.nvim_create_autocmd("BufWriteCmd", {
       buffer = self.buf,
       group = augroup,
       callback = function()
         print("xing")
-      end
+      end,
     })
   end
 end
@@ -111,7 +123,7 @@ function Extmark:create_extmarks(lines)
       firstline = #lines - #sub_lines,
       lastline = #lines,
       col = 0,
-      name = reg.name
+      name = reg.name,
     }
     -- table.insert(self.extmarks, {
     --   firstline = #lines - #sub_lines,
@@ -132,7 +144,7 @@ function Extmark:set_extmark(mark, buf)
   mark.id = vim.api.nvim_buf_set_extmark(buf, self.ns_id, mark.firstline, 0, {
     virt_lines = {
       {
-        { mark.name .. " 寄存器：", "CursorLineNr" }
+        { mark.name .. " 寄存器：", "CursorLineNr" },
       },
     },
     virt_lines_above = true,
@@ -158,7 +170,7 @@ function Extmark:update_extmarks(count, _i)
 end
 
 function Extmark:iter_extmarks(special, callback)
-  local break_index;
+  local break_index
   for index, regname in ipairs(registers) do
     local mark = self.extmarks[regname]
     if special.condition(mark) then
@@ -201,7 +213,7 @@ function BufAttch:attach(buf, opt)
         return
       end
     end,
-    on_detach = function() end
+    on_detach = function() end,
   })
 end
 
@@ -221,7 +233,7 @@ local function on_add_line(bufnr, add_count, firstline, lastline, new_lastline)
       end)
       mark.lastline = mark.lastline + add_count
       return true
-    end
+    end,
   })
   if break_index then
     Extmark:update_extmarks(add_count, break_index + 1)

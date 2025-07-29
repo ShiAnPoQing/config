@@ -1,7 +1,5 @@
 local M = {}
 
-function W()
-
-end
+function W() end
 
 return M

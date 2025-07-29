@@ -13,7 +13,9 @@ local function is_no_meeting_line_break_condition(cursor_pos, virtcol, lines)
     cursor_in_virt_space_fix_cursor(lines, cursor_pos, virtcol)
     return true
   end
-  if cursor_pos[2] == 0 then return true end
+  if cursor_pos[2] == 0 then
+    return true
+  end
 
   return false
 end
@@ -41,7 +43,7 @@ function Line_break:line_split(line, cursor)
     self.line_break_display_width = line_left_display_width
   end
 
-  local move;
+  local move
   if line_left_display_width < self.line_break_display_width then
     line_left = line_left .. vim.fn.strcharpart(line_right, 0, 1)
     line_right = vim.fn.strcharpart(line_right, 1)
@@ -81,11 +83,15 @@ local function _line_break()
   local cursor_pos = vim.api.nvim_win_get_cursor(0)
   local virtcol = vim.fn.virtcol(".")
   return function(type)
-    if type ~= "line" then return end
+    if type ~= "line" then
+      return
+    end
     local start_mark = vim.api.nvim_buf_get_mark(0, "[")
     local end_mark = vim.api.nvim_buf_get_mark(0, "]")
     local lines = vim.api.nvim_buf_get_lines(0, start_mark[1] - 1, end_mark[1], false)
-    if is_no_meeting_line_break_condition(cursor_pos, virtcol, lines) then return end
+    if is_no_meeting_line_break_condition(cursor_pos, virtcol, lines) then
+      return
+    end
     Line_break:init()
     Line_break:lines_break(lines, cursor_pos)
   end

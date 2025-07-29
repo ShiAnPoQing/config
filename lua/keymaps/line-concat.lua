@@ -11,8 +11,8 @@ return {
       end)
       return "g@"
     end,
-    { "n",        "x" },
-    { expr = true }
+    { "n", "x" },
+    { expr = true },
   },
   ["<space><space>-"] = {
     function()
@@ -23,7 +23,7 @@ return {
       end)
       return "g@_"
     end,
-    { "n",        "x" },
-    { expr = true }
-  }
+    { "n", "x" },
+    { expr = true },
+  },
 }

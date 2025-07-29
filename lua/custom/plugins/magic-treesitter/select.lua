@@ -32,8 +32,6 @@ function M.import()
   end
 end
 
-function M.import_current()
-
-end
+function M.import_current() end
 
 return M

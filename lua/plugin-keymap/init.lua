@@ -20,14 +20,13 @@
 -- }
 -- 6,7,8,9.. same as 1, 2, 3, 4
 
-
 local M = {}
 
 local filetype_set_keymaps = {
   typescript = {},
   javascript = {},
   lua = {},
-  typescriptreact = {}
+  typescriptreact = {},
 }
 
 --- @alias ModeType string|table
@@ -84,7 +83,7 @@ local function hadKeymapSet(mode, keymap)
       mode = mode,
       lhs = keymap.lhs,
       rhs = keymap.rhs,
-      opts = keymap.opts
+      opts = keymap.opts,
     })
     return true
   end
@@ -98,7 +97,6 @@ end
 local function parseModeObj(modeObj, keymap, parseModes)
   local mode = modeObj[1]
   keymap.opts = vim.tbl_extend("keep", modeObj[2] or {}, keymap.opts)
-
 
   if not hadKeymapSet(mode, keymap) then
     parseModes(mode, keymap)
@@ -138,8 +136,7 @@ function M.add(maps)
     local mode = value[2]
     local opts = value[3] or {}
 
-
-    if (isMoreRhs(rhs)) then
+    if isMoreRhs(rhs) then
       addMoreRhsKeymap(lhs, value)
     else
       addOneRhsKeymap(mode, { lhs = lhs, rhs = rhs, opts = opts })
@@ -147,9 +144,7 @@ function M.add(maps)
   end
 end
 
-function M.del(maps)
-
-end
+function M.del(maps) end
 
 local function load_keymaps(base_path, current_path)
   local path = current_path .. "/*.lua"

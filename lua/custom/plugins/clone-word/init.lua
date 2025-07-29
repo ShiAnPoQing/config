@@ -22,7 +22,9 @@ local function should_clone_up(cursor_row)
 end
 
 local function clone_up(count, mode, cursor_row, cursor_col)
-  if not should_clone_up(cursor_row) then return end
+  if not should_clone_up(cursor_row) then
+    return
+  end
 
   if mode == "n" then
     vim.api.nvim_feedkeys("k", "n", true)
@@ -46,7 +48,9 @@ local function clone_up(count, mode, cursor_row, cursor_col)
 end
 
 local function clone_down(count, mode, cursor_row, cursor_col)
-  if not should_clone_down(cursor_row, cursor_col) then return end
+  if not should_clone_down(cursor_row, cursor_col) then
+    return
+  end
   if mode == "n" then
     vim.api.nvim_feedkeys("j", "n", true)
     if cursor_col ~= 0 then

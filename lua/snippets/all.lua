@@ -26,7 +26,6 @@ local parse = require("luasnip.util.parser").parse_snippet
 local ms = ls.multi_snippet
 local k = require("luasnip.nodes.key_indexer").new_key
 
-
 local util = require("luasnip-utils")
 
 local snippets = {
@@ -1078,7 +1077,7 @@ local snippets = {
     trig = "\\([a-zA-Z]+)%[%]%{%}%s",
     regTrig = true,
     wordTrig = false,
-    hidden = true
+    hidden = true,
   }, {
     t("\\"),
     f(function(args, snip)
@@ -1096,7 +1095,7 @@ local snippets = {
     trig = "([a-zA-Z]+)\\",
     regTrig = true,
     wordTrig = false,
-    hidden = true
+    hidden = true,
   }, {
     t("\\"),
     f(function(args, snip)
@@ -1118,11 +1117,11 @@ local snippets = {
 
   s("false", {
     t("true"),
-    i(1)
+    i(1),
   }),
   s("true", {
     t("false"),
-    i(1)
+    i(1),
   }),
 
   -- insert mode register p

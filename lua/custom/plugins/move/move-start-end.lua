@@ -15,11 +15,11 @@ local function set_extmark(up_col, down_col, up_line, down_line)
   local ns_id = vim.api.nvim_create_namespace("test")
   vim.api.nvim_buf_set_extmark(0, ns_id, up_line, 0, {
     virt_text = { { "k", "HopNextKey" } },
-    virt_text_win_col = up_col
+    virt_text_win_col = up_col,
   })
   vim.api.nvim_buf_set_extmark(0, ns_id, down_line, 0, {
     virt_text = { { "j", "HopNextKey" } },
-    virt_text_win_col = down_col
+    virt_text_win_col = down_col,
   })
   vim.cmd.redraw()
 

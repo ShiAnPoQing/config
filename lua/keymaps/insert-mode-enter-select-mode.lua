@@ -1,11 +1,11 @@
 return {
   ["<M-`><M-h>"] = {
     "<Esc>gh",
-    "i"
+    "i",
   },
   ["<M-`><M-l>"] = {
     "<C-o>gh",
-    "i"
+    "i",
   },
   ["<M-`><M-j>"] = {
     "<C-o>vj<C-g>",
@@ -18,28 +18,28 @@ return {
   -- enter block select mode
   ["<M-`><M-`><M-h>"] = {
     "<Esc><C-v><C-G>",
-    "i"
+    "i",
   },
   ["<M-`><M-`><M-l>"] = {
     "<C-o><C-v><C-G>",
-    "i"
+    "i",
   },
   ["<M-`><M-`><M-j>"] = {
     "<C-o><C-v>j<C-G>",
-    "i"
+    "i",
   },
   ["<M-`><M-`><M-k>"] = {
     "<Esc><C-v>k<C-G>",
-    "i"
+    "i",
   },
   -- insert mode into select mode: right word
   ["<M-`><M-o>"] = {
     "<C-o>ve<C-G>",
-    "i"
+    "i",
   },
   -- insert mode into select mode: left word
   ["<M-`><M-i>"] = {
     "<Esc>gh<S-left>",
-    "i"
+    "i",
   },
 }

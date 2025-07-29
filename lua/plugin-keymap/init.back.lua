@@ -20,7 +20,6 @@
 -- }
 -- 6,7,8,9.. same as 1, 2, 3, 4
 
-
 local M = {}
 
 --- @alias ModeType string|table
@@ -66,7 +65,7 @@ local function hadKeymapSet(mode, keymap)
       mode = mode,
       lhs = keymap.lhs,
       rhs = keymap.rhs,
-      opts = keymap.opts
+      opts = keymap.opts,
     })
     return true
   end
@@ -118,7 +117,7 @@ function M.add(maps)
     local mode = value[2]
     local opts = value[3] or {}
 
-    if (isMoreRhs(rhs)) then
+    if isMoreRhs(rhs) then
       addMoreRhsKeymap(lhs, value)
     else
       addOneRhsKeymap(mode, { lhs = lhs, rhs = rhs, opts = opts })
@@ -126,9 +125,7 @@ function M.add(maps)
   end
 end
 
-function M.del(maps)
-
-end
+function M.del(maps) end
 
 local function load_keymaps(base_path, current_path)
   local path = current_path .. "/*.lua"

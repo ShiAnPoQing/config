@@ -34,11 +34,9 @@ return {
       "i",
     },
     {
-      function()
-
-      end,
-      "n"
-    }
+      function() end,
+      "n",
+    },
   },
   -- clone down line with single letter
   ["<M-e>"] = {
@@ -47,10 +45,8 @@ return {
       "i",
     },
     {
-      function()
-
-      end,
-      "n"
-    }
+      function() end,
+      "n",
+    },
   },
 }

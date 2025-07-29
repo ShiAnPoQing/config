@@ -54,13 +54,7 @@ function M.searchManual()
       vim.api.nvim_buf_set_keymap(buf, "n", "<C-k>", "<cmd>lua require('float-win').updataWinPos('k')<cr>", {})
       vim.api.nvim_buf_set_keymap(buf, "n", "<C-h>", "<cmd>lua require('float-win').updataWinPos('h')<cr>", {})
       vim.api.nvim_buf_set_keymap(buf, "n", "<C-l>", "<cmd>lua require('float-win').updataWinPos('l')<cr>", {})
-      vim.api.nvim_buf_set_keymap(
-        buf,
-        "n",
-        ";cs",
-        "<cmd>lua require('search-manual').changeFloatWinSize()<cr>",
-        {}
-      )
+      vim.api.nvim_buf_set_keymap(buf, "n", ";cs", "<cmd>lua require('search-manual').changeFloatWinSize()<cr>", {})
       vim.api.nvim_win_set_option(win, "winhl", "Normal:floatWin")
     end
   end)

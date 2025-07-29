@@ -11,7 +11,7 @@ local function get_new_line(dir, line_to_start, line_to_end, text)
     col_offset = #line_to_end
   else
     new_line = text .. line_to_start .. line_to_end
-    col_offset = - #line_to_start
+    col_offset = -#line_to_start
   end
 
   return new_line, col_offset
@@ -40,8 +40,11 @@ local function select_one_line(dir, text, start_row, start_col, end_row, end_col
   vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, { new_line })
   utils.set_visual_mark(start_row, start_col + col_offset, end_row, end_col + col_offset)
   local exchange_cursor_key = cursor_pos[2] == start_col and "o" or ""
-  vim.api.nvim_feedkeys("gv" .. exchange_cursor_key .. vim.api.nvim_replace_termcodes("<c-g>", true, true, true), "n",
-    false)
+  vim.api.nvim_feedkeys(
+    "gv" .. exchange_cursor_key .. vim.api.nvim_replace_termcodes("<c-g>", true, true, true),
+    "n",
+    false
+  )
 end
 
 --- @param dir Dir
@@ -63,8 +66,11 @@ local function select_more_line(dir, text, start_row, start_col, end_row, end_co
   vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, vim.split(new_line, "\n"))
   utils.set_visual_mark(start_row, start_col + col_offset, end_row, end_col)
   local exchange_cursor_key = cursor_pos[2] == start_col and "o" or ""
-  vim.api.nvim_feedkeys("gv" .. exchange_cursor_key .. vim.api.nvim_replace_termcodes("<c-g>", true, true, true), "n",
-    false)
+  vim.api.nvim_feedkeys(
+    "gv" .. exchange_cursor_key .. vim.api.nvim_replace_termcodes("<c-g>", true, true, true),
+    "n",
+    false
+  )
 end
 
 --- @param dir Dir
@@ -95,7 +101,7 @@ local function select_block_mode_move(dir)
   local first_col_offset
   local last_col_offset
   for i, line in ipairs(lines) do
-    local _start_col;
+    local _start_col
     if i == 1 then
       _start_col = start_col
     else
@@ -120,10 +126,10 @@ local function select_block_mode_move(dir)
       table.insert(new_lines, text .. line_to_start .. line_to_end)
 
       if i == 1 then
-        first_col_offset = - #line_to_start
+        first_col_offset = -#line_to_start
       end
       if i == #lines then
-        last_col_offset = - #line_to_start
+        last_col_offset = -#line_to_start
       end
     end
   end

@@ -4,5 +4,5 @@ return {
   cmd = { "ShowFileInfo" },
   config = function(opt)
     require("custom.plugins.show-file-info").setup()
-  end
+  end,
 }

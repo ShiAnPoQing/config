@@ -21,7 +21,7 @@ local function left_move()
   local virtcol = vim.fn.virtcol(".")
   local line_displaywidth = vim.fn.strdisplaywidth(line)
 
-  local line_to_end_without_space_count = #line:match('(.-)%s*$')
+  local line_to_end_without_space_count = #line:match("(.-)%s*$")
   local start_space_count = #line:match("^%s*")
 
   if virtcol > line_displaywidth then
@@ -65,9 +65,8 @@ local function right_move()
   local virtcol = vim.fn.virtcol(".")
   local line_displaywidth = vim.fn.strdisplaywidth(line)
 
-  local line_to_end_without_space_count = #line:match('(.-)%s*$')
+  local line_to_end_without_space_count = #line:match("(.-)%s*$")
   local start_space_count = #line:match("^%s*")
-
 
   if col < start_space_count then
     vim.api.nvim_feedkeys("^", "n", true)
@@ -92,7 +91,6 @@ local function right_move()
     return
   end
 
-
   if col + 1 >= line_to_end_without_space_count and col + 1 < #line then
     vim.api.nvim_feedkeys("$", "n", true)
     return
@@ -106,11 +104,11 @@ end
 
 local MoveAction = {
   ["left"] = {
-    move = left_move
+    move = left_move,
   },
   ["right"] = {
-    move = right_move
-  }
+    move = right_move,
+  },
 }
 
 --- @param action "left"|"right"

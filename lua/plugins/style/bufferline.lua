@@ -93,7 +93,7 @@ return {
       ["<Tab>f"] = {
         "<cmd>BufferLinePick<cr>",
         "n",
-        { desc = "Pick buffer" }
+        { desc = "Pick buffer" },
       },
       ["<Tab>1"] = { "<Cmd>BufferLineGoToBuffer 1<CR>", "n" },
       ["<Tab>2"] = { "<Cmd>BufferLineGoToBuffer 2<CR>", "n" },

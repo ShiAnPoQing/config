@@ -1,6 +1,5 @@
 local M = {
-  select = {}
+  select = {},
 }
-
 
 return M

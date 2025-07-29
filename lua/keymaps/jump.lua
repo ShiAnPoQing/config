@@ -6,5 +6,5 @@ return {
 
   -- Ctrl-] goto tag
   -- Ctrl-[ goto pre tag
-  ["<C-[>"] = { "<C-t>", "n", { noremap = true } }
+  ["<C-[>"] = { "<C-t>", "n", { noremap = true } },
 }

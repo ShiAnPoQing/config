@@ -16,7 +16,7 @@ return {
       history = true,
       updateevents = "TextChanged,TextChangedI",
       enable_autosnippets = true,
-      cut_selection_keys = '<Tab>',
+      cut_selection_keys = "<Tab>",
     }
 
     ls.config.set_config(options)

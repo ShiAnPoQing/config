@@ -29,7 +29,7 @@ return {
           },
         },
       },
-      "saghen/blink.cmp"
+      "saghen/blink.cmp",
     },
     config = function(_, opts)
       local lspconfig = require("lspconfig")
@@ -64,10 +64,10 @@ return {
             {
               name = "@vue/typescript-plugin",
               location = "/usr/lib/node_modules/@vue/language-server",
-              languages = { "vue", "javascript", "typescript" }
-            }
+              languages = { "vue", "javascript", "typescript" },
+            },
           },
-          filetypes = { "vue", "typescript", "javascript", "javascriptreact", "typescriptreact" }
+          filetypes = { "vue", "typescript", "javascript", "javascriptreact", "typescriptreact" },
         },
         on_attach = function(client, bufnr)
           if client.supports_method("textDocument/codeLens", { bufnr = bufnr }) then
@@ -100,15 +100,14 @@ return {
       })
       lspconfig.volar.setup({
         -- capabilities = capabilities,
-        filetypes = { 'vue' },
+        filetypes = { "vue" },
         -- 'typescript', 'javascript', 'javascriptreact', 'typescriptreact',
         init_options = {
           vue = {
             hybridMode = false,
           },
           typescript = {
-            tsdk =
-            "/home/luoqing/.local/share/nvim/mason/packages/vue-language-server/node_modules/typescript/lib/"
+            tsdk = "/home/luoqing/.local/share/nvim/mason/packages/vue-language-server/node_modules/typescript/lib/",
           },
         },
       })
@@ -164,10 +163,13 @@ return {
                 hint = {
                   enable = true,
                 },
+                format = {
+                  enable = false,
+                },
               },
             },
-          }
-        }
+          },
+        },
       })
       -- lspconfig.tailwindcss.setup {}
       vim.keymap.set("n", ";k", vim.lsp.buf.hover, {})
@@ -182,14 +184,14 @@ return {
     end,
   },
   {
-    'nvimdev/lspsaga.nvim',
+    "nvimdev/lspsaga.nvim",
     lazy = true,
     config = function()
-      require('lspsaga').setup({})
+      require("lspsaga").setup({})
     end,
     dependencies = {
-      'nvim-treesitter/nvim-treesitter', -- optional
-      'nvim-tree/nvim-web-devicons',     -- optional
-    }
-  }
+      "nvim-treesitter/nvim-treesitter", -- optional
+      "nvim-tree/nvim-web-devicons", -- optional
+    },
+  },
 }

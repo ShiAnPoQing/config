@@ -20,7 +20,7 @@ local function get_keymap(keymap)
   local map = {
     count = 0,
     key = key,
-    child = {}
+    child = {},
   }
 
   if child[key] == nil then
@@ -54,7 +54,7 @@ local function fill_keymap_one_key(keymap, extmark)
   keymap.reset_mark = function()
     vim.api.nvim_buf_set_extmark(0, extmark.ns_id, extmark.line, 0, {
       virt_text = { { keymap.key, "HopNextKey" } },
-      virt_text_win_col = extmark.virt_text_win_col
+      virt_text_win_col = extmark.virt_text_win_col,
     })
   end
 end
@@ -64,7 +64,7 @@ local function one_key_set_extmark(parent, line, virt_text_win_col)
   keymap.jump_number = line + 1
   vim.api.nvim_buf_set_extmark(0, parent.ns_id, line, 0, {
     virt_text = { { keymap.key, "HopNextKey" } },
-    virt_text_win_col = virt_text_win_col
+    virt_text_win_col = virt_text_win_col,
   })
 end
 
@@ -72,12 +72,14 @@ end
 local function more_key_set_extmark(param)
   vim.api.nvim_buf_set_extmark(0, param.ns_id, param.line, 0, {
     virt_text = param.virt_text,
-    virt_text_win_col = param.virt_text_win_col
+    virt_text_win_col = param.virt_text_win_col,
   })
 end
 
 local function jump_key_target(keymap)
-  if not keymap then return end
+  if not keymap then
+    return
+  end
 
   if keymap.callback then
     keymap.callback()
@@ -100,9 +102,7 @@ function Up:get_line_count()
   return
 end
 
-function Down:get_line_count()
-
-end
+function Down:get_line_count() end
 
 function Up:one_keys(cursor_row)
   local count = 0
@@ -157,7 +157,7 @@ function Up:more_keys()
         ns_id = keymap.ns_id,
         line = i - 1,
         virt_text = { { keymap.key, "HopNextKey1" }, { child_keymap.key, "HopNextKey2" } },
-        virt_text_win_col = self.virt_col
+        virt_text_win_col = self.virt_col,
       })
     end
   end
@@ -171,7 +171,7 @@ function Down:more_keys()
         ns_id = keymap.ns_id,
         line = i - 1,
         virt_text = { { keymap.key, "HopNextKey1" }, { child_keymap.key, "HopNextKey2" } },
-        virt_text_win_col = self.virt_col
+        virt_text_win_col = self.virt_col,
       })
     end
   end
@@ -186,7 +186,7 @@ function Line:set_hl(topline, botline)
   self.ns_id = vim.api.nvim_create_namespace("line-custom---")
   vim.api.nvim_buf_set_extmark(0, self.ns_id, topline - 1, 0, {
     end_row = botline,
-    hl_group = "HopUnmatched"
+    hl_group = "HopUnmatched",
   })
 end
 
@@ -200,7 +200,7 @@ function Key:init(UD, topline, botline, cursor_row, virt_col)
   self.keymap = {
     count = 0,
     child = {},
-    ns_id = vim.api.nvim_create_namespace("base-custom")
+    ns_id = vim.api.nvim_create_namespace("base-custom"),
   }
   self.more_keymap = {}
   self.virt_col = virt_col
@@ -229,7 +229,7 @@ function Key:get_more_key_keymap(i)
   fill_keymap_one_key(keymap, {
     ns_id = parent.ns_id,
     line = i - 1,
-    virt_text_win_col = self.virt_col
+    virt_text_win_col = self.virt_col,
   })
   return parent, keymap
 end

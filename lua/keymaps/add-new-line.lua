@@ -9,17 +9,17 @@ return {
   ["<space>B"] = { "O<C-u>", { "n" } },
   ["<S-CR>"] = {
     "<C-o>O",
-    "i"
+    "i",
   },
   -- no blank
   ["<C-CR>"] = {
     "<CR><C-U>",
-    "i"
+    "i",
   },
   -- no blank
   ["<C-S-CR>"] = {
     "<C-o>O<C-U>",
-    "i"
+    "i",
   },
   -- add new line below cursor line, and cursor jump new line
   ["<M-b>"] = {
@@ -52,5 +52,5 @@ return {
       end)
     end,
     { "n", "i" },
-  }
+  },
 }

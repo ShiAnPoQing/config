@@ -1,5 +1,5 @@
 return {
   typescript = {
     number = true,
-  }
+  },
 }

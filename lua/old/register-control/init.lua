@@ -9,7 +9,9 @@ local M = {}
 local registers = {
   -- '"', -- 未命名寄存器
   -- '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',                -- 数字寄存器
-  'a', 'b', 'c' --, 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+  "a",
+  "b",
+  "c", --, 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
   -- 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', -- 命名寄存器
   -- '-',      -- 小删除寄存器
   -- '*', '+', -- 系统剪贴板寄存器
@@ -26,11 +28,11 @@ local Extmark = {
 
 local Float = {
   buf = nil,
-  win = nil
+  win = nil,
 }
 
 local BufAttch = {
-  had_stop = nil
+  had_stop = nil,
 }
 
 local OnAddLine = {}
@@ -49,7 +51,7 @@ local function get_all_register()
     local content = vim.fn.getreg(reg)
     table.insert(results, {
       name = reg,
-      content = content
+      content = content,
     })
   end
 
@@ -84,19 +86,21 @@ local function create_float_win(buf)
 end
 
 function Float:create_buf()
-  if self.buf then return end
+  if self.buf then
+    return
+  end
 
   self.buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(self.buf, "[Registers]")
   vim.api.nvim_buf_set_option(self.buf, "buftype", "acwrite")
 
-  local augroup = vim.api.nvim_create_augroup('RegisterBuffer' .. self.buf, { clear = true })
+  local augroup = vim.api.nvim_create_augroup("RegisterBuffer" .. self.buf, { clear = true })
   vim.api.nvim_create_autocmd("BufWriteCmd", {
     buffer = self.buf,
     group = augroup,
     callback = function()
       print("xing")
-    end
+    end,
   })
 
   vim.api.nvim_buf_set_keymap(Float.buf, "n", "p", "", {
@@ -105,7 +109,7 @@ function Float:create_buf()
     callback = function()
       SpecialPaste:head_off()
       vim.api.nvim_feedkeys(vim.v.count1 .. "p", "n", false)
-    end
+    end,
   })
 end
 
@@ -119,7 +123,9 @@ function Float:close()
 end
 
 function Extmark:del_extmark(mark)
-  if not mark then return end
+  if not mark then
+    return
+  end
   vim.api.nvim_buf_del_extmark(Float.buf, Extmark.ns_id, mark.id)
   mark.id = nil
 end
@@ -138,7 +144,7 @@ function Extmark:create_extmarks(lines)
       id = nil,
       row = #lines - #sub_lines,
       name = reg.name,
-      _next = nil
+      _next = nil,
     }
 
     if pre then
@@ -172,8 +178,8 @@ function Extmark:update_following_mark_row(i)
 end
 
 function Extmark:iter_extmarks(start, callback)
-  local break_index;
-  local break_mark;
+  local break_index
+  local break_mark
 
   for i = start, #self.extmarks do
     local mark = self.extmarks[i]
@@ -190,7 +196,7 @@ function Extmark:get_reg_extmark_opt(mark)
   return {
     virt_lines = {
       {
-        { mark.name .. " 寄存器：", "CursorLineNr" }
+        { mark.name .. " 寄存器：", "CursorLineNr" },
       },
     },
     virt_lines_above = true,
@@ -199,7 +205,9 @@ function Extmark:get_reg_extmark_opt(mark)
 end
 
 function Extmark:set_extmark(mark, row)
-  if not mark then return end
+  if not mark then
+    return
+  end
   mark.id = vim.api.nvim_buf_set_extmark(Float.buf, self.ns_id, row, 0, self:get_reg_extmark_opt(mark))
 end
 
@@ -227,7 +235,7 @@ function BufAttch:attach(opt)
         return
       end
     end,
-    on_detach = function() end
+    on_detach = function() end,
   })
 end
 
@@ -242,7 +250,9 @@ end
 function OnAddLine:update(mark, break_index, add_count)
   vim.schedule(function()
     SpecialPaste:repair_extmark_location(mark, add_count)
-    if not break_index then return end
+    if not break_index then
+      return
+    end
     Extmark:update_following_mark_row(break_index)
     update_registers()
   end)
@@ -293,7 +303,9 @@ function OnDelLine:outer_ranger(break_index, firstline, lastline)
   end)
 
   vim.schedule(function()
-    if not break_index then return end
+    if not break_index then
+      return
+    end
 
     if #set_extmark_callbacks > 0 then
       BufAttch:stop()
@@ -313,7 +325,9 @@ end
 
 function OnDelLine:inner_ranger(break_index)
   vim.schedule(function()
-    if not break_index then return end
+    if not break_index then
+      return
+    end
     Extmark:update_following_mark_row(break_index)
     update_registers()
   end)
@@ -388,14 +402,16 @@ function SpecialPaste:head_off()
 
   Extmark:iter_extmarks(1, function(_mark)
     if row == _mark.row then
-      self.isPaste = true;
+      self.isPaste = true
       return true
     end
   end)
 end
 
 function SpecialPaste:repair_extmark_location(mark, add_count)
-  if not self.isPaste then return end
+  if not self.isPaste then
+    return
+  end
   Extmark:del_extmark(mark)
   Extmark:set_extmark(mark, mark.row + add_count)
   self.isPaste = nil

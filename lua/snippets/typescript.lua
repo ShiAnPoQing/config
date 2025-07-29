@@ -30,7 +30,7 @@ local snippets = {
   s("cs", {
     t('<div class="'),
     i(1),
-    t('">')
+    t('">'),
   }),
   s("und", t("undefined")),
   s("imp", {
@@ -77,7 +77,15 @@ local snippets = {
     end)
   ),
   s("fun", {
-    t("function "), i(1), t("("), i(2), t(") {"), t({ "", "\t" }), i(3, "return"), t({ "", "}" }), i(4)
+    t("function "),
+    i(1),
+    t("("),
+    i(2),
+    t(") {"),
+    t({ "", "\t" }),
+    i(3, "return"),
+    t({ "", "}" }),
+    i(4),
   }),
   -- 临时
   -- s("fun", {
@@ -189,7 +197,7 @@ local snippets = {
     t({ "get(target, prop: string) {", "\t" }),
     i(2),
     t({ "", "\t}", "})" }),
-    i(3)
+    i(3),
   }),
   s("ten", {
     t({ ".then(() => {", "" }),

@@ -1,7 +1,5 @@
 local M = {}
 
-function M.move_viewport_bottom()
-
-end
+function M.move_viewport_bottom() end
 
 return M

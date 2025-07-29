@@ -31,17 +31,21 @@ return {
     d(1, function(_, snip)
       if utils.has_TM_SELECTED_TEXT(snip) then
         return sn(nil, {
-          t("~~~"), i(1),
-          t({ "", "" }), i(2, snip.env.TM_SELECTED_TEXT),
-          t({ "", "~~~" })
+          t("~~~"),
+          i(1),
+          t({ "", "" }),
+          i(2, snip.env.TM_SELECTED_TEXT),
+          t({ "", "~~~" }),
         })
       else
         return sn(nil, {
-          t("~~~"), i(1),
-          t({ "", "" }), i(2),
-          t({ "", "~~~" })
+          t("~~~"),
+          i(1),
+          t({ "", "" }),
+          i(2),
+          t({ "", "~~~" }),
         })
       end
     end, {}),
-  })
+  }),
 }

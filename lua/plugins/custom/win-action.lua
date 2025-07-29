@@ -4,5 +4,5 @@ return {
   cmd = { "WindowFocus", "WindowExchange" },
   config = function(opt)
     require("custom.plugins.win-action").setup()
-  end
+  end,
 }

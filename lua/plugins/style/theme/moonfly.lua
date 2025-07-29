@@ -10,6 +10,6 @@ return {
       bg = "#121212",
       -- violet = "#ff74b8",
     })
-    vim.cmd [[colorscheme moonfly]]
-  end
+    vim.cmd([[colorscheme moonfly]])
+  end,
 }

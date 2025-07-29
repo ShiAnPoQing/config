@@ -1,7 +1,7 @@
 local M = {}
 
-local pointer = 0;
-local undo_pointer = 0;
+local pointer = 0
+local undo_pointer = 0
 
 --- @alias HistoryWins table<number>
 --- @alias HistoryList table<number, HistoryWins>
@@ -40,7 +40,7 @@ function M.exchange_pre()
   end
 
   if undo_pointer == 0 then
-    undo_pointer = pointer;
+    undo_pointer = pointer
   end
 
   local history_wins = history_list[pointer]

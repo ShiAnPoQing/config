@@ -17,29 +17,29 @@ function M.move_vertical_center(opt)
 
     vim.api.nvim_feedkeys(center_line_number .. "G", "nx", false)
     vim.api.nvim_feedkeys(count .. "h", "nx", false)
-    local left_virt_col = vim.fn.virtcol('.') - leftcol
+    local left_virt_col = vim.fn.virtcol(".") - leftcol
     vim.api.nvim_feedkeys(2 * count .. "l", "nx", false)
-    local right_virt_col = vim.fn.virtcol('.') - leftcol
+    local right_virt_col = vim.fn.virtcol(".") - leftcol
     vim.api.nvim_feedkeys(count .. "h", "nx", false)
 
     local ns_id = vim.api.nvim_create_namespace("test")
     local up_line_start = center_line_number - count - 1
     vim.api.nvim_buf_set_extmark(0, ns_id, up_line_start, 0, {
       virt_text = { { "k", "HopNextKey" } },
-      virt_text_win_col = virt_col - 1 - leftcol
+      virt_text_win_col = virt_col - 1 - leftcol,
     })
     local down_line_start = center_line_number + count - 1
     vim.api.nvim_buf_set_extmark(0, ns_id, down_line_start, 0, {
       virt_text = { { "j", "HopNextKey" } },
-      virt_text_win_col = virt_col - 1 - leftcol
+      virt_text_win_col = virt_col - 1 - leftcol,
     })
     vim.api.nvim_buf_set_extmark(0, ns_id, center_line_number - 1, 0, {
       virt_text = { { "h", "HopNextKey" } },
-      virt_text_win_col = left_virt_col - 1
+      virt_text_win_col = left_virt_col - 1,
     })
     vim.api.nvim_buf_set_extmark(0, ns_id, center_line_number - 1, 0, {
       virt_text = { { "l", "HopNextKey" } },
-      virt_text_win_col = right_virt_col - 1
+      virt_text_win_col = right_virt_col - 1,
     })
 
     vim.schedule(function()
@@ -48,7 +48,7 @@ function M.move_vertical_center(opt)
         ["j"] = true,
         ["h"] = true,
         ["l"] = true,
-        ["k"] = true
+        ["k"] = true,
       }
       if targets[char] then
         vim.api.nvim_feedkeys(count .. char, "nx", false)

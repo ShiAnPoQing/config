@@ -24,9 +24,8 @@ local postfix = require("luasnip.extras.postfix").postfix
 local types = require("luasnip.util.types")
 local parse = require("luasnip.util.parser").parse_snippet
 
-
 return {
   s(".help", {
-    t("vim:tw=78:ts=8:noet:ft=help:norl:")
+    t("vim:tw=78:ts=8:noet:ft=help:norl:"),
   }),
 }

@@ -20,8 +20,8 @@ function left:get_new_line(line_part)
 end
 
 function right:get_new_line(line_part, longest)
-  local need_blank_count = vim.fn.strdisplaywidth(longest.select_text_right_line) -
-      vim.fn.strdisplaywidth(line_part.select_text_right_line)
+  local need_blank_count = vim.fn.strdisplaywidth(longest.select_text_right_line)
+    - vim.fn.strdisplaywidth(line_part.select_text_right_line)
   if need_blank_count > 0 then
     line_part.select_text_right_line = line_part.select_text_right_line .. string.rep(" ", need_blank_count)
   end
@@ -29,7 +29,7 @@ function right:get_new_line(line_part, longest)
 end
 
 function left:get_mark_offset()
-  return - #self.line_parts[1].select_text_left_line, - #self.line_parts[#self.line_parts].select_text_left_line
+  return -#self.line_parts[1].select_text_left_line, -#self.line_parts[#self.line_parts].select_text_left_line
 end
 
 function right:get_mark_offset()
@@ -54,7 +54,7 @@ function Line:set_line_left_part(i, col)
   local select_text_left_line = self.lines[i]:sub(1, col)
 
   table.insert(self.line_parts, {
-    select_text_left_line = select_text_left_line
+    select_text_left_line = select_text_left_line,
   })
 end
 

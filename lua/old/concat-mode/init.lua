@@ -1,4 +1,4 @@
-local save_maps;
+local save_maps
 local custom_maps = { "<M-j>", "<Esc>", "<C-j>" }
 
 local function createFloatWin(winId, title)
@@ -9,15 +9,15 @@ local function createFloatWin(winId, title)
   vim.api.nvim_buf_set_lines(float_bufnr, 0, -1, false, { message })
   local win_config = {
     relative = "win", -- 相对于指定的窗口
-    win = winId,      -- 指定相对的窗口ID
-    width = 13,       -- 浮动窗口的宽度
-    height = 1,       -- 浮动窗口的高度
+    win = winId, -- 指定相对的窗口ID
+    width = 13, -- 浮动窗口的宽度
+    height = 1, -- 浮动窗口的高度
     row = win_height - 3,
     col = 0,
     style = "minimal", -- 最小化样式
-    noautocmd = true,  -- 禁用自动命令
+    noautocmd = true, -- 禁用自动命令
     focusable = false,
-    border = require("custom.style.float.border").border1
+    border = require("custom.style.float.border").border1,
   }
 
   local float_win = vim.api.nvim_open_win(float_bufnr, false, win_config)
@@ -27,7 +27,6 @@ local function createFloatWin(winId, title)
 
   return float_win
 end
-
 
 return {
   setup = function()
@@ -51,12 +50,12 @@ return {
         ["<M-j>"] = {
           "J",
           "n",
-          { buffer = true }
+          { buffer = true },
         },
         ["<C-j>"] = {
           "gJ",
           "n",
-          { buffer = true }
+          { buffer = true },
         },
         ["<Esc>"] = {
           function()
@@ -72,9 +71,9 @@ return {
             vim.api.nvim_win_close(float_win_id, true)
           end,
           "n",
-          { buffer = true }
-        }
+          { buffer = true },
+        },
       })
     end, {})
-  end
+  end,
 }

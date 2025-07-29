@@ -26,15 +26,21 @@ local parse = require("luasnip.util.parser").parse_snippet
 
 local utils = require("luasnip-utils")
 
-
 local snippets = {
   s("pi", {
-    t("print(vim.inspect("), i(1), t("))")
+    t("print(vim.inspect("),
+    i(1),
+    t("))"),
   }),
   s("fun", {
-    t("function "), i(1), t("("), i(2), t(")"),
-    t({ "", "\t" }), i(3),
-    t({ "", "end" })
+    t("function "),
+    i(1),
+    t("("),
+    i(2),
+    t(")"),
+    t({ "", "\t" }),
+    i(3),
+    t({ "", "end" }),
   }),
   s("lc", {
     t("local "),
@@ -112,17 +118,17 @@ local snippets = {
     c(3, {
       t(""),
       { t({ "", "else", "\t" }), r(1, "elsetext1") },
-      { t({ "", "elseif " }),    i(1),             t({ " then", "\t" }), r(2, "elsetext1") },
+      { t({ "", "elseif " }), i(1), t({ " then", "\t" }), r(2, "elsetext1") },
     }),
     c(4, {
       t(" "),
       { t({ "", "else", "\t" }), r(1, "elsetext2") },
-      { t({ "", "elseif " }),    i(1),             t({ " then", "\t" }), r(2, "elsetext2") },
+      { t({ "", "elseif " }), i(1), t({ " then", "\t" }), r(2, "elsetext2") },
     }),
     c(5, {
       t(" "),
       { t({ "", "else", "\t" }), r(1, "elsetext3") },
-      { t({ "", "elseif " }),    i(1),             t({ " then", "\t" }), r(2, "elsetext3") },
+      { t({ "", "elseif " }), i(1), t({ " then", "\t" }), r(2, "elsetext3") },
     }),
     t({ "", "end" }),
   }, {
@@ -135,9 +141,9 @@ local snippets = {
 
   s("for", {
     c(1, {
-      { t("for "), i(1, "key"),   t(", "),         i(2, "value"), t(" in pairs("), i(3, "table"), t(") do") },
+      { t("for "), i(1, "key"), t(", "), i(2, "value"), t(" in pairs("), i(3, "table"), t(") do") },
       { t("for "), i(1, "value"), t(" in pairs("), i(3, "table"), t(") do") },
-      { t("for "), i(1, "i"),     t(" = "),        i(2, "1"),     t(" , "),        i(3, "10"),    t(" do") },
+      { t("for "), i(1, "i"), t(" = "), i(2, "1"), t(" , "), i(3, "10"), t(" do") },
     }),
     t({ "", "\t" }),
     d(2, function(_, snip)
@@ -229,7 +235,6 @@ return snippets
 --      end
 --    end,
 --    {}),
-
 
 -- s(
 -- 	"fun",

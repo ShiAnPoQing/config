@@ -12,12 +12,12 @@ local WordMoveAction = {
     get_new_line = function(line_to_start, line_to_end, select)
       local mark_offset
       local new_line_to_start = line_to_start:gsub("(%S+)(%s*)$", function(match, space)
-        mark_offset = - #space - #match
+        mark_offset = -#space - #match
         return select .. space .. match
       end)
       local line = new_line_to_start .. line_to_end
       return line, mark_offset
-    end
+    end,
   },
   ["right"] = {
     is_outer_boundary = function(line_to_start, line_to_end)
@@ -35,8 +35,8 @@ local WordMoveAction = {
       end)
       local line = line_to_start .. new_line_to_end
       return line, mark_offset
-    end
-  }
+    end,
+  },
 }
 
 local function select_mode_move(dir)
@@ -63,9 +63,7 @@ local function select_mode_move(dir)
   vim.api.nvim_exec2([[execute "normal! gv\<C-G>"]], {})
 end
 
-local function select_block_mode_move(dir)
-
-end
+local function select_block_mode_move(dir) end
 
 --- @param dir "left"| "right"
 function M.select_word_move(dir)

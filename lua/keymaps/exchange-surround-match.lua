@@ -5,60 +5,60 @@ return {
     function()
       exchange.exchange_surround_match(")")
     end,
-    "n"
+    "n",
   },
   ["cs("] = {
     function()
       exchange.exchange_surround_match("(")
     end,
-    "n"
+    "n",
   },
   ["cs{"] = {
     function()
       exchange.exchange_surround_match("{")
     end,
-    "n"
+    "n",
   },
   ["cs}"] = {
     function()
       exchange.exchange_surround_match("{")
     end,
-    "n"
+    "n",
   },
   ["cs["] = {
     function()
       exchange.exchange_surround_match("[")
     end,
-    "n"
+    "n",
   },
   ["cs]"] = {
     function()
       exchange.exchange_surround_match("[")
     end,
-    "n"
+    "n",
   },
   ["cs<"] = {
     function()
       exchange.exchange_surround_match("<")
     end,
-    "n"
+    "n",
   },
   ["cs>"] = {
     function()
       exchange.exchange_surround_match(">")
     end,
-    "n"
+    "n",
   },
   ["cs'"] = {
     function()
       exchange.exchange_surround_match("'")
     end,
-    "n"
+    "n",
   },
   ['cs"'] = {
     function()
       exchange.exchange_surround_match('"')
     end,
-    "n"
+    "n",
   },
 }

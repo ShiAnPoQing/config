@@ -3,5 +3,5 @@ return {
   name = "word-move",
   config = function(opt)
     require("custom.plugins.word-move").setup()
-  end
+  end,
 }

@@ -3,8 +3,7 @@ return {
   lazy = false,
   enable = true,
   event = "VeryLazy",
-  opts = {
-  },
+  opts = {},
   -- stylua: ignore
   -- keys = {
   --   { "s",     mode = { "n", "x", "o" }, function() require("flash").jump() end,              desc = "Flash" },

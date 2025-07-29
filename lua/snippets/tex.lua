@@ -24,7 +24,6 @@ local postfix = require("luasnip.extras.postfix").postfix
 local types = require("luasnip.util.types")
 local parse = require("luasnip.util.parser").parse_snippet
 
-
 local tex = {}
 tex.in_mathzone = function()
   return vim.fn["vimtex#syntax#in_mathzone"]() == 1
@@ -45,7 +44,7 @@ end
 local function dynamic_node_select_text(args, snip)
   if has_TM_SELECTED_TEXT(snip) then
     return sn(nil, {
-      i(1, snip.env.TM_SELECTED_TEXT)
+      i(1, snip.env.TM_SELECTED_TEXT),
     })
   else
     return sn(nil, { i(1) })
@@ -77,7 +76,7 @@ local function create_tex_command(cmd)
   return {
     t("\\" .. cmd .. "{"),
     d(1, dynamic_node_select_text),
-    t("}")
+    t("}"),
   }
 end
 
@@ -92,8 +91,8 @@ local snippets = {
       local action = snip.captures[3]
       local action_count = snip.captures[4]
 
-      local str_sub_count;
-      local i = 0;
+      local str_sub_count
+      local i = 0
       for _ in string.gmatch(str_sub, "sub") do
         i = i + 1
       end
@@ -105,7 +104,7 @@ local snippets = {
       end
       local sub = string.rep("sub", str_sub_count)
       return "\\" .. sub .. "section{" .. m2 .. "}"
-    end)
+    end),
   }),
 
   s("beg", {
@@ -127,7 +126,6 @@ local snippets = {
     t("}"),
     i(3),
   }),
-
 
   s("inpt", {
     d(1, function(_, snip)
@@ -167,7 +165,6 @@ local snippets = {
       })
     end),
   }),
-
 
   s("alg", {
     t("\\begin{"),
@@ -467,7 +464,6 @@ local snippets = {
     show_condition = tex.in_mathzone,
   }),
 
-
   s({
     trig = "lr([{%[%(|<]?)([}%)>%]|]?)",
     regTrig = true,
@@ -562,7 +558,6 @@ local snippets = {
     --   -- end
     -- end,
   }),
-
 
   s({
     trig = "(%l%l)(%l?%l?)",
@@ -668,7 +663,7 @@ local snippets = {
     i(1),
   }, {
     condition = function(line, trig, cap)
-      local before_char = string.sub(line, - #trig - 1)
+      local before_char = string.sub(line, -#trig - 1)
       if before_char ~= "\\sin" then
         return true
       end
@@ -685,7 +680,7 @@ local snippets = {
     i(1),
   }, {
     condition = function(line, trig, cap)
-      local before_char = string.sub(line, - #trig - 1)
+      local before_char = string.sub(line, -#trig - 1)
       if before_char ~= "\\cos" then
         return true
       end
@@ -702,7 +697,7 @@ local snippets = {
     i(1),
   }, {
     condition = function(line, trig, cap)
-      local before_char = string.sub(line, - #trig - 1)
+      local before_char = string.sub(line, -#trig - 1)
       if before_char ~= "\\tan" then
         return true
       end
@@ -1148,8 +1143,6 @@ local snippets = {
     i(2),
   }),
 
-
-
   s("par", {
     t("\\par"),
     i(1),
@@ -1337,7 +1330,6 @@ local snippets = {
     end,
   }),
 
-
   s("cubox", {
     t("\\node[below left="),
     i(1, "1cm"),
@@ -1401,22 +1393,20 @@ local snippets = {
       end
     end,
   }),
-  s('||', {
-    t('| '),
-    d(1,
-      function(_, snip)
-        if next(snip.env.TM_SELECTED_TEXT) == nil then
-          return sn(nil, { i(1, 'Text') })
-        else
-          return sn(1, {
-            i(1, snip.env.TM_SELECTED_TEXT)
-          })
-        end
-      end,
-      {}),
-    t(' |')
+  s("||", {
+    t("| "),
+    d(1, function(_, snip)
+      if next(snip.env.TM_SELECTED_TEXT) == nil then
+        return sn(nil, { i(1, "Text") })
+      else
+        return sn(1, {
+          i(1, snip.env.TM_SELECTED_TEXT),
+        })
+      end
+    end, {}),
+    t(" |"),
   }, {
-    condition = tex.in_text
+    condition = tex.in_text,
   }),
 
   s({
@@ -1424,23 +1414,22 @@ local snippets = {
     regTrig = true,
     wordTrig = false,
   }, {
-    d(1,
-      function(_, snip)
-        local select_text = snip.env.TM_SELECTED_TEXT
-        if type(select_text) == "table" and next(select_text) ~= nil then
-          return sn(nil, {
-            t("\\verb|"),
-            i(1, select_text),
-            t("|"),
-          })
-        else
-          return sn(nil, {
-            t("\\verb|"),
-            i(1),
-            t("|"),
-          })
-        end
-      end)
+    d(1, function(_, snip)
+      local select_text = snip.env.TM_SELECTED_TEXT
+      if type(select_text) == "table" and next(select_text) ~= nil then
+        return sn(nil, {
+          t("\\verb|"),
+          i(1, select_text),
+          t("|"),
+        })
+      else
+        return sn(nil, {
+          t("\\verb|"),
+          i(1),
+          t("|"),
+        })
+      end
+    end),
   }),
 
   s({
@@ -1452,11 +1441,11 @@ local snippets = {
     d(1, function(_, snip)
       if hasCapture(snip.captures) then
         return sn(nil, {
-          i(1, snip.captures[1])
+          i(1, snip.captures[1]),
         })
       end
       return sn(nil, {
-        i(1, "env")
+        i(1, "env"),
       })
     end),
     t({ "}", "" }),
@@ -1469,13 +1458,13 @@ local snippets = {
       end
       return sn(nil, {
         t("\t"),
-        i(1, "Text")
+        i(1, "Text"),
       })
     end, {}),
     t({ "", "\\end{" }),
     extras.rep(1),
     t("}"),
-    i(3)
+    i(3),
   }),
   s("vs", create_tex_command("vspace")),
   s("hs", create_tex_command("hspace")),
@@ -1554,12 +1543,12 @@ local snippets = {
   }),
   s("ltx", {
     t("\\LaTeX"),
-    i(0)
+    i(0),
   }),
   s("tx", {
     t("\\TeX"),
-    i(0)
-  })
+    i(0),
+  }),
 }
 
 return snippets

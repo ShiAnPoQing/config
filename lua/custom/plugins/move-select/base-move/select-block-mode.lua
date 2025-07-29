@@ -34,17 +34,21 @@ end
 function left:get_new_line(part)
   local select_text_left_line_char_len = vim.fn.strcharlen(part.select_text_left_line)
   local char_len = vim.fn.strcharlen(part.char)
-  return vim.fn.strcharpart(part.select_text_left_line, 0, select_text_left_line_char_len - char_len) ..
-      part.select_text .. part.char .. part.select_text_right_line
+  return vim.fn.strcharpart(part.select_text_left_line, 0, select_text_left_line_char_len - char_len)
+    .. part.select_text
+    .. part.char
+    .. part.select_text_right_line
 end
 
 function right:get_new_line(part)
-  return part.select_text_left_line ..
-      part.char .. part.select_text .. vim.fn.strcharpart(part.select_text_right_line, vim.fn.strcharlen(part.char))
+  return part.select_text_left_line
+    .. part.char
+    .. part.select_text
+    .. vim.fn.strcharpart(part.select_text_right_line, vim.fn.strcharlen(part.char))
 end
 
 function left:get_mark_offset()
-  return - #self.line_parts[1].char, - #self.line_parts[#self.line_parts].char
+  return -#self.line_parts[1].char, -#self.line_parts[#self.line_parts].char
 end
 
 function right:get_mark_offset()
@@ -82,11 +86,15 @@ function Line:set_line_right_part(i, select_text)
 end
 
 function Line:revise_chars()
-  if self.stop == true then return end
+  if self.stop == true then
+    return
+  end
 
   self.revise_char_count = 0
   for _, part in ipairs(self.line_parts) do
-    if self.stop == true then break end
+    if self.stop == true then
+      break
+    end
     self:revise_char(1, part)
   end
 
@@ -111,7 +119,9 @@ function Line:revise_char(col, line_part)
 end
 
 function Line:line_concat()
-  if self.stop == true then return end
+  if self.stop == true then
+    return
+  end
 
   for _, part in ipairs(self.line_parts) do
     table.insert(self.new_lines, Line.Action:get_new_line(part))
@@ -133,8 +143,7 @@ function Line:set_lines(start_row, start_col, end_row, end_col, cursor_pos)
   vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, self.new_lines)
 
   local start_col_offset, end_col_offset = self.Action:get_mark_offset()
-  utils.set_visual_mark(start_row, start_col + start_col_offset, end_row,
-    end_col + end_col_offset)
+  utils.set_visual_mark(start_row, start_col + start_col_offset, end_row, end_col + end_col_offset)
   select(cursor_pos, start_col)
 end
 
@@ -171,8 +180,7 @@ function M.select_block_mode_move(dir)
   vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, Line.new_lines)
 
   local start_col_offset, end_col_offset = Line.Action:get_mark_offset()
-  utils.set_visual_mark(start_row, start_col + start_col_offset, end_row,
-    end_col + end_col_offset)
+  utils.set_visual_mark(start_row, start_col + start_col_offset, end_row, end_col + end_col_offset)
   select(cursor_pos, start_col)
 end
 

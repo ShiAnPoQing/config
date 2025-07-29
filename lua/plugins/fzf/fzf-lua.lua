@@ -49,77 +49,77 @@ local hot = {
     function()
       require("fzf-lua").files()
     end,
-    desc = "Find Files in Current Working Directory"
+    desc = "Find Files in Current Working Directory",
   },
   {
     "<leader>fb",
     function()
       require("fzf-lua").buffers()
     end,
-    desc = "[F]ind [B]uffers"
+    desc = "[F]ind [B]uffers",
   },
   {
     "<leader>fll",
     function()
       require("fzf-lua").lines()
     end,
-    desc = "Fzf Lines"
+    desc = "Fzf Lines",
   },
   {
     "<leader>flb",
     function()
       require("fzf-lua").blines()
     end,
-    desc = "Fzf Lines Buffer"
+    desc = "Fzf Lines Buffer",
   },
   {
     "<leader>flo",
     function()
       require("fzf-lua").loclist()
     end,
-    desc = "Fzf Loclist"
+    desc = "Fzf Loclist",
   },
   {
     "<leader>fts",
     function()
       require("fzf-lua").treesitter()
     end,
-    desc = "Fzf Treesitter"
+    desc = "Fzf Treesitter",
   },
   {
     "<leader>ftb",
     function()
       require("fzf-lua").tabs()
     end,
-    desc = "Fzf Tabs"
+    desc = "Fzf Tabs",
   },
   {
     "<leader>fag",
     function()
       require("fzf-lua").args()
     end,
-    desc = "Fzf Args"
+    desc = "Fzf Args",
   },
   {
     "<leader>fac",
     function()
       require("fzf-lua").autocmds()
     end,
-    desc = "Fzf Autocmds"
+    desc = "Fzf Autocmds",
   },
   {
     "<leader>fo",
     function()
       require("fzf-lua").oldfiles()
     end,
-    desc = "Fzf Old Files"
+    desc = "Fzf Old Files",
   },
   {
     "<leader>fq",
     function()
       require("fzf-lua").quickfix()
     end,
-    desc = "Fzf Quickfix"
+    desc = "Fzf Quickfix",
   },
   {
     "<leader>fm",
@@ -231,5 +231,5 @@ return {
     vim.api.nvim_create_user_command("FzfFileTypes", function()
       fzf.filetypes()
     end, {})
-  end
+  end,
 }

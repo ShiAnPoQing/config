@@ -4,5 +4,5 @@ return {
   cmd = { "RegisterOpen" },
   config = function(opt)
     require("custom.plugins.register-control").setup()
-  end
+  end,
 }

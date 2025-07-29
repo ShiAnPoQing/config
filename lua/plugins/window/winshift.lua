@@ -1,5 +1,5 @@
 return {
-  'sindrets/winshift.nvim',
+  "sindrets/winshift.nvim",
   config = function()
     -- Lua
     require("winshift").setup({
@@ -60,5 +60,5 @@ return {
         })
       end,
     })
-  end
+  end,
 }

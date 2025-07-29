@@ -5,7 +5,9 @@ function M.line_concat()
   local cursor_pos = vim.api.nvim_win_get_cursor(0)
 
   _G.custom_line_concat = function(type)
-    if type ~= "line" then return end
+    if type ~= "line" then
+      return
+    end
     local start_mark = vim.api.nvim_buf_get_mark(0, "[")
     local end_mark = vim.api.nvim_buf_get_mark(0, "]")
 

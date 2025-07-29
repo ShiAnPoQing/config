@@ -3,11 +3,13 @@ local M = {
 }
 
 local queue = {}
-local hadStart = false;
-local hadFixed = false;
+local hadStart = false
+local hadFixed = false
 
 local function processQueue()
-  if not queue then return end
+  if not queue then
+    return
+  end
   for _, callback in ipairs(queue) do
     callback()
   end
@@ -34,7 +36,9 @@ function M.Repeat()
 end
 
 function M.Record(callback)
-  if hadFixed then return end
+  if hadFixed then
+    return
+  end
 
   M.currentRepeat = callback
   if hadStart then

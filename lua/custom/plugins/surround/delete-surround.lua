@@ -1,7 +1,9 @@
 local M = {}
 
 local function _delete_surround_match(count, mc)
-  if count == 0 then return end
+  if count == 0 then
+    return
+  end
 
   local start_pos = vim.api.nvim_win_get_cursor(0)
 

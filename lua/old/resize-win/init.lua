@@ -9,9 +9,11 @@ function Tree:init()
   local layout = vim.fn.winlayout()
 
   self.tree = { type = "root", nodes = {} }
-  self.queue = { function()
-    self:build_tree(self.tree, { layout })
-  end }
+  self.queue = {
+    function()
+      self:build_tree(self.tree, { layout })
+    end,
+  }
   self.current_win = vim.api.nvim_get_current_win()
 end
 
@@ -21,7 +23,7 @@ function Tree:build_tree(parent, layouts)
       type = layout[1],
       nodes = {},
       parent = parent,
-      index = #parent.nodes + 1
+      index = #parent.nodes + 1,
     }
     table.insert(parent.nodes, child)
     if type(layout[2]) == "number" then
@@ -153,7 +155,7 @@ function M.resize_win(opt)
     local left = find_left(Tree.find)
     if left then
       local winnr = vim.fn.win_id2win(left.win)
-      vim.cmd('vertical ' .. winnr .. "resize -3")
+      vim.cmd("vertical " .. winnr .. "resize -3")
     else
       vim.cmd("vertical resize -3")
     end

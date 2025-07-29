@@ -55,7 +55,7 @@ return {
           function()
             builtin.current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
               previewer = false,
-              height = 10
+              height = 10,
             }))
           end,
           "n",
@@ -66,10 +66,12 @@ return {
         ["<leader>fb"] = {
           function()
             builtin.buffers({
-              { only_cwd = vim.fn.haslocaldir() == 1 }
+              { only_cwd = vim.fn.haslocaldir() == 1 },
             })
-          end
-          , "n", { desc = "[F]ind [B]uffers" } },
+          end,
+          "n",
+          { desc = "[F]ind [B]uffers" },
+        },
         ["<leader>fh"] = { builtin.help_tags, "n" },
         ["<leader>fq"] = { builtin.quickfix, "n" },
         ["<leader>fsh"] = { builtin.search_history, "n" },

@@ -15,7 +15,7 @@ local function get_new_line(dir, line_to_start, line_to_end, text)
     col_offset = #line_to_end
   else
     new_line = text .. line_to_start .. line_to_end
-    col_offset = - #line_to_start
+    col_offset = -#line_to_start
   end
 
   return new_line, col_offset

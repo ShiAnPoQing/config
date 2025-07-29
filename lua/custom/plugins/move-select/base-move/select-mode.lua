@@ -3,8 +3,8 @@ local utils = require("utils.mark")
 local M = {}
 
 local function get_new_line(dir, line_to_start, line_to_end, text)
-  local col_offset;
-  local new_line;
+  local col_offset
+  local new_line
 
   if dir == "right" then
     local line_to_end_part1 = vim.fn.strcharpart(line_to_end, 0, 1)
@@ -16,7 +16,7 @@ local function get_new_line(dir, line_to_start, line_to_end, text)
     local line_to_start_part2 = vim.fn.strcharpart(line_to_start_reverse, 0, 1)
     local line_to_start_part1 = vim.fn.reverse(vim.fn.strcharpart(line_to_start_reverse, 1))
     new_line = line_to_start_part1 .. text .. line_to_start_part2 .. line_to_end
-    col_offset = - #line_to_start_part2
+    col_offset = -#line_to_start_part2
   end
 
   return new_line, col_offset
@@ -24,8 +24,7 @@ end
 
 local function reverse_cursor(cursor_pos, start_col)
   local key = cursor_pos[2] == start_col and "o" or ""
-  vim.api.nvim_feedkeys("gv" .. key .. vim.api.nvim_replace_termcodes("<c-g>", true, true, true), "n",
-    false)
+  vim.api.nvim_feedkeys("gv" .. key .. vim.api.nvim_replace_termcodes("<c-g>", true, true, true), "n", false)
 end
 
 local function select_one_line(dir, text, start_row, start_col, end_row, end_col, cursor_pos)

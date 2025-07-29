@@ -4,11 +4,11 @@ local function create_treesitter_textobject_keymap(opts)
       require("custom.plugins.treesitter-query.treesitter-textobject").textobject({
         language = opts.language,
         scm = "mytextobjects",
-        query = opts.query
+        query = opts.query,
       })
     end,
-    { "o",                     "x" },
-    { filetype = opts.filetype }
+    { "o", "x" },
+    { filetype = opts.filetype },
   }
 end
 
@@ -17,18 +17,18 @@ local function create_js_treesitter_textobject_keymap(query)
     create_treesitter_textobject_keymap({
       language = "tsx",
       query = query,
-      filetype = "typescriptreact"
+      filetype = "typescriptreact",
     }),
     create_treesitter_textobject_keymap({
       language = "typescript",
       query = query,
-      filetype = "typescript"
+      filetype = "typescript",
     }),
     create_treesitter_textobject_keymap({
       language = "javascript",
       query = query,
-      filetype = "javascript"
-    })
+      filetype = "javascript",
+    }),
   }
 end
 
@@ -87,5 +87,5 @@ return {
   ["<space>tv"] = create_js_treesitter_textobject_keymap("type_value"),
   ["<space>tin"] = create_js_treesitter_textobject_keymap("interface_name"),
   ["<space>tiv"] = create_js_treesitter_textobject_keymap("interface_body"),
-  ["<space>af"] = create_js_treesitter_textobject_keymap("arrow_function")
+  ["<space>af"] = create_js_treesitter_textobject_keymap("arrow_function"),
 }

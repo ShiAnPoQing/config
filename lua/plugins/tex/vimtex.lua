@@ -28,7 +28,7 @@ return {
 
     vim.g.vimtex_text_obj_enabled = 1
 
-    vim.g.tex_conceal = 'abdmg'
+    vim.g.tex_conceal = "abdmg"
 
     vim.g.vimtex_flavor = "latex"
 
@@ -71,7 +71,6 @@ return {
 
     vim.g.vimtex_syntax_enabled = 1
 
-
     vim.g.vimtex_indent_ignored_envs = {
       "docunment",
       "FVerbminipage",
@@ -87,7 +86,7 @@ return {
     }
 
     vim.g.vimtex_syntax_custom_cmds = {
-      { name = 'vspace', concealchar = 'M', arg = false, arggreedy = 1 }
+      { name = "vspace", concealchar = "M", arg = false, arggreedy = 1 },
     }
     --
     -- Vimtex 格式化不影响注释
@@ -185,7 +184,7 @@ return {
       [";vv"] = {
         "<cmd>VimtexView<cr>",
         "n",
-        { desc = "[V]imtex [V]iew" }
+        { desc = "[V]imtex [V]iew" },
       },
       [";vc"] = {
         function()
@@ -193,7 +192,7 @@ return {
           vim.cmd("VimtexCompile")
         end,
         "n",
-        { desc = "[V]imtex [C]ompile" }
+        { desc = "[V]imtex [C]ompile" },
       },
       ["wc"] = { "<Plug>(vimtex-ac)", { "x", "o" } },
       ["we"] = { "<Plug>(vimtex-ae)", { "x", "o" } },

@@ -2,16 +2,10 @@ local M = {}
 
 M.state = nil
 
-function M.update_float()
+function M.update_float() end
 
-end
+function M.start() end
 
-function M.start()
-
-end
-
-function M._end()
-
-end
+function M._end() end
 
 return M

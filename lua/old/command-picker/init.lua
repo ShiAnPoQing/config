@@ -51,7 +51,7 @@ function M.picker()
     height = list_height,
     row = row + input_height + 2 + 1,
     col = col + 1,
-    focusable = false
+    focusable = false,
   })
   local input_buf, input_win = create_flot_win({
     title = " SEARCH ",
@@ -62,8 +62,8 @@ function M.picker()
     col = col + 1,
   })
 
-  vim.api.nvim_buf_set_option(input_buf, 'buftype', 'prompt')
-  vim.fn.prompt_setprompt(input_buf, '> ')
+  vim.api.nvim_buf_set_option(input_buf, "buftype", "prompt")
+  vim.fn.prompt_setprompt(input_buf, "> ")
 
   vim.keymap.set("i", "<Esc>", function()
     vim.api.nvim_win_close(input_win, true)
@@ -72,7 +72,7 @@ function M.picker()
 
   -- 自动聚焦输入框
   vim.api.nvim_set_current_win(input_win)
-  vim.api.nvim_feedkeys('i', 'n', false)
+  vim.api.nvim_feedkeys("i", "n", false)
 end
 
 return M

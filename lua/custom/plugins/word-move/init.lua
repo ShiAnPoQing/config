@@ -5,7 +5,7 @@ local M = {}
 local function space_o()
   local mode = vim.api.nvim_get_mode().mode
   local count = vim.v.count1
-  if mode == 'no' then
+  if mode == "no" then
     vim.api.nvim_exec2(string.format([[execute "normal! v%dw"]], count), {})
     -- vim.api.nvim_exec2(string.format([[execute "normal! v%dwh"]], count), {})
     return
@@ -39,7 +39,7 @@ end
 local function space_O()
   local mode = vim.api.nvim_get_mode().mode
   local count = vim.v.count1
-  if mode == 'no' then
+  if mode == "no" then
     -- vim.api.nvim_exec2(string.format([[execute "normal! v%dWh"]], count), {})
     vim.api.nvim_exec2(string.format([[execute "normal! v%dW"]], count), {})
     return

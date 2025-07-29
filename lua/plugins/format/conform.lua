@@ -1,8 +1,7 @@
 return {
   "stevearc/conform.nvim",
   enabled = true,
-  opts = {
-  },
+  opts = {},
   config = function()
     local conform = require("conform")
     conform.setup({
@@ -23,7 +22,7 @@ return {
         python = { "isort", "black" },
         -- json = { "jq" },
         vue = { "prettier" },
-        tex = { "latexindent" }
+        tex = { "latexindent" },
       },
 
       format_on_save = {
@@ -33,14 +32,14 @@ return {
       },
     })
     conform.formatters.latexindent = {
-      prepend_args = { '-l', vim.fn.expand('~/.config/latexindent/indentconfig.yaml'), '-m' },
+      prepend_args = { "-l", vim.fn.expand("~/.config/latexindent/indentconfig.yaml"), "-m" },
     }
     require("plugin-keymap").add({
       ["<leader>="] = {
         function()
           conform.format({ async = true, lsp_fallback = true })
         end,
-        { "n",                               "x" },
+        { "n", "x" },
         { desc = "Format the current buffer" },
       },
     })

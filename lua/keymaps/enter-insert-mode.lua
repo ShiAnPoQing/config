@@ -87,10 +87,10 @@ local function E()
 end
 
 return {
-  ["w"] = { w, "n", { desc = "left enter insert mode" }, },
-  ["e"] = { e, "n", { desc = "right enter insert mode" }, },
-  ["W"] = { W, { "n", "x" }, { desc = "start enter insert mode" }, },
-  ["E"] = { E, { "n", "x" }, { desc = "end enter insert mode" }, },
+  ["w"] = { w, "n", { desc = "left enter insert mode" } },
+  ["e"] = { e, "n", { desc = "right enter insert mode" } },
+  ["W"] = { W, { "n", "x" }, { desc = "start enter insert mode" } },
+  ["E"] = { E, { "n", "x" }, { desc = "end enter insert mode" } },
   -- normal mode cursor move: Home(without space)
   ["<space>w"] = {
     {
@@ -142,31 +142,30 @@ return {
   },
   -- normal mode into insert mode: ei
   ["<M-o>"] = {
-    { "<Esc>ea",   { "i" } },
+    { "<Esc>ea", { "i" } },
     { "<S-right>", { "c" } },
-    { "ea",        { "n" } },
-    { "<C-right>", "t" }
+    { "ea", { "n" } },
+    { "<C-right>", "t" },
   },
   -- normal mode into insert mode: Ei
   ["<M-S-o>"] = {
     { "<Esc>Ea", { "i" } },
-    { "Ea",      { "n" } },
+    { "Ea", { "n" } },
   },
   -- normal mode into insert mode: bi
   ["<M-i>"] = {
-    { "<Esc>bi",  { "i" } },
+    { "<Esc>bi", { "i" } },
     { "<S-left>", { "c" } },
-    { "bi",       { "n" } },
-    { "<C-left>", "t" }
+    { "bi", { "n" } },
+    { "<C-left>", "t" },
   },
   -- normal mode into insert mode: Bi
   ["<M-S-i>"] = {
     { "<Esc>Bi", { "i" } },
-    { "Bi",      { "n" } },
+    { "Bi", { "n" } },
   },
   -- normal mode into insert mode: cursor at screen left
   ["aw"] = { "<Esc>g0i", { "n" } },
   -- normal mode into insert mode: cursor at screen right
   ["ae"] = { "<Esc>g$i", { "n" } },
-
 }

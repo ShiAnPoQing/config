@@ -4,7 +4,7 @@ local Feedkey = require("utils.feedkey")
 local M = {}
 
 local S = {
-  line_match_marks = {}
+  line_match_marks = {},
 }
 
 function S:collect(start_mark, end_mark)
@@ -41,11 +41,9 @@ function S:exchange(start_match, end_match)
       local type = mark_col_info[1]
       local col = mark_col_info[2]
       if type == "start" then
-        vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col + 1,
-          { start_match })
+        vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col + 1, { start_match })
       else
-        vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col + 1,
-          { end_match })
+        vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col + 1, { end_match })
       end
     end
   end
@@ -62,7 +60,7 @@ function S:line_match_mark_sort()
 end
 
 function S:get_marks(count, mc, callback)
-  local after;
+  local after
 
   local function get_mark(_count)
     if _count == 0 then
@@ -85,7 +83,7 @@ function S:get_marks(count, mc, callback)
   return {
     after = function(cb)
       after = cb
-    end
+    end,
   }
 end
 

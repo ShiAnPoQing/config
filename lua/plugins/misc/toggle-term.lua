@@ -2,7 +2,7 @@ return {
   "akinsho/toggleterm.nvim",
   version = "*",
   keys = {
-    { ";tm", "<cmd>ToggleTerm<cr>", desc = "Toggle Term" }
+    { ";tm", "<cmd>ToggleTerm<cr>", desc = "Toggle Term" },
   },
   config = function()
     require("toggleterm").setup({

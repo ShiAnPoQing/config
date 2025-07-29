@@ -46,7 +46,6 @@
 -- }
 --
 
-
 local M = {}
 
 local function visual(start_row, start_col, end_row, end_col)
@@ -57,10 +56,9 @@ local function visual(start_row, start_col, end_row, end_col)
   end
 
   vim.api.nvim_win_set_cursor(0, { start_row + 1, start_col })
-  vim.cmd('normal! v')
+  vim.cmd("normal! v")
   vim.api.nvim_win_set_cursor(0, { end_row + 1, end_col - 1 })
 end
-
 
 --- @class opts
 --- @field language string

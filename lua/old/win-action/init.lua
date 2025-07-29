@@ -81,12 +81,12 @@ local function setKeymapForExchange(bufnr, currentWinId)
       "n",
       tostring(collect.mark),
       "<cmd>lua require('custom.plugins.win-action').exchange("
-      .. bufnr
-      .. ","
-      .. currentWinId
-      .. ","
-      .. collect.winId
-      .. ")<CR>",
+        .. bufnr
+        .. ","
+        .. currentWinId
+        .. ","
+        .. collect.winId
+        .. ")<CR>",
       {}
     )
   end
@@ -130,14 +130,14 @@ local function createFloatWin(win_id, mark, title)
   vim.api.nvim_buf_set_lines(float_bufnr, 0, -1, false, { message })
 
   local win_config = {
-    relative = "win",  -- 相对于指定的窗口
-    win = win_id,      -- 指定相对的窗口ID
+    relative = "win", -- 相对于指定的窗口
+    win = win_id, -- 指定相对的窗口ID
     width = win_width, -- 浮动窗口的宽度
-    height = 1,        -- 浮动窗口的高度
+    height = 1, -- 浮动窗口的高度
     row = win_height - 1,
     col = 0,
     style = "minimal", -- 最小化样式
-    noautocmd = true,  -- 禁用自动命令
+    noautocmd = true, -- 禁用自动命令
   }
 
   local float_win = vim.api.nvim_open_win(float_bufnr, false, win_config)

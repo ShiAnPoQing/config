@@ -7,11 +7,11 @@ return {
   ["<C-space><C-.>"] = { "^<C-D>", "i" },
   ["<M-b>"] = {
     "<C-G>o<C-G>",
-    "s"
+    "s",
   },
   ["a"] = {
     "<nop>",
-    "n"
+    "n",
   },
   -- ["s"] = {
   --   "<nop>",
@@ -19,15 +19,15 @@ return {
   -- },
   ["<bs>"] = {
     "X",
-    "n"
+    "n",
   },
   ["<S-bs>"] = {
     "x",
-    "n"
+    "n",
   },
   ["<space><bs>"] = {
     "s",
-    "n"
+    "n",
   },
   -- ["<M-bs>"] = {
   --   "s",
@@ -155,19 +155,22 @@ return {
   ["<space><space>v"] = {
     function()
       vim.opt.virtualedit = ""
-      vim.api.nvim_exec2([[
+      vim.api.nvim_exec2(
+        [[
       execute "normal! $\<C-v>"
-      ]], {})
+      ]],
+        {}
+      )
 
-      local group = vim.api.nvim_create_augroup('CustomModeChanged', { clear = true })
-      vim.api.nvim_create_autocmd('ModeChanged', {
+      local group = vim.api.nvim_create_augroup("CustomModeChanged", { clear = true })
+      vim.api.nvim_create_autocmd("ModeChanged", {
         group = group,
         callback = function(ev)
           vim.opt.virtualedit = "all"
           vim.api.nvim_del_autocmd(ev.id)
-        end
+        end,
       })
     end,
-    "n"
-  }
+    "n",
+  },
 }
