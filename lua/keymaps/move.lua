@@ -295,12 +295,12 @@ return {
 		{ "^", "x" },
 		{ space_h_omode, "o" },
 	},
-	["0<space>h"] = {
-		function()
-			require("custom.plugins.move").magic.move_start_end("left")
-		end,
-		"n",
-	},
+	-- ["0<space>h"] = {
+	-- 	function()
+	-- 		require("custom.plugins.move").magic.move_start_end("left")
+	-- 	end,
+	-- 	"n",
+	-- },
 	["0<space>l"] = {
 		function()
 			require("custom.plugins.move").magic.move_start_end("right")

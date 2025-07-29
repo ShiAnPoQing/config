@@ -207,6 +207,18 @@ return {
 				require("custom.plugins.magic.magic-move").magic_word_move({ position = 1, type = "WORD" })
 			end,
 		},
+		{
+			"0<space>h",
+			function()
+				require("custom.plugins.magic.magic-move").magic_line_start_end_move({ position = 1 })
+			end,
+		},
+		{
+			"0<space>l",
+			function()
+				require("custom.plugins.magic.magic-move").magic_line_start_end_move({ position = 2 })
+			end,
+		},
 	},
 	config = function(opt)
 		require("custom.plugins.magic").setup()

@@ -3,329 +3,326 @@ local M = {}
 local Key = {}
 local Line = {}
 local Left = {
-  key = "^"
+	key = "^",
 }
 local Right = {
-  key = "g_"
+	key = "g_",
 }
 
 -- @param keymap table
 local function get_keymap(keymap)
-  if keymap.count == 26 then
-    return {}
-  end
+	if keymap.count == 26 then
+		return {}
+	end
 
-  local random = math.random(26)
-  local key = Key.keys:sub(random, random)
-  local child = keymap.child
-  local map = {
-    count = 0,
-    key = key,
-    child = {}
-  }
+	local random = math.random(26)
+	local key = Key.keys:sub(random, random)
+	local child = keymap.child
+	local map = {
+		count = 0,
+		key = key,
+		child = {},
+	}
 
-  if child[key] == nil then
-    child[key] = map
-    keymap.count = keymap.count + 1
-    return map
-  else
-    return get_keymap(keymap)
-  end
+	if child[key] == nil then
+		child[key] = map
+		keymap.count = keymap.count + 1
+		return map
+	else
+		return get_keymap(keymap)
+	end
 end
-
 
 --- @param param table
 local function more_key_set_extmark(param)
-  vim.api.nvim_buf_set_extmark(0, param.ns_id, param.line, 0, {
-    virt_text = param.virt_text,
-    virt_text_win_col = param.virt_text_win_col
-  })
+	vim.api.nvim_buf_set_extmark(0, param.ns_id, param.line, 0, {
+		virt_text = param.virt_text,
+		virt_text_win_col = param.virt_text_win_col,
+	})
 end
 
 local function one_key_set_extmark(parent, line, Action)
-  local keymap = get_keymap(parent)
-  keymap.jump_number = line + 1
-  vim.api.nvim_buf_set_extmark(0, parent.ns_id, line, 0, {
-    virt_text = { { keymap.key, "HopNextKey" } },
-    virt_text_win_col = Action:get_extmark_col(line)
-  })
+	local keymap = get_keymap(parent)
+	keymap.jump_number = line + 1
+	vim.api.nvim_buf_set_extmark(0, parent.ns_id, line, 0, {
+		virt_text = { { keymap.key, "HopNextKey" } },
+		virt_text_win_col = Action:get_extmark_col(line),
+	})
 end
 
 function Key:on_key(keymap)
-  vim.schedule(function()
-    local char = vim.fn.nr2char(vim.fn.getchar())
+	vim.schedule(function()
+		local char = vim.fn.nr2char(vim.fn.getchar())
 
-    local child_keymap = keymap.child[char]
-    if child_keymap then
-      if child_keymap.callback then
-        child_keymap.callback()
-      end
-      if child_keymap.jump_number then
-        vim.api.nvim_feedkeys(child_keymap.jump_number .. "G" .. self.Action.key, "nx", false)
-      end
-    end
-    self:clean_mark()
-    Line:del_hl()
-  end)
+		local child_keymap = keymap.child[char]
+		if child_keymap then
+			if child_keymap.callback then
+				child_keymap.callback()
+			end
+			if child_keymap.jump_number then
+				vim.api.nvim_feedkeys(child_keymap.jump_number .. "G" .. self.Action.key, "nx", false)
+			end
+		end
+		self:clean_mark()
+		Line:del_hl()
+	end)
 end
 
 local function reset_keymap_mark(keymap)
-  keymap.ns_id = vim.api.nvim_create_namespace(keymap.key .. "-custom")
-  for key, value in pairs(keymap.child) do
-    value.reset_mark()
-  end
-  vim.cmd.redraw()
+	keymap.ns_id = vim.api.nvim_create_namespace(keymap.key .. "-custom")
+	for key, value in pairs(keymap.child) do
+		value.reset_mark()
+	end
+	vim.cmd.redraw()
 end
 
 local function fill_more_keymap(keymap)
-  keymap.ns_id = vim.api.nvim_create_namespace(keymap.key .. "-custom")
-  keymap.callback = function()
-    Key:clean_mark()
-    reset_keymap_mark(keymap)
-    Key:on_key(keymap)
-  end
+	keymap.ns_id = vim.api.nvim_create_namespace(keymap.key .. "-custom")
+	keymap.callback = function()
+		Key:clean_mark()
+		reset_keymap_mark(keymap)
+		Key:on_key(keymap)
+	end
 end
 
 local function fill_one_keymap(keymap, extmark)
-  keymap.jump_number = extmark.line + 1
-  keymap.reset_mark = function()
-    vim.api.nvim_buf_set_extmark(0, extmark.ns_id, extmark.line, 0, {
-      virt_text = { { keymap.key, "HopNextKey" } },
-      virt_text_win_col = extmark.virt_text_win_col
-    })
-  end
+	keymap.jump_number = extmark.line + 1
+	keymap.reset_mark = function()
+		vim.api.nvim_buf_set_extmark(0, extmark.ns_id, extmark.line, 0, {
+			virt_text = { { keymap.key, "HopNextKey" } },
+			virt_text_win_col = extmark.virt_text_win_col,
+		})
+	end
 end
 
 function Left:get_extmark_col(line_number, is_two_keys)
-  local leftcol = self.wininfo.leftcol
-  local line = vim.api.nvim_buf_get_lines(0, line_number, line_number + 1, false)[1]
-  local pattern = vim.regex('^\\s*\\S')
-  local _, end_ = pattern:match_str(line and line or "")
-  end_ = end_ and end_ - leftcol - 1 or 0 - leftcol - 1
-  return math.max(end_, 0)
+	local leftcol = self.wininfo.leftcol
+	local line = vim.api.nvim_buf_get_lines(0, line_number, line_number + 1, false)[1]
+	local pattern = vim.regex("^\\s*\\S")
+	local _, end_ = pattern:match_str(line and line or "")
+	end_ = end_ and end_ - leftcol - 1 or 0 - leftcol - 1
+	return math.max(end_, 0)
 end
 
 function Right:get_extmark_col(line_number, is_two_keys)
-  local wininfo = self.wininfo
-  local leftcol = wininfo.leftcol
-  local width = wininfo.width - wininfo.textoff
-  local line = vim.api.nvim_buf_get_lines(0, line_number, line_number + 1, false)[1]
-  local pattern = vim.regex('\\S\\s*$')
-  local start, _ = pattern:match_str(line and line or "")
-  start = start and start - leftcol or 0 - leftcol
+	local wininfo = self.wininfo
+	local leftcol = wininfo.leftcol
+	local width = wininfo.width - wininfo.textoff
+	local line = vim.api.nvim_buf_get_lines(0, line_number, line_number + 1, false)[1]
+	local pattern = vim.regex("\\S\\s*$")
+	local start, _ = pattern:match_str(line and line or "")
+	start = start and start - leftcol or 0 - leftcol
 
-  if start >= width then
-    start = width - 1
-    if is_two_keys then
-      start = start - 1
-    end
-  end
+	if start >= width then
+		start = width - 1
+		if is_two_keys then
+			start = start - 1
+		end
+	end
 
-  return math.max(start, 0)
+	return math.max(start, 0)
 end
 
 function Key:clean_mark()
-  vim.api.nvim_buf_clear_namespace(0, self.keymap.ns_id, 0, -1)
-  for k, value in pairs(self.keymap.child) do
-    if value.ns_id then
-      vim.api.nvim_buf_clear_namespace(0, value.ns_id, 0, -1)
-    end
-  end
+	vim.api.nvim_buf_clear_namespace(0, self.keymap.ns_id, 0, -1)
+	for k, value in pairs(self.keymap.child) do
+		if value.ns_id then
+			vim.api.nvim_buf_clear_namespace(0, value.ns_id, 0, -1)
+		end
+	end
 end
 
 function Key:init(line_count, LR, wininfo)
-  self.keys = "abcdefghijklmnopqrstuvwxyz"
-  self.keymap = {
-    count = 0,
-    child = {},
-    ns_id = vim.api.nvim_create_namespace("base-custom")
-  }
-  self.up_break = nil
-  self.down_break = nil
-  self.more_keymap = {}
-  self:collect_more_keys(line_count)
-  if LR == "left" then
-    self.Action = Left
-  else
-    self.Action = Right
-  end
-  self.Action.wininfo = wininfo
+	self.keys = "abcdefghijklmnopqrstuvwxyz"
+	self.keymap = {
+		count = 0,
+		child = {},
+		ns_id = vim.api.nvim_create_namespace("base-custom"),
+	}
+	self.up_break = nil
+	self.down_break = nil
+	self.more_keymap = {}
+	self:collect_more_keys(line_count)
+	if LR == "left" then
+		self.Action = Left
+	else
+		self.Action = Right
+	end
+	self.Action.wininfo = wininfo
 end
 
 function Key:collect_more_keys(line_count)
-  local count = 0
-  if line_count > 26 then
-    count = math.ceil((line_count - 26) / 26)
-  end
-  for i = 1, count do
-    local keymap = get_keymap(self.keymap)
-    fill_more_keymap(keymap)
-    table.insert(self.more_keymap, keymap)
-  end
+	local count = 0
+	if line_count > 26 then
+		count = math.ceil((line_count - 26) / 26)
+	end
+	for i = 1, count do
+		local keymap = get_keymap(self.keymap)
+		fill_more_keymap(keymap)
+		table.insert(self.more_keymap, keymap)
+	end
 end
 
 function Key:no_key_can_be_use(cursor_row, count)
-  if self.keymap.count == 26 then
-    self.up_break = cursor_row - count
-    self.down_break = cursor_row + count
-  end
+	if self.keymap.count == 26 then
+		self.up_break = cursor_row - count
+		self.down_break = cursor_row + count
+	end
 end
 
 function Key:one_keys(topline, botline, cursor_row)
-  local count = 0
+	local count = 0
 
-  while true do
-    if self.up_break ~= nil and self.down_break ~= nil then
-      break
-    end
+	while true do
+		if self.up_break ~= nil and self.down_break ~= nil then
+			break
+		end
 
-    if not self.up_break then
-      if cursor_row - count > topline - 1 then
-        one_key_set_extmark(self.keymap, cursor_row - count - 1, self.Action)
-        self:no_key_can_be_use(cursor_row, count)
-      else
-        self.up_break = cursor_row - count
-      end
-    end
+		if not self.up_break then
+			if cursor_row - count > topline - 1 then
+				one_key_set_extmark(self.keymap, cursor_row - count - 1, self.Action)
+				self:no_key_can_be_use(cursor_row, count)
+			else
+				self.up_break = cursor_row - count
+			end
+		end
 
-    if not self.down_break then
-      if cursor_row + count < botline then
-        one_key_set_extmark(self.keymap, cursor_row + count, self.Action)
-        self:no_key_can_be_use(cursor_row, count)
-      else
-        self.down_break = cursor_row + count
-      end
-    end
-    count = count + 1
-  end
+		if not self.down_break then
+			if cursor_row + count < botline then
+				one_key_set_extmark(self.keymap, cursor_row + count, self.Action)
+				self:no_key_can_be_use(cursor_row, count)
+			else
+				self.down_break = cursor_row + count
+			end
+		end
+		count = count + 1
+	end
 end
 
 function Key:more_keys(topline, botline)
-  if Key.up_break > 1 then
-    for i = topline, Key.up_break - 1 do
-      local keymap, child_keymap = Key:get_more_key_keymap(i)
-      more_key_set_extmark({
-        ns_id = keymap.ns_id,
-        line = i - 1,
-        virt_text = { { keymap.key, "HopNextKey1" }, { child_keymap.key, "HopNextKey2" } },
-        virt_text_win_col = self.Action:get_extmark_col(i - 1, true)
-      })
-    end
-  end
+	if Key.up_break > 1 then
+		for i = topline, Key.up_break - 1 do
+			local keymap, child_keymap = Key:get_more_key_keymap(i)
+			more_key_set_extmark({
+				ns_id = keymap.ns_id,
+				line = i - 1,
+				virt_text = { { keymap.key, "HopNextKey1" }, { child_keymap.key, "HopNextKey2" } },
+				virt_text_win_col = self.Action:get_extmark_col(i - 1, true),
+			})
+		end
+	end
 
-  if Key.down_break <= botline then
-    for i = Key.down_break + 1, botline do
-      local keymap, child_keymap = Key:get_more_key_keymap(i)
-      more_key_set_extmark({
-        ns_id = keymap.ns_id,
-        line = i - 1,
-        virt_text = { { keymap.key, "HopNextKey1" }, { child_keymap.key, "HopNextKey2" } },
-        virt_text_win_col = self.Action:get_extmark_col(i - 1, true)
-      })
-    end
-  end
+	if Key.down_break <= botline then
+		for i = Key.down_break + 1, botline do
+			local keymap, child_keymap = Key:get_more_key_keymap(i)
+			more_key_set_extmark({
+				ns_id = keymap.ns_id,
+				line = i - 1,
+				virt_text = { { keymap.key, "HopNextKey1" }, { child_keymap.key, "HopNextKey2" } },
+				virt_text_win_col = self.Action:get_extmark_col(i - 1, true),
+			})
+		end
+	end
 end
 
 function Key:get_more_key_keymap(i)
-  local parent = self.more_keymap[1]
-  local keymap = get_keymap(parent)
-  fill_one_keymap(keymap, {
-    ns_id = parent.ns_id,
-    line = i - 1,
-    virt_text_win_col = self.Action:get_extmark_col(i - 1)
-  })
+	local parent = self.more_keymap[1]
+	local keymap = get_keymap(parent)
+	fill_one_keymap(keymap, {
+		ns_id = parent.ns_id,
+		line = i - 1,
+		virt_text_win_col = self.Action:get_extmark_col(i - 1),
+	})
 
-  if parent.count == 26 then
-    table.remove(self.more_keymap, 1)
-  end
+	if parent.count == 26 then
+		table.remove(self.more_keymap, 1)
+	end
 
-  return parent, keymap
+	return parent, keymap
 end
 
 function Line:init(topline, botline)
-  self.ns_id = nil
-  Line:set_hl(topline, botline)
+	self.ns_id = nil
+	Line:set_hl(topline, botline)
 end
 
 function Line:set_hl(topline, botline)
-  self.ns_id = vim.api.nvim_create_namespace("line-custom")
-  vim.api.nvim_buf_set_extmark(0, self.ns_id, topline - 1, 0, {
-    end_row = botline,
-    hl_group = "HopUnmatched"
-  })
+	self.ns_id = vim.api.nvim_create_namespace("line-custom")
+	vim.api.nvim_buf_set_extmark(0, self.ns_id, topline - 1, 0, {
+		end_row = botline,
+		hl_group = "HopUnmatched",
+	})
 end
 
 function Line:del_hl()
-  vim.api.nvim_buf_clear_namespace(0, self.ns_id, 0, -1)
+	vim.api.nvim_buf_clear_namespace(0, self.ns_id, 0, -1)
 end
 
 --- @param LR "left"|"right"
 function M.start_end_move(LR)
-  local count = vim.v.count1
+	local count = vim.v.count1
 
-  if LR == "left" then
-    if count == 1 then
-      local cursor1 = vim.api.nvim_win_get_cursor(0)
-      vim.api.nvim_feedkeys("^", "nx", false)
-      local cursor2 = vim.api.nvim_win_get_cursor(0)
-      if cursor1[2] == cursor2[2] then
-        vim.api.nvim_feedkeys("0", "nx", false)
-      end
-    else
-      local cursor = vim.api.nvim_win_get_cursor(0)
-      local virt_col = vim.fn.virtcol(".")
-      local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
-      local ns_id = vim.api.nvim_create_namespace("test")
-      local up_line_start = cursor[1] - count - 1
-      local up_line = vim.api.nvim_buf_get_lines(0, up_line_start, up_line_start + 1, false)[1]
+	if LR == "left" then
+		if count == 1 then
+			local cursor1 = vim.api.nvim_win_get_cursor(0)
+			vim.api.nvim_feedkeys("^", "nx", false)
+			local cursor2 = vim.api.nvim_win_get_cursor(0)
+			if cursor1[2] == cursor2[2] then
+				vim.api.nvim_feedkeys("0", "nx", false)
+			end
+		else
+			local cursor = vim.api.nvim_win_get_cursor(0)
+			local virt_col = vim.fn.virtcol(".")
+			local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+			local ns_id = vim.api.nvim_create_namespace("test")
+			local up_line_start = cursor[1] - count - 1
+			local up_line = vim.api.nvim_buf_get_lines(0, up_line_start, up_line_start + 1, false)[1]
 
-      vim.api.nvim_buf_set_extmark(0, ns_id, up_line_start, 0, {
-        virt_text = { { "k", "HopNextKey" } },
-        virt_text_win_col = virt_col
-      })
+			vim.api.nvim_buf_set_extmark(0, ns_id, up_line_start, 0, {
+				virt_text = { { "k", "HopNextKey" } },
+				virt_text_win_col = virt_col,
+			})
 
-      local down_line_start = cursor[1] + count - 1
-      local down_line = vim.api.nvim_buf_get_lines(0, down_line_start, down_line_start + 1, false)[1]
-      vim.api.nvim_buf_set_extmark(0, ns_id, cursor[1] + count - 1, 0, {
-        virt_text = { { "j", "HopNextKey" } },
-        virt_text_win_col = virt_col
-      })
-      vim.cmd.redraw()
-      local char = vim.fn.nr2char(vim.fn.getchar())
-      if char == "j" then
-        vim.api.nvim_feedkeys(count .. "j^", "nx", false)
-      elseif char == "k" then
-        vim.api.nvim_feedkeys(count .. "k^", "nx", false)
-      end
-      vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
-    end
-  else
-    if count == 1 then
-      local cursor1 = vim.api.nvim_win_get_cursor(0)
-      vim.api.nvim_feedkeys(count .. "g_", "nx", false)
-      local cursor2 = vim.api.nvim_win_get_cursor(0)
-      if cursor1[2] == cursor2[2] then
-        vim.api.nvim_feedkeys("$", "nx", false)
-      end
-    else
-
-    end
-  end
+			local down_line_start = cursor[1] + count - 1
+			local down_line = vim.api.nvim_buf_get_lines(0, down_line_start, down_line_start + 1, false)[1]
+			vim.api.nvim_buf_set_extmark(0, ns_id, cursor[1] + count - 1, 0, {
+				virt_text = { { "j", "HopNextKey" } },
+				virt_text_win_col = virt_col,
+			})
+			vim.cmd.redraw()
+			local char = vim.fn.nr2char(vim.fn.getchar())
+			if char == "j" then
+				vim.api.nvim_feedkeys(count .. "j^", "nx", false)
+			elseif char == "k" then
+				vim.api.nvim_feedkeys(count .. "k^", "nx", false)
+			end
+			vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+		end
+	else
+		if count == 1 then
+			local cursor1 = vim.api.nvim_win_get_cursor(0)
+			vim.api.nvim_feedkeys(count .. "g_", "nx", false)
+			local cursor2 = vim.api.nvim_win_get_cursor(0)
+			if cursor1[2] == cursor2[2] then
+				vim.api.nvim_feedkeys("$", "nx", false)
+			end
+		end
+	end
 end
 
 --- @param LR "left" | "right"
 function M.move_start_end(LR)
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  local cursor_row = cursor[1]
-  local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
-  local topline = wininfo.topline
-  local botline = wininfo.botline
+	local cursor = vim.api.nvim_win_get_cursor(0)
+	local cursor_row = cursor[1]
+	local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+	local topline = wininfo.topline
+	local botline = wininfo.botline
 
-  Line:init(topline, botline)
-  Key:init(botline - topline + 1, LR, wininfo)
-  Key:one_keys(topline, botline, cursor_row)
-  Key:more_keys(topline, botline)
-  Key:on_key(Key.keymap)
+	Line:init(topline, botline)
+	Key:init(botline - topline + 1, LR, wininfo)
+	Key:one_keys(topline, botline, cursor_row)
+	Key:more_keys(topline, botline)
+	Key:on_key(Key.keymap)
 end
 
 return M
