@@ -1,5 +1,4 @@
 vim.g.mapleader = ";"
-
 require("plugin-options").setup({
 	paths = {
 		"options/options",

@@ -48,15 +48,34 @@ local registers = {
 	"=", -- 表达式寄存器
 }
 
-function M.paste_register(operator)
+function M.paste(operator)
 	local char = vim.fn.nr2char(vim.fn.getchar())
-
 	if not vim.tbl_contains(registers, char) then
 		return
 	end
 
 	vim.schedule(function()
-		vim.api.nvim_feedkeys('"' .. char .. operator, "nx", false)
+		vim.api.nvim_feedkeys('"' .. char .. operator, "n", false)
+	end)
+end
+
+function M.copy(operator)
+	local char = vim.fn.nr2char(vim.fn.getchar())
+	if not vim.tbl_contains(registers, char) then
+		return
+	end
+	vim.schedule(function()
+		vim.api.nvim_feedkeys('"' .. char .. operator, "n", false)
+	end)
+end
+
+function M.delete(operator)
+	local char = vim.fn.nr2char(vim.fn.getchar())
+	if not vim.tbl_contains(registers, char) then
+		return
+	end
+	vim.schedule(function()
+		vim.api.nvim_feedkeys('"' .. char .. operator, "n", false)
 	end)
 end
 
