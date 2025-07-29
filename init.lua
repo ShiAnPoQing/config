@@ -73,6 +73,7 @@ require("lazy").setup({
 
 	-- require("plugins.custom.win-action"),
 	require("plugins.custom.show-file-info"),
+	require("plugins.custom.magic"),
 	require("plugins.custom.word-move"),
 })
 

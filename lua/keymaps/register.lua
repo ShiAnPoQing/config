@@ -35,4 +35,16 @@ return {
 		end,
 		{ "n", "x" },
 	},
+	["<space>c"] = {
+		function()
+			require("custom.plugins.register").delete("c")
+		end,
+		{ "n", "x" },
+	},
+	["<space>C"] = {
+		function()
+			require("custom.plugins.register").delete("C")
+		end,
+		{ "n", "x" },
+	},
 }

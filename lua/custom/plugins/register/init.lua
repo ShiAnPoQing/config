@@ -79,4 +79,14 @@ function M.delete(operator)
 	end)
 end
 
+function M.change(operator)
+	local char = vim.fn.nr2char(vim.fn.getchar())
+	if not vim.tbl_contains(registers, char) then
+		return
+	end
+	vim.schedule(function()
+		vim.api.nvim_feedkeys('"' .. char .. operator, "n", false)
+	end)
+end
+
 return M
