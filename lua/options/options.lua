@@ -25,7 +25,7 @@ return {
     -- 0: never
     -- 1: only if there are at least two tab pages
     -- 2: always
-    showtabline = 0,
+    showtabline = 1,
 
     linebreak = false,
     ruler = true,
@@ -40,7 +40,8 @@ return {
     undofile = true,
     timeout = false,
     --imdisable = true,
-    autochdir = true,
+    -- 是否自动切换工作目录
+    -- autochdir = true,
     autoread = true,
     foldcolumn = "0",
     -- signcolumn = "no",

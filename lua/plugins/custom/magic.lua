@@ -132,6 +132,70 @@ return {
       end,
     },
     {
+      "0gUwi",
+      function()
+        require("custom.plugins.magic").magic_uppercase_keyword({
+          keyword = "word_inner",
+        })
+      end,
+    },
+    {
+      "0gUwo",
+      function()
+        require("custom.plugins.magic").magic_uppercase_keyword({
+          keyword = "word_outer",
+        })
+      end,
+    },
+    {
+      "0gUWi",
+      function()
+        require("custom.plugins.magic").magic_uppercase_keyword({
+          keyword = "WORD_inner",
+        })
+      end,
+    },
+    {
+      "0gUwo",
+      function()
+        require("custom.plugins.magic").magic_uppercase_keyword({
+          keyword = "WORD_outer",
+        })
+      end,
+    },
+    {
+      "0guwi",
+      function()
+        require("custom.plugins.magic").magic_lowercase_keyword({
+          keyword = "word_inner",
+        })
+      end,
+    },
+    {
+      "0guwo",
+      function()
+        require("custom.plugins.magic").magic_lowercase_keyword({
+          keyword = "word_outer",
+        })
+      end,
+    },
+    {
+      "0guWi",
+      function()
+        require("custom.plugins.magic").magic_lowercase_keyword({
+          keyword = "WORD_inner",
+        })
+      end,
+    },
+    {
+      "0guwo",
+      function()
+        require("custom.plugins.magic").magic_lowercase_keyword({
+          keyword = "WORD_outer",
+        })
+      end,
+    },
+    {
       "0cr",
       function()
         vim.ui.input({ prompt = ">修改>正则匹配: " }, function(input)
@@ -172,51 +236,116 @@ return {
       end,
     },
     {
-      "0k",
+      "gk",
       function()
         require("custom.plugins.magic.magic-move").magic_line_move("up")
       end,
+      mode = { "n", "x" },
     },
     {
-      "0j",
+      "gj",
       function()
         require("custom.plugins.magic.magic-move").magic_line_move("down")
       end,
+      mode = { "n", "x" },
     },
     {
-      "0o",
+      "go",
       function()
         require("custom.plugins.magic.magic-move").magic_word_move({ position = 2, type = "word" })
       end,
+      mode = { "n", "x" },
     },
     {
-      "0i",
+      "gi",
       function()
         require("custom.plugins.magic.magic-move").magic_word_move({ position = 1, type = "word" })
       end,
+      mode = { "n", "x" },
     },
     {
-      "0O",
+      "gO",
       function()
         require("custom.plugins.magic.magic-move").magic_word_move({ position = 2, type = "WORD" })
       end,
+      mode = { "n", "x" },
     },
     {
-      "0I",
+      "gI",
       function()
         require("custom.plugins.magic.magic-move").magic_word_move({ position = 1, type = "WORD" })
       end,
+      mode = { "n", "x" },
     },
     {
       "0<space>h",
       function()
-        require("custom.plugins.magic.magic-move").magic_line_start_end_move({ position = 1 })
+        require("custom.plugins.magic").magic_line_start_end_move({ position = 1 })
       end,
+      mode = { "n", "x" },
     },
     {
       "0<space>l",
       function()
-        require("custom.plugins.magic.magic-move").magic_line_start_end_move({ position = 2 })
+        require("custom.plugins.magic").magic_line_start_end_move({ position = 2 })
+      end,
+      mode = { "n", "x" },
+    },
+    {
+      "dgo",
+      function()
+        require("custom.plugins.magic").magic_delete_to_word({
+          position = 2,
+          type = "word",
+        })
+      end,
+    },
+    {
+      "d0<space>l",
+      function()
+        require("custom.plugins.magic").magic_delete_to_line_start_end({
+          position = 2,
+        })
+      end,
+    },
+    {
+      "d0<space>h",
+      function()
+        require("custom.plugins.magic").magic_delete_to_line_start_end({
+          position = 1,
+        })
+      end,
+    },
+    {
+      "c0<space>h",
+      function()
+        require("custom.plugins.magic").magic_change_to_line_start_end({
+          position = 1,
+        })
+      end,
+    },
+    {
+      "c0<space>l",
+      function()
+        require("custom.plugins.magic").magic_change_to_line_start_end({
+          position = 2,
+        })
+      end,
+    },
+    {
+      "y0<space>h",
+      function()
+        require("custom.plugins.magic").magic_yank_to_line_start_end({
+          position = 1,
+        })
+      end,
+    },
+    {
+      "y0<space>l",
+      function()
+        require("custom.plugins.magic").magic_yank_to_line_start_end({
+          position = 2,
+        })
       end,
     },
   },

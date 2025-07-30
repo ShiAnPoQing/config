@@ -40,11 +40,12 @@ local function get_col(position, line, wininfo)
   return col, cursor_col
 end
 
---- @class MagicLineStartEndMoveOpts
+--- @class MagicLineStartEndOpts
 --- @field position 1|2
+--- @field callback fun(opts)
 
---- @param opts MagicLineStartEndMoveOpts
-function M.magic_line_start_end_move(opts)
+--- @param opts MagicLineStartEndOpts
+function M.magic_line_start_end(opts)
   local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
   local topline = wininfo.topline
   local botline = wininfo.botline
@@ -62,7 +63,10 @@ function M.magic_line_start_end_move(opts)
 
     Key:register({
       callback = function()
-        vim.api.nvim_win_set_cursor(0, { line, cursor_col })
+        opts.callback({
+          line = line,
+          col = cursor_col,
+        })
       end,
       one_key = {
         set_extmark = function(opts)

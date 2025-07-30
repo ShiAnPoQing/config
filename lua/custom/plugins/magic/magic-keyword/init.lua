@@ -23,7 +23,6 @@ function M.magic_keyword(opts)
       Keyword:clean()
     end,
   })
-
   Keyword:init({
     cursor = cursor,
     topline = topline,

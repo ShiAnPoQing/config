@@ -61,7 +61,15 @@ return {
     "n",
   },
   -- open myvimrc
-  [";<F5>"] = { ":e $MYVIMRC<cr>", "n", { desc = "Edit my neovim config" } },
+  [";<F5>"] = {
+    function()
+      local path = vim.fn.expand("$MYVIMRC"):gsub("init.lua", "")
+      vim.fn.chdir(path)
+      vim.cmd("e $MYVIMRC")
+    end,
+    "n",
+    { desc = "Edit my neovim config" },
+  },
   -- enlarge base cursor move
   ["m+"] = {
     function()

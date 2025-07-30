@@ -1,3 +1,4 @@
+require("command")
 vim.g.mapleader = ";"
 require("plugin-options").setup({
   paths = {
@@ -52,6 +53,7 @@ require("lazy").setup({
 
   require("plugins.style.lualine"),
   require("plugins.style.dashboard-nvim"),
+  -- require("plugins.style.barbar"),
   -- require"plugins.style.alpha-nvim",
   -- require("plugins.style.theme.material"),
   -- require("plugins.style.theme.moonfly"),

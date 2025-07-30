@@ -8,6 +8,7 @@ function M.magic_line_move(dir)
   local topline = wininfo.topline
   local botline = wininfo.botline
   local cursor = vim.api.nvim_win_get_cursor(0)
+  local virt_col = vim.fn.virtcol(".") - 1
   local startline, endline
 
   if dir == "up" then
@@ -29,12 +30,12 @@ function M.magic_line_move(dir)
   for line = startline, endline do
     Key:register({
       callback = function()
-        vim.api.nvim_win_set_cursor(0, { line, cursor[2] })
+        vim.api.nvim_win_set_cursor(0, { line, virt_col })
       end,
       one_key = {
         set_extmark = function(opts)
           vim.api.nvim_buf_set_extmark(0, opts.ns_id, line - 1, 0, {
-            virt_text_win_col = cursor[2],
+            virt_text_win_col = virt_col,
             virt_text = { { opts.key, "CustomMagicNextKey" } },
           })
         end,
@@ -42,17 +43,17 @@ function M.magic_line_move(dir)
       two_key = {
         set_extmark = function(opts1, opts2)
           vim.api.nvim_buf_set_extmark(0, opts1.ns_id, line - 1, 0, {
-            virt_text_win_col = cursor[2],
+            virt_text_win_col = virt_col,
             virt_text = { { opts1.key, "CustomMagicNextKey1" } },
           })
           vim.api.nvim_buf_set_extmark(0, opts2.ns_id, line - 1, 0, {
-            virt_text_win_col = cursor[2] + 1,
+            virt_text_win_col = virt_col + 1,
             virt_text = { { opts2.key, "CustomMagicNextKey2" } },
           })
         end,
         reset_extmark = function(opts)
           vim.api.nvim_buf_set_extmark(0, opts.ns_id, line - 1, 0, {
-            virt_text_win_col = cursor[2],
+            virt_text_win_col = virt_col,
             virt_text = { { opts.key, "CustomMagicNextKey" } },
           })
         end,
