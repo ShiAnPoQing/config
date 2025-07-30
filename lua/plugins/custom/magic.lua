@@ -6,7 +6,9 @@ return {
       "0vwi",
       function()
         require("custom.plugins.magic").magic_visual_keyword({
-          keyword = "word_inner",
+          keyword = function(opts)
+            return opts.word_inner
+          end,
         })
       end,
     },
@@ -14,7 +16,9 @@ return {
       "0vwo",
       function()
         require("custom.plugins.magic").magic_visual_keyword({
-          keyword = "word_outer",
+          keyword = function(opts)
+            return opts.word_outer
+          end,
         })
       end,
     },
@@ -22,7 +26,9 @@ return {
       "0vWi",
       function()
         require("custom.plugins.magic").magic_visual_keyword({
-          keyword = "WORD_inner",
+          keyword = function(opts)
+            return opts.WORD_inner
+          end,
         })
       end,
     },
@@ -30,7 +36,9 @@ return {
       "0vWo",
       function()
         require("custom.plugins.magic").magic_visual_keyword({
-          keyword = "WORD_outer",
+          keyword = function(opts)
+            return opts.WORD_outer
+          end,
         })
       end,
     },
@@ -38,7 +46,9 @@ return {
       "0ywi",
       function()
         require("custom.plugins.magic").magic_yank_keyword({
-          keyword = "word_inner",
+          keyword = function(opts)
+            return opts.word_inner
+          end,
         })
       end,
     },
@@ -46,7 +56,9 @@ return {
       "0ywo",
       function()
         require("custom.plugins.magic").magic_yank_keyword({
-          keyword = "word_outer",
+          keyword = function(opts)
+            return opts.word_outer
+          end,
         })
       end,
     },
@@ -54,7 +66,9 @@ return {
       "0yWi",
       function()
         require("custom.plugins.magic").magic_yank_keyword({
-          keyword = "WORD_inner",
+          keyword = function(opts)
+            return opts.WORD_inner
+          end,
         })
       end,
     },
@@ -62,7 +76,9 @@ return {
       "0yWo",
       function()
         require("custom.plugins.magic").magic_yank_keyword({
-          keyword = "WORD_outer",
+          keyword = function(opts)
+            return opts.WORD_outer
+          end,
         })
       end,
     },
@@ -71,7 +87,9 @@ return {
       "0dwi",
       function()
         require("custom.plugins.magic").magic_delete_keyword({
-          keyword = "word_inner",
+          keyword = function(opts)
+            return opts.word_inner
+          end,
         })
       end,
     },
@@ -79,7 +97,9 @@ return {
       "0dwo",
       function()
         require("custom.plugins.magic").magic_delete_keyword({
-          keyword = "word_outer",
+          keyword = function(opts)
+            return opts.word_outer
+          end,
         })
       end,
     },
@@ -87,7 +107,9 @@ return {
       "0dWi",
       function()
         require("custom.plugins.magic").magic_delete_keyword({
-          keyword = "WORD_inner",
+          keyword = function(opts)
+            return opts.WORD_inner
+          end,
         })
       end,
     },
@@ -95,7 +117,9 @@ return {
       "0dWo",
       function()
         require("custom.plugins.magic").magic_delete_keyword({
-          keyword = "WORD_outer",
+          keyword = function(opts)
+            return opts.WORD_outer
+          end,
         })
       end,
     },
@@ -103,7 +127,9 @@ return {
       "0cwi",
       function()
         require("custom.plugins.magic").magic_change_keyword({
-          keyword = "word_inner",
+          keyword = function(opts)
+            return opts.word_inner
+          end,
         })
       end,
     },
@@ -111,7 +137,9 @@ return {
       "0cwo",
       function()
         require("custom.plugins.magic").magic_change_keyword({
-          keyword = "word_outer",
+          keyword = function(opts)
+            return opts.word_outer
+          end,
         })
       end,
     },
@@ -119,7 +147,9 @@ return {
       "0cWi",
       function()
         require("custom.plugins.magic").magic_change_keyword({
-          keyword = "WORD_inner",
+          keyword = function(opts)
+            return opts.WORD_inner
+          end,
         })
       end,
     },
@@ -127,7 +157,9 @@ return {
       "0cWo",
       function()
         require("custom.plugins.magic").magic_change_keyword({
-          keyword = "WORD_outer",
+          keyword = function(opts)
+            return opts.WORD_outer
+          end,
         })
       end,
     },
@@ -135,7 +167,9 @@ return {
       "0gUwi",
       function()
         require("custom.plugins.magic").magic_uppercase_keyword({
-          keyword = "word_inner",
+          keyword = function(opts)
+            return opts.word_inner
+          end,
         })
       end,
     },
@@ -143,7 +177,9 @@ return {
       "0gUwo",
       function()
         require("custom.plugins.magic").magic_uppercase_keyword({
-          keyword = "word_outer",
+          keyword = function(opts)
+            return opts.word_outer
+          end,
         })
       end,
     },
@@ -151,7 +187,9 @@ return {
       "0gUWi",
       function()
         require("custom.plugins.magic").magic_uppercase_keyword({
-          keyword = "WORD_inner",
+          keyword = function(opts)
+            return opts.WORD_inner
+          end,
         })
       end,
     },
@@ -159,7 +197,9 @@ return {
       "0gUwo",
       function()
         require("custom.plugins.magic").magic_uppercase_keyword({
-          keyword = "WORD_outer",
+          keyword = function(opts)
+            return opts.WORD_outer
+          end,
         })
       end,
     },
@@ -167,7 +207,9 @@ return {
       "0guwi",
       function()
         require("custom.plugins.magic").magic_lowercase_keyword({
-          keyword = "word_inner",
+          keyword = function(opts)
+            return opts.word_inner
+          end,
         })
       end,
     },
@@ -175,7 +217,9 @@ return {
       "0guwo",
       function()
         require("custom.plugins.magic").magic_lowercase_keyword({
-          keyword = "word_outer",
+          keyword = function(opts)
+            return opts.word_outer
+          end,
         })
       end,
     },
@@ -183,7 +227,9 @@ return {
       "0guWi",
       function()
         require("custom.plugins.magic").magic_lowercase_keyword({
-          keyword = "WORD_inner",
+          keyword = function(opts)
+            return opts.WORD_inner
+          end,
         })
       end,
     },
@@ -191,7 +237,9 @@ return {
       "0guwo",
       function()
         require("custom.plugins.magic").magic_lowercase_keyword({
-          keyword = "WORD_outer",
+          keyword = function(opts)
+            return opts.WORD_outer
+          end,
         })
       end,
     },
@@ -236,44 +284,64 @@ return {
       end,
     },
     {
-      "gk",
+      "0k",
       function()
-        require("custom.plugins.magic.magic-move").magic_line_move("up")
+        require("custom.plugins.magic.magic-line-move").magic_line_move("up")
       end,
       mode = { "n", "x" },
     },
     {
-      "gj",
+      "0j",
       function()
-        require("custom.plugins.magic.magic-move").magic_line_move("down")
+        require("custom.plugins.magic.magic-line-move").magic_line_move("down")
       end,
       mode = { "n", "x" },
     },
     {
-      "go",
+      "0o",
       function()
-        require("custom.plugins.magic.magic-move").magic_word_move({ position = 2, type = "word" })
+        require("custom.plugins.magic").magic_word_move({
+          position = 2,
+          keyword = function(opts)
+            return opts.word_outer
+          end,
+        })
       end,
       mode = { "n", "x" },
     },
     {
-      "gi",
+      "0i",
       function()
-        require("custom.plugins.magic.magic-move").magic_word_move({ position = 1, type = "word" })
+        require("custom.plugins.magic").magic_word_move({
+          position = 1,
+          keyword = function(opts)
+            return opts.word_inner
+          end,
+        })
       end,
       mode = { "n", "x" },
     },
     {
-      "gO",
+      "0O",
       function()
-        require("custom.plugins.magic.magic-move").magic_word_move({ position = 2, type = "WORD" })
+        require("custom.plugins.magic").magic_word_move({
+          position = 2,
+          keyword = function(opts)
+            return opts.WORD_outer
+          end,
+        })
       end,
       mode = { "n", "x" },
     },
     {
-      "gI",
+      "0I",
       function()
-        require("custom.plugins.magic.magic-move").magic_word_move({ position = 1, type = "WORD" })
+        require("custom.plugins.magic").magic_word_move({
+          position = 1,
+          keyword = function(opts)
+            return opts.WORD_inner
+          end,
+        })
       end,
       mode = { "n", "x" },
     },
@@ -292,14 +360,72 @@ return {
       mode = { "n", "x" },
     },
     {
-      "dgo",
+      "d0o",
       function()
-        require("custom.plugins.magic").magic_delete_to_word({
+        require("custom.plugins.magic").magic_delete_to_keyword({
           position = 2,
-          type = "word",
+          keyword = function(opts)
+            return opts.word_inner
+          end,
         })
       end,
     },
+    {
+      "d0i",
+      function()
+        require("custom.plugins.magic").magic_delete_to_keyword({
+          position = 1,
+          keyword = function(opts)
+            return opts.word_inner
+          end,
+        })
+      end,
+    },
+    {
+      "y0o",
+      function()
+        require("custom.plugins.magic").magic_yank_to_keyword({
+          position = 2,
+          keyword = function(opts)
+            return opts.word_inner
+          end,
+        })
+      end,
+    },
+    {
+      "y0i",
+      function()
+        require("custom.plugins.magic").magic_yank_to_keyword({
+          position = 1,
+          keyword = function(opts)
+            return opts.word_inner
+          end,
+        })
+      end,
+    },
+    {
+      "c0o",
+      function()
+        require("custom.plugins.magic").magic_change_to_keyword({
+          position = 2,
+          keyword = function(opts)
+            return opts.word_inner
+          end,
+        })
+      end,
+    },
+    {
+      "c0i",
+      function()
+        require("custom.plugins.magic").magic_change_to_keyword({
+          position = 1,
+          keyword = function(opts)
+            return opts.word_inner
+          end,
+        })
+      end,
+    },
+
     {
       "d0<space>l",
       function()

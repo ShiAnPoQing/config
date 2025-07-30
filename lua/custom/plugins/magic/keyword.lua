@@ -4,18 +4,7 @@ function M:init(opt)
   self.keyword_count = 0
   self.matches = {}
   self.keyword_ns_id = vim.api.nvim_create_namespace("custom-keyword-highlight")
-  if opt.keyword == "word_inner" then
-    self.regex = vim.regex("\\k\\+")
-  elseif opt.keyword == "word_outer" then
-    self.regex = vim.regex("\\k\\+\\s*")
-  elseif opt.keyword == "WORD_inner" then
-    self.regex = vim.regex("\\S\\+")
-  elseif opt.keyword == "WORD_outer" then
-    self.regex = vim.regex("\\S\\+\\s*")
-  else
-    self.regex = vim.regex(opt.keyword)
-  end
-
+  self.regex = vim.regex(opt.keyword)
   self.cursor_row = opt.cursor[1]
   self.topline = opt.topline
   self.botline = opt.botline

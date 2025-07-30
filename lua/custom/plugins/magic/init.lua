@@ -1,6 +1,5 @@
 local M = {}
 local magic_keyword = require("custom.plugins.magic.magic-keyword")
-local magic_word_edge = require("custom.plugins.magic.magic-word-edge")
 local magic_line_start_end = require("custom.plugins.magic.magic-line-start-end")
 
 local function set_hl_group()
@@ -35,79 +34,135 @@ end
 function M.magic_visual_keyword(opt)
   magic_keyword.magic_keyword({
     keyword = opt.keyword,
-    callback = function(line, start_col, end_col)
-      require("utils.mark").set_visual_mark(line + 1, start_col, line + 1, end_col - 1)
+    callback = function(opts)
+      require("utils.mark").set_visual_mark(opts.line + 1, opts.start_col, opts.line + 1, opts.end_col - 1)
       vim.api.nvim_feedkeys("gv", "n", true)
     end,
+    key_position = 1,
+    should_visual = true,
   })
 end
 
 function M.magic_yank_keyword(opt)
   magic_keyword.magic_keyword({
     keyword = opt.keyword,
-    callback = function(line, start_col, end_col)
+    callback = function(opts)
+      local line = opts.line
+      local start_col = opts.start_col
+      local end_col = opts.end_col
       vim.fn.setreg("+", vim.api.nvim_buf_get_text(0, line, start_col, line, end_col, {})[1])
     end,
+    key_position = 1,
+    should_visual = true,
   })
 end
 
 function M.magic_delete_keyword(opt)
   magic_keyword.magic_keyword({
     keyword = opt.keyword,
-    callback = function(line, start_col, end_col)
+    callback = function(opts)
+      local line = opts.line
+      local start_col = opts.start_col
+      local end_col = opts.end_col
       vim.api.nvim_buf_set_text(0, line, start_col, line, end_col, {})
     end,
+    key_position = 1,
+    should_visual = true,
   })
 end
 
 function M.magic_change_keyword(opt)
   magic_keyword.magic_keyword({
     keyword = opt.keyword,
-    callback = function(line, start_col, end_col)
+    callback = function(opts)
+      local line = opts.line
+      local start_col = opts.start_col
+      local end_col = opts.end_col
       require("utils.mark").set_visual_mark(line + 1, start_col, line + 1, end_col - 1)
       vim.api.nvim_feedkeys("gvc", "n", true)
     end,
+    key_position = 1,
+    should_visual = true,
   })
 end
 
 function M.magic_uppercase_keyword(opt)
   magic_keyword.magic_keyword({
     keyword = opt.keyword,
-    callback = function(line, start_col, end_col)
+    callback = function(opts)
+      local line = opts.line
+      local start_col = opts.start_col
+      local end_col = opts.end_col
       require("utils.mark").set_visual_mark(line + 1, start_col, line + 1, end_col - 1)
       vim.api.nvim_feedkeys("gvU", "n", true)
     end,
+    key_position = 1,
+    should_visual = true,
   })
 end
 
 function M.magic_lowercase_keyword(opt)
   magic_keyword.magic_keyword({
     keyword = opt.keyword,
-    callback = function(line, start_col, end_col)
+    callback = function(opts)
+      local line = opts.line
+      local start_col = opts.start_col
+      local end_col = opts.end_col
       require("utils.mark").set_visual_mark(line + 1, start_col, line + 1, end_col - 1)
       vim.api.nvim_feedkeys("gvu", "n", true)
     end,
+    key_position = 1,
+    should_visual = true,
   })
 end
 
-function M.magic_delete_to_word(opt)
-  magic_word_edge.magic_word_edge({
-    type = opt.type,
-    position = opt.position,
-    callback = function(opts)
-      require("utils.mark").set_visual_mark(opts.cursor[1], opts.cursor[2], opts.line + 1, opts.col)
-      vim.api.nvim_feedkeys("gvd", "n", false)
+function M.magic_delete_to_keyword(opt)
+  magic_keyword.magic_keyword({
+    keyword = opt.keyword,
+    callback = function(callback_opts)
+      local cursor = vim.api.nvim_win_get_cursor(0)
+      require("utils.mark").set_visual_mark(cursor[1], cursor[2], callback_opts.line + 1, callback_opts.col)
+      vim.api.nvim_buf_set_text(0, cursor[1] - 1, cursor[2], callback_opts.line + 1 - 1, callback_opts.col + 1, {})
     end,
+    key_position = opt.position,
+    should_visual = false,
+  })
+end
+
+function M.magic_yank_to_keyword(opt)
+  magic_keyword.magic_keyword({
+    keyword = opt.keyword,
+    callback = function(callback_opts)
+      local cursor = vim.api.nvim_win_get_cursor(0)
+      require("utils.mark").set_visual_mark(cursor[1], cursor[2], callback_opts.line + 1, callback_opts.col)
+      vim.api.nvim_feedkeys("gvy", "n", false)
+    end,
+    key_position = opt.position,
+    should_visual = false,
+  })
+end
+
+function M.magic_change_to_keyword(opt)
+  magic_keyword.magic_keyword({
+    keyword = opt.keyword,
+    callback = function(callback_opts)
+      local cursor = vim.api.nvim_win_get_cursor(0)
+      require("utils.mark").set_visual_mark(cursor[1], cursor[2], callback_opts.line + 1, callback_opts.col)
+      vim.api.nvim_buf_set_text(0, cursor[1] - 1, cursor[2], callback_opts.line + 1 - 1, callback_opts.col + 1, {})
+      vim.api.nvim_feedkeys("i", "n", false)
+    end,
+    key_position = opt.position,
+    should_visual = false,
   })
 end
 
 function M.magic_delete_to_line_start_end(opts)
   magic_line_start_end.magic_line_start_end({
     position = opts.position,
-    callback = function(opts)
+    callback = function(callback_opts)
       local cursor = vim.api.nvim_win_get_cursor(0)
-      require("utils.mark").set_visual_mark(cursor[1], cursor[2], opts.line, opts.col)
-      vim.api.nvim_feedkeys("gvd", "n", false)
+      require("utils.mark").set_visual_mark(cursor[1], cursor[2], callback_opts.line, callback_opts.col)
+      vim.api.nvim_buf_set_text(0, cursor[1] - 1, cursor[2], callback_opts.line - 1, callback_opts.col + 1, {})
     end,
   })
 end
@@ -140,6 +195,17 @@ function M.magic_line_start_end_move(opts)
     callback = function(opts)
       vim.api.nvim_win_set_cursor(0, { opts.line, opts.col })
     end,
+  })
+end
+
+function M.magic_word_move(opts)
+  magic_keyword.magic_keyword({
+    keyword = opts.keyword,
+    callback = function(opts)
+      vim.api.nvim_win_set_cursor(0, { opts.line + 1, opts.col })
+    end,
+    key_position = opts.position,
+    should_visual = false,
   })
 end
 
