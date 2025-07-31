@@ -25,9 +25,11 @@ ASCII 值排序。
 
 |i_CTRL-D|	CTRL-D		删除当前行的一个缩进宽度
 
-|i_CTRL-E|	CTRL-E		插入光标下方的字符
+✅ |i_CTRL-E|	CTRL-E		插入光标下方的字符
 		CTRL-F		未使用（但默认在 'cinkeys' 中用于重新缩进
 				当前行）
+✅ |i_CTRL-Y|	CTRL-Y		插入光标上方的字符
+      
 |i_CTRL-G_j|	CTRL-G CTRL-J	向下一行，到开始插入的列
 |i_CTRL-G_j|	CTRL-G j	向下一行，到开始插入的列
 |i_CTRL-G_j|	CTRL-G <Down>	向下一行，到开始插入的列
@@ -38,18 +40,19 @@ ASCII 值排序。
 |i_CTRL-G_U|	CTRL-G U	下一个光标移动不打断撤销
     
 
-|i_<BS>|	<BS>		删除光标前的字符
+✅ |i_<BS>|	<BS>		删除光标前的字符
 |i_CTRL-H|	CTRL-H		同 <BS>
 
 |i_digraph|	{char1}<BS>{char2}
 				输入二合字符（仅当 'digraph' 选项设置时）
-|i_<Tab>|	<Tab>		插入 <Tab> 字符
-|i_CTRL-I|	CTRL-I		同 <Tab>
+✅ |i_<Tab>|	<Tab>		插入 <Tab> 字符
+✅ |i_CTRL-I|	CTRL-I		同 <Tab>
 |i_CTRL-K|	CTRL-K {char1} {char2}
 				输入二合字符
 
-|i_<CR>|	<CR>		开始新行
-|i_<NL>|	<NL>		同 <CR>
+✅ |i_<CR>|	<CR>		开始新行
+✅ |i_<NL>|	<NL>		同 <CR>
+
 |i_CTRL-J|	CTRL-J		同 <CR>
 |i_CTRL-M|	CTRL-M		同 <CR>
 
@@ -70,17 +73,16 @@ ASCII 值排序。
 				按字面插入寄存器内容并修正缩进
 		CTRL-S		未使用或用于终端控制流
 |i_CTRL-T|	CTRL-T		在当前行插入一个缩进宽度
-|i_CTRL-U|	CTRL-U		删除当前行中所有输入的字符
+✅ |i_CTRL-U|	CTRL-U		删除当前行中所有输入的字符
 |i_CTRL-V|	CTRL-V {char}	按字面插入下一个非数字
 |i_CTRL-SHIFT-V|  CTRL-SHIFT-V {char}
 				同 CTRL-V，除非 |tui-modifyOtherKeys| 激活
 |i_CTRL-V_digit| CTRL-V {number} 将三位十进制数字作为单个字节插入
 |i_CTRL-W|	CTRL-W		删除光标前的单词
 |i_CTRL-X|	CTRL-X {mode}	进入 CTRL-X 子模式，参见 |i_CTRL-X_index|
-|i_CTRL-Y|	CTRL-Y		插入光标上方的字符
 |i_CTRL-[|	CTRL-[		同 <Esc>
 
-|i_<Esc>|	<Esc>		结束插入模式
+✅ |i_<Esc>|	<Esc>		结束插入模式
 |i_CTRL-\_CTRL-N| CTRL-\ CTRL-N	进入普通模式
 |i_CTRL-\_CTRL-G| CTRL-\ CTRL-G	进入普通模式
 
@@ -96,21 +98,23 @@ ASCII 值排序。
 |i_0_CTRL-D|	0 CTRL-D	删除当前行的所有缩进
 |i_^_CTRL-D|	^ CTRL-D	删除当前行的所有缩进，在下一行恢复
 
-|i_<Del>|	<Del>		删除光标下的字符
+✅ |i_<Del>|	<Del>		删除光标下的字符
 
 		Meta 字符 (0x80 到 0xff, 128 到 255)
 				未使用
 
-|i_<Left>|	<Left>		光标左移一个字符
+✅ |i_<Left>|	<Left>		光标左移一个字符
+✅ |i_<Right>|	<Right>		光标右移一个字符
+✅ |i_<Up>|	<Up>		光标上移一行
+✅ |i_<Down>|	<Down>		光标下移一行
+
 |i_<S-Left>|	<S-Left>	光标左移一个单词
 |i_<C-Left>|	<C-Left>	光标左移一个单词
-|i_<Right>|	<Right>		光标右移一个字符
 |i_<S-Right>|	<S-Right>	光标右移一个单词
 |i_<C-Right>|	<C-Right>	光标右移一个单词
-|i_<Up>|	<Up>		光标上移一行
 |i_<S-Up>|	<S-Up>		同 <PageUp>
-|i_<Down>|	<Down>		光标下移一行
 |i_<S-Down>|	<S-Down>	同 <PageDown>
+
 |i_<Home>|	<Home>		光标移到行首
 |i_<C-Home>|	<C-Home>	光标移到文件开头
 |i_<End>|	<End>		光标移到行尾之后
@@ -121,14 +125,15 @@ ASCII 值排序。
 |i_<Help>|	<Help>		停止插入模式并显示帮助窗口
 |i_<Insert>|	<Insert>	切换插入/替换模式
 |i_<LeftMouse>|	<LeftMouse>	光标移到鼠标点击处
-|i_<ScrollWheelDown>|	<ScrollWheelDown>	窗口下移三行
-|i_<S-ScrollWheelDown>|	<S-ScrollWheelDown>	窗口下移一页
-|i_<ScrollWheelUp>|	<ScrollWheelUp>		窗口上移三行
-|i_<S-ScrollWheelUp>|	<S-ScrollWheelUp>	窗口上移一页
-|i_<ScrollWheelLeft>|	<ScrollWheelLeft>	窗口左移六列
-|i_<S-ScrollWheelLeft>|	<S-ScrollWheelLeft>	窗口左移一页
-|i_<ScrollWheelRight>|	<ScrollWheelRight>	窗口右移六列
-|i_<S-ScrollWheelRight>| <S-ScrollWheelRight>	窗口右移一页
+
+✅ |i_<ScrollWheelDown>|	<ScrollWheelDown>	窗口下移三行
+✅ |i_<S-ScrollWheelDown>|	<S-ScrollWheelDown>	窗口下移一页
+✅ |i_<ScrollWheelUp>|	<ScrollWheelUp>		窗口上移三行
+✅ |i_<S-ScrollWheelUp>|	<S-ScrollWheelUp>	窗口上移一页
+✅ |i_<ScrollWheelLeft>|	<ScrollWheelLeft>	窗口左移六列
+✅ |i_<S-ScrollWheelLeft>|	<S-ScrollWheelLeft>	窗口左移一页
+✅ |i_<ScrollWheelRight>|	<ScrollWheelRight>	窗口右移六列
+✅ |i_<S-ScrollWheelRight>| <S-ScrollWheelRight>	窗口右移一页
 
 CTRL-X 子模式下的命令				*i_CTRL-X_index*
 
@@ -316,6 +321,7 @@ mark
 [⚠️][✅] |o|		o		2  在光标下方开始新行并插入文本，重复 N 次
 [⚠️][✅] |O|		O		2  在光标上方开始新行并插入文本，重复 N 次
 
+[✅] |V|		V		   开始行可视模式
 		CTRL-@		   未使用
 |CTRL-A|	CTRL-A		2  将光标处/后的数字加 N
 |CTRL-B|	CTRL-B		1  向后滚动 N 屏
@@ -328,8 +334,8 @@ mark
 |<Tab>|		<Tab>		1  转到跳转列表中第 N 个较新的条目
 	  	CTRL-I		1  同 <Tab>
 |<S-NL>|	<S-NL>		1  同 CTRL-F
-		CTRL-K		   未使用
-|CTRL-L|	CTRL-L		   重绘屏幕
+[✅]     	CTRL-K		   未使用
+[✅] |CTRL-L|	CTRL-L		   重绘屏幕
 |<CR>|		<CR>		1  光标移到下 N 行的第一个字符
 |<S-CR>|	<S-CR>		1  同 CTRL-F
 |CTRL-M|	CTRL-M		1  同 <CR>
@@ -388,7 +394,7 @@ mark
 |?<CR>|		?<CR>		1  向后搜索上次搜索的 {pattern}
 |@|		@{a-z}		2  执行寄存器 {a-z} 中的内容 N 次
 |@:|		@:		   重复上次 ":" 命令 N 次
-|@@|		@@		2  重复上次 @{a-z} N 次
+[✅] |@@|		@@		2  重复上次 @{a-z} N 次
 
 
 |K|		K		   使用 'keywordprg' 查找光标下的关键字
@@ -397,7 +403,6 @@ mark
 
 
 |U|		U		2  撤销对一行的所有最近更改
-|V|		V		   开始行可视模式
 |ZZ|		ZZ		   如果缓冲区已更改则写入并关闭窗口
 |ZQ|		ZQ		   不写入就关闭窗口
 |[|		[{char}		   方括号命令（见下面的 |[|）
@@ -408,7 +413,7 @@ mark
 |do|		do		2  同 ":diffget"
 |dp|		dp		2  同 ":diffput"
 |i|		i		2  在光标前插入文本 N 次
-|q|		q{0-9a-zA-Z"}	   将输入的字符记录到命名寄存器 {0-9a-zA-Z"}
+[✅] |q|		q{0-9a-zA-Z"}	   将输入的字符记录到命名寄存器 {0-9a-zA-Z"}
 				   （大写用于追加）
 [✅] |q|		q		   （记录时）停止记录
 |Q|		Q		2  重放上次记录的寄存器
@@ -435,14 +440,15 @@ mark
 |<S-LeftMouse>|	<S-LeftMouse>	   在鼠标点击位置同 "*"
 |<S-RightMouse>| <S-RightMouse>	   在鼠标点击位置同 "#"
 |<S-Up>|	<S-Up>		1  同 CTRL-B
-*<ScrollWheelDown>*	<ScrollWheelDown>	窗口下移三行
-*<S-ScrollWheelDown>*	<S-ScrollWheelDown>	窗口下移一页
-*<ScrollWheelUp>*	<ScrollWheelUp>		窗口上移三行
-*<S-ScrollWheelUp>*	<S-ScrollWheelUp>	窗口上移一页
-*<ScrollWheelLeft>*	<ScrollWheelLeft>	窗口左移六列
-*<S-ScrollWheelLeft>*	<S-ScrollWheelLeft>	窗口左移一页
-*<ScrollWheelRight>*	<ScrollWheelRight>	窗口右移六列
-*<S-ScrollWheelRight>*	<S-ScrollWheelRight>	窗口右移一页
+[✅] *<ScrollWheelDown>*	<ScrollWheelDown>	窗口下移三行
+[✅] *<S-ScrollWheelDown>*	<S-ScrollWheelDown>	窗口下移一页
+[✅] *<ScrollWheelUp>*	<ScrollWheelUp>		窗口上移三行
+[✅] |V|		V		   开始行可视模式
+[✅] *<S-ScrollWheelUp>*	<S-ScrollWheelUp>	窗口上移一页
+[✅] *<ScrollWheelLeft>*	<ScrollWheelLeft>	窗口左移六列
+[✅] *<S-ScrollWheelLeft>*	<S-ScrollWheelLeft>	窗口左移一页
+[✅] *<ScrollWheelRight>*	<ScrollWheelRight>	窗口右移六列
+[✅] *<S-ScrollWheelRight>*	<S-ScrollWheelRight>	窗口右移一页
 
 ==============================================================================
 2.1 文本对象						*objects*
@@ -451,42 +457,42 @@ mark
 
 标签		命令		   操作符等待和可视模式下的动作	~
 ------------------------------------------------------------------------------ ~
-|v_aquote|	a"		   双引号字符串
-|v_a'|		a'		   单引号字符串
-|v_a(|		a(		   同 ab
-|v_a)|		a)		   同 ab
-|v_a<|		a<		   从 '<' 到匹配的 '>' 的 "a <>"
-|v_a>|		a>		   同 a<
+[✅] |v_aquote|	a"		   双引号字符串
+[✅] |v_iquote|	i"		   双引号字符串内部（不含引号）
+[✅] |v_a'|		a'		   单引号字符串
+[✅] |v_i'|		i'		   单引号字符串内部（不含引号）
+[✅] |v_a(|		a(		   同 ab
+[✅] |v_a)|		a)		   同 ab
+[✅] |v_a<|		a<		   从 '<' 到匹配的 '>' 的 "a <>"
+[✅] |v_a>|		a>		   同 a<
 |v_aB|		aB		   从 `[{` 到 `]}` 的 "一个块"（带括号）
-|v_aW|		aW		   "一个词"（带空白）
-|v_a[|		a[		   从 '[' 到匹配的 ']' 的 "a []"
-|v_a]|		a]		   同 a[
-|v_a`|		a`		   反引号字符串
+[✅] |v_aw|		aw		   "一个单词"（带空白）
+[✅] |v_aW|		aW		   "一个词"（带空白）
+[✅] |v_a[|		a[		   从 '[' 到匹配的 ']' 的 "a []"
+[✅] |v_a]|		a]		   同 a[
+[✅] |v_a`|		a`		   反引号字符串
 |v_ab|		ab		   从 "[(" 到 "])" 的 "一个块"（带括号）
 |v_ap|		ap		   "一个段落"（带空白）
 |v_as|		as		   "一个句子"（带空白）
 |v_at|		at		   "一个标签块"（带空白）
-|v_aw|		aw		   "一个单词"（带空白）
-|v_a{|		a{		   同 aB
-|v_a}|		a}		   同 aB
-|v_iquote|	i"		   双引号字符串内部（不含引号）
-|v_i'|		i'		   单引号字符串内部（不含引号）
-|v_i(|		i(		   同 ib
-|v_i)|		i)		   同 ib
-|v_i<|		i<		   从 '<' 到匹配的 '>' 的内部
-|v_i>|		i>		   同 i<
+[✅] |v_a{|		a{		   同 aB
+[✅] |v_a}|		a}		   同 aB
+[✅] |v_i(|		i(		   同 ib
+[✅] |v_i)|		i)		   同 ib
+[✅] |v_i<|		i<		   从 '<' 到匹配的 '>' 的内部
+[✅] |v_i>|		i>		   同 i<
 |v_iB|		iB		   从 `[{` 和 `]}` 的内部块
-|v_iW|		iW		   "内部词"
-|v_i[|		i[		   从 '[' 到匹配的 ']' 的内部
-|v_i]|		i]		   同 i[
-|v_i`|		i`		   反引号字符串内部（不含反引号）
+[✅] |v_iW|		iW		   "内部词"
+[✅] |v_i[|		i[		   从 '[' 到匹配的 ']' 的内部
+[✅] |v_i]|		i]		   同 i[
+[✅] |v_i`|		i`		   反引号字符串内部（不含反引号）
 |v_ib|		ib		   从 "[(" 到 "])" 的内部块
 |v_ip|		ip		   "内部段落"
 |v_is|		is		   "内部句子"
 |v_it|		it		   "内部标签块"
 |v_iw|		iw		   "内部单词"
-|v_i{|		i{		   同 iB
-|v_i}|		i}		   同 iB
+[✅] |v_i{|		i{		   同 iB
+[✅] |v_i}|		i}		   同 iB
 
 ==============================================================================
 2.2 窗口命令						*CTRL-W*
@@ -697,11 +703,11 @@ tag		command		   action in Normal mode	~
 |gr|		gr{char}	2  虚拟替换 N 个字符为 {char}
 |gs|		gs		   休眠 N 秒（默认 1）
 |gt|		gt		   转到下一个标签页
-|gu|		gu{motion}	2  使 Nmove 文本变成小写
-|gv|		gv		   重新选择上一个可视区域
+[✅] |gu|		gu{motion}	2  使 Nmove 文本变成小写
+[✅] |gv|		gv		   重新选择上一个可视区域
 |gw|		gw{motion}	2  格式化 Nmove 文本并保持光标位置
 |gx|		gx		   执行光标处文件路径对应的应用程序
-|g@|		g@{motion}	   调用 'operatorfunc'
+[✅] |g@|		g@{motion}	   调用 'operatorfunc'
 |g~|		g~{motion}	2  切换 Nmove 文本的大小写
 |g<Down>|	g<Down>		1  同 "gj"
 |g<End>|	g<End>		1  同 "g$"
@@ -733,12 +739,16 @@ tag		command		   action in Normal mode	~
 |zE|		zE		   清除所有折叠
 |zF|		zF		   为 N 行创建折叠
 |zG|		zG		   临时将单词标记为拼写正确
-|zH|		zH		   当 'wrap' 关闭时向右滚动半个屏幕宽度
-|zL|		zL		   当 'wrap' 关闭时向左滚动半个屏幕宽度
-|zM|		zM		   设置 'foldlevel' 为零
+
+✅ |zH|		zH		   当 'wrap' 关闭时向右滚动半个屏幕宽度
+✅ |zL|		zL		   当 'wrap' 关闭时向左滚动半个屏幕宽度
+✅ |zh|		zh		   当 'wrap' 关闭时向右滚动 N 个字符
+✅ |zl|		zl		   当 'wrap' 关闭时向左滚动 N 个字符
+
 |zN|		zN		   设置 'foldenable'
 |zO|		zO		   递归打开折叠
-|zR|		zR		   设置 'foldlevel' 为最深层折叠
+[✅] |zM|		zM		   设置 'foldlevel' 为零
+[✅] |zR|		zR		   设置 'foldlevel' 为最深层折叠
 |zW|		zW		   临时将单词标记为拼写错误
 |zX|		zX		   重新应用 'foldlevel'
 |z^|		z^		   光标移到第 N 行（默认为窗口上方的行），
@@ -749,11 +759,9 @@ tag		command		   action in Normal mode	~
 |zd|		zd		   删除一个折叠
 |zf|		zf{motion}	   为 Nmove 文本创建折叠
 |zg|		zg		   永久将单词标记为拼写正确
-|zh|		zh		   当 'wrap' 关闭时向右滚动 N 个字符
 |zi|		zi		   切换 'foldenable'
 |zj|		zj		1  移动到下一个折叠的开始
 |zk|		zk		1  移动到上一个折叠的末尾
-|zl|		zl		   当 'wrap' 关闭时向左滚动 N 个字符
 |zm|		zm		   从 'foldlevel' 减去一
 |zn|		zn		   重置 'foldenable'
 |zo|		zo		   打开折叠
@@ -801,20 +809,73 @@ tag		command		   action in Normal mode	~
 |v_CTRL-O|	CTRL-O		   从选择模式切换到可视模式，执行一个命令
 |v_CTRL-V|	CTRL-V		   使可视模式变为块模式或停止可视模式
 |v_CTRL-X|	CTRL-X		2  从高亮文本中的数字减去 N
-|v_<Esc>|	<Esc>		   停止可视模式
+✅ |v_<Esc>|	<Esc>		   停止可视模式
 |v_CTRL-]|	CTRL-]		   跳转到高亮的标签
 |v_!|		!{filter}	2  通过外部命令 {filter} 过滤高亮的行
-|v_:|		:		   以高亮的行作为范围开始一个命令行
-|v_<|		<		2  将高亮的行向左缩进一个 'shiftwidth'
+✅ |v_:|		:		   以高亮的行作为范围开始一个命令行
 |v_=|		=		2  通过 'equalprg' 选项给出的外部程序
 				   过滤高亮的行
-|v_>|		>		2  将高亮的行向右缩进一个 'shiftwidth'
+✅ |v_<|		<		2  将高亮的行向左缩进一个 'shiftwidth'
+✅ |v_>|		>		2  将高亮的行向右缩进一个 'shiftwidth'
 |v_b_A|		A		2  块模式：在所有行的高亮区域后追加相同的文本
-|v_C|		C		2  删除高亮的行并开始插入
-|v_D|		D		2  删除高亮的行
 |v_b_I|		I		2  块模式：在所有行的高亮区域前插入相同的文本
 |v_J|		J		2  连接高亮的行
 |v_K|		K		   在高亮区域上运行 'keywordprg'
+|v_aquote|	a"		   扩展高亮区域，包含一个双引号字符串
+[✅] |v_a'|		a'		   扩展高亮区域，包含一个单引号字符串
+[✅] |v_a(|		a(		   同 ab
+[✅] |v_a)|		a)		   同 ab
+[✅] |v_a<|		a<		   扩展高亮区域，包含一个 <> 块
+[✅] |v_a>|		a>		   同 a<
+|v_aB|		aB		   扩展高亮区域，包含一个 {} 块（带括号）
+[✅] |v_aW|		aW		   扩展高亮区域，包含 "一个词"（带空白）
+|v_a[|		a[		   扩展高亮区域，包含一个 [] 块
+|v_a]|		a]		   同 a[
+[✅] |v_a`|		a`		   扩展高亮区域，包含一个反引号字符串
+|v_ab|		ab		   扩展高亮区域，包含一个 () 块（带括号）
+|v_ap|		ap		   扩展高亮区域，包含一个段落（带空白）
+|v_as|		as		   扩展高亮区域，包含一个句子（带空白）
+|v_at|		at		   扩展高亮区域，包含一个标签块（带空白）
+[✅] |v_aw|		aw		   扩展高亮区域，包含 "一个单词"（带空白）
+[✅] |v_a{|		a{		   同 aB
+[✅] |v_a}|		a}		   同 aB
+|v_g_CTRL-A|	g CTRL-A	2  给高亮文本中的数字加 N
+|v_g_CTRL-X|	g CTRL-X	2  从高亮文本中的数字减去 N
+|v_gJ|		gJ		2  连接高亮的行且不插入空格
+|v_gq|		gq		2  格式化高亮的行
+|v_gv|		gv		   交换当前和上一个高亮区域
+✅ |v_iquote|	i"		   扩展高亮区域，包含一个双引号字符串（不含引号）
+✅ |v_i'|		i'		   扩展高亮区域，包含一个单引号字符串（不含引号）
+✅ |v_i(|		i(		   同 ib
+✅ |v_i)|		i)		   同 ib
+✅ |v_i<|		i<		   扩展高亮区域，包含内部 <> 块
+✅ |v_i>|		i>		   同 i<
+|v_iB|		iB		   扩展高亮区域，包含内部 {} 块
+✅ |v_iW|		iW		   扩展高亮区域，包含 "内部词"
+✅ |v_i[|		i[		   扩展高亮区域，包含内部 [] 块
+✅ |v_i]|		i]		   同 i[
+✅ |v_i`|		i`		   扩展高亮区域，包含一个反引号字符串（不含反引号）
+|v_ib|		ib		   扩展高亮区域，包含内部 () 块
+|v_ip|		ip		   扩展高亮区域，包含内部段落
+|v_is|		is		   扩展高亮区域，包含内部句子
+✅ |v_it|		it		   扩展高亮区域，包含内部标签块
+✅ |v_iw|		iw		   扩展高亮区域，包含 "内部单词"
+✅ |v_i{|		i{		   同 iB
+✅ |v_i}|		i}		   同 iB
+|v_o|		o		   移动光标到区域的另一端
+✅ |v_p|		p		   用寄存器内容替换高亮区域；删除的文本进入未命名寄存器
+|v_r|		r		2  用一个字符替换高亮区域
+✅ |v_s|		s		2  删除高亮区域并开始插入
+✅ |v_u|		u		2  使高亮区域变成小写
+✅ |v_c|		c		2  删除高亮区域并开始插入
+✅ |v_d|		d		2  删除高亮区域
+✅ |v_v|		v		   使可视模式变为字符方式或停止可视模式
+✅ |v_x|		x		2  删除高亮区域
+✅ |v_y|		y		   复制高亮区域
+✅ |v_~|		~		2  切换高亮区域的大小写
+
+|v_C|		C		2  删除高亮的行并开始插入
+|v_D|		D		2  删除高亮的行
 |v_O|		O		   移动到区域的另一个角落
 |v_P|		P		   用寄存器内容替换高亮区域；寄存器不变
 |v_R|		R		2  删除高亮的行并开始插入
@@ -823,58 +884,6 @@ tag		command		   action in Normal mode	~
 |v_V|		V		   使可视模式变为行方式或停止可视模式
 |v_X|		X		2  删除高亮的行
 |v_Y|		Y		   复制高亮的行
-|v_aquote|	a"		   扩展高亮区域，包含一个双引号字符串
-|v_a'|		a'		   扩展高亮区域，包含一个单引号字符串
-|v_a(|		a(		   同 ab
-|v_a)|		a)		   同 ab
-|v_a<|		a<		   扩展高亮区域，包含一个 <> 块
-|v_a>|		a>		   同 a<
-|v_aB|		aB		   扩展高亮区域，包含一个 {} 块（带括号）
-|v_aW|		aW		   扩展高亮区域，包含 "一个词"（带空白）
-|v_a[|		a[		   扩展高亮区域，包含一个 [] 块
-|v_a]|		a]		   同 a[
-|v_a`|		a`		   扩展高亮区域，包含一个反引号字符串
-|v_ab|		ab		   扩展高亮区域，包含一个 () 块（带括号）
-|v_ap|		ap		   扩展高亮区域，包含一个段落（带空白）
-|v_as|		as		   扩展高亮区域，包含一个句子（带空白）
-|v_at|		at		   扩展高亮区域，包含一个标签块（带空白）
-|v_aw|		aw		   扩展高亮区域，包含 "一个单词"（带空白）
-|v_a{|		a{		   同 aB
-|v_a}|		a}		   同 aB
-|v_c|		c		2  删除高亮区域并开始插入
-|v_d|		d		2  删除高亮区域
-|v_g_CTRL-A|	g CTRL-A	2  给高亮文本中的数字加 N
-|v_g_CTRL-X|	g CTRL-X	2  从高亮文本中的数字减去 N
-|v_gJ|		gJ		2  连接高亮的行且不插入空格
-|v_gq|		gq		2  格式化高亮的行
-|v_gv|		gv		   交换当前和上一个高亮区域
-|v_iquote|	i"		   扩展高亮区域，包含一个双引号字符串（不含引号）
-|v_i'|		i'		   扩展高亮区域，包含一个单引号字符串（不含引号）
-|v_i(|		i(		   同 ib
-|v_i)|		i)		   同 ib
-|v_i<|		i<		   扩展高亮区域，包含内部 <> 块
-|v_i>|		i>		   同 i<
-|v_iB|		iB		   扩展高亮区域，包含内部 {} 块
-|v_iW|		iW		   扩展高亮区域，包含 "内部词"
-|v_i[|		i[		   扩展高亮区域，包含内部 [] 块
-|v_i]|		i]		   同 i[
-|v_i`|		i`		   扩展高亮区域，包含一个反引号字符串（不含反引号）
-|v_ib|		ib		   扩展高亮区域，包含内部 () 块
-|v_ip|		ip		   扩展高亮区域，包含内部段落
-|v_is|		is		   扩展高亮区域，包含内部句子
-|v_it|		it		   扩展高亮区域，包含内部标签块
-|v_iw|		iw		   扩展高亮区域，包含 "内部单词"
-|v_i{|		i{		   同 iB
-|v_i}|		i}		   同 iB
-|v_o|		o		   移动光标到区域的另一端
-|v_p|		p		   用寄存器内容替换高亮区域；删除的文本进入未命名寄存器
-|v_r|		r		2  用一个字符替换高亮区域
-|v_s|		s		2  删除高亮区域并开始插入
-|v_u|		u		2  使高亮区域变成小写
-|v_v|		v		   使可视模式变为字符方式或停止可视模式
-|v_x|		x		2  删除高亮区域
-|v_y|		y		   复制高亮区域
-|v_~|		~		2  切换高亮区域的大小写
 ==============================================================================
 4==============================================================================
 4. 命令行编辑					*ex-edit-index*

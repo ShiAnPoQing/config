@@ -200,6 +200,7 @@
 |:left|		:le[ft]		左对齐行
 |:right|	:ri[ght]	右对齐文本
 |:center|	:ce[nter]	将行居中对齐
+
 |:copy|		:co[py]		复制行
 |:t|		:t		复制行
 |:move|		:m[ove]		移动行

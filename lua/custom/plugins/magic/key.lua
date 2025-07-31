@@ -2,6 +2,7 @@ local M = {}
 local KEYS = "abcdefghijklmnopqrstuvwxyz"
 local key_types = { "one_key", "two_key", "three_key" }
 
+local count = 0
 local function get_random_key(is_ok)
   local random = math.random(26)
   local key = KEYS:sub(random, random)
@@ -27,6 +28,7 @@ function M:init(opts)
         self[key] = nil
       end
     end
+    count = 0
   end
   self.one_key = {
     available_key_count = 0,
@@ -50,6 +52,10 @@ end
 
 function M:compute_key(total)
   local function run(i)
+    if count >= 4 then
+      return
+    end
+    count = count + 1
     local min = math.pow(26, i)
     local max = math.pow(26, i + 1)
 
@@ -73,6 +79,12 @@ function M:compute_key(total)
   end
 
   local result = run(1)
+
+  print(total)
+  if result == nil then
+    print(total, "chucuo")
+    return
+  end
 
   if result.one_key ~= nil then
     self.one_key.available_key_count = result.one_key
