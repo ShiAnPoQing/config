@@ -80,9 +80,9 @@ function M:compute_key(total)
 
   local result = run(1)
 
-  print(total)
+  -- print(total)
   if result == nil then
-    print(total, "chucuo")
+    -- print(total, "chucuo")
     return
   end
 

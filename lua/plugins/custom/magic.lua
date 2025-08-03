@@ -3,6 +3,38 @@ return {
   name = "magic",
   keys = {
     {
+      "0vw(",
+      function()
+        require("custom.plugins.magic").magic_visual_keyword({
+          keyword = "([^)]*)",
+        })
+      end,
+    },
+    {
+      "0vw)",
+      function()
+        require("custom.plugins.magic").magic_visual_keyword({
+          keyword = "([^)]*)",
+        })
+      end,
+    },
+    {
+      "0vw{",
+      function()
+        require("custom.plugins.magic").magic_visual_keyword({
+          keyword = "{[^}]*}",
+        })
+      end,
+    },
+    {
+      "0vw}",
+      function()
+        require("custom.plugins.magic").magic_visual_keyword({
+          keyword = "{[^}]*}",
+        })
+      end,
+    },
+    {
       "0vwi",
       function()
         require("custom.plugins.magic").magic_visual_keyword({
@@ -82,7 +114,6 @@ return {
         })
       end,
     },
-
     {
       "0dwi",
       function()

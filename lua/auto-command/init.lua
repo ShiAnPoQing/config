@@ -1,16 +1,16 @@
 -- vim.api.nvim_create_autocmd("TextYankPost", {
--- callback = function()
--- vim.highlight.on_yank({
--- higroup = "IncSearch",
--- timeout = 150,
--- })
--- end
+--   callback = function()
+--     vim.highlight.on_yank({
+--       higroup = "IncSearch",
+--       timeout = 150,
+--     })
+--   end,
 -- })
 -- vim.api.nvim_create_augroup("custom_buffer", { clear = true })
 -- vim.api.nvim_create_autocmd("TextYankPost", {
--- group = "custom_buffer",
--- pattern = "*",
--- callback = function()
--- vim.highlight.on_yank({ timeout = 200 })
--- end,
+--   group = "custom_buffer",
+--   pattern = "*",
+--   callback = function()
+--     vim.highlight.on_yank({ timeout = 200 })
+--   end,
 -- })

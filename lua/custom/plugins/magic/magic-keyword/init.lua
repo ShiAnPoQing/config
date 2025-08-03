@@ -56,6 +56,7 @@ function M.magic_keyword(opts)
     rightcol = rightcol,
     keyword = keyword,
   })
+
   Line_hl:init(topline, botline)
 
   Keyword:match_keyword()

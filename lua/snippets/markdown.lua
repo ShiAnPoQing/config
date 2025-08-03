@@ -48,4 +48,177 @@ return {
       end
     end, {}),
   }),
+
+  s("@html", {
+    d(1, function(_, snip)
+      if utils.has_TM_SELECTED_TEXT(snip) then
+        return sn(nil, {
+          t("~~~html"),
+          t({ "", "" }),
+          i(1, snip.env.TM_SELECTED_TEXT),
+          t({ "", "~~~" }),
+        })
+      else
+        return sn(nil, {
+          t("~~~html"),
+          t({ "", "" }),
+          i(1),
+          t({ "", "~~~" }),
+        })
+      end
+    end, {}),
+  }),
+
+  s("@css", {
+    d(1, function(_, snip)
+      if utils.has_TM_SELECTED_TEXT(snip) then
+        return sn(nil, {
+          t("~~~css"),
+          t({ "", "" }),
+          i(1, snip.env.TM_SELECTED_TEXT),
+          t({ "", "~~~" }),
+        })
+      else
+        return sn(nil, {
+          t("~~~css"),
+          t({ "", "" }),
+          i(1),
+          t({ "", "~~~" }),
+        })
+      end
+    end, {}),
+  }),
+  s("@ps", {
+    d(1, function(_, snip)
+      if utils.has_TM_SELECTED_TEXT(snip) then
+        return sn(nil, {
+          t("~~~powershell"),
+          t({ "", "" }),
+          i(1, snip.env.TM_SELECTED_TEXT),
+          t({ "", "~~~" }),
+        })
+      else
+        return sn(nil, {
+          t("~~~powershell"),
+          t({ "", "" }),
+          i(1),
+          t({ "", "~~~" }),
+        })
+      end
+    end, {}),
+  }),
+  s("@c", {
+    d(1, function(_, snip)
+      if utils.has_TM_SELECTED_TEXT(snip) then
+        return sn(nil, {
+          t("~~~c"),
+          t({ "", "" }),
+          i(1, snip.env.TM_SELECTED_TEXT),
+          t({ "", "~~~" }),
+        })
+      else
+        return sn(nil, {
+          t("~~~c"),
+          t({ "", "" }),
+          i(1),
+          t({ "", "~~~" }),
+        })
+      end
+    end, {}),
+  }),
+  s("@js", {
+    d(1, function(_, snip)
+      if utils.has_TM_SELECTED_TEXT(snip) then
+        return sn(nil, {
+          t("~~~js"),
+          t({ "", "" }),
+          i(1, snip.env.TM_SELECTED_TEXT),
+          t({ "", "~~~" }),
+        })
+      else
+        return sn(nil, {
+          t("~~~js"),
+          t({ "", "" }),
+          i(1),
+          t({ "", "~~~" }),
+        })
+      end
+    end, {}),
+  }),
+  s("@ts", {
+    d(1, function(_, snip)
+      if utils.has_TM_SELECTED_TEXT(snip) then
+        return sn(nil, {
+          t("~~~ts"),
+          t({ "", "" }),
+          i(1, snip.env.TM_SELECTED_TEXT),
+          t({ "", "~~~" }),
+        })
+      else
+        return sn(nil, {
+          t("~~~ts"),
+          t({ "", "" }),
+          i(1),
+          t({ "", "~~~" }),
+        })
+      end
+    end, {}),
+  }),
+  s("@cpp", {
+    d(1, function(_, snip)
+      if utils.has_TM_SELECTED_TEXT(snip) then
+        return sn(nil, {
+          t("~~~cpp"),
+          t({ "", "" }),
+          i(1, snip.env.TM_SELECTED_TEXT),
+          t({ "", "~~~" }),
+        })
+      else
+        return sn(nil, {
+          t("~~~cpp"),
+          t({ "", "" }),
+          i(1),
+          t({ "", "~~~" }),
+        })
+      end
+    end, {}),
+  }),
+  s("@py", {
+    d(1, function(_, snip)
+      if utils.has_TM_SELECTED_TEXT(snip) then
+        return sn(nil, {
+          t("~~~python"),
+          t({ "", "" }),
+          i(1, snip.env.TM_SELECTED_TEXT),
+          t({ "", "~~~" }),
+        })
+      else
+        return sn(nil, {
+          t("~~~python"),
+          t({ "", "" }),
+          i(1),
+          t({ "", "~~~" }),
+        })
+      end
+    end, {}),
+  }),
+  s("@jv", {
+    d(1, function(_, snip)
+      if utils.has_TM_SELECTED_TEXT(snip) then
+        return sn(nil, {
+          t("~~~java"),
+          t({ "", "" }),
+          i(1, snip.env.TM_SELECTED_TEXT),
+          t({ "", "~~~" }),
+        })
+      else
+        return sn(nil, {
+          t("~~~java"),
+          t({ "", "" }),
+          i(1),
+          t({ "", "~~~" }),
+        })
+      end
+    end, {}),
+  }),
 }

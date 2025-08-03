@@ -4,7 +4,7 @@ function M:init(opt)
   self.keyword_count = 0
   self.matches = {}
   self.keyword_ns_id = vim.api.nvim_create_namespace("custom-keyword-highlight")
-  self.regex = vim.regex(opt.keyword)
+  self.regex = vim.regex(opt.keyword or "")
   self.cursor_row = opt.cursor[1]
   self.topline = opt.topline
   self.botline = opt.botline
@@ -54,9 +54,11 @@ end
 function M:get_keyword(i, leftcol, rightcol)
   table.insert(self.matches, {})
   local start_pos = 0
+
   while true do
     local start, end_ = self.regex:match_line(0, i - 1, start_pos)
-    if not start then
+
+    if not start or not end_ or (start == 0 and end_ == 0) then
       break
     end
 

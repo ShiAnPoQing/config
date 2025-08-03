@@ -1,5 +1,14 @@
-require("command")
 vim.g.mapleader = ";"
+require("command")
+require("lsp")
+vim.lsp.enable("lua_ls")
+vim.lsp.enable("ts_ls")
+vim.lsp.enable({ "vue_ls", "vtsls" })
+vim.lsp.enable("clangd")
+vim.lsp.enable("html")
+vim.lsp.enable("cssls")
+vim.lsp.enable("jsonls")
+
 require("plugin-options").setup({
   paths = {
     "options/options",
@@ -13,7 +22,7 @@ require("lazy-setup")
 require("lazy").setup({
   require("plugins.snippet.luasnip"),
   require("plugins.cmp.blank-cmp"),
-  require("plugins.lsp.lsp-config"),
+  -- require("plugins.lsp.lsp-config"),
   require("plugins.lsp.tiny-inline-diagnostic"),
   require("plugins.format.conform"),
   require("plugins.treesitter.treesitter"),
@@ -56,9 +65,9 @@ require("lazy").setup({
   -- require("plugins.style.barbar"),
   -- require"plugins.style.alpha-nvim",
   -- require("plugins.style.theme.material"),
-  require("plugins.style.theme.moonfly"),
+  -- require("plugins.style.theme.moonfly"),
   -- require("plugins.style.theme.gruvbox"),
-  -- require("plugins.style.theme.kanagawa"),
+  require("plugins.style.theme.kanagawa"),
   -- require("plugins.style.theme.tokyonight"),
   -- require("plugins.style.theme.catppuccin"),
   -- require("plugins.style.theme.colorbuddy"),
@@ -129,8 +138,15 @@ Keymap.add({
     end,
     "n",
   },
+  [";fd"] = {
+    "<cmd>FzFDirectories<CR>",
+    "n",
+  },
 })
 
 -- vim.cmd([[
 --   let g:augment_workspace_folders = ['~/Learn']
 -- ]])
+--
+
+vim.keymap.set("n", ";k", vim.lsp.buf.hover, {})
