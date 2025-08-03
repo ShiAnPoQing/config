@@ -1,29 +1,4 @@
-vim.lsp.config("vtsls", {
-  cmd = { "vtsls", "--stdio" },
-  filetypes = {
-    "typescript",
-    "javascript",
-    "javascriptreact",
-    "typescriptreact",
-    "vue",
-  },
-  root_markers = { "tsconfig.json", "package.json", "jsconfig.json", ".git" },
-  settings = {
-    vtsls = {
-      tsserver = {
-        globalPlugins = {
-          {
-            name = "@vue/typescript-plugin",
-            location = "/usr/lib/node_modules/@vue/language-server",
-            languages = { "vue" },
-            configNamespace = "typescript",
-          },
-        },
-      },
-    },
-  },
-})
-vim.lsp.config("vue_ls", {
+return {
   cmd = { "vue-language-server", "--stdio" },
   filetypes = { "vue" },
   root_markers = { "package.json" },
@@ -56,4 +31,4 @@ vim.lsp.config("vue_ls", {
       end)
     end
   end,
-})
+}

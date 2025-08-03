@@ -1,14 +1,5 @@
 vim.g.mapleader = ";"
 require("command")
-require("lsp")
-vim.lsp.enable("lua_ls")
-vim.lsp.enable("ts_ls")
-vim.lsp.enable({ "vue_ls", "vtsls" })
-vim.lsp.enable("clangd")
-vim.lsp.enable("html")
-vim.lsp.enable("cssls")
-vim.lsp.enable("jsonls")
-
 require("plugin-options").setup({
   paths = {
     "options/options",
@@ -83,6 +74,7 @@ require("lazy").setup({
   -- require("plugins.style.theme.rose-pine-neovim"),
 
   -- require("plugins.custom.win-action"),
+  require("plugins.custom.lsp"),
   require("plugins.custom.show-file-info"),
   require("plugins.custom.magic"),
   require("plugins.custom.word-move"),
@@ -144,9 +136,9 @@ Keymap.add({
   },
 })
 
+vim.keymap.del("x", "in")
+
 -- vim.cmd([[
 --   let g:augment_workspace_folders = ['~/Learn']
 -- ]])
 --
-
-vim.keymap.set("n", ";k", vim.lsp.buf.hover, {})

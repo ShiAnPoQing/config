@@ -60,7 +60,7 @@ end
 ---@class ClangdInitializeResult: lsp.InitializeResult
 ---@field offsetEncoding? string
 
-vim.lsp.config("clangd", {
+return {
   cmd = { "clangd" },
   filetypes = { "c", "cpp", "objc", "objcpp", "cuda" },
   root_markers = {
@@ -96,4 +96,4 @@ vim.lsp.config("clangd", {
       symbol_info()
     end, { desc = "Show symbol info" })
   end,
-})
+}

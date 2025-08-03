@@ -1,4 +1,4 @@
-vim.lsp.config("ts_ls", {
+return {
   cmd = { "typescript-language-server", "--stdio" },
   root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
   filetypes = {
@@ -29,4 +29,4 @@ vim.lsp.config("ts_ls", {
       implementationsCodeLens = { enabled = true },
     },
   },
-})
+}

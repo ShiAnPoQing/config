@@ -2,7 +2,7 @@
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-vim.lsp.config("jsonls", {
+return {
   cmd = { "vscode-json-language-server", "--stdio" },
   filetypes = { "json", "jsonc" },
   root_markers = { ".git" },
@@ -10,4 +10,4 @@ vim.lsp.config("jsonls", {
     provideFormatter = true,
   },
   capabilities = capabilities,
-})
+}

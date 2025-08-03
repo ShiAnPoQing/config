@@ -1,4 +1,10 @@
 return {
+  [";k"] = {
+    function()
+      vim.lsp.buf.hover()
+    end,
+    "n",
+  },
   -- Run lsp codelens
   ["<leader>lc"] = {
     function()

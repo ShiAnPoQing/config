@@ -1,4 +1,9 @@
-vim.lsp.config("lua_ls", {
+return {
+  cmd = { "lua-language-server" },
+  filetypes = { "lua" },
+  --   -- 将“根目录”设置为当前缓冲区文件的父目录，该目录包含“.luarc.json”或
+  --   -- “.luarc.jsonc”文件。共享根目录的文件将复用同一个 LSP 服务器的连接。
+  root_markers = { ".luarc.json", ".luarc.jsonc" },
   on_init = function(client)
     if client.workspace_folders then
       local path = client.workspace_folders[1].name
@@ -45,7 +50,7 @@ vim.lsp.config("lua_ls", {
   settings = {
     Lua = {},
   },
-})
+}
 
 -- vim.lsp.config["luals"] = {
 --   -- 启动服务器的命令和参数。
