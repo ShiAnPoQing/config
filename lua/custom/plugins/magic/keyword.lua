@@ -13,13 +13,18 @@ function M:init(opt)
   self.down_break = nil
 end
 
-function M:collect_keyword(i, keyword_start, keyword_end, byte_start, byte_end)
+function M:collect_keyword(i, keyword_start, keyword_end)
+  local before_text = vim.api.nvim_buf_get_text(0, i - 1, 0, i - 1, keyword_start, {})[1]
+  local text = vim.api.nvim_buf_get_text(0, i - 1, 0, i - 1, keyword_end, {})[1]
+  local virt_start_col = vim.fn.strdisplaywidth(before_text)
+  local virt_end_col = vim.fn.strdisplaywidth(text) - 1
+
   self.keyword_count = self.keyword_count + 1
   table.insert(self.matches[#self.matches], {
     keyword_end = keyword_end,
     keyword_start = keyword_start,
-    byte_start = byte_start,
-    byte_end = byte_end,
+    virt_start_col = virt_start_col,
+    virt_end_col = virt_end_col,
   })
 end
 
@@ -33,7 +38,13 @@ function M:set_keyword_callback(callback)
     if self.cursor_row - count >= self.topline then
       local match = self.matches[self.cursor_row - count - self.topline + 1]
       for _, value in ipairs(match) do
-        callback(self.cursor_row - count - 1, value.keyword_start, value.keyword_end, value.byte_start, value.byte_end)
+        callback(
+          self.cursor_row - count - 1,
+          value.keyword_start,
+          value.keyword_end,
+          value.virt_start_col,
+          value.virt_end_col
+        )
       end
     else
       self.up_break = true
@@ -42,7 +53,13 @@ function M:set_keyword_callback(callback)
     if self.cursor_row + count < self.botline then
       local match = self.matches[self.cursor_row + count - self.topline + 2]
       for _, value in ipairs(match) do
-        callback(self.cursor_row + count, value.keyword_start, value.keyword_end, value.byte_start, value.byte_end)
+        callback(
+          self.cursor_row + count,
+          value.keyword_start,
+          value.keyword_end,
+          value.virt_start_col,
+          value.virt_end_col
+        )
       end
     else
       self.down_break = true
@@ -65,15 +82,12 @@ function M:get_keyword(i, leftcol, rightcol)
 
     local keyword_start = start + start_pos
     local keyword_end = end_ + start_pos
+
     if keyword_start < leftcol or keyword_end > rightcol then
       return
     end
-    local before_text = vim.api.nvim_buf_get_text(0, i - 1, 0, i - 1, keyword_start, {})[1]
-    local text = vim.api.nvim_buf_get_text(0, i - 1, 0, i - 1, keyword_end, {})[1]
-    local display_start = vim.fn.strdisplaywidth(before_text)
-    local display_end = vim.fn.strdisplaywidth(text) - 1
-    self:collect_keyword(i, display_start, display_end, keyword_start, keyword_end)
-    -- self:collect_keyword(i, keyword_start, keyword_end)
+
+    self:collect_keyword(i, keyword_start, keyword_end)
     start_pos = start_pos + end_
   end
 end

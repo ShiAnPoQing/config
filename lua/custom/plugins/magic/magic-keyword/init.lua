@@ -61,32 +61,35 @@ function M.magic_keyword(opts)
 
   Keyword:match_keyword()
   Key:compute_key(Keyword.keyword_count)
-  Keyword:set_keyword_callback(function(line, start_col, end_col, byte_start, byte_end)
+  Keyword:set_keyword_callback(function(line, start_col, end_col, virt_start_col, virt_end_col)
     local col
-    local byte_col
+    local virt_col
 
     if key_position == 1 then
       col = start_col
-      byte_col = byte_start - 1
+      virt_col = virt_start_col
     elseif key_position == 2 then
       col = end_col - 1
-      byte_col = byte_end - 2
+      virt_col = virt_end_col
     end
+
     -- extmark 必须使用 display width 位置
     Key:register({
       callback = function()
         opts.callback({
           line = line,
+          col = col,
           start_col = start_col,
           end_col = end_col,
-          col = col,
-          byte_col = byte_col,
+          virt_col = virt_col,
+          virt_start_col = virt_start_col,
+          virt_end_col = virt_end_col,
         })
       end,
       one_key = {
         set_extmark = function(opts)
           vim.api.nvim_buf_set_extmark(0, opts.ns_id, line, 0, {
-            virt_text_win_col = col,
+            virt_text_win_col = virt_col,
             virt_text = { { opts.key, hl_group_next_key } },
           })
           if should_visual then
@@ -100,12 +103,12 @@ function M.magic_keyword(opts)
       two_key = {
         set_extmark = function(opts1, opts2)
           vim.api.nvim_buf_set_extmark(0, opts1.ns_id, line, 0, {
-            virt_text_win_col = col,
+            virt_text_win_col = virt_col,
             virt_text = { { opts1.key, hl_group_next_key1 } },
           })
           if end_col - start_col ~= 1 then
             vim.api.nvim_buf_set_extmark(0, opts2.ns_id, line, 0, {
-              virt_text_win_col = col + 1,
+              virt_text_win_col = virt_col + 1,
               virt_text = { { opts2.key, hl_group_next_key2 } },
             })
           end
@@ -118,7 +121,7 @@ function M.magic_keyword(opts)
         end,
         reset_extmark = function(opts)
           vim.api.nvim_buf_set_extmark(0, opts.ns_id, line, 0, {
-            virt_text_win_col = col,
+            virt_text_win_col = virt_col,
             virt_text = { { opts.key, hl_group_next_key } },
           })
           if should_visual then

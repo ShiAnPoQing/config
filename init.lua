@@ -7,6 +7,7 @@ require("plugin-options").setup({
     "options/markdown",
   },
 })
+
 require("repeat").setup({})
 local Keymap = require("plugin-keymap").setup()
 require("lazy-setup")
@@ -125,12 +126,6 @@ Keymap.add({
           print("可以")
         end,
       })
-    end,
-    "n",
-  },
-  [";."] = {
-    function()
-      require("repeat").toggle_repeat()
     end,
     "n",
   },

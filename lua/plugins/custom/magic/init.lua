@@ -19,7 +19,7 @@ local keys = {
       require("custom.plugins.magic").magic_word_move({
         position = 2,
         keyword = function(opts)
-          return opts.word_outer
+          return opts.word_inner
         end,
       })
     end,
@@ -43,7 +43,7 @@ local keys = {
       require("custom.plugins.magic").magic_word_move({
         position = 2,
         keyword = function(opts)
-          return opts.WORD_outer
+          return opts.WORD_inner
         end,
       })
     end,

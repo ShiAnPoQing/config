@@ -1,7 +1,6 @@
 local M = {}
 
 local current_record
-local is_neovim_repeat = false
 
 function M.vim_repeat()
   if not current_record then
@@ -19,23 +18,11 @@ function M.record(opts)
   current_record = opts
 end
 
-function M.toggle_repeat()
-  if not is_neovim_repeat then
-    pcall(vim.keymap.del, "n", ".", {})
-  else
-    vim.keymap.set("n", ".", function()
-      M.vim_repeat()
-    end, { noremap = true })
-  end
-
-  is_neovim_repeat = not is_neovim_repeat
-end
-
 --- @class RepeatOptions
 
 --- @param opts RepeatOptions
 function M.setup(opts)
-  vim.keymap.set("n", ".", function()
+  vim.keymap.set("n", "<M-.>", function()
     M.vim_repeat()
   end, { noremap = true })
 end
