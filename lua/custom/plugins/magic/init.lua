@@ -3,8 +3,15 @@ local magic_keyword = require("custom.plugins.magic.magic-keyword")
 local magic_line_start_end = require("custom.plugins.magic.magic-line-start-end")
 
 local function set_hl_group()
-  local visual_hl = vim.api.nvim_get_hl(0, { name = "Visual" })
-
+  vim.api.nvim_set_hl(0, "CustomMagicVisual", {
+    fg = "#cdcdcd",
+    bg = "#333738",
+  })
+  vim.api.nvim_set_hl(0, "CustomMagicVisual2", {
+    fg = "#cdcdcd",
+    bg = "#292D2D",
+  })
+  local visual_hl = vim.api.nvim_get_hl(0, { name = "CustomMagicVisual" })
   vim.api.nvim_set_hl(0, "CustomMagicNextKey", {
     fg = "#ff007c",
   })

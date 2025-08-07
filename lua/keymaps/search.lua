@@ -1,3 +1,11 @@
+local function select_all()
+  vim.cmd("normal! vv")
+  local Mark = require("utils.mark")
+  local line_count = vim.api.nvim_buf_line_count(0)
+  Mark.set_visual_mark(1, 0, line_count, 0)
+  vim.cmd("normal! gvV")
+end
+
 return {
   -- search cursor text
   ["*"] = { "*zz", "n" },
@@ -6,7 +14,7 @@ return {
   --["%"] = { "%zz", "n" },
   -- select all
   ["<C-a>"] = {
-    "ggVG",
+    select_all,
     "n",
   },
   -- search visual text

@@ -221,6 +221,7 @@ Blob操作：blob-functions
   setbufline() 替换指定缓冲区中的一行
   appendbufline() 在指定缓冲区中附加行列表
   deletebufline() 从指定缓冲区中删除行
+
 系统函数和文件操作：system-functions file-functions
   glob() 扩展通配符
   globpath() 在多个目录中扩展通配符
@@ -267,6 +268,7 @@ Blob操作：blob-functions
   reltime() 准确获取当前或经过的时间
   reltimestr() 将reltime()结果转换为字符串
   reltimefloat() 将reltime()结果转换为浮点数
+
 缓冲区、窗口和参数列表：buffer-functions window-functions arg-functions
   argc() 参数列表中的条目数
   argidx() 参数列表中的当前位置

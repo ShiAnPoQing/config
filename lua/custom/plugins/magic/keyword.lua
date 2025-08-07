@@ -13,11 +13,15 @@ function M:init(opt)
   self.down_break = nil
 end
 
+local function get_display_width(start_row, start_col, end_row, end_col)
+  local text = vim.api.nvim_buf_get_text(0, start_row, start_col, end_row, end_col, {})[1]
+  local display_width = vim.fn.strdisplaywidth(text)
+  return display_width
+end
+
 function M:collect_keyword(i, keyword_start, keyword_end)
-  local before_text = vim.api.nvim_buf_get_text(0, i - 1, 0, i - 1, keyword_start, {})[1]
-  local text = vim.api.nvim_buf_get_text(0, i - 1, 0, i - 1, keyword_end, {})[1]
-  local virt_start_col = vim.fn.strdisplaywidth(before_text)
-  local virt_end_col = vim.fn.strdisplaywidth(text) - 1
+  local virt_start_col = get_display_width(i - 1, 0, i - 1, keyword_start)
+  local virt_end_col = get_display_width(i - 1, 0, i - 1, keyword_end) - 1
 
   self.keyword_count = self.keyword_count + 1
   table.insert(self.matches[#self.matches], {
@@ -82,8 +86,10 @@ function M:get_keyword(i, leftcol, rightcol)
 
     local keyword_start = start + start_pos
     local keyword_end = end_ + start_pos
+    local start_dislay_width = get_display_width(i - 1, 0, i - 1, keyword_start)
+    local end_dislay_width = get_display_width(i - 1, 0, i - 1, keyword_end)
 
-    if keyword_start < leftcol or keyword_end > rightcol then
+    if start_dislay_width < leftcol or end_dislay_width > rightcol then
       return
     end
 

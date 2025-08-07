@@ -88,12 +88,20 @@ end
 function M.load(buf, opt)
   require("plugin-keymap").add({
     ["<Esc>"] = {
-      "<cmd>q!<cr>",
+      function()
+        if opt.on_close then
+          opt.on_close()
+        end
+      end,
       "n",
       { buffer = buf },
     },
     ["q"] = {
-      "<cmd>q!<cr>",
+      function()
+        if opt.on_close then
+          opt.on_close()
+        end
+      end,
       "n",
       { buffer = buf },
     },

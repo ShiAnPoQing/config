@@ -76,7 +76,7 @@ require("lazy").setup({
   -- require("plugins.style.theme.onenord"),
   -- require("plugins.style.theme.rose-pine-neovim"),
   require("plugins.custom.lsp"),
-  require("plugins.custom.show-file-info"),
+  require("plugins.custom.file-details"),
   require("plugins.custom.magic"),
 })
 
