@@ -27,7 +27,8 @@ require("lazy").setup({
   require("plugins.filemanager.yazi"),
   require("plugins.filemanager.oil-nvim"),
   require("plugins.code.aerial"),
-  require("plugins.code.windsurf"),
+  -- require("plugins.code.windsurf"),
+  require("plugins.code.supermaven"),
   require("plugins.code.typescript-tool"),
   require("plugins.code.twilight"),
   require("plugins.tmux.vim-tmux-navigator"),
@@ -47,18 +48,20 @@ require("lazy").setup({
   require("plugins.misc.undotree"),
   require("plugins.misc.numb"),
   require("plugins.misc.nvim-possession"),
-  require("plugins.misc.harpoon"),
+  -- require("plugins.misc.harpoon"),
+  require("plugins.misc.showkey"),
 
   require("plugins.git.gitsigns"),
 
-  require("plugins.style.lualine"),
-  require("plugins.style.dashboard-nvim"),
+  -- require("plugins.style.lualine"),
+  -- require("plugins.style.dashboard-nvim"),
   -- require("plugins.style.barbar"),
   -- require"plugins.style.alpha-nvim",
   -- require("plugins.style.theme.material"),
   -- require("plugins.style.theme.moonfly"),
   -- require("plugins.style.theme.gruvbox"),
-  require("plugins.style.theme.kanagawa"),
+  require("plugins.style.theme.vague"),
+  -- require("plugins.style.theme.kanagawa"),
   -- require("plugins.style.theme.tokyonight"),
   -- require("plugins.style.theme.catppuccin"),
   -- require("plugins.style.theme.colorbuddy"),
@@ -77,7 +80,6 @@ require("lazy").setup({
   require("plugins.custom.lsp"),
   require("plugins.custom.show-file-info"),
   require("plugins.custom.magic"),
-  require("plugins.custom.word-move"),
 })
 
 require("test")

@@ -144,7 +144,28 @@ function M.add(maps)
   end
 end
 
-function M.del(maps) end
+--- @param maps table<string, table>
+function M.del(maps)
+  if type(maps) ~= "table" then
+    return
+  end
+
+  for lhs, v in pairs(maps) do
+    local modes = {}
+    for _, mode in ipairs(v) do
+      if type(mode) == "string" then
+        table.insert(modes, mode)
+      end
+    end
+
+    local opts = {}
+    if type(maps.buffer) == "number" or type(maps.buffer) == "boolean" then
+      opts.buffer = maps.buffer
+    end
+
+    vim.keymap.del(modes, lhs, opts)
+  end
+end
 
 local function load_keymaps(base_path, current_path)
   local path = current_path .. "/*.lua"

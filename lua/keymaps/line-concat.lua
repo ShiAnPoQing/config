@@ -14,7 +14,7 @@ return {
     { "n", "x" },
     { expr = true },
   },
-  ["<space><space>-"] = {
+  ["<space>--"] = {
     function()
       line_concat.line_concat()
       R.Record(function()

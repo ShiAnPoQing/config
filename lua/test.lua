@@ -1,7 +1,6 @@
 local K = require("plugin-keymap")
 
 K.add({
-
   -- ["<F9>"] = {
   --   function()
   --     local pickers = require("telescope.pickers")

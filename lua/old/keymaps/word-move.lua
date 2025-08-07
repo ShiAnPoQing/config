@@ -1,7 +1,3 @@
-local R = require("repeat")
-local K = require("plugin-keymap")
-local M = {}
-
 local function space_o()
   local mode = vim.api.nvim_get_mode().mode
   local count = vim.v.count1
@@ -89,48 +85,47 @@ local function O()
   vim.api.nvim_feedkeys(count .. "E", "n", true)
 end
 
-function M.space_o()
-  space_o()
-  R.Record(space_o)
-end
-
-function M.space_i()
-  space_i()
-  R.Record(space_i)
-end
-
-function M.space_I()
-  space_I()
-  R.Record(space_I)
-end
-
-function M.space_O()
-  space_O()
-  R.Record(space_O)
-end
-
-function M.i()
-  i()
-  R.Record(i)
-end
-
-function M.o()
-  o()
-  R.Record(o)
-end
-
-function M.I()
-  I()
-  R.Record(I)
-end
-
-function M.O()
-  O()
-  R.Record(O)
-end
-
-function M.setup()
-  K.add(require("custom.plugins.word-move.keymaps"))
-end
-
-return M
+return {
+  -- For insert mode: like <M-d><M-o>
+  ["<M-o>"] = {
+    o,
+    "o",
+  },
+  -- For insert mode: like <M-d><M-i>
+  ["<M-i>"] = {
+    i,
+    "o",
+  },
+  ["i"] = {
+    i,
+    { "n", "x", "o" },
+  },
+  ["o"] = {
+    o,
+    { "n", "x", "o" },
+  },
+  ["I"] = {
+    I,
+    { "n", "x", "o" },
+  },
+  ["O"] = {
+    O,
+    { "n", "x", "o" },
+  },
+  ["<space>i"] = {
+    space_i,
+    { "n", "x", "o" },
+  },
+  ["<space>o"] = {
+    space_o,
+    { "n", "x", "o" },
+  },
+  ["<space>I"] = {
+    space_I,
+    { "n", "x", "o" },
+  },
+  ["<space>O"] = {
+    space_O,
+    { "n", "x", "o" },
+  },
+}

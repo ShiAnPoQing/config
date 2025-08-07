@@ -6,7 +6,7 @@ return {
     showcmd = true,
     title = true,
     titlestring = "MuHuiXueLuoAnPoQing -neovim",
-    showmode = false,
+    showmode = true,
     cmdheight = 1,
     autoindent = true,
     cindent = true,

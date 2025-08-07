@@ -1,48 +1,44 @@
-local W = require("custom.plugins.word-move")
-
 return {
-  ["<M-o>"] = {
-    W.o,
-    "o",
-  },
-  ["<M-i>"] = {
-    W.i,
-    "o",
-  },
+  -- For insert mode: like <M-d><M-o>
+  -- ["<M-o>"] = {
+  --   "e",
+  --   "o",
+  -- },
+  -- -- For insert mode: like <M-d><M-i>
+  -- ["<M-i>"] = {
+  --   "b",
+  --   "o",
+  -- },
   ["i"] = {
-    W.i,
+    "b",
     { "n", "x", "o" },
   },
   ["o"] = {
-    W.o,
+    "e",
     { "n", "x", "o" },
   },
   ["I"] = {
-    W.I,
+    "B",
     { "n", "x", "o" },
   },
   ["O"] = {
-    W.O,
+    "E",
     { "n", "x", "o" },
   },
   ["<space>i"] = {
-    function()
-      W.space_i()
-    end,
+    "ge",
     { "n", "x", "o" },
   },
   ["<space>o"] = {
-    function()
-      W.space_o()
-    end,
+    "w",
     { "n", "x", "o" },
   },
   ["<space>I"] = {
-    W.space_I,
+    "gE",
     { "n", "x", "o" },
   },
   ["<space>O"] = {
-    W.space_O,
+    "W",
     { "n", "x", "o" },
   },
 }

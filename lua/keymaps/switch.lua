@@ -5,6 +5,17 @@ local function switch(option)
 end
 
 return {
+  [";vt"] = {
+    function()
+      local value = vim.opt.virtualedit:get()[1]
+      if value == "all" then
+        vim.opt.virtualedit = "none"
+      else
+        vim.opt.virtualedit = "all"
+      end
+    end,
+    "n",
+  },
   [";csl"] = {
     function()
       vim.opt.cursorline = not vim.opt.cursorline:get()
@@ -14,8 +25,22 @@ return {
   ["<space><space>-"] = {
     function()
       if vim.opt["wrap"]:get() then
+        require("plugin-keymap").add({
+          ["J"] = { "3j", { "n", "x" } },
+          ["K"] = { "3k", { "n", "x" } },
+        })
+        require("plugin-keymap").del({
+          ["j"] = { "n", "x" },
+          ["k"] = { "n", "x" },
+        })
         vim.opt.wrap = false
       else
+        require("plugin-keymap").add({
+          ["j"] = { "gj", { "n", "x" } },
+          ["k"] = { "gk", { "n", "x" } },
+          ["J"] = { "3gj", { "n", "x" } },
+          ["K"] = { "3gk", { "n", "x" } },
+        })
         vim.opt.wrap = true
       end
     end,

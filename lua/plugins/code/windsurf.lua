@@ -1,6 +1,7 @@
 return {
   "Exafunction/windsurf.vim",
-  event = "BufEnter",
+  -- event = "BufEnter",
+  enabled = false,
   config = function()
     vim.keymap.set("i", "<C-g>", function()
       return vim.fn["codeium#Accept"]()
