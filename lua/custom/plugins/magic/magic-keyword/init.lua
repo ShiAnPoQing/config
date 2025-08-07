@@ -11,6 +11,8 @@ local keywords = {
   ["WORD_outer"] = "\\S\\+\\s*",
 }
 
+-- 为何中文不行 为何中文不行 为何中文不行 为何中文不行 为何中文不行 为何中文不行为何中文不行为何中文不行
+
 --- @class MagicKeyword
 --- @field keyword string | fun(opts):string
 --- @field callback function

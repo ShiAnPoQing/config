@@ -1,101 +1,46 @@
-local M = {
-  currentRepeat = nil,
-}
+local M = {}
 
-local queue = {}
-local hadStart = false
-local hadFixed = false
+local current_record
+local current_changedtick = vim.b.changedtick
+M.is_repeat_lead_to_cursored = false
 
-local function processQueue()
-  if not queue then
+function M.vim_repeat()
+  if not current_record then
     return
   end
-  for _, callback in ipairs(queue) do
-    callback()
-  end
+  M.is_repeat_lead_to_cursored = true
+  current_record.callback()
 end
 
-local function execRepeat()
-  if queue then
-    processQueue()
-  else
-    if type(M.currentRepeat) == "function" then
-      M.currentRepeat()
-    end
-  end
+--- @class RecordOptions
+--- @field callback fun()
+--- @field name string
+
+--- @param opts RecordOptions
+function M.record(opts)
+  current_record = opts
+  vim.keymap.set("n", ".", function()
+    M.vim_repeat()
+  end, { noremap = true })
 end
 
-function M.Repeat()
-  if vim.v.count1 > 0 then
-    for i = 1, vim.v.count1 do
-      execRepeat()
-    end
-  else
-    execRepeat()
-  end
-end
+--- @class RepeatOptions
 
-function M.Record(callback)
-  if hadFixed then
-    return
-  end
-
-  M.currentRepeat = callback
-  if hadStart then
-    table.insert(queue, callback)
-  else
-    queue = nil
-  end
-end
-
-function M.RepeatToggleFixed()
-  if hadFixed then
-    print("取消 Reqeat 固定")
-    hadFixed = false
-  else
-    print("固定 Repeat")
-    hadFixed = true
-  end
-end
-
-function M.RecordStart()
-  print("开始记录")
-  queue = {}
-  hadStart = true
-end
-
-function M.RecordEnd()
-  print("结束记录")
-  hadStart = false
-end
-
-function M.setup()
-  require("plugin-keymap").add({
-    [";rs"] = {
-      function()
-        M.RecordStart()
-      end,
-      "n",
-    },
-    [";re"] = {
-      function()
-        M.RecordEnd()
-      end,
-      "n",
-    },
-    [";rf"] = {
-      function()
-        M.RepeatToggleFixed()
-      end,
-      "n",
-    },
-    -- repeat
-    -- ["."] = {
-    --   function()
-    --     require("repeat").Repeat()
-    --   end,
-    --   { "n", "x" },
-    -- },
+--- @param opts RepeatOptions
+function M.setup(opts)
+  vim.api.nvim_create_autocmd("CursorMoved", {
+    group = vim.api.nvim_create_augroup("custom-repeat", {}),
+    callback = function()
+      local changedtick = vim.b.changedtick
+      if changedtick ~= current_changedtick then
+        current_changedtick = changedtick
+        if not M.is_repeat_lead_to_cursored then
+          vim.keymap.set("n", ".", ".", { noremap = true })
+        else
+          M.is_repeat_lead_to_cursored = false
+        end
+      end
+    end,
   })
 end
 

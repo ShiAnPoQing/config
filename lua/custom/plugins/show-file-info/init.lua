@@ -36,7 +36,9 @@ function M.show_file_info()
   vim.api.nvim_buf_set_lines(buf, 0, 1, false, { info, line_count .. " lines" })
 
   WIN_ID = vim.api.nvim_open_win(buf, true, opts)
-  vim.api.nvim_buf_set_option(buf, "modifiable", false)
+  vim.api.nvim_set_option_value("modifiable", false, {
+    buf = buf,
+  })
   require("utils.float.win-move").load(buf, {})
 end
 

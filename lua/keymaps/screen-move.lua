@@ -180,13 +180,13 @@ return {
   -- jump the middle of cursor to left
   ["<C-m>"] = {
     function()
-      require("custom.plugins.move-col-center").move_col_center("left")
+      require("custom.builtin.move-col-center").move_col_center("left")
     end,
     "n",
   },
   ["<M-m>"] = {
     function()
-      require("custom.plugins.move-col-center").move_col_center("right")
+      require("custom.builtin.move-col-center").move_col_center("right")
     end,
     "n",
   },

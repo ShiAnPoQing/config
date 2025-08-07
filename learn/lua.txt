@@ -1294,60 +1294,6 @@ vim.isarray({t})                                               *vim.isarray()*
     另见: ~
       • https://github.com/openresty/luajit2#tableisarray
 
-vim.islist({t})                                                 *vim.islist()*
-    测试 `t` 是否为“列表”：仅用从 1 开始连续整数索引的表（|lua-length| 所称“正规数组”）。
-
-    空表 `{}` 是列表，除非由 |vim.empty_dict()| 创建或作为字典风格 |API| 或 Vimscript 结果返回，如 |rpcrequest()| 或 |vim.fn|。
-
-    参数: ~
-      • {t}  (`table?`)
-
-    返回: ~
-        (`boolean`) 若为列表风格表则为 `true`，否则为 `false`
-
-    另见: ~
-      • |vim.isarray()|
-
-vim.list_contains({t}, {value})                          *vim.list_contains()*
-    检查列表风格表（整数键无间断）是否包含 `value`。
-
-    参数: ~
-      • {t}      (`table`) 要检查的表（必须为列表风格，不做校验）
-      • {value}  (`any`) 要比较的值
-
-    返回: ~
-        (`boolean`) 若 `t` 包含 `value` 则为 `true`
-
-    另见: ~
-      • |vim.tbl_contains()| 检查一般表中的值
-
-vim.list_extend({dst}, {src}, {start}, {finish})           *vim.list_extend()*
-    用另一个列表风格表的值扩展一个列表风格表。
-
-    注意: 该操作会修改 dst！
-
-    参数: ~
-      • {dst}     (`table`) 被修改并追加的列表
-      • {src}     (`table`) 要插入值的列表
-      • {start}   (`integer?`) src 的起始索引，默认 1
-      • {finish}  (`integer?`) src 的结束索引，默认 `#src`
-
-    返回: ~
-        (`table`) dst
-
-    另见: ~
-      • |vim.tbl_extend()|
-
-vim.list_slice({list}, {start}, {finish})                   *vim.list_slice()*
-    创建一个只包含 start 到 end（含）元素的表副本
-
-    参数: ~
-      • {list}    (`any[]`) 表
-      • {start}   (`integer?`) 切片起始范围
-      • {finish}  (`integer?`) 切片结束范围
-
-    返回: ~
-        (`any[]`) 从 start 到 finish（含）的表副本
 
 vim.pesc({s})                                                     *vim.pesc()*
     转义 |lua-patterns| 中的魔法字符。

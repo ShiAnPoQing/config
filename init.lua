@@ -7,18 +7,15 @@ require("plugin-options").setup({
     "options/markdown",
   },
 })
-require("repeat").setup()
+-- require("repeat").setup({})
 local Keymap = require("plugin-keymap").setup()
 require("lazy-setup")
 require("lazy").setup({
   require("plugins.snippet.luasnip"),
   require("plugins.cmp.blank-cmp"),
-  -- require("plugins.lsp.lsp-config"),
   require("plugins.lsp.tiny-inline-diagnostic"),
   require("plugins.format.conform"),
   require("plugins.treesitter.treesitter"),
-  -- require("plugins.treesitter.nvim-treesitter-context"),
-  -- require("plugins.telescope.telescope"),
   require("plugins.fzf.fzf-lua"),
   require("plugins.tex.vimtex"),
   require("plugins.markdown.markdown-preview"),
@@ -33,8 +30,11 @@ require("lazy").setup({
   require("plugins.code.twilight"),
   require("plugins.tmux.vim-tmux-navigator"),
   require("plugins.window.winshift"),
+  -- require("plugins.lsp.lsp-config"),
+  -- require("plugins.treesitter.nvim-treesitter-context"),
+  -- require("plugins.telescope.telescope"),
 
-  -- require("plugins-auto.harpoon"),
+  require("plugins.misc.harpoon"),
   require("plugins.misc.toggle-term"),
   require("plugins.misc.grug-far"),
   require("plugins.misc.flash"),
@@ -48,11 +48,11 @@ require("lazy").setup({
   require("plugins.misc.undotree"),
   require("plugins.misc.numb"),
   require("plugins.misc.nvim-possession"),
-  -- require("plugins.misc.harpoon"),
   require("plugins.misc.showkey"),
 
   require("plugins.git.gitsigns"),
 
+  require("plugins.style.theme.vague"),
   -- require("plugins.style.lualine"),
   -- require("plugins.style.dashboard-nvim"),
   -- require("plugins.style.barbar"),
@@ -60,7 +60,6 @@ require("lazy").setup({
   -- require("plugins.style.theme.material"),
   -- require("plugins.style.theme.moonfly"),
   -- require("plugins.style.theme.gruvbox"),
-  require("plugins.style.theme.vague"),
   -- require("plugins.style.theme.kanagawa"),
   -- require("plugins.style.theme.tokyonight"),
   -- require("plugins.style.theme.catppuccin"),
@@ -75,8 +74,6 @@ require("lazy").setup({
   -- require("plugins.style.theme.onedarkpro"),
   -- require("plugins.style.theme.onenord"),
   -- require("plugins.style.theme.rose-pine-neovim"),
-
-  -- require("plugins.custom.win-action"),
   require("plugins.custom.lsp"),
   require("plugins.custom.show-file-info"),
   require("plugins.custom.magic"),
@@ -131,8 +128,19 @@ Keymap.add({
     end,
     "n",
   },
-  [";fd"] = {
-    "<cmd>FzFDirectories<CR>",
+  [";;z"] = {
+    function()
+      require("repeat").is_repeat_lead_to_cursored = true
+      vim.api.nvim_feedkeys("l", "nx", false)
+      print("可以")
+      require("repeat").record({
+        name = "test",
+        callback = function()
+          vim.api.nvim_feedkeys("l", "nx", false)
+          print("可以")
+        end,
+      })
+    end,
     "n",
   },
 })

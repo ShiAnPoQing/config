@@ -26,9 +26,12 @@ return {
     function()
       local count = vim.v.count1
       add_new_line.add_new_line("down", {})
-      require("repeat").Record(function()
-        add_new_line.add_new_line("down", { count = count })
-      end)
+      require("repeat").record({
+        name = "add-new-line",
+        callback = function()
+          add_new_line.add_new_line("down", {})
+        end,
+      })
     end,
     "n",
   },
@@ -37,9 +40,6 @@ return {
     function()
       local count = vim.v.count1
       add_new_line.add_new_line("up", {})
-      require("repeat").Record(function()
-        add_new_line.add_new_line("up", { count = count })
-      end)
     end,
     { "n", "i" },
   },
@@ -47,9 +47,6 @@ return {
     function()
       local count = vim.v.count1
       add_new_line.add_new_line("all", {})
-      require("repeat").Record(function()
-        add_new_line.add_new_line("all", { count = count })
-      end)
     end,
     { "n", "i" },
   },

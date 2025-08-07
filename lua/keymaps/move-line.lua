@@ -6,9 +6,6 @@ return {
     {
       function()
         move_line.move_line("down")
-        require("repeat").Record(function()
-          move_line.move_line("down")
-        end)
       end,
       { "n", "i", "x" },
     },
@@ -18,9 +15,6 @@ return {
     {
       function()
         move_line.move_line("up")
-        require("repeat").Record(function()
-          move_line.move_line("up")
-        end)
       end,
       { "n", "i", "x" },
     },
