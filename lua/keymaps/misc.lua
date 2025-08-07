@@ -1,10 +1,6 @@
 return {
   ["<C-[>"] = { "<C-O>", "n" },
   ["<M-->"] = { "J", "x" },
-  ["<C-.>"] = { "<C-T>", "i" },
-  ["<C-space><C-,>"] = { "0<C-D>", "i" },
-  ["<C-,>"] = { "<C-D>", "i" },
-  ["<C-space><C-.>"] = { "^<C-D>", "i" },
   ["<M-b>"] = {
     "<C-G>o<C-G>",
     "s",
@@ -126,19 +122,6 @@ return {
       { "v" },
     },
   },
-
-  -- Keep window centered when going up/down
-  ["n"] = {
-    "nzzzv",
-    "n",
-  },
-  ["N"] = {
-    "Nzzzv",
-    "n",
-  },
-
-  ["<space>u"] = { "U", "n" },
-  ["U"] = { "<C-R>", "n" },
   -- gh: normal mode into select mode
   -- normal mode into select block mode
   ["<space>gh"] = { "g<C-h>", { "n" } },
@@ -180,5 +163,9 @@ return {
       })
     end,
     "n",
+  },
+  ["<C-Space><C-K>"] = {
+    "<C-K>",
+    "i",
   },
 }

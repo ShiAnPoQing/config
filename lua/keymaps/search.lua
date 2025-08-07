@@ -25,4 +25,14 @@ return {
       "x",
     },
   },
+
+  -- Keep window centered when going up/down
+  ["n"] = {
+    "nzzzv",
+    "n",
+  },
+  ["N"] = {
+    "Nzzzv",
+    "n",
+  },
 }

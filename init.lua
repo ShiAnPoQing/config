@@ -90,13 +90,16 @@ Keymap.add({
     { "<Del>", { "i" } },
     { "lxh", "n" },
   },
+  -- tmux fixed
   ["<F6>"] = {
     function()
       require("custom.plugins.move-col-center").move_col_center("left")
     end,
     "n",
   },
+  -- tmux fixed
   ["<F31>"] = { "<Left><C-o>diw", { "i" } },
+
   [";x"] = {
     function()
       require("test.test").test()
@@ -109,10 +112,6 @@ Keymap.add({
       require("test.typescript_exchange_function").test()
     end,
     "n",
-  },
-  ["<C-Space><C-K>"] = {
-    "<C-K>",
-    "i",
   },
   [";;a"] = {
     function()

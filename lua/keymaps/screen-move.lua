@@ -70,7 +70,7 @@ local function aam()
   local win_info = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
   local screen_width = win_info.width - win_info.textoff
   local screent_cursor_rol = vim.fn.virtcol(".") - win_info.leftcol
-  local offset = math.ceil(screen_width / 2) - screent_cursor_rol + 1
+  local offset = math.ceil(screen_width / 2) - screent_cursor_rol
 
   if offset > 0 then
     vim.api.nvim_feedkeys(offset .. "zh", "n", false)
@@ -79,7 +79,8 @@ local function aam()
   end
 end
 
-return { -- normal mode cursor move: screen left
+return {
+  -- normal mode cursor move: screen left
   -- 支持 count
   ["ah"] = {
     { a_h, "n" },
@@ -199,6 +200,7 @@ return { -- normal mode cursor move: screen left
   ["aaj"] = { "zb", { "n", "x" } },
   -- normal mode view move: cursor line position at screen center col
   ["aan"] = { "zz", { "n", "x" } },
+  -- normal mode view move: cursor line position at screen center row
   ["aam"] = { aam, { "n" } },
 
   -- normal mode view move: cursor word position at screen right
