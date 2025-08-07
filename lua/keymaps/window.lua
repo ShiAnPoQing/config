@@ -1,40 +1,26 @@
 return {
-  -- -- exchange window
-  -- ["<M-x>"] = {
-  -- 	function()
-  -- 		require("custom.plugins.win-action").window_exchange()
-  -- 	end,
-  -- 	"n",
-  -- },
-  -- -- jump window
-  -- ["<M-g>"] = {
-  -- 	function()
-  -- 		require("custom.plugins.win-action").window_focus()
-  -- 	end,
-  -- 	"n",
-  -- },
   -- resize window
   ["<M-down>"] = {
     function()
-      require("custom.plugins.resize-win").resize_win({ direction = "down" })
+      require("custom.plugins.window-resize").window_resize({ type = "vertical increase" })
     end,
     { "n" },
   },
   ["<M-up>"] = {
     function()
-      require("custom.plugins.resize-win").resize_win({ direction = "up" })
+      require("custom.plugins.window-resize").window_resize({ type = "vertical decrease" })
     end,
     { "n" },
   },
   ["<M-right>"] = {
     function()
-      require("custom.plugins.resize-win").resize_win({ direction = "right" })
+      require("custom.plugins.window-resize").window_resize({ type = "horizontal increase" })
     end,
     { "n" },
   },
   ["<M-left>"] = {
     function()
-      require("custom.plugins.resize-win").resize_win({ direction = "left" })
+      require("custom.plugins.window-resize").window_resize({ type = "horizontal decrease" })
     end,
     { "n" },
   },
@@ -100,18 +86,6 @@ return {
     end,
     "n",
   },
-  -- ["<M-S-P>"] = {
-  -- 	function()
-  -- 		require("windows-layout").exchange_pre()
-  -- 	end,
-  -- 	"n",
-  -- },
-  -- ["<M-S-N>"] = {
-  -- 	function()
-  -- 		require("windows-layout").exchange_next()
-  -- 	end,
-  -- 	"n",
-  -- },
   ["<M-q>"] = {
     "<C-w>q",
     "n",
