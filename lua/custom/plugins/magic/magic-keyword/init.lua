@@ -11,8 +11,6 @@ local keywords = {
   ["WORD_outer"] = "\\S\\+\\s*",
 }
 
--- 为何中文不行 为何中文不行 为何中文不行 为何中文不行 为何中文不行 为何中文不行为何中文不行为何中文不行
-
 --- @class MagicKeyword
 --- @field keyword string | fun(opts):string
 --- @field callback function
@@ -63,15 +61,18 @@ function M.magic_keyword(opts)
 
   Keyword:match_keyword()
   Key:compute_key(Keyword.keyword_count)
-  Keyword:set_keyword_callback(function(line, start_col, end_col)
+  Keyword:set_keyword_callback(function(line, start_col, end_col, byte_start, byte_end)
     local col
+    local byte_col
 
     if key_position == 1 then
       col = start_col
+      byte_col = byte_start - 1
     elseif key_position == 2 then
       col = end_col - 1
+      byte_col = byte_end - 2
     end
-
+    -- extmark 必须使用 display width 位置
     Key:register({
       callback = function()
         opts.callback({
@@ -79,6 +80,7 @@ function M.magic_keyword(opts)
           start_col = start_col,
           end_col = end_col,
           col = col,
+          byte_col = byte_col,
         })
       end,
       one_key = {

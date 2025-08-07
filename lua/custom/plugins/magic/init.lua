@@ -202,7 +202,8 @@ function M.magic_word_move(opts)
   magic_keyword.magic_keyword({
     keyword = opts.keyword,
     callback = function(opts)
-      vim.api.nvim_win_set_cursor(0, { opts.line + 1, opts.col })
+      -- 光标设置必须使用字节位置
+      vim.api.nvim_win_set_cursor(0, { opts.line + 1, opts.byte_col })
     end,
     key_position = opts.position,
     should_visual = false,
