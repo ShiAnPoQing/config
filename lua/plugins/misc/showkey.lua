@@ -1,1 +1,7 @@
-return { "nvzone/showkeys", cmd = "ShowkeysToggle" }
+return {
+  "nvzone/showkeys",
+  config = function()
+    require("showkeys").setup({})
+    vim.cmd("ShowkeysToggle")
+  end,
+}

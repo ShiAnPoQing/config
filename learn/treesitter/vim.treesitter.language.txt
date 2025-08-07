@@ -1,0 +1,82 @@
+==============================================================================
+Lua 模块：vim.treesitter.language                      *treesitter-language*
+
+add({lang}, {opts})                            *vim.treesitter.language.add()*
+    加载名为 {lang} 的解析器
+
+    在 `parser` 运行时目录中搜索解析器，或提供的
+    {path}。可用于在启用 treesitter 功能之前检查
+    可用的解析器，例如， >lua
+          if vim.treesitter.language.add('markdown') then
+            vim.treesitter.start(bufnr, 'markdown')
+          end
+<
+
+    参数： ~
+      • {lang}  (`string`) 解析器名称（仅字母数字和 `_`）
+      • {opts}  (`table?`) 选项：
+                • {path}? (`string`) 解析器所在的可选路径
+                • {symbol_name}? (`string`) 要加载的语言的内部符号名
+
+    返回（多个）： ~
+        (`boolean?`) 如果解析器已加载则为 true
+        (`string?`) 如果无法加载解析器则为错误
+
+get_filetypes({lang})                *vim.treesitter.language.get_filetypes()*
+    返回使用名为 {lang} 的解析器的文件类型。
+
+    该列表包括 {lang} 本身加上通过
+    |vim.treesitter.language.register()| 注册的所有文件类型。
+
+    参数： ~
+      • {lang}  (`string`) 解析器名称
+
+    返回： ~
+        (`string[]`) 文件类型
+
+get_lang({filetype})                      *vim.treesitter.language.get_lang()*
+    返回为 {filetype} 加载解析器时要使用的语言名称。
+
+    如果没有通过 |vim.treesitter.language.register()| 显式
+    注册语言，默认为 {filetype}。对于像 `html.glimmer`
+    这样的复合文件类型，只返回主文件类型。
+
+    参数： ~
+      • {filetype}  (`string`)
+
+    返回： ~
+        (`string?`)
+
+inspect({lang})                            *vim.treesitter.language.inspect()*
+    检查提供的语言。
+
+    检查提供了一些关于语言的有用信息，如 ABI
+    版本、解析器状态计数（解析器复杂性的度量）、
+    节点和字段名称，以及语言是否来自 WASM 模块。
+
+    节点名称在表中返回，将每个节点名称映射到
+    表示节点是否命名的 `boolean`（即不是匿名的）。
+    匿名节点用双引号（`"`）括起来。
+
+    对于 ABI 15 解析器，还显示解析器元数据（主版本、
+    次版本、补丁版本）和超类型及其各自子类型的表。
+
+    参数： ~
+      • {lang}  (`string`) 语言
+
+    返回： ~
+        (`TSLangInfo`)
+
+register({lang}, {filetype})              *vim.treesitter.language.register()*
+    注册名为 {lang} 的解析器以用于 {filetype}(s)。
+
+    注意：这会添加或覆盖 {filetype} 的映射，任何
+    从其他文件类型到 {lang} 的现有映射都将保留。
+
+    参数： ~
+      • {lang}      (`string`) 解析器名称
+      • {filetype}  (`string|string[]`) 要与 lang 关联的文件类型
+
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

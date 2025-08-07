@@ -1,14 +1,12 @@
 local M = {}
 
 local current_record
-local current_changedtick = vim.b.changedtick
-M.is_repeat_lead_to_cursored = false
+local is_neovim_repeat = false
 
 function M.vim_repeat()
   if not current_record then
     return
   end
-  M.is_repeat_lead_to_cursored = true
   current_record.callback()
 end
 
@@ -19,29 +17,27 @@ end
 --- @param opts RecordOptions
 function M.record(opts)
   current_record = opts
-  vim.keymap.set("n", ".", function()
-    M.vim_repeat()
-  end, { noremap = true })
+end
+
+function M.toggle_repeat()
+  if not is_neovim_repeat then
+    pcall(vim.keymap.del, "n", ".", {})
+  else
+    vim.keymap.set("n", ".", function()
+      M.vim_repeat()
+    end, { noremap = true })
+  end
+
+  is_neovim_repeat = not is_neovim_repeat
 end
 
 --- @class RepeatOptions
 
 --- @param opts RepeatOptions
 function M.setup(opts)
-  vim.api.nvim_create_autocmd("CursorMoved", {
-    group = vim.api.nvim_create_augroup("custom-repeat", {}),
-    callback = function()
-      local changedtick = vim.b.changedtick
-      if changedtick ~= current_changedtick then
-        current_changedtick = changedtick
-        if not M.is_repeat_lead_to_cursored then
-          vim.keymap.set("n", ".", ".", { noremap = true })
-        else
-          M.is_repeat_lead_to_cursored = false
-        end
-      end
-    end,
-  })
+  vim.keymap.set("n", ".", function()
+    M.vim_repeat()
+  end, { noremap = true })
 end
 
 return M

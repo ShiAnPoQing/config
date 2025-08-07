@@ -1,0 +1,250 @@
+
+==============================================================================
+Lua 模块：vim.treesitter.languagetree              *treesitter-languagetree*
+
+*LanguageTree* 包含解析器树：{lang} 的根 treesitter 解析器
+和任何"注入"的语言解析器，它们本身可能递归地注入其他
+语言。例如，包含一些 Vimscript 命令的 Lua 缓冲区需要
+多个解析器来完全理解其内容。
+
+要为给定缓冲区和语言创建 LanguageTree（解析器对象），请使用： >lua
+    local parser = vim.treesitter.get_parser(bufnr, lang)
+<
+
+（其中 `bufnr=0` 表示当前缓冲区）。`lang` 默认为 'filetype'。
+注意：目前解析器在缓冲区的生命周期内保留，但这可能
+改变；如果插件想要增量更新，应该保留对解析器对象的
+引用。
+
+每当需要访问当前语法树时，解析缓冲区： >lua
+    local tree = parser:parse({ start_row, end_row })
+<
+
+这返回表示缓冲区当前状态的不可变 |treesitter-tree| 对象
+表。当插件想要在（可能的）编辑后访问状态时，它必须
+再次调用 `parse()`。如果缓冲区未被编辑，将再次返回
+相同的树，无需额外工作。如果缓冲区之前被解析过，
+将对更改的部分进行增量解析。
+
+注意：要在 |nvim_buf_attach()| Lua 回调中直接使用解析器，
+你必须在注册回调之前调用 |vim.treesitter.get_parser()|。
+但最好解析不应该直接在更改回调中完成，因为它们会
+非常频繁。相反，对树进行任何分析的插件应该使用
+计时器来限制过于频繁的更新。
+
+
+LanguageTree:children()                              *LanguageTree:children()*
+    返回语言到子树的映射。
+
+    返回： ~
+        (`table<string,vim.treesitter.LanguageTree>`)
+
+LanguageTree:contains({range})                       *LanguageTree:contains()*
+    确定 {range} 是否包含在 |LanguageTree| 中。
+
+    参数： ~
+      • {range}  (`table`) 具有以下字段的表：
+                 • {[1]} (`integer`) 开始行
+                 • {[2]} (`integer`) 开始列
+                 • {[3]} (`integer`) 结束行
+                 • {[4]} (`integer`) 结束列
+
+    返回： ~
+        (`boolean`)
+
+LanguageTree:destroy()                                *LanguageTree:destroy()*
+    销毁此 |LanguageTree| 及其所有子节点。
+
+    应在此处执行任何清理逻辑。
+
+    注意：这不会从父节点中删除此树。相反，必须在
+    父节点上调用 `remove_child` 来删除它。
+
+LanguageTree:for_each_tree({fn})                *LanguageTree:for_each_tree()*
+    递归地为每个 |LanguageTree| 调用回调。
+
+    注意：这包括调用树的子树。
+
+    参数： ~
+      • {fn}  (`fun(tree: TSTree, ltree: vim.treesitter.LanguageTree)`)
+
+LanguageTree:included_regions()              *LanguageTree:included_regions()*
+    获取由此 LanguageTree 管理的包含区域集。这可能与
+    注入查询设置的区域不同，因为部分 |LanguageTree:parse()|
+    会丢弃请求范围之外的区域。每个列表表示一个范围，
+    形式为 { {start_row}, {start_col}, {start_bytes},
+    {end_row}, {end_col}, {end_bytes} }。
+
+    返回： ~
+        (`table<integer, Range6[]>`)
+
+LanguageTree:invalidate({reload})                  *LanguageTree:invalidate()*
+    使此解析器及其子节点无效。
+
+    仅当 LanguageTree 跟踪的状态与 treesitter 中的
+    解析树不一致时才应调用。不清除文件系统缓存。
+    经常调用，所以需要快速。
+
+    参数： ~
+      • {reload}  (`boolean?`)
+
+                                                     *LanguageTree:is_valid()*
+LanguageTree:is_valid({exclude_children}, {range})
+    返回此 LanguageTree 是否有效，即 |LanguageTree:trees()|
+    反映源的最新状态。如果无效，用户应该调用
+    |LanguageTree:parse()|。
+
+    参数： ~
+      • {exclude_children}  (`boolean?`) 是否忽略子节点的
+                                 有效性（默认 `false`）
+      • {range}             (`Range?`) 要检查有效性的范围
+
+    返回： ~
+        (`boolean`)
+
+LanguageTree:lang()                                      *LanguageTree:lang()*
+    获取此树节点的语言。
+
+    返回： ~
+        (`string`)
+
+                                           *LanguageTree:language_for_range()*
+LanguageTree:language_for_range({range})
+    获取包含 {range} 的适当语言。
+
+    参数： ~
+      • {range}  (`table`) 具有以下字段的表：
+                 • {[1]} (`integer`) 开始行
+                 • {[2]} (`integer`) 开始列
+                 • {[3]} (`integer`) 结束行
+                 • {[4]} (`integer`) 结束列
+
+    返回： ~
+        (`vim.treesitter.LanguageTree`) 管理 {range} 的树
+
+                                         *LanguageTree:named_node_for_range()*
+LanguageTree:named_node_for_range({range}, {opts})
+    获取包含 {range} 的最小命名节点。
+
+    参数： ~
+      • {range}  (`table`) 具有以下字段的表：
+                 • {[1]} (`integer`) 开始行
+                 • {[2]} (`integer`) 开始列
+                 • {[3]} (`integer`) 结束行
+                 • {[4]} (`integer`) 结束列
+      • {opts}   (`table?`) 具有以下字段的表：
+                 • {ignore_injections}? (`boolean`, 默认：`true`) 忽略
+                   注入的语言
+
+    返回： ~
+        (`TSNode?`)
+
+                                               *LanguageTree:node_for_range()*
+LanguageTree:node_for_range({range}, {opts})
+    获取包含 {range} 的最小节点。
+
+    参数： ~
+      • {range}  (`table`) 具有以下字段的表：
+                 • {[1]} (`integer`) 开始行
+                 • {[2]} (`integer`) 开始列
+                 • {[3]} (`integer`) 结束行
+                 • {[4]} (`integer`) 结束列
+      • {opts}   (`table?`) 具有以下字段的表：
+                 • {ignore_injections}? (`boolean`, 默认：`true`) 忽略
+                   注入的语言
+
+    返回： ~
+        (`TSNode?`)
+
+LanguageTree:parent()                                  *LanguageTree:parent()*
+    返回父树。根树为 `nil`。
+
+    返回： ~
+        (`vim.treesitter.LanguageTree?`)
+
+LanguageTree:parse({range}, {on_parse})                 *LanguageTree:parse()*
+    使用相应语言的 |treesitter-parsers| 递归解析语言树中的
+    所有区域，并在解析的树上运行注入查询以确定是否应该
+    创建和解析子树。
+
+    任何具有空范围的区域（`{}`，通常只有根树）始终被解析；
+    否则（通常是注入）仅当它与 {range} 相交时（或如果
+    {range} 是 `true`）。
+
+    参数： ~
+      • {range}     (`boolean|Range?`) 在解析器的源中解析此范围。
+                   设置为 `true` 以运行源的完整解析（注意：可能很慢！）
+                   设置为 `false|nil` 以仅解析具有空范围的区域
+                   （通常只有没有注入的根树）。
+      • {on_parse}  (`fun(err?: string, trees?: table<integer, TSTree>)?`)
+                   解析完成时调用的函数。当提供且未设置
+                   `vim.g._ts_force_sync_parsing` 时，解析将
+                   异步运行。函数的第一个参数是表示错误类型
+                   的字符串，在失败的情况下（目前仅可能超时）。
+                   第二个参数是解析返回的树列表（成功时），
+                   如果解析超时则为 `nil`（由 'redrawtime' 确定）。
+
+                   如果解析仍然能够同步完成（在 3ms 内），
+                   `parse()` 返回树列表。否则，它返回 `nil`。
+
+    返回： ~
+        (`table<integer, TSTree>?`)
+
+                                                 *LanguageTree:register_cbs()*
+LanguageTree:register_cbs({cbs}, {recursive})
+    为 |LanguageTree| 注册回调。
+
+    参数： ~
+      • {cbs}        (`table<TSCallbackNameOn,function>`) 一个
+                     |nvim_buf_attach()|-like 表参数，具有以下
+                     处理程序：
+                     • `on_bytes`：参见 |nvim_buf_attach()|。
+                     • `on_changedtree`：每次树有语法更改时
+                       调用的回调。它将传递两个参数：更改的
+                       范围（作为节点范围）表和更改的树。
+                     • `on_child_added`：当子节点添加到树时
+                       发出。
+                     • `on_child_removed`：当子节点从树中
+                       移除时发出。
+                     • `on_detach`：当缓冲区分离时发出，参见
+                       |nvim_buf_detach_event|。接受一个参数，
+                       缓冲区的编号。
+      • {recursive}  (`boolean?`) 递归地为所有子节点应用
+                    回调。任何新的子节点也将继承回调。
+
+LanguageTree:source()                                  *LanguageTree:source()*
+    返回语言树的源内容（缓冲区号或字符串）。
+
+    返回： ~
+        (`integer|string`)
+
+                                               *LanguageTree:tree_for_range()*
+LanguageTree:tree_for_range({range}, {opts})
+    获取包含 {range} 的树。
+
+    参数： ~
+      • {range}  (`table`) 具有以下字段的表：
+                 • {[1]} (`integer`) 开始行
+                 • {[2]} (`integer`) 开始列
+                 • {[3]} (`integer`) 结束行
+                 • {[4]} (`integer`) 结束列
+      • {opts}   (`table?`) 具有以下字段的表：
+                 • {ignore_injections}? (`boolean`, 默认：`true`) 忽略
+                   注入的语言
+
+    返回： ~
+        (`TSTree?`)
+
+LanguageTree:trees()                                    *LanguageTree:trees()*
+    返回由此解析器解析的区域的所有树。不包括子语言。
+    如果
+    • 此 LanguageTree 是根，在这种情况下结果是空或
+      单例列表；或
+    • 根 LanguageTree 完全解析。
+    则结果是列表式的。
+
+    返回： ~
+        (`table<integer, TSTree>`)
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

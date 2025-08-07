@@ -1,0 +1,264 @@
+==============================================================================
+TREESITTER 节点                                    *treesitter-node* *TSNode*
+
+"treesitter 节点"表示缓冲区解析内容中的一个特定元素，
+可以由 |Query| 捕获，例如，用于高亮显示。它是 treesitter
+库持有的对象的 |userdata| 引用。
+
+treesitter 节点的实例 `TSNode` 支持以下方法。
+
+
+TSNode:byte_length()                                    *TSNode:byte_length()*
+    返回此节点跨越的字节数。
+
+    返回： ~
+        (`integer`)
+
+TSNode:child({index})                                         *TSNode:child()*
+    获取给定 {index} 处的节点的子节点，其中零表示第一个
+    子节点。
+
+    参数： ~
+      • {index}  (`integer`)
+
+    返回： ~
+        (`TSNode?`)
+
+TSNode:child_count()                                    *TSNode:child_count()*
+    获取节点的子节点数。
+
+    返回： ~
+        (`integer`)
+
+                                              *TSNode:child_with_descendant()*
+TSNode:child_with_descendant({descendant})
+    获取包含 {descendant} 的节点的子节点（包括 {descendant}）。
+
+    例如，使用以下节点层次结构： >
+        a -> b -> c
+
+        a:child_with_descendant(c) == b
+        a:child_with_descendant(b) == b
+        a:child_with_descendant(a) == nil
+<
+
+    参数： ~
+      • {descendant}  (`TSNode`)
+
+    返回： ~
+        (`TSNode?`)
+
+                                               *TSNode:descendant_for_range()*
+TSNode:descendant_for_range({start_row}, {start_col}, {end_row}, {end_col})
+    获取此节点内跨越给定（行、列）位置范围的最小节点
+
+    参数： ~
+      • {start_row}  (`integer`)
+      • {start_col}  (`integer`)
+      • {end_row}    (`integer`)
+      • {end_col}    (`integer`)
+
+    返回： ~
+        (`TSNode?`)
+
+TSNode:end_()                                                  *TSNode:end_()*
+    获取节点的结束位置。返回三个值：行、列和总字节数
+    （都从零开始）。
+
+    返回（多个）： ~
+        (`integer`)
+        (`integer`)
+        (`integer`)
+
+TSNode:equal({node})                                          *TSNode:equal()*
+    检查 {node} 是否引用同一树中的同一节点。
+
+    参数： ~
+      • {node}  (`TSNode`)
+
+    返回： ~
+        (`boolean`)
+
+TSNode:extra()                                                *TSNode:extra()*
+    检查节点是否是额外的。额外节点表示像注释这样的东西，
+    它们不是语法所必需的，但可以出现在任何地方。
+
+    返回： ~
+        (`boolean`)
+
+TSNode:field({name})                                          *TSNode:field()*
+    返回具有给定字段名的所有节点子节点的列表。
+
+    参数： ~
+      • {name}  (`string`)
+
+    返回： ~
+        (`TSNode[]`)
+
+TSNode:has_changes()                                    *TSNode:has_changes()*
+    检查语法节点是否已被编辑。
+
+    返回： ~
+        (`boolean`)
+
+TSNode:has_error()                                        *TSNode:has_error()*
+    检查节点是否是语法错误或包含任何语法错误。
+
+    返回： ~
+        (`boolean`)
+
+TSNode:id()                                                      *TSNode:id()*
+    获取节点在其自己的树中的唯一标识符。
+
+    不对此标识符的内部表示做任何保证，除了是
+    具有值相等性的原始 Lua 类型（所以不是表）。
+    目前它是一个（不可打印的）字符串。
+
+    注意：`id` 不保证对于来自不同树的节点是唯一的。
+
+    返回： ~
+        (`string`)
+
+TSNode:iter_children()                                *TSNode:iter_children()*
+    迭代 {TSNode} 的所有直接子节点，无论它们是否命名。
+    返回子节点加上与此子节点对应的字段名。
+
+    返回： ~
+        (`fun(): TSNode, string`)
+
+TSNode:missing()                                            *TSNode:missing()*
+    检查节点是否缺失。缺失节点由解析器插入以从
+    某些类型的语法错误中恢复。
+
+    返回： ~
+        (`boolean`)
+
+TSNode:named()                                                *TSNode:named()*
+    检查节点是否命名。命名节点对应于语法中的命名规则，
+    而匿名节点对应于语法中的字符串字面量。
+
+    返回： ~
+        (`boolean`)
+
+TSNode:named_child({index})                             *TSNode:named_child()*
+    获取给定 {index} 处的节点的命名子节点，其中零表示
+    第一个命名子节点。
+
+    参数： ~
+      • {index}  (`integer`)
+
+    返回： ~
+        (`TSNode?`)
+
+TSNode:named_child_count()                        *TSNode:named_child_count()*
+    获取节点的命名子节点数。
+
+    返回： ~
+        (`integer`)
+
+TSNode:named_children()                              *TSNode:named_children()*
+    返回节点的命名子节点列表。
+
+    返回： ~
+        (`TSNode[]`)
+
+                                         *TSNode:named_descendant_for_range()*
+TSNode:named_descendant_for_range({start_row}, {start_col}, {end_row},
+                                  {end_col})
+    获取此节点内跨越给定（行、列）位置范围的最小命名节点
+
+    参数： ~
+      • {start_row}  (`integer`)
+      • {start_col}  (`integer`)
+      • {end_row}    (`integer`)
+      • {end_col}    (`integer`)
+
+    返回： ~
+        (`TSNode?`)
+
+TSNode:next_named_sibling()                      *TSNode:next_named_sibling()*
+    获取节点的下一个命名兄弟节点。
+
+    返回： ~
+        (`TSNode?`)
+
+TSNode:next_sibling()                                  *TSNode:next_sibling()*
+    获取节点的下一个兄弟节点。
+
+    返回： ~
+        (`TSNode?`)
+
+TSNode:parent()                                              *TSNode:parent()*
+    获取节点的直接父节点。对于迭代节点的祖先，
+    优先使用 |TSNode:child_with_descendant()|。
+
+    返回： ~
+        (`TSNode?`)
+
+TSNode:prev_named_sibling()                      *TSNode:prev_named_sibling()*
+    获取节点的前一个命名兄弟节点。
+
+    返回： ~
+        (`TSNode?`)
+
+TSNode:prev_sibling()                                  *TSNode:prev_sibling()*
+    获取节点的前一个兄弟节点。
+
+    返回： ~
+        (`TSNode?`)
+
+TSNode:range({include_bytes})                                 *TSNode:range()*
+    获取节点的范围。
+
+    返回四个或六个值：
+    • 开始行
+    • 开始列
+    • 开始字节（如果 {include_bytes} 为 `true`）
+    • 结束行
+    • 结束列
+    • 结束字节（如果 {include_bytes} 为 `true`）
+
+    参数： ~
+      • {include_bytes}  (`false?`)
+
+    返回（多个）： ~
+        (`integer`)
+        (`integer`)
+        (`integer`)
+        (`integer`)
+
+TSNode:sexpr()                                                *TSNode:sexpr()*
+    获取表示节点的 S 表达式作为字符串。
+
+    返回： ~
+        (`string`)
+
+TSNode:start()                                                *TSNode:start()*
+    获取节点的开始位置。返回三个值：行、列和总字节数
+    （都从零开始）。
+
+    返回（多个）： ~
+        (`integer`)
+        (`integer`)
+        (`integer`)
+
+TSNode:symbol()                                              *TSNode:symbol()*
+    获取节点的类型作为数字 id。
+
+    返回： ~
+        (`integer`)
+
+TSNode:tree()                                                  *TSNode:tree()*
+    获取节点的 |TSTree|。
+
+    返回： ~
+        (`TSTree`)
+
+TSNode:type()                                                  *TSNode:type()*
+    获取节点的类型作为字符串。
+
+    返回： ~
+        (`string`)
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

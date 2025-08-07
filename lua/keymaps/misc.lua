@@ -43,9 +43,6 @@ return {
     function()
       local K = require("key-show")
       K.keyShow()
-      require("repeat").Record(function()
-        K.keyShow()
-      end)
     end,
     "n",
   },
@@ -84,9 +81,6 @@ return {
       local M = require("move-size")
       local count = vim.v.count1
       M.ChangeMoveSize(count, "down")
-      require("repeat").Record(function()
-        M.ChangeMoveSize(count, "down")
-      end)
     end,
     { "n" },
   },
@@ -104,9 +98,6 @@ return {
         local D = require("del-space")
         local count = vim.vim.count1
         D.delSpace(count, "n")
-        require("repeat").Record(function()
-          D.delSpace(count, "n")
-        end)
       end,
       { "n" },
     },
@@ -115,9 +106,6 @@ return {
         local D = require("del-space")
         local count = vim.vim.count1
         D.delSpace(count, "v")
-        require("repeat").Record(function()
-          D.delSpace(count, "v")
-        end)
       end,
       { "v" },
     },

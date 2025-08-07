@@ -7,7 +7,7 @@ require("plugin-options").setup({
     "options/markdown",
   },
 })
--- require("repeat").setup({})
+require("repeat").setup({})
 local Keymap = require("plugin-keymap").setup()
 require("lazy-setup")
 require("lazy").setup({
@@ -116,30 +116,21 @@ Keymap.add({
     end,
     "n",
   },
-  [";;b"] = {
-    function()
-      local current_win = vim.api.nvim_get_current_win()
-      local size = require("utils.get-window-size").get_window_size(current_win)
-      local width = size.width + 5
-      require("utils.set-window-size").set_window_size({
-        win_id = current_win,
-        width = width,
-      })
-    end,
-    "n",
-  },
   [";;z"] = {
     function()
-      require("repeat").is_repeat_lead_to_cursored = true
-      vim.api.nvim_feedkeys("l", "nx", false)
       print("可以")
       require("repeat").record({
         name = "test",
         callback = function()
-          vim.api.nvim_feedkeys("l", "nx", false)
           print("可以")
         end,
       })
+    end,
+    "n",
+  },
+  [";."] = {
+    function()
+      require("repeat").toggle_repeat()
     end,
     "n",
   },

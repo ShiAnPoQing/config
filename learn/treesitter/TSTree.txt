@@ -1,0 +1,23 @@
+==============================================================================
+TREESITTER 树                                    *treesitter-tree* *TSTree*
+
+"treesitter 树"表示缓冲区的解析内容，可用于执行进一步
+的分析。它是 treesitter 库持有的对象的 |userdata| 引用。
+
+treesitter 树的实例 `TSTree` 支持以下方法。
+
+
+TSTree:copy()                                                  *TSTree:copy()*
+    返回 `TSTree` 的副本。
+
+    返回： ~
+        (`TSTree`)
+
+TSTree:root()                                                  *TSTree:root()*
+    返回此树的根节点。
+
+    返回： ~
+        (`TSNode`)
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

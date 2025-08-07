@@ -1,4 +1,5 @@
 local line_break = require("custom.plugins.line-break")
+local Repeat = require("repeat")
 
 return {
   -- Line Break
@@ -6,22 +7,16 @@ return {
     {
       function()
         line_break.line_break(vim.v.count1)
+        Repeat.record({
+          name = "line_break",
+          callback = function()
+            line_break.line_break(vim.v.count1)
+          end,
+        })
       end,
       { "n", "x" },
       { expr = true },
     },
-    -- {
-    --   function()
-    --     local L = require("line-break")
-    --     local count = vim.v.count1
-    --     L.LineBreak(count, "v", "al")
-    --     require("repeat").Record(function()
-    --       L.LineBreak(count, "v", "al")
-    --     end)
-    --   end,
-    --   { "x" },
-    --   { expr = true },
-    -- },
   },
 }
 

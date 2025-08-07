@@ -1,0 +1,349 @@
+==============================================================================
+Lua 模块：vim.treesitter.query                        *lua-treesitter-query*
+
+这个 Lua |treesitter-query| 接口允许你创建查询并使用
+它们来解析文本。参见 |vim.treesitter.query.parse()| 获取
+工作示例。
+
+
+*vim.treesitter.Query*
+    解析的查询，参见 |vim.treesitter.query.parse()|
+
+    字段： ~
+      • {lang}                     (`string`) 解析器语言名称
+      • {captures}                 (`string[]`) 查询中定义的（唯一）
+                                   捕获名称列表
+      • {info}                     (`vim.treesitter.QueryInfo`) 查询上下文
+                                   （例如捕获、谓词、指令）
+      • {has_conceal_line}         (`boolean`) 查询是否设置
+                                   conceal_lines 元数据
+      • {has_combined_injections}  (`boolean`) 查询是否包含
+                                   组合注入
+      • {query}                    (`TSQuery`) userdata 查询对象
+      • {iter_captures}            (`fun(self: vim.treesitter.Query, node: TSNode, source: integer|string, start: integer?, stop: integer?, opts: table?): fun(end_line: integer?): integer, TSNode, vim.treesitter.query.TSMetadata, TSQueryMatch, TSTree`)
+                                   参见 |Query:iter_captures()|。
+      • {iter_matches}             (`fun(self: vim.treesitter.Query, node: TSNode, source: integer|string, start: integer?, stop: integer?, opts: table?): fun(): integer, table<integer, TSNode[]>, vim.treesitter.query.TSMetadata, TSTree`)
+                                   参见 |Query:iter_matches()|。
+
+
+                                        *vim.treesitter.query.add_directive()*
+add_directive({name}, {handler}, {opts})
+    添加要在查询中使用的新指令
+
+    处理程序可以通过直接在元数据对象上设置来设置
+    匹配级别数据 `metadata.key = value`。此外，处理程序
+    可以通过在元数据表上使用捕获 id 来设置节点级别
+    数据 `metadata[capture_id].key = value`
+
+    参数： ~
+      • {name}     (`string`) 指令名称，不带前导 #
+      • {handler}  (`fun(match: table<integer,TSNode[]>, pattern: integer, source: integer|string, predicate: any[], metadata: vim.treesitter.query.TSMetadata)`)
+                   • match：将捕获 ID 映射到捕获的
+                     节点列表的表
+                   • pattern：查询文件中匹配模式的
+                     索引
+                   • predicate：包含正在调用的完整指令的
+                     字符串列表，例如 `(node (#set! conceal "-"))`
+                     将获得谓词 `{ "#set!", "conceal", "-" }`
+      • {opts}     (`table`) 具有以下字段的表：
+                   • {force}? (`boolean`) 覆盖同名谓词
+                   • {all}? (`boolean`) 使用匹配表的正确实现，
+                     其中捕获 ID 映射到节点列表而不是单个
+                     节点。默认为 true。此选项将在未来版本中
+                     删除。
+
+                                        *vim.treesitter.query.add_predicate()*
+add_predicate({name}, {handler}, {opts})
+    添加要在查询中使用的新谓词
+
+    参数： ~
+      • {name}     (`string`) 谓词名称，不带前导 #
+      • {handler}  (`fun(match: table<integer,TSNode[]>, pattern: integer, source: integer|string, predicate: any[], metadata: vim.treesitter.query.TSMetadata): boolean?`)
+                   • 参见 |vim.treesitter.query.add_directive()| 了解参数
+                     含义
+      • {opts}     (`table?`) 具有以下字段的表：
+                   • {force}? (`boolean`) 覆盖同名谓词
+                   • {all}? (`boolean`) 使用匹配表的正确实现，
+                     其中捕获 ID 映射到节点列表而不是单个
+                     节点。默认为 true。此选项将在未来版本中
+                     删除。
+
+edit({lang})                                     *vim.treesitter.query.edit()*
+    打开一个实时编辑器来查询你开始的缓冲区。
+
+    也可以用 *:EditQuery* 显示。
+
+    如果你将光标移动到捕获名称（"@foo"），匹配捕获的
+    文本会在源缓冲区中高亮显示。查询编辑器是一个临时
+    缓冲区，使用 `:write` 保存它。你可以在
+    `$VIMRUNTIME/queries/` 找到示例查询。
+
+    参数： ~
+      • {lang}  (`string?`) 要打开查询编辑器的语言。如果省略，
+               从当前缓冲区的文件类型推断。
+
+get({lang}, {query_name})                         *vim.treesitter.query.get()*
+    返回 {lang} 的运行时查询 {query_name}。
+
+    参数： ~
+      • {lang}        (`string`) 用于查询的语言
+      • {query_name}  (`string`) 查询名称（例如 "highlights"）
+
+    返回： ~
+        (`vim.treesitter.Query?`) 解析的查询。如果未找到查询文件，
+        则为 `nil`。参见 |vim.treesitter.Query|。
+
+                                            *vim.treesitter.query.get_files()*
+get_files({lang}, {query_name}, {is_included})
+    获取组成查询的文件列表
+
+    参数： ~
+      • {lang}         (`string`) 要获取查询的语言
+      • {query_name}   (`string`) 要加载的查询名称（例如，
+                       "highlights"）
+      • {is_included}  (`boolean?`) 内部参数，大多数时候
+                      保持为 `nil`
+
+    返回： ~
+        (`string[]`) query_files 为给定查询和语言加载的文件列表
+
+lint({buf}, {opts})                              *vim.treesitter.query.lint()*
+    使用安装的解析器检查 treesitter 查询，或清除检查错误。
+
+    使用 runtimepath 中的 |treesitter-parsers| 检查 {buf} 中的
+    查询文件是否有错误：
+    • 验证使用的节点是否是语法中的有效标识符。
+    • 验证谓词和指令是否有效。
+    • 验证顶级 s 表达式是否有效。
+
+    发现的诊断使用 |diagnostic-api| 报告。默认情况下，用于
+    验证的解析器由查询文件的包含文件夹确定，例如，如果
+    路径以 `/lua/highlights.scm` 结尾，将使用 `lua` 语言的
+    解析器。
+
+    参数： ~
+      • {buf}   (`integer`) 缓冲区句柄
+      • {opts}  (`table?`) 可选关键字参数：
+                • {langs}? (`string|string[]`) 用于检查查询的
+                  语言。如果指定了多种语言，查询将针对所有
+                  语言进行验证
+                • {clear} (`boolean`) 仅清除当前检查错误
+
+list_directives()                     *vim.treesitter.query.list_directives()*
+    列出当前可用于查询的指令。
+
+    返回： ~
+        (`string[]`) 支持的指令。
+
+list_predicates()                     *vim.treesitter.query.list_predicates()*
+    列出当前可用于查询的谓词。
+
+    返回： ~
+        (`string[]`) 支持的谓词。
+
+omnifunc({findstart}, {base})                *vim.treesitter.query.omnifunc()*
+    treesitter 查询中完成节点名称和谓词的 omnifunc。
+
+    通过 >lua
+        vim.bo.omnifunc = 'v:lua.vim.treesitter.query.omnifunc'
+< 使用
+
+    参数： ~
+      • {findstart}  (`0|1`)
+      • {base}       (`string`)
+
+parse({lang}, {query})                          *vim.treesitter.query.parse()*
+    解析 {query} 字符串并返回 `Query` 对象
+    （|lua-treesitter-query|），可用于在树中搜索查询模式
+    （通过 |Query:iter_captures()|、|Query:iter_matches()|），或
+    通过这些字段检查/修改查询：
+    • `captures`：查询中定义的唯一捕获名称列表（别名：
+      `info.captures`）。
+    • `info.patterns`：关于谓词的信息。
+    • `query`：可用于禁用模式或捕获的基础 |TSQuery|。
+
+    示例： >lua
+        local query = vim.treesitter.query.parse('vimdoc', [[
+          ; query
+          ((h1) @str
+            (#trim! @str 1 1 1 1))
+        ]])
+        local tree = vim.treesitter.get_parser():parse()[1]
+        for id, node, metadata in query:iter_captures(tree:root(), 0) do
+           -- 打印节点名称和源文本。
+           vim.print({node:type(), vim.treesitter.get_node_text(node, vim.api.nvim_get_current_buf())})
+        end
+<
+
+    参数： ~
+      • {lang}   (`string`) 用于查询的语言
+      • {query}  (`string`) 查询文本，使用 s-expr 语法
+
+    返回： ~
+        (`vim.treesitter.Query`) 解析的查询。参见 |vim.treesitter.Query|。
+
+    另见： ~
+      • |vim.treesitter.query.get()|
+
+                                                       *Query:iter_captures()*
+Query:iter_captures({node}, {source}, {start}, {stop}, {opts})
+    迭代 {node} 中所有匹配的所有捕获。
+
+    如果查询包含谓词，则需要 {source}；然后调用者必须
+    确保使用与缓冲区当前文本一致的新解析树（如果相关）。
+    {start} 和 {stop} 可用于限制行范围内的匹配（这通常
+    与根节点一起使用作为 {node}，即，获取当前视口中
+    的语法高亮匹配）。当省略时，使用给定节点的 {start}
+    和 {stop} 行值。
+
+    迭代器返回四个值：
+    1. 标识捕获的数字 id
+    2. 捕获的节点
+    3. 来自处理匹配的任何指令的元数据
+    4. 匹配本身
+
+    示例：如何按名称获取捕获： >lua
+        for id, node, metadata, match in query:iter_captures(tree:root(), bufnr, first, last) do
+          local name = query.captures[id] -- 查询中捕获的名称
+          -- 通常有用的节点信息：
+          local type = node:type() -- 捕获节点的类型
+          local row1, col1, row2, col2 = node:range() -- 捕获的范围
+          -- ... 在这里使用信息 ...
+        end
+<
+
+    注意： ~
+      • 仅当特定捕获的查询模式包含谓词时才返回捕获。
+
+    参数： ~
+      • {node}    (`TSNode`) 搜索将在其下进行
+      • {source}  (`integer|string`) 从中提取文本的源缓冲区或字符串
+      • {start}   (`integer?`) 搜索的起始行。默认为
+                 `node:start()`。
+      • {stop}    (`integer?`) 搜索的停止行（不包括结束）。
+                 默认为 `node:end_()`。
+      • {opts}    (`table?`) 可选关键字参数：
+                  • max_start_depth (integer) 如果非零，设置每个
+                    匹配的最大起始深度。这用于防止遍历
+                    太深的树。
+                  • match_limit (integer) 设置进行中匹配的
+                    最大数量（默认：256）。
+
+    返回： ~
+        (`fun(end_line: integer?): integer, TSNode, vim.treesitter.query.TSMetadata, TSQueryMatch, TSTree`)
+        捕获 id、捕获节点、元数据、匹配、树
+
+                                                        *Query:iter_matches()*
+Query:iter_matches({node}, {source}, {start}, {stop}, {opts})
+    迭代给定范围内的自身匹配。
+
+    迭代 {node} 内的所有匹配。参数与 |Query:iter_captures()|
+    相同，但迭代的值不同：查询中模式的（1 基）索引、
+    将捕获索引映射到节点列表的表，以及来自处理匹配的
+    任何指令的元数据。
+
+    示例： >lua
+        for pattern, match, metadata in cquery:iter_matches(tree:root(), bufnr, 0, -1) do
+          for id, nodes in pairs(match) do
+            local name = query.captures[id]
+            for _, node in ipairs(nodes) do
+              -- `node` 在匹配中被 `name` 捕获捕获
+
+              local node_data = metadata[id] -- 节点级别元数据
+              -- ... 在这里使用信息 ...
+            end
+          end
+        end
+<
+
+    参数： ~
+      • {node}    (`TSNode`) 搜索将在其下进行
+      • {source}  (`integer|string`) 要搜索的源缓冲区或字符串
+      • {start}   (`integer?`) 搜索的起始行。默认为
+                 `node:start()`。
+      • {stop}    (`integer?`) 搜索的停止行（不包括结束）。
+                 默认为 `node:end_()`。
+      • {opts}    (`table?`) 可选关键字参数：
+                  • max_start_depth (integer) 如果非零，设置每个
+                    匹配的最大起始深度。这用于防止遍历
+                    太深的树。
+                  • match_limit (integer) 设置进行中匹配的
+                    最大数量（默认：256）。all (boolean) 当
+                    `false`（默认 `true`）时，返回的表将捕获
+                    ID 映射到单个（最后）节点，而不是匹配
+                    节点的完整列表。此选项仅用于向后
+                    兼容性，将在未来版本中删除。
+
+    返回： ~
+        (`fun(): integer, table<integer, TSNode[]>, vim.treesitter.query.TSMetadata, TSTree`)
+        模式 id、匹配、元数据、树
+
+set({lang}, {query_name}, {text})                 *vim.treesitter.query.set()*
+    设置 {lang} 的运行时查询 {query_name}
+
+    这允许用户覆盖或扩展插件设置的任何运行时文件和/或
+    配置。
+
+    例如，你可以使用以下代码启用 `C` 标识符的拼写检查： >lua
+        vim.treesitter.query.set(
+          'c',
+          'highlights',
+          [[;inherits c
+          (identifier) @spell]])
+        ]])
+<
+
+    参数： ~
+      • {lang}        (`string`) 用于查询的语言
+      • {query_name}  (`string`) 查询名称（例如，"highlights"）
+      • {text}        (`string`) 查询文本（未解析）。
+
+
+
+
+*TSQuery*
+    扩展：|userdata|
+
+    treesitter 库持有的对象的引用，用作 |vim.treesitter.Query| 的
+    组件，用于语言功能支持。有关查询的更多信息，请参见
+    |treesitter-query|，或参见 |vim.treesitter.query.parse()| 获取
+    如何获取查询对象的示例。
+
+    字段： ~
+      • {disable_capture}  (`fun(self: TSQuery, capture_name: string)`) 参见
+                           |TSQuery:disable_capture()|。
+      • {disable_pattern}  (`fun(self: TSQuery, pattern_index: integer)`) 参见
+                           |TSQuery:disable_pattern()|。
+
+
+TSQuery:disable_capture({capture_name})            *TSQuery:disable_capture()*
+    在此查询中禁用特定捕获；一旦禁用，捕获就不能
+    重新启用。{capture_name} 不应包含前导 "@"。
+
+    示例：要从 vimdoc 高亮查询中禁用 `@variable.parameter` 捕获： >lua
+        local query = vim.treesitter.query.get('vimdoc', 'highlights')
+        query.query:disable_capture("variable.parameter")
+        vim.treesitter.get_parser():parse()
+<
+
+    参数： ~
+      • {capture_name}  (`string`)
+
+TSQuery:disable_pattern({pattern_index})           *TSQuery:disable_pattern()*
+    在此查询中禁用特定模式；一旦禁用，模式就不能
+    重新启用。特定匹配的 {pattern_index} 可以通过
+    |:Inspect!| 获取，或通过读取查询的源代码（即从
+    |vim.treesitter.query.get_files()|）获取。
+
+    示例：要在 vimdoc 中禁用 `|` 链接但保持其他 `@markup.link`s
+    高亮： >lua
+        local link_pattern = 9 -- 来自 :Inspect!
+        local query = vim.treesitter.query.get('vimdoc', 'highlights')
+        query.query:disable_pattern(link_pattern)
+        local tree = vim.treesitter.get_parser():parse()[1]
+<
+
+    参数： ~
+      • {pattern_index}  (`integer`)
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
