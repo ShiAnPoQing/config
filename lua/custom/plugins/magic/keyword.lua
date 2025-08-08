@@ -89,11 +89,10 @@ function M:get_keyword(i, leftcol, rightcol)
     local start_dislay_width = get_display_width(i - 1, 0, i - 1, keyword_start)
     local end_dislay_width = get_display_width(i - 1, 0, i - 1, keyword_end)
 
-    if start_dislay_width < leftcol or end_dislay_width > rightcol then
-      return
+    if not (start_dislay_width < leftcol or end_dislay_width > rightcol) then
+      self:collect_keyword(i, keyword_start, keyword_end)
     end
 
-    self:collect_keyword(i, keyword_start, keyword_end)
     start_pos = start_pos + end_
   end
 end

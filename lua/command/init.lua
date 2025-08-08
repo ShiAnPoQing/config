@@ -1,6 +1,5 @@
 vim.api.nvim_create_user_command("ChangeDirectoryToFile", function()
   vim.fn.chdir(vim.fn.expand("%:p:h"))
-  vim.notify("Changed directory to " .. vim.fn.getcwd())
 end, {})
 
 -- -- 创建工作区目录列表

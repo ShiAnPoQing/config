@@ -128,6 +128,7 @@ return {
   -- repeat latest F
   ["<M-S-f>"] = { ",", { "n" } },
   -- block visual
+  ["<space>gv"] = { "`[v`]", { "n" } },
   -- virtualedit = "all"
   ["<space>v"] = { "<C-v>", { "n", "x" } },
   -- virtualedit = "none"

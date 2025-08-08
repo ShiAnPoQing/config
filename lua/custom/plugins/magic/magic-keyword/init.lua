@@ -67,10 +67,10 @@ function M.magic_keyword(opts)
 
     if key_position == 1 then
       col = start_col
-      virt_col = virt_start_col
+      virt_col = virt_start_col - leftcol
     elseif key_position == 2 then
       col = end_col - 1
-      virt_col = virt_end_col
+      virt_col = virt_end_col - leftcol
     end
 
     -- extmark 必须使用 display width 位置

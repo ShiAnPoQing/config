@@ -11,6 +11,12 @@ return {
     end,
     { "n", "x" },
   },
+  ["<space>yy"] = {
+    function()
+      require("custom.plugins.register").copy("yy")
+    end,
+    { "n" },
+  },
   ["<space>p"] = {
     function()
       require("custom.plugins.register").paste("p")

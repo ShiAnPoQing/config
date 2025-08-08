@@ -140,7 +140,7 @@ gJ			连接 [count] 行，最少两行。
 2. 删除和插入				*delete-insert* *replacing*
 
 							*R*
-R			进入替换模式：您输入的每个字符替换
+R			进入替换模式：您输入的每个字符替换     
 			一个现有字符，从光标下的字符开始。
 			重复输入的文本 [count]-1 次。参见
 			|Replace-mode| 了解更多详情。
@@ -233,13 +233,12 @@ Vim 将 "cw" 解释为 change-word，而单词不包括
 
 ==============================================================================
 3. 简单更改				*simple-change* *changing*
-
 							*r*
-r{char}			用 {char} 替换光标下的字符。
+r{char}		        用 {char} 替换光标下的字符。
 			如果 {char} 是 <CR> 或 <NL>，则用换行符替换
 			该字符。要用真正的 <CR> 替换，请使用 CTRL-V
 			<CR>。CTRL-V <NL> 用 <Nul> 替换。
-
+ 
 			如果 {char} 是 CTRL-E 或 CTRL-Y，则使用来自
 			下面或上面行的字符，就像 |i_CTRL-E| 和
 			|i_CTRL-Y| 一样。这也适用于计数，因此
@@ -921,6 +920,7 @@ command		text	result ~
 							*zy*
 ["x]zy{motion}		复制 {motion} 文本 [到寄存器 x]。仅在选择文本块时
 			与 `y` 不同，参见 |v_zy|。
+
 
 							*v_y*
 {Visual}["x]y		复制高亮的文本 [到寄存器 x]（对于 {Visual} 参见
