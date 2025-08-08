@@ -97,4 +97,6 @@ vim.api.nvim_create_user_command("LineConcatInput", function()
     input = true,
   })
   vim.api.nvim_feedkeys("g@", "n", false)
-end, {})
+end, {
+  range = true,
+})

@@ -70,7 +70,7 @@ return {
     { "n" },
     { expr = true },
   },
-  ["<space>-i"] = {
+  ["<M-space>-"] = {
     function()
       line_concat.line_concat({
         trim_blank = false,
