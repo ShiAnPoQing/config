@@ -35,16 +35,40 @@ return {
     end,
     { "n", "x" },
   },
+  ["<space>dd"] = {
+    function()
+      require("custom.plugins.register").delete("dd")
+    end,
+    { "n" },
+  },
+  ["<space>x"] = {
+    function()
+      require("custom.plugins.register").delete_x("x")
+    end,
+    { "n", "x" },
+  },
+  ["<space>X"] = {
+    function()
+      require("custom.plugins.register").delete_x("X")
+    end,
+    { "n", "x" },
+  },
   ["<space>c"] = {
     function()
-      require("custom.plugins.register").delete("c")
+      require("custom.plugins.register").change("c")
     end,
     { "n", "x" },
   },
   ["<space>C"] = {
     function()
-      require("custom.plugins.register").delete("C")
+      require("custom.plugins.register").change("C")
     end,
     { "n", "x" },
+  },
+  ["<space>cc"] = {
+    function()
+      require("custom.plugins.register").change("cc")
+    end,
+    { "n" },
   },
 }

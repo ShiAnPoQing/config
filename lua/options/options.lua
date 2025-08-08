@@ -87,7 +87,7 @@ return {
     foldenable = false,
     pumheight = 8,
     append = {
-      matchpairs = { "【:】", "<:>", "《:》", "（:）" },
+      matchpairs = { "【:】", "<:>", "《:》", "（:）", "`:`" },
     },
   },
   -- javascript = {

@@ -29,10 +29,10 @@ return {
     { "<Esc>", { "i" } },
     { "<C-u><ESC>", { "c" } },
   },
-  ["<space>c"] = { ":close<CR>", "n" },
-  ["<space><space>c"] = { ":close!<CR>", "n" },
+  ["<space>c"] = { "<cmd>close<cr>", "n" },
+  ["<space><space>c"] = { "<cmd>close!<cr>", "n" },
 
-  ["<space>q"] = { ":q<CR>", "n" },
-  ["<space><space>q"] = { ":q!<CR>", "n" },
-  ["<space><space><space>q"] = { ":qa!<CR>", "n" },
+  ["<space>q"] = { "<cmd>q<cr>", "n" },
+  ["<space><space>q"] = { "<cmd>q!<cr>", "n" },
+  ["<space><space><space>q"] = { "<cmd>qa!<cr>", "n" },
 }

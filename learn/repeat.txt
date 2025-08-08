@@ -1,0 +1,771 @@
+*repeat.txt*    Nvim
+
+
+		  VIM 参考手册    by Bram Moolenaar
+
+
+重复命令、Vim脚本和调试			*repeating*
+
+用户手册第26章介绍了重复 |usr_26.txt|。
+
+                                      输入 |gO| 查看目录。
+
+==============================================================================
+单一重复						*single-repeat*
+
+							*.*
+.			重复最后的更改，用[count]替换计数。
+			当'cpoptions'中包含'y'标志时，也重复拉取命令。
+			不重复命令行命令。
+
+简单更改可以用"."命令重复。没有计数时，使用最后更改的计数。
+如果输入计数，它将替换最后一个。|v:count| 和 |v:count1| 将被设置。
+
+如果最后更改包含编号寄存器的规范，寄存器编号将递增。
+参见 |redo-register| 了解如何使用此功能的示例。
+
+注意：当重复使用可视选择的命令时，使用相同大小的区域，
+参见 |visual-repeat|。
+
+							*@:*
+@:			重复最后命令行[count]次。
+
+
+==============================================================================
+多重重复					*multi-repeat*
+
+						*:g* *:global* *E148*
+:[range]g[lobal]/{pattern}/[cmd]
+			在[range]范围内匹配{pattern}的行上执行Ex命令[cmd]
+			（默认":p"）。
+
+:[range]g[lobal]!/{pattern}/[cmd]
+			在[range]范围内不匹配{pattern}的行上执行Ex命令[cmd]
+			（默认":p"）。
+
+							*:v* *:vglobal*
+:[range]v[global]/{pattern}/[cmd]
+			与:g!相同。
+
+示例: >
+	:g/^Obsolete/d _
+在`:d`后使用下划线避免覆盖寄存器或剪贴板。
+这也使其更快。
+
+除了包围{pattern}的'/'，您可以使用任何其他单字节字符，
+但不能是字母字符、'\'、'"'、'|'或'!'。
+如果您想在搜索模式或替换字符串中包含'/'，这很有用。
+
+关于模式的定义，参见 |pattern|。
+
+注意[cmd]可能包含范围；参见 |collapse| 和 |edit-paragraph-join| 的示例。
+
+全局命令的工作原理是首先扫描[range]行并标记每个匹配发生的行
+（对于多行模式，只有匹配的开始很重要）。
+在第二次扫描中，对每个标记的行执行[cmd]，就像光标在该行一样。
+对于":v"和":g!"，对每个未标记的行执行命令。如果删除一行，其标记消失。
+[range]的默认值是整个缓冲区(1,$)。使用"CTRL-C"中断命令。
+如果对某行给出错误消息，该行的命令被中止，全局命令继续处理下一个
+标记或未标记的行。
+								*E147*
+当命令递归使用时，它只在一行上工作。此时不允许给出范围。
+这对于查找匹配一个模式但不匹配另一个模式的所有行很有用: >
+	:g/found/v/notfound/{cmd}
+这首先查找包含"found"的所有行，但只在没有"notfound"匹配时执行{cmd}。
+
+可以使用任何Ex命令，参见 |ex-cmd-index|。要执行普通模式命令，
+您可以使用`:normal`命令: >
+	:g/pat/normal {commands}
+确保{commands}以完整命令结尾，否则Vim将等待您为每个匹配输入
+命令的其余部分。屏幕不会更新，所以您不知道您在做什么。参见 |:normal|。
+
+撤销/重做命令将一次性撤销/重做整个全局命令。
+前一个上下文标记只设置一次（使用"''"您回到全局命令前光标所在的位置）。
+
+全局命令设置最后使用的搜索模式和最后使用的替换模式（这与vi兼容）。
+这使得全局替换字符串变得容易: >
+	:g/pat/s//PAT/g
+这用"PAT"替换所有"pat"的出现。同样可以用以下方式完成: >
+	:%s/pat/PAT/g
+这短了两个字符！
+
+在Ex模式中使用"global"时，一个特殊情况是使用":visual"作为命令。
+这将移动到匹配行，进入普通模式让您在那里执行命令，直到您使用|gQ|
+返回Ex模式。这将为每个匹配行重复。在执行此操作时，您不能使用":global"。
+要中止此操作，请按CTRL-C两次。
+
+==============================================================================
+复杂重复						*complex-repeat*
+
+							*q* *recording* *macro*
+q{0-9a-zA-Z"}		将键入的字符记录到寄存器{0-9a-zA-Z"}中
+			（大写字母追加）。在执行寄存器时'q'命令被禁用，
+			它在映射和|:normal|内部不起作用。
+
+			注意：如果用于记录的寄存器也用于|y|和|p|，
+			结果很可能不是预期的，因为put将粘贴记录的宏，
+			而yank将覆盖记录的宏。
+
+			注意：记录在您键入时发生，重放寄存器就像键来自映射一样。
+			这很重要，例如，对于撤销，它只在命令被键入时同步。
+
+q			停止记录。
+			实现说明：停止记录的'q'不存储在寄存器中，
+			除非它是映射的结果
+
+							*@*
+@{0-9a-z".=*+}		执行寄存器{0-9a-z".=*+}的内容[count]次。
+			注意寄存器'%'（当前文件名）和'#'（备用文件名）不能使用。
+			寄存器像映射一样执行，这意味着'wildchar'和'wildcharm'
+			之间的差异适用，撤销可能不会以相同方式同步。
+			对于"@="，您被提示输入表达式。然后执行表达式的结果。
+			另见 |@:|。
+
+							*@@* *E748*
+@@			重复前一个@{0-9a-z":*} [count]次。
+
+							*v_@-default*
+{Visual}@{0-9a-z".=*+}	在行式可视模式中，为每个选定行执行寄存器的内容。
+{Visual}@@		参见 |visual-repeat|，|default-mappings|。
+
+							*Q*
+Q			重复最后记录的寄存器[count]次。
+			参见 |reg_recorded()|。
+
+							*v_Q-default*
+{Visual}Q		在行式可视模式中，为每个选定行重复最后记录的寄存器。
+			参见 |visual-repeat|，|default-mappings|。
+
+							*:@*
+:[addr]@{0-9a-z".=*+}	将寄存器{0-9a-z".=*+}的内容作为Ex命令执行。
+			首先在行[addr]设置光标（默认是当前行）。
+			当寄存器中的最后一行没有<CR>时，如果'cpoptions'中
+			存在'e'标志，它将自动添加。
+			对于":@="，使用最后使用的表达式。表达式求值的结果
+			作为Ex命令执行。
+			在这些命令中不识别映射。
+			当行式寄存器中行的开头存在|line-continuation|字符(\)时，
+			然后它与前一行组合。这对于拉取和执行Vim脚本的部分很有用。
+
+							*:@:*
+:[addr]@:		重复最后命令行。首先在行[addr]设置光标（默认是当前行）。
+
+:[addr]@							*:@@*
+:[addr]@@		重复前一个:@{register}。首先在行[addr]设置光标（默认是当前行）。
+
+==============================================================================
+使用Vim脚本					*using-scripts*
+
+关于编写Vim脚本，参见用户手册第41章 |usr_41.txt|。
+
+					*:so* *:source*
+:so[urce] {file}	从{file}运行|Ex-commands|或Lua代码（".lua"文件）。
+			触发|SourcePre|自动命令。
+
+:[range]so[urce]	从当前缓冲区的[range]行读取Ex命令或Lua代码。
+			当省略[range]时读取所有行。如果缓冲区的'filetype'
+			是"lua"或其文件名以".lua"结尾，则将其视为Lua代码。
+
+			当从当前缓冲区源化命令或Lua代码时，即使缓冲区被源化多次，
+			也使用相同的脚本ID |<SID>|。如果缓冲区被源化超过一次，
+			则缓冲区中的函数被重新定义。
+
+			实现细节：当源化落在折叠区域内的[range]行时，
+			范围将调整为折叠的开始和结束，但仅在使用两行指定符范围时。
+
+							*:source!*
+:so[urce]! {file}	从{file}运行|Normal-mode|命令。当在|:global|、|:argdo|、
+			|:windo|、|:bufdo|之后使用，在循环中或当另一个命令
+			跟随时，在执行命令时显示不会更新。
+
+							*:ru* *:runtime*
+:ru[ntime][!] [where] {file} ..
+			从'runtimepath'和/或'packpath'给出的每个目录中的{file}
+			（相对路径）源化|Ex|命令或Lua代码（".lua"文件）。
+			忽略不存在的文件。
+
+			示例: >
+				:runtime syntax/c.vim
+				:runtime syntax/c.lua
+
+<			可以有多个空格分隔的{file}参数。每个{file}在'runtimepath'
+			的第一个目录中搜索，然后在第二个目录中搜索，等等。
+
+			当包含[!]时，源化所有找到的文件。
+			否则只源化第一个找到的文件。
+
+			当省略[where]时只使用'runtimepath'。
+			其他值：
+				START	只在'packpath'的"start"下搜索
+				OPT	只在'packpath'的"opt"下搜索
+				PACK	在'packpath'的"start"和"opt"下搜索
+				ALL	首先使用'runtimepath'，然后在'packpath'
+					的"start"和"opt"下搜索
+
+			当{file}包含通配符时，它扩展到所有匹配的文件。示例: >
+				:runtime! plugin/**/*.{vim,lua}
+<			这是Nvim在启动时用来加载插件文件的命令。这个类似命令: >
+				:runtime plugin/**/*.{vim,lua}
+<			将只源化第一个文件。
+
+			对于每个{file}模式，如果两个`.vim`和`.lua`文件名匹配
+			且仅在扩展名上不同，则首先源化`.vim`文件。
+
+			当'verbose'为1或更高时，当找不到文件时会有消息。
+			当'verbose'为2或更高时，关于每个搜索文件都有消息。
+
+							*:pa* *:packadd* *E919*
+:pa[ckadd][!] {name}	|pack-add| 在'packpath'中搜索可选插件目录，
+			源化找到的任何插件文件，并将其添加到'runtimepath'。
+			目录必须匹配: >
+				pack/*/opt/{name}
+<			如果目录pack/*/opt/{name}/after存在，它被添加到'runtimepath'的末尾。
+
+			注意：使用|vim.pack.add()|从URL安装。
+
+			如果从"pack/*/start"加载包被跳过，则首先搜索此目录: >
+				pack/*/start/{name}
+<
+			注意{name}是目录名，不是.vim文件的名称。
+			所有匹配模式的文件 >
+				pack/*/opt/{name}/plugin/**/*.vim
+				pack/*/opt/{name}/plugin/**/*.lua
+<			将被源化。这允许在"plugin"下使用子目录，
+			就像'runtimepath'中的插件一样。
+
+			如果文件类型检测已经启用（这通常通过您的|vimrc|中的
+			`syntax enable`或`filetype on`命令完成，或在|initialization|
+			期间自动完成），并且包在"pack/*/opt/{name}"中找到，
+			此命令还将查找"{name}/ftdetect/*.vim"文件。
+
+			当给出可选的"!"时，不加载plugin/文件或ftdetect/脚本，
+			只将匹配的目录添加到'runtimepath'。这在您的|init.vim|中很有用。
+			然后插件将在|load-plugins| |initialization|步骤期间加载
+			（注意加载顺序将相反，因为每个目录都插入到其他目录之前），
+			在加载ftdetect脚本之后。
+
+						*:packl* *:packloadall*
+:packl[oadall][!]	加载'packpath'中每个条目下"start"目录中的所有包。
+
+			首先将所有找到的目录添加到'runtimepath'，
+			然后源化目录中找到的插件。这允许插件依赖于另一个插件的某些东西，
+			例如"autoload"目录。参见|packload-two-steps|了解这如何有用。
+
+			这通常在启动期间自动完成，在加载您的|vimrc|文件之后。
+			使用此命令可以更早完成。
+
+			包只加载一次。第二次使用`:packloadall`将没有效果。
+			当添加可选的!时，即使之前完成过，此命令也会加载包。
+
+			注意当在|vimrc|文件中使用`:packloadall`时，
+			'runtimepath'选项被更新，稍后'runtimepath'中的所有插件将被加载，
+			这意味着它们被再次加载。插件应该处理这种情况。
+
+			错误只导致源化脚本被中止，进一步的插件将被加载。
+			参见|packages|。
+
+:scripte[ncoding] [encoding]		*:scripte* *:scriptencoding* *E167*
+			指定脚本中使用的字符编码。
+			如果它们不同，以下行将从[encoding]转换为'encoding'选项的值。
+			示例: >
+				scriptencoding iso-8859-5
+				scriptencoding cp932
+<
+			当[encoding]为空时，不进行转换。这可用于将转换限制为一系列行: >
+				scriptencoding euc-jp
+				... 要转换的行 ...
+				scriptencoding
+				... 不转换 ...
+
+<			当系统不支持转换时，没有错误消息且不进行转换。
+			当行无法转换时没有错误，保留原始行。
+
+			不要使用"ucs-2"或"ucs-4"，脚本不能在这些编码中
+			（它们将包含NUL字节）。
+			当源化的脚本以utf-8格式的BOM（字节顺序标记）开头时，
+			Vim将识别它，无需使用":scriptencoding utf-8"。
+
+						*:scr* *:scriptnames*
+:scr[iptnames]		列出所有源化的脚本名称，按它们首次被源化的顺序。
+			数字用于脚本ID |<SID>|。
+			另见`getscriptinfo()`。
+
+:scr[iptnames][!] {scriptId}			*:script*
+			编辑脚本{scriptId}。虽然":scriptnames name"有效，
+			但建议使用":script name"。
+			当当前缓冲区不能被|abandon|且!不存在时，命令失败。
+
+						*:fini* *:finish* *E168*
+:fini[sh]		停止源化脚本。只能在Vim脚本文件中使用。
+			这是跳过文件其余部分的快速方法。
+			如果它在|:try|之后但在匹配的|:finally|（如果存在）之前使用，
+			则首先执行从":finally"到匹配的|:endtry|的命令。
+			此过程适用于脚本中的所有嵌套":try"。
+			最外层的":endtry"然后停止源化脚本。
+
+所有命令和命令序列都可以通过将它们放在命名寄存器中然后执行来重复。
+有两种方法可以将命令放入寄存器：
+- 使用记录命令"q"。您键入命令一次，当它们被执行时它们被存储在寄存器中。
+  简单，因为您可以看到您在做什么。如果您犯错误，将寄存器"p"ut到文件中，
+  编辑命令序列，然后再次将其删除到寄存器中。您可以通过追加到寄存器
+  （使用大写字母）继续记录。
+- 将命令序列删除或拉取到寄存器中。
+
+经常使用的命令序列可以通过':map'命令放在功能键下。
+
+另一种方法是将命令放在文件中，并用':source!'命令执行它们。
+对于长命令序列很有用。可以与':map'命令结合使用，将复杂命令放在功能键下。
+
+':source'命令从文件或缓冲区逐行读取Ex命令。您必须键入任何需要的键盘输入。
+':source!'命令从脚本文件逐字符读取，将每个字符解释为您键入的字符。
+
+示例：当您给出":!ls"命令时，您会得到|hit-enter|提示。
+如果您':source'一个包含"!ls"行的文件，您必须自己键入<Enter>。
+但如果您':source!'一个包含":!ls"行的文件，从该文件读取下一个字符，
+直到找到<CR>。您不必自己键入<CR>，除非":!ls"是文件中的最后一行。
+
+可以在脚本文件中放置':source[!]'命令，所以您可以制作脚本文件的
+自上而下层次结构。':source'命令可以嵌套到可以同时打开的文件数量
+（约15个）那么深。':source!'命令可以嵌套到15层深。
+
+您可以在源化文件内部使用"<script>"字符串（字面意思，这不是特殊键），
+在期望文件名的地方。它将被源化文件的文件名替换。
+例如，如果您在与|init.vim|文件相同的目录中有一个"other.vimrc"文件，
+您可以用此命令从|init.vim|文件源化它: >
+	:source <script>:h/other.vimrc
+
+在脚本文件中，终端相关的键码由终端无关的两字符码表示。
+这意味着它们可以在不同类型的终端上以相同的方式使用。
+键码的第一个字符是0x80或128，在屏幕上显示为"~@"。
+第二个字符可以在列表|key-notation|中找到。
+这些代码中的任何一个也可以用CTRL-V后跟三位十进制代码输入。
+
+							*:source_crnl* *W15*
+Windows：用":source"读取的文件通常有<CR><NL> <EOL>s。
+这些总是有效。如果您使用带有<NL> <EOL>s的文件（例如，在Unix上制作的文件），
+如果'fileformats'不为空且第一行不以<CR>结尾，这将被识别。
+如果第一行有类似":map <F1> :help^M"的内容，其中"^M"是<CR>，这就会失败。
+如果第一行以<CR>结尾，但后面的行不，您将得到错误消息，
+因为第一行的<CR>将丢失。
+
+在其他系统上，Vim期望":source"ed文件以<NL>结尾。
+这些总是有效。如果您使用带有<CR><NL> <EOL>s的文件（例如，在MS-Windows上制作的文件），
+所有行都将有尾随<CR>。这可能对某些命令（例如，映射）造成问题。
+没有自动<EOL>检测，因为通常以定义以<CR>结尾的映射的行开始，
+这会混淆自动机。
+
+							*line-continuation*
+":source"ed Ex命令脚本文件中的长行可以通过在下一行开头插入
+行继续符号"\"（反斜杠）来分割。反斜杠前可以有空白，这被忽略。
+
+示例：行 >
+	:set comments=sr:/*,mb:*,el:*/,
+		     \://,
+		     \b:#,
+		     \:%,
+		     \n:>,
+		     \fb:-
+被解释为好像它们在一行中给出: >
+	:set comments=sr:/*,mb:*,el:*/,://,b:#,:%,n:>,fb:-
+
+反斜杠前行的所有前导空白字符都被忽略。
+但是，请注意，反斜杠前行中的尾随空白不能自由插入；
+这取决于命令被分割的位置是否允许额外的空白。
+
+当需要空格时，最好将其放在反斜杠之后。行末尾的空格很难看到，
+可能会被意外删除。 >
+	:syn match Comment
+		\ "very long regexp"
+		\ keepend
+
+":append"和":insert"命令有问题: >
+   :1append
+   \asdf
+   .
+反斜杠被视为行继续符号，因此这导致命令: >
+   :1appendasdf
+   .
+为了避免这种情况，将'C'标志添加到'cpoptions'选项: >
+   :set cpo+=C
+   :1append
+   \asdf
+   .
+   :set cpo-=C
+
+注意当命令在函数内部时，您需要在定义函数时添加'C'标志，
+在执行时它不相关。 >
+   :set cpo+=C
+   :function Foo()
+   :1append
+   \asdf
+   .
+   :endfunction
+   :set cpo-=C
+<
+					*line-continuation-comment*
+要在行之间添加注释，以`'"\ '`开始。注意反斜杠后的空格。示例: >
+	let array = [
+		"\ first entry comment
+		\ 'first',
+		"\ second entry comment
+		\ 'second',
+		\ ]
+
+原理：
+	大多数程序使用尾随反斜杠表示行继续。在Vim中使用这将导致与Vi不兼容。
+	例如对于这个Vi映射: >
+		:map xx  asdf\
+<	因此使用不寻常的前导反斜杠。
+
+	在继续行中开始注释导致所有后续继续行成为注释的一部分。
+	由于长期以来都是这样，当使在继续行序列中间添加注释成为可能时，
+	不可能使用\"，因为那是有效的继续行。使用`'"\ '`最接近，
+	即使它可能看起来有点奇怪。要求反斜杠后的空格是为了使这不太可能是普通注释行。
+
+==============================================================================
+调试脚本					*debug-scripts*
+
+除了您可以添加到脚本中以找出它们在做什么的明显消息外，
+Vim还提供调试模式。这允许您逐步通过源化文件或用户函数并设置断点。
+
+注意：调试模式远非完美。调试将对Vim的工作方式产生副作用。
+您不能用它来调试所有内容。例如，显示被调试消息搞乱了。
+
+调试模式的替代方案是设置'verbose'选项。数字越大，它将给出关于Vim
+正在做什么的更详细消息。
+
+
+启动调试模式						*debug-mode*
+
+要进入调试模式，使用以下方法之一：
+1. 使用|-D|参数启动Vim: >
+	vim -D file.txt
+<  调试将在第一个vimrc文件被源化时立即开始。这对于找出Vim启动时
+   发生了什么很有用。副作用是Vim将在初始化完成之前切换终端模式，
+   结果不可预测。
+   对于仅GUI版本（Windows），调试将在GUI窗口打开后立即开始。
+   要使这更早发生，在vimrc文件中添加":gui"命令。
+								*:debug*
+2. 在命令前加上":debug"运行命令。调试只在此命令执行时进行。
+   对于调试特定脚本或用户函数很有用。对于自动命令使用的脚本和函数也很有用。
+   示例: >
+	:debug edit test.txt.gz
+
+3. 在源化文件或用户函数中设置断点。您可以在命令行中这样做: >
+	vim -c "breakadd file */explorer.vim" .
+<  这将运行Vim并停在"explorer.vim"脚本的第一行。
+   断点也可以在调试模式中设置。
+
+在调试模式中，每个执行的命令在执行前都会显示。
+注释行、空行和未执行的行被跳过。当一行包含两个命令，用"|"分隔时，
+每个命令将分别显示。
+
+
+调试模式
+
+一旦进入调试模式，可以使用通常的Ex命令。例如，检查变量的值: >
+	echo idx
+当在用户函数内部时，这将打印局部变量"idx"的值。
+在前面加上"g:"来获取全局变量的值: >
+	echo g:idx
+所有命令都在当前函数或脚本的上下文中执行。
+您也可以设置选项，例如设置或重置'verbose'将显示发生了什么，
+但您可能只想在执行您感兴趣的行之前设置它: >
+	:set verbose=20
+
+应该避免需要更新屏幕的命令，因为它们的效果在离开调试模式之前不会被注意到。
+例如: >
+	:help
+不会很有帮助。
+
+调试模式有单独的命令行历史。
+
+函数行的行号相对于函数的开始。如果您在弄清楚您在哪里有困难，
+在另一个Vim中编辑定义函数的文件，搜索函数的开始并执行"99j"。
+用行号替换"99"。
+
+此外，可以使用这些命令：
+							*>cont*
+	cont		继续执行直到遇到下一个断点。
+							*>quit*
+	quit		中止执行。这就像使用CTRL-C，一些事情可能仍然被执行，
+			不会中止所有内容。仍然在下一个断点停止。
+							*>next*
+	next		执行命令并在完成时返回调试模式。
+			这跳过用户函数调用和源化文件。
+							*>step*
+	step		执行命令并为下一个命令返回调试模式。
+			这进入调用的用户函数和源化文件。
+							*>interrupt*
+	interrupt	这就像使用CTRL-C，但与">quit"不同，为下一个执行的命令
+			返回调试模式。对于测试中断异常上的|:finally|和|:catch|很有用。
+							*>finish*
+	finish		完成当前脚本或用户函数并为源化或调用它的命令之后的
+			命令返回调试模式。
+							*>bt*
+							*>backtrace*
+							*>where*
+	backtrace	显示当前调试会话的调用堆栈跟踪。
+	bt
+	where
+							*>frame*
+	frame N		转到N回溯级别。+和-符号使移动相对。
+			例如，":frame +3"向上移动三个帧。
+							*>up*
+	up		从调用堆栈跟踪向上移动一级。
+							*>down*
+	down		从调用堆栈跟踪向下移动一级。
+
+关于调试模式中的附加命令：
+- 它们没有命令行完成，您只获得正常Ex命令的完成。
+- 您可以缩短它们，最多到一个字符，除非多个命令以相同字母开头。
+  "f"代表"finish"，使用"fr"表示"frame"。
+- 按<CR>将重复前一个。当执行另一个命令时，这被重置
+  （因为不清楚您想重复什么）。
+- 当您想使用同名Ex命令时，在前面加上冒号：
+  ":cont"、":next"、":finish"（或更短）。
+
+回溯显示函数调用的层次结构，例如：
+	>bt ~
+	  3 function One[3] ~
+	  2 Two[3] ~
+	->1 Three[3] ~
+	  0 Four ~
+	line 1: let four = 4 ~
+
+"->"指向当前帧。使用"up"、"down"和"frame N"选择另一个帧。
+
+在当前帧中，您可以评估局部函数变量。目前还没有方法查看当前行的命令。
+
+
+定义断点
+							*:breaka* *:breakadd*
+:breaka[dd] func [lnum] {name}
+		在函数中设置断点。示例: >
+			:breakadd func Explore
+<		不检查有效的函数名，因此断点可以在函数定义之前设置。
+
+:breaka[dd] file [lnum] {name}
+		在源化文件中设置断点。示例: >
+			:breakadd file 43 init.vim
+
+:breaka[dd] here
+		在当前文件的当前行设置断点。
+		就像做: >
+			:breakadd file <cursor-line> <current-file>
+<		注意这只适用于在源化文件时执行的命令，
+		不适用于在该文件中定义的函数。
+
+:breaka[dd] expr {expression}
+		设置一个断点，当{expression}求值为不同值时将中断。
+		示例: >
+			:breakadd expr g:lnum
+<		每当全局变量lnum改变时都会中断。
+
+		求值中的错误被抑制，您可以使用尚不存在的变量名。
+		这也意味着如果表达式有错误，您不会注意到任何东西。
+
+		注意如果您监视|script-variable|，这将在切换脚本时中断，
+		因为脚本变量只在定义它的脚本中有效，如果该脚本被多个其他脚本调用，
+		每当该特定变量变得可见或不可访问时，这将停止。
+
+[lnum]是断点的行号。Vim将在此行或之后停止。省略时使用第1行。
+
+							*:debug-name*
+{name}是与文件名或函数名匹配的模式。模式就像用于自动命令的模式。
+必须有完全匹配（就像模式以"^"开头并以"$"结尾）。"*"匹配任何字符序列。
+不使用'ignorecase'，但可以在模式中使用"\c"忽略大小写|/\c|。
+不要为函数名包含()！
+
+源化脚本的匹配是针对完整文件名进行的。如果没有指定路径，使用当前目录。
+示例: >
+	breakadd file explorer.vim
+匹配当前目录中的"explorer.vim"。 >
+	breakadd file *explorer.vim
+匹配".../plugin/explorer.vim"、".../plugin/iexplorer.vim"等。 >
+	breakadd file */explorer.vim
+匹配".../plugin/explorer.vim"和任何其他目录中的"explorer.vim"。
+
+函数的匹配是针对":function"输出中显示的名称进行的。
+对于局部函数，这意味着类似"<SNR>99_"的东西被前置。
+
+注意函数首先被加载，然后被执行。当它们被加载时检查"file"断点，
+当它们被执行时检查"func"断点。
+
+
+删除断点
+						*:breakd* *:breakdel* *E161*
+:breakd[el] {nr}
+		删除断点{nr}。使用|:breaklist|查看每个断点的编号。
+
+:breakd[el] *
+		删除所有断点。
+
+:breakd[el] func [lnum] {name}
+		删除函数中的断点。
+
+:breakd[el] file [lnum] {name}
+		删除源化文件中的断点。
+
+:breakd[el] here
+		删除当前文件当前行的断点。
+
+当省略[lnum]时，删除函数或文件中的第一个断点。
+{name}必须与":breakadd"命令中键入的完全相同。
+"explorer"、"*explorer.vim"和"*explorer*"是不同的。
+
+
+列出断点
+							*:breakl* *:breaklist*
+:breakl[ist]
+		列出所有断点。
+
+
+晦涩
+
+						*:debugg* *:debuggreedy*
+:debugg[reedy]
+		从正常输入流读取调试模式命令，而不是直接从用户获取。
+		仅对测试脚本有用。示例: >
+		  echo 'q^Mq' | vim -e -s -c debuggreedy -c 'breakadd file script.vim' -S script.vim
+
+:0debugg[reedy]
+		撤销":debuggreedy"：直接从用户获取调试模式命令，
+			不使用调试命令的类型提前。
+
+==============================================================================
+性能分析						*profile* *profiling*
+
+性能分析意味着Vim测量执行函数和/或脚本所花费的时间。
+
+您也可以使用|reltime()|函数来测量时间。
+
+关于性能分析语法高亮，参见|:syntime|。
+
+例如，要性能分析one_script.vim脚本文件: >
+	:profile start /tmp/one_script_profile
+	:profile file one_script.vim
+	:source one_script.vim
+	:exit
+
+
+:prof[ile] start {fname}			*:prof* *:profile* *E750*
+		开始性能分析，在退出或调用`:profile stop`或`:profile dump`
+		命令时将输出写入{fname}。"~/"和{fname}中的环境变量将被扩展。
+		如果{fname}已存在，它将静默覆盖。变量|v:profiling|被设置为1。
+
+:prof[ile] stop
+		将收集的性能分析信息写入日志文件并停止性能分析。
+		您可以使用`:profile start`命令清除性能分析统计信息并重新开始性能分析。
+
+:prof[ile] pause
+		停止性能分析直到下一个`:profile continue`命令。
+		当做一些不应该被计算的事情时可以使用（例如，外部命令）。不嵌套。
+
+:prof[ile] continue
+		在`:profile pause`后继续性能分析。
+
+:prof[ile] func {pattern}
+		性能分析匹配模式{pattern}的函数。
+			参见|:debug-name|了解如何使用{pattern}。
+
+:prof[ile][!] file {pattern}
+		性能分析匹配模式{pattern}的脚本文件。
+			参见|:debug-name|了解如何使用{pattern}。
+			这只性能分析脚本本身，不性能分析其中定义的函数。
+			当添加[!]时，脚本中定义的所有函数也将被性能分析。
+			注意性能分析只在此命令后加载脚本时开始。
+			脚本本身的:profile命令不起作用。
+
+:prof[ile] dump
+		立即将性能分析的当前状态写入日志文件。
+			运行此命令后，Vim继续收集性能分析统计信息。
+
+:profd[el] ...						*:profd* *:profdel*
+		停止对指定参数的性能分析。参见|:breakdel|了解参数。
+		示例: >
+			profdel func MyFunc
+			profdel file MyScript.vim
+			profdel here
+
+您必须始终以":profile start fname"命令开始。结果文件在Vim退出时写入。
+例如，要性能分析一个特定函数: >
+	profile start /tmp/vimprofile
+	profile func MyFunc
+
+这是输出的示例，为解释添加了行号：
+
+  1 FUNCTION  Test2() ~
+  2 Called 1 time ~
+  3 Total time:   0.155251 ~
+  4  Self time:   0.002006 ~
+  5  ~
+  6 count  total (s)   self (s) ~
+  7	9	       0.000096   for i in range(8) ~
+  8	8   0.153655   0.000410     call Test3() ~
+  9	8	       0.000070   endfor ~
+ 10				  " Ask a question ~
+ 11	1	       0.001341   echo input("give me an answer: ") ~
+
+头部（第1-4行）给出整个函数的时间。"Total"时间是函数执行时经过的时间。
+"Self"时间是"Total"时间减去在以下方面花费的时间：
+- 其他用户定义函数
+- 源化脚本
+- 执行的自动命令
+- 外部（shell）命令
+
+第7-11行显示每行执行所花费的时间。未执行的行不计入。
+因此注释行从不被计算。
+
+Count列显示一行被执行了多少次。注意第7行中的"for"命令比后面的行多执行一次。
+这是因为该行也被执行以检测循环的结束。
+
+Vim等待用户输入的时间根本不被计算。因此您对input()提示的响应时间无关紧要。
+
+性能分析应该很好地指示时间花在哪里，但请记住有各种可能搞乱结果的事情：
+
+- 测量的是实际经过时间，如果其他进程忙碌，它们可能在不可预测的时刻
+  造成延迟。您可能想要运行性能分析几次并使用最低结果。
+
+- 如果您在一行中有几个命令，您只得到一个时间。分割行以查看各个命令的时间。
+
+- 行的总时间通常小于整个函数的时间。中间有一些开销。
+
+- 在Vim退出前删除的函数不会产生性能分析信息。
+  如果需要，您可以检查|v:profiling|变量: >
+	:if !v:profiling
+	:   delfunc MyFunc
+	:endif
+<
+- 在多处理器系统上，当睡眠模式启动或处理器频率降低以节省电源时，
+  性能分析可能给出奇怪的结果。
+
+- 当函数递归使用时，"self"时间是错误的。
+
+==============================================================================
+上下文							*Context* *context*
+
+编辑器状态由Context概念表示。这包括诸如当前|jumplist|、|registers|的值等，
+如下所述。
+
+							*context-types*
+支持以下Context项：
+	"jumps"		|jumplist|
+	"regs"		|registers|
+	"bufs"		|buffer-list|
+	"gvars"		|global-variable|s
+	"sfuncs"	|script-local| functions
+	"funcs"		global and |script-local| functions
+
+							*context-dict*
+Context对象是具有以下键值对的字典：
+- "jumps"、"regs"、"bufs"、"gvars"：
+      对应msgpack对象的|readfile()|样式|List|表示 （参见|msgpackdump()|和|msgpackparse()|）。
+- "funcs"（包括|script-local|函数）：
+      |:function|定义的|List|。
+
+							*context-stack*
+由ctx系列函数维护一个初始为空的内部Context栈（参见|ctx-functions|）。
+
+
+ vim:tw=78:ts=8:noet:ft=help:norl:

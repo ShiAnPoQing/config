@@ -54,8 +54,9 @@ function M.paste(operator)
     return
   end
 
+  local count = vim.v.count1
   vim.schedule(function()
-    vim.api.nvim_feedkeys('"' .. char .. operator, "n", false)
+    vim.api.nvim_feedkeys(count .. '"' .. char .. operator, "n", false)
   end)
 end
 
@@ -64,8 +65,9 @@ function M.copy(operator)
   if not vim.tbl_contains(registers, char) then
     return
   end
+  local count = vim.v.count1
   vim.schedule(function()
-    vim.api.nvim_feedkeys('"' .. char .. operator, "n", false)
+    vim.api.nvim_feedkeys(count .. '"' .. char .. operator, "n", false)
   end)
 end
 
@@ -74,8 +76,20 @@ function M.delete(operator)
   if not vim.tbl_contains(registers, char) then
     return
   end
+  local count = vim.v.count1
   vim.schedule(function()
-    vim.api.nvim_feedkeys('"' .. char .. operator, "n", false)
+    vim.api.nvim_feedkeys(count .. '"' .. char .. operator, "n", false)
+  end)
+end
+
+function M.delete_x(operator)
+  local char = vim.fn.nr2char(vim.fn.getchar())
+  if not vim.tbl_contains(registers, char) then
+    return
+  end
+  local count = vim.v.count1
+  vim.schedule(function()
+    vim.api.nvim_feedkeys(count .. '"' .. char .. operator, "n", false)
   end)
 end
 
@@ -84,8 +98,9 @@ function M.change(operator)
   if not vim.tbl_contains(registers, char) then
     return
   end
+  local count = vim.v.count1
   vim.schedule(function()
-    vim.api.nvim_feedkeys('"' .. char .. operator, "n", false)
+    vim.api.nvim_feedkeys(count .. '"' .. char .. operator, "n", false)
   end)
 end
 

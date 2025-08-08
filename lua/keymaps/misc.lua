@@ -13,10 +13,6 @@ return {
   --   "<nop>",
   --   "n"
   -- },
-  ["<bs>"] = {
-    "X",
-    "n",
-  },
   ["<S-bs>"] = {
     "x",
     "n",
@@ -121,7 +117,11 @@ return {
   -- select mode select line
   ["gH"] = { "<C-g>gH", { "s" } },
   -- select mode delete select text
-  ["<BS>"] = { "<C-g>s", "s" },
+  ["<BS>"] = {
+    { "<C-g>s", "s" },
+    { "X", "n" },
+    { "d", "v" },
+  },
   ["<space>r"] = { "gR", "n" },
   -- repeat latest f
   ["<M-f>"] = { ";", { "n" } },

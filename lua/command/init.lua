@@ -90,3 +90,11 @@ end
 vim.api.nvim_create_user_command("FzFDirectories", function()
   fzf_dirs()
 end, {})
+
+vim.api.nvim_create_user_command("LineConcatInput", function()
+  require("custom.plugins.line-concat").line_concat({
+    trim_blank = false,
+    input = true,
+  })
+  vim.api.nvim_feedkeys("g@", "n", false)
+end, {})

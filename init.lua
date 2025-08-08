@@ -5,9 +5,9 @@ require("plugin-options").setup({
     "options/options",
     "options/typescript",
     "options/markdown",
+    "options/css",
   },
 })
-
 require("repeat").setup({})
 local Keymap = require("plugin-keymap").setup()
 require("lazy-setup")
@@ -32,10 +32,12 @@ require("lazy").setup({
   require("plugins.tmux.vim-tmux-navigator"),
   require("plugins.window.winshift"),
   -- require("plugins.lsp.lsp-config"),
+  -- TODO: 自己实现
   -- require("plugins.treesitter.nvim-treesitter-context"),
   -- require("plugins.telescope.telescope"),
 
   require("plugins.misc.harpoon"),
+  -- TODO: 自己实现
   require("plugins.misc.toggle-term"),
   require("plugins.misc.grug-far"),
   require("plugins.misc.flash"),
@@ -119,13 +121,9 @@ Keymap.add({
   },
   [";;z"] = {
     function()
-      print("可以")
-      require("repeat").record({
-        name = "test",
-        callback = function()
-          print("可以")
-        end,
-      })
+      vim.ui.input({ prompt = "请输入内容:" }, function(input)
+        print(input)
+      end)
     end,
     "n",
   },
