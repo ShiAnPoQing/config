@@ -120,12 +120,7 @@ Keymap.add({
     "n",
   },
   [";;z"] = {
-    function()
-      require("custom.plugins.insert-line").insert_line({
-        dir = "above",
-        cursor = "move",
-      })
-    end,
+    function() end,
     "n",
     -- function()
     --   vim.ui.input({ prompt = "请输入内容:" }, function(input)
@@ -135,9 +130,9 @@ Keymap.add({
     -- "n",
   },
 })
-
-vim.keymap.del("x", "in")
-
+Keymap.del({
+  ["in"] = { "x" },
+})
 -- vim.cmd([[
 --   let g:augment_workspace_folders = ['~/Learn']
 -- ]])

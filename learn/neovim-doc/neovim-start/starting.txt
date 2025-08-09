@@ -1,0 +1,1276 @@
+*starting.txt*  Nvim
+
+
+		  VIM 参考手册    作者 Bram Moolenaar
+
+
+启动 Vim						*starting*
+
+                                      输入 |gO| 查看目录。
+
+==============================================================================
+Nvim 参数						*cli-arguments*
+
+大多数情况下，Nvim 是通过以下命令启动来编辑单个文件的： >
+
+	nvim filename
+
+更一般地，Nvim 是这样启动的： >
+
+	nvim [option | filename] ..
+
+选项参数和文件名参数可以混合使用，并且可以给出任意数量的它们。
+但是，要注意接受参数的选项。
+
+以下项目决定了如何开始编辑：
+
+							*-file* *---*
+filename	一个或多个文件名。第一个将成为当前文件并读入缓冲区。
+		光标将定位在缓冲区的第一行。
+		为了避免以 '-' 开头的文件名被解释为选项，在参数列表前
+		加上 "--"，例如： >
+			nvim -- -filename
+<		"--" 后的所有参数都被解释为文件名，不能跟随其他选项或
+		"+command" 参数。
+
+							*--*
+`-`		stdin（标准输入）的别名。
+		示例： >
+			echo text | nvim - file
+<		"text" 被读入缓冲区 1，"file" 被打开为缓冲区 2。
+		在大多数情况下（除了 -s、-es、|--embed|、--headless），如果
+		stdin 不是 TTY，那么它被读取为文本，所以 "-" 是隐含的： >
+			echo text | nvim file
+<		缓冲区将被标记为已修改，因为它包含需要保存的文本（只读
+		|-R| 模式除外）。
+		如果你不喜欢这样，在你的 init.vim 中放入这些行： >
+			" 从 stdin 读取时不设置 'modified'
+			au StdinReadPost * set nomodified
+<
+		要将 stdin 读取为普通命令，使用带有 "-" 的 |-s|： >
+			echo "ifoo" | nvim -s -
+<		要将 stdin 读取为 Ex 命令，使用 |-es| 或 |-e|： >
+			echo "echo getpid()" | nvim -e - -V1
+<		要打开字面名为 "-" 的文件，将其放在 "--" 后： >
+			echo foo | nvim -- -
+<		要使用 |--headless| 将 stdin 读取为文本，使用 "-"。
+
+							*-t* *-tag*
+-t {tag}	一个标签。"tag" 在标签文件中查找，相关文件成为当前文件，
+		并执行相关命令。主要用于 C 程序，在这种情况下 "tag" 通常
+		是函数名。效果是包含该函数的文件成为当前文件，光标定位在
+		函数的开始处（参见 |tags|）。
+
+							*-q* *-qf*
+-q [errorfile]	QuickFix 模式。读取名为 [errorfile] 的文件并显示第一个
+		错误。参见 |quickfix|。
+		如果没有给出 [errorfile]，使用 'errorfile' 选项作为文件名。
+		参见 'errorfile' 获取默认值。
+
+(nothing)	没有上述四项之一，Vim 将开始编辑新缓冲区。它是空的且没有
+		文件名。
+
+							*startup-options*
+选项参数可以以任意顺序给出。单字母选项可以在一个破折号后组合。
+在 "--" 参数后不能有选项参数。
+
+--help							*-h* *--help* *-?*
+-?
+-h		给出用法（帮助）信息并退出。
+
+--version						*-v* *--version*
+-v		打印版本信息并退出。与 |:version| 命令的输出相同。
+
+							*--clean*
+--clean		模拟 Nvim 的全新安装：
+		- 跳过文件和环境变量的初始化。
+		- 不读取或写入 'shada' 文件。
+		- 从 'runtimepath' 中排除用户目录
+		- 加载内置插件，不像 "-u NONE -i NONE"。
+
+							*--noplugin*
+--noplugin	跳过加载插件。重置 'loadplugins' 选项。
+		注意 |-u| 参数也可能禁用加载插件：
+			参数		加载 vimrc 文件	加载插件 ~
+			(nothing)		yes		    yes
+			-u NONE			no		    no
+			-u NORC			no		    yes
+			--noplugin		yes		    no
+
+--startuptime {fname}					*--startuptime*
+		在启动期间将计时信息写入文件 {fname}。
+		这可以用来找出加载你的 |config|、插件和打开第一个文件时
+		花费时间的地方。
+		当 {fname} 已存在时，新信息被追加。
+
+							*-+*
++[num]		光标将定位在第一个被编辑文件的第 "num" 行。如果缺少
+		"num"，光标将定位在最后一行。
+
+							*-+/*
++/{pat}		光标将定位在第一个被编辑文件中包含 "pat" 的第一行
+		（参见 |pattern| 获取可用的搜索模式）。搜索从光标位置
+		开始，这可能是第一行或从 |shada| 最后使用的光标位置。
+		要强制从第一行搜索，使用 "+1 +/pat"。
+
++{command}						*-+c* *-c*
+-c {command}	{command} 将在第一个文件被读取后执行（在该文件的自动
+		命令和模式行被处理后）。"command" 被解释为 Ex 命令。
+		如果 "command" 包含空格，必须用双引号括起来（这取决于
+		使用的 shell）。
+		示例： >
+			vim  "+set si"  main.c
+			vim  "+find stdio.h"
+			vim  -c "set ff=dos"  -c wq  mine.mak
+<
+		注意：你可以在一个 Vim 命令中使用最多 10 个 "+" 或 "-c"
+		参数。它们按给定顺序执行。"-S" 参数也算作 "-c" 参数。
+
+--cmd {command}						*--cmd*
+		{command} 将在处理任何 vimrc 文件之前执行。
+		否则，它的作用类似于 -c {command}。你可以使用最多 10 个
+		这样的命令，独立于 "-c" 命令。
+
+							*-S*
+-S [file]	在第一个文件被读取后执行 Vimscript 或 Lua (".lua") [file]。
+		另请参见 |:source|。如果没有给出 [file]，
+		默认为 "Session.vim"。等效于： >
+			-c "source {file}"
+<		可以像 "-c" 一样重复，受到 10 个 "-c" 参数的相同限制。
+		{file} 不能以 "-" 开头。
+
+-L							*-L* *-r*
+-r		恢复模式。没有文件名参数时，给出现有交换文件的列表。
+		有文件名时，读取交换文件以恢复崩溃的编辑会话。
+		参见 |crash-recovery|。
+
+							*-R*
+-R		只读模式。所有被编辑的文件都将设置 'readonly' 选项。
+		你仍然可以编辑缓冲区，但会被阻止意外覆盖文件。
+		如果你忘记你处于查看模式并确实做了一些更改，你可以通过
+		在 Ex 命令中添加感叹号来覆盖文件，如 ":w!"。
+		'readonly' 选项可以用 ":set noro" 重置（参见选项章节，
+		|options|）。后续编辑将不在只读模式下进行。
+		'updatecount' 选项将设置为 10000，意味着交换文件不会
+		自动频繁更新。
+		参见 |-M| 禁止修改。
+
+							*-m*
+-m		不允许写入修改。'write' 选项将被重置，因此禁用写入文件。
+		但是，'write' 选项可以设置为再次启用写入。
+
+							*-M*
+-M		不允许修改。'modifiable' 选项将被重置，因此不允许更改。
+		'write' 选项将被重置，因此禁用写入文件。但是，
+		'modifiable' 和 'write' 选项可以设置为启用更改和写入。
+
+-e							*-e* *-E*
+-E		在 Ex 模式 |gQ| 中启动 Nvim，参见 |Ex-mode|。
+
+		如果 stdin 不是 TTY：
+		  -e 将 stdin 读取/执行为 Ex 命令。
+		  -E 将 stdin 读取为文本（到缓冲区 1）。
+
+-es						*-es* *-Es* *-s-ex* *silent-mode*
+-Es		脚本模式，又称"静默模式"，又称"批处理模式"。没有 UI，
+		禁用大多数提示和消息。与 |-s| 无关。
+		另请参见 |-S| 运行脚本文件。
+
+		-es 将 stdin 读取/执行为 Ex 命令。 >
+			printf "put ='foo'\n%%print\n" | nvim -es
+
+<		-Es 将 stdin 读取为文本（到缓冲区 1）。使用 |-c| 或 "+" 
+		发送命令。 >
+			printf "foo\n" | nvim -Es +"%print"
+
+<		这些命令在 stdout 上显示：
+			:list
+			:number
+			:print
+			:set
+		使用 |:verbose| 或 'verbose'，其他命令在 stderr 上显示： >
+			nvim -es +"verbose echo 'foo'"
+			nvim -V1 -es +"echo 'foo'"
+<
+		跳过用户 |config|，除非给出了 |-u|。
+		禁用 |shada|，除非给出了 |-i|。
+		禁用交换文件（如 |-n|）。
+
+							*-l*
+-l {script} [args]
+		非交互式地执行 Lua {script}（没有 UI），在处理任何
+		前面的 Nvim |cli-arguments| 后带有可选的 [args]，
+		然后退出。Lua 错误时退出 1。参见 |-S| 运行多个 Lua
+		脚本而不带参数，带有 UI。
+								    *lua-args*
+		所有 [args] 都被视为 {script} 参数并存储在 Lua `_G.arg`
+		全局表中，因此 "-l" 结束 Nvim 参数的处理。{script} 名称
+		存储在 `_G.arg[0]`。
+
+		设置 'verbose' 为 1（如 "-V1"），因此 Lua `print()` 写入
+		输出，以及其他消息发射函数如 |:echo|。
+		如果 {script} 打印消息且不导致 Nvim 退出，Nvim 确保输出
+		以换行符结束。
+
+		"-l" 之前的参数在执行 {script} 之前被处理。
+		这个例子在执行 "foo.lua" 之前退出： >
+			nvim +q -l foo.lua
+<		这在执行 "foo.lua" 之前加载 Lua 模块 "bar"： >
+			nvim +"lua require('bar')" -l foo.lua
+<								    *lua-shebang*
+		你可以设置脚本的 "shebang"，以便当从 shell 调用 "./" 时
+		Nvim 执行脚本（记住 "chmod u+x"）： >
+			#!/usr/bin/env -S nvim -l
+<
+		跳过用户 |config|，除非给出了 |-u|。
+		禁用插件，除非设置了 'loadplugins'。
+		禁用 |shada|，除非给出了 |-i|。
+		禁用交换文件（如 |-n|）。
+
+							*-ll*
+-ll {script} [args]
+		执行 Lua 脚本，类似于 |-l|，但编辑器不被初始化。
+		这提供了类似于工作线程的 Lua 环境。参见 |lua-loop-threading|。
+
+		与 `-l` 不同，不允许先前的参数。
+
+							*-b*
+-b		二进制模式。文件 I/O 只识别 <NL> 来分隔行。
+		'expandtab' 选项将被重置。'textwidth' 选项设置为 0。
+		'modeline' 被重置。'binary' 选项被设置。
+		这在读取 |vimrc| 后但在读取参数列表中的任何文件之前完成。
+		另请参见 |edit-binary|。
+
+							*-A*
+-A		阿拉伯语模式。设置 'arabic' 选项。
+
+							*-H*
+-H		希伯来语模式。设置 'rightleft' 选项并将 'keymap' 选项
+		设置为 "hebrew"。
+
+							*-V* *verbose*
+-V[N]		详细。将 'verbose' 选项设置为 [N]（默认：10）。
+		将为每个被 ":source" 的文件和读取或写入 ShaDa 文件给出消息。
+		可用于找出启动和退出时发生的情况。
+		示例： >
+			nvim -V8
+
+-V[N]{file}
+		如 -V 并将 'verbosefile' 设置为 {file}（不能以数字开头）。
+		消息不被显示，而是写入 {file}。
+		示例： >
+			nvim -V20vimlog
+<
+							*-D*
+-D		调试。当执行脚本中的第一个命令时进入调试模式。|debug-mode|
+
+							*-n*
+-n		通过设置 'updatecount' 为 0 禁用 |swap-file|（在执行任何
+		|vimrc| 后）。崩溃后的恢复将不可能。当在非常慢的介质
+		（usb 驱动器、网络共享）上处理文件时提高性能。
+
+		通过设置 'updatecount' 为某个值再次启用它，例如
+		":set updatecount=100"。
+
+		为了减少对磁盘的访问，不要使用 "-n"，而是将 'updatetime'
+		和 'updatecount' 设置为非常大的数字，当你想保存工作时
+		输入 ":preserve"。这样你保持了崩溃恢复的可能性。
+
+							*-o*
+-o[N]		打开 N 个窗口，水平分割。如果没有给出 [N]，为每个
+		作为参数给出的文件打开一个窗口。如果没有足够的空间，
+		只有前几个文件得到窗口。如果窗口比参数多，最后几个
+		窗口将编辑空文件。
+
+							*-O*
+-O[N]		打开 N 个窗口，垂直分割。否则，它就像 -o。
+		如果同时给出 -o 和 -O 选项，命令行上的最后一个决定
+		如何分割窗口。
+
+							*-p*
+-p[N]		打开 N 个标签页。如果没有给出 [N]，为每个作为参数给出的
+		文件打开一个标签页。最大值用 'tabpagemax' 页面设置（默认 50）。
+		如果标签页比参数多，最后几个标签页将编辑空文件。
+		另请参见 |tabpage|。
+							*-d*
+-d		在 |diff-mode| 中启动。
+
+							*-u* *E282*
+-u {vimrc}	读取文件 {vimrc} 进行初始化。跳过大多数其他初始化；
+		参见 |initialization|。
+
+		这可以用来在特殊模式下启动 Vim，带有特殊映射和设置。
+		可以使用 shell 别名来轻松使用。例如，在 C shell 后代中： >
+			alias vimc 'nvim -u ~/.config/nvim/c_init.vim \!*'
+<		在 Bash shell 中： >
+			alias vimc='nvim -u ~/.config/nvim/c_init.vim'
+<		也考虑使用自动命令；参见 |autocommand|。
+
+		当 {vimrc} 是 "NONE"（全大写）时，跳过所有来自文件和
+		环境变量的初始化。也跳过插件和语法高亮。
+
+		当 {vimrc} 是 "NORC"（全大写）时，这与 "NONE" 有相同的
+		效果，但不跳过插件和语法高亮。
+
+							*-i*
+-i {shada}	使用文件 {shada} 而不是默认的 ShaDa 文件。如果使用名称
+		"NONE"（全大写），不读取或写入 ShaDa 文件，即使设置了
+		'shada' 或使用 ":rsh" 或 ":wsh"。另请参见 |shada-file|。
+
+							*-s*
+-s {scriptin}	读取脚本文件 {scriptin}，将字符解释为普通模式输入。
+		可以用 ":source!" 做同样的事情： >
+			:source! {scriptin}
+<		如果 {scriptin} 是 "-" 则从 stdin 读取： >
+			echo "ifoo" | nvim -s -
+<		如果在 Nvim 退出之前到达文件末尾，进一步的字符从键盘读取。
+
+		不能与 |-es| 一起使用。另请参见 |complex-repeat|。
+
+							*-w_nr*
+-w {number}
+-w{number}	将 'window' 选项设置为 {number}。
+
+							*-w*
+-w {scriptout}	你输入的所有键都被记录在文件 "scriptout" 中，直到你
+		退出 Vim。用于创建脚本文件以与 "vim -s" 或 ":source!" 
+		一起使用。如果 "scriptout" 文件已存在则追加。{scriptout} 
+		不能以数字开头。
+		另请参见 |vim.on_key()|。
+		另请参见 |complex-repeat|。
+
+							*-W*
+-W {scriptout}	如 -w，但不追加，覆盖现有文件。
+
+							*--api-info*
+--api-info	打印 msgpack 编码的 |api-metadata| 并退出。
+
+							*--embed*
+--embed		使用 stdin/stdout 作为 msgpack-RPC 通道，因此应用程序可以
+		通过 RPC |API| 嵌入和控制 Nvim。如果通道关闭（除了通过
+		|:detach|），Nvim 退出。
+
+		等待客户端（"嵌入器"）调用 |nvim_ui_attach()| 后再源启动
+		文件和读取缓冲区，这样 UI 可以确定性地处理（显示）早期
+		消息、对话框等。客户端可以在 `nvim_ui_attach` 之前做其他
+		请求（例如用于功能检测的 `nvim_get_api_info`）。
+		在这个预启动阶段，用户配置当然不可用（类似于 `--cmd`）。
+
+		非 UI 嵌入器必须传递 |--headless|，然后启动将继续而不等待
+		`nvim_ui_attach`： >
+		    nvim --embed --headless
+<		等效于： >
+		    nvim --headless --cmd "call stdioopen({'rpc': v:true})"
+<
+		想要在套接字（而不是 stdio）上使用 UI 协议的 UI 嵌入器
+		必须传递 |--listen| 以及 |--embed|： >
+		    nvim --embed --listen addr
+
+<		另请参见：|ui-startup| |channel-stdio|
+
+							*--headless*
+--headless	无 UI 启动，不等待 `nvim_ui_attach`。内置 TUI 不被使用，
+		因此 stdio 作为任意通信通道工作。|channel-stdio|
+
+		对于脚本（测试）也很有用，可以看到不会被 |-es| 打印的消息。
+
+		要检测 UI 是否可用，在 |VimEnter| 期间或之后检查
+		|nvim_list_uis()| 是否为空。
+
+		要将 stdin 读取为文本，必须明确给出 "-"：
+		--headless 不能假设 stdin 只是文本。 >
+			echo foo | nvim --headless +"%print" +"q!" -
+<
+		另请参见 |--embed|。
+		另请参见 |-es|，它也禁用大多数消息。
+
+--listen {addr}						*--listen*
+		在管道或 TCP 地址 {addr} 上启动 |RPC| 服务器。将主监听
+		地址 |v:servername| 设置为 {addr}。|serverstart()|
+
+		要使用 systemd 按需启动服务器，使用 systemd 套接字单元
+		和运行以下命令的关联服务单元： >
+		systemd-socket-proxyd --exit-idle-time
+<
+==============================================================================
+初始化					*initialization* *startup*
+
+在启动时，Nvim 检查环境变量和文件并相应地设置值，
+按如下方式进行：
+
+1. 设置 'shell' 选项			*SHELL* *COMSPEC*
+	环境变量 SHELL，如果存在，用于设置 'shell' 选项。
+	在 Win32 上，如果没有设置 SHELL，则使用 COMSPEC 变量。
+
+2. 处理参数
+	检查启动 Vim 的命令中的选项和文件名。
+	|-V| 参数可用于显示或记录接下来发生的事情，
+	对调试初始化很有用。
+	执行 |--cmd| 参数。
+	为所有文件创建缓冲区（但尚未加载）。
+
+3. 启动服务器（除非给出了 |--listen|）并设置 |v:servername|。
+
+4. 等待 UI 连接。
+	使用 |--embed| 启动的 Nvim 在继续加载用户配置之前等待 UI 连接。
+
+5. 设置 |default-mappings| 和 |default-autocmds|。创建 |popup-menu|。
+
+6. 启用文件类型和缩进插件。
+	这与命令相同： >
+		:runtime! ftplugin.vim indent.vim
+<	如果给出了 "-u NONE" 命令行参数则跳过。
+
+7. 加载用户配置 (从文件、环境变量等执行 Ex 命令)。
+	$VIMINIT 环境变量被作为一行 Ex 命令读取 (用 '|' 或 <NL> 分隔多个命令)。
+
+					*config* *init.vim* *init.lua* *vimrc* *exrc*
+	包含初始化命令的文件通常被称为
+	"vimrc" 或配置文件。它可以是 Vimscript ("init.vim") 或
+	Lua ("init.lua")，但不能同时是两者。*E5422*
+	另请参阅 |vimrc-intro| 和 |base-directories|。
+
+	配置文件位于：
+	Unix			~/.config/nvim/init.vim		(或 init.lua)
+	Windows			~/AppData/Local/nvim/init.vim	(或 init.lua)
+	|$XDG_CONFIG_HOME|	$XDG_CONFIG_HOME/nvim/init.vim	(或 init.lua)
+
+	如果 Nvim 使用 "-u {file}" 启动，那么 {file} 被用作配置文件，
+	并且跳过所有初始化直到第 8 步。$MYVIMRC 不会被设置。
+	"nvim -u NORC" 可以用来跳过这些初始化而不读取文件。
+	"nvim -u NONE" 还会跳过插件和语法高亮。|-u|
+
+	如果 Nvim 使用 |-es| 或 |-Es| 或 |-l| 启动，则跳过所有初始化直到第 8 步。
+
+						*system-vimrc* *sysinit.vim*
+     a. 读取系统 vimrc 文件进行初始化。如果
+	在 $XDG_CONFIG_DIRS 中的某个目录存在 nvim/sysinit.vim 文件，将使用它。
+	否则使用系统 vimrc 文件。此文件的路径由 |:version| 命令给出。
+	通常是 "$VIM/sysinit.vim"。
+
+						*VIMINIT* *EXINIT* *$MYVIMRC*
+     b. 搜索初始化的位置，按优先级顺序：
+	-  $VIMINIT 环境变量 (Ex 命令行)。
+	-  用户 |config|: $XDG_CONFIG_HOME/nvim/init.vim (或 init.lua)。
+	-  其他配置: {dir}/nvim/init.vim (或 init.lua)，其中 {dir} 是
+	   $XDG_CONFIG_DIRS 中的任何目录。
+	-  $EXINIT 环境变量 (Ex 命令行)。
+	|$MYVIMRC| 被设置为第一个有效位置，除非它已经被设置或使用 $VIMINIT。
+
+     c. 如果 'exrc' 选项开启 (这不是默认值)，当前目录会按优先级顺序
+	搜索以下文件：
+	- ".nvim.lua"
+	- ".nvimrc"
+	- ".exrc"
+	使用第一个存在的文件，其他的被忽略。
+
+8. 启用文件类型检测。
+	这与以下命令相同：>
+		:runtime! filetype.lua
+<	如果调用了 ":filetype off" 或给出了 "-u NONE" 命令行参数，则跳过。
+
+9. 启用语法高亮。
+	这与以下命令相同：>
+		:runtime! syntax/syntax.vim
+<	如果调用了 ":syntax off" 或给出了 "-u NONE" 命令行参数，则跳过。
+
+10. 加载插件脚本。					*load-plugins*
+	这与以下命令相同：>
+		:runtime! plugin/**/*.{vim,lua}
+<	结果是搜索 'runtimepath' 中的所有目录的 "plugin" 子目录，
+	并且所有以 ".vim" 或 ".lua" 结尾的文件都会被源代码加载
+	(每个目录按字母顺序)，也包括子目录。首先加载 "*.vim"，
+	然后是 "*.lua" 文件，每个目录都是如此。
+
+	但是，'runtimepath' 中以 "after" 结尾的目录在这里被跳过，
+	只有在包加载后才会加载，见下文。
+	在以下情况下不会加载插件：
+	- 'loadplugins' 选项在 vimrc 文件中被重置。
+	- 使用了 |--noplugin| 命令行参数。
+	- 使用了 |--clean| 命令行参数。
+	- 使用了 "-u NONE" 命令行参数 |-u|。
+	注意使用 `-c 'set noloadplugins'` 不起作用，因为命令行的命令
+	还没有执行。你可以使用 `--cmd 'set noloadplugins'` 或
+	`--cmd 'set loadplugins'` |--cmd|。
+
+	包被加载。这些是插件，如上所述，但在 'packpath' 中每个条目的
+	"start" 目录中找到。找到的每个插件目录都会添加到 'runtimepath'
+	中，然后加载插件。参见 |packages|。
+
+	插件脚本被加载，如上所述，但现在只使用以 "after" 结尾的目录。
+	注意如果找到包，'runtimepath' 将会改变，但这不应该添加以
+	"after" 结尾的目录。
+
+11. 设置 'shellpipe' 和 'shellredir'
+	'shellpipe' 和 'shellredir' 选项根据 'shell' 选项的值设置，
+	除非它们之前已经被设置。这意味着 Nvim 会为你计算出
+	'shellpipe' 和 'shellredir' 的值，除非你自己设置了它们。
+
+12. 如果使用了 "-n" 命令参数，将 'updatecount' 设置为零。
+
+13. 如果给出了 |-b| 标志，设置二进制选项。
+
+14. 读取 |shada-file|。
+
+15. 如果给出了 |-q| 标志，读取 quickfix 文件，或在失败时退出。
+
+16. 打开所有窗口
+	当给出 |-o| 标志时，窗口将被打开 (但还不显示)。
+	当给出 |-p| 标志时，标签页将被创建 (但还不显示)。
+	当切换屏幕时，现在就会发生。重绘开始。
+	如果给出了 |-q| 标志，跳转到第一个错误。
+	所有窗口的缓冲区将被加载，不触发 |BufAdd| 自动命令。
+
+17. 执行启动命令
+	如果给出了 |-t| 标志，跳转到标签。
+	执行用 |-c| 和 |+cmd| 给出的命令。
+	启动标志被重置，has("vim_starting") 现在将返回零。
+	|v:vim_did_enter| 变量被设置为 1。
+	执行 |VimEnter| 自动命令。
+
+
+将 Vim 的当前状态保存到文件 ~
+
+每当你改变了选项的值或创建了映射时，你可能想要将它们保存在 vimrc 文件中
+以供以后使用。参见 |save-settings| 关于将设置的当前状态保存到文件。
+
+
+避免木马病毒 ~
+							*trojan-horse*
+在读取当前目录中的 "vimrc" 或 "exrc" 文件时，出于安全原因，通过设置
+'secure' 选项可以禁用某些命令。当从标签文件执行命令时总是这样做。
+否则，你可能会意外使用别人创建的包含恶意命令的 vimrc 或标签文件。
+被禁用的命令是那些启动 shell 的命令、写入文件的命令和 ":autocmd"。
+":map" 命令会被回显，所以你可以看到哪些键被映射了。
+	如果你想让 Vim 执行本地 vimrc 文件中的所有命令，你可以在
+EXINIT 或 VIMINIT 环境变量中或在全局 exrc 或 vimrc 文件中重置
+'secure' 选项。在当前目录的 vimrc 或 exrc 中这是不可能的，原因很明显。
+	在 Unix 系统上，只有当你不是 vimrc 文件的所有者时才会发生这种情况。
+警告：如果你解压包含 vimrc 或 exrc 文件的存档，它将属于你。
+你不会有安全保护。在该目录中启动 Vim 之前检查 vimrc 文件，
+或重置 'exrc' 选项。一些 Unix 系统允许用户对文件执行 "chown"。
+这使得另一个用户有可能创建恶意的 vimrc 并让你成为所有者。小心！
+	当使用标签搜索命令时，执行搜索命令 (标签文件中行的最后部分) 
+总是在安全模式下完成。这就像从当前目录的 vimrc 执行命令一样。
+
+
+如果 Vim 启动很慢 ~
+							*slow-start*
+如果 Vim 启动需要很长时间，使用 |--startuptime| 参数来找出发生了什么。
+
+如果你启用了 'shada'，加载 ShaDa 文件可能需要一段时间。你可以通过暂时
+禁用 ShaDa 来查看这是否是问题 (使用 Vim 参数 "-i NONE"，|-i|)。
+尝试用 ":set shada='20,<50,s10" 减少寄存器中存储的行数。|shada-file|。
+
+
+排除损坏的配置 ~
+							*bisect*
+像 Vim 和 Emacs 这样的编辑器的极度灵活性意味着任何插件或设置都可能
+以最初不明显的方式影响整个编辑器。
+
+要找到配置中问题的原因，你必须"二分"它：
+1. 移除或禁用你 |config| 的一半。
+2. 重启 Nvim。
+3. 如果问题仍然出现，转到第 1 步。
+4. 如果问题消失了，恢复一半被移除的行。
+5. 继续以这种方式缩小你的配置，直到你找到导致问题的设置或插件。
+
+
+介绍信息 ~
+							*:intro*
+当 Vim 在没有文件名的情况下启动时，会显示介绍信息。一旦显示被重绘，
+它就会被移除。要再次查看消息，使用 ":intro" 命令。要在启动时避免
+介绍信息，将 "I" 标志添加到 'shortmess'。
+
+==============================================================================
+$VIM 和 $VIMRUNTIME
+								*$VIM*
+环境变量 "$VIM" 用于定位 Nvim 的各种用户文件，例如用户 |config|。
+这取决于系统，参见 |startup|。
+
+Nvim 将按此顺序尝试获取 $VIM 的值：
+
+1. 环境变量 $VIM，如果它被设置。
+2. 从 'helpfile' 选项派生的路径，除非它也包含某些环境变量
+   (默认是 "$VIMRUNTIME/doc/help.txt")。文件名 ("help.txt" 等) 被移除。
+   尾随目录名按此顺序被移除："doc"、"runtime"。
+3. 从 `nvim` 可执行文件位置派生的路径。
+4. 编译时定义的安装目录 (参见 ":version" 的输出)。
+
+做完这些后，Nvim 设置 $VIM 环境变量。
+
+								*$VIMRUNTIME*
+环境变量 "$VIMRUNTIME" 用于定位各种支持文件，例如文档和语法高亮文件。
+例如，主帮助文件通常是 "$VIMRUNTIME/doc/help.txt"。
+
+Nvim 将按此顺序尝试获取 $VIMRUNTIME 的值：
+
+1. 环境变量 $VIMRUNTIME，如果它被设置。
+2. 目录路径 "$VIM/runtime"，如果它存在。
+3. $VIM 环境变量的值。这是为了与旧版本 Vim 的向后兼容性。
+4. 如果相对于 |v:progpath| 存在 "../share/nvim/runtime"，则使用它。
+5. 从 'helpfile' 选项派生的路径 (如果它不包含 '$')，末尾移除
+   "doc/help.txt"。
+
+做完这些后，Nvim 设置 $VIMRUNTIME 环境变量。
+
+如果你需要在 shell 中获取 $VIMRUNTIME 的值 (例如，用于在帮助文件中
+进行 grep 的脚本)，你可能可以使用这个：>
+
+	VIMRUNTIME="$(nvim --clean --headless --cmd 'echo $VIMRUNTIME|q')"
+
+==============================================================================
+挂起						*suspend*
+
+					*CTRL-Z* *v_CTRL-Z*
+CTRL-Z			挂起 Nvim，像 ":stop"。
+			在普通模式和可视模式下工作。在插入模式和
+			命令行模式下，CTRL-Z 作为普通字符插入。
+			在可视模式下 Nvim 回到普通模式。
+
+:sus[pend][!]	或			*:sus* *:suspend* *:st* *:stop*
+:st[op][!]		使用操作系统的"作业控制"挂起 Nvim；如果你再次
+			将其设为前台作业，它将继续。在挂起前触发
+			|VimSuspend|，恢复时触发 |VimResume|。
+			如果没有给出 "!" 且设置了 'autowrite'，每个
+			有更改和文件名的缓冲区都会被写出。
+			如果给出了 "!" 或没有设置 'autowrite'，更改的
+			缓冲区不会被写入，不要忘记稍后将 Nvim 带回前台！
+
+在 GUI 中，挂起是实现定义的。
+
+==============================================================================
+退出							*exiting*
+
+有几种退出 Vim 的方法：
+- 用 `:quit` 关闭最后一个窗口。只有在没有更改时。
+- 用 `:quit!` 关闭最后一个窗口。即使有更改时也是如此。
+- 用 `:qall` 关闭所有窗口。只有在没有更改时。
+- 用 `:qall!` 关闭所有窗口。即使有更改时也是如此。
+- 使用 `:cquit`。即使有更改时也是如此。
+
+当使用 `:cquit` 或有错误消息时，Vim 以退出代码 1 退出。
+可以通过使用 `:silent!` 或 `:catch` 来避免错误。
+
+==============================================================================
+保存设置						*save-settings*
+
+大多数情况下你会手动编辑 vimrc 文件。这给你最大的灵活性。
+有几个命令可以自动生成 vimrc 文件。你可以按原样使用这些文件，
+或复制/粘贴行到另一个 vimrc 文件中。
+
+							*:mk* *:mkexrc*
+:mk[exrc] [file]	将当前键映射和更改的选项写入 [file]
+			(默认为当前目录中的 ".exrc")，除非它已经存在。
+
+:mk[exrc]! [file]	总是将当前键映射和更改的选项写入 [file]
+			(默认为当前目录中的 ".exrc")。
+
+						*:mkv* *:mkvi* *:mkvimrc*
+:mkv[imrc][!] [file]	像 ":mkexrc"，但默认是当前目录中的 ".nvimrc"。
+			":version" 命令也会写入文件。
+
+这些命令会将 ":map" 和 ":set" 命令写入文件，以这样的方式：
+当执行这些命令时，当前的键映射和选项将被设置为相同的值。
+选项 'columns'、'endofline'、'fileformat'、'lines'、'modified' 和
+'scroll' 不包括在内，因为这些依赖于终端或文件。
+注意选项 'binary'、'paste' 和 'readonly' 被包括在内，这可能不总是
+你想要的。
+
+当在映射中使用特殊键时，'cpoptions' 选项将临时设置为其 Vim 默认值，
+以避免映射被误解。这使文件与 Vi 不兼容，但确保它可以与不同的终端一起使用。
+
+只存储全局映射，不存储局部于缓冲区的映射。
+
+一种常见的方法是使用默认的 |config| 文件，用 ":map" 和 ":set" 命令
+进行一些修改，然后写入修改后的文件。首先用类似 ":source ~piet/.vimrc.Cprogs"
+的命令读入默认 vimrc，更改设置，然后用 ":mkvimrc!" 在当前目录中保存它们。
+如果你想让这个文件成为你的默认 |config|，将它移动到 $XDG_CONFIG_HOME/nvim。
+你也可以使用自动命令 |autocommand| 和/或模式行 |modeline|。
+
+						*vimrc-option-example*
+如果你只想向 vimrc 添加单个选项设置，你可以使用这些步骤：
+1. 用 Vim 编辑你的 vimrc 文件。
+2. 尝试选项直到正确。例如，为 'guifont' 尝试不同的值。
+3. 添加一行来设置选项的值，使用表达式寄存器 '=' 来输入值。
+   例如，对于 'guifont' 选项：>
+   o:set guifont=<C-R>=&guifont<CR><Esc>
+<  [<C-R> 是 CTRL-R，<CR> 是回车，<Esc> 是转义键]
+   你需要转义特殊字符，特别是空格。
+
+==============================================================================
+视图和会话					*views-sessions*
+
+这在用户手册的 |21.4| 和 |21.5| 节中介绍。
+
+						*View* *view-file*
+视图是应用于一个窗口的设置集合。你可以保存视图，当稍后恢复它时，
+文本以相同的方式显示。此窗口中的选项和映射也将被恢复，
+这样你可以像保存视图时一样继续编辑。
+
+						*Session* *session-file*
+会话保留所有窗口的视图，加上全局设置。你可以保存会话，
+当稍后恢复它时，窗口布局看起来相同。你可以使用会话在不同项目之间
+快速切换，自动加载你在该项目中最后工作的文件。
+
+视图和会话是 ShaDa 文件的很好补充，ShaDa 文件用于记住所有视图和
+会话的信息 |shada-file|。
+
+你可以用 |-S| 参数快速开始编辑先前保存的视图或会话：>
+	vim -S Session.vim
+<
+							*:mks* *:mksession*
+:mks[ession][!] [file]	写一个恢复当前编辑会话的 Vim 脚本。
+			当包含 [!] 时，现有文件被覆盖。
+			当省略 [file] 时，使用 "Session.vim"。
+
+":mksession" 的输出像 ":mkvimrc"，但额外的命令被添加到文件中。
+哪些命令取决于 'sessionoptions' 选项。生成的文件，当用 ":source" 命令执行时：
+1. 如果 'sessionoptions' 包含 "options"，恢复全局映射和选项。
+   脚本局部映射不会被写入。
+2. 如果 'sessionoptions' 包含 "globals"，恢复以大写字母开头并包含
+   至少一个小写字母的全局变量。
+3. 关闭当前标签页中除当前窗口外的所有窗口；关闭除当前标签页外的
+   所有标签页 (这导致当前加载的缓冲区被卸载，如果设置了 'hidden' 或
+   另有指定，一些可能变成隐藏的)；如果当前缓冲区为空且未命名，则清除它。
+4. 如果 'sessionoptions' 包含 "curdir"，恢复当前目录，或如果
+   'sessionoptions' 包含 "sesdir"，将当前目录设置为会话文件所在位置。
+5. 如果 'sessionoptions' 包含 "winpos"，恢复 GUI Vim 窗口位置。
+6. 如果 'sessionoptions' 包含 "resize"，恢复屏幕大小。
+7. 重新加载缓冲区列表，带有最后的光标位置。如果 'sessionoptions' 包含
+   "buffers"，则恢复所有缓冲区，包括隐藏和未加载的缓冲区。
+   否则，只恢复窗口中的缓冲区。
+8. 用相同的布局恢复所有窗口。如果 'sessionoptions' 包含 "help"，
+   恢复帮助窗口。如果 'sessionoptions' 包含 "blank"，
+   编辑没有名称的缓冲区的窗口将被恢复。
+   如果 'sessionoptions' 包含 "winsize" 且没有 (帮助/空白) 窗口被遗漏，
+   窗口大小被恢复 (相对于屏幕大小)。否则，窗口只是给出合理的大小。
+9. 用 |:mkview| 恢复所有窗口的视图。但使用 'sessionoptions' 而不是
+   'viewoptions'。
+10. 如果存在与会话文件同名但以 "x.vim" (表示额外) 结尾的文件，
+   也会执行它。你可以使用 `*x.vim` 文件来指定与给定会话相关的
+   额外设置和操作，例如在 GUI 版本中创建菜单项。
+
+恢复会话后，当前会话的完整文件名在内部变量 |v:this_session| 中可用。
+一个示例映射：>
+  :nmap <F2> :wa<Bar>exe "mksession! " .. v:this_session<CR>:so ~/sessions/
+这保存当前会话，并开始加载另一个的命令。
+
+会话包括所有标签页，除非从 'sessionoptions' 中移除了 "tabpages"。|tab-page|
+
+在加载/源代码会话文件后触发 |SessionLoadPost| 自动命令事件。
+						*SessionLoad-variable*
+当会话文件正在加载时，SessionLoad 全局变量被设置为 1。
+插件可以使用这个来推迟某些工作，直到触发 SessionLoadPost 事件。
+
+							*:mkvie* *:mkview*
+:mkvie[w][!] [file]	写一个恢复当前窗口内容的 Vim 脚本。
+			当包含 [!] 时，现有文件被覆盖。
+			当省略 [file] 或是 1 到 9 的数字时，生成名称并在前面
+			加上 'viewdir'。当 'viewdir' 的最后路径部分不存在时，
+			创建此目录。例如，当 'viewdir' 是 "$VIM/vimfiles/view"
+			时，在 "$VIM/vimfiles" 中创建 "view"。
+			然后总是覆盖现有文件。使用 |:loadview| 再次加载此视图。
+			当 [file] 是文件名时 (不使用 'viewdir')，向生成的文件
+			添加编辑文件的命令。
+
+":mkview" 的输出包含这些项目：
+1. 窗口中使用的参数列表。当使用全局参数列表时，它被重置为全局列表。
+   参数列表中的索引也被恢复。
+2. 窗口中正在编辑的文件。如果没有文件，窗口变为空。
+3. 如果 'viewoptions' 包含 "options" 或 "localoptions"，恢复窗口局部的
+   映射、缩写和选项。只恢复当前缓冲区和当前窗口局部的选项值。
+   当将视图存储为会话的一部分且 'sessionoptions' 中有 "options" 时，
+   局部选项的全局值也会被存储。
+4. 当使用手动折叠且 'viewoptions' 包含 "folds" 时恢复折叠。
+   恢复手动打开和关闭的折叠。
+5. 文件中的滚动位置和光标位置。当有关闭的折叠时效果不是很好。
+6. 如果局部当前目录与全局当前目录不同且 'viewoptions' 包含 "curdir"，
+   则恢复局部当前目录。
+
+注意视图和会话不是完美的：
+- 它们不恢复所有内容。例如，定义的函数、自动命令和 ":syntax on" 不包括在内。
+  像寄存器内容和命令行历史这样的东西在 ShaDa 中，不在会话或视图中。
+- 全局选项值只有在与默认值不同时才被设置。当当前值不是默认值时，
+  加载会话不会将其设置回默认值。但局部选项会被设置回默认值。
+- 现有映射会被覆盖而不警告。现有映射可能因歧义而导致错误。
+- 当存储手动折叠和存储手动打开/关闭的折叠时，保存和加载视图之间
+  文件中的更改会搞乱它。
+- Vim 脚本不是很高效。但仍然比自己输入命令快！
+
+							*:lo* *:loadview*
+:lo[adview] [nr]	为当前文件加载视图。当省略 [nr] 时，
+			加载用 ":mkview" 存储的视图。
+			当指定 [nr] 时，加载用 ":mkview [nr]" 存储的视图。
+
+":mkview" 和 ":loadview" 的组合可以用来存储一个文件的最多十个
+不同视图。这些记住在用 'viewdir' 选项指定的目录中。
+视图使用文件名存储。如果文件被重命名或通过 (符号) 链接访问，
+将找不到视图。
+
+你可能想要不时清理你的 'viewdir' 目录。
+
+为 `*.c` 文件自动保存和恢复视图：>
+	au BufWinLeave *.c mkview
+	au BufWinEnter *.c silent! loadview
+
+==============================================================================
+Shada ("共享数据") 文件			*shada* *shada-file*
+
+如果你退出 Vim 然后再次启动它，你通常会丢失大量信息。
+ShaDa 文件可以用来记住那些信息，这使你能够从离开的地方继续。
+它的名称是 SHAred DAta 的缩写，因为它用于在 Nvim 会话之间共享数据。
+
+这在用户手册的 |21.3| 节中介绍。
+
+ShaDa 文件用于存储：
+- 命令行历史。
+- 搜索字符串历史。
+- 输入行历史。
+- 非空寄存器的内容。
+- 多个文件的标记。
+- 文件标记，指向文件中的位置。
+- 最后的搜索/替换模式 (用于 'n' 和 '&')。
+- 缓冲区列表。
+- 全局变量。
+
+你也可以使用会话文件。区别是 ShaDa 文件不依赖于你正在工作的内容。
+通常只有一个 ShaDa 文件。会话文件用于保存特定编辑会话的状态。
+你可以有几个会话文件，每个项目一个。ShaDa 和会话文件一起可以用于
+有效地进入 Vim 并直接开始在你期望的设置中工作。|session-file|
+
+							*shada-read*
+当 Vim 启动且 'shada' 选项非空时，读取 ShaDa 文件的内容，
+信息可以在适当的地方使用。|v:oldfiles| 变量被填充。
+标记在启动时不被读入 (但文件标记是的)。参见 |initialization| 了解
+如何在启动时设置 'shada' 选项。
+
+							*shada-write*
+当 Vim 退出且 'shada' 非空时，信息被存储在 ShaDa 文件中
+(实际上与现有的合并，如果存在的话 |shada-merging|)。
+'shada' 选项是包含关于应该存储什么信息的字符串，并包含应该存储
+多少的限制 (参见 'shada')。
+
+Unix 的注意事项：
+- ShaDa 文件的文件保护将被设置为防止其他用户能够读取它，
+  因为它可能包含你工作过的任何文本或命令。
+- 如果你想与其他用户共享 ShaDa 文件 (例如当你 "su" 到另一个用户时)，
+  你可以让文件对组或每个人可写。Vim 在写入新 ShaDa 文件时会保持这个。
+  小心，不要让任何人都能读写你的 ShaDa 文件！
+- Vim 不会覆盖当前"真实"用户不可写的 ShaDa 文件。这有助于当你
+  "su" 成为 root，但你的 $HOME 仍然设置为普通用户的主目录时。
+  否则，Vim 会创建一个 root 拥有的其他人无法读取的 ShaDa 文件。
+- ShaDa 文件不能是符号链接。这是为了避免安全问题。
+
+标记为每个文件单独存储。当读取文件且 'shada' 非空时，
+该文件的标记从 ShaDa 文件中读取。注意：只有在退出 Vim 时才写入标记，
+这很好，因为标记被记住为当前编辑会话中你打开的所有文件，
+除非使用 ":bdel"。如果你想为即将用 ":bdel" 放弃的文件保存标记，
+使用 ":wsh"。'[' 和 ']' 标记不被存储，但 '"' 标记是的。
+'"' 标记对于跳转到文件最后退出时的光标位置非常有用。
+对于以 'shada' 中 "r" 标志给出的任何字符串开头的文件，不保存标记。
+这可以用来避免为可移动媒体上的文件保存标记 (对于 MS-Windows，
+你会使用 "ra:,rb:")。
+|v:oldfiles| 变量用 ShaDa 文件有标记的文件名填充。
+
+							*shada-file-marks*
+大写标记 ('A 到 'Z) 在写入 ShaDa 文件时被存储。
+编号标记 ('0 到 '9) 有点特殊。当写入 ShaDa 文件时
+(退出或使用 |:wshada| 命令时)，'0 被设置为当前光标位置和文件。
+旧的 '0 移动到 '1，'1 到 '2，等等。这类似于 "1 到 "9 删除寄存器
+发生的情况。如果当前光标位置已经在 '0 到 '9 中存在，
+它移动到 '0，以避免有相同的位置两次。结果是用 "'0"，
+你可以跳回到你退出 Vim 的文件和行。要立即做到这点，
+尝试使用这个命令：>
+
+	vim -c "normal '0"
+
+在 C shell 衍生品中，你可以为它制作别名：>
+
+	alias lvim vim -c '"'normal "'"0'"'
+
+对于类 Bash shell：>
+
+	alias lvim='vim -c "normal '\''0"'
+
+使用 'shada' 中的 "r" 标志来指定不应记住标记的文件。
+
+合并							*shada-merging*
+
+当用 |:wshada| 不带 bang 写入 ShaDa 文件或在常规退出时，
+现有 ShaDa 文件中的信息与当前 Nvim 实例的信息合并。
+为此目的，ShaDa 文件存储与 ShaDa 条目相关的时间戳。
+具体做以下事情：
+
+1. 历史行被合并，按时间戳排序。ShaDa 文件中项目的最大数量由
+   'shada' 选项定义 (|shada-/|、|shada-:|、|shada-@| 等：
+   每个代表历史名称的字符一个子选项 (|:history|))。
+2. Nvim 未打开的文件的局部标记和更改被复制到新 ShaDa 文件。
+   Nvim 打开的文件的标记被合并，Nvim 打开的文件的更改被忽略。|shada-'|
+3. 跳转列表被合并：跳转按时间戳排序，相同的跳转 (相同位置和时间戳) 被压缩。
+4. 搜索模式和替换字符串不被合并：具有最大时间戳的搜索模式或替换字符串
+   将是唯一复制到 ShaDa 文件的。
+5. 对于每个寄存器，具有最大时间戳的实体是唯一保存的。|shada-<|
+6. 所有保存的变量都从当前 Nvim 实例保存。另外，现有变量值被复制，
+   意味着从 ShaDa 文件中移除变量的唯一方法是手动移除它或完全禁用写入变量。|shada-!|
+7. 对于每个全局标记，具有最大时间戳的实体是唯一保存的。
+8. 缓冲区列表和头部是唯一不以任何方式合并的条目：
+   存在的唯一头部和缓冲区列表是最后写入文件的 Nvim 实例的。|shada-%|
+
+兼容性						*shada-compatibility*
+
+ShaDa 文件向前和向后兼容。这意味着
+
+1. 具有未知类型 (即保存未识别数据) 的条目在读取时被忽略，
+   在写入时被盲目复制。
+2. 具有未知寄存器名称的寄存器条目在读取时被忽略，在写入时被盲目复制。
+   限制：只支持使用代码在区间 [1, 255] 中的名称的寄存器。|registers|
+3. 具有未知寄存器类型的寄存器条目在读取时被忽略，在写入时正常合并。|getregtype()|
+4. 具有未知标记名称的局部和全局标记条目在读取时被忽略。
+   写入时全局标记条目被盲目复制，局部标记条目也被盲目复制，
+   但只有当它们附加到的文件符合 |shada-'| 限制时。
+   在计算哪些文件确切应该符合此限制时，也考虑未知局部标记条目的时间戳。
+   限制：只支持使用代码在区间 [1, 255] 中的名称的标记。|mark-motions|
+5. 具有未知历史类型的历史条目在读取时被忽略，在写入时被盲目复制。
+   限制：最多只能有 256 个历史类型。|history|
+6. 在寄存器、局部标记、全局标记、更改、跳转和搜索模式条目中找到的未知键
+   被内部保存并在写入时转储。在 Nvim 会话期间创建的条目从来没有这样的附加。
+7. 在替换字符串和历史条目中找到的额外元素被内部保存并转储。
+   在 Nvim 会话期间创建的条目从来没有这样的附加。
+8. 在变量条目中找到的额外元素在读取时被简单忽略。
+   写入新变量时它们在合并期间被保留，但仅此而已。
+   从当前 Nvim 会话转储的变量值从来没有额外的元素，
+   即使变量本身是通过读取 ShaDa 文件获得的。
+
+这里"盲目"意味着不会尝试以某种方式合并它们，即使其他条目
+(具有已知名称/类型/等) 被合并。|shada-merging|
+
+SHADA 文件名						*shada-file-name*
+
+- |shada| 文件的默认名称是：
+      Unix:     "$XDG_STATE_HOME/nvim/shada/main.shada"
+      Windows:  "$XDG_STATE_HOME/nvim-data/shada/main.shada"
+  另请参阅 |base-directories|。
+- 要选择不同的文件名，你可以使用：
+    - 'shada' 选项中的 "n" 标志。
+    - |-i| 启动参数。"NONE" 意味着从不读取或写入 shada 文件。
+      也不适用于下面的命令！
+    - 'shadafile' 选项。来自 "-i" 参数的值 (如果有的话) 存储在
+      'shadafile' 选项中。
+- 对于下面的命令，可以给出另一个文件名，覆盖默认值和用 'shada' 或
+  "-i" 给出的名称 (除非它是 NONE)。
+
+SHADA 文件名						*shada-file-name*
+
+- |shada| 文件的默认名称是：
+      Unix:     "$XDG_STATE_HOME/nvim/shada/main.shada"
+      Windows:  "$XDG_STATE_HOME/nvim-data/shada/main.shada"
+  另请参阅 |base-directories|。
+- 要选择不同的文件名，你可以使用：
+    - 'shada' 选项中的 "n" 标志。
+    - |-i| 启动参数。"NONE" 意味着从不读取或写入 shada 文件。
+      也不适用于下面的命令！
+    - 'shadafile' 选项。来自 "-i" 参数的值 (如果有的话) 存储在
+      'shadafile' 选项中。
+- 对于下面的命令，可以给出另一个文件名，覆盖默认值和用 'shada' 或
+  "-i" 给出的名称 (除非它是 NONE)。
+
+
+手动读取和写入				*shada-read-write*
+
+两个命令可以用来手动读取和写入 ShaDa 文件。这可以用于在两个运行的
+Vim 程序之间交换寄存器：首先在一个中输入 ":wsh"，然后在另一个中输入 ":rsh"。
+注意如果寄存器已经包含某些内容，那么需要 ":rsh!"。
+但也要注意，这意味着一切都会被来自第一个 Vim 的信息覆盖，
+包括命令行历史等。
+
+ShaDa 文件本身也可以手工编辑，尽管我们建议你从现有的文件开始
+以获得正确的格式。你需要理解 MessagePack (或者，更可能的是，
+找到能够使用它的软件) 格式来做这件事。这对于创建第二个文件很有用，
+比如 "~/.my.shada"，它可以包含你在首次启动 Nvim 时总是想要的某些设置。
+例如，你可以用特定数据预加载寄存器，或将某些命令放入命令行历史中。
+在你的 |config| 文件中的一行，如 >
+	:rshada! ~/.my.shada
+可以用来加载这些信息。你甚至可以为不同类型的文件 (例如，C 代码) 
+有不同的 ShaDa 文件，并使用 ":autocmd" 命令根据文件名加载它们 (参见 |:autocmd|)。
+有关 ShaDa 文件格式的更多信息包含在 |shada-format| 节中。
+
+					  *E136* *E929* *shada-error-handling*
+一些错误使 Nvim 留下名为 `{basename}.tmp.X` 的临时文件 (X 是从 `a` 到 `z` 
+的任何空闲字母)，而通常它会创建此文件，写入它然后将 `{basename}.tmp.X` 
+重命名为 `{basename}`。此类错误包括：
+
+- 使 Nvim 认为正在读取的文件根本不是 ShaDa 文件的错误：
+  出于安全原因，非 ShaDa 文件不会被覆盖，以避免意外破坏不相关的文件。
+  这可能发生，例如当输入 "nvim -i file" 而不是 "nvim -R file" 时
+  (是的，有人至少在 Vim 中这样做过)。
+  此类错误列在 |shada-critical-contents-errors| 中。
+- 如果写入临时文件失败：例如由于剩余空间不足。
+- 如果重命名文件失败：例如由于权限不足。
+- 如果目标 ShaDa 文件与 Nvim 实例的所有者 (用户和组) 不同且更改它们失败。
+  Unix 特定，仅在从 root 启动 Nvim 时适用。
+
+在遇到上述错误之一后，不要忘记删除临时文件或用临时文件替换目标文件，
+否则所有创建 ShaDa 文件的尝试都可能失败并出现 |E929|。
+如果在使用 |:wshada| 时遇到其中之一 (而不是在退出 Nvim 时：
+即当你有运行的 Nvim 会话时)，你有额外的选择：
+
+- 如果你遇到任何错误，除了写入临时文件失败，你应该考虑的第一件事是：
+  删除现有文件并用临时文件替换它。即使你有运行的 Nvim 实例也要这样做。
+- 修复权限和/或文件所有权，释放一些空间并尝试再次写入。不要删除现有文件。
+- 使用带 bang 的 |:wshada|。在权限错误的情况下没有帮助。
+  如果目标文件实际上是 ShaDa 文件，在这种情况下可能会丢失一些信息。
+  为了稍微改善情况，在写入之前使用 |:rshada|，但这仍然会丢失
+  当前 Nvim 实例中未打开的任何文件的缓冲区局部标记和更改列表条目。
+- 从 shell 中删除目标文件并使用 |:wshada|。后果与使用带 bang 的 |:wshada| 
+  没有不同，但 "rm -f" 在你没有写权限的某些情况下有效。
+
+						    *:rsh* *:rshada* *E886*
+:rsh[ada][!] [file]	从 ShaDa 文件 [file] 读取 (默认：见上文)。
+			如果给出 [!]，那么已经设置的任何信息
+			(寄存器、标记、|v:oldfiles| 等) 将被覆盖。
+
+						    *:wsh* *:wshada* *E137*
+:wsh[ada][!] [file]	写入 ShaDa 文件 [file] (默认：见上文)。
+			首先读取文件中的信息以在旧信息和新信息之间进行合并。
+			当使用 [!] 时，不首先读取旧信息，只写入内部信息
+			(也禁用 |shada-error-handling| 中描述的安全检查)。
+			如果 'shada' 为空，将写入最多 100 个文件的标记。
+			当你得到错误 "E929: All .tmp.X files exist,
+			cannot write ShaDa file!" 时，检查没有留下旧的临时文件
+			(例如 ~/.local/state/nvim/shada/main.shada.tmp*)。
+
+			注意：执行 :wshada 将重置所有 |'quote| 标记。
+
+						*:o* *:ol* *:oldfiles*
+:o[ldfiles]		列出在 ShaDa 文件中存储标记的文件。
+			此列表在启动时读取，之后只有通过 `:rshada!` 才会更改。
+			另请参阅 |v:oldfiles|。
+			数字可以与 |c_#<| 一起使用。
+			输出可以用 |:filter| 过滤，例如：>
+				filter /\.vim/ oldfiles
+<			过滤发生在文件名上。
+
+:bro[wse] o[ldfiles][!]
+			像 |:oldfiles| 一样列出文件名，然后提示输入数字。
+			当数字有效时，编辑列表中的该文件。
+			如果你得到 |press-enter| 提示，你可以按 "q" 
+			并仍然得到输入文件号的提示。
+			使用 [!] 放弃修改的缓冲区。|abandon|
+
+SHADA 文件格式						*shada-format*
+
+ShaDa 文件是 MessagePack 条目的连接。每个条目是恰好四个 MessagePack 对象的连接：
+
+1. 首先是条目的类型。对象类型必须是无符号整数。对象类型不能等于零。
+2. 其次是条目时间戳。它也必须是无符号整数。
+3. 第三是第四个条目的长度。也是无符号整数，用于快速跳过而不解析。
+4. 第四是实际条目数据。所有当前使用的 ShaDa 条目都使用容器来保存数据：
+   映射或数组。这些容器中的所有字符串值要么是二进制 (适用于文件名) 
+   要么是 UTF-8，但解析器需要预期 UTF-8 字符串中可能存在无效字节。
+
+   确切格式取决于条目类型：
+
+   条目类型 (名称)     条目数据 ~
+   1 (Header)          包含描述写入此 ShaDa 文件的生成器实例的数据的映射。
+                       读取 ShaDa 文件时被忽略。包含以下数据：
+                       键         数据 ~
+                       generator  二进制，用于生成 ShaDa 文件的软件。
+                                  当 ShaDa 文件由 Nvim 写入时等于 "nvim"。
+                       version    二进制，生成器版本。
+                       encoding   二进制，有效的 'encoding' 值。
+                       max_kbyte  整数，有效的 |shada-s| 限制值。
+                       pid        整数，实例进程 ID。
+                       `*`          允许有任何数量的带有任何数据的额外键。
+   2 (SearchPattern)   包含描述最后使用的搜索或替换模式的数据的映射。
+                       通常 ShaDa 文件包含两个这样的条目：一个 "ss" 键
+                       设置为 true (描述替换模式，参见 |:substitute|)，
+                       一个设置为 false (描述搜索模式，参见 |search-commands|)。
+                       "su" 键应该在其中一个条目上为 true。
+                       如果键值等于默认值，则通常不存在。键：
+                       键   类型     默认     描述 ~
+                       sm   Boolean  true     有效的 'magic' 值。
+                       sc   Boolean  false    有效的 'smartcase' 值。
+                       sl   Boolean  true     如果搜索模式带有行偏移，则为 true。
+                                              参见 |search-offset|。
+                       se   Boolean  false    如果 |search-offset| 请求将光标
+                                              放置在模式末尾 (相对于)，则为 true。
+                       so   Integer  0        偏移值。|search-offset|
+                       su   Boolean  false    如果当前条目是最后使用的搜索模式，
+                                              则为 true。
+                       ss   Boolean  false    如果当前条目描述 |:substitute| 模式，
+                                              则为 true。
+                       sh   Boolean  false    如果 |v:hlsearch| 开启，则为 true。
+                                              使用 |shada-h| 或 'nohlsearch' 时
+                                              此键总是 false。
+                       sp   Binary   N/A      实际模式。必需。
+                       sb   Boolean  false    如果搜索方向向后，则为 true。
+                       `*`    any      none     出于兼容性原因允许其他键，
+                                              参见 |shada-compatibility|。
+   3 (SubString)       包含最后一个 |:substitute| 替换字符串的数组。
+                       包含单个条目：二进制，使用的替换字符串。
+                       出于兼容性原因允许更多条目，参见 |shada-compatibility|。
+   4 (HistoryEntry)    包含历史中一个条目的数组。应该有两个或三个条目。
+                       第一个是历史类型 (无符号整数)，第二个是历史行 (二进制)，
+                       第三个是分隔符字符 (无符号整数，必须在区间 [0, 255] 中)。
+                       第三项仅对搜索历史有效。可能的历史类型列在 |hist-names| 中，
+                       这里是相应的数字：0 - cmd，1 - search，2 - expr，3 - input，
+                       4 - debug。
+   5 (Register)        描述一个寄存器 (|registers|) 的映射。如果键值等于默认值，
+                       则通常不存在。键：
+                       键   类型             默认  描述 ~
+                       rt   UInteger         0     寄存器类型：
+                                                   否  描述 ~
+                                                   0   |charwise-register|
+                                                   1   |linewise-register|
+                                                   2   |blockwise-register|
+                       rw   UInteger         0     寄存器宽度。仅对 
+                                                   |blockwise-register| 有效。
+                       rc   Array of binary  N/A   寄存器内容。数组中的每个条目
+                                                   代表自己的行。行内的 NUL 字符
+                                                   应该根据 |NL-used-for-Nul|
+                                                   表示为 NL。
+                       ru   Boolean          false 未命名寄存器。未命名寄存器是否
+                                                   指向此寄存器。
+                       n    UInteger         N/A   寄存器名称：范围 [1, 255] 中的
+                                                   字符代码。例如：|quote0| 寄存器
+                                                   的名称是 48 (零字符的 ASCII 代码)。
+                       *    any              none  出于兼容性原因允许其他键，
+                                                   参见 |shada-compatibility|。
+   6 (Variable)        包含两个项目的数组：变量名 (二进制) 和变量值 (任何对象)。
+                       值使用 |msgpackparse()| 读取时使用的相同代码转换，
+                       |msgpackdump()| 写入时，所以可能出现 |msgpack-special-dict|。
+                       如果有超过两个条目，则其余的被忽略 (|shada-compatibility|)。
+   7 (GlobalMark)
+   8 (Jump)
+   10 (LocalMark)
+   11 (Change)         包含某些位置描述的映射：
+                       条目       位置 ~
+                       GlobalMark 全局标记位置。|'A|
+                       LocalMark  局部标记位置。|'a|
+                       Jump       |jumplist| 中的一个位置。
+                       Change     |changelist| 中的一个位置。
+
+                       映射中包含的数据：
+                       键   类型      默认     描述 ~
+                       l    UInteger  1        位置行号。必须大于零。
+                       c    UInteger  0        位置列号。
+                       n    UInteger  34 ('"') 标记名称。仅对 GlobalMark 和
+                                               LocalMark 条目有效。
+                       f    Binary    N/A      文件名。必需。
+                       `*`    any       none     出于兼容性原因允许其他键，
+                                               参见 |shada-compatibility|。
+   9 (BufferList)      包含映射的数组。数组中的每个映射代表一个缓冲区。可能的键：
+                       键   类型      默认     描述 ~
+                       l    UInteger  1        位置行号。必须大于零。
+                       c    UInteger  0        位置列号。
+                       f    Binary    N/A      文件名。必需。
+                       `*`    any       none     出于兼容性原因允许其他键，
+                                               参见 |shada-compatibility|。
+   `*` (Unknown)         出于兼容性原因允许任何其他条目类型，
+                       参见 |shada-compatibility|。
+
+								*E575* *E576*
+ShaDa 文件中的错误可能有两种类型：
+1. E575 用于"逻辑"错误。
+2. E576 用于"关键"错误。
+写入时，关键错误触发 |shada-error-handling| 中描述的行为。
+读取时，关键错误导致跳过文件的其余部分。
+关键错误包括：
+					    *shada-critical-contents-errors*
+- 前三个 MessagePack 对象中的任何一个不是无符号整数。
+- 第三个对象请求的字节数大于 ShaDa 文件中剩余的字节数。
+- 类型为零的条目。即第一个对象等于零。
+- MessagePack 解析器无法解析条目数据。
+- MessagePack 解析器消耗的字节数少于或请求的字节数大于第三个对象中
+  描述的用于解析第四个对象的字节数。即当第四个对象包含超过一个
+  MessagePack 对象或它不包含完整的 MessagePack 对象时。
+
+==============================================================================
+标准路径					*standard-path*
+
+Nvim 将配置、数据和日志存储在标准位置。强烈鼓励插件也遵循此模式。
+使用 |stdpath()| 获取路径。
+
+						*base-directories* *xdg*
+"基"(根) 目录符合 XDG 基目录规范。
+https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+如果定义了 $XDG_CONFIG_HOME、$XDG_DATA_HOME、$XDG_RUNTIME_DIR、$XDG_STATE_HOME、
+$XDG_CACHE_HOME、$XDG_CONFIG_DIRS 和 $XDG_DATA_DIRS 环境变量，则使用它们，
+否则使用默认值 (如下所列)。
+
+注意：在帮助中，这些默认值用作占位符，例如 "~/.config" 理解为
+"$XDG_CONFIG_HOME 或 ~/.config"。
+
+配置目录 (默认) ~
+                  *$XDG_CONFIG_HOME*            Nvim: stdpath("config")
+    Unix:         ~/.config                   ~/.config/nvim
+    Windows:      ~/AppData/Local             ~/AppData/Local/nvim
+
+数据目录 (默认) ~
+                  *$XDG_DATA_HOME*              Nvim: stdpath("data")
+    Unix:         ~/.local/share              ~/.local/share/nvim
+    Windows:      ~/AppData/Local             ~/AppData/Local/nvim-data
+
+运行目录 (默认) ~
+                  *$XDG_RUNTIME_DIR*            Nvim: stdpath("run")
+    Unix:         /tmp/nvim.user/xxx          /tmp/nvim.user/xxx
+    Windows:      $TMP/nvim.user/xxx          $TMP/nvim.user/xxx
+
+状态目录 (默认) ~
+                  *$XDG_STATE_HOME*             Nvim: stdpath("state")
+    Unix:         ~/.local/state              ~/.local/state/nvim
+    Windows:      ~/AppData/Local             ~/AppData/Local/nvim-data
+
+缓存目录 (默认) ~
+                  *$XDG_CACHE_HOME*             Nvim: stdpath("cache")
+    Unix:         ~/.cache                    ~/.cache/nvim
+    Windows:      ~/AppData/Local/Temp        ~/AppData/Local/Temp/nvim-data
+
+日志文件 (默认) ~
+                  `$NVIM_LOG_FILE`              Nvim: stdpath("log")/log
+    Unix:         ~/.local/state/nvim         ~/.local/state/nvim/log
+    Windows:      ~/AppData/Local/nvim-data   ~/AppData/Local/nvim-data/log
+
+注意 stdpath("log") 目前是 stdpath("state") 的别名。
+
+额外配置目录 (默认) ~
+                  *$XDG_CONFIG_DIRS*            Nvim: stdpath("config_dirs")
+    Unix:         /etc/xdg/                   /etc/xdg/nvim
+    Windows:      Not applicable              Not applicable
+
+额外数据目录 (默认) ~
+                  *$XDG_DATA_DIRS*              Nvim: stdpath("data_dirs")
+    Unix:         /usr/local/share            /usr/local/share/nvim
+                  /usr/share                  /usr/share/nvim
+    Windows:      Not applicable              Not applicable
+
+NVIM_APPNAME					*$NVIM_APPNAME*
+标准目录可以通过 `$NVIM_APPNAME` 环境变量进一步配置。
+此变量控制 Nvim 将在每个基目录中读取 (并自动创建) 的子目录。
+例如，在启动前将 `$NVIM_APPNAME` 设置为 "foo" 将导致 Nvim 在
+`$XDG_CONFIG_HOME/foo` 而不是 `$XDG_CONFIG_HOME/nvim` 中查找配置文件。
+`$NVIM_APPNAME` 必须是名称，如 "foo"，或相对路径，如 "foo/bar"。
+
+注意：在帮助中，无论何处提到 `$XDG_CONFIG_…/nvim`，都理解为
+`$XDG_CONFIG_…/$NVIM_APPNAME`。
+
+						*state-isolation*
+$NVIM_APPNAME 的一个用例是"隔离" Nvim 应用程序。
+或者，对于真正的隔离，在 Linux 上你可以使用 cgroups 命名空间：>
+    systemd-run --user -qt -p PrivateUsers=yes -p BindPaths=/home/user/profile_xy:/home/user/.config/nvim nvim
+<
+						*stateless*
+要在不创建任何目录或数据文件的情况下运行 Nvim：>
+    NVIM_LOG_FILE=/dev/null nvim -n -i NONE
+
+日志文件					*log* *$NVIM_LOG_FILE* *E5430*
+除了 'debug' 和 'verbose' 之外，Nvim 还保留用于内部调试、插件和 RPC 客户端的
+通用日志文件。>
+	:echo $NVIM_LOG_FILE
+默认情况下，文件位于 stdpath("log")/log ($XDG_STATE_HOME/nvim/log)，
+除非该路径不可访问或在 |startup| 之前设置了 $NVIM_LOG_FILE。
+
+
+ vim:noet:tw=78:ts=8:ft=help:norl:
+
