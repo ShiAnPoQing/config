@@ -22,7 +22,7 @@ end
 
 --- @param opts RepeatOptions
 function M.setup(opts)
-  vim.keymap.set("n", "<M-.>", function()
+  vim.keymap.set({ "n", "i" }, "<M-.>", function()
     M.vim_repeat()
   end, { noremap = true })
 end

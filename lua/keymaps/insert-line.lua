@@ -5,18 +5,9 @@ return {
   ["<space>b"] = { "o<C-u>", { "n" } },
   -- no blank
   ["<space>B"] = { "O<C-u>", { "n" } },
+  -- no blank
   ["<S-CR>"] = {
-    "<C-o>O",
-    "i",
-  },
-  -- no blank
-  ["<C-CR>"] = {
     "<CR><C-U>",
-    "i",
-  },
-  -- no blank
-  ["<C-S-CR>"] = {
-    "<C-o>O<C-U>",
     "i",
   },
   ["<C-b>"] = {
@@ -35,7 +26,27 @@ return {
         end,
       })
     end,
-    "n",
+    { "n", "i" },
+  },
+  ["<C-space><C-b>"] = {
+    function()
+      require("custom.plugins.insert-line").insert_line({
+        dir = "above",
+        cursor = "move",
+        indent = false,
+      })
+      require("repeat").record({
+        name = "insert-line",
+        callback = function()
+          require("custom.plugins.insert-line").insert_line({
+            dir = "above",
+            cursor = "move",
+            indent = false,
+          })
+        end,
+      })
+    end,
+    "i",
   },
   ["<M-b>"] = {
     function()
@@ -53,7 +64,27 @@ return {
         end,
       })
     end,
-    "n",
+    { "n", "i" },
+  },
+  ["<M-space><M-b>"] = {
+    function()
+      require("custom.plugins.insert-line").insert_line({
+        dir = "below",
+        cursor = "move",
+        indent = false,
+      })
+      require("repeat").record({
+        name = "insert-line",
+        callback = function()
+          require("custom.plugins.insert-line").insert_line({
+            dir = "below",
+            cursor = "move",
+            indent = false,
+          })
+        end,
+      })
+    end,
+    "i",
   },
   ["<C-M-b>"] = {
     function()
