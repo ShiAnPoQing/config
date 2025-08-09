@@ -121,11 +121,18 @@ Keymap.add({
   },
   [";;z"] = {
     function()
-      vim.ui.input({ prompt = "请输入内容:" }, function(input)
-        print(input)
-      end)
+      require("custom.plugins.insert-line").insert_line({
+        dir = "above",
+        cursor = "move",
+      })
     end,
     "n",
+    -- function()
+    --   vim.ui.input({ prompt = "请输入内容:" }, function(input)
+    --     print(input)
+    --   end)
+    -- end,
+    -- "n",
   },
 })
 
