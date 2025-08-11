@@ -120,6 +120,14 @@ return {
     space_o,
     { "n", "x", "o" },
   },
+  ["<C-i>"] = {
+    space_i,
+    { "n", "x", "o" },
+  },
+  ["<C-o>"] = {
+    space_o,
+    { "n", "x", "o" },
+  },
   ["<space>I"] = {
     space_I,
     { "n", "x", "o" },

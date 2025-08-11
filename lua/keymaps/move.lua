@@ -171,11 +171,12 @@ return {
   -- },
   -- insert mode move: exclusive words like e,
   ["<M-space><M-i>"] = {
-    { "<Esc>gea", { "i" } },
+    "<Esc>gea",
+    "i",
   },
   -- insert mode move: exclusive words like E,
   ["<M-space><M-S-i>"] = {
-    { "<Esc>gEa", { "i" } },
+    { "<C-o>gE", { "i" } },
   },
   -- insert mode move: exclusive words like w,
   ["<M-space><M-o>"] = {
@@ -183,8 +184,24 @@ return {
   },
   -- insert mode move: exclusive words like W,
   ["<M-space><M-S-o>"] = {
-    { "<Esc>Wi", { "i" } },
+    { "<C-o>W", { "i" } },
   },
+  -- -- insert mode move: exclusive words like e,
+  -- ["<M-C-i>"] = {
+  --   { "<Esc>gea", { "i" } },
+  -- },
+  -- -- insert mode move: exclusive words like E,
+  -- ["<M-C-S-i>"] = {
+  --   { "<Esc>gEa", { "i" } },
+  -- },
+  -- -- insert mode move: exclusive words like w,
+  -- ["<M-C-o>"] = {
+  --   { "<S-right>", { "i" } },
+  -- },
+  -- -- insert mode move: exclusive words like W,
+  -- ["<M-C-S-o>"] = {
+  --   { "<Esc>Wi", { "i" } },
+  -- },
   -- insert mode move: like H,
   ["<M-S-h>"] = {
     { "<C-o>3h", { "i" }, { silent = false } },

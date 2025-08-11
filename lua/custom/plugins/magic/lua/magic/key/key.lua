@@ -2,6 +2,97 @@ local M = {}
 local KEYS = "abcdefghijklmnopqrstuvwxyz"
 local key_types = { "one_key", "two_key", "three_key" }
 
+--- @class VisualExtmarkOpts
+--- @field start_col number
+--- @field end_col number
+--- @field hl_group? string
+
+--- @class KeyHighlightOpts
+--- @field visual? VisualExtmarkOpts
+
+--- @class OneKeyRegisterOpts
+--- @field line number
+--- @field virt_col number
+--- @field visual? VisualExtmarkOpts
+
+--- @class TwoKeyRegisterOpts
+--- @field line number
+--- @field virt_col number
+--- @field visual? VisualExtmarkOpts
+
+--- @class KeyRegisterOpts
+--- @field one_key OneKeyRegisterOpts
+--- @field two_key TwoKeyRegisterOpts
+--- @field callback fun()
+
+--- @class KeyOpts
+
+--- @param ns_id number
+--- @param line number
+--- @param visual VisualExtmarkOpts|nil
+local function set_visual_hl(ns_id, line, visual)
+  if not visual then
+    return
+  end
+  vim.api.nvim_buf_set_extmark(0, ns_id, line, visual.start_col, {
+    end_col = visual.end_col,
+    hl_group = visual.hl_group or "Visual",
+  })
+end
+
+local function get_hl_groups(visual)
+  local v = "InVisual"
+  local hl_groups = {
+    CustomMagicNextKey = "CustomMagicNextKey",
+    CustomMagicNextKey1 = "CustomMagicNextKey1",
+    CustomMagicNextKey2 = "CustomMagicNextKey2",
+  }
+  if visual then
+    for key, value in pairs(hl_groups) do
+      hl_groups[key] = value .. v
+    end
+  end
+  return hl_groups
+end
+
+local function set_one_key_extmark(opts)
+  local visual = opts.visual
+  local line = opts.line
+  local virt_col = opts.virt_col
+  local ns_id = opts.ns_id
+  local key = opts.key
+
+  local hl_groups = get_hl_groups(visual)
+  vim.api.nvim_buf_set_extmark(0, ns_id, line, 0, {
+    virt_text_win_col = virt_col,
+    virt_text = { { key, hl_groups.CustomMagicNextKey } },
+  })
+  set_visual_hl(ns_id, line, visual)
+end
+
+local function set_two_key_extmark(opts)
+  local visual = opts.visual
+  local ns_id1 = opts.ns_id1
+  local ns_id2 = opts.ns_id2
+  local key1 = opts.key1
+  local key2 = opts.key2
+  local line = opts.line
+  local virt_col = opts.virt_col
+
+  local hl_groups = get_hl_groups(visual)
+  vim.api.nvim_buf_set_extmark(0, ns_id1, line, 0, {
+    virt_text_win_col = virt_col,
+    virt_text = { { key1, hl_groups.CustomMagicNextKey1 } },
+  })
+  -- if end_col - start_col ~= 1 then
+  vim.api.nvim_buf_set_extmark(0, ns_id2, line, 0, {
+    virt_text_win_col = virt_col + 1,
+    virt_text = { { key2, hl_groups.CustomMagicNextKey2 } },
+  })
+  -- end
+  set_visual_hl(ns_id2, line, visual)
+end
+
 local count = 0
 local function get_random_key(is_ok)
   local random = math.random(26)
@@ -14,43 +105,7 @@ local function get_random_key(is_ok)
   return key
 end
 
---- @class KeyOpts
---- @field clean fun()
-
---- @param opts KeyOpts
-function M:init(opts)
-  self.ns_ids = {}
-  self.on_keys = nil
-  self.clean = function()
-    opts.clean()
-    for key, value in pairs(self) do
-      if type(value) ~= "function" then
-        self[key] = nil
-      end
-    end
-    count = 0
-  end
-  self.one_key = {
-    available_key_count = 0,
-    used_key_count = 0,
-    keys = {},
-    ns_id = nil,
-  }
-
-  self.two_key = {
-    available_key_count = 0,
-    used_key_count = 0,
-    keys = {},
-  }
-
-  self.three_key = {
-    available_key_count = 0,
-    used_key_count = 0,
-    keys = {},
-  }
-end
-
-function M:compute_key(total)
+function M:compute(total)
   local function run(i)
     if count >= 4 then
       return
@@ -98,22 +153,6 @@ function M:compute_key(total)
   end
 end
 
---- @class KeySetExtmarkOpts
---- @field ns_id number
---- @field key string
-
---- @class OneKeyRegisterOpts
---- @field set_extmark fun(opts: KeySetExtmarkOpts)
-
---- @class TwoKeyRegisterOpts
---- @field set_extmark fun(opts1: KeySetExtmarkOpts, opts2: KeySetExtmarkOpts)
---- @field reset_extmark fun(opts: KeySetExtmarkOpts)
-
---- @class KeyRegisterOpts
---- @field one_key OneKeyRegisterOpts
---- @field two_key TwoKeyRegisterOpts
---- @field callback fun()
-
 --- @param opts KeyRegisterOpts
 function M:register(opts)
   if self.one_key.used_key_count < self.one_key.available_key_count then
@@ -146,7 +185,13 @@ function M:register_one_key(opts, callback)
     end,
   }
   self.one_key.used_key_count = self.one_key.used_key_count + 1
-  opts.set_extmark({ ns_id = self.one_key.ns_id, key = key })
+  set_one_key_extmark({
+    visual = opts.visual,
+    line = opts.line,
+    virt_col = opts.virt_col,
+    ns_id = self.one_key.ns_id,
+    key = key,
+  })
 end
 
 --- @param opts TwoKeyRegisterOpts
@@ -171,7 +216,7 @@ function M:register_two_key(opts, callback)
         child.reset_mark()
       end
       vim.cmd.redraw()
-      self:on_key()
+      self:listen()
     end
 
     self.two_key.keys[key] = current
@@ -197,31 +242,46 @@ function M:register_two_key(opts, callback)
         self:clean()
       end,
       reset_mark = function()
-        opts.reset_extmark({ ns_id = current.child_ns_id, key = key })
+        set_one_key_extmark({
+          visual = opts.visual,
+          line = opts.line,
+          virt_col = opts.virt_col,
+          ns_id = current.child_ns_id,
+          key = key,
+        })
       end,
     }
     current.used_key_count = current.used_key_count + 1
-    opts.set_extmark({ ns_id = current.ns_id, key = current.key }, { ns_id = current.child_ns_id, key = key })
+
+    set_two_key_extmark({
+      visual = opts.visual,
+      ns_id1 = current.ns_id,
+      ns_id2 = current.child_ns_id,
+      key1 = current.key,
+      key2 = key,
+      line = opts.line,
+      virt_col = opts.virt_col,
+    })
   end
 end
 
 function M:register_three_key(opts) end
 
-function M:on_key()
+function M:listen()
   vim.schedule(function()
     local char = vim.fn.nr2char(vim.fn.getchar())
     if self.on_keys[char] == nil then
       self:clear_ns_id()
-      self.clean()
+      self:clean()
       return
     end
     self.on_keys[char].callback()
   end)
 end
 
-function M:ready_on_key()
+function M:on_key()
   self.on_keys = vim.tbl_extend("force", {}, self.one_key.keys, self.two_key.keys, self.three_key.keys)
-  self:on_key()
+  self:listen()
 end
 
 function M:create_ns_id(name)
@@ -245,6 +305,38 @@ function M:clear_ns_id(opts)
       vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
     end
   end
+end
+
+function M:clean()
+  for key, value in pairs(self) do
+    if type(value) ~= "function" then
+      self[key] = nil
+    end
+  end
+  count = 0
+end
+
+--- @param opts KeyOpts
+function M:init(opts)
+  self.ns_ids = {}
+  self.on_keys = nil
+
+  self.one_key = {
+    available_key_count = 0,
+    used_key_count = 0,
+    keys = {},
+    ns_id = nil,
+  }
+  self.two_key = {
+    available_key_count = 0,
+    used_key_count = 0,
+    keys = {},
+  }
+  self.three_key = {
+    available_key_count = 0,
+    used_key_count = 0,
+    keys = {},
+  }
 end
 
 return M

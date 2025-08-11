@@ -1,4 +1,5 @@
 local M = {}
+
 function M:init(topline, botline)
   self.topline = topline
   self.botline = botline

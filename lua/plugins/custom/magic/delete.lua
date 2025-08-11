@@ -1,90 +1,110 @@
+local function delete(opts)
+  local line = opts.line
+  local start_col = opts.start_col
+  local end_col = opts.end_col
+  vim.api.nvim_buf_set_text(0, line, start_col, line, end_col, {})
+end
+
+local function magic_delete_keyword(keyword)
+  require("magic").magic_keyword({
+    position = 3,
+    keyword = keyword,
+    should_visual = true,
+    callback = delete,
+  })
+end
+
+local function delete_to(opts)
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  if opts.position == 1 then
+    vim.api.nvim_buf_set_text(0, cursor[1] - 1, cursor[2], opts.line, opts.col + 1 - 1, {})
+  elseif opts.position == 2 then
+    vim.api.nvim_buf_set_text(0, cursor[1] - 1, cursor[2], opts.line, opts.col + 1, {})
+  end
+end
+
+local function magic_delete_to_keyword(position, keyword)
+  require("magic").magic_keyword({
+    position = position,
+    keyword = keyword,
+    should_visual = true,
+    callback = function(opts)
+      delete_to(vim.tbl_extend("force", { position = position }, opts))
+    end,
+  })
+end
+
 return {
   {
     "0dwi",
     function()
-      require("custom.plugins.magic").magic_delete_keyword({
-        keyword = function(opts)
-          return opts.word_inner
-        end,
-      })
+      magic_delete_keyword(function(opts)
+        return opts.word_inner
+      end)
     end,
   },
   {
     "0dwo",
     function()
-      require("custom.plugins.magic").magic_delete_keyword({
-        keyword = function(opts)
-          return opts.word_outer
-        end,
-      })
+      magic_delete_keyword(function(opts)
+        return opts.word_outer
+      end)
     end,
   },
   {
     "0dWi",
     function()
-      require("custom.plugins.magic").magic_delete_keyword({
-        keyword = function(opts)
-          return opts.WORD_inner
-        end,
-      })
+      magic_delete_keyword(function(opts)
+        return opts.WORD_inner
+      end)
     end,
   },
   {
     "0dWo",
     function()
-      require("custom.plugins.magic").magic_delete_keyword({
-        keyword = function(opts)
-          return opts.WORD_outer
-        end,
-      })
+      magic_delete_keyword(function(opts)
+        return opts.WORD_outer
+      end)
     end,
   },
   {
     "0dr",
     function()
       vim.ui.input({ prompt = ">删除>正则匹配: " }, function(input)
-        require("custom.plugins.magic").magic_delete_keyword({
-          keyword = input,
-        })
+        magic_delete_keyword(input)
       end)
     end,
   },
   {
     "d0o",
     function()
-      require("custom.plugins.magic").magic_delete_to_keyword({
-        position = 2,
-        keyword = function(opts)
-          return opts.word_inner
-        end,
-      })
+      magic_delete_to_keyword(2, function(opts)
+        return opts.word_inner
+      end)
     end,
   },
   {
     "d0i",
     function()
-      require("custom.plugins.magic").magic_delete_to_keyword({
-        position = 1,
-        keyword = function(opts)
-          return opts.word_inner
-        end,
-      })
+      magic_delete_to_keyword(1, function(opts)
+        return opts.word_inner
+      end)
     end,
   },
-  {
-    "d0<space>l",
-    function()
-      require("custom.plugins.magic").magic_delete_to_line_start_end({
-        position = 2,
-      })
-    end,
-  },
-  {
-    "d0<space>h",
-    function()
-      require("custom.plugins.magic").magic_delete_to_line_start_end({
-        position = 1,
-      })
-    end,
-  },
+  -- {
+  --   "d0<space>l",
+  --   function()
+  --     require("custom.plugins.magic").magic_delete_to_line_start_end({
+  --       position = 2,
+  --     })
+  --   end,
+  -- },
+  -- {
+  --   "d0<space>h",
+  --   function()
+  --     require("custom.plugins.magic").magic_delete_to_line_start_end({
+  --       position = 1,
+  --     })
+  --   end,
+  -- },
 }
