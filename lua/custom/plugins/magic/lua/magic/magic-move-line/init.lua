@@ -16,6 +16,20 @@ local Action = {
   },
 }
 
+local function esc()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
+end
+
+local function revisual(start_row, end_row, start_col, end_col, row, col, count)
+  if row == start_row then
+    utils.set_visual_mark(end_row + count, end_col, start_row + count, start_col)
+  else
+    utils.set_visual_mark(start_row + count, start_col, end_row + count, end_col)
+  end
+  api.nvim_feedkeys("gv", "nx", false)
+  api.nvim_win_set_cursor(0, { row + count, col })
+end
+
 local function get_mode()
   local mode = vim.api.nvim_get_mode().mode
   if mode == "V" or mode == "" or mode == "v" then
@@ -54,9 +68,20 @@ function Action.down:main(_, botline)
   end
 end
 
+function Action.up.visual:init(opts)
+  esc()
+  local start_row, start_col, end_row, end_col = utils.get_visual_mark(true)
+  vim.cmd("norm! gv")
+  self.start_row = start_row
+  self.start_col = start_col
+  self.end_row = end_row
+  self.end_col = end_col
+  self.cursor = opts.cursor
+end
+
 function Action.down.visual:init(opts)
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
-  local start_row, start_col, end_row, end_col = require("utils.mark").get_visual_mark(true)
+  esc()
+  local start_row, start_col, end_row, end_col = utils.get_visual_mark(true)
   vim.cmd("norm! gv")
   self.start_row = start_row
   self.start_col = start_col
@@ -74,8 +99,7 @@ function Action.down.visual:get_offset(cursor)
 end
 
 function Action.down.visual:move_line(line_number)
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
-
+  esc()
   local row, col = unpack(self.cursor)
   local lines = api.nvim_buf_get_lines(0, row - 1, row, false)
   local line_count = api.nvim_buf_line_count(0)
@@ -83,24 +107,7 @@ function Action.down.visual:move_line(line_number)
   count = math.min(line_count - self.end_row, count)
   api.nvim_buf_set_lines(0, self.end_row + count, self.end_row + count, false, lines)
   api.nvim_buf_set_lines(0, self.start_row - 1, self.end_row, false, {})
-  if row == self.start_row then
-    utils.set_visual_mark(self.end_row + count, self.end_col, self.start_row + count, self.start_col)
-  else
-    utils.set_visual_mark(self.start_row + count, self.start_col, self.end_row + count, self.end_col)
-  end
-  api.nvim_feedkeys("gv", "nx", false)
-  api.nvim_win_set_cursor(0, { row + count, col })
-end
-
-function Action.up.visual:init(opts)
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
-  local start_row, start_col, end_row, end_col = require("utils.mark").get_visual_mark(true)
-  vim.cmd("norm! gv")
-  self.start_row = start_row
-  self.start_col = start_col
-  self.end_row = end_row
-  self.end_col = end_col
-  self.cursor = opts.cursor
+  revisual(self.start_row, self.end_row, self.start_col, self.end_col, row, col, count)
 end
 
 function Action.up.visual:get_offset(cursor)
@@ -112,22 +119,51 @@ function Action.up.visual:get_offset(cursor)
 end
 
 function Action.up.visual:move_line(line_number)
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
-
+  esc()
   local row, col = unpack(self.cursor)
   local lines = api.nvim_buf_get_lines(0, row - 1, row, false)
   local count = row - line_number
   count = -math.min(self.start_row - 1, count)
-
   api.nvim_buf_set_lines(0, self.start_row - 1, self.end_row, false, {})
   api.nvim_buf_set_lines(0, self.start_row + count - 1, self.start_row + count - 1, false, lines)
-  if row == self.start_row then
-    utils.set_visual_mark(self.end_row + count, self.end_col, self.start_row + count, self.start_col)
-  else
-    utils.set_visual_mark(self.start_row + count, self.start_col, self.end_row + count, self.end_col)
-  end
-  api.nvim_feedkeys("gv", "nx", false)
-  api.nvim_win_set_cursor(0, { row + count, col })
+  revisual(self.start_row, self.end_row, self.start_col, self.end_col, row, col, count)
+end
+
+function Action.up.normal:init(opts)
+  self.cursor = opts.cursor
+end
+
+function Action.down.normal:init(opts)
+  self.cursor = opts.cursor
+end
+
+function Action.up.normal:get_offset()
+  return 0
+end
+
+function Action.down.normal:get_offset()
+  return 0
+end
+
+function Action.up.normal:move_line(line_number)
+  local row, col = unpack(self.cursor)
+  local line = vim.api.nvim_get_current_line()
+  local count = row - line_number
+  count = -math.min(row - 1, count)
+  vim.api.nvim_buf_set_lines(0, row - 1, row, false, {})
+  vim.api.nvim_buf_set_lines(0, row + count - 1, row + count - 1, false, { line })
+  vim.api.nvim_win_set_cursor(0, { row + count, col })
+end
+
+function Action.down.normal:move_line(line_number)
+  local row, col = unpack(self.cursor)
+  local line = vim.api.nvim_get_current_line()
+  local line_count = api.nvim_buf_line_count(0)
+  local count = line_number - row
+  count = math.min(line_count - row, count)
+  vim.api.nvim_buf_set_lines(0, row + count, row + count, false, { line })
+  vim.api.nvim_buf_set_lines(0, row - 1, row, false, {})
+  vim.api.nvim_win_set_cursor(0, { row + count, col })
 end
 
 --- @param dir "up" | "down"

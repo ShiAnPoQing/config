@@ -55,7 +55,7 @@ require("lazy").setup({
 
   require("plugins.git.gitsigns"),
 
-  -- require("plugins.style.theme.vague"),
+  require("plugins.style.theme.vague"),
   -- require("plugins.style.lualine"),
   -- require("plugins.style.dashboard-nvim"),
   -- require("plugins.style.barbar"),
@@ -64,7 +64,7 @@ require("lazy").setup({
   -- require("plugins.style.theme.moonfly"),
   -- require("plugins.style.theme.gruvbox"),
   -- require("plugins.style.theme.kanagawa"),
-  require("plugins.style.theme.tokyonight"),
+  -- require("plugins.style.theme.tokyonight"),
   -- require("plugins.style.theme.catppuccin"),
   -- require("plugins.style.theme.colorbuddy"),
   -- require("plugins.style.theme.everforest"),
