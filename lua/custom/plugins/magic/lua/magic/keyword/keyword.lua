@@ -14,6 +14,22 @@ local BuiltinKeyword = {
 --- @field leftcol number
 --- @field rightcol number
 --- @field match_callback fun(count: number)
+--- @field should_capture? boolean
+
+local function get_pattern(pattern)
+  if type(pattern) == "function" then
+    pattern = pattern(BuiltinKeyword)
+    if type(pattern) ~= "string" then
+      pattern = ""
+    end
+  else
+    if type(pattern) ~= "string" then
+      pattern = ""
+    end
+  end
+
+  return pattern or ""
+end
 
 local function get_display_width(start_row, start_col, end_row, end_col)
   local text = vim.api.nvim_buf_get_text(0, start_row, start_col, end_row, end_col, {})[1]
@@ -21,19 +37,23 @@ local function get_display_width(start_row, start_col, end_row, end_col)
   return display_width
 end
 
-function M:collect_keyword(i, keyword_start, keyword_end)
-  local virt_start_col = get_display_width(i - 1, 0, i - 1, keyword_start)
-  local virt_end_col = get_display_width(i - 1, 0, i - 1, keyword_end) - 1
+function M:collect_keyword(i, start_col, end_col, current_line)
+  local virt_start_col = get_display_width(i - 1, 0, i - 1, start_col)
+  local virt_end_col = get_display_width(i - 1, 0, i - 1, end_col) - 1
 
-  self.keyword_count = self.keyword_count + 1
-  table.insert(self.matches[#self.matches], {
-    start_col = keyword_start,
-    end_col = keyword_end,
+  local data = {
+    start_col = start_col,
+    end_col = end_col,
     virt_start_col = virt_start_col,
     virt_end_col = virt_end_col,
     virt_win_start_col = virt_start_col - self.leftcol,
     virt_win_end_col = virt_end_col - self.leftcol,
-  })
+  }
+  if self.should_capture then
+    data.capture = current_line:sub(start_col + 1, end_col)
+  end
+  self.keyword_count = self.keyword_count + 1
+  table.insert(self.matches[#self.matches], data)
 end
 
 function M:get_keyword(i, leftcol, rightcol)
@@ -42,18 +62,19 @@ function M:get_keyword(i, leftcol, rightcol)
 
   while true do
     local start, end_ = self.regex:match_line(0, i - 1, start_pos)
+    local current_line = self.should_capture and vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1]
 
     if not start or not end_ or (start == 0 and end_ == 0) then
       break
     end
 
-    local keyword_start = start + start_pos
-    local keyword_end = end_ + start_pos
-    local start_dislay_width = get_display_width(i - 1, 0, i - 1, keyword_start)
-    local end_dislay_width = get_display_width(i - 1, 0, i - 1, keyword_end)
+    local start_col = start + start_pos
+    local end_col = end_ + start_pos
+    local start_dislay_width = get_display_width(i - 1, 0, i - 1, start_col)
+    local end_dislay_width = get_display_width(i - 1, 0, i - 1, end_col)
 
     if not (start_dislay_width < leftcol or end_dislay_width > rightcol) then
-      self:collect_keyword(i, keyword_start, keyword_end)
+      self:collect_keyword(i, start_col, end_col, current_line)
     end
 
     start_pos = start_pos + end_
@@ -126,15 +147,8 @@ function M:init(opts)
 
   self.keyword_count = 0
   self.matches = {}
-  local keyword = opts.keyword
-  if type(keyword) == "function" then
-    local k = keyword(BuiltinKeyword)
-    if type(k) == "string" then
-      self.regex = vim.regex(k or "")
-    end
-  elseif type(keyword) == "string" then
-    self.regex = vim.regex(keyword or "")
-  end
+  self.regex = vim.regex(get_pattern(opts.keyword))
+  self.should_capture = opts.should_capture
   self.match_callback = opts.match_callback
   self.up_break = nil
   self.down_break = nil

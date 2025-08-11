@@ -36,7 +36,6 @@ function M.magic_screen(opts)
         opts.callback({
           line = line,
         })
-        Line_hl:del_hl()
       end,
       one_key = {
         line = line - 1,
@@ -48,7 +47,14 @@ function M.magic_screen(opts)
       },
     })
   end
-  key.on_key()
+  key.on_key({
+    unmatched_callback = function()
+      Line_hl:del_hl()
+    end,
+    matched_callback = function()
+      Line_hl:del_hl()
+    end,
+  })
 end
 
 return M

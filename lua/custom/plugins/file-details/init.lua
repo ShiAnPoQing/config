@@ -78,7 +78,7 @@ function M.file_details()
     col = col,
     height = #lines,
     anchor = "NW",
-    title = { { "File Details", "Normal" } },
+    title = { { " File Details ", "Normal" } },
     title_pos = "center",
     style = "minimal",
     border = require("custom.style.float.border").border2,

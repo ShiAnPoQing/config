@@ -62,7 +62,6 @@ function M.magic_line_start_end(opts)
           line = line,
           col = cursor_col,
         })
-        Line_hl:del_hl()
       end,
       one_key = {
         line = line - 1,
@@ -74,7 +73,14 @@ function M.magic_line_start_end(opts)
       },
     })
   end
-  key.on_key()
+  key.on_key({
+    unmatched_callback = function()
+      Line_hl:del_hl()
+    end,
+    matched_callback = function()
+      Line_hl:del_hl()
+    end,
+  })
 end
 
 return M

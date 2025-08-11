@@ -42,8 +42,9 @@ local M = {
       register = function(register_opts)
         return Key:register(register_opts)
       end,
-      on_key = function()
-        return Key:on_key()
+      --- @param on_key_opts OnKeyOpts
+      on_key = function(on_key_opts)
+        return Key:on_key(on_key_opts)
       end,
     }
   end,

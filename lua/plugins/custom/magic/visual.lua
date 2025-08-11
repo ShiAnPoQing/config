@@ -39,14 +39,21 @@ local function magic_visual_to_keyword(position, keyword)
 end
 
 return {
-  -- {
-  --   "0vw(",
-  --   function()
-  --     require("custom.plugins.magic").magic_visual_keyword({
-  --       keyword = "([^)]*)",
-  --     })
-  --   end,
-  -- },
+  {
+    "0vw(",
+    function()
+      require("magic").magic_keyword({
+        position = 3,
+        keyword = "([^)]*)",
+        should_visual = true,
+        should_capture = true,
+        callback = function(opts)
+          -- -- 光标设置必须使用字节位置
+          -- vim.api.nvim_win_set_cursor(0, { opts.line + 1, opts.col })
+        end,
+      })
+    end,
+  },
   -- {
   --   "0vw)",
   --   function()

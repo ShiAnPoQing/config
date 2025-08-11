@@ -9,6 +9,7 @@ local Line_hl = require("magic.line-hl")
 --- @field callback fun()
 --- @field position number
 --- @field should_visual boolean
+--- @field should_capture? boolean
 
 function M.magic_keyword(opts)
   local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
@@ -27,6 +28,7 @@ function M.magic_keyword(opts)
     botline = botline,
     leftcol = leftcol,
     rightcol = rightcol,
+    should_capture = opts.should_capture,
     match_callback = function(count)
       key.compute(count)
     end,
@@ -62,7 +64,6 @@ function M.magic_keyword(opts)
             virt_start_col = virt_start_col,
             virt_end_col = virt_end_col,
           })
-          Line_hl:del_hl()
         end,
         one_key = {
           line = line,
@@ -83,7 +84,14 @@ function M.magic_keyword(opts)
       })
     end,
     end_callback = function()
-      key.on_key()
+      key.on_key({
+        matched_callback = function()
+          Line_hl:del_hl()
+        end,
+        unmatched_callback = function()
+          Line_hl:del_hl()
+        end,
+      })
     end,
   })
 end

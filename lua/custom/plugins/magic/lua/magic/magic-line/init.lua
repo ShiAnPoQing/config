@@ -26,7 +26,6 @@ function M.magic_line(dir)
     key.register({
       callback = function()
         vim.api.nvim_win_set_cursor(0, { line, virt_col })
-        Line_hl:del_hl()
       end,
       one_key = {
         line = line - 1,
@@ -38,7 +37,14 @@ function M.magic_line(dir)
       },
     })
   end
-  key.on_key()
+  key.on_key({
+    unmatched_callback = function()
+      Line_hl:del_hl()
+    end,
+    matched_callback = function()
+      Line_hl:del_hl()
+    end,
+  })
 end
 
 return M

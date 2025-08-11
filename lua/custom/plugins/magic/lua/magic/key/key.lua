@@ -267,21 +267,33 @@ end
 
 function M:register_three_key(opts) end
 
-function M:listen()
+--- @param opts OnKeyOpts
+function M:listen(opts)
   vim.schedule(function()
     local char = vim.fn.nr2char(vim.fn.getchar())
     if self.on_keys[char] == nil then
       self:clear_ns_id()
+      if opts.unmatched_callback then
+        opts.unmatched_callback()
+      end
       self:clean()
       return
     end
     self.on_keys[char].callback()
+    if opts.matched_callback then
+      opts.matched_callback()
+    end
   end)
 end
 
-function M:on_key()
+--- @class OnKeyOpts
+--- @field unmatched_callback? fun()
+--- @field matched_callback? fun()
+
+--- @param opts OnKeyOpts
+function M:on_key(opts)
   self.on_keys = vim.tbl_extend("force", {}, self.one_key.keys, self.two_key.keys, self.three_key.keys)
-  self:listen()
+  self:listen(opts)
 end
 
 function M:create_ns_id(name)
@@ -320,7 +332,6 @@ end
 function M:init(opts)
   self.ns_ids = {}
   self.on_keys = nil
-
   self.one_key = {
     available_key_count = 0,
     used_key_count = 0,
