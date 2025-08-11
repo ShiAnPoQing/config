@@ -109,6 +109,7 @@ local yank_keys = require("plugins.custom.magic.yank")
 local change_keys = require("plugins.custom.magic.change")
 local upper_lower_keys = require("plugins.custom.magic.upper-lowercase")
 local screen_keys = require("plugins.custom.magic.screen")
+local move_line_keys = require("plugins.custom.magic.move-line")
 
 vim.list_extend(keys, delete_keys)
 vim.list_extend(keys, visual_keys)
@@ -116,6 +117,7 @@ vim.list_extend(keys, yank_keys)
 vim.list_extend(keys, change_keys)
 vim.list_extend(keys, upper_lower_keys)
 vim.list_extend(keys, screen_keys)
+vim.list_extend(keys, move_line_keys)
 
 return {
   dir = vim.fn.stdpath("config") .. "/lua/custom/plugins/magic",

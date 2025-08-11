@@ -18,6 +18,10 @@ function M.record(opts)
   current_record = opts
 end
 
+function M.reset()
+  current_record = nil
+end
+
 --- @class RepeatOptions
 
 --- @param opts RepeatOptions

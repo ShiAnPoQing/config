@@ -273,14 +273,15 @@ function M:listen(opts)
     local char = vim.fn.nr2char(vim.fn.getchar())
     if self.on_keys[char] == nil then
       self:clear_ns_id()
-      if opts.unmatched_callback then
+      if opts and opts.unmatched_callback then
         opts.unmatched_callback()
       end
       self:clean()
       return
     end
     self.on_keys[char].callback()
-    if opts.matched_callback then
+
+    if opts and opts.matched_callback then
       opts.matched_callback()
     end
   end)
