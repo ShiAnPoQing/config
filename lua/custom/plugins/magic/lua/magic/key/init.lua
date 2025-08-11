@@ -38,7 +38,7 @@ local M = {
       compute = function(total)
         return Key:compute(total)
       end,
-      --- @param register_opts KeyRegisterOpts
+      --- @type fun(register_opts: KeyRegisterOpts)
       register = function(register_opts)
         return Key:register(register_opts)
       end,

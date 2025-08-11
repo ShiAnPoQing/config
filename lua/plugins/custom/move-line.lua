@@ -7,15 +7,11 @@ return {
     {
       "<C-down>",
       function()
-        require("move-line").move_line({
-          dir = "down",
-        })
+        require("move-line").move_line("down")
         Repeat.record({
           name = "move-line",
           callback = function()
-            require("move-line").move_line({
-              dir = "down",
-            })
+            require("move-line").move_line("down")
           end,
         })
       end,
@@ -24,15 +20,11 @@ return {
     {
       "<C-up>",
       function()
-        require("move-line").move_line({
-          dir = "up",
-        })
+        require("move-line").move_line("up")
         Repeat.record({
           name = "move-line",
           callback = function()
-            require("move-line").move_line({
-              dir = "up",
-            })
+            require("move-line").move_line("up")
           end,
         })
       end,
