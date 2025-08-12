@@ -81,6 +81,7 @@ require("lazy").setup({
   require("plugins.custom.file-details"),
   require("plugins.custom.magic"),
   require("plugins.custom.move-line"),
+  require("plugins.custom.window-resize"),
 })
 
 require("test")

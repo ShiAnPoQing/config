@@ -1,29 +1,4 @@
 return {
-  -- resize window
-  ["<M-down>"] = {
-    function()
-      require("custom.plugins.window-resize").window_resize({ type = "vertical increase" })
-    end,
-    { "n" },
-  },
-  ["<M-up>"] = {
-    function()
-      require("custom.plugins.window-resize").window_resize({ type = "vertical decrease" })
-    end,
-    { "n" },
-  },
-  ["<M-right>"] = {
-    function()
-      require("custom.plugins.window-resize").window_resize({ type = "horizontal increase" })
-    end,
-    { "n" },
-  },
-  ["<M-left>"] = {
-    function()
-      require("custom.plugins.window-resize").window_resize({ type = "horizontal decrease" })
-    end,
-    { "n" },
-  },
 
   -- vsplit current file left-right
   ["<M-v>"] = {
