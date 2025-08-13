@@ -24,7 +24,7 @@ local postfix = require("luasnip.extras.postfix").postfix
 local types = require("luasnip.util.types")
 local parse = require("luasnip.util.parser").parse_snippet
 
-local utils = require("luasnip-utils")
+local utils = require("snippets.utils")
 
 return {
   s("cd", {

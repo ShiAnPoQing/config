@@ -1,5 +1,3 @@
-local Repeat = require("repeat")
-
 return {
   dir = vim.fn.stdpath("config") .. "/lua/custom/plugins/move-line",
   name = "move-line",
@@ -8,7 +6,7 @@ return {
       "<C-down>",
       function()
         require("move-line").move_line("down")
-        Repeat.record({
+        require("repeat").record({
           name = "move-line",
           callback = function()
             require("move-line").move_line("down")
@@ -21,7 +19,7 @@ return {
       "<C-up>",
       function()
         require("move-line").move_line("up")
-        Repeat.record({
+        require("repeat").record({
           name = "move-line",
           callback = function()
             require("move-line").move_line("up")

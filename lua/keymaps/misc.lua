@@ -65,9 +65,6 @@ return {
       local M = require("move-size")
       local count = vim.v.count1
       M.ChangeMoveSize(count, "up")
-      require("repeat").Record(function()
-        M.ChangeMoveSize(count, "up")
-      end)
     end,
     { "n" },
   },

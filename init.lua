@@ -1,8 +1,8 @@
 vim.g.mapleader = ";"
 require("command")
-require("repeat").setup({})
 require("lazy-setup")
 require("lazy").setup({
+  require("plugins.custom.repeat"),
   require("plugins.custom.parse-option"),
   require("plugins.custom.parse-keymap"),
   require("plugins.download.snippet.luasnip"),

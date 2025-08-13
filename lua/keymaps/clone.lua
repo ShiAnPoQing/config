@@ -7,9 +7,6 @@ return {
       function()
         local count = vim.v.count1
         clone.copy_line_word("up", count)
-        require("repeat").Record(function()
-          clone.copy_line_word("up", count)
-        end)
       end,
       { "i", "n" },
     },
@@ -20,9 +17,6 @@ return {
       function()
         local count = vim.v.count1
         clone.copy_line_word("down", count)
-        require("repeat").Record(function()
-          clone.copy_line_word("down", count)
-        end)
       end,
       { "i", "n" },
     },
