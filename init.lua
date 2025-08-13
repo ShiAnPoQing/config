@@ -1,61 +1,52 @@
 vim.g.mapleader = ";"
 require("command")
-require("plugin-options").setup({
-  paths = {
-    "options/options",
-    "options/typescript",
-    "options/markdown",
-    "options/css",
-  },
-})
 require("repeat").setup({})
-local Keymap = require("plugin-keymap").setup()
 require("lazy-setup")
 require("lazy").setup({
-  require("plugins.snippet.luasnip"),
-  require("plugins.cmp.blank-cmp"),
-  require("plugins.lsp.tiny-inline-diagnostic"),
-  require("plugins.format.conform"),
-  require("plugins.treesitter.treesitter"),
-  require("plugins.fzf.fzf-lua"),
-  require("plugins.tex.vimtex"),
-  require("plugins.markdown.markdown-preview"),
-  require("plugins.markdown.render-markdown"),
-  require("plugins.filemanager.neo-tree"),
-  require("plugins.filemanager.yazi"),
-  require("plugins.filemanager.oil-nvim"),
-  require("plugins.code.aerial"),
+  require("plugins.custom.parse-option"),
+  require("plugins.custom.parse-keymap"),
+  require("plugins.download.snippet.luasnip"),
+  require("plugins.download.cmp.blank-cmp"),
+  require("plugins.download.fzf.fzf-lua"),
+  require("plugins.download.format.conform"),
+  require("plugins.download.lsp.tiny-inline-diagnostic"),
+  require("plugins.download.treesitter.treesitter"),
+  require("plugins.download.tex.vimtex"),
+  require("plugins.download.markdown.markdown-preview"),
+  require("plugins.download.markdown.render-markdown"),
+  require("plugins.download.filemanager.neo-tree"),
+  require("plugins.download.filemanager.yazi"),
+  require("plugins.download.filemanager.oil-nvim"),
+  require("plugins.download.code.aerial"),
   -- require("plugins.code.windsurf"),
-  require("plugins.code.supermaven"),
-  require("plugins.code.typescript-tool"),
-  require("plugins.code.twilight"),
-  require("plugins.tmux.vim-tmux-navigator"),
-  require("plugins.window.winshift"),
+  require("plugins.download.code.supermaven"),
+  require("plugins.download.code.typescript-tool"),
+  require("plugins.download.code.twilight"),
+  require("plugins.download.tmux.vim-tmux-navigator"),
+  require("plugins.download.window.winshift"),
   -- require("plugins.lsp.lsp-config"),
-  -- TODO: 自己实现
   -- require("plugins.treesitter.nvim-treesitter-context"),
   -- require("plugins.telescope.telescope"),
 
-  require("plugins.misc.harpoon"),
-  -- TODO: 自己实现
-  require("plugins.misc.toggle-term"),
-  require("plugins.misc.grug-far"),
-  require("plugins.misc.flash"),
-  require("plugins.misc.autopairs"),
-  require("plugins.misc.nvim-ts-autotag"),
+  require("plugins.download.misc.harpoon"),
+  require("plugins.download.misc.toggle-term"),
+  require("plugins.download.misc.grug-far"),
+  require("plugins.download.misc.flash"),
+  require("plugins.download.misc.autopairs"),
+  require("plugins.download.misc.nvim-ts-autotag"),
   -- require("plugins.misc.augment"),
-  require("plugins.misc.zen-mode"),
-  require("plugins.misc.colorizer"),
-  require("plugins.misc.todo-comments"),
-  require("plugins.misc.hop"),
-  require("plugins.misc.undotree"),
-  require("plugins.misc.numb"),
-  require("plugins.misc.nvim-possession"),
-  require("plugins.misc.showkey"),
+  require("plugins.download.misc.zen-mode"),
+  require("plugins.download.misc.colorizer"),
+  require("plugins.download.misc.todo-comments"),
+  require("plugins.download.misc.hop"),
+  require("plugins.download.misc.undotree"),
+  require("plugins.download.misc.numb"),
+  require("plugins.download.misc.nvim-possession"),
+  require("plugins.download.misc.showkey"),
 
-  require("plugins.git.gitsigns"),
+  require("plugins.download.git.gitsigns"),
 
-  require("plugins.style.theme.vague"),
+  require("plugins.download.style.theme.vague"),
   -- require("plugins.style.lualine"),
   -- require("plugins.style.dashboard-nvim"),
   -- require("plugins.style.barbar"),
@@ -78,64 +69,9 @@ require("lazy").setup({
   -- require("plugins.style.theme.onenord"),
   -- require("plugins.style.theme.rose-pine-neovim"),
   require("plugins.custom.lsp"),
-  require("plugins.custom.file-details"),
   require("plugins.custom.magic"),
   require("plugins.custom.move-line"),
+  require("plugins.custom.file-details"),
   require("plugins.custom.window-resize"),
+  require("plugins.custom.window-exchange"),
 })
-
-require("test")
-
-Keymap.add({
-  -- tmux fixed
-  ["<F32>"] = {
-    { "<Del>", { "i" } },
-    { "lxh", "n" },
-  },
-  -- tmux fixed
-  ["<F6>"] = {
-    function()
-      require("custom.plugins.move-col-center").move_col_center("left")
-    end,
-    "n",
-  },
-  -- tmux fixed
-  ["<F31>"] = { "<Left><C-o>diw", { "i" } },
-
-  [";x"] = {
-    function()
-      require("test.test").test()
-    end,
-    "n",
-    { filetype = "javascript" },
-  },
-  [";;cf"] = {
-    function()
-      require("test.typescript_exchange_function").test()
-    end,
-    "n",
-  },
-  [";;a"] = {
-    function()
-      require("utils.get-window-size").get_window_size()
-    end,
-    "n",
-  },
-  [";;z"] = {
-    function() end,
-    "n",
-    -- function()
-    --   vim.ui.input({ prompt = "请输入内容:" }, function(input)
-    --     print(input)
-    --   end)
-    -- end,
-    -- "n",
-  },
-})
-Keymap.del({
-  ["in"] = { "x" },
-})
--- vim.cmd([[
---   let g:augment_workspace_folders = ['~/Learn']
--- ]])
---

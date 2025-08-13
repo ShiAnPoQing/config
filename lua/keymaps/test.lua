@@ -1,4 +1,43 @@
-local utils = require("utils.mark")
+-- local utils = require("utils.mark")
+
+-- Keymap.add({
+--   [";x"] = {
+--     function()
+--       require("test.test").test()
+--     end,
+--     "n",
+--     { filetype = "javascript" },
+--   },
+--   [";;cf"] = {
+--     function()
+--       require("test.typescript_exchange_function").test()
+--     end,
+--     "n",
+--   },
+--   [";;a"] = {
+--     function()
+--       require("utils.get-window-size").get_window_size()
+--     end,
+--     "n",
+--   },
+--   [";;z"] = {
+--     function()
+--       local lnum = vim.fn.searchpairpos("{", "", "}", "n")
+--       vim.print(lnum)
+--     end,
+--     "n",
+--     -- function()
+--     --   vim.ui.input({ prompt = "请输入内容:" }, function(input)
+--     --     print(input)
+--     --   end)
+--     -- end,
+--     -- "n",
+--   },
+-- })
+-- vim.cmd([[
+--   let g:augment_workspace_folders = ['~/Learn']
+-- ]])
+--
 
 return {
   -- ["<CR>"] = {

@@ -86,7 +86,7 @@ function M.float_win_boundary_move(dir)
 end
 
 function M.load(buf, opt)
-  require("plugin-keymap").add({
+  require("parse-keymap").add({
     ["<Esc>"] = {
       function()
         if opt.on_close then

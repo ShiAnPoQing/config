@@ -25,17 +25,17 @@ return {
   ["<space><space>-"] = {
     function()
       if vim.opt["wrap"]:get() then
-        require("plugin-keymap").add({
+        require("parse-keymap").add({
           ["J"] = { "3j", { "n", "x" } },
           ["K"] = { "3k", { "n", "x" } },
         })
-        require("plugin-keymap").del({
+        require("parse-keymap").del({
           ["j"] = { "n", "x" },
           ["k"] = { "n", "x" },
         })
         vim.opt.wrap = false
       else
-        require("plugin-keymap").add({
+        require("parse-keymap").add({
           ["j"] = { "gj", { "n", "x" } },
           ["k"] = { "gk", { "n", "x" } },
           ["J"] = { "3gj", { "n", "x" } },

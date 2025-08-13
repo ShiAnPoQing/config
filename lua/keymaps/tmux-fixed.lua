@@ -1,0 +1,16 @@
+return {
+  -- tmux fixed
+  ["<F32>"] = {
+    { "<Del>", { "i" } },
+    { "lxh", "n" },
+  },
+  -- tmux fixed
+  ["<F6>"] = {
+    function()
+      require("custom.plugins.move-col-center").move_col_center("left")
+    end,
+    "n",
+  },
+  -- tmux fixed
+  ["<F31>"] = { "<Left><C-o>diw", { "i" } },
+}
