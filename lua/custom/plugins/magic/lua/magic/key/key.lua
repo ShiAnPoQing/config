@@ -19,6 +19,7 @@ local key_types = { "one_key", "two_key", "three_key" }
 --- @field line number
 --- @field virt_col number
 --- @field visual? VisualExtmarkOpts
+--- @field hidden_second_key? boolean
 
 --- @class KeyRegisterOpts
 --- @field one_key OneKeyRegisterOpts
@@ -78,18 +79,19 @@ local function set_two_key_extmark(opts)
   local key2 = opts.key2
   local line = opts.line
   local virt_col = opts.virt_col
+  local hidden_second_key = opts.hidden_second_key
 
   local hl_groups = get_hl_groups(visual)
   vim.api.nvim_buf_set_extmark(0, ns_id1, line, 0, {
     virt_text_win_col = virt_col,
     virt_text = { { key1, hl_groups.CustomMagicNextKey1 } },
   })
-  -- if end_col - start_col ~= 1 then
-  vim.api.nvim_buf_set_extmark(0, ns_id2, line, 0, {
-    virt_text_win_col = virt_col + 1,
-    virt_text = { { key2, hl_groups.CustomMagicNextKey2 } },
-  })
-  -- end
+  if not hidden_second_key then
+    vim.api.nvim_buf_set_extmark(0, ns_id2, line, 0, {
+      virt_text_win_col = virt_col + 1,
+      virt_text = { { key2, hl_groups.CustomMagicNextKey2 } },
+    })
+  end
   set_visual_hl(ns_id2, line, visual)
 end
 
@@ -261,14 +263,16 @@ function M:register_two_key(opts, callback)
       key2 = key,
       line = opts.line,
       virt_col = opts.virt_col,
+      hidden_second_key = opts.hidden_second_key,
     })
   end
 end
 
 function M:register_three_key(opts) end
 
---- @param opts OnKeyOpts
+--- @param opts? OnKeyOpts
 function M:listen(opts)
+  opts = opts or {}
   vim.schedule(function()
     local char = vim.fn.nr2char(vim.fn.getchar())
     if self.on_keys[char] == nil then
@@ -281,7 +285,7 @@ function M:listen(opts)
     end
     self.on_keys[char].callback()
 
-    if opts and opts.matched_callback then
+    if opts.matched_callback then
       opts.matched_callback()
     end
   end)

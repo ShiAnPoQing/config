@@ -95,20 +95,20 @@ return {
       end)
     end,
   },
-  {
-    "y0<space>h",
-    function()
-      require("custom.plugins.magic").magic_yank_to_line_start_end({
-        position = 1,
-      })
-    end,
-  },
-  {
-    "y0<space>l",
-    function()
-      require("custom.plugins.magic").magic_yank_to_line_start_end({
-        position = 2,
-      })
-    end,
-  },
+  -- {
+  --   "y0<space>h",
+  --   function()
+  --     require("custom.plugins.magic").magic_yank_to_line_start_end({
+  --       position = 1,
+  --     })
+  --   end,
+  -- },
+  -- {
+  --   "y0<space>l",
+  --   function()
+  --     require("custom.plugins.magic").magic_yank_to_line_start_end({
+  --       position = 2,
+  --     })
+  --   end,
+  -- },
 }

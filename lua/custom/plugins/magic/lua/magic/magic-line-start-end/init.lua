@@ -3,7 +3,7 @@ local M = {}
 local Key = require("magic.key")
 local Line_hl = require("magic.line-hl")
 
-local function get_col(position, line, wininfo)
+local function get_col(position, line, wininfo, blank)
   local leftcol = wininfo.leftcol
   local rightcol = leftcol + wininfo.width - wininfo.textoff
   local width = wininfo.width - wininfo.textoff
@@ -13,17 +13,25 @@ local function get_col(position, line, wininfo)
 
   if position == 1 then
     local l = vim.api.nvim_buf_get_lines(0, line - 1, line, false)[1] or ""
+
     if #l == 0 then
-      col = 0 - leftcol
+      col = 0 - leftcol + 1
       cursor_col = 0
     else
-      col = l:find("%S") - 1 - leftcol
+      if not blank then
+        col = l:find("%S") - 1 - leftcol
+      else
+        col = 0 - leftcol
+      end
       cursor_col = l:find("%S") - 1
     end
   elseif position == 2 then
-    local l = vim.api.nvim_buf_get_lines(0, line - 1, line, false)[1]
-    local displaywidth = vim.fn.strdisplaywidth(l)
+    local l = vim.api.nvim_buf_get_lines(0, line - 1, line, false)[1] or ""
+    if not blank then
+      l = l:gsub("%s*$", "")
+    end
 
+    local displaywidth = vim.fn.strdisplaywidth(l)
     if #l == 0 then
       col = 0 - leftcol
       cursor_col = 0
@@ -43,9 +51,11 @@ end
 --- @class MagicLineStartEndOpts
 --- @field position 1|2
 --- @field callback fun(opts)
+--- @field blank boolean
 
 --- @param opts MagicLineStartEndOpts
 function M.magic_line_start_end(opts)
+  opts = opts or {}
   local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
   local topline = wininfo.topline
   local botline = wininfo.botline
@@ -55,7 +65,7 @@ function M.magic_line_start_end(opts)
   key.compute(botline - topline + 1)
 
   for line = topline, botline do
-    local col, cursor_col = get_col(opts.position, line, wininfo)
+    local col, cursor_col = get_col(opts.position, line, wininfo, opts.blank)
     key.register({
       callback = function()
         opts.callback({
@@ -70,6 +80,7 @@ function M.magic_line_start_end(opts)
       two_key = {
         line = line - 1,
         virt_col = col,
+        hidden_second_key = true,
       },
     })
   end

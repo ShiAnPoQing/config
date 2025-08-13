@@ -67,6 +67,7 @@ require("lazy-setup").setup({
   require("plugins.custom.magic"),
   require("plugins.custom.move-line"),
   require("plugins.custom.concat-line"),
+  require("plugins.custom.break-line"),
   require("plugins.custom.file-details"),
   require("plugins.custom.window-resize"),
   require("plugins.custom.window-exchange"),

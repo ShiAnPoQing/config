@@ -85,6 +85,7 @@ local keys = {
         callback = function(opts)
           vim.api.nvim_win_set_cursor(0, { opts.line, opts.col })
         end,
+        blank = false,
       })
     end,
     mode = { "n", "x" },
@@ -97,6 +98,33 @@ local keys = {
         callback = function(opts)
           vim.api.nvim_win_set_cursor(0, { opts.line, opts.col })
         end,
+        blank = false,
+      })
+    end,
+    mode = { "n", "x" },
+  },
+  {
+    "0<space><space>h",
+    function()
+      require("magic").magic_line_start_end({
+        position = 1,
+        callback = function(opts)
+          vim.api.nvim_win_set_cursor(0, { opts.line, opts.col })
+        end,
+        blank = true,
+      })
+    end,
+    mode = { "n", "x" },
+  },
+  {
+    "0<space><space>l",
+    function()
+      require("magic").magic_line_start_end({
+        position = 2,
+        callback = function(opts)
+          vim.api.nvim_win_set_cursor(0, { opts.line, opts.col })
+        end,
+        blank = true,
       })
     end,
     mode = { "n", "x" },

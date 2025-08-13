@@ -3,21 +3,6 @@ local Repeat = require("repeat")
 
 return {
   -- Line Break
-  ["<space><CR>"] = {
-    {
-      function()
-        line_break.line_break(vim.v.count1)
-        Repeat.record({
-          name = "line_break",
-          callback = function()
-            line_break.line_break(vim.v.count1)
-          end,
-        })
-      end,
-      { "n", "x" },
-      { expr = true },
-    },
-  },
 }
 
 -- line connect
