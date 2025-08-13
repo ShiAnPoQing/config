@@ -3,6 +3,6 @@ return {
   name = "file-details",
   cmd = { "FileDetails" },
   config = function(opt)
-    require("custom.plugins.file-details").setup()
+    require("file-details").setup()
   end,
 }

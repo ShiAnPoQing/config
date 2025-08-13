@@ -89,15 +89,3 @@ return {
     { "│", "Special" },
   },
 }
-
--- ┌──────────┐
--- │ 你好啊你asda │
--- │ 你好啊你sadfas │
--- └──────────┘
--- { "─", "Special" },
--- { "┐", "Special" },
--- { "│", "Special" },
--- { "┘", "Special" },
--- { "─", "Special" },
--- { "└", "Special" },
--- { "│", "Special" },

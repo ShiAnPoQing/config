@@ -174,4 +174,6 @@ function M.line_concat(opts)
   vim.opt.operatorfunc = "v:lua.custom_line_concat"
 end
 
+function M.setup() end
+
 return M

@@ -1,6 +1,6 @@
 local M = {}
 
---- @param should_unpack boolean?               #默认 false 不解包
+--- @param should_unpack? boolean               #默认 false 不解包
 --- @overload fun(should_unpack:nil|false): integer[],integer[]
 --- @overload fun(should_unpack:true): integer, integer, integer, integer
 function M.get_visual_mark(should_unpack)

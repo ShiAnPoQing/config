@@ -1,11 +1,14 @@
-local Matchs = require("custom.plugins.surround.matchs")
-local Feedkey = require("utils.feedkey")
+local Matchs = require("surround.matchs")
 
 local M = {}
 
 local S = {
   line_match_marks = {},
 }
+
+local function esc()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
+end
 
 function S:collect(start_mark, end_mark)
   local function collect(mark, type)
@@ -64,13 +67,13 @@ function S:get_marks(count, mc, callback)
 
   local function get_mark(_count)
     if _count == 0 then
-      Feedkey.esc()
+      esc()
       after()
       return
     end
     vim.api.nvim_feedkeys("a" .. mc, "nx", false)
     vim.schedule(function()
-      Feedkey.esc()
+      esc()
       callback(vim.api.nvim_buf_get_mark(0, "<"), vim.api.nvim_buf_get_mark(0, ">"))
       vim.api.nvim_feedkeys("gv", "nx", false)
       get_mark(_count - 1)
@@ -87,7 +90,7 @@ function S:get_marks(count, mc, callback)
   }
 end
 
-function M.exchange_surround_match(mc)
+function M.surround_exchange(mc)
   local pos = vim.api.nvim_win_get_cursor(0)
 
   S:get_marks(vim.v.count1, mc, function(start_mark, end_mark)

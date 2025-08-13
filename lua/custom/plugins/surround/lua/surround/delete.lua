@@ -33,7 +33,7 @@ local function _delete_surround_match(count, mc)
   end)
 end
 
-function M.delete_surround_match(mc)
+function M.surround_delete(mc)
   _delete_surround_match(vim.v.count1, mc)
 end
 
