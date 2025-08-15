@@ -1,11 +1,9 @@
 # 如何安装 clangd (arch)
 
-~~~powershell
+```powershell
 sudo pacman -S clang
-~~~
+```
 
-~~~lua
+```lua
 require'lspconfig'.clangd.setup{}
-~~~
-
-
+```

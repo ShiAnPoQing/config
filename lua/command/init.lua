@@ -85,7 +85,7 @@ end
 --     end
 --   end, opts)
 -- end
-
+--
 vim.api.nvim_create_user_command("FzFDirectories", function()
   fzf_dirs()
 end, {})

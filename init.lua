@@ -29,7 +29,7 @@ require("lazy-setup").setup({
   require("plugins.download.misc.autopairs"),
   require("plugins.download.misc.nvim-ts-autotag"),
   require("plugins.download.misc.zen-mode"),
-  require("plugins.download.misc.colorizer"),
+  -- require("plugins.download.misc.colorizer"),
   require("plugins.download.misc.todo-comments"),
   require("plugins.download.misc.hop"),
   require("plugins.download.misc.undotree"),
@@ -42,7 +42,7 @@ require("lazy-setup").setup({
   -- require("plugins.download.misc.augment"),
   -- require("plugins.code.windsurf"),
   require("plugins.download.style.theme.vague"),
-  -- require("plugins.download.style.lualine"),
+  require("plugins.download.style.lualine"),
   require("plugins.download.style.dashboard-nvim"),
   -- require("plugins.download.style.barbar"),
   -- require{"plugins.download.style.alpha-nvim"_,
@@ -63,6 +63,7 @@ require("lazy-setup").setup({
   -- require("plugins.download.style.theme.onedarkpro"),
   -- require("plugins.download.style.theme.onenord"),
   -- require("plugins.download.style.theme.rose-pine-neovim"),
+  -- require("plugins.custom.colorscheme"),
   require("plugins.custom.lsp"),
   require("plugins.custom.magic"),
   require("plugins.custom.move-line"),
@@ -72,3 +73,8 @@ require("lazy-setup").setup({
   require("plugins.custom.window-resize"),
   require("plugins.custom.window-exchange"),
 })
+
+local function nihao()
+  return "你好"
+end
+nihao()

@@ -5,6 +5,17 @@ local function switch(option)
 end
 
 return {
+  [";st"] = {
+    function()
+      local value = vim.opt.laststatus:get()
+      if value == 0 then
+        vim.opt.laststatus = 3
+      else
+        vim.opt.laststatus = 0
+      end
+    end,
+    "n",
+  },
   [";vt"] = {
     function()
       local value = vim.opt.virtualedit:get()[1]

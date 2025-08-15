@@ -1,3 +1,32 @@
+function MyTabLabel(n)
+  local buflist = vim.fn.tabpagebuflist(n)
+  local winnr = vim.fn.tabpagewinnr(n)
+  local full_path = vim.fn.bufname(buflist[winnr])
+  local filename = vim.fn.fnamemodify(full_path, ":t")
+
+  if filename == "" then
+    return "[No Name]"
+  else
+    return filename
+  end
+end
+
+function _G.MyTabLine()
+  local s = ""
+
+  for i = 1, vim.fn.tabpagenr("$") do
+    if i == vim.fn.tabpagenr() then
+      s = s .. "%#TabLineSel#"
+    else
+      s = s .. "%#TabLine#"
+    end
+    s = s .. "%" .. i .. "T"
+    s = s .. " " .. MyTabLabel(i) .. " "
+  end
+  s = s .. "%#TabLineFill#%T"
+  return s
+end
+
 return {
   normal = {
     clipboard = { "unnamedplus" },
@@ -26,6 +55,7 @@ return {
     -- 1: only if there are at least two tab pages
     -- 2: always
     showtabline = 1,
+    tabline = "%!v:lua.MyTabLine()",
 
     linebreak = false,
     ruler = true,
