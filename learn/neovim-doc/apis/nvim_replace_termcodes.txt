@@ -1,0 +1,18 @@
+                                                    *nvim_replace_termcodes()*
+nvim_replace_termcodes({str}, {from_part}, {do_lt}, {special})
+    替换字符串中的终端代码和 |keycodes|（<CR>, <Esc>, ...）为内部表示。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {str}        要转换的字符串。
+      • {from_part}  旧版 Vim 参数。通常为 true。
+      • {do_lt}      也翻译 <lt>。如果 `special` 为 false，则忽略。
+      • {special}    替换 |keycodes|，例如 <CR> 变为 "\r" 字符。
+
+    另请参见：~
+      • replace_termcodes
+      • cpoptions
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

@@ -1,0 +1,18 @@
+nvim_buf_get_mark({buffer}, {name})                      *nvim_buf_get_mark()*
+    返回表示命名标记位置的 `(row,col)` 元组。
+    "行尾" 列位置返回为 |v:maxcol|（大数字）。
+    参见 |mark-motions|。
+
+    标记是 (1,0) 索引的。
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {buffer}  缓冲区 id，或当前缓冲区为 0
+      • {name}    标记名称
+
+    返回：~
+        (row, col) 元组，如果标记未设置，或是设置在另一个缓冲区中的大写/文件标记，则为 (0, 0)。
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

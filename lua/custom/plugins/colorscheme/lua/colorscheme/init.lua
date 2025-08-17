@@ -38,7 +38,7 @@ local function get_groups()
 
   local groups = {
     -- 普通文本
-    Normal = { fg = "#969aa3", bg = "#0d0d0d" },
+    Normal = { fg = "#969aa3", bg = "#191C1E" },
     --- 浮动窗口的普通文本
     NormalFloat = { link = "Normal" },
     -- 非当前窗口的普通文本

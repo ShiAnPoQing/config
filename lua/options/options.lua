@@ -20,12 +20,13 @@ function _G.MyTabLine()
     else
       s = s .. "%#TabLine#"
     end
-    s = s .. "%" .. i .. "T"
     s = s .. " " .. MyTabLabel(i) .. " "
   end
   s = s .. "%#TabLineFill#%T"
   return s
 end
+
+_G.MyTabLine()
 
 return {
   normal = {

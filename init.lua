@@ -35,13 +35,13 @@ require("lazy-setup").setup({
   require("plugins.download.misc.undotree"),
   require("plugins.download.misc.numb"),
   require("plugins.download.misc.nvim-possession"),
-  require("plugins.download.misc.showkey"),
+  -- require("plugins.download.misc.showkey"),
   require("plugins.download.git.gitsigns"),
   -- require("plugins.download.treesitter.nvim-treesitter-context"),
   -- require("plugins.download.telescope.telescope"),
   -- require("plugins.download.misc.augment"),
   -- require("plugins.code.windsurf"),
-  require("plugins.download.style.theme.vague"),
+  -- require("plugins.download.style.theme.vague"),
   require("plugins.download.style.lualine"),
   require("plugins.download.style.dashboard-nvim"),
   -- require("plugins.download.style.barbar"),
@@ -49,7 +49,7 @@ require("lazy-setup").setup({
   -- require("plugins.download.style.theme.material"),
   -- require("plugins.download.style.theme.moonfly"),
   -- require("plugins.download.style.theme.gruvbox"),
-  -- require("plugins.download.style.theme.kanagawa"),
+  require("plugins.download.style.theme.kanagawa"),
   -- require("plugins.download.style.theme.tokyonight"),
   -- require("plugins.download.style.theme.catppuccin"),
   -- require("plugins.download.style.theme.colorbuddy"),
@@ -72,9 +72,5 @@ require("lazy-setup").setup({
   require("plugins.custom.file-details"),
   require("plugins.custom.window-resize"),
   require("plugins.custom.window-exchange"),
+  require("plugins.custom.visual-move"),
 })
-
-local function nihao()
-  return "你好"
-end
-nihao()

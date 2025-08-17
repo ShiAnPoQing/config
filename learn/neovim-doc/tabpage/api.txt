@@ -1,0 +1,150 @@
+==============================================================================
+标签页函数                                                *api-tabpage*
+
+nvim_tabpage_del_var({tabpage}, {name})               *nvim_tabpage_del_var()*
+    移除标签页范围（t:）的变量
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {tabpage}  |tab-ID|，或当前标签页为 0
+      • {name}     变量名称
+
+nvim_tabpage_get_number({tabpage})                 *nvim_tabpage_get_number()*
+    获取标签页编号
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {tabpage}  |tab-ID|，或当前标签页为 0
+
+    返回：~
+        标签页编号
+
+nvim_tabpage_get_var({tabpage}, {name})               *nvim_tabpage_get_var()*
+    获取标签页范围（t:）的变量
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {tabpage}  |tab-ID|，或当前标签页为 0
+      • {name}     变量名称
+
+    返回：~
+        变量值
+
+nvim_tabpage_get_win({tabpage})                       *nvim_tabpage_get_win()*
+    获取标签页中的当前窗口
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {tabpage}  |tab-ID|，或当前标签页为 0
+
+    返回：~
+        |window-ID|
+
+nvim_tabpage_is_valid({tabpage})                     *nvim_tabpage_is_valid()*
+    检查标签页是否有效
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {tabpage}  |tab-ID|，或当前标签页为 0
+
+    返回：~
+        如果标签页有效则为 true，否则为 false
+
+nvim_tabpage_list_wins({tabpage})                   *nvim_tabpage_list_wins()*
+    获取标签页中的窗口
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {tabpage}  |tab-ID|，或当前标签页为 0
+
+    返回：~
+        `tabpage` 中的窗口列表
+
+                                                      *nvim_tabpage_set_var()*
+nvim_tabpage_set_var({tabpage}, {name}, {value})
+    设置标签页范围（t:）的变量
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {tabpage}  |tab-ID|，或当前标签页为 0
+      • {name}     变量名称
+      • {value}    变量值
+
+nvim_tabpage_set_win({tabpage}, {win})                *nvim_tabpage_set_win()*
+    设置标签页中的当前窗口
+
+    属性：~
+        自 0.10.0 起
+
+    参数：~
+
+      • {tabpage}  |tab-ID|，或当前标签页为 0
+      • {win}      |window-ID|，必须已属于 {tabpage}
+
+nvim_get_current_tabpage()                        *nvim_get_current_tabpage()*
+    获取当前标签页。
+
+    属性：~
+        自 0.1.0 起
+
+    返回：~
+        |tab-ID|
+
+nvim_list_tabpages()                                    *nvim_list_tabpages()*
+    获取当前 |tab-ID| 列表。
+
+    属性：~
+        自 0.1.0 起
+
+    返回：~
+        |tab-ID| 列表
+
+nvim_set_current_tabpage({tabpage})               *nvim_set_current_tabpage()*
+    设置当前标签页。
+
+    属性：~
+        当 |textlock| 激活或在 |cmdwin| 中时不允许
+        自 0.1.0 起
+
+    参数：~
+      • {tabpage}  要聚焦的 |tab-ID|
+
+nvim_win_get_tabpage({window})                        *nvim_win_get_tabpage()*
+    获取窗口的标签页
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {window}  |window-ID|，或当前窗口为 0
+
+    返回：~
+        包含窗口的标签页
+
+
+nvim_list_wins()                                            *nvim_list_wins()*
+    获取所有标签页中所有 |window-ID| 的当前列表。
+
+    属性：~
+        自 0.1.0 起
+
+    返回：~
+        |window-ID| 列表
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
+
+

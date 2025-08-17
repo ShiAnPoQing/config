@@ -1,0 +1,28 @@
+                                                         *nvim_buf_get_text()*
+nvim_buf_get_text({buffer}, {start_row}, {start_col}, {end_row}, {end_col},
+                  {opts})
+    从缓冲区获取一个范围
+
+    1. 0 基索引
+    2. 行索引是结束包含的
+    3. 列索引是结束排除的
+
+    当检索整行时，优先使用 |nvim_buf_get_lines()|。
+
+    参数：~
+      • {buffer}     缓冲区 id，或当前缓冲区为 0
+      • {start_row}  第一行索引
+      • {start_col}  第一行的起始列（字节偏移）
+      • {end_row}    最后一行索引，包含
+      • {end_col}    最后一行的结束列（字节偏移），排除
+      • {opts}       可选参数。目前未使用。
+
+    返回：~
+        行数组，未加载缓冲区返回空数组。
+
+    >lua
+    local text = vim.api.nvim_buf_get_text(0, 0, 0, 0, 1, {}) 
+    vim.print(text)
+<
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

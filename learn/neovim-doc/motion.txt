@@ -904,4 +904,4 @@ L			跳转到窗口底部第 [count] 行，默认窗口最后一行，停在第�
 
 <LeftMouse>		移动到鼠标点击的屏幕位置 |exclusive|。另见 |<LeftMouse>|。若点击状态栏，则该窗口变为活动窗口，光标不移动。
 
- vim:tw=78:ts=8:noet:ft=help:norl:
+ vim:tw=78:ts=8:noet:ft=help:norl:  

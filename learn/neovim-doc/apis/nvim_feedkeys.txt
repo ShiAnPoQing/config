@@ -1,0 +1,28 @@
+nvim_feedkeys({keys}, {mode}, {escape_ks})                   *nvim_feedkeys()*
+    将输入键发送到 Nvim，受 `mode` 标志控制的各种怪癖影响。
+    这是一个阻塞调用，与 |nvim_input()| 不同。
+
+    执行错误时：不会失败，但会更新 v:errmsg。
+
+    要输入像 <C-o> 这样的序列，请使用 |nvim_replace_termcodes()|（通常与 escape_ks=false 一起使用）替换 |keycodes|，然后将结果传递给 nvim_feedkeys()。
+
+    示例：
+    >vim
+        :let key = nvim_replace_termcodes("<C-o>", v:true, v:false, v:true)
+        :call nvim_feedkeys(key, 'n', v:false)
+<
+
+    属性：~
+        自 0.1.0 起
+
+    参数：~
+      • {keys}       要输入的键
+      • {mode}       行为标志，参见 |feedkeys()|
+      • {escape_ks}  如果为 true，则在 `keys` 中转义 K_SPECIAL 字节。
+      如果您已经使用 |nvim_replace_termcodes()|，则应为 false，否则为 true。
+
+    另请参见：~
+      • feedkeys()
+      • vim_strsave_escape_ks
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
