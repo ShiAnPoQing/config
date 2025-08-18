@@ -1,6 +1,6 @@
 local M = {}
 
---- @param dir "left"| "right"
+--- @param dir "left"| "right" | "up" | "down"
 function M.visual_move(dir)
   local mode = vim.api.nvim_get_mode().mode
   if mode == "s" or mode == "v" then

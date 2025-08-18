@@ -38,7 +38,7 @@ local function get_groups()
 
   local groups = {
     -- 普通文本
-    Normal = { fg = "#969aa3", bg = "#191C1E" },
+    Normal = { fg = "#969aa3", bg = "#0D0B0B" },
     --- 浮动窗口的普通文本
     NormalFloat = { link = "Normal" },
     -- 非当前窗口的普通文本
@@ -48,15 +48,15 @@ local function get_groups()
     -- Mode Message
     ModeMsg = { link = "Normal" },
     -- 行号
-    LineNr = { fg = "#404040", bg = "#0d0d0d" },
+    LineNr = { fg = "#404040", bg = "#0D0B0B" },
     -- 搜索结果
     Search = { reverse = true },
     IncSearch = { link = "Search" },
     CurSearch = { link = "IncSearch" },
     -- 状态栏
-    StatusLine = { bg = "#0d0d0d", fg = "#969aa3", reverse = true },
+    StatusLine = { bg = "#0D0B0B", fg = "#969aa3", reverse = true },
     -- 符号列
-    SignColumn = { bg = "#0d0d0d" },
+    SignColumn = { bg = "#0D0B0B" },
     -- 光标行
     CursorLine = { bg = "#202329" },
     CursorLineNr = { fg = colors.black10 },
@@ -68,10 +68,10 @@ local function get_groups()
     -- 非当前标签
     TabLine = { link = "TabLineFill" },
     -- 当前标签选中
-    TabLineSel = { fg = "#36BBAC", bg = "#0d0d0d", bold = true },
+    TabLineSel = { fg = "#36BBAC", bg = "#0D0B0B", bold = true },
     WarningMsg = { fg = "#F2B33F" },
     Error = { fg = "#C54659" },
-    ErrorMsg = { fg = "#0d0d0d", bg = "#C54659", bold = true },
+    ErrorMsg = { fg = "#0D0B0B", bg = "#C54659", bold = true },
     MatchParen = { reverse = true },
     -- Conceal = { fg = colors.blue },
     Keyword = { fg = "#8F5FDE", bold = true },
@@ -87,7 +87,7 @@ local function get_groups()
     ["@property"] = {},
     ["@lsp.type.property"] = { link = "@property" },
     ["@keyword"] = { link = "Keyword" },
-    ["@keyword.function"] = { fg = "#8F5FDE", bold = true },
+    ["@keyword.function"] = { fg = "#BC93F9", bold = true },
     ["@keyword.return"] = { fg = "#C54659", bold = true },
     -- ["@keyword.conditional"] = { bg = "#191C20", fg = "#8A7B7A", bold = true },
     -- ["@keyword.repeat"] = { bg = "#191C20", fg = "#8A8A9A", bold = true },
@@ -101,11 +101,11 @@ local function get_groups()
 
     Function = { fg = "#C54659", bold = true },
     String = { fg = "#F2B33F" },
-    Number = { bg = "#0d0d0d", fg = "#C54659" },
+    Number = { bg = "#0D0B0B", fg = "#C54659" },
     Operator = { fg = "#969aa3" },
     Delimiter = { fg = "#969aa3" },
     Comment = { fg = "#4b4d52" },
-    Boolean = { bg = "#0d0d0d", fg = "#DA8D59", bold = true },
+    Boolean = { bg = "#0D0B0B", fg = "#DA8D59", bold = true },
     Type = { fg = "#59B38C", bold = true },
     ["@function"] = { link = "Function" },
     ["@function.call"] = { link = "Function" },

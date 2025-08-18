@@ -2,7 +2,7 @@ local M = {}
 
 function M.setup() end
 
---- @type fun(dir: "left"|"right")
+--- @type fun(dir: "left"|"right" | "up" | "down")
 M.visual_move = function(dir)
   require("visual-move.base-move").visual_move(dir)
 end
