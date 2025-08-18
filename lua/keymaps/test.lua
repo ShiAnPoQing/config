@@ -49,41 +49,13 @@ return {
   --   "n",
   -- },
   [";;z"] = {
-    function()
-      -- 获取光标下的语法高亮组
-      local function get_highlight_at_cursor()
-        local line = vim.fn.line(".")
-        local col = vim.fn.col(".")
-
-        -- 获取语法ID
-        local syn_id = vim.fn.synID(line, col, 1)
-
-        -- 获取透明语法ID
-        local trans_id = vim.fn.synIDtrans(syn_id)
-
-        -- 获取语法组名称
-        local syn_name = vim.fn.synIDattr(syn_id, "name")
-        local trans_name = vim.fn.synIDattr(trans_id, "name")
-
-        -- 获取高亮组名称
-        local hl_group = vim.fn.synIDattr(trans_id, "name")
-
-        return {
-          syn_id = syn_id,
-          trans_id = trans_id,
-          syn_name = syn_name,
-          trans_name = trans_name,
-          hl_group = hl_group,
-        }
-      end
-
-      -- 使用示例
-      local highlight_info = get_highlight_at_cursor()
-      print("语法组:", highlight_info.syn_name)
-      print("高亮组:", highlight_info.hl_group)
-    end,
+    function() end,
     "n",
   },
+  -- ["<C-j>"] = { "+", "n" },
+  -- ["<C-k>"] = { "-", "n" },
+  -- ["<M-j>"] = { "<down>g_", "n" },
+  -- ["<M-k>"] = { "<up>g_", "n" },
   -- ["<CR>"] = {
   --   "<nop>",
   --   "n",

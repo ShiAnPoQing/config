@@ -36,8 +36,8 @@ function M.magic_keyword(opts)
       local line = match_opts.line
       local start_col = match_opts.start_col
       local end_col = match_opts.end_col
-      local virt_start_col = match_opts.virt_start_col
-      local virt_end_col = match_opts.virt_end_col
+      local virt_start_col = match_opts.virt_win_start_col
+      local virt_end_col = match_opts.virt_win_end_col
 
       local col
       local virt_col

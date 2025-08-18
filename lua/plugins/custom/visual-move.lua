@@ -14,6 +14,7 @@ return {
       function()
         require("visual-move").visual_move("left")
       end,
+      mode = { "v" },
     },
   },
   config = function(opt)

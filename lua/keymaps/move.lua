@@ -129,7 +129,7 @@ return {
   -- insert mode move: k,
   ["<M-k>"] = {
     { "<Up>", { "i", "c", "s" }, { silent = false } },
-    { "<C-W>k^", { "n" } },
+    -- { "<C-W>k^", { "n" } },
     -- {""},
     { "<up>", "t" },
   },
@@ -151,7 +151,7 @@ return {
   ["<M-h>"] = {
     { "<left>", { "i", "c", "s" }, { silent = false } },
     -- { "<C-W>h^", { "n" } },
-    -- { "i",      "n" },
+    -- { "i", "n" },
     { "<left>", "t" },
   },
   -- ["<M-C-h>"] = {
@@ -161,7 +161,7 @@ return {
   -- insert mode move: l,
   ["<M-l>"] = {
     { "<right>", { "i", "c", "s" }, { silent = false } },
-    --  { "a",       "n" },
+    -- { "a", "n" },
     -- { "<C-W>l^", { "n" } },
     { "<right>", "t" },
   },

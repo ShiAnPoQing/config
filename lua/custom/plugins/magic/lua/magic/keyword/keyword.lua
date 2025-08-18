@@ -70,10 +70,8 @@ function M:get_keyword(i, leftcol, rightcol)
 
     local start_col = start + start_pos
     local end_col = end_ + start_pos
-    local start_dislay_width = get_display_width(i - 1, 0, i - 1, start_col)
-    local end_dislay_width = get_display_width(i - 1, 0, i - 1, end_col)
 
-    if not (start_dislay_width < leftcol or end_dislay_width > rightcol) then
+    if end_col > leftcol then
       self:collect_keyword(i, start_col, end_col, current_line)
     end
 
