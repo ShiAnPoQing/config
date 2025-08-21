@@ -43,7 +43,7 @@ require("lazy-setup").setup({
   -- require("plugins.code.windsurf"),
   -- require("plugins.download.style.theme.vague"),
   require("plugins.download.style.lualine"),
-  require("plugins.download.style.dashboard-nvim"),
+  -- require("plugins.download.style.dashboard-nvim"),
   -- require("plugins.download.style.barbar"),
   -- require{"plugins.download.style.alpha-nvim",
   -- require("plugins.download.style.theme.material"),
