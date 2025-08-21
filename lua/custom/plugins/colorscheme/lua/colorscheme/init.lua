@@ -58,7 +58,7 @@ local function get_groups()
     -- 符号列
     SignColumn = { bg = "#0D0B0B" },
     -- 光标行
-    CursorLine = { bg = "#202329" },
+    CursorLine = { bg = "#0D0B0B" },
     CursorLineNr = { fg = colors.black10 },
     ColorColumn = { bg = colors.black2 },
     Visual = { bg = "#24272F", reverse = false },
@@ -68,13 +68,13 @@ local function get_groups()
     -- 非当前标签
     TabLine = { link = "TabLineFill" },
     -- 当前标签选中
-    TabLineSel = { fg = "#36BBAC", bg = "#0D0B0B", bold = true },
+    TabLineSel = { fg = "#36BBAC", bg = "#191919", bold = true },
     WarningMsg = { fg = "#F2B33F" },
     Error = { fg = "#C54659" },
     ErrorMsg = { fg = "#0D0B0B", bg = "#C54659", bold = true },
     MatchParen = { reverse = true },
     -- Conceal = { fg = colors.blue },
-    Keyword = { fg = "#8F5FDE", bold = true },
+    Keyword = { fg = "#c07c7c", bold = true },
 
     ["@variable"] = { fg = "#7C9DC0" },
     ["@variable.parameter"] = { fg = "#7C9DC0" },
@@ -87,8 +87,8 @@ local function get_groups()
     ["@property"] = {},
     ["@lsp.type.property"] = { link = "@property" },
     ["@keyword"] = { link = "Keyword" },
-    ["@keyword.function"] = { fg = "#BC93F9", bold = true },
-    ["@keyword.return"] = { fg = "#C54659", bold = true },
+    ["@keyword.function"] = { fg = "#c07c7c", bold = true },
+    ["@keyword.return"] = { fg = "#c07c7c", bold = true },
     -- ["@keyword.conditional"] = { bg = "#191C20", fg = "#8A7B7A", bold = true },
     -- ["@keyword.repeat"] = { bg = "#191C20", fg = "#8A8A9A", bold = true },
     -- ["@keyword.debug"] = { link = "Debug" },
@@ -99,8 +99,8 @@ local function get_groups()
     -- ["@keyword.operator"] = { link = "GruvboxRed" },
     -- ["@keyword.storage"] = { link = "StorageClass" },
 
-    Function = { fg = "#C54659", bold = true },
-    String = { fg = "#F2B33F" },
+    Function = { fg = "#87c07c", bold = true },
+    String = { fg = "#c0c07c" },
     Number = { bg = "#0D0B0B", fg = "#C54659" },
     Operator = { fg = "#969aa3" },
     Delimiter = { fg = "#969aa3" },
@@ -109,7 +109,7 @@ local function get_groups()
     Type = { fg = "#59B38C", bold = true },
     ["@function"] = { link = "Function" },
     ["@function.call"] = { link = "Function" },
-    -- ["@function.builtin"] = { link = "Special" },
+    ["@function.builtin"] = { link = "Function" },
     -- ["@function.macro"] = { link = "Macro" },
     -- ["@function.method"] = { link = "Function" },
     ["@string"] = { link = "String" },

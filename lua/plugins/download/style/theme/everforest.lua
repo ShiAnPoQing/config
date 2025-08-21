@@ -9,7 +9,7 @@ return {
     -- directly inside the plugin declaration.
     -- vim.opt.background = "light"
     vim.g.everforest_enable_italic = true
-    vim.g.everforest_background = "soft"
+    -- vim.g.everforest_background = "soft"
     vim.cmd.colorscheme("everforest")
   end,
 }

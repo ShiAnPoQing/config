@@ -1,6 +1,7 @@
 return {
   dir = vim.fn.stdpath("config") .. "/lua/custom/plugins/colorscheme",
   priority = 1000,
+  lazy = false,
   name = "colorscheme",
   config = function(opt)
     require("colorscheme").setup()

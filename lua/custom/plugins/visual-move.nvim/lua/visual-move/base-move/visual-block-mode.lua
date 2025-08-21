@@ -157,7 +157,7 @@ function Line:set_lines(start_row, start_col, end_row, end_col, cursor_pos)
   select(cursor_pos, start_col)
 end
 
---- @param dir "left"|"right"
+--- @param dir "left"|"right"|"up"|"down"
 function M.visual_block_mode_move(dir)
   local cursor_pos = vim.api.nvim_win_get_cursor(0)
   vim.api.nvim_exec2([[execute "normal! \<C-g>y"]], {})

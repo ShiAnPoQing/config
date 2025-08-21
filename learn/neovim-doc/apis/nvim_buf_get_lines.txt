@@ -1,0 +1,29 @@
+                                                        *nvim_buf_get_lines()*
+nvim_buf_get_lines({buffer}, {start}, {end}, {strict_indexing})
+    从缓冲区获取行范围。
+
+    0 索引，结束排他
+
+    负索引被解释为 length+1+index：-1 指的是结束后的索引。
+    因此，要获取最后一个元素，请使用 start=-2 和 end=-1。
+
+    越界索引被限制在最近的有效值，除非设置了 `strict_indexing`。
+
+    参数：~
+      • {buffer}           缓冲区 id，或当前缓冲区为 0
+      • {start}            第一行索引
+      • {end}              最后一行索引，排除
+      • {strict_indexing}  越界是否应为错误。
+
+    返回：~
+        行数组，或未加载缓冲区的空数组。
+
+    另请参见：~
+      • |nvim_buf_get_text()|
+
+    >lua
+        local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false) 
+        vim.print(lines)
+<
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

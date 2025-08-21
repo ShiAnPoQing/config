@@ -64,6 +64,7 @@ return {
       highlight_groups = {
         -- Comment = { fg = "foam" },
         -- VertSplit = { fg = "muted", bg = "muted" },
+        Normal = { bg = "none" },
       },
 
       before_highlight = function(group, highlight, palette)
@@ -79,9 +80,9 @@ return {
       end,
     })
 
-    -- vim.cmd("colorscheme rose-pine")
+    vim.cmd("colorscheme rose-pine")
     -- vim.cmd("colorscheme rose-pine-main")
     -- vim.cmd("colorscheme rose-pine-moon")
-    vim.cmd("colorscheme rose-pine-dawn")
+    -- vim.cmd("colorscheme rose-pine-dawn")
   end,
 }

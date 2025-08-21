@@ -21,28 +21,40 @@ local function space_j_Omode()
   local count = vim.v.count1
   vim.api.nvim_exec2(string.format([[exec "normal! v%d\<Down>g_"]], count), {})
 end
+
+--- @param key "h" | "j" | "k" | "l"
+local function large_move(key)
+  vim.cmd("normal! " .. vim.v.count1 * 3 .. key)
+end
+
 return {
   ["H"] = {
-    "3h",
+    function()
+      large_move("h")
+    end,
     { "x", "n" },
     { desc = "3 Char Left move" },
   },
   ["J"] = {
-    "3j",
+    function()
+      large_move("j")
+    end,
     { "x", "n" },
     { desc = "3 Char Down move" },
   },
   ["K"] = {
-    "3k",
+    function()
+      large_move("k")
+    end,
     { "x", "n" },
     { desc = "3 Char Up move" },
   },
   ["L"] = {
-    {
-      "3l",
-      { "x", "n" },
-      { desc = "Right move" },
-    },
+    function()
+      large_move("l")
+    end,
+    { "x", "n" },
+    { desc = "Right move" },
   },
 
   -- 支持 count 可以向上
