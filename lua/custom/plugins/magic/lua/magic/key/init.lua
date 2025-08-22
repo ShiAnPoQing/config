@@ -2,7 +2,7 @@ vim.api.nvim_set_hl(0, "CustomMagicVisual", {
   fg = "#cdcdcd",
   bg = "#333738",
 })
-local visual_hl = vim.api.nvim_get_hl(0, { name = "Visual" })
+local visual_hl = vim.api.nvim_get_hl(0, { name = "CustomVisual" })
 vim.api.nvim_set_hl(0, "CustomMagicNextKey", {
   fg = "#ff007c",
 })
