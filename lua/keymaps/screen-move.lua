@@ -83,18 +83,33 @@ return {
   -- normal mode cursor move: screen left
   -- 支持 count
   ["ah"] = {
-    { a_h, "n" },
+    {
+      function()
+        require("builtin.screen-move").move("left")
+      end,
+      "n",
+    },
     { "g0", { "x", "o" } },
   },
   -- normal mode cursor move: screen right
   -- 支持 count
   ["al"] = {
-    { a_l, "n" },
+    {
+      function()
+        require("builtin.screen-move").move("right")
+      end,
+      "n",
+    },
     { "g$", { "x", "o" } },
   },
   -- normal mode cursor move: screen bottom
   ["aj"] = {
-    { a_j, "n" },
+    {
+      function()
+        require("builtin.screen-move").move("bottom")
+      end,
+      "n",
+    },
     { "L", { "x", "o" } },
   },
   ["0aj"] = {
@@ -107,13 +122,18 @@ return {
   },
   -- normal mode cursor move: screen top
   ["ak"] = {
-    { a_k, "n" },
     {
       function()
-        require("custom.plugins.move.move-viewport-top").move_viewport_top()
+        require("builtin.screen-move").move("top")
       end,
       "n",
     },
+    -- {
+    --   function()
+    --     require("custom.plugins.move.move-viewport-top").move_viewport_top()
+    --   end,
+    --   "n",
+    -- },
     { "H", { "x", "o" } },
   },
   ["0ak"] = {

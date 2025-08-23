@@ -88,7 +88,7 @@ function Direction:move(dir)
 end
 
 function Select.prepare()
-  vim.cmd("normal \\<C-g>y")
+  vim.api.nvim_exec2([[execute "normal! \<C-g>y"]], {})
 end
 
 function Select:reselect()
@@ -103,7 +103,7 @@ function Select:reselect()
 end
 
 function Visual:prepare()
-  vim.cmd("normal y")
+  vim.cmd("normal! y")
 end
 
 function Visual:reselect()

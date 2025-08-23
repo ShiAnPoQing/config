@@ -25,16 +25,4 @@ return {
     end,
     "s",
   },
-  ["<C-h>"] = {
-    function()
-      select_move.select_move("left")
-    end,
-    "s",
-  },
-  ["<C-l>"] = {
-    function()
-      select_move.select_move("right")
-    end,
-    "s",
-  },
 }

@@ -10,6 +10,20 @@ return {
       mode = { "v" },
     },
     {
+      "<C-l>",
+      function()
+        require("visual-move").visual_move("right")
+      end,
+      mode = { "s" },
+    },
+    {
+      "<C-h>",
+      function()
+        require("visual-move").visual_move("left")
+      end,
+      mode = { "s" },
+    },
+    {
       "<M-h>",
       function()
         require("visual-move").visual_move("left")

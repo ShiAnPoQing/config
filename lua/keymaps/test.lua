@@ -49,7 +49,9 @@ return {
   --   "n",
   -- },
   [";;z"] = {
-    function() end,
+    function()
+      require("builtin.sreen-move").move("left")
+    end,
     "n",
   },
   -- ["<C-j>"] = { "+", "n" },

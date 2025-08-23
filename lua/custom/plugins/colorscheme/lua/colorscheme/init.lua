@@ -171,6 +171,7 @@ local function get_groups()
       Label = { fg = colors.hue50, bold = true },
       Special = { fg = colors.hue35 },
       Title = { fg = colors.hue45 },
+      Folded = { link = "Visual" },
 
       -- Underlined = { fg = colors.blue, underline = config.underline }, -- 突出的文本，HTML链接
 
@@ -286,6 +287,7 @@ local function get_groups()
       ["@label.vimdoc"] = { link = "Label" },
 
       DiagnosticUnderlineWarn = { underline = true, sp = colors.orange0 },
+      -- DiagnosticUnnecessary = { underdotted = true },
       BlinkCmpLabelDeprecated = { strikethrough = true },
       BlinkCmpKind = { fg = colors.hue52 },
       -- BlinkCmpLabel = { bg = "" },

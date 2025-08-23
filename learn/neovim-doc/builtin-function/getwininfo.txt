@@ -1,0 +1,32 @@
+getwininfo([{winid}])                                             *getwininfo()*
+		返回关于窗口的信息作为包含字典的 |List|。
+
+		如果给出了 {winid}，则返回具有该 ID 的窗口的信息，作为包含一个
+		项目的 |List|。如果窗口不存在，则结果为空列表。
+
+		没有 {winid} 时，返回所有标签页中所有窗口的信息。
+
+		每个 List 项目都是一个包含以下条目的 |Dictionary|：
+			botline		最后完整显示的缓冲区行
+			bufnr		窗口中缓冲区的编号
+			height		窗口高度（不包括工具栏）
+			leftcol		显示的第一列；仅在 'wrap' 关闭时使用
+			loclist		如果显示位置列表则为 1
+			quickfix	如果是快速修复或位置列表窗口则为 1
+			terminal	如果是终端窗口则为 1
+			tabnr		标签页编号
+			topline		显示的第一行缓冲区行
+			variables	对包含窗口局部变量的字典的引用
+			width		窗口宽度
+			winbar		如果窗口有工具栏则为 1，否则为 0
+			wincol		窗口最左侧的屏幕列；来自 |win_screenpos()| 的
+					"col"
+			textoff		文本前任何 'foldcolumn'、'signcolumn' 和行号
+					占用的列数
+			winid		|window-ID|
+			winnr		窗口编号
+			winrow		窗口最顶部的屏幕行；来自 |win_screenpos()| 的
+					"row"
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
