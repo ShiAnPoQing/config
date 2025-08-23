@@ -11,38 +11,34 @@ local function get_col(position, line, wininfo, blank)
   local col
   local cursor_col
 
-  if position == 1 then
-    local l = vim.api.nvim_buf_get_lines(0, line - 1, line, false)[1] or ""
+  local l = vim.api.nvim_buf_get_lines(0, line - 1, line, false)[1] or ""
 
-    if #l == 0 then
-      col = 0 - leftcol + 1
-      cursor_col = 0
+  if #l == 0 then
+    col = 0 - leftcol
+    cursor_col = 0
+    return col, cursor_col
+  end
+
+  if position == 1 then
+    if not blank then
+      col = l:find("%S") - 1 - leftcol
     else
-      if not blank then
-        col = l:find("%S") - 1 - leftcol
-      else
-        col = 0 - leftcol
-      end
-      cursor_col = l:find("%S") - 1
+      col = 0 - leftcol
     end
+    cursor_col = l:find("%S") - 1
   elseif position == 2 then
-    local l = vim.api.nvim_buf_get_lines(0, line - 1, line, false)[1] or ""
     if not blank then
       l = l:gsub("%s*$", "")
     end
 
     local displaywidth = vim.fn.strdisplaywidth(l)
-    if #l == 0 then
-      col = 0 - leftcol
-      cursor_col = 0
+
+    if displaywidth > rightcol then
+      col = width - 1
     else
-      if displaywidth > rightcol then
-        col = width - 1
-      else
-        col = displaywidth - leftcol - 1
-      end
-      cursor_col = #l - 1
+      col = displaywidth - leftcol - 1
     end
+    cursor_col = #l - 1
   end
 
   return col, cursor_col
@@ -80,7 +76,11 @@ function M.magic_line_start_end(opts)
       two_key = {
         line = line - 1,
         virt_col = col,
-        hidden_second_key = true,
+        hidden_second_key = function()
+          if wininfo.leftcol > 0 then
+            return true
+          end
+        end,
       },
     })
   end

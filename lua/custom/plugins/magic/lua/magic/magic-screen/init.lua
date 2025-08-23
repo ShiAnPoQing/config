@@ -31,6 +31,10 @@ function M.magic_screen(opts)
 
   for line = topline, botline do
     local col = get_virt_col(opts, wininfo)
+    local _col = col
+    if opts.position == "right" then
+      _col = col - 1
+    end
     key.register({
       callback = function()
         opts.callback({
@@ -43,7 +47,7 @@ function M.magic_screen(opts)
       },
       two_key = {
         line = line - 1,
-        virt_col = col,
+        virt_col = _col,
       },
     })
   end

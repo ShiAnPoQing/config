@@ -1,309 +1,371 @@
 local M = {}
 
-local function get_colors()
+local function get_colors(bg)
   local color_groups = {
     dark = {
-      red0 = "#8f3d3d",
-      red1 = "#8f443d",
-      red2 = "#8f4b3d",
-      red3 = "#8f523d",
-      red4 = "#8f583d",
-      red5 = "#8f5f3d",
+      hue1 = "#c0827c", -- 5
+      hue2 = "#c0877c", -- 10
+      hue3 = "#c08d7c", -- 15
+      hue4 = "#c0937c", -- 20
 
-      orange0 = "#8f663d",
-      orange1 = "#8f6d3d",
-      orange2 = "#8f743d",
-      orange3 = "#8f7a3d",
-      orange4 = "#8f813d",
-      orange5 = "#8f883d",
+      hue5 = "#c0987c", -- 25
+      hue6 = "#c09e7c", -- 30
+      hue7 = "#c0a47c", -- 35
 
-      yellow0 = "#8f8f3d",
-      yellow1 = "#888f3d",
-      yellow2 = "#818f3d",
-      yellow3 = "#7a8f3d",
-      yellow4 = "#748f3d",
-      yellow5 = "#6d8f3d",
+      hue8 = "#c0a97c", -- 40
+      hue9 = "#c0af7c", -- 45
+      hue10 = "#c0b57c", -- 50
 
-      yellow_green0 = "#668f3d",
-      yellow_green1 = "#5f8f3d",
-      yellow_green2 = "#588f3d",
-      yellow_green3 = "#528f3d",
-      yellow_green4 = "#4b8f3d",
-      yellow_green5 = "#448f3d",
+      hue11 = "#c0ba7c", -- 55
+      hue12 = "#c0c07c", -- 60
+      hue13 = "#bac07c", -- 65
 
-      green0 = "#3d8f3d",
-      green1 = "#3d8f44",
-      green2 = "#3d8f4b",
-      green3 = "#3d8f52",
-      green4 = "#3d8f58",
-      green5 = "#3d8f5f",
+      hue14 = "#b5c07c", -- 70
+      hue15 = "#afc07c", -- 75
+      hue16 = "#a9c07c", -- 80
 
-      turquoise0 = "#3d8f66",
-      turquoise1 = "#3d8f6d",
-      turquoise2 = "#3d8f74",
-      turquoise3 = "#3d8f7a",
-      turquoise4 = "#3d8f81",
-      turquoise5 = "#3d8f88",
+      hue17 = "#a4c07c", -- 85
+      hue18 = "#9ec07c", -- 90
+      hue19 = "#98c07c", -- 95
 
-      cyan_blue0 = "#3d8f8f",
-      cyan_blue1 = "#3d888f",
-      cyan_blue2 = "#3d818f",
-      cyan_blue3 = "#3d7a8f",
-      cyan_blue4 = "#3d748f",
-      cyan_blue5 = "#3d6d8f",
+      hue20 = "#93c07c", -- 100
+      hue21 = "#8dc07c", -- 105
+      hue22 = "#87c07c", -- 110
 
-      indigo0 = "#3d668f",
-      indigo1 = "#3d5f8f",
-      indigo2 = "#3d588f",
-      indigo3 = "#3d528f",
-      indigo4 = "#3d4b8f",
-      indigo5 = "#3d448f",
+      hue23 = "#82c07c", -- 115
+      hue24 = "#7cc07c", -- 120
+      hue25 = "#7cc082", -- 125
 
-      blue0 = "#3d3d8f",
-      blue1 = "#443d8f",
-      blue2 = "#4b3d8f",
-      blue3 = "#523d8f",
-      blue4 = "#583d8f",
-      blue5 = "#5f3d8f",
+      hue26 = "#7cc087", -- 130
+      hue27 = "#7cc08d", -- 135
+      hue28 = "#7cc093", -- 140
 
-      purple0 = "#663d8f",
-      purple1 = "#6d3d8f",
-      purple2 = "#743d8f",
-      purple3 = "#7a3d8f",
-      purple4 = "#813d8f",
-      purple5 = "#883d8f",
+      hue29 = "#7cc098", -- 145
+      hue30 = "#7cc09e", -- 150
+      hue31 = "#7cc0a4", -- 155
 
-      magenta0 = "#8f3d8f",
-      magenta1 = "#8f3d88",
-      magenta2 = "#8f3d81",
-      magenta3 = "#8f3d7a",
-      magenta4 = "#8f3d74",
-      magenta5 = "#8f3d6d",
+      hue32 = "#7cc0a9", -- 160
+      hue33 = "#7cc0af", -- 165
+      hue34 = "#7cc0b5", -- 170
 
-      peach0 = "#8f3d66",
-      peach1 = "#8f3d5f",
-      peach2 = "#8f3d58",
-      peach3 = "#8f3d52",
-      peach4 = "#8f3d4b",
-      peach5 = "#8f3d44",
+      hue35 = "#7cc0ba", -- 175
+      hue36 = "#7cc0c0", -- 180
+      hue37 = "#7cbac0", -- 185
 
-      bg1 = "#262A36",
-      bg2 = "#191919",
-      fg1 = "#969aa3",
+      hue38 = "#7cb5c0", -- 190
+      hue39 = "#7cafc0", -- 195
+      hue40 = "#7ca9c0", -- 200
+
+      hue41 = "#7ca4c0", -- 205
+      hue42 = "#7c9ec0", -- 210
+      hue43 = "#7c98c0", -- 215
+
+      hue44 = "#7c93c0", -- 220
+      hue45 = "#7c8dc0", -- 225
+      hue46 = "#7c87c0", -- 230
+
+      hue47 = "#7c82c0", -- 235
+      hue48 = "#7c7cc0", -- 240
+      hue49 = "#827cc0", -- 245
+
+      hue50 = "#877cc0", -- 250
+      hue51 = "#8d7cc0", -- 255
+      hue52 = "#937cc0", -- 260
+
+      hue53 = "#987cc0", -- 265
+      hue54 = "#9e7cc0", -- 270
+      hue55 = "#a47cc0", -- 275
+
+      hue56 = "#a97cc0", -- 280
+      hue57 = "#af7cc0", -- 285
+      hue58 = "#b57cc0", -- 290
+
+      hue59 = "#ba7cc0", -- 295
+      hue60 = "#c07cc0", -- 300
+      hue61 = "#c07cba", -- 305
+
+      hue62 = "#c07cb5", -- 310
+      hue63 = "#c07caf", -- 315
+      hue64 = "#c07ca9", -- 320
+
+      hue65 = "#c07ca4", -- 325
+      hue66 = "#c07c9e", -- 330
+      hue67 = "#c07c98", -- 335
+
+      hue68 = "#c07c93", -- 340
+      hue69 = "#c07c8d", -- 345
+      hue70 = "#c07c87", -- 350
+
+      hue71 = "#c07c82", -- 355
+      hue72 = "#c07c7c", -- 360
+
+      bg1 = "#080A13",
+      bg2 = "#0A0B15",
+      bg3 = "#131520",
+      bg4 = "#1D202B",
+      bg5 = "#262A36",
+      bg6 = "#313644",
+      bg7 = "#3D414F",
+      bg8 = "#484C5A",
+      bg9 = "#545868",
+      bg10 = "#5F6372",
+      bg11 = "#6B7081",
+      bg12 = "#777C8F",
+      bg13 = "#82879A",
+      bg14 = "#8E93A5",
+      bg15 = "#999FB3",
+      bg16 = "#A5AAC0",
+      bg17 = "#B0B6CC",
+      bg18 = "#BCC2D9",
+      bg19 = "#C7CEE5",
+      bg20 = "#D3D9F2",
+      bg21 = "#DEE5FF",
+      bg22 = "#E3E9FF",
     },
-    light = {
-      black1 = "#c0caf5",
-    },
+    light = {},
   }
-  local bg = vim.o.background
   return color_groups[bg]
 end
 
 local function get_groups()
-  local colors = get_colors()
+  local bg = vim.o.background
+  local colors = get_colors(bg)
   local groups = {
-    CustomVisual = { bg = "#262626", reverse = false },
-    Normal = { fg = colors.fg1, bg = colors.bg1 }, -- 普通文本
-    NormalFloat = { link = "Normal" }, --- 浮动窗口的普通文本
-    NormalNC = { link = "Normal" }, -- 非当前窗口的普通文本
-    MoreMsg = { link = "Normal" }, -- More Message
-    ModeMsg = { link = "Normal" }, -- Mode Message
-    LineNr = { fg = "#404040", bg = colors.bg1 }, -- 行号
-    Search = { reverse = true }, -- 搜索结果
-    IncSearch = { link = "Search" },
-    CurSearch = { link = "IncSearch" },
-    StatusLine = { bg = colors.bg1, fg = "#404040", reverse = true }, -- 状态栏
-    SignColumn = { bg = colors.bg1 }, -- 符号列
-    CursorLine = { bg = colors.bg2 }, -- 光标行
-    CursorLineNr = { fg = colors.black10 },
-    ColorColumn = { bg = colors.black2 },
-    Visual = { link = "CustomVisual" },
-    VisualNOS = { link = "Visual" },
-    TabLineFill = { bg = "#0C0E11" }, -- 标签栏
-    TabLine = { link = "TabLineFill" }, -- 非当前标签
-    TabLineSel = { fg = "#36BBAC", bg = colors.bg2, bold = true }, -- 当前标签选中
-    WarningMsg = { fg = "#F2B33F" },
-    Error = { fg = "#C54659" },
-    ErrorMsg = { fg = colors.bg1, bg = "#C54659", bold = true },
-    MatchParen = { reverse = true },
-    -- Conceal = { fg = colors.blue },
-    Keyword = { fg = "#937cc0", bold = true },
-    Function = { fg = "#7c8dc0", bold = true },
-    String = { fg = "#a9c07c" },
-    Number = { bg = colors.bg1, fg = "#bf4055" },
-    Operator = { fg = colors.fg1 },
-    Delimiter = { fg = colors.fg1 },
-    Comment = { fg = "#4b4d52" },
-    Boolean = { fg = "#bf5540", bold = true },
-    Type = { fg = colors.turquoise5, bold = true },
-    Constant = { fg = colors.cyan_blue0, bold = true },
-    Directory = { fg = "#6a40bf", bold = true },
+    dark = {
+      CustomVisual = { bg = colors.bg7, reverse = false },
+      Normal = { fg = colors.bg15, bg = colors.bg5 }, -- 普通文本
+      NormalFloat = { fg = colors.bg15, bg = colors.bg3 }, --- 浮动窗口的普通文本
+      NormalNC = { link = "Normal" }, -- 非当前窗口的普通文本
+      MoreMsg = { link = "Normal" }, -- More Message
+      ModeMsg = { link = "Normal" }, -- Mode Message
+      LineNr = { fg = colors.bg9, bg = colors.bg5, bold = false }, -- 行号
+      Search = { reverse = true }, -- 搜索结果
+      IncSearch = { link = "Search" },
+      CurSearch = { link = "IncSearch" },
+      StatusLine = { bg = colors.bg5, fg = colors.bg15, reverse = true }, -- 状态栏
+      SignColumn = { bg = colors.bg5 }, -- 符号列
+      CursorLine = { bg = colors.bg6 }, -- 光标行
+      CursorLineNr = { fg = colors.bg15, bold = true },
+      ColorColumn = { bg = colors.bg6 },
+      Visual = { link = "CustomVisual" },
+      VisualNOS = { link = "Visual" },
+      TabLineFill = { bg = colors.bg5 }, -- 标签栏
+      TabLine = { link = "TabLineFill" }, -- 非当前标签
+      TabLineSel = { fg = colors.hue44, bg = colors.bg6, bold = true }, -- 当前标签选中
+      WarningMsg = { fg = colors.hue5 },
+      Error = { fg = colors.hue72 },
+      ErrorMsg = { fg = colors.bg5, bg = colors.hue72, bold = true },
+      MatchParen = { reverse = true },
+      -- Conceal = { fg =  },
+      Keyword = { fg = colors.hue52, bold = true },
+      Function = { fg = colors.hue45, bold = true },
+      String = { fg = colors.hue18 },
+      Number = { bg = colors.bg5, fg = colors.hue1 },
+      Operator = { fg = colors.hue40 },
+      Delimiter = { fg = colors.bg15 },
+      Comment = { fg = colors.bg9 },
+      Boolean = { fg = colors.hue72, bold = true },
+      Type = { fg = colors.hue36, bold = true },
+      Constant = { fg = colors.hue1, bold = true },
+      Directory = { fg = colors.hue45, bold = true },
+      Label = { fg = colors.hue50, bold = true },
+      Special = { fg = colors.hue35 },
+      Title = { fg = colors.hue45 },
 
-    -- Underlined = { fg = colors.blue, underline = config.underline }, -- 突出的文本，HTML链接
+      -- Underlined = { fg = colors.blue, underline = config.underline }, -- 突出的文本，HTML链接
 
-    ["@variable"] = { fg = colors.fg1 },
-    ["@variable.parameter"] = { fg = "#7C9DC0" },
-    ["@variable.builtin"] = { fg = colors.turquoise1, bold = true },
-    ["@variable.member"] = { fg = "#937cc0" },
-    ["@module.builtin"] = { link = "@variable.builtin" },
-    ["@property"] = {},
-    ["@keyword"] = { link = "Keyword" },
-    ["@keyword.function"] = { fg = "#937cc0", bold = true },
-    ["@keyword.return"] = { fg = "#c07c7c", bold = true },
-    -- ["@keyword.conditional"] = { bg = "#191C20", fg = "#8A7B7A", bold = true },
-    -- ["@keyword.repeat"] = { bg = "#191C20", fg = "#8A8A9A", bold = true },
-    -- ["@keyword.debug"] = { link = "Debug" },
-    -- ["@keyword.directive"] = { link = "PreProc" },
-    -- ["@keyword.directive.define"] = { link = "Define" },
-    -- ["@keyword.exception"] = { link = "Exception" },
-    -- ["@keyword.import"] = { link = "Include" },
-    -- ["@keyword.operator"] = { link = "Gruvboxpeach4" },
-    -- ["@keyword.storage"] = { link = "StorageClass" },
-    ["@function"] = { link = "Function" },
-    ["@function.call"] = { link = "Function" },
-    ["@function.builtin"] = { link = "Function" },
-    -- ["@function.macro"] = { link = "Macro" },
-    -- ["@function.method"] = { link = "Function" },
-    ["@operator"] = { link = "Operator" },
-    ["@punctuation.delimiter"] = { link = "Delimiter" },
-    ["@punctuation.bracket"] = { link = "Delimiter" },
-    ["@punctuation.special"] = { link = "Delimiter" },
-    ["@constructor"] = { link = "Delimiter" },
-    ["@comment"] = { fg = "#4b4d52" },
-    ["@type"] = { link = "Type" },
-    ["@type.builtin"] = { link = "Type" },
-    ["@number"] = { link = "Number" },
-    ["@number.float"] = { link = "Float" },
-    ["@boolean"] = { link = "Boolean" },
-    ["@constant"] = { link = "Constant" },
-    ["@constant.builtin"] = { link = "Constant" },
-    ["@tag"] = { fg = colors.indigo5, bold = true },
-    ["@tag.attribute"] = { fg = "#7c7cc0" },
-    ["@tag.delimiter"] = { link = "Delimiter" },
-    ["@tag.builtin"] = { fg = colors.turquoise3, bold = false },
+      ["@variable"] = { fg = colors.bg15 },
+      ["@variable.parameter"] = { fg = colors.hue8, bold = false },
+      ["@variable.builtin"] = { fg = colors.hue72, bold = true },
+      -- ["@variable.member"] = { fg = "" },
+      ["@module.builtin"] = { link = "@variable.builtin" },
+      ["@property"] = { fg = colors.hue48 },
+      ["@keyword"] = { link = "Keyword" },
+      ["@keyword.function"] = { fg = colors.hue52, bold = true },
+      ["@keyword.return"] = { fg = colors.hue52, bold = true },
+      -- ["@keyword.conditional"] = { bg = "", fg = "", bold = true },
+      -- ["@keyword.repeat"] = { bg = "", fg = "", bold = true },
+      -- ["@keyword.debug"] = { link = "Debug" },
+      -- ["@keyword.directive"] = { link = "PreProc" },
+      -- ["@keyword.directive.define"] = { link = "Define" },
+      -- ["@keyword.exception"] = { link = "Exception" },
+      -- ["@keyword.import"] = { link = "Include" },
+      -- ["@keyword.operator"] = { link = "Gruvboxpeach4" },
+      -- ["@keyword.storage"] = { link = "StorageClass" },
+      ["@function"] = { link = "Function" },
+      ["@function.call"] = { link = "Function" },
+      ["@function.builtin"] = { link = "Function" },
+      -- ["@function.macro"] = { link = "Macro" },
+      -- ["@function.method"] = { link = "Function" },
+      ["@operator"] = { link = "Operator" },
+      ["@punctuation.delimiter"] = { link = "Delimiter" },
+      ["@punctuation.bracket"] = { link = "Delimiter" },
+      ["@punctuation.special"] = { link = "Delimiter" },
+      ["@constructor"] = { link = "Delimiter" },
+      ["@comment"] = { link = "Comment" },
+      ["@type"] = { link = "Type" },
+      ["@type.builtin"] = { link = "Type" },
+      ["@number"] = { link = "Number" },
+      ["@number.float"] = { link = "Float" },
+      ["@boolean"] = { link = "Boolean" },
+      ["@constant"] = { link = "Constant" },
+      ["@constant.builtin"] = { link = "Constant" },
+      ["@tag"] = { fg = colors.hue72, bold = true },
+      ["@tag.attribute"] = { fg = colors.hue48 },
+      ["@tag.delimiter"] = { link = "Delimiter" },
+      ["@tag.builtin"] = { fg = colors.hue40, bold = false },
 
-    ["@lsp.type.variable"] = {},
-    ["@lsp.type.property"] = { link = "@property" },
-    ["@lsp.type.class"] = { link = "@type" },
-    -- ["@lsp.type.comment"] = { link = "@comment" },
-    -- ["@lsp.type.decorator"] = { link = "@macro" },
-    -- ["@lsp.type.enum"] = { link = "@type" },
-    -- ["@lsp.type.enumMember"] = { link = "@constant" },
-    -- ["@lsp.type.function"] = { link = "@function" },
-    -- ["@lsp.type.interface"] = { link = "@constructor" },
-    -- ["@lsp.type.macro"] = { link = "@macro" },
-    -- ["@lsp.type.method"] = { link = "@method" },
-    -- ["@lsp.type.modifier.java"] = { link = "@keyword.type.java" },
-    -- ["@lsp.type.namespace"] = { link = "@namespace" },
-    -- ["@lsp.type.parameter"] = { link = "@parameter" },
-    -- ["@lsp.type.struct"] = { link = "@type" },
-    -- ["@lsp.type.type"] = { link = "@type" },
-    -- ["@lsp.type.typeParameter"] = { link = "@type.definition" },
-    -- ["@text"] = { link = "GruvboxFg1" },
-    -- ["@text.strong"] = { bold = config.bold },
-    -- ["@text.emphasis"] = { italic = config.italic.emphasis },
-    -- ["@text.underline"] = { underline = config.underline },
-    -- ["@text.strike"] = { strikethrough = config.strikethrough },
-    -- ["@text.title"] = { link = "Title" },
-    -- ["@text.literal"] = { link = "String" },
-    -- ["@text.uri"] = { link = "Underlined" },
-    -- ["@text.math"] = { link = "Special" },
-    -- ["@text.environment"] = { link = "Macro" },
-    -- ["@text.environment.name"] = { link = "Type" },
-    -- ["@text.reference"] = { link = "Constant" },
-    -- ["@text.todo"] = { link = "Todo" },
-    -- ["@text.todo.checked"] = { link = "GruvboxGreen" },
-    -- ["@text.todo.unchecked"] = { link = "GruvboxGray" },
-    -- ["@text.note"] = { link = "SpecialComment" },
-    -- ["@text.note.comment"] = { fg = colors.purple, bold = config.bold },
-    -- ["@text.warning"] = { link = "WarningMsg" },
-    -- ["@text.danger"] = { link = "ErrorMsg" },
-    -- ["@text.danger.comment"] = { fg = colors.fg0, bg = colors.red, bold = config.bold },
-    -- ["@text.diff.add"] = { link = "diffAdded" },
-    -- ["@text.diff.delete"] = { link = "diffRemoved" },
+      ["@lsp.type.variable"] = {},
+      ["@lsp.type.property"] = { link = "@property" },
+      ["@lsp.type.class"] = { link = "@type" },
+      -- ["@lsp.type.comment"] = { link = "@comment" },
+      -- ["@lsp.type.decorator"] = { link = "@macro" },
+      -- ["@lsp.type.enum"] = { link = "@type" },
+      -- ["@lsp.type.enumMember"] = { link = "@constant" },
+      -- ["@lsp.type.function"] = { link = "@function" },
+      -- ["@lsp.type.interface"] = { link = "@constructor" },
+      -- ["@lsp.type.macro"] = { link = "@macro" },
+      -- ["@lsp.type.method"] = { link = "@method" },
+      -- ["@lsp.type.modifier.java"] = { link = "@keyword.type.java" },
+      -- ["@lsp.type.namespace"] = { link = "@namespace" },
+      -- ["@lsp.type.parameter"] = { link = "@parameter" },
+      -- ["@lsp.type.struct"] = { link = "@type" },
+      -- ["@lsp.type.type"] = { link = "@type" },
+      -- ["@lsp.type.typeParameter"] = { link = "@type.definition" },
+      -- ["@text"] = { link = "GruvboxFg1" },
+      -- ["@text.strong"] = { bold = config.bold },
+      -- ["@text.emphasis"] = { italic = config.italic.emphasis },
+      -- ["@text.underline"] = { underline = config.underline },
+      -- ["@text.strike"] = { strikethrough = config.strikethrough },
+      -- ["@text.title"] = { link = "Title" },
+      -- ["@text.literal"] = { link = "String" },
+      -- ["@text.uri"] = { link = "Underlined" },
+      -- ["@text.math"] = { link = "Special" },
+      -- ["@text.environment"] = { link = "Macro" },
+      -- ["@text.environment.name"] = { link = "Type" },
+      -- ["@text.reference"] = { link = "Constant" },
+      -- ["@text.todo"] = { link = "Todo" },
+      -- ["@text.todo.checked"] = { link = "GruvboxGreen" },
+      -- ["@text.todo.unchecked"] = { link = "GruvboxGray" },
+      -- ["@text.note"] = { link = "SpecialComment" },
+      -- ["@text.note.comment"] = { fg = colors.purple, bold = config.bold },
+      -- ["@text.warning"] = { link = "WarningMsg" },
+      -- ["@text.danger"] = { link = "ErrorMsg" },
+      -- ["@text.danger.comment"] = { fg = colors.fg0, bg = colors.red, bold = config.bold },
+      -- ["@text.diff.add"] = { link = "diffAdded" },
+      -- ["@text.diff.delete"] = { link = "diffRemoved" },
 
-    ["@string"] = { link = "String" },
-    ["@string.escape"] = { fg = colors.peach4 },
-    -- ["@string.regex"] = { link = "String" },
-    -- ["@string.regexp"] = { link = "String" },
-    -- ["@string.special"] = { link = "SpecialChar" },
-    -- ["@string.special.path"] = { link = "Underlined" },
-    -- ["@string.special.symbol"] = { link = "Identifier" },
-    -- ["@string.special.url"] = { link = "Underlined" },
-    ["@none"] = { bg = "NONE", fg = "NONE" },
+      ["@string"] = { link = "String" },
+      ["@string.escape"] = { fg = colors.peach4 },
+      -- ["@string.regex"] = { link = "String" },
+      -- ["@string.regexp"] = { link = "String" },
+      -- ["@string.special"] = { link = "SpecialChar" },
+      -- ["@string.special.path"] = { link = "Underlined" },
+      -- ["@string.special.symbol"] = { link = "Identifier" },
+      -- ["@string.special.url"] = { link = "Underlined" },
+      ["@none"] = { bg = "NONE", fg = "NONE" },
 
-    DiagnosticUnderlineWarn = { underline = true, sp = colors.orange0 },
-    -- BlinkCmpLabelDeprecated = { bg = "black" },
-    BlinkCmpKind = { fg = colors.peach4 },
-    -- BlinkCmpLabel = { bg = "black" },
-    BlinkCmpLabelMatch = { fg = colors.turquoise5 },
-    BlinkCmpMenuSelection = { bg = "#262626" },
-    BlinkCmpMenu = { bg = colors.bg2 },
-    BlinkCmpSource = { fg = "#404040" },
-    -- BlinkCmpLabelDetail = { link = "GruvboxGray" },
-    -- BlinkCmpLabelDescription = { link = "GruvboxGray" },
-    BlinkCmpKindText = { fg = colors.yellow_green0 },
-    -- BlinkCmpKindVariable = { link = "GruvboxOrange" },
-    BlinkCmpKindMethod = { link = "BlinkCmpKindFunction" },
-    BlinkCmpKindFunction = { fg = colors.purple1 },
-    -- BlinkCmpKindConstructor = { link = "Gruvboxorange2" },
-    -- BlinkCmpKindUnit = { link = "GruvboxBlue" },
-    -- BlinkCmpKindField = { link = "GruvboxBlue" },
-    -- BlinkCmpKindClass = { link = "Gruvboxorange2" },
-    -- BlinkCmpKindInterface = { link = "Gruvboxorange2" },
-    -- BlinkCmpKindModule = { link = "GruvboxBlue" },
-    -- BlinkCmpKindProperty = { link = "GruvboxBlue" },
-    -- BlinkCmpKindValue = { link = "GruvboxOrange" },
-    -- BlinkCmpKindEnum = { link = "Gruvboxorange2" },
-    -- BlinkCmpKindOperator = { link = "Gruvboxorange2" },
-    -- BlinkCmpKindKeyword = { link = "Gruvboxblue4" },
-    -- BlinkCmpKindEvent = { link = "Gruvboxblue4" },
-    -- BlinkCmpKindReference = { link = "Gruvboxblue4" },
-    -- BlinkCmpKindColor = { link = "Gruvboxblue4" },
-    -- BlinkCmpKindSnippet = { link = "Gruvboxgreen4" },
-    -- BlinkCmpKindFile = { link = "GruvboxBlue" },
-    -- BlinkCmpKindFolder = { link = "GruvboxBlue" },
-    -- BlinkCmpKindEnumMember = { link = "GruvboxAqua" },
-    -- BlinkCmpKindConstant = { link = "GruvboxOrange" },
-    -- BlinkCmpKindStruct = { link = "Gruvboxorange2" },
-    -- BlinkCmpKindTypeParameter = { link = "Gruvboxorange2" },
-    -- BlinkCmpGhostText = { link = "GruvboxBg4" },
+      -- ["@markup"] = { link = "GruvboxFg1" },
+      -- ["@markup.strong"] = { bold = config.bold },
+      -- ["@markup.italic"] = { link = "@text.emphasis" },
+      -- ["@markup.underline"] = { underline = config.underline },
+      -- ["@markup.strikethrough"] = { strikethrough = config.strikethrough },
+      -- ["@markup.heading"] = { link = "Title" },
+      ["@markup.raw"] = { link = "String" },
+      -- ["@markup.math"] = { link = "Special" },
+      -- ["@markup.environment"] = { link = "Macro" },
+      -- ["@markup.environment.name"] = { link = "Type" },
+      ["@markup.link"] = { fg = colors.hue62 },
+      ["@markup.link.label"] = { link = "@markup.link" },
+      ["@markup.link.vimdoc"] = { link = "@markup.link" },
+      ["@markup.list"] = { link = "Delimiter" },
+      -- ["@markup.list.checked"] = { link = "GruvboxGreen" },
+      -- ["@markup.list.unchecked"] = { link = "GruvboxGray" },
 
-    NeoTreeDirectoryName = { link = "Directory" },
-    NeoTreeGitUntracked = { fg = colors.orange0, bold = true },
-    NeoTreeGitModified = { fg = colors.cyan_blue0, bold = true },
-    -- NeoTreeDotfile = { fg = colors.fg4 },
-    -- NeoTreeFadeText1 = { fg = colors.fg3 },
-    -- NeoTreeFadeText2 = { fg = colors.fg4 },
-    -- NeoTreeFileIcon = { fg = colors.blue },
-    -- NeoTreeFileName = { fg = colors.fg1 },
-    -- NeoTreeFileNameOpened = { fg = colors.fg1, bold = true },
-    -- NeoTreeFileStats = { fg = colors.fg3 },
-    -- NeoTreeFileStatsHeader = { fg = colors.fg2, italic = true },
-    -- NeoTreeFilterTerm = { link = "SpecialChar" },
-    -- NeoTreeHiddenByName = { link = "NeoTreeDotfile" },
-    -- NeoTreeIndentMarker = { fg = colors.fg4 },
-    -- NeoTreeMessage = { fg = colors.fg3, italic = true },
-    -- NeoTreeModified = { fg = colors.yellow },
-    -- NeoTreeRootName = { fg = colors.fg1, bold = true, italic = true },
-    -- NeoTreeSymbolicLinkTarget = { link = "NeoTreeFileName" },
-    -- NeoTreeExpander = { fg = colors.fg4 },
-    -- NeoTreeWindowsHidden = { link = "NeoTreeDotfile" },
-    -- NeoTreePreview = { link = "Search" },
-    -- NeoTreeGitAdded = { link = "GitGutterAdd" },
-    -- NeoTreeGitConflict = { fg = colors.orange, bold = true, italic = true },
-    -- NeoTreeGitDeleted = { link = "GitGutterDelete" },
-    -- NeoTreeGitIgnored = { link = "NeoTreeDotfile" },
-    -- NeoTreeGitRenamed = { link = "NeoTreeGitModified" },
-    -- NeoTreeGitStaged = { link = "NeoTreeGitAdded" },
-    -- NeoTreeGitUnstaged = { link = "NeoTreeGitConflict" },
-    -- NeoTreeTabActive = { fg = colors.fg1, bold = true },
-    -- NeoTreeTabInactive = { fg = colors.fg4, bg = colors.bg1 },
-    -- NeoTreeTabSeparatorActive = { fg = colors.bg1 },
-    -- NeoTreeTabSeparatorInactive = { fg = colors.bg2, bg = colors.bg1 },
+      ["@label"] = { link = "Label" },
+      ["@label.vimdoc"] = { link = "Label" },
+
+      DiagnosticUnderlineWarn = { underline = true, sp = colors.orange0 },
+      BlinkCmpLabelDeprecated = { strikethrough = true },
+      BlinkCmpKind = { fg = colors.hue52 },
+      -- BlinkCmpLabel = { bg = "" },
+      BlinkCmpLabelMatch = { fg = colors.hue52, bold = true },
+      BlinkCmpMenuSelection = { bg = colors.bg6 },
+      BlinkCmpMenu = { bg = colors.bg3 },
+      BlinkCmpSource = { fg = colors.bg10 },
+      BlinkCmpDoc = { bg = colors.bg3 },
+      -- BlinkCmpLabelDetail = { bg = colors.bg2 },
+      BlinkCmpLabelDescription = { bg = colors.bg2 },
+      BlinkCmpKindText = { fg = colors.hue23 },
+      BlinkCmpKindVariable = { fg = colors.hue48 },
+      BlinkCmpKindMethod = { link = "BlinkCmpKindFunction" },
+      BlinkCmpKindFunction = { fg = colors.purple1 },
+      -- BlinkCmpKindConstructor = { link = "Gruvboxorange2" },
+      -- BlinkCmpKindUnit = { link = "GruvboxBlue" },
+      -- BlinkCmpKindField = { link = "GruvboxBlue" },
+      -- BlinkCmpKindClass = { link = "Gruvboxorange2" },
+      -- BlinkCmpKindInterface = { link = "Gruvboxorange2" },
+      -- BlinkCmpKindModule = { link = "GruvboxBlue" },
+      -- BlinkCmpKindProperty = { link = "GruvboxBlue" },
+      -- BlinkCmpKindValue = { link = "GruvboxOrange" },
+      -- BlinkCmpKindEnum = { link = "Gruvboxorange2" },
+      -- BlinkCmpKindOperator = { link = "Gruvboxorange2" },
+      -- BlinkCmpKindKeyword = { link = "Gruvboxblue4" },
+      -- BlinkCmpKindEvent = { link = "Gruvboxblue4" },
+      -- BlinkCmpKindReference = { link = "Gruvboxblue4" },
+      -- BlinkCmpKindColor = { link = "Gruvboxblue4" },
+      -- BlinkCmpKindSnippet = { link = "Gruvboxgreen4" },
+      -- BlinkCmpKindFile = { link = "GruvboxBlue" },
+      -- BlinkCmpKindFolder = { link = "GruvboxBlue" },
+      -- BlinkCmpKindEnumMember = { link = "GruvboxAqua" },
+      -- BlinkCmpKindConstant = { link = "GruvboxOrange" },
+      -- BlinkCmpKindStruct = { link = "Gruvboxorange2" },
+      -- BlinkCmpKindTypeParameter = { link = "Gruvboxorange2" },
+      -- BlinkCmpGhostText = { link = "GruvboxBg4" },
+
+      NeoTreeDirectoryName = { link = "Directory" },
+      NeoTreeGitUntracked = { fg = colors.hue5, bold = true },
+      NeoTreeGitModified = { fg = colors.hue36, bold = true },
+      -- NeoTreeDotfile = { fg = colors.fg4 },
+      -- NeoTreeFadeText1 = { fg = colors.fg3 },
+      -- NeoTreeFadeText2 = { fg = colors.fg4 },
+      -- NeoTreeFileIcon = { fg = colors.blue },
+      -- NeoTreeFileName = { fg = colors.fg1 },
+      -- NeoTreeFileNameOpened = { fg = colors.fg1, bold = true },
+      -- NeoTreeFileStats = { fg = colors.fg3 },
+      -- NeoTreeFileStatsHeader = { fg = colors.fg2, italic = true },
+      -- NeoTreeFilterTerm = { link = "SpecialChar" },
+      -- NeoTreeHiddenByName = { link = "NeoTreeDotfile" },
+      -- NeoTreeIndentMarker = { fg = colors.fg4 },
+      -- NeoTreeMessage = { fg = colors.fg3, italic = true },
+      -- NeoTreeModified = { fg = colors. },
+      -- NeoTreeRootName = { fg = colors.fg1, bold = true, italic = true },
+      -- NeoTreeSymbolicLinkTarget = { link = "NeoTreeFileName" },
+      -- NeoTreeExpander = { fg = colors.fg4 },
+      -- NeoTreeWindowsHidden = { link = "NeoTreeDotfile" },
+      -- NeoTreePreview = { link = "Search" },
+      -- NeoTreeGitAdded = { link = "GitGutterAdd" },
+      -- NeoTreeGitConflict = { fg = colors., bold = true, italic = true },
+      -- NeoTreeGitDeleted = { link = "GitGutterDelete" },
+      -- NeoTreeGitIgnored = { link = "NeoTreeDotfile" },
+      -- NeoTreeGitRenamed = { link = "NeoTreeGitModified" },
+      -- NeoTreeGitStaged = { link = "NeoTreeGitAdded" },
+      -- NeoTreeGitUnstaged = { link = "NeoTreeGitConflict" },
+      -- NeoTreeTabActive = { fg = colors.fg1, bold = true },
+      -- NeoTreeTabInactive = { fg = colors.fg4, bg = colors.bg5 },
+      -- NeoTreeTabSeparatorActive = { fg = colors.bg5 },
+      -- NeoTreeTabSeparatorInactive = { fg = colors.bg2, bg = colors.bg5 },
+    },
+    light = {
+      Normal = { fg = "black", bg = "#B0B6CC" }, -- 普通文本
+      ["@variable"] = { fg = "#2D3142" },
+      Keyword = { fg = "#8033cc", bold = true },
+      Function = { fg = "#6633cc", bold = true },
+      String = { fg = "#007373" },
+    },
   }
 
-  return groups
+  return groups[bg]
 end
 
 function M.setup(opts) end
@@ -319,140 +381,3 @@ function M.loader()
 end
 
 return M
-
--- 40 40
--- 350
--- #8f3d4b
--- 260
--- #583d8f
--- 40
--- #8f743d
--- 10
--- #8f4b3d
---
--- 120
--- #3d8f3d
--- 160
--- #3d8f74
-
--- 卡
--- #BE5454
--- #F2B33F
--- #DA8D59
--- #7C9DC0
--- #969BA2
---
--- 背景
--- #191C1E
--- 前景
--- #BBBFC2
---
--- 大红
--- #C54659
--- #2476C6
--- #1C5A95
--- #49B095
--- #59B38C
--- #387262
--- #5D3D98
--- #8F5FDE
--- #B52227
--- #851E23
--- #2B1260
-
--- #8D6B42
--- #CEA961
-
--- #3D8BA0
--- #58CBE1
-
--- #637028
--- #4C733E
-
--- #BEA34C
--- #36BBAC
--- #5ED0E6
--- 红色系
--- #C07C7C - 红灰色
--- #C07C8A - 粉红色
--- #C07C98 - 玫瑰红
--- #C07CA6 - 紫红色
--- #C07CB4 - 洋红色
--- 橙色系
--- #C08A7C - 橙红色
--- #C0987C - 橙黄色
--- #C0A67C - 金黄色
--- #C0B47C - 柠檬黄
--- #C0C27C - 黄绿色
--- 黄色系
--- #C0C07C - 黄色
--- #B4C07C - 黄绿色
--- #A6C07C - 青绿色
--- #98C07C - 绿色
--- #8AC07C - 蓝绿色
--- 绿色系
--- #7CC07C - 绿色
--- #7CC08A - 青绿色
--- #7CC098 - 蓝绿色
--- #7CC0A6 - 青色
--- #7CC0B4 - 蓝青色
--- 青色系
--- #7CC0C0 - 青色
--- #7CB4C0 - 蓝青色
--- #7CA6C0 - 蓝色
--- #7C98C0 - 蓝紫色
--- #7C8AC0 - 紫色
--- 蓝色系
--- #7C7CC0 - 蓝色
--- #8A7CC0 - 蓝紫色
--- #987CC0 - 紫色
--- #A67CC0 - 紫红色
--- #B47CC0 - 洋红色
--- 紫色系
--- #C07CC0 - 紫色
--- #C07CB4 - 紫红色
--- #C07CA6 - 紫蓝色
--- #C07C98 - 蓝紫色
--- #C07C8A - 紫绿色
--- 中性色系
--- #A0A0A0 - 中性灰色
--- #B0B0B0 - 浅灰色
--- #C0C0C0 - 银灰色
--- #D0D0D0 - 更浅灰色
--- #E0E0E0 - 极浅灰色
--- 暖色系
--- #C0A07C - 棕色
--- #C0B07C - 米色
--- #C0C07C - 米黄色
--- #B0C07C - 橄榄绿
--- #A0C07C - 苔藓绿
--- 冷色系
--- #7CA0C0 - 钢蓝色
--- #7CB0C0 - 青蓝色
--- #7CC0C0 - 青色
--- #7CC0B0 - 青绿色
--- #7CC0A0 - 绿色
--- black0 = "#000000",
--- black1 = "#0d0d0d",
--- black2 = "#191919",
--- black3 = "#262626",
--- black4 = "#333333",
--- black5 = "#404040",
--- black6 = "#4d4d4d",
--- black7 = "#595959",
--- black8 = "#666666",
--- black9 = "#737373",
--- black10 = "#808080",
--- black11 = "#8C8C8C",
--- black12 = "#999999",
--- black13 = "#A6A6A6",
--- black14 = "#B3B3B3",
--- black15 = "#BFBFBF",
--- black16 = "#CCCCCC",
--- black17 = "#D9D9D9",
--- black18 = "#E6E6E6",
--- black19 = "#F2F2F2",
--- black20 = "#FFFFFF",
--- #222831
--- #1D1616
--- #0C0C0C

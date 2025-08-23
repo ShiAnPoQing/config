@@ -80,6 +80,9 @@ function M.magic_keyword(opts)
             start_col = start_col,
             end_col = end_col,
           },
+          hidden_second_key = function()
+            return start_col + 1 == end_col
+          end,
         },
       })
     end,

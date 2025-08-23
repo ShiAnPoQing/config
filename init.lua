@@ -73,4 +73,5 @@ require("lazy-setup").setup({
   require("plugins.custom.window-resize"),
   require("plugins.custom.window-exchange"),
   require("plugins.custom.visual-move"),
+  require("plugins.download.test.marks"),
 })

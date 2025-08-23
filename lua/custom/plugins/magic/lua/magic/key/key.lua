@@ -19,7 +19,7 @@ local key_types = { "one_key", "two_key", "three_key" }
 --- @field line number
 --- @field virt_col number
 --- @field visual? VisualExtmarkOpts
---- @field hidden_second_key? boolean
+--- @field hidden_second_key? boolean | fun():boolean|nil
 
 --- @class KeyRegisterOpts
 --- @field one_key OneKeyRegisterOpts
@@ -86,6 +86,11 @@ local function set_two_key_extmark(opts)
     virt_text_win_col = virt_col,
     virt_text = { { key1, hl_groups.CustomMagicNextKey1 } },
   })
+
+  if type(hidden_second_key) == "function" then
+    hidden_second_key = hidden_second_key()
+  end
+
   if not hidden_second_key then
     vim.api.nvim_buf_set_extmark(0, ns_id2, line, 0, {
       virt_text_win_col = virt_col + 1,
