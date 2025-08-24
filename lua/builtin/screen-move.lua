@@ -45,7 +45,8 @@ local function exchange_extmark_opts(extmark_opts)
 end
 
 function Direction:init(dir)
-  local wininfo = vim.fn.getwininfo()[1]
+  local current_win = vim.api.nvim_get_current_win()
+  local wininfo = vim.fn.getwininfo(current_win)[1]
   local cursor_row, _ = unpack(api.nvim_win_get_cursor(0))
   local virt_col = vim.fn.virtcol(".") - 1
   self.wininfo = wininfo
