@@ -5,7 +5,6 @@ Direction.left = setmetatable({}, { __index = Direction })
 Direction.right = setmetatable({}, { __index = Direction })
 Direction.top = setmetatable({}, { __index = Direction })
 Direction.bottom = setmetatable({}, { __index = Direction })
-Direction.Target = {}
 
 api.nvim_set_hl(0, "ScreenMoveKey", { fg = "#ff007c" })
 
@@ -54,30 +53,29 @@ function Direction:init(dir)
   self.cursor_row = cursor_row
   self.count = vim.v.count
   self.Dir = Direction[dir]
-  self.Target = setmetatable(self.Target, { __index = self.Dir })
   self.Dir:_init()
   self.ns_id = api.nvim_create_namespace("screen-move-extmark")
 end
 
-function Direction.Target:t1()
+function Direction:action1()
   api.nvim_feedkeys(self.move_key, "n", false)
 end
 
-function Direction.Target:t2(char)
+function Direction:action2(char)
   api.nvim_feedkeys(self.move_key .. self.count .. char, "n", false)
 end
 
-function Direction.Target:t3()
+function Direction:action3()
   local key = self:get_move_view_key()
   api.nvim_feedkeys(key, "n", false)
 end
 
-function Direction.Target:t4(char)
+function Direction:action4(char)
   local key = self:get_move_view_key()
   api.nvim_feedkeys(key .. self.count .. char:lower(), "n", false)
 end
 
-function Direction.Target:t5()
+function Direction:action5()
   api.nvim_buf_clear_namespace(0, self.ns_id, 0, -1)
   self.extmark_opts = exchange_extmark_opts(self.extmark_opts)
   set_extmark(self.ns_id, self.extmark_opts)
@@ -110,29 +108,11 @@ function Direction.left:_init()
     k = { self.cursor_row - self.count - 1, self.boundary },
     h = { self.cursor_row - 1, self.boundary },
   }
-  self.targets = {
-    j = function(char)
-      self.Target:t2(char)
-    end,
-    k = function(char)
-      self.Target:t2(char)
-    end,
-    h = function()
-      self.Target:t1()
-    end,
-    H = function()
-      self.Target:t3()
-    end,
-    J = function(char)
-      self.Target:t4(char)
-    end,
-    K = function(char)
-      self.Target:t4(char)
-    end,
-    [" "] = function()
-      self.Target:t5()
-    end,
-  }
+  self.a1 = { "h" }
+  self.a2 = { "j", "k" }
+  self.a3 = { "H" }
+  self.a4 = { "J", "K" }
+  self.a5 = { " " }
 end
 
 function Direction.right:_init()
@@ -144,29 +124,11 @@ function Direction.right:_init()
     k = { self.cursor_row - self.count - 1, self.boundary },
     l = { self.cursor_row - 1, self.boundary },
   }
-  self.targets = {
-    j = function(char)
-      self.Target:t2(char)
-    end,
-    k = function(char)
-      self.Target:t2(char)
-    end,
-    l = function()
-      self.Target:t1()
-    end,
-    L = function()
-      self.Target:t3()
-    end,
-    J = function(char)
-      self.Target:t4(char)
-    end,
-    K = function(char)
-      self.Target:t4(char)
-    end,
-    [" "] = function()
-      self.Target:t5()
-    end,
-  }
+  self.a1 = { "l" }
+  self.a2 = { "j", "k" }
+  self.a3 = { "L" }
+  self.a4 = { "J", "K" }
+  self.a5 = { " " }
 end
 
 function Direction.top:_init()
@@ -178,29 +140,11 @@ function Direction.top:_init()
     k = { self.boundary, self.virt_win_col },
     l = { self.boundary, self.virt_win_col + self.count },
   }
-  self.targets = {
-    h = function(char)
-      self.Target:t2(char)
-    end,
-    l = function(char)
-      self.Target:t2(char)
-    end,
-    k = function()
-      self.Target:t1()
-    end,
-    H = function(char)
-      self.Target:t4(char)
-    end,
-    L = function(char)
-      self.Target:t4(char)
-    end,
-    K = function()
-      self.Target:t3()
-    end,
-    [" "] = function()
-      self.Target:t5()
-    end,
-  }
+  self.a1 = { "k" }
+  self.a2 = { "l", "h" }
+  self.a3 = { "K" }
+  self.a4 = { "L", "H" }
+  self.a5 = { " " }
 end
 
 function Direction.bottom:_init()
@@ -212,30 +156,11 @@ function Direction.bottom:_init()
     j = { self.boundary, self.virt_win_col },
     l = { self.boundary, self.virt_win_col + self.count },
   }
-
-  self.targets = {
-    h = function(char)
-      self.Target:t2(char)
-    end,
-    l = function(char)
-      self.Target:t2(char)
-    end,
-    j = function()
-      self.Target:t1()
-    end,
-    H = function(char)
-      self.Target:t4(char)
-    end,
-    L = function(char)
-      self.Target:t4(char)
-    end,
-    J = function()
-      self.Target:t3()
-    end,
-    [" "] = function()
-      self.Target:t5()
-    end,
-  }
+  self.a1 = { "j" }
+  self.a2 = { "l", "h" }
+  self.a3 = { "J" }
+  self.a4 = { "L", "H" }
+  self.a5 = { " " }
 end
 
 function Direction.left:at_boundary()
@@ -267,10 +192,18 @@ end
 
 function Direction:on_key()
   local char = on_key()
-  if not self.targets[char] then
-    return
+  local action_map = {
+    action1 = self.a1,
+    action2 = self.a2,
+    action3 = self.a3,
+    action4 = self.a4,
+    action5 = self.a5,
+  }
+  for method, action in pairs(action_map) do
+    if vim.tbl_contains(action, char) then
+      self[method](self, char)
+    end
   end
-  self.targets[char](char)
   api.nvim_buf_clear_namespace(0, self.ns_id, 0, -1)
 end
 

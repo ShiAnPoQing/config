@@ -9,4 +9,8 @@ return {
     '<cmd>let @+ = expand("%:p")<CR>',
     { "n" },
   },
+  ["<leader>cd"] = {
+    "<cmd>ChangeDirectoryToFile<CR>",
+    "n",
+  },
 }
