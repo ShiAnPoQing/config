@@ -5,6 +5,8 @@ Direction.left = setmetatable({}, { __index = Direction })
 Direction.right = setmetatable({}, { __index = Direction })
 Direction.top = setmetatable({}, { __index = Direction })
 Direction.bottom = setmetatable({}, { __index = Direction })
+Direction.v_center = setmetatable({}, { __index = Direction })
+Direction.h_center = setmetatable({}, { __index = Direction })
 
 api.nvim_set_hl(0, "ScreenMoveKey", { fg = "#ff007c" })
 
@@ -164,6 +166,42 @@ function Direction.bottom:_init()
   self.a5 = { " " }
 end
 
+function Direction.v_center:_init()
+  self.move_key = "M"
+  self.move_view_key = ""
+  self.boundary = math.floor((self.wininfo.botline - self.wininfo.topline) / 2 + self.wininfo.topline - 1)
+  self.extmark_opts = {
+    h = { self.boundary, self.virt_win_col - self.count },
+    l = { self.boundary, self.virt_win_col + self.count },
+    j = { self.boundary + self.count, self.virt_win_col },
+    k = { self.boundary - self.count, self.virt_win_col },
+    n = { self.boundary, self.virt_win_col },
+  }
+  self.a1 = { "n" }
+  self.a2 = { "h", "l", "j", "k" }
+  self.a3 = {}
+  self.a4 = {}
+  self.a5 = {}
+end
+
+function Direction.h_center:_init()
+  self.move_key = "gm"
+  self.move_view_key = ""
+  self.boundary = math.ceil((self.wininfo.width - self.wininfo.textoff - 1) / 2)
+  self.extmark_opts = {
+    h = { self.cursor_row - 1, self.boundary - self.count },
+    l = { self.cursor_row - 1, self.boundary + self.count },
+    j = { self.cursor_row - 1 + self.count, self.boundary },
+    k = { self.cursor_row - 1 - self.count, self.boundary },
+    m = { self.cursor_row - 1, self.boundary },
+  }
+  self.a1 = { "m" }
+  self.a2 = { "h", "l", "j", "k" }
+  self.a3 = {}
+  self.a4 = {}
+  self.a5 = {}
+end
+
 function Direction.left:at_boundary()
   return self.virt_win_col == 0
 end
@@ -178,6 +216,14 @@ end
 
 function Direction.bottom:at_boundary()
   return self.cursor_row == self.wininfo.botline
+end
+
+function Direction.v_center:at_boundary()
+  return false
+end
+
+function Direction.h_center:at_boundary()
+  return false
 end
 
 function Direction:get_move_view_key()

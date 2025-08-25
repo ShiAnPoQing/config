@@ -1,71 +1,3 @@
---- @return boolean
-local function on_screen_col_border(key)
-  local before_col = vim.fn.virtcol(".")
-  vim.api.nvim_feedkeys(key, "nx", false)
-  local after_col = vim.fn.virtcol(".")
-  return before_col == after_col
-end
-
-local function on_screen_row_border(key)
-  local before_row = vim.api.nvim_win_get_cursor(0)[1]
-  vim.api.nvim_feedkeys(key, "nx", false)
-  local after_row = vim.api.nvim_win_get_cursor(0)[1]
-  return before_row == after_row
-end
-
--- g0 默认不支持 count
-local function a_h()
-  local count = vim.v.count1
-  for i = 1, count do
-    if on_screen_col_border("g0") then
-      vim.api.nvim_feedkeys("zeg0", "nx", false)
-      if vim.api.nvim_win_get_cursor(0)[2] == 0 then
-        break
-      end
-    else
-      if count > 1 then
-        vim.api.nvim_feedkeys(count - 1 .. "k", "nx", false)
-      end
-    end
-  end
-end
-
-local function a_l()
-  local count = vim.v.count1
-  for i = 1, count do
-    if on_screen_col_border("g$") then
-      vim.api.nvim_feedkeys("zsg$", "nx", false)
-    else
-      vim.api.nvim_feedkeys(count .. "g$", "nx", false)
-    end
-  end
-end
-
-local function a_j()
-  local count = vim.v.count1
-  for i = 1, count do
-    if on_screen_row_border("L") then
-      vim.api.nvim_feedkeys("ztL", "nx", false)
-    else
-      vim.api.nvim_feedkeys(count .. "L", "nx", false)
-    end
-  end
-end
-
-local function a_k()
-  local count = vim.v.count1
-  for i = 1, count do
-    if on_screen_row_border("H") then
-      vim.api.nvim_feedkeys("zbH", "nx", false)
-      if vim.api.nvim_win_get_cursor(0)[1] == 1 then
-        break
-      end
-    else
-      vim.api.nvim_feedkeys(count .. "H", "nx", false)
-    end
-  end
-end
-
 local function aam()
   local win_info = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
   local screen_width = win_info.width - win_info.textoff
@@ -128,12 +60,6 @@ return {
       end,
       "n",
     },
-    -- {
-    --   function()
-    --     require("custom.plugins.move.move-viewport-top").move_viewport_top()
-    --   end,
-    --   "n",
-    -- },
     { "H", { "x", "o" } },
   },
   ["0ak"] = {
@@ -146,7 +72,13 @@ return {
   },
   -- normal mode cursor move: screen center
   ["am"] = {
-    { "gm", { "x", "o", "n" } },
+    {
+      function()
+        require("builtin.screen-move").move("h_center")
+      end,
+      "n",
+    },
+    { "gm", { "x", "o" } },
   },
   ["0am"] = {
     {
@@ -160,16 +92,7 @@ return {
   ["an"] = {
     {
       function()
-        require("custom.plugins.move.move-viewport-vertical-center").move_vertical_center()
-      end,
-      "n",
-    },
-    { "M", { "x", "o" } },
-  },
-  ["1an"] = {
-    {
-      function()
-        require("custom.plugins.move.move-viewport-vertical-center").move_vertical_center({ one_count = true })
+        require("builtin.screen-move").move("v_center")
       end,
       "n",
     },
@@ -179,6 +102,10 @@ return {
     function()
       require("custom.plugins.move.magic-move-viewport-vertical-center").move_vertical_center()
     end,
+    "n",
+  },
+  ["ac"] = {
+    "gmM",
     "n",
   },
   -- jump the middle of cursor to left

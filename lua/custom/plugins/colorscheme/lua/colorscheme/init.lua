@@ -7,95 +7,72 @@ local function get_colors(bg)
       hue2 = "#c0877c", -- 10
       hue3 = "#c08d7c", -- 15
       hue4 = "#c0937c", -- 20
-
       hue5 = "#c0987c", -- 25
       hue6 = "#c09e7c", -- 30
       hue7 = "#c0a47c", -- 35
-
       hue8 = "#c0a97c", -- 40
       hue9 = "#c0af7c", -- 45
       hue10 = "#c0b57c", -- 50
-
       hue11 = "#c0ba7c", -- 55
       hue12 = "#c0c07c", -- 60
       hue13 = "#bac07c", -- 65
-
       hue14 = "#b5c07c", -- 70
       hue15 = "#afc07c", -- 75
       hue16 = "#a9c07c", -- 80
-
       hue17 = "#a4c07c", -- 85
       hue18 = "#9ec07c", -- 90
       hue19 = "#98c07c", -- 95
-
       hue20 = "#93c07c", -- 100
       hue21 = "#8dc07c", -- 105
       hue22 = "#87c07c", -- 110
-
       hue23 = "#82c07c", -- 115
       hue24 = "#7cc07c", -- 120
       hue25 = "#7cc082", -- 125
-
       hue26 = "#7cc087", -- 130
       hue27 = "#7cc08d", -- 135
       hue28 = "#7cc093", -- 140
-
       hue29 = "#7cc098", -- 145
       hue30 = "#7cc09e", -- 150
       hue31 = "#7cc0a4", -- 155
-
       hue32 = "#7cc0a9", -- 160
       hue33 = "#7cc0af", -- 165
       hue34 = "#7cc0b5", -- 170
-
       hue35 = "#7cc0ba", -- 175
       hue36 = "#7cc0c0", -- 180
       hue37 = "#7cbac0", -- 185
-
       hue38 = "#7cb5c0", -- 190
       hue39 = "#7cafc0", -- 195
       hue40 = "#7ca9c0", -- 200
-
       hue41 = "#7ca4c0", -- 205
       hue42 = "#7c9ec0", -- 210
       hue43 = "#7c98c0", -- 215
-
       hue44 = "#7c93c0", -- 220
       hue45 = "#7c8dc0", -- 225
       hue46 = "#7c87c0", -- 230
-
       hue47 = "#7c82c0", -- 235
       hue48 = "#7c7cc0", -- 240
       hue49 = "#827cc0", -- 245
-
       hue50 = "#877cc0", -- 250
       hue51 = "#8d7cc0", -- 255
       hue52 = "#937cc0", -- 260
-
       hue53 = "#987cc0", -- 265
       hue54 = "#9e7cc0", -- 270
       hue55 = "#a47cc0", -- 275
-
       hue56 = "#a97cc0", -- 280
       hue57 = "#af7cc0", -- 285
       hue58 = "#b57cc0", -- 290
-
       hue59 = "#ba7cc0", -- 295
       hue60 = "#c07cc0", -- 300
       hue61 = "#c07cba", -- 305
-
       hue62 = "#c07cb5", -- 310
       hue63 = "#c07caf", -- 315
       hue64 = "#c07ca9", -- 320
-
       hue65 = "#c07ca4", -- 325
       hue66 = "#c07c9e", -- 330
       hue67 = "#c07c98", -- 335
-
       hue68 = "#c07c93", -- 340
       hue69 = "#c07c8d", -- 345
       hue70 = "#c07c87", -- 350
-
       hue71 = "#c07c82", -- 355
       hue72 = "#c07c7c", -- 360
 
@@ -122,7 +99,80 @@ local function get_colors(bg)
       bg21 = "#DEE5FF",
       bg22 = "#E3E9FF",
     },
-    light = {},
+    light = {
+      hue1 = "#ac4339", -- 5
+      hue2 = "#ac4d39", -- 10
+      hue3 = "#ac5639", -- 15
+      hue4 = "#ac6039", -- 20
+      hue5 = "#ac6939", -- 25
+      hue6 = "#ac7339", -- 30
+      hue7 = "#ac7c39", -- 35
+      hue8 = "#ac8639", -- 40
+      hue9 = "#ac8f39", -- 45
+      hue10 = "#ac9939", -- 50
+      hue11 = "#aca339", -- 55
+      hue12 = "#acac39", -- 60
+      hue13 = "#a3ac39", -- 65
+      hue14 = "#99ac39", -- 70
+      hue15 = "#8fac39", -- 75
+      hue16 = "#86ac39", -- 80
+      hue17 = "#7cac39", -- 85
+      hue18 = "#73ac39", -- 90
+      hue19 = "#69ac39", -- 95
+      hue20 = "#60ac39", -- 100
+      hue21 = "#56ac39", -- 105
+      hue22 = "#4dac39", -- 110
+      hue23 = "#43ac39", -- 115
+      hue24 = "#39ac39", -- 120
+      hue25 = "#39ac43", -- 125
+      hue26 = "#39ac4c", -- 130
+      hue27 = "#39ac56", -- 135
+      hue28 = "#39ac60", -- 140
+      hue29 = "#39ac69", -- 145
+      hue30 = "#39ac73", -- 150
+      hue31 = "#39ac7c", -- 155
+      hue32 = "#39ac86", -- 160
+      hue33 = "#39ac8f", -- 165
+      hue34 = "#39ac99", -- 170
+      hue35 = "#39aca3", -- 175
+      hue36 = "#39acac", -- 180
+      hue37 = "#39a3ac", -- 185
+      hue38 = "#3999ac", -- 190
+      hue39 = "#398fac", -- 195
+      hue40 = "#3986ac", -- 200
+      hue41 = "#397cac", -- 205
+      hue42 = "#3973ac", -- 210
+      hue43 = "#3969ac", -- 215
+      hue44 = "#3960ac", -- 220
+      hue45 = "#3956ac", -- 225
+      hue46 = "#394cac", -- 230
+      hue47 = "#3943ac", -- 235
+      hue48 = "#3939ac", -- 240
+      hue49 = "#4339ac", -- 245
+      hue50 = "#4d39ac", -- 250
+      hue51 = "#5639ac", -- 255
+      hue52 = "#6039ac", -- 260
+      hue53 = "#6939ac", -- 265
+      hue54 = "#7339ac", -- 270
+      hue55 = "#7c39ac", -- 275
+      hue56 = "#8639ac", -- 280
+      hue57 = "#8f39ac", -- 285
+      hue58 = "#9939ac", -- 290
+      hue59 = "#a339ac", -- 295
+      hue60 = "#ac39ac", -- 300
+      hue61 = "#ac39a3", -- 305
+      hue62 = "#ac3999", -- 310
+      hue63 = "#ac398f", -- 315
+      hue64 = "#ac3986", -- 320
+      hue65 = "#ac397c", -- 325
+      hue66 = "#ac3973", -- 330
+      hue67 = "#ac3969", -- 335
+      hue68 = "#ac3960", -- 340
+      hue69 = "#ac3956", -- 345
+      hue70 = "#ac394d", -- 350
+      hue71 = "#ac3943", -- 355
+      hue72 = "#ac3939", -- 360
+    },
   }
   return color_groups[bg]
 end
@@ -159,7 +209,7 @@ local function get_groups()
       -- Conceal = { fg =  },
       Keyword = { fg = colors.hue52, bold = true },
       Function = { fg = colors.hue45, bold = true },
-      String = { fg = colors.hue18 },
+      String = { fg = colors.hue20 },
       Number = { bg = colors.bg5, fg = colors.hue1 },
       Operator = { fg = colors.hue40 },
       Delimiter = { fg = colors.bg15 },
@@ -176,7 +226,7 @@ local function get_groups()
       -- Underlined = { fg = colors.blue, underline = config.underline }, -- 突出的文本，HTML链接
 
       ["@variable"] = { fg = colors.bg15 },
-      ["@variable.parameter"] = { fg = colors.hue8, bold = false },
+      ["@variable.parameter"] = { fg = colors.hue6, bold = false },
       ["@variable.builtin"] = { fg = colors.hue72, bold = true },
       -- ["@variable.member"] = { fg = "" },
       ["@module.builtin"] = { link = "@variable.builtin" },
@@ -359,11 +409,16 @@ local function get_groups()
       -- NeoTreeTabSeparatorInactive = { fg = colors.bg2, bg = colors.bg5 },
     },
     light = {
-      Normal = { fg = "black", bg = "#B0B6CC" }, -- 普通文本
+      Normal = { fg = "#2D3142", bg = "#B0B6CC" }, -- 普通文本
       ["@variable"] = { fg = "#2D3142" },
-      Keyword = { fg = "#8033cc", bold = true },
-      Function = { fg = "#6633cc", bold = true },
-      String = { fg = "#007373" },
+      -- ["@variable.builtin"] = { fg = "#6a40bf" },
+      Keyword = { fg = colors.hue55, bold = true },
+      Function = { fg = colors.hue50, bold = true },
+      Special = { fg = "#007373" },
+      String = { fg = "#4d7300" },
+      Boolean = { fg = colors.hue1, bold = true },
+      ["@property"] = { fg = "#007373" },
+      ["@lsp.type.property"] = { link = "@property" },
     },
   }
 

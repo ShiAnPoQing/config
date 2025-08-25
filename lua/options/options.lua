@@ -50,6 +50,7 @@ return {
     incsearch = true,
     ignorecase = true,
     smartcase = true,
+    concealcursor = {},
 
     updatetime = 100,
     -- 0: never

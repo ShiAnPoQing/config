@@ -55,31 +55,6 @@ g'{mark}  g`{mark}
 <			跳转到文件中的最后已知位置。
 			另见 |:keepjumps|。
 
-						*:marks*
-:marks			列出所有当前标记（不是移动命令）。
-			|'( |、|')|、|'{| 和 |'}| 标记不会被列出。
-			第一列编号为零。
-						*E283*
-:marks {arg}		列出 {arg} 中提到的标记（不是移动命令）。
-			例如：>
-				:marks aB
-<			列出标记 'a' 和 'B'。
-
-							*:delm* *:delmarks*
-:delm[arks] {marks}	删除指定的标记。可以删除的标记包括 A-Z 和 0-9。不能删除 ' 标记。
-			可以通过给出标记名列表或用范围（用短横线分隔）来指定。
-                        空格会被忽略。
-                        例如：>
-			   :delmarks a	      删除标记 a
-			   :delmarks a b 1    删除标记 a、b 和 1
-			   :delmarks Aa       删除标记 A 和 a
-			   :delmarks p-z      删除 p 到 z 范围内的标记
-			   :delmarks ^.[]     删除标记 ^ . [ ]
-			   :delmarks \"	      删除标记 "
-<
-
-:delm[arks]!		删除当前缓冲区的所有标记，但不包括标记 A-Z 或 0-9。
-                        也会清除 |changelist|。
 
 标记是不可见的。
 它只是文件中被记住的位置。
@@ -181,47 +156,5 @@ g'{mark}  g`{mark}
 [`			[count] 次跳转到光标前的小写标记。
 
 
-:loc[kmarks] {command}				*:loc* *:lock* *:lockmarks*
-			执行 {command} 时不调整标记。当以某种方式更改文本且更改完成后行数保持不变时，这很有用。
-			警告：当行数发生变化时，更改下方的标记会保持其行号，因此会移动到另一行文本。
-			以下项目不会因删除/插入行而调整：
-			- 小写字母标记 'a - 'z
-			- 大写字母标记 'A - 'Z
-			- 编号标记 '0 - '9
-			- 上次插入位置 '^
-			- 上次更改位置 '.
-			- 上次影响的文本区域 '[ 和 ']
-			- 可视区域 '< 和 '>
-			- 已放置标志的行号
-			- quickfix 位置的行号
-			- |jumplist| 中的位置
-			- |tagstack| 中的位置
-			以下项目仍会被调整：
-			- 上一个上下文标记 ''
-			- 光标位置
-			- 窗口在缓冲区上的视图
-			- 折叠
-			- diff
-
-:kee[pmarks] {command}				*:kee* *:keep* *:keepmarks*
-			目前只对过滤命令 |:range!| 有效：
-			- 过滤后行数等于或大于之前时，所有标记都保留在相同行号。
-			- 行数减少时，消失行中的标记会被删除。
-			无论哪种情况，过滤文本下方的标记都会调整其行号，因此会像往常一样跟随文本。
-			当 'cpoptions' 缺少 'R' 标志时，这与使用 ":keepmarks" 效果相同。
-
-							*:keepj* *:keepjumps*
-:keepj[umps] {command}
-			在 {command} 中移动不会更改 |''|、|'.| 和 |'^| 标记、|jumplist| 或 |changelist|。
-			当自动更改或插入文本且用户不希望跳转到该位置时很有用。例如，在第一行更新 "Last change" 时间戳时：>
-
-				:let lnum = line(".")
-				:keepjumps normal gg
-				:call SetLastChange()
-				:keepjumps exe "normal " .. lnum .. "G"
-<
-			注意，":keepjumps" 必须用于每个命令。
-			当调用函数时，该函数中的命令仍可能更改跳转列表。此外，对于
-			`:keepjumps exe 'command '`，"command" 不会保持跳转。应改用：`:exe 'keepjumps command'`
 
 vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

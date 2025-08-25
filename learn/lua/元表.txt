@@ -1,0 +1,258 @@
+"add":                                                                 *__add()*
+------
+`+` 操作。
+
+下面的函数 `getbinhandler` 定义了 Lua 如何为二元操作选择处理程序。首先，Lua 尝试第一个操作数。如果其类型没有定义该操作的处理程序，则 Lua 尝试第二个操作数。
+>lua
+       function getbinhandler (op1, op2, event)
+         return metatable(op1)[event] or metatable(op2)[event]
+       end
+<
+通过使用此函数，`op1 + op2` 的行为是
+>lua
+       function add_event (op1, op2)
+         local o1, o2 = tonumber(op1), tonumber(op2)
+         if o1 and o2 then  -- 两个操作数都是数字？
+           return o1 + o2   -- 这里的 `+` 是原始的 `add`
+         else  -- 至少有一个操作数不是数字
+           local h = getbinhandler(op1, op2, "__add")
+           if h then
+             -- 用两个操作数调用处理程序
+             return h(op1, op2)
+           else  -- 没有可用的处理程序：默认行为
+             error(...)
+           end
+         end
+       end
+<
+"sub":                                                                 *__sub()*
+------
+`-` 操作。行为类似于 "add" 操作。
+
+"mul":                                                                 *__mul()*
+------
+`*` 操作。行为类似于 "add" 操作。
+
+"div":                                                                 *__div()*
+------
+`/` 操作。行为类似于 "add" 操作。
+
+"mod":                                                                 *__mod()*
+------
+`%` 操作。行为类似于 "add" 操作，以操作 `o1 - floor(o1/o2)*o2` 作为原始操作。
+
+"pow":                                                                 *__pow()*
+------
+`^`（求幂）操作。行为类似于 "add" 操作，以函数 `pow`（来自 C 数学库）作为原始操作。
+
+"unm":                                                                 *__unm()*
+------
+一元 `-` 操作。
+>lua
+       function unm_event (op)
+         local o = tonumber(op)
+         if o then  -- 操作数是数字？
+           return -o  -- 这里的 `-` 是原始的 `unm`
+         else  -- 操作数不是数字。
+           -- 尝试从操作数获取处理程序
+           local h = metatable(op).__unm
+           if h then
+             -- 用操作数调用处理程序
+             return h(op)
+           else  -- 没有可用的处理程序：默认行为
+             error(...)
+           end
+         end
+       end
+<
+"concat":                                                           *__concat()*
+---------
+`..`（连接）操作。
+>lua
+       function concat_event (op1, op2)
+         if (type(op1) == "string" or type(op1) == "number") and
+            (type(op2) == "string" or type(op2) == "number") then
+           return op1 .. op2  -- 原始字符串连接
+         else
+           local h = getbinhandler(op1, op2, "__concat")
+           if h then
+             return h(op1, op2)
+           else
+             error(...)
+           end
+         end
+       end
+<
+"len":                                                                 *__len()*
+------
+`#` 操作。
+>lua
+       function len_event (op)
+         if type(op) == "string" then
+           return strlen(op)         -- 原始字符串长度
+         elseif type(op) == "table" then
+           return #op                -- 原始表长度
+         else
+           local h = metatable(op).__len
+           if h then
+             -- 用操作数调用处理程序
+             return h(op)
+           else  -- 没有可用的处理程序：默认行为
+             error(...)
+           end
+         end
+       end
+<
+"eq":                                                                   *__eq()*
+-----
+`==` 操作。
+
+函数 `getcomphandler` 定义了 Lua 如何为比较运算符选择元方法。只有当被比较的两个对象具有相同的类型并且具有所选操作的相同元方法时，才会选择元方法。
+>lua
+       function getcomphandler (op1, op2, event)
+         if type(op1) ~= type(op2) then return nil end
+         local mm1 = metatable(op1)[event]
+         local mm2 = metatable(op2)[event]
+         if mm1 == mm2 then return mm1 else return nil end
+       end
+<
+"eq" 事件定义如下：
+>lua
+       function eq_event (op1, op2)
+         if type(op1) ~= type(op2) then  -- 类型不同？
+           return false   -- 不同的对象
+         end
+         if op1 == op2 then   -- 原始相等？
+           return true   -- 对象相等
+         end
+         -- 尝试元方法
+         local h = getcomphandler(op1, op2, "__eq")
+         if h then
+           return h(op1, op2)
+         else
+           return false
+         end
+       end
+<
+`a ~= b` 等价于 `not (a == b)`。
+
+"lt":                                                                   *__lt()*
+-----
+`<` 操作。
+>lua
+       function lt_event (op1, op2)
+         if type(op1) == "number" and type(op2) == "number" then
+           return op1 < op2   -- 数字比较
+         elseif type(op1) == "string" and type(op2) == "string" then
+           return op1 < op2   -- 字典序比较
+         else
+           local h = getcomphandler(op1, op2, "__lt")
+           if h then
+             return h(op1, op2)
+           else
+             error(...);
+           end
+         end
+       end
+<
+`a > b` 等价于 `b < a`。
+
+"le":                                                                   *__le()*
+-----
+`<=` 操作。
+>lua
+       function le_event (op1, op2)
+         if type(op1) == "number" and type(op2) == "number" then
+           return op1 <= op2   -- 数字比较
+         elseif type(op1) == "string" and type(op2) == "string" then
+           return op1 <= op2   -- 字典序比较
+         else
+           local h = getcomphandler(op1, op2, "__le")
+           if h then
+             return h(op1, op2)
+           else
+             h = getcomphandler(op1, op2, "__lt")
+             if h then
+               return not h(op2, op1)
+             else
+               error(...);
+             end
+           end
+         end
+       end
+<
+`a >= b` 等价于 `b <= a`。请注意，在没有 "le" 元方法的情况下，Lua 尝试 "lt"，假设 `a <= b` 等价于 `not (b < a)`。
+
+"index":                                                             *__index()*
+--------
+索引访问 `table[key]`。
+
+>lua
+   function gettable_event (table, key)
+     local h
+
+     if type(table) == "table" then
+       local v = rawget(table, key)
+       if v ~= nil then 
+         return v 
+       end
+       h = metatable(table).__index
+       if h == nil then 
+         return nil 
+       end
+     else
+       h = metatable(table).__index
+       if h == nil then
+         error(...);
+       end
+     end
+
+     if type(h) == "function" then
+       return h(table, key)      -- 调用处理程序
+     else  
+       return h[key]          -- 或在其上重复操作
+     end
+   end
+<
+
+"newindex":                                                       *__newindex()*
+-----------
+索引赋值 `table[key] = value`。
+>lua
+       function settable_event (table, key, value)
+         local h
+         if type(table) == "table" then
+           local v = rawget(table, key)
+           if v ~= nil then rawset(table, key, value); return end
+           h = metatable(table).__newindex
+           if h == nil then rawset(table, key, value); return end
+         else
+           h = metatable(table).__newindex
+           if h == nil then
+             error(...);
+           end
+         end
+         if type(h) == "function" then
+           return h(table, key,value)    -- 调用处理程序
+         else h[key] = value             -- 或在其上重复操作
+       end
+<
+"call":                                                               *__call()*
+-------
+当 Lua 调用一个值时调用。
+>lua
+       function function_event (func, ...)
+         if type(func) == "function" then
+           return func(...)   -- 原始调用
+         else
+           local h = metatable(func).__call
+           if h then
+             return h(func, ...)
+           else
+             error(...)
+           end
+         end
+       end
+<
+
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

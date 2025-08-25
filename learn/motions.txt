@@ -1,1159 +1,1441 @@
+*motion.txt* Nvim
+
+
+		  VIM 参考手册    作者 Bram Moolenaar
+
+
+光标移动					*cursor-motions* *navigation*
+
+这些命令移动光标位置。
+如果新位置超出了
+屏幕，屏幕会滚动以显示光标（另请参阅 'scrolljump' 和
+'scrolloff' 选项）。
+一般说明：
+
+如果你想知道你在文件中的位置，请使用 "CTRL-G" 命令
+|CTRL-G|
+或 "g CTRL-G" 命令 |g_CTRL-G|。如果你设置了 'ruler' 选项，
+光标位置会持续显示在状态行中（这会稍微减慢
+Vim 的速度）。
+经验丰富的用户更喜欢 hjkl 键，因为它们总是在他们的手指正下方。
+初学者通常更喜欢方向键，因为他们不知道
+hjkl 键的作用。
+hjkl 的助记价值从键盘上看就很清楚。
+可以把 j 想象成一个向下的箭头。
+可以设置 'virtualedit' 选项，使光标能够移动到
+没有字符的位置或多列字符（如
+制表符）内。
+输入 |gO| 查看目录。
+
 ==============================================================================
-1. 动作操作符
+1. 移动和操作符				*operator*
+
+移动命令可以在操作符命令之后使用，以使命令
+作用于移动过的文本。
+也就是移动前后光标位置之间的文本。
+操作符通常用于删除
+或更改文本。
+以下操作符可用：
 
 	|c|	c	更改
 	|d|	d	删除
-	|y|	y	复制
-	|~|	~	swap case (only if 'tildeop' is set)
-	|g~|	g~	swap case
-	|gu|	gu	小写
-	|gU|	gU	大写
-	|!|	!	filter through an external program
-	|=|	=	filter through 'equalprg' or C-indenting if empty
-	|gq|	gq	text formatting
-	|gw|	gw	text formatting with no cursor movement
-	|g?|	g?	ROT13 encoding
+	|y|	y	复制到寄存器（不更改文本）
+	|~|
+~	切换大小写（仅当 'tildeop' 设置时）
+	|g~|	g~	切换大小写
+	|gu|	gu	转换为小写
+	|gU|	gU	转换为大写
+	|!|	!	通过外部程序过滤
+	|=|
+=	通过 'equalprg' 或 C-缩进（如果为空）过滤
+	|gq|	gq	文本格式化
+	|gw|	gw	文本格式化且不移动光标
+	|g?|	g?	ROT13 编码
 	|>|	>	右移
-	|<|	<	左移
-	|zf|	zf	定义折叠
-	|g@|	g@	call function set with the 'operatorfunc' option
+	|<|
+<	左移
+	|zf|	zf	定义一个折叠
+	|g@|	g@	调用由 'operatorfunc' 选项设置的函数
+						*motion-count-multiplied*
+如果移动包含计数，并且操作符之前也有计数，
+则这两个计数会相乘。
+例如："2d3w" 删除六个单词。
+						*operator-doubled*
+当重复操作符时，它作用于一行。
+当在第一个字符之前
+或之后使用计数时，会操作那么多行。因此 `3dd`
+删除三行。
+第一个字符前后的计数会
+相乘，因此 `2y3y` 复制六行。
+*operator-resulting-pos*
+应用操作符后，光标大多留在被操作文本的开头。
+例如，"yfe" 不会移动光标，但 "yFe"
+会将光标向左移动到复制开始的 "e" 处。
+'startofline' 选项仅适用于 "d"、"<<"、"==" 和 ">>" 的行操作。
+*linewise* *charwise* *characterwise*
+操作符要么影响整行，要么影响开始
+和结束位置之间的字符。
+通常，在行之间移动的移动会影响行
+（是行模式的），而在行内移动的移动会影响字符（是
+字符模式的）。
+但是，也有一些例外。
 
-相乘："2d3w" => 删除 6 个单词
-操作符加倍："3dd"  "2y3y"
-大部分情况光标停留在操作文本的开头，例如，“yfe”不会移动光标，但“yFe”会将光标向左移动到开始提取的“e”。
+						*exclusive* *inclusive*
+字符移动可以是包含性的或非包含性的。
+当是包含性时，
+移动的开始和结束位置都包含在操作中。
+当
+是非包含性时，朝向缓冲区末尾的最后一个字符不被包含。
+行模式移动总是包含开始和结束位置。插件可以
+检查 |TextYankPost| 事件的 v:event.inclusive 标志。
+哪些移动是行模式的、包含性的或非包含性的，会在命令中提及。
+然而，有两个一般性的例外：
+1. 如果移动是非包含性的，并且移动的终点在第 1 列，则
+   移动的终点会移到前一行的末尾，并且移动
+   变为包含性。
+示例："}" 移动到段落后的第一行，
+   但 "d}" 将不包括那一行。
+*exclusive-linewise*
+2. 如果移动是非包含性的，移动的终点在第 1 列，并且
+   移动的起点在该行的第一个非空白字符处或之前，则
+   移动变为行模式。
+示例：如果一个段落以一些空格开头，
+   而你站在第一个非空白字符上执行 "d}"，那么段落的所有行
+   都会被删除，包括这些空格。
+如果你现在执行粘贴操作，
+   被删除的行将被插入到光标位置下方。
+注意，当操作符处于待定状态时（即已输入操作符命令，但
+移动命令尚未输入），可以使用一组特殊的映射。
+参见 |:omap|。
 
-操作符要么影响整行，要么影响开始和结束位置之间的字符
+除了先给出操作符再给出移动之外，你还可以使用可视
+模式：用 "v" 标记文本的开始，将光标移动到
+要影响的文本的末尾，然后点击操作符。
+开始和光标位置之间的文本
+会被高亮显示，这样你就可以看到哪些文本将被操作。
+这允许更大的自由度，但需要更多的按键，
+并且重做功能有限。请参见关于可视模式的章节
+|Visual-mode|。
+你可以使用 ":" 命令进行移动。例如 "d:call FindEnd()"。
+但是如果命令超过一行，这不能用 "."
+重复。
+这个可以重复： >
+	d:call search("f")<CR>
+这个不能重复： >
+	d:if 1<CR>
+	   call search("f")<CR>
+	endif<CR>
+注意，当使用 ":" 时，任何移动都会变成字符模式非包含性。
+*inclusive-motion-selection-exclusive*
+当 'selection' 为 "exclusive"，|Visual| 模式处于活动状态，并且使用了包含性
+移动时，光标位置将向右再调整一个
+字符，以便可视选择区包含预期的
+文本并可以对其进行操作。
+*forced-motion*
+强制移动为行模式、字符模式或块模式
 
-字符动作要么包括，要么不包括
-如果包括，则动作的开始和结束位置包含在操作中。
-如果包括，则缓冲区末尾的最后一个字符不包含在内
+当一个移动不是你想要使用的类型时，你可以在操作符之后
+使用 "v"、"V" 或 CTRL-V 来强制另一种类型。
+示例： >
+	dj
+删除两行 >
+	dvj
+从光标位置删除到光标下方的字符 >
+	d<C-V>j
+删除光标下的字符和光标下方的字符。
+>
 
-行动作始终包括开始和结束位置
-
-1. 如果动作是排他的，并且动作的结尾在第 1 列，则动作的结尾将移动到前一行的结尾，并且动作将变为包含的。
-例如：“}”移动到段落后的第一行，但“d}”将不包括该行。
-
-2. 如果动作是排他的，动作的结尾在第 1 列，并且动作的开始位于行中第一个非空白处或之前，则动作将变为逐行的。
-例如：如果段落以一些空白开头，并且您在第一个非空白处执行“d}”，则将删除该段落的所有行，包括空白。
-如果您现在执行 put，则删除的行将插入到光标位置下方。
-
-1. 操作符+动作
-  - 操作符开头的复合字母映射：dd
-  - 操作符等待模式 + 动作(omap)
-  - 操作符 + : + vimfunction
-      例如“d:call FindEnd()”。
-      但是，如果命令超过一行，则不能使用“.”重复此命令。
-          可以重复此命令：
-      	    d:call search("f")<CR>
-          不能重复此命令：
-      	    d:if 1<CR>
-      	      call search("f")<CR>
-      	      endif<CR>
-    
-2. visual+操作符
-
-1. 操作符等待模式（等待动作）omap
-2. 可视化模式选择范围，应用操作符
-
-
-如果动作不是您想要使用的类型，您可以在操作符后使用“v”、“V”或 CTRL-V 强制使用其他类型。
-示例：
-    dj	删除两行
-    dvj 从光标位置删除直到光标下方的字符
-    d<C-V>j 删除光标下方的字符和光标下方的字符
-
-强制逐行移动以逐字符或逐块使用时要小心，列可能并不总是定义的。
-
+小心将行模式移动强制为字符模式或块模式，
+列可能不总是被定义。
 *o_v*
-v 在操作符后、动作命令前使用时：强制操作符以逐字符方式工作，当动作为逐行时也是如此。
-如果动作是逐行的，它将变为 |exclusive|。
-如果动作已经是逐字符的，请切换包含/排除。这可用于使排他性运动成为包容性运动，并使包容性运动成为排他性运动。
-
+v		当在操作符之后、移动命令之前使用时：强制
+		操作符以字符模式工作，即使移动是
+		行模式的。
+如果移动是行模式的，它将变为
+		|exclusive|。
+		如果移动已经是字符模式的，则切换
+		包含性/非包含性。
+这可以用来使非包含性
+		移动变为包含性，包含性移动变为非包含性。
 *o_V*
-V 在操作符之后、运动命令之前使用时：强制操作符按行工作，当运动是字符时也是如此。
-
+V		当在操作符之后、移动命令之前使用时：强制
+		操作符以行模式工作，即使移动是
+		字符模式的。
 *o_CTRL-V*
-CTRL-V 在操作符之后、运动命令之前使用时：强制操作符按块工作。
-这类似于可视块模式选择，角由运动前后的光标位置定义。
-
+CTRL-V		当在操作符之后、移动命令之前使用时：强制
+		操作符以块模式工作。
+这就像可视块
+		模式选择一样工作，其角由移动
+		前后的光标位置定义。
 ==============================================================================
-2. Left-right motions					*left-right-motions*
+2. 左右移动					*left-right-motions*
 
-这些命令将光标移动到当前行的指定列。它们在第一列和行末停止
-但“$”除外，它可能会移动到下一行。
+这些命令将光标移动到当前行的指定列。
+它们会在第一列和行尾停止，除了 "$" 可能会
+移动到下一行之一。
+参见 'whichwrap' 选项，使一些
+命令可以跨越行边界移动。
 
-请参阅“whichwrap”选项以使某些命令跨行移动。
-
-h		or					*h*
-<Left>		or					*<Left>*
-CTRL-H		or					*CTRL-H* *<BS>*
-<BS>			向左移动 [count] 个字符.  |exclusive| motion.
-
-			Note: If you prefer <BS> to delete a character, use
-			the mapping:
+h		或					*h*
+<Left>		或					*<Left>*
+CTRL-H		或					*CTRL-H* *<BS>*
+<BS>			向左移动 [count] 个字符。|exclusive| 移动。
+注意：如果你希望 <BS> 删除一个字符，请使用
+			映射： >
 				:map CTRL-V<BS>		X
-			(to enter "CTRL-V<BS>" type the CTRL-V key, followed
-			by the <BS> key)
+<			（要输入 "CTRL-V<BS>"，请先按 CTRL-V 键，然后
+			按 <BS> 键）
 
-l		or					*l*
-<Right>		or					*<Right>* *<Space>*
-<Space>			[count] characters to the right.  |exclusive| motion.
-			See the 'whichwrap' option for adjusting the behavior
-			at end of line
+l		或					*l*
+<Right>		或					*<Right>* *<Space>*
+<Space>			向右移动 [count] 个字符。
+|exclusive| 移动。
+			有关在行尾调整行为的信息，请参阅 'whichwrap' 选项
 
 							*0*
-0			To the first character of the line.  |exclusive| motion.
+0			到行首的第一个字符。|exclusive|
+移动。
 
 							*<Home>* *<kHome>*
-<Home>			To the first character of the line.  |exclusive|
-			motion.  When moving up or down next, stay in same
-			TEXT column (if possible).  Most other commands stay
-			in the same SCREEN column.  <Home> works like "1|",
-			which differs from "0" when the line starts with a
-			<Tab>.
+<Home>			到行首的第一个字符。|exclusive|
+			移动。
+接下来向上或向下移动时，停留在相同的
+			文本列（如果可能）。大多数其他命令停留在
+			相同的屏幕列。
+<Home> 的作用类似于 "1|"，
+			当行以 <Tab> 开头时，它与 "0" 不同。
+*^*
+^			到行首的第一个非空白字符。
+			|exclusive| 移动。任何计数都将被忽略。
+*$* *<End>* *<kEnd>*
+$  或 <End>		到行尾。
+当给出计数时，也向下移动
+			[count - 1] 行，或尽可能远。
+			|inclusive| 移动。
+如果给出 2 或更大的计数，
+			并且光标在最后一行，则这是一个
+			错误，光标不会移动。
+在可视模式下，光标会移动到行中最后一个字符之后。
+当 'virtualedit' 激活时，"$" 可能会将光标
+			从行尾之后移回到行中的最后一个
+			字符。
+*g_*
+g_			到行尾的最后一个非空白字符，并
+			向下移动 [count - 1] 行 |inclusive|。
+*g0* *g<Home>*
+g0 或 g<Home>		当行换行时（'wrap' 开启）：到屏幕行的第一个字符。
+			|exclusive| 移动。
+当一行比屏幕宽时，与
+			"0" 不同。
+当行不换行时（'wrap' 关闭）：到屏幕上当前行的最左边
+			字符。
+当行的第一个字符
+不在屏幕上时，与 "0" 不同。
+*g^*
+g^			当行换行时（'wrap' 开启）：到屏幕行的第一个非空白
+			字符。|exclusive| 移动。
+当一行比屏幕宽时，与 "^" 不同。
+当行不换行时（'wrap' 关闭）：到屏幕上当前行的最左边
+			非空白字符。
+当行的第一个非空白
+			字符不在屏幕上时，与 "^" 不同。
+*gm*
+gm			类似于 "g0"，但向右移动半个屏幕宽度（或
+			尽可能多）。
+*gM*
+gM			类似于 "g0"，但移动到行文本的一半处。
+带有计数时：到行中文本的这个百分比位置。
+因此 "10gM" 靠近文本的开头，"90gM"
+			靠近文本的结尾。
+*g$*
+g$			当行换行时（'wrap' 开启）：到屏幕行的最后一个字符，
+			并向下移动 [count - 1] 个屏幕行
+			|inclusive|。
+当一行比屏幕宽时，
+			与 "$" 不同。
+当行不换行时（'wrap' 关闭）：到屏幕上可见的当前行的最右边
+			字符。
+当行的最后一个字符
+不在屏幕上或使用计数时，与 "$" 不同。
+此外，垂直移动会保持列，
+			而不是移动到行尾。
+当启用 'virtualedit' 时，会移动到屏幕行的末尾。
 
-							*^*
-^			到行的第一个非空白字符。
-			|exclusive| 动作。任何计数都会被忽略。
-			
-
-							*$* *<End>* *<kEnd>*
-$  or <End>		当给出计数时，也向下移动 [count - 1] 行，或尽可能远。
-			如果给出的计数为 2 或更大，并且光标位于最后一行，则会出现错误，并且光标不会移动。
-			在可视模式下，光标会移动到行中最后一个字符之后。
-			当“virtualedit”处于活动状态时，“$”可能会将光标从行尾移回行中的最后一个字符。
-
-							*g_*
-g_			到该行的最后一个非空白字符以及
-			向下 [count - 1] 行
-			|inclusive|.
-
-							*g0* *g<Home>*
-g0 or g<Home>		移动到屏幕行的第一个字符（识别wrap） |exclusive| 运动
-			当行宽超过屏幕时，与“0”不同。
-
-未使用!							*g^*
-g^			当行换行时（'wrap' 开启）：换行到屏幕行的第一个非空白字符。|exclusive| 运动。
-			当行比屏幕宽时，与“^”不同。
-			当行不换行时（'wrap' 关闭）：换行到屏幕上当前行最左边的非空白字符。
-			当行的第一个非空白字符不在屏幕上时，与“^”不同。
-
-							*gm*
-gm			与“g0”类似，但位于屏幕宽度的一半右侧（或尽可能向右）。
-
-							*gM*
-gM			类似于“g0”，但位于行文本的中间。
-			使用计数：位于行中文本的百分比。
-			因此，“10gM”位于文本开头附近，“90gM”位于文本结尾附近。
-
-							*g$*
-g$			当行换行时（启用“换行”）：移至屏幕行的最后一个字符，并向下移至 [count - 1] 个屏幕行（| 含|）。
-			当行宽于屏幕时，与“$”不同。
-			当行不换行时（禁用“换行”）：移至屏幕上可见的当前行的最右边的字符。
-			当行的最后一个字符不在屏幕上或使用计数时，与“$”不同。
-			此外，垂直移动会保持列不变，而不是移至行尾。
-			启用“virtualedit”时，将移至屏幕行的末尾。
-
-未使用!							*g<End>* *g<kEnd>*
-g<End>			Like |g$| but to the last non-blank character
-			instead of the last character.
+							*g<End>* *g<kEnd>*
+g<End>			类似于 |g$|
+但移动到最后一个非空白字符
+			而不是最后一个字符。
 
 							*bar*
-|			To screen column [count] in the current line.
-			|exclusive| motion.  Ceci n'est pas une pipe.
+|			到当前行的屏幕列 [count]。
+			|exclusive|
+移动。这不是一个管道。
 
 							*f*
-f{char}			To [count]'th occurrence of {char} to the right.  The
-			cursor is placed on {char} |inclusive|.
-			{char} can be entered as a digraph |digraph-arg|.
-			When 'encoding' is set to Unicode, composing
-			characters may be used, see |utf-8-char-arg|.
-			|:lmap| mappings apply to {char}.  The CTRL-^ command
-			in Insert mode can be used to switch this on/off
-			|i_CTRL-^|.
-
-							*F*
-F{char}			To the [count]'th occurrence of {char} to the left.
-			The cursor is placed on {char} |exclusive|.
-			{char} can be entered like with the |f| command.
+f{char}			向右移动到第 [count] 次出现的 {char}。
+			光标放置在 {char} 上 |inclusive|。
+{char} 可以作为双字符输入 |digraph-arg|。
+			当 'encoding' 设置为 Unicode 时，组合
+			字符可能会被使用，参见 |utf-8-char-arg|。
+|:lmap| 映射适用于 {char}。插入模式下的 CTRL-^ 命令
+			可用于打开/关闭此功能
+			|i_CTRL-^|。
+*F*
+F{char}			向左移动到第 [count] 次出现的 {char}。
+			光标放置在 {char} 上 |exclusive|。
+{char} 可以像 |f| 命令一样输入。
 
 							*t*
-t{char}			Till before [count]'th occurrence of {char} to the
-			right.  The cursor is placed on the character left of
-			{char} |inclusive|.
-			{char} can be entered like with the |f| command.
-
-							*T*
-T{char}			Till after [count]'th occurrence of {char} to the
-			left.  The cursor is placed on the character right of
-			{char} |exclusive|.
-			{char} can be entered like with the |f| command.
+t{char}			直到向右第 [count] 次出现 {char} 之前。
+光标放置在 {char} 左侧的字符上
+			|inclusive|。
+			{char} 可以像 |f| 命令一样输入。
+*T*
+T{char}			直到向左第 [count] 次出现 {char} 之后。
+			光标放置在 {char} 右侧的字符上 |exclusive|。
+{char} 可以像 |f| 命令一样输入。
 
 							*;*
-;			Repeat latest f, t, F or T [count] times. See |cpo-;|
+;			重复最新的 f, t, F 或 T [count] 次。
+参见 |cpo-;|
 
 							*,*
-,			Repeat latest f, t, F or T in opposite direction
-			[count] times. See also |cpo-;|
-
+,			在相反方向重复最新的 f, t, F 或 T
+			[count] 次。另请参见 |cpo-;|
 ==============================================================================
-3. Up-down motions					*up-down-motions*
+3. 上下移动					*up-down-motions*
 
-k		or					*k*
-<Up>		or					*<Up>* *CTRL-P*
-CTRL-P			[count] lines upward |linewise|.
+k		或					*k*
+<Up>		或					*<Up>* *CTRL-P*
+CTRL-P			向上移动 [count] 行 |linewise|。
 
-j		or					*j*
-<Down>		or					*<Down>*
-CTRL-J		or					*CTRL-J*
-<NL>		or					*<NL>* *CTRL-N*
-CTRL-N			[count] lines downward |linewise|.
+j		或					*j*
+<Down>		或					*<Down>*
+CTRL-J		或					*CTRL-J*
+<NL>		或					*<NL>* *CTRL-N*
+CTRL-N			向下移动 [count] 行 |linewise|。
 
-gk		or					*gk* *g<Up>*
-g<Up>			[count] display lines upward.  |exclusive| motion.
-			Differs from 'k' when lines wrap, and when used with
-			an operator, because it's not linewise.
+gk		或					*gk* *g<Up>*
+g<Up>			向上移动 [count] 个显示行。|exclusive| 移动。
+当行换行时，与 'k' 不同；当与
+			操作符一起使用时也不同，因为它不是行模式的。
 
-gj		or					*gj* *g<Down>*
-g<Down>			[count] display lines downward.  |exclusive| motion.
-			Differs from 'j' when lines wrap, and when used with
-			an operator, because it's not linewise.
+gj		或					*gj* *g<Down>*
+g<Down>			向下移动 [count] 个显示行。
+|exclusive| 移动。
+			当行换行时，与 'j' 不同；当与
+			操作符一起使用时也不同，因为它不是行模式的。
+*-*
+`-`  <minus>		向上移动 [count] 行，到第一个非空白
+			字符处 |linewise|。
 
-							*-*
-`-`  <minus>		[count] lines upward, on the first non-blank
-			character |linewise|.
-
-`+`		or					*+*
-CTRL-M		or					*CTRL-M* *<CR>*
-<CR>			[count] lines downward, on the first non-blank
-			character |linewise|.
-
-未使用！							*_*
-_  <underscore>		[count] - 1 lines downward, on the first non-blank
-			character |linewise|.
-
-			行号绝对位置
-							*G*
-G			Goto line [count], default last line, on the first
-			non-blank character |linewise|.  If 'startofline' not
-			set, keep the same column.
-			G is one of the |jump-motions|.
+`+`		或					*+*
+CTRL-M		或					*CTRL-M* *<CR>*
+<CR>			向下移动 [count] 行，到第一个非空白
+			字符处 |linewise|。
+*_*
+_  <underscore>		向下移动 [count] - 1 行，到第一个非空白
+			字符处 |linewise|。
+*G*
+G			跳转到第 [count] 行，默认为最后一行，到第一个
+			非空白字符处 |linewise|。如果 'startofline' 未
+			设置，则保持相同的列。
+G 是 |jump-motions| 之一。
 
 							*<C-End>*
-<C-End>			Goto line [count], default last line, on the last	
-			character |inclusive|.
-
-<C-Home>	or					*gg* *<C-Home>*
-gg			Goto line [count], default first line, on the first
-			non-blank character |linewise|.  If 'startofline' not
-			set, keep the same column.
-
-							*:[range]*
-:[range]		Set the cursor on the last line number in [range].
-			[range] can also be just one line number, e.g., ":1"
-			or ":'m".
-			In contrast with |G| this command does not modify the
-			|jumplist|.
-			1. 可跳转mark标记
-			2. 不会记录
-??							*N%*
-{count}%		Go to {count} percentage in the file, on the first
-			non-blank in the line |linewise|.  To compute the new
-			line number this formula is used:
-			    ({count} * number-of-lines + 99) / 100
-			See also 'startofline' option.
-
-			字符绝对位置
-
+<C-End>			跳转到第 [count] 行，默认为最后一行，到最后一个
+			字符处 |inclusive|。
+<C-Home>	或					*gg* *<C-Home>*
+gg			跳转到第 [count] 行，默认为第一行，到第一个
+			非空白字符处 |linewise|。如果 'startofline' 未
+			设置，则保持相同的列。
+*:[range]*
+:[range]		将光标设置在 [range] 中的最后一行号上。
+			在 Ex 模式下，打印 [range] 中的行。
+[range] 也可以只是一个行号，例如，":1"
+			或 ":'m"。
+			与 |G| 相比
+此命令不会修改
+			|jumplist|。
+							*N%*
+{count}%		跳转到文件中的 {count} 百分比位置，在该行的第一个
+			非空白处 |linewise|。
+计算新
+			行号使用以下公式：
+			    ({count} * 行数 + 99) / 100
+			另请参阅 'startofline' 选项。
 :[range]go[to] [count]					*:go* *:goto* *go*
-[count]go		转到缓冲区中的 [count] 字节。|exclusive| 动作。
-			默认 [count] 为 1，即文件开头。当给出 [range] 时，其中的最后一个数字用作字节计数。
-			行尾字符的计数取决于当前的 'fileformat' 设置。
-			另请参阅 |line2byte()| 函数和 'statusline' 中的 'o'选项。
+[count]go		跳转到缓冲区中的第 [count] 个字节。|exclusive| 移动。
+			默认 [count] 为一，即文件开头。
+当
+			给出 [range] 时，其中的最后一个数字用作字节
+			计数。行尾字符的计数取决于
+			当前的 'fileformat' 设置。
+另请参阅 |line2byte()| 函数和 'statusline' 中的 'o'
+			选项。
 
-这些命令会移动到指定行。
-它们会在到达第一行或最后一行时停止。
-前两个命令会将光标放在与上一个更改列的命令相同的列中（如果可能），
-但“$”命令除外，否则光标将放在该行的最后一个字符上。
-
+这些命令移动到指定的行。
+它们在到达第一行
+或最后一行时停止。前两个命令将光标置于与上次
+更改列的命令之后相同的列（如果可能），
+但在 "$" 命令之后除外，此时光标将被置于该行的最后一个
+字符上。
 ==============================================================================
-4. Word motions						*word-motions*
+4. 单词移动						*word-motions*
 
-<S-Right>	or					*<S-Right>* *w*
-w			[count] words forward.  |exclusive| motion.
+<S-Right>	或					*<S-Right>* *w*
+w			向前移动 [count] 个单词。|exclusive| 移动。
 
-<C-Right>	or					*<C-Right>* *W*
-W			[count] WORDS forward.  |exclusive| motion.
+<C-Right>	或					*<C-Right>* *W*
+W			向前移动 [count] 个大写单词。|exclusive| 移动。
+*e*
+e			向前移动到第 [count] 个单词的末尾 |inclusive|。
+			不会在空行停止。
+*E*
+E			向前移动到第 [count] 个大写单词的末尾 |inclusive|。
+			不会在空行停止。
 
-							*e*
-e			Forward to the end of word [count] |inclusive|.
-			Does not stop in an empty line.
+<S-Left>	或					*<S-Left>* *b*
+b			向后移动 [count] 个单词。|exclusive|
+移动。
 
-							*E*
-E			Forward to the end of WORD [count] |inclusive|.
-			Does not stop in an empty line.
-
-<S-Left>	or					*<S-Left>* *b*
-b			[count] words backward.  |exclusive| motion.
-
-<C-Left>	or					*<C-Left>* *B*
-B			[count] WORDS backward.  |exclusive| motion.
+<C-Left>	或					*<C-Left>* *B*
+B			向后移动 [count] 个大写单词。|exclusive| 移动。
 
 							*ge*
-ge			Backward to the end of word [count] |inclusive|.
+ge			向后移动到第 [count] 个单词的末尾 |inclusive|。
+*gE*
+gE			向后移动到第 [count] 个大写单词的末尾 |inclusive|。
 
-							*gE*
-gE			Backward to the end of WORD [count] |inclusive|.
-
-这些命令在 word 或 WORDS 上移动。
-
+这些命令移动过单词或大写单词。
 *word*
-单词由字母、数字和下划线序列组成，或由其他非空白字符序列组成，
-以空格（空格、制表符、<EOL>）分隔。可以使用“iskeyword”选项更改。空行也被视为单词。
-
+一个单词由一串字母、数字和下划线组成，或者由
+一串其他非空白字符组成，用空白（空格、
+制表符、<EOL>）分隔。
+这可以通过 'iskeyword' 选项来更改。空行
+也被认为是一个单词。
 *WORD*
-WORD 由非空白字符序列组成，以空格分隔。
-空行也被视为单词。
+一个大写单词由一串非空白字符组成，用空白分隔。
+空行也被认为是一个大写单词。
+一系列折叠的行被计为一个单字符的单词。
+"w" 和 "W"、"e" 和 "E" 移动到一系列折叠行之后的第一个单词或大写单词的开头/结尾。
+"b" 和 "B" 移动到折叠之前的第一个单词或大写单词的开头。
+特殊情况：如果光标在非空白字符上，"cw" 和 "cW" 会被视为 "ce" 和 "cE"。
+这是 Vi 兼容的，参见 |cpo-_| 来更改行为。
 
-折叠行序列计为一个字符的单词。
-“w”和“W”、“e”和“E”移动到一系列折叠行之后的第一个单词或 WORD 的开头/结尾。
-“b”和“B”移动到折叠前的第一个单词或 WORD 的开头。
-
-特殊情况：如果光标位于非空白处，则“cw”和“cW”将被视为“ce”和“cE”。这与 Vi 兼容，请参阅 |cpo-_| 以更改行为。
-
-另一个特殊情况：当将“w”动作与操作符结合使用时，如果移动的最后一个单词位于行尾，则该单词的末尾将成为操作文本的末尾，而不是下一行的第一个单词。
-
-Vi 对“e”的原始实现存在错误。例如，如果前一行是空的，“e”命令将停止在行的第一个字符上。
-但是当您使用“2e”时，不会发生这种情况。在 Vim 中，“ee”和“2e”是相同的，这更合乎逻辑。
-但是，这会导致 Vi 和 Vim 之间出现轻微的不兼容性。
+另一个特殊情况：当使用 "w" 移动并与操作符结合时，
+如果移动过的最后一个单词在行尾，那么该单词的结尾将成为
+操作文本的结尾，而不是下一行的第一个单词。
+"e" 的原始 Vi 实现是有缺陷的。例如，如果前一行是空的，"e" 命令会停在一行的第一个字符上。
+但是当你使用 "2e" 时，这种情况不会发生。在 Vim 中，"ee" 和 "2e" 是相同的，
+这更合乎逻辑。
+然而，这导致了 Vi 和 Vim 之间的一个小不兼容。
 
 ==============================================================================
-5. Text object motions					*object-motions*
+5. 文本对象移动					*object-motions*
 
 							*(*
-(			[count] |sentence|s backward.  |exclusive| motion.
+(			向后移动 [count] 个 |sentence|。|exclusive| 移动。
 
 							*)*
-)			[count] |sentence|s forward.  |exclusive| motion.
+)			向前移动 [count] 个 |sentence|。
+|exclusive| 移动。
 
 							*{*
-{			[count] |paragraph|s backward.  |exclusive| motion.
+{			向后移动 [count] 个 |paragraph|。|exclusive| 移动。
 
 							*}*
-}			[count] |paragraph|s forward.  |exclusive| motion.
+}			向前移动 [count] 个 |paragraph|。|exclusive| 移动。
+*]]*
+]]			向前移动 [count] 个 |section| 或到第一列的下一个 "{"。
+当在操作符之后使用时，那么也
+			会在第一列的 "}" 下方停止。|exclusive|
+			注意 |exclusive-linewise| 经常适用。
+在 :terminal 缓冲区中，每个 shell 提示符都被视为
+			一个段。|terminal_]]|
+*][*
+][			向前移动 [count] 个 |section| 或到第一列的下一个 '}'。|exclusive|
+			注意 |exclusive-linewise| 经常适用。
+*[[*
+[[			向后移动 [count] 个 |section| 或到第一列的前一个 "{"。|exclusive|
+			注意 |exclusive-linewise| 经常适用。
+在 :terminal 缓冲区中，每个 shell 提示符都被视为
+			一个段。|terminal_]]|
+*[]*
+[]			向后移动 [count] 个 |section| 或到第一列的前一个 "}"。|exclusive|
+			注意 |exclusive-linewise| 经常适用。
+这些命令移动过三种文本对象。
 
-							*]]*
-]]			[count] |section|s forward or to the next "{" in the
-			first column.  When used after an operator, then also
-			stops below a "}" in the first column.  |exclusive|
-			Note that |exclusive-linewise| often applies.
+							*sentence*
+一个句子被定义为以 '.'、'!'
+或 '?' 结尾，其后跟
+行尾，或空格或制表符。
+在 '.'、'!' 或 '?' 之后可以出现任意数量的闭合 ')'、']'、'"'
+和 ''' 字符，
+然后是空格、
+制表符或行尾。段落和节边界也是句子
+边界。
+如果 'J' 标志存在于 'cpoptions' 中，则标点符号后必须至少跟两个空格；
+<Tab> 不被识别为空白。
+句子的定义不能更改。
 
-							*][*
-][			[count] |section|s forward or to the next '}' in the
-			first column.  |exclusive|
-			Note that |exclusive-linewise| often applies.
+							*paragraph*
+一个段落在每个空行之后开始，也在一组
+段落宏处开始，由 'paragraphs'
+选项中的字符对指定。默认是 "IPLPPPQPP TPHPLIPpLpItpplpipbp"，对应于
+宏 ".IP"、".LP" 等。（这些是 nroff 宏，所以点必须在
+第一列）。一个节
+边界也是一个段落边界。
+注意，一个空行（只包含空白）不是一个段落
+边界。
+注意：这不包括第一列的 '{' 或 '}'。
 
-							*[[*
-[[			[count] |section|s backward or to the previous "{" in
-			the first column.  |exclusive|
-			Note that |exclusive-linewise| often applies.
-
-							*[]*
-[]			[count] |section|s backward or to the previous "}" in
-			the first column.  |exclusive|
-			Note that |exclusive-linewise| often applies.
-
-]]   向后{
-][   向后}
-[[   向前{
-[]   向前}
-
-注意：{ or } 必须在第一列才算数
-
-{
-  abc
-}
-
-{
-  abc
-}
-
-
-这些命令可在三种文本对象上移动。
-
-*句子*
-句子的定义是，以 '.'、'!' 或 '?' 结尾，后跟一行的结尾，或者空格或制表符。
-在 '.'、'!' 或 '?' 之后可以出现任意数量的结束 ')'、']'、'"'和 ''' 字符在空格、制表符或行尾之前。
-段落和节边界也是句子边界。
-如果“cpoptions”中存在“J”标志，标点符号后必须至少有两个空格；<Tab> 不会被识别为空格。
-句子的定义不能改变。
-
-*段落*
-段落在每个空行之后开始，也在每个段落宏集之后开始，这些宏集由“段落”选项中的字符对指定。
-默认值为“IPLPPPQPP TPHPLIPpLpItpplpipbp”，它对应于宏“.IP”、“.LP”等。
-（这些是 nroff 宏，因此点必须位于第一列）。节边界也是段落边界。
-请注意，空白行（仅包含空格）不是段落边界。
-注意：这不包括第一列中的“{”或“}”。
-
-*section*
-节从第一列的换页符 (<C-L>) 后开始，并开始于由 'sections' 选项中的字符对指定的一组节宏中的每一个。
-默认值为“SHNHH HUnhsh”，它定义一个节从 nroff 宏“.SH”、“.NH”、“.H”、“.HU”、“.nh”和“.sh”开始。
-“]]”和“[[”命令在第一列的“{”处停止。
-  这对于查找 C 程序中函数的开头很有用。要在第一列（C 函数的结尾）中搜索“}”，请使用“][”（向前）或“[]”（向后）。
-  请注意，命令的第一个字符决定了搜索方向。
-
-If your '{' or '}' are not in the first column, and you would like to use "[["
-and "]]" anyway, try these mappings: >
+							*section*
+一个节在第一列的换页符（<C-L>）之后开始，也在一组
+节宏处开始，由 'sections' 选项中的字符对指定。
+默认是 "SHNHH HUnhsh"，它定义一个节
+在 nroff 宏 ".SH"、".NH"、".H"、".HU"、".nh" 和 ".sh" 处开始。
+在 :terminal 缓冲区中，每个 shell 提示符都被视为一个节。|terminal_]]|
+"]]" 和 "[[" 命令在第一列的 '{' 处停止。
+这
+对于在 C 程序中查找函数开头很有用。
+要搜索第一列中的 '}'，
+即 C 函数的结尾，请使用 "]["（向前）或 "[]"
+（向后）。
+注意，命令的第一个字符决定了
+搜索方向。
+如果你的 '{' 或 '}' 不在第一列，而你仍想使用 "[["
+和 "]]"，请尝试这些映射： >
    :map [[ ?{<CR>w99[{
    :map ][ /}<CR>b99]}
    :map ]] j0[[%/{<CR>
    :map [] k$][%?}<CR>
-[type these literally, see |<>|]
+[请照字面输入，参见 |<>|]
 
 ==============================================================================
-6. Text object selection			*object-select* *text-objects*
+6. 文本对象选择			*object-select* *text-objects*
 						*v_a* *v_i*
 
-这是一系列只能在可视模式下或在操作符之后使用的命令。
-以“a”开头的命令选择“a”n 个对象，包括空格，以“i”开头的命令选择“内部”对象，不带空格，或仅带空格。
-因此，“内部”命令选择的文本总是比“a”命令少。
-
-另请参阅`gn`和`gN`，它们对最后一个搜索模式进行操作。
+这是一系列只能在可视模式下或
+在操作符之后使用的命令。
+以 "a" 开头的命令选择一个包含
+空白的对象，以 "i" 开头的命令选择一个不带
+空白的“内部”对象，或者只选择空白。
+因此，“内部”命令
+总是比 "a" 命令选择更少的文本。
+另请参见 `gn` 和 `gN`，作用于上一个搜索模式。
 
 							*v_aw* *aw*
-aw			"a word", select [count] words (see |word|).
-			Leading or trailing white space is included, but not
-			counted.
-			When used in Visual linewise mode "aw" switches to
-			Visual charwise mode.
-
-							*v_iw* *iw*
-iw			"inner word", select [count] words (see |word|).
-			White space between words is counted too.
-			When used in Visual linewise mode "iw" switches to
-			Visual charwise mode.
+aw			"a word"，选择 [count] 个单词（参见 |word|）。
+前导或尾随的空白被包括在内，但
+			不被计数。
+			在可视行模式下使用时，"aw" 会切换到
+			可视字符模式。
+*v_iw* *iw*
+iw			"inner word"，选择 [count] 个单词（参见 |word|）。
+			单词之间的空白也被计数。
+在可视行模式下使用时，"iw" 会切换到
+			可视字符模式。
 
 							*v_aW* *aW*
-aW			"a WORD", select [count] WORDs (see |WORD|).
-			Leading or trailing white space is included, but not
-			counted.
-			When used in Visual linewise mode "aW" switches to
-			Visual charwise mode.
-
-							*v_iW* *iW*
-iW			"inner WORD", select [count] WORDs (see |WORD|).
-			White space between words is counted too.
-			When used in Visual linewise mode "iW" switches to
-			Visual charwise mode.
+aW			"a WORD"，选择 [count] 个大写单词（参见 |WORD|）。
+前导或尾随的空白被包括在内，但
+			不被计数。
+			在可视行模式下使用时，"aW" 会切换到
+			可视字符模式。
+*v_iW* *iW*
+iW			"inner WORD"，选择 [count] 个大写单词（参见 |WORD|）。
+			单词之间的空白也被计数。
+在可视行模式下使用时，"iW" 会切换到
+			可视字符模式。
 
 							*v_as* *as*
-as			"a sentence", select [count] sentences (see
-			|sentence|).
-			When used in Visual mode it is made charwise.
+as			"a sentence"，选择 [count] 个句子（参见
+			|sentence|）。
+在可视模式下使用时，它会变为字符模式。
 
 							*v_is* *is*
-is			"inner sentence", select [count] sentences (see
-			|sentence|).
-			When used in Visual mode it is made charwise.
+is			"inner sentence"，选择 [count] 个句子（参见
+			|sentence|）。
+在可视模式下使用时，它会变为字符模式。
 
 							*v_ap* *ap*
-ap			"a paragraph", select [count] paragraphs (see
-			|paragraph|).
-			Exception: a blank line (only containing white space)
-			is also a paragraph boundary.
-			When used in Visual mode it is made linewise.
+ap			"a paragraph"，选择 [count] 个段落（参见
+			|paragraph|）。
+例外：一个空行（只包含空白）
+			也是一个段落边界。
+在可视模式下使用时，它会变为行模式。
 
 							*v_ip* *ip*
-ip			"inner paragraph", select [count] paragraphs (see
-			|paragraph|).
-			Exception: a blank line (only containing white space)
-			is also a paragraph boundary.
-			When used in Visual mode it is made linewise.
+ip			"inner paragraph"，选择 [count] 个段落（参见
+			|paragraph|）。
+例外：一个空行（只包含空白）
+			也是一个段落边界。
+在可视模式下使用时，它会变为行模式。
 
 a]						*v_a]* *v_a[* *a]* *a[*
-a[			"a [] block", select [count] '[' ']' blocks.  This
-			goes backwards to the [count] unclosed '[', and finds
-			the matching ']'.  The enclosed text is selected,
-			including the '[' and ']'.  The |cpo-M| option flag
-			is used to handle escaped brackets.
-			When used in Visual mode it is made charwise.
-
+a[			"a [] block"，选择 [count] 个 '[' ']' 块。
+这
+			会向后找到第 [count] 个未闭合的 '['，并找到
+			匹配的 ']'。被包围的文本被选中，
+			包括 '[' 和 ']'。
+|cpo-M| 选项标志
+			用于处理转义的方括号。
+			在可视模式下使用时，它会变为字符模式。
 i]						*v_i]* *v_i[* *i]* *i[*
-i[			"inner [] block", select [count] '[' ']' blocks.  This
-			goes backwards to the [count] unclosed '[', and finds
-			the matching ']'.  The enclosed text is selected,
-			excluding the '[' and ']'.  It's an error to select an
-			empty inner block like "[]".  The |cpo-M| option flag
-			is used to handle escaped brackets.
-			When used in Visual mode it is made charwise.
+i[			"inner [] block"，选择 [count] 个 '[' ']' 块。
+这
+			会向后找到第 [count] 个未闭合的 '['，并找到
+			匹配的 ']'。被包围的文本被选中，
+			不包括 '[' 和 ']'。
+选择一个空的
+			内部块如 "[]" 是一个错误。|cpo-M| 选项标志
+			用于处理转义的方括号。
+在可视模式下使用时，它会变为字符模式。
 
 a)							*v_a)* *a)* *a(*
 a(							*vab* *v_ab* *v_a(* *ab*
-ab			"a block", select [count] blocks, from "[count] [(" to
-			the matching ')', including the '(' and ')' (see
-			|[(|).  Does not include white space outside of the
-			parenthesis.  The |cpo-M| option flag is used to
-			handle escaped parenthesis.
-			When used in Visual mode it is made charwise.
+ab			"a block"，选择 [count] 个块，从 "[count] [(" 到
+			匹配的 ')'，包括 '(' 和 ')'（参见
+			|[(|）。不包括括号外的空白。
+			|cpo-M| 选项标志用于
+			处理转义的括号。
+			在可视模式下使用时，它会变为字符模式。
 
 i)							*v_i)* *i)* *i(*
 i(							*vib* *v_ib* *v_i(* *ib*
-ib			"inner block", select [count] blocks, from "[count] [("
-			to the matching ')', excluding the '(' and ')' (see
-			|[(|).  If the cursor is not inside a () block, then
-			find the next "(".  It's an error to select an empty
-			inner block like "()".  The |cpo-M| option flag
-			is used to handle escaped parenthesis.
-			When used in Visual mode it is made charwise.
+ib			"inner block"，选择 [count] 个块，从 "[count] [("
+			到匹配的 ')'，不包括 '(' 和 ')'（参见
+			|[(|）。如果光标不在 () 块内，则
+			找到下一个 "("。选择一个
+空的
+			内部块如 "()" 是一个错误。|cpo-M| 选项标志
+			用于处理转义的括号。
+			在可视模式下使用时，它会变为字符模式。
 
 a>						*v_a>* *v_a<* *a>* *a<*
-a<			"a <> block", select [count] <> blocks, from the
-			[count]'th unmatched '<' backwards to the matching
-			'>', including the '<' and '>'.  The |cpo-M| option flag
-			is used to handle escaped '<' and '>'.
-			When used in Visual mode it is made charwise.
+a<			"a <> block"，选择 [count] 个 <> 块，从
+			向后第 [count] 个未匹配的 '<' 到匹配的
+			'>'，包括 '<' 和 '>'。|cpo-M| 选项标志
+			用于处理转义的 '<' 和 '>'。
+在可视模式下使用时，它会变为字符模式。
 
 i>						*v_i>* *v_i<* *i>* *i<*
-i<			"inner <> block", select [count] <> blocks, from
-			the [count]'th unmatched '<' backwards to the matching
-			'>', excluding the '<' and '>'.  It's an error to
-			select an empty inner block like "<>".  The |cpo-M|
-			option flag is used to handle escaped '<' and '>'.
-			When used in Visual mode it is made charwise.
-
-						*v_at* *at*
-at			"a tag block", select [count] tag blocks, from the
-			[count]'th unmatched "<aaa>" backwards to the matching
-			"</aaa>", including the "<aaa>" and "</aaa>".
-			See |tag-blocks| about the details.
-			When used in Visual mode it is made charwise.
-
-						*v_it* *it*
-it			"inner tag block", select [count] tag blocks, from the
-			[count]'th unmatched "<aaa>" backwards to the matching
-			"</aaa>", excluding the "<aaa>" and "</aaa>".
-			See |tag-blocks| about the details.
-			When used in Visual mode it is made charwise.
-
+i<			"inner <> block"，选择 [count] 个 <> 块，从
+			向后第 [count] 个未匹配的 '<' 到匹配的
+			'>'，不包括 '<' 和 '>'。
+选择一个空的内部块如 "<>"
+			是一个错误。|cpo-M|
+选项标志用于处理转义的 '<' 和 '>'。
+			在可视模式下使用时，它会变为字符模式。
+*v_at* *at*
+at			"a tag block"，选择 [count] 个标签块，从
+			向后第 [count] 个未匹配的 "<aaa>" 到匹配的
+			"</aaa>"，包括 "<aaa>" 和 "</aaa>"。
+详情参见 |tag-blocks|。
+			在可视模式下使用时，它会变为字符模式。
+*v_it* *it*
+it			"inner tag block"，选择 [count] 个标签块，从
+			向后第 [count] 个未匹配的 "<aaa>" 到匹配的
+			"</aaa>"，不包括 "<aaa>" 和 "</aaa>"。
+详情参见 |tag-blocks|。
+			在可视模式下使用时，它会变为字符模式。
 a}							*v_a}* *a}* *a{*
 a{							*v_aB* *v_a{* *aB*
-aB			"a Block", select [count] Blocks, from `[count] [{` to
-			the matching "}", including the "{" and "}" (see
-			|[{|).  The |cpo-M| option flag is used to handle
-			escaped braces.
-			When used in Visual mode it is made charwise.
-
+aB			"a Block"，选择 [count] 个块，从 `[count] [{` 到
+			匹配的 "}"，包括 "{" 和 "}"（参见
+			|[{|）。
+|cpo-M| 选项标志用于处理
+			转义的大括号。
+			在可视模式下使用时，它会变为字符模式。
 i}							*v_i}* *i}* *i{*
 i{							*v_iB* *v_i{* *iB*
-iB			"inner Block", select [count] Blocks, from `[count] [{`
-			to the matching "}", excluding the "{" and "}" (see
-			|[{|).  It"s an error to select an empty inner block
-			like "{}".  The |cpo-M| option flag is used to handle
-			escaped braces.
-			When used in Visual mode it is made charwise.
+iB			"inner Block"，选择 [count] 个块，从 `[count] [{`
+			到匹配的 "}"，不包括 "{" 和 "}"（参见
+			|[{|）。
+选择一个空的内部块
+			如 "{}" 是一个错误。|cpo-M| 选项标志用于处理
+			转义的大括号。
+			在可视模式下使用时，它会变为字符模式。
 
 a"							*v_aquote* *aquote*
 a'							*v_a'* *a'*
 a`							*v_a`* *a`*
-			"a quoted string".  Selects the text from the previous
-			quote until the next quote.  The 'quoteescape' option
-			is used to skip escaped quotes.
-			Only works within one line.
-			When the cursor starts on a quote, Vim will figure out
-			which quote pairs form a string by searching from the
-			start of the line.
-			Any trailing white space is included, unless there is
-			none, then leading white space is included.
-			When used in Visual mode it is made charwise.
-			Repeating this object in Visual mode another string is
-			included.  A count is currently not used.
+			"a quoted string"。
+选择从前一个
+			引号到下一个引号的文本。'quoteescape' 选项
+			用于跳过转义的引号。
+仅在单行内有效。
+			当光标从引号开始时，Vim 会通过从
+			行首搜索来确定哪对引号构成字符串。
+任何尾随的空白都被包括在内，除非没有，
+			那么前导的空白被包括在内。
+在可视模式下使用时，它会变为字符模式。
+			在可视模式下重复此对象会包括
+			另一个字符串。
+当前不使用计数。
 
 i"							*v_iquote* *iquote*
 i'							*v_i'* *i'*
 i`							*v_i`* *i`*
-			Like a", a' and a`, but exclude the quotes and
-			repeating won't extend the Visual selection.
-			Special case: With a count of 2 the quotes are
-			included, but no extra white space as with a"/a'/a`.
+			类似于 a"、a' 和 a`，但不包括引号，并且
+			重复不会扩展可视选择区。
+特殊情况：计数为 2 时，引号
+			被包括在内，但没有像 a"/a'/a` 那样的额外空白。
 
 							*o_object-select*
-*o_object-select*
-在运算符之后使用时：
+当在操作符之后使用时：
 对于非块对象：
-对于“a”命令：运算符适用于对象和对象后的空白。如果对象后没有空白或光标位于对象前的空白处，则包括对象前的空白。
-对于“inner”命令：如果光标位于对象上，则运算符适用于对象。如果光标位于空白处，则运算符适用于空白。
+	对于 "a" 命令：操作符应用于对象和
+	对象之后的空白。如果对象之后没有空白
+	或者当光标在对象之前的空白中时，对象
+	之前的空白被包括在内。
+	对于“内部”命令：如果光标在对象上，
+	操作符应用于对象。如果光标在空白上，
+	操作符应用于空白。
 对于块对象：
-运算符适用于光标所在的块，或光标位于括号之一上的块。对于“inner”命令，括号被排除在外。对于“a”命令，括号被包括在内。
+	操作符
+应用于光标所在的块，或光标
+	位于其大括号之一上的块。对于“内部”命令，
+	周围的大括号被排除。对于 "a" 命令，大括号
+	被包括在内。
 
 							*v_object-select*
-在可视模式下使用时：
-当可视区域的开始和结束相同时（刚输入“v”后）：
-选择一个对象，与使用运算符相同。
-当可视区域的开始和结束不同时：
-对于非块对象，区域将扩展一个对象或空白空间到下一个对象，对于“a”对象则两者兼而有之。这种情况发生的方向取决于光标位于可视区域的哪一侧。对于块对象，块向外扩展一层。
-为了说明，下面是删除命令列表，按从小到大对象分组。请注意，对于单个字符和整行，使用现有的 vi 移动命令。
+当在可视模式下使用时：
+当可视区域的开始和结束相同时（刚输入 "v" 之后）：
+	一个对象被选中，与使用操作符时相同。
+当可视区域的开始和结束不相同时：
+	对于非块对象，区域会扩展一个对象或
+	直到下一个对象的空白，或对于 "a" 对象两者都扩展。
+发生
+	这种情况的方向取决于光标在可视区域的哪一侧。
+对于块对象，块向外扩展
+	一级。
+为说明起见，这里是删除命令的列表，按从小到大的
+对象分组。
+注意，对于单个字符和整行，使用现有的 vi
+移动命令。
+	"dl"	删除字符 (别名: "x")		|dl|
+"diw"	删除内部单词			*diw*
+	"daw"	删除一个单词				*daw*
+	"diW"	删除内部大写单词 (参见 |WORD|)		*diW*
+	"daW"	删除一个大写单词 (参见 |WORD|)		*daW*
+	"dgn"   删除下一个搜索模式匹配项    *dgn*
+	"dd"	删除一行				|dd|
+"dis"	删除内部句子			*dis*
+	"das"	删除一个句子			*das*
+	"dib"	删除内部 '(' ')' 块		*dib*
+	"dab"	删除一个 '(' ')' 块			*dab*
+	"dip"	删除内部段落			*dip*
+	"dap"	删除一个段落			*dap*
+	"diB"	删除内部 '{' '}' 块		*diB*
+	"daB"	删除一个 '{' '}' 块			*daB*
 
-注意	"dgn"   delete the next search pattern match    *dgn*
+注意使用移动命令和对象之间的区别。
 
-请注意使用移动命令和对象之间的区别。
-移动命令从此处（光标位置）开始操作，直到移动带我们到达的地方。
-使用对象时，无论光标在对象上的哪个位置，都会对整个对象进行操作。
-例如，比较“dw”和“daw”：“dw”从光标位置删除到下一个单词的开头，“daw”删除光标下的单词以及其后或前的空格。
+移动命令从这里（光标位置）操作到移动
+带我们去的地方。
+当使用对象时，整个对象都被操作，无论
+光标在对象的哪个位置。
+例如，比较 "dw" 和 "daw"："dw"
+从光标位置删除到下一个单词的开头，"daw" 删除
+光标下的单词及其之后或之前的空格。
+标签块						*tag-blocks*
 
-对于“it”和“at”文本对象，会尝试选择 HTML 和 XML 匹配标签之间的块。但由于这些并不完全兼容，因此有一些限制。
-正常方法是选择 <tag> 直到匹配的 </tag>。对于“at”，标签包括在内，对于“it”，则排除标签。但当重复“it”时，标签将被包括在内（否则不会发生任何变化）。
-此外，在没有内容的标签块上使用“it”将选择前导标签。
-“<aaa/>”项将被跳过。忽略大小写，对于大小写很重要的 XML 也是如此。
-在 HTML 中，可能存在像 <br> 或 <meta ...> 这样的标签，而没有匹配的结束标签。这些将被忽略。
-文本对象对错误是宽容的。杂散的结束标签将被忽略。
+对于 "it" 和 "at" 文本对象，会尝试选择
+HTML 和 XML 的匹配标签之间的块。
+但由于这些不完全兼容，
+有一些限制。
+正常方法是选择一个 <tag> 直到匹配的 </tag>。
+对于 "at"，
+标签被包括在内，对于 "it"，它们被排除。
+但是当 "it" 重复时，
+标签将被包括在内（否则什么都不会改变）。
+此外，在没有
+内容的标签块上使用 "it" 将选择前导标签。
 
+"<aaa/>" 项被跳过。
+忽略大小写，对于 XML 也是如此，尽管大小写在 XML 中很重要。
+
+在 HTML 中，可能会有像 <br> 或 <meta ...> 这样的标签，而没有
+匹配的结束标签。
+这些会被忽略。
+
+文本对象对错误是宽容的。游离的结束标签被忽略。
 ==============================================================================
-7. Marks					*mark-motions* *E20* *E78*
+7. 标记					*mark-motions* *E20* *E78*
 
-跳转到标记有两种方式：
-1. 使用 `（反引号）：光标定位在指定位置 并且动作是 |exclusive|。
-2. 使用 '（单引号）：光标定位在指定位置行中的第一个非空白字符上，并且动作是逐行的。
-3. 除上述情况外，如果 'jumpoptions' 包含“view”，它们还将尝试恢复标记视图。
-这是光标位置和窗口顶行（窗口中显示的第一个缓冲区行）之间的行数（设置时）。
-
-m{a-zA-Z}	在光标位置设置标记 {a-zA-Z}（不移动光标，这不是运动命令）。
-
-m' 或 m`	(toggle 上下文位置)设置前一个上下文标记。可以使用 "''" 或 "``" 命令跳转到此标记（不移动光标，这不是运动命令）
-
-m[ 或 m]	设置 |'[| 或 |']| 标记。当要通过多个命令模拟操作符时很有用。（不移动光标，这不是运动命令）
-
-m< 或 m>	设置 |'<| 或 |'>| 标记。用于更改 `gv` 命令选择的内容。（不移动光标，这不是运动命令）。
-
-请注意，无法设置可视模式，只能设置开始和结束位置。
-
-						*:ma* *:mark* *E191*
+跳转到一个标记有两种方式：
+1. 使用 ` (反引号)：光标定位到指定位置，
+			  并且移动是 |exclusive|。
+2. 使用 ' (单引号)：光标定位到指定位置所在行的第一个非空白
+			  字符上，并且移动是行模式的。
+*mark-view*
+3. 除了以上，如果 'jumpoptions' 包含 "view"，它们也会尝试
+恢复标记视图。
+这是设置时，光标位置
+和窗口顶行（窗口中显示的第一个缓冲区行）之间的行数。
+*m* *mark* *Mark*
+m{a-zA-Z}		在光标位置设置标记 {a-zA-Z}（不移动
+			光标，这不是一个移动命令）。
+*m'* *m`*
+m'  或  m`		设置前一个上下文标记。
+可以用 "''" 或 "``" 命令
+			跳转到这里（不移动
+			光标，这不是一个移动命令）。
+*m[* *m]*
+m[  或  m]		设置 |'[| 或 |']| 标记。
+当一个操作符需要
+			由多个命令模拟时很有用。（不移动
+			光标，这不是一个移动命令）。
+*m<* *m>*
+m<  或  m>		设置 |'<| 或 |'>| 标记。用于更改
+			`gv` 命令选择的内容很有用。
+（不移动光标，这
+			不是一个移动命令）。
+注意，可视模式不能被设置，只能设置
+			开始和结束位置。
+*:ma* *:mark* *E191*
 :[range]ma[rk] {a-zA-Z'}
-			Set mark {a-zA-Z'} at last line number in [range],
-			column 0.  Default is cursor line.
-
-						*:k*
-:[range]k{a-zA-Z'}	Same as :mark, but the space before the mark name can
-			be omitted.
-
-						*'* *'a* *`* *`a*
-'{a-z}  `{a-z}		Jump to the mark {a-z} in the current buffer.
-
-						*'A* *'0* *`A* *`0*
-'{A-Z0-9}  `{A-Z0-9}	To the mark {A-Z0-9} in the file where it was set (not
-			a motion command when in another file).
-
-						*g'* *g'a* *g`* *g`a*
+			在 [range] 的最后一行号，第 0 列设置标记 {a-zA-Z'}。
+			默认是光标行。
+*:k*
+:[range]k{a-zA-Z'}	与 :mark 相同，但标记名前的空格可以
+			省略。
+*'* *'a* *`* *`a*
+'{a-z}  `{a-z}		跳转到当前缓冲区中的标记 {a-z}。
+*'A* *'0* *`A* *`0*
+'{A-Z0-9}  `{A-Z0-9}	到它被设置的文件中的标记 {A-Z0-9}（在另一个文件中时不是
+			一个移动命令）。
+*g'* *g'a* *g`* *g`a*
 g'{mark}  g`{mark}
-			Jump to the {mark}, but don't change the jumplist when
-			jumping within the current buffer.  Example: >
+			跳转到 {mark}，但在当前缓冲区内跳转时
+			不更改跳转列表。
+示例： >
 				g`"
-<			jumps to the last known position in a file.
-			See also |:keepjumps|.
+<			跳转到文件中的最后一个已知位置。
+			另请参阅 |:keepjumps|。
 
 						*:marks*
-:marks			List all the current marks (not a motion command).
-			The |'(|, |')|, |'{| and |'}| marks are not listed.
-			The first column has number zero.
+:marks			列出所有当前标记（不是一个移动命令）。
+			|'(|, |')|, |'{| 和 |'}| 标记不会被列出。
+			第一列的编号为零。
 						*E283*
-:marks {arg}		List the marks that are mentioned in {arg} (not a
-			motion command).  For example: >
+:marks {arg}		列出在 {arg} 中提到的标记（不是一个
+			移动命令）。例如： >
 				:marks aB
-<			to list marks 'a' and 'B'.
+<			列出标记 'a' 和 'B'。
 
 							*:delm* *:delmarks*
-:delm[arks] {marks}	Delete the specified marks.  Marks that can be deleted
-			include A-Z and 0-9.  You cannot delete the ' mark.
-			They can be specified by giving the list of mark
-			names, or with a range, separated with a dash.  Spaces
-			are ignored.  Examples: >
-			   :delmarks a	      deletes mark a
-			   :delmarks a b 1    deletes marks a, b and 1
-			   :delmarks Aa       deletes marks A and a
-			   :delmarks p-z      deletes marks in the range p to z
-			   :delmarks ^.[]     deletes marks ^ . [ ]
-			   :delmarks \"	      deletes mark "
+:delm[arks] {marks}	删除指定的标记。可以删除的标记
+			包括 A-Z 和 0-9。你不能删除 ' 标记。
+			它们可以通过给出标记名列表来指定，
+			或者用一个范围，用破折号分隔。空格
+			被忽略。示例： >
+			  
+ :delmarks a	      删除标记 a
+			   :delmarks a b 1    删除标记 a, b 和 1
+			   :delmarks Aa       删除标记 A 和 a
+			   :delmarks p-z      删除范围 p 到 z 内的标记
+			   :delmarks ^.[]     删除标记 ^ . [ ]
+			   :delmarks \"	      删除标记 "
 <
 
-:delm[arks]!		Delete all marks for the current buffer, but not marks
-			A-Z or 0-9.  Also clear the |changelist|.
+:delm[arks]!
+删除当前缓冲区的所有标记，但不包括标记
+			A-Z 或 0-9。同时清除 |changelist|。
+一个标记在任何方面都不可见。它只是文件中一个被
+记住的位置。
+不要将标记与命名寄存器混淆，它们完全
+无关。
+'a - 'z		小写标记，在一个文件内有效
+'A - 'Z		大写标记，也称为文件标记，在文件之间有效
+'0 - '9		数字标记，从 |shada| 设置
+文件
 
-标记在任何情况下都是不可见的。它只是被记住的文件中的一个位置。不要将标记与命名寄存器混淆，它们完全无关。
+小写标记 'a 到 'z 只要文件保留在缓冲区列表中，就会被记住。
+如果你从缓冲区列表中移除文件，它的所有标记都会
+丢失。
+如果你删除包含标记的行，该标记将被擦除。
+小写标记可以与操作符结合使用。例如："d't"
+删除从光标位置到标记 't' 的行。
+提示：使用标记 't' 表示
+顶部（Top），'b' 表示底部（Bottom）等。小写标记在使用撤销和
+重做时会恢复。
+大写标记 'A 到 'Z 包括文件名。你可以使用它们在文件
+之间跳转。
+只有当大写标记在当前文件中时，你才能
+将它与操作符一起使用。
+标记的行号保持正确，即使
+你插入/删除行或暂时编辑另一个文件。
+当 'shada'
+选项不为空时，大写标记会保存在 .shada 文件中。参见
+|shada-file-marks|。
+数字标记 '0 到 '9 完全不同。它们不能被直接设置。
+它们只在使用 shada 文件时存在 |shada-file|。
+基本上 '0
+是你上次退出 Vim 时的光标位置，'1 是倒数第二次，
+等等。在 'shada' 中使用 "r" 标志来指定不应存储数字标记的文件。
+参见 |shada-file-marks|。
 
-'a - 'z 小写标记，在一个文件内有效
-'A - 'Z 大写标记，也称为文件标记，在文件之间有效
-'0 - '9 编号标记，由 .shada 文件设置
-
-只要文件保留在缓冲区列表中，就会记住小写标记 'a 到 'z。
-如果从缓冲区列表中删除文件，则其所有标记都会丢失。
-如果删除包含标记的行，则该标记将被删除。
-
-小写标记可以与运算符结合使用。
-例如：“d't”删除从光标位置到标记 't' 的行。
-提示：使用标记 't' 表示顶部，'b' 表示底部，等等。
-使用撤消和重做时会恢复小写标记。
-
-大写标记 'A 到 'Z 包括文件名。
-您可以使用它们在文件之间跳转。
-如果标记位于当前文件中，则只能将大写标记与运算符一起使用。
-即使您插入/删除行或暂时编辑另一个文件，标记的行号仍然正确。
-当 'shada' 选项不为空时，大写标记将保留在 .shada 文件中。
-请参阅|shada-file-marks|。
 
 							*'[* *`[*
-'[  `[			To the first character of the previously changed
-			or yanked text.
+'[  `[			到先前更改或
+			复制的文本的第一个字符。
+写入缓冲区时也会设置。
 
 							*']* *`]*
-']  `]			To the last character of the previously changed or
-			yanked text.
+']  `]			到先前更改或
+			复制的文本的最后一个字符。
+写入缓冲区时也会设置。
 
-执行操作符后，光标将置于被操作的文本的开头。
-在执行 put 命令（“p”或“P”）后，光标有时会置于插入的第一行，有时会置于插入的最后一个字符上。
-上述四个命令将光标置于任一端。
-示例：复制 10 行后，您想转到其中的最后一行：“10Y']”。
-使用“p”命令插入多行后，您想跳转到插入的最低行：“p']”。
+执行操作符后，光标会放在被操作文本的开头。
+在粘贴命令（"p" 或 "P"）之后，光标
+有时会放在第一个插入的行，有时会放在最后一个插入的
+字符。
+上面四个命令将光标放在任一端。
+示例：
+复制 10 行后，你想去到其中的最后一行："10Y']"。
+在
+使用 "p" 命令插入几行后，你想跳转到最下面
+插入的行："p']"。
 这也适用于已插入的文本。
 
-注意：删除文本后，起始和结束位置相同，除非使用块状可视模式。如果当前文件中尚未进行任何更改，则这些命令不起作用。
-
-'<  `<			到当前缓冲区中最后选择的可视区域的第一行或第一个字符。
-			对于块模式，它也可能为第一行中的最后一个字符（以便能够定义块）。
-
-'>  `>			到当前缓冲区中最后选择的可视区域的最后一行或最后一字符。
-			对于块模式，它也可能为最后一行的第一个字符（以便能够定义块）。
-		      	请注意，如果使用“选择”，则位置可能就在可视区域之后。
-
-''  ``			到最近一次跳转之前的位置，或最后一个“m'”或“m`”命令发出的位置。
-			使用 |:keepjumps| 命令修饰符时未设置。另请参阅 |restore-position|。
-
-							*'quote* *`quote*
-'"  `"			上次退出当前缓冲区时，光标位置为当前位置。
-			默认为第一行的第一个字符。
-			请参阅 |last-position-jump| 了解如何对每个打开的文件使用此功能。
-			每个缓冲区只记住一个位置，而不是每个窗口都记住一个位置。
-			只要缓冲区在窗口中可见，位置就不会改变。运行 |:wshada| 时，标记也会重置。
+注意：删除文本后，开始和结束位置是相同的，除非
+使用块模式可视模式。
+这些命令在当前文件中尚无更改时
+不起作用。
+*'<* *`<*
+'<  `<			到当前缓冲区中最后选择的
+			可视区域的第一行或字符。
+对于块模式，
+			它也可能是第一行的最后一个字符（以便
+			能够定义块）。
+*'>* *`>*
+'>  `>			到当前缓冲区中最后选择的
+			可视区域的最后一行或字符。
+对于块模式，
+			它也可能是最后一行的第一个字符（以便
+			能够定义块）。
+注意 'selection'
+			适用，位置可能在可视区域之后。
+*''* *``*
+''  ``			到最近一次跳转之前的位置，或
+			最后一次 "m'" 或 "m`" 命令给出的位置。
+当
+			|:keepjumps| 命令修饰符被使用时，不会设置。
+			另请参阅 |restore-position|。
+*'quote* *`quote*
+'"  `"			到上次退出当前
+			缓冲区时的光标位置。默认为第一行
+			的第一个字符。
+参见 |last-position-jump| 了解如何对
+			每个打开的文件使用此功能。
+每个缓冲区只记住一个位置，而不是
+			每个窗口一个。
+只要缓冲区在窗口中可见，
+			位置就不会改变。当运行 |:wshada|
+时，标记也会被重置。
 
 							*'^* *`^*
-'^  `^			回到上次停止插入模式时光标所在的位置。
-			此位置由 |gi| 命令使用。
-			使用 |:keepjumps| 命令修饰符时未设置。
+'^  `^			到上次
+			停止插入模式时的光标位置。
+这被
+			|gi| 命令使用。当 |:keepjumps| 命令
+			修饰符被使用时，不会设置。
 
 							*'.* *`.*
-'.  `.			To the position where the last change was made.  The
-			position is at or near where the change started.
-			Sometimes a command is executed as several changes,
-			then the position can be near the end of what the
-			command changed.  For example when inserting a word,
-			the position will be on the last character.
-			To jump to older changes use |g;|.
-
-							*'(* *`(*
-'(  `(			To the start of the current sentence, like the |(|
-			command.
+'.  `.
+到最后一次更改的位置。
+			位置在或接近更改开始的地方。
+有时一个命令作为几个更改执行，
+			那么位置可能接近
+			命令更改内容的末尾。
+例如当插入一个单词时，
+			位置将在最后一个字符上。
+			要跳转到更早的更改，请使用 |g;|。
+*':* *`:*
+':			在提示缓冲区中，当前提示的开始。
+从此行到缓冲区末尾的文本将在用户提交提示时被
+			提交。
+*'(* *`(*
+'(  `(			到当前句子的开头，像 |(|
+			命令一样。
 
 							*')* *`)*
-')  `)			To the end of the current sentence, like the |)|
-			command.
+')  `)			到当前句子的结尾，像 |)|
+命令一样。
 
 							*'{* *`{*
-'{  `{			To the start of the current paragraph, like the |{|
-			command.
-
-							*'}* *`}*
-'}  `}			To the end of the current paragraph, like the |}|
-			command.
-
-These commands are not marks themselves, but jump to a mark:
+'{  `{			到当前段落的开头，像 |{|
+			命令一样。
+*'}* *`}*
+'}  `}			到当前段落的结尾，像 |}|
+			命令一样。
+这些命令本身不是标记，而是跳转到一个标记：
 
 							*]'*
-]'			[count] times to next line with a lowercase mark below
-			the cursor, on the first non-blank character in the
-			line.
-
-							*]`*
-]`			[count] times to lowercase mark after the cursor.
+]'			[count] 次到光标下方带有小写标记的下一行，
+			在该行的第一个非空白字符上。
+*]`*
+]`			[count] 次到光标后的小写标记。
 
 							*['*
-['			[count] times to previous line with a lowercase mark
-			before the cursor, on the first non-blank character in
-			the line.
-
-							*[`*
-[`			[count] times to lowercase mark before the cursor.
+['			[count] 次到光标之前带有小写标记的前一行，
+			在该行的第一个非空白字符上。
+*[`*
+[`			[count] 次到光标前的小写标记。
 
 
 :loc[kmarks] {command}				*:loc* *:lock* *:lockmarks*
-			Execute {command} without adjusting marks.  This is
-			useful when changing text in a way that the line count
-			will be the same when the change has completed.
-			WARNING: When the line count does change, marks below
-			the change will keep their line number, thus move to
-			another text line.
-			These items will not be adjusted for deleted/inserted
-			lines:
-			- lower case letter marks 'a - 'z
-			- upper case letter marks 'A - 'Z
-			- numbered marks '0 - '9
-			- last insert position '^
-			- last change position '.
-			- last affected text area '[ and ']
-			- the Visual area '< and '>
-			- line numbers in placed signs
-			- line numbers in quickfix positions
-			- positions in the |jumplist|
-			- positions in the |tagstack|
-			These items will still be adjusted:
-			- previous context mark ''
-			- the cursor position
-			- the view of a window on a buffer
-			- folds
-			- diffs
+			执行 {command} 而不调整标记。
+这在
+			更改文本的方式使得更改完成后行数
+			将相同时很有用。
+警告：当行数确实改变时，更改
+			下方的标记将保持其行号，因此会移动到
+			另一个文本行。
+以下项目不会因删除/插入
+			行而调整：
+			- 小写字母标记 'a - 'z
+			- 大写字母标记 'A - 'Z
+			- 数字标记 '0 - '9
+			- 最后插入位置 '^
+			- 最后更改位置 '.
+- 最后影响的文本区域 '[ 和 ']
+			- 可视区域 '< 和 '>
+			- 放置的标志中的行号
+			- 快速修复位置中的行号
+			- |jumplist| 中的位置
+- |tagstack| 中的位置
+			以下项目仍将调整：
+			- 前一个上下文标记 ''
+			- 光标位置
+			- 窗口对缓冲区的视图
+			- 折叠
+			- 差异
 
 :kee[pmarks] {command}				*:kee* *:keep* *:keepmarks*
-			Currently only has effect for the filter command
-			|:range!|:
-			- When the number of lines after filtering is equal to
-			  or larger than before, all marks are kept at the
-			  same line number.
-			- When the number of lines decreases, the marks in the
-			  lines that disappeared are deleted.
-			In any case the marks below the filtered text have
-			their line numbers adjusted, thus stick to the text,
-			as usual.
-			When the 'R' flag is missing from 'cpoptions' this has
-			the same effect as using ":keepmarks".
-
-							*:keepj* *:keepjumps*
+			目前只对过滤命令
+			|:range!| 有效：
+			- 当过滤后的行数等于
+			  或大于过滤前时，所有标记都保持在
+			  相同的行号。
+- 当行数减少时，消失的
+			  行中的标记被删除。
+在任何情况下，过滤文本下方的标记
+			都会调整其行号，因此像
+			往常一样附着在文本上。
+当 'cpoptions' 中缺少 'R' 标志时，这与
+			使用 ":keepmarks" 具有相同的效果。
+*:keepj* *:keepjumps*
 :keepj[umps] {command}
-			Moving around in {command} does not change the |''|,
-			|'.| and |'^| marks, the |jumplist| or the
-			|changelist|.
-			Useful when making a change or inserting text
-			automatically and the user doesn't want to go to this
-			position.  E.g., when updating a "Last change"
-			timestamp in the first line: >
+			在 {command} 中移动不会改变 |''|,
+			|'.| 和 |'^| 标记、|jumplist| 或
+			|changelist|。
+在自动进行更改或插入文本
+			并且用户不想去到这个
+			位置时很有用。
+例如，当更新第一行中的
+			“最后更改”时间戳时： >
 
 				:let lnum = line(".")
 				:keepjumps normal gg
 				:call SetLastChange()
 				:keepjumps exe "normal " .. lnum .. "G"
 <
-			Note that ":keepjumps" must be used for every command.
-			When invoking a function the commands in that function
-			can still change the jumplist.  Also, for
-			`:keepjumps exe 'command '` the "command" won't keep
-			jumps.  Instead use: `:exe 'keepjumps command'`
+			注意，":keepjumps" 必须用于每个命令。
+当调用一个函数时，该函数中的命令
+			仍然可以改变跳转列表。
+此外，对于
+			`:keepjumps exe 'command '`，"command" 不会保持
+			跳转。应该使用：`:exe 'keepjumps command'`
 
 ==============================================================================
-8. Jumps					*jump-motions*
+8. 跳转					*jump-motions*
 
-“跳转”命令通常将光标移开几行。
-如果您让光标“跳转”，则跳转前光标的位置会被记住。
-您可以使用“''”和“``”命令返回到该位置，除非包含该位置的行已被更改或删除。
-以下命令是“跳转”命令：“'”、“`”、“G”、“/”、“？”、“n”、“N”、“%”、“(”、“)”、“[[”、“]]”、“{”、“}”、“:s”、“:tag”、“L”、“M”、“H”和
-开始编辑新文件的命令。
+“跳转”是一个通常会将光标移动几行远的命令。
+如果
+你让光标“跳转”，跳转前光标的位置
+会被记住。
+你可以用 "''" 和 "``" 命令返回到那个位置，
+除非包含那个位置的行被更改或删除了。
 
-							*CTRL-O*
-CTRL-O			Go to [count] Older cursor position in jump list
-			(not a motion command).
-
-<Tab>		or					*CTRL-I* *<Tab>*
-CTRL-I			Go to [count] newer cursor position in jump list
-			(not a motion command).
-
-			NOTE: In the GUI and in a terminal supporting
-			|tui-modifyOtherKeys| or |tui-csiu|, CTRL-I can be
-			mapped separately from <Tab>, on the condition that
-			both keys are mapped, otherwise the mapping applies to
-			both. Except in tmux: https://github.com/tmux/tmux/issues/2705
+以下命令是“跳转”命令："'", "`", "G", "/", "?", "n", "N",
+"%", "(", ")", "[[", "]]", "{", "}", ":s", ":tag", "L", "M", "H" 以及
+开始编辑一个新文件的命令。
+*CTRL-O*
+CTRL-O			到跳转列表中第 [count] 个旧的光标位置
+			（不是一个移动命令）。
+<Tab>		或					*CTRL-I* *<Tab>*
+CTRL-I			到跳转列表中第 [count] 个新的光标位置
+			（不是一个移动命令）。
+注意：在 GUI 和支持
+			|tui-modifyOtherKeys| 或 |tui-csiu| 的终端中，CTRL-I 可以
+			与 <Tab> 分开映射，条件是
+			两个键都已映射，否则映射对
+			两者都适用。
+除了在 tmux 中：https://github.com/tmux/tmux/issues/2705
 
 							*:ju* *:jumps*
-:ju[mps]		Print the jump list (not a motion command).
-
-							*:cle* *:clearjumps*
-:cle[arjumps]		Clear the jump list of the current window.
+:ju[mps]		打印跳转列表（不是一个移动命令）。
+*:cle* *:clearjumps*
+:cle[arjumps]		清除当前窗口的跳转列表。
 
 							*jumplist*
-跳转会记录在跳转列表中。使用 CTRL-O 和 CTRL-I 命令，您可以转到旧跳转之前的光标位置，然后再返回。
-因此，您可以在列表中上下移动。
-每个窗口都有一个单独的跳转列表。
+跳转被记录在跳转列表中。
+使用 CTRL-O 和 CTRL-I 命令，你
+可以回到旧跳转前的光标位置，然后再回来。
+因此你可以在
+列表中上下移动。每个窗口都有一个单独的跳转列表。
 最大条目数固定为 100。
 
-For example, after three jump commands you have this jump list: >
+例如，经过三次跳转命令后，你有这个跳转列表： >
 
-    jump line  col file/text
-      3     1    0 some text
-      2    70    0 another line
-      1  1154   23 end.
-   >
+    跳转 行  列 文件/文本
+      3     1    0 一些文本
+      2    70    0 另一行
+      1  1154   23 结束。
+>
 <
-“文件/文本”列显示文件名，或跳转处的文本（如果在当前文件中则显示（缩进被删除，长行被截断以适合窗口）。
+“文件/文本”列显示文件名，或者如果跳转在
+当前文件中，则显示跳转处的文本（缩进被移除，长行被截断以适应
+窗口）。
+标记 ">" 指示在跳转列表中的当前位置。当使用 |:filter|
+过滤 |:jumps|
+命令时，它可能不显示。
 
-标记“>”表示跳转列表中的当前位置。使用 |:filter| 过滤 |:jumps| 命令时可能不会显示该标记
+你当前在第 1167 行。如果你然后使用 CTRL-O 命令，
+光标会放在第 1154 行。结果是： >
 
-您当前位于第 1167 行。如果您随后使用 CTRL-O 命令，则光标将位于第 1154 行。结果为：>
-
-    jump line  col file/text
-      2     1    0 some text
-      1    70    0 another line
-   >  0  1154   23 end.
-      1  1167    0 foo bar
+    跳转 行  列 文件/文本
+      2     1    0 一些文本
+      1    70    0 另一行
+   >  0  1154   23 结束。
+1  1167    0 foo bar
 <
-指针将设置在最后使用的跳转位置。
-下一个 CTRL-O 命令将使用其上方的条目，下一个 CTRL-I 命令将使用其下方的条目。
-如果指针位于最后一个条目下方，则表明您之前未使用过 CTRL-I 或 CTRL-O。
-在这种情况下，CTRL-O 命令将导致光标位置添加到跳转列表中，因此您可以返回到 CTRL-O 之前的位置。
+指针将被设置在最后使用的跳转位置。
+下一个 CTRL-O
+命令将使用它上面的条目，下一个 CTRL-I 命令将使用
+它下面的条目。
+如果指针在最后一个条目下面，这表示
+你之前没有使用 CTRL-I 或 CTRL-O。
+在这种情况下，CTRL-O 命令
+将导致光标位置被添加到跳转列表，所以你可以回到
+CTRL-O 之前的位置。
 在这种情况下，这是第 1167 行。
 
-使用更多 CTRL-O 命令，您将转到第 70 行和第 1 行。
-如果您使用 CTRL-I 您可以再次返回到 1154 行和 1167 行。
-请注意，“跳转” 列中的数字表示将您带到此位置的 CTRL-O 或 CTRL-I 命令的计数。
+使用更多的 CTRL-O 命令，你将去到第 70 行和第 1 行。如果你使用 CTRL-I，
+你可以再次回到 1154 和 1167 行。
+注意，“跳转”
+列中的数字表示将你带到
+这个位置的 CTRL-O 或 CTRL-I 命令的计数。
+如果你使用一个跳转命令，当前行号被插入到跳转列表的末尾。
+如果同一行已经在跳转列表中，它将被移除。
+结果是当重复 CTRL-O 时，你只会回到旧位置
+一次。
 
-如果您使用跳转命令，当前行号将插入到跳转列表的末尾。
-如果同一行已经在跳转列表中，则会将其删除。
+当使用 |:keepjumps|
+命令修饰符时，跳转不会存储在
+跳转列表中。
+在其他情况下，跳转也不会被存储，例如，在 |:global|
+命令中。
+你可以通过用 "m'" 设置 ' 标记来显式添加一个跳转。注意
+调用 setpos() 不会这样做。
+在将你带到第 1154 行的 CTRL-O 命令之后，你可以发出另一个
+跳转命令（例如，"G"）。
+跳转列表然后会变成： >
 
-结果是，当重复 CTRL-O 时，您将只能返回到旧位置一次。
-
-当使用 |:keepjumps| 命令修饰符时，跳转不会存储在跳转列表中。
-在其他情况下，例如在 |:global|命令中，跳转也不会存储。
-您可以通过将 ' 标记设置为“m”来明确添加跳转。
-请注意，调用 setpos() 不会执行此操作。
-
-在将您带到第 1154 行的 CTRL-O 命令之后，
-您可以给出另一个跳转命令（例如“G”）。然后跳转列表将变为：>
-
-    jump line  col file/text
-      4     1    0 some text
-      3    70    0 another line
+    跳转 行  列 文件/文本
+      4     1    0 一些文本
+      3    70    0 另一行
       2  1167    0 foo bar
-      1  1154   23 end.
-   >
+      1  1154   23 结束。
+>
 <
-行号将根据删除和插入的行进行调整。如果您停止编辑文件而不写入，例如使用“:n!”，则此操作会失败。
-
-拆分窗口时，跳转列表将复制到新窗口。
-
-如果您在“shada”选项中包含了 ' 项，则跳转列表将存储在 ShaDa 文件中，并在启动 Vim 时恢复。
-
+行号会因删除和插入的行而调整。
+如果
+你在不写入的情况下停止编辑文件，这会失败，比如用 ":n!"。
+当你分割一个窗口时，跳转列表将被复制到新窗口。
+如果你在 'shada' 选项中包含了 ' 项目，跳转列表将
+被存储在 ShaDa 文件中，并在启动 Vim 时恢复。
 *jumplist-stack*
-当“jumpoptions”选项包含“stack”时，跳转列表的行为类似于标签堆栈。
-当从跳转列表中间跳转到新位置时，当前位置之后的位置将被丢弃。
-设置此选项后，您可以在跳转位置树中移动。
-当返回一个分支然后向下移动另一个分支时，CTRL-O 仍会带您进一步向上移动树。
+当 'jumpoptions' 选项包含 "stack" 时，跳转列表的行为类似于标签
+栈。
+当从跳转列表的中间跳转到一个新位置时，
+当前位置之后的
+位置将被丢弃。
+设置此选项后，
+你可以在跳转位置的树中移动。
+当返回一个分支
+然后下到另一个分支时，CTRL-O 仍然会将你带到树的更上层。
+假设有如下的跳转列表，其中 CTRL-O 已被用来
+三次返回到位置 X： >
 
-给出一个如下所示的跳转列表，其中 CTRL-O 已用于三次返回位置 X：>
-
-     jump line  col file/text
-       2  1260    8 mark.c		<-- location X-2
-       1   685    0 eval.c		<-- location X-1
-    >  0   462   36 eval.c		<-- location X
+     跳转 行  列 文件/文本
+       2  1260    8 mark.c		<-- 位置 X-2
+       1   685    0 eval.c		<-- 位置 X-1
+    >  0   462   36 eval.c		<-- 位置 X
        1   479   39 eval.c
-       2   213    2 mark.c
+       2   
+213    2 mark.c
        3   181    0 mark.c
 <
-jumping to (new) location Y results in the locations after the current
-locations being removed: >
+跳转到（新的）位置 Y 会导致当前
+位置之后的位置被移除： >
 
-     jump line  col file/text
-       3  1260    8 mark.c		<-- location X-2
-       2   685    0 eval.c		<-- location X-1
-       1   462   36 eval.c		<-- location X
+     跳转 行  列 文件/文本
+       3  1260    8 mark.c		<-- 位置 X-2
+       2   685    0 eval.c		<-- 位置 X-1
+       1   462   36 eval.c		<-- 位置 X
     >
 <
-Then, when yet another location Z is jumped to, the new location Y appears
-directly after location X in the jumplist and location X remains in the same
-position relative to the locations (X-1, X-2, etc., ...) that had been before
-it prior to the original jump from X to Y: >
+然后，当跳转到另一个
+位置 Z 时，新位置 Y
+直接出现在跳转列表中的位置 X 之后，并且位置 X 保持在
+相对于在从 X 到 Y 的原始跳转之前
+它前面的位置（X-1, X-2, 等等...）相同的位置： >
 
-     jump line  col file/text
-       4  1260    8 mark.c		<-- location X-2
-       3   685    0 eval.c		<-- location X-1
-       2   462   36 eval.c		<-- location X
-       1   100    0 buffer.c		<-- location Y
+     跳转 行  列 文件/文本
+       4  1260    8 mark.c		<-- 位置 X-2
+       3   685    0 eval.c		<-- 位置 X-1
+       2   462   36 
+eval.c		<-- 位置 X
+       1   100    0 buffer.c		<-- 位置 Y
     >
 <
-CHANGE LIST JUMPS			*changelist* *change-list-jumps* *E664*
+更改列表跳转			*changelist* *change-list-jumps* *E664*
 
-进行更改时，会记住光标位置。
-对于每个可以撤消的更改，都会记住一个位置，除非该位置接近上一个更改。
-可以使用两个命令跳转到更改的位置，也可以跳转到已撤消的位置：
+当进行更改时，光标位置会被记住。
+每个可以撤销的
+更改都会记住一个位置，除非它接近
+上一个更改。
+有两个命令可以用来跳转到更改的位置，
+也包括那些已经被撤销的：
 
 							*g;* *E662*
-g;			转到变更列表中 [count] 个较早的位置。
-			如果 [count] 大于较早变更的数量
-			则转到最旧的变更。
-			如果没有较早的变更，则会显示错误消息。
-			（不是运动命令）
+g;
+到更改列表中第 [count] 个旧的位置。
+			如果 [count] 大于旧更改
+			位置的数量，则转到最旧的更改。
+如果没有更旧的更改，则会给出错误消息。
+（不是一个移动命令）
+
 							*g,* *E663*
-g,			Go to [count] newer position in change list.
-			Just like |g;| but in the opposite direction.
-			(not a motion command)
+g,			到更改列表中第 [count] 个新的位置。
+			就像 |g;| 但方向相反。
+（不是一个移动命令）
 
-使用计数时，您可以尽可能地向前或向后跳转。
-因此，您可以使用“999g;”转到仍记住位置的第一个更改。
-更改列表中的条目数是固定的，与 |jumplist| 相同。
-当两个可撤消的更改位于同一行且列位置相距小于“textwidth”时，仅记住最后一个更改。
-这避免了一行中的一系列小更改（例如“xxxxx”）向更改列表添加许多位置。
-当“textwidth”为零时，使用“wrapmargin”。当也没有设置时，使用固定数字 79。
-详细信息：对于计算，使用字节而不是字符，以避免速度损失（这只对多字节编码有影响）。
+当使用计数时，你会尽可能地向后或向前跳转。因此你可以
+使用 "999g;"
+去到仍然记得位置的第一个更改。
+更改列表中的条目数是固定的，并且与
+|jumplist| 相同。
+当两个可撤销的更改在同一行且列位置相距小于
+'textwidth' 时，只记住最后一个。
+这避免了
+一行中一系列小的更改，例如 "xxxxx"，向更改列表添加许多位置。
+当 'textwidth' 为零时，使用 'wrapmargin'。当那
+也没有设置时，使用固定的数字 79。
+细节：为了计算，
+使用字节而不是字符，以避免速度损失（这只在
+多字节编码中重要）。
+注意，当文本被插入或删除时，光标位置可能
+与更改的位置略有不同。
+特别是当行
+被删除时。
 
-请注意，插入或删除文本后，光标位置可能与更改位置略有不同。尤其是当删除了行时。
+当使用 `:keepjumps` 命令修饰符时，更改的位置不会
+被记住。
+*:changes*
+:changes		打印更改列表。">" 字符表示
+			当前位置。
+更改之后，它在
+			最新条目的下方，表示 `g;` 会将你带到
+			最新条目的位置。
+第一列表示
+			将你带到这个位置所需的计数。
+示例：
 
-当使用 `:keepjumps` 命令修饰符时，不会记住更改的位置。
-
-							*:changes*
-:changes		Print the change list.  A ">" character indicates the
-			current position.  Just after a change it is below the
-			newest entry, indicating that `g;` takes you to the
-			newest entry position.  The first column indicates the
-			count needed to take you to this position.  Example:
-
-				change line  col text ~
+				更改 行  列 文本 ~
 				    3     9    8 bla bla bla
 				    2    11   57 foo is a bar
 				    1    14   54 the latest changed line
 				>
 
-			The `3g;` command takes you to line 9.  Then the
-			output of `:changes` is:
+			`3g;` 命令将你带到第 9 行。然后
+			`:changes` 的输出是：
 
-				change line  col text ~
+				更改 行  列 文本 ~
 				>   0     9    8 bla bla bla
 				    1    11   57 foo is a bar
-				    2    14   54 the latest changed line
+				 
+   2    14   54 the latest changed line
 
-			Now you can use "g," to go to line 11 and "2g," to go
-			to line 14.
+			现在你可以使用 "g," 去到第 11 行，"2g," 去到
+			第 14 行。
 
 ==============================================================================
-9. Various motions				*various-motions*
+9. 各种移动				*various-motions*
 
 							*%*
-%					    查找此行中光标后或光标下的下一个项目并跳转到其匹配项。|inclusive| 运动。
-					    项目可以是：
-					    ([{}]) 圆括号或 (花括号/方括号) 括号
-					    （可以使用 'matchpairs' 选项更改）
-					    `/* */` C 风格注释的开始或结束
-					    #if、#ifdef、#else、#elif、#endif
-					    C 预处理器条件（当
-					    光标位于 # 上或没有（[{
-					    紧随其后）时）
-					    有关可以使用 matchit 插件的其他项目，请参阅
-					    |matchit|。此插件还有助于跳过注释中的匹配。
+%			查找此行中光标之后或之下的下一个项目
+			并跳转到其匹配项。
+|inclusive| 移动。
+			项目可以是：
+			([{}])		括号或（大/方）括号
+					（这可以用
+					'matchpairs' 选项更改）
+			`/* */`		C 风格注释的开始或结束
+			#if, #ifdef, #else, #elif, #endif
+					C 预处理器条件（当
+					光标在 # 上或没有 ([{
+					跟随时）
+			对于其他项目，可以使用 matchit 插件，参见
+			|matchit|。这个插件也帮助跳过
+			注释中的匹配。
 
-当 'cpoptions' 包含“M”时，|cpo-M| 括号和花括号前的反斜杠将被忽略。
-如果没有“M”，反斜杠的数量很重要：偶数与奇数不匹配。
-因此，在“( \) )”和“\( (\)”中，第一个和最后一个括号匹配。
+			当 'cpoptions' 包含 "M" |cpo-M| 时，括号和
+			大括号前的反斜杠被忽略。没有 "M" 时，
+			反斜杠的数量很重要：偶数个不
+			与奇数个匹配。因此在 "( \) )" 和 "\( (
+			\)" 中，第一个和最后一个括号匹配。
 
-当 'cpoptions' 中不存在“%”字符时
-|cpo-%|，双引号内的括号和花括号会被忽略，除非一行中的括号/花括号数量不均等，且本行和前一行未以反斜杠结尾。'('、'{'、'['、']'、'}' 和 ')' 也会被忽略（单引号内的括号和花括号）。请注意，这在 C 中可以正常工作，但在 Perl 中则不行，因为 Perl 使用单引号表示字符串。
-
-注释中的匹配项没有特殊处理。您可以使用 |matchit| 插件，也可以在匹配项两边加上引号。
-
-不允许计数，{count}% 会跳转到文件下行 {count} 的百分比 |N%|。在 #if/#else/#endif 上使用 '%' 可使移动逐行进行。
+			当 '%' 字符不存在于
+'cpoptions'
+			|cpo-%| 中时，双引号内的括号和
+			大括号被忽略，除非一行中的括号/大括号数量
+			是奇数，并且此行和前一行不
+			以反斜杠结尾。'(', '{', '[', ']', '}' 和 ')'
+			也被忽略（单引号内的括号和大括号）。
+注意，这对于 C 语言工作得很好，但对于
+			Perl 则不行，因为 Perl 中单引号用于字符串。
+对于注释中的匹配没有做特殊处理。你
+			可以使用 |matchit| 插件或在匹配项周围加上引号。
+不允许计数，{count}% 跳转到文件向下 {count}
+			百分比的行 |N%|。
+在 #if/#else/#endif 上使用 '%'
+			会使移动变为行模式。
 
 						*[(*
-[(			Go to [count] previous unmatched '('.
-			|exclusive| motion.
+[(			到 [count] 个之前的未匹配 '('。
+			|exclusive| 移动。
 
 						*[{*
-[{			Go to [count] previous unmatched '{'.
-			|exclusive| motion.
+[{			到 [count] 个之前的未匹配 '{'。
+			|exclusive| 移动。
 
 						*])*
-])			Go to [count] next unmatched ')'.
-			|exclusive| motion.
+])			到 [count] 个之后的未匹配 ')'。
+|exclusive| 移动。
 
 						*]}*
-]}			Go to [count] next unmatched '}'.
-			|exclusive| motion.
+]}			到 [count] 个之后的未匹配 '}'。
+			|exclusive| 移动。
+以上四个命令可以用来去到当前
+代码块的开始或结束。
+这就像在代码块另一端的
+"(", ")", "{" 或 "}" 上执行 "%"，但你可以在代码块的任何地方
+执行此操作。
+对于 C 程序非常有用。示例：当站在 "case x:" 上时，`[{` 会
+将你带回到 switch 语句。
+*]m*
+]m			到 [count] 个下一个方法的开始（对于 Java 或
+			类似结构的语言）。
+当不在
+			方法开始之前时，跳转到
+			类的开始或结束。|exclusive| 移动。
+*]M*
+]M			到 [count] 个下一个方法的结束（对于 Java 或
+			类似结构的语言）。
+当不在
+			方法结束之前时，跳转到
+			类的开始或结束。|exclusive| 移动。
+*[m*
+[m			到 [count] 个之前的方法的开始（对于 Java 或
+			类似结构的语言）。
+当不在
+			方法开始之后时，跳转到
+			类的开始或结束。
+当在光标之前找不到 '{' 时，
+			这是一个错误。|exclusive| 移动。
+*[M*
+[M			到 [count] 个之前的方法的结束（对于 Java 或
+			类似结构的语言）。
+当不在
+			方法结束之后时，跳转到
+			类的开始或结束。
+当在光标之前找不到 '}' 时，
+			这是一个错误。|exclusive| 移动。
+以上两个命令假设文件包含一个带有方法的类。
+类定义被 '{' 和 '}' 包围。类中的每个方法
+也用 '{' 和 '}' 包围。
+这适用于 Java 语言。
+文件看起来像这样： >
 
-上述四个命令可用于转到当前代码块的开头或结尾。
-这就像在代码块另一端的“(”、“)”、“{”或“}”上执行“%”，但您可以在代码块的任何地方执行此操作。
-对于 C 程序非常有用。
-示例：当站在“case x:”上时，`[{` 将带您回到 switch 语句。
-
-						*]m*
-]m			Go to [count] next start of a method (for Java or
-			similar structured language).  When not before the
-			start of a method, jump to the start or end of the
-			class.  |exclusive| motion.
-						*]M*
-]M			Go to [count] next end of a method (for Java or
-			similar structured language).  When not before the end
-			of a method, jump to the start or end of the class.
-			|exclusive| motion.
-						*[m*
-[m			Go to [count] previous start of a method (for Java or
-			similar structured language).  When not after the
-			start of a method, jump to the start or end of the
-			class.  When no '{' is found before the cursor this is
-			an error. |exclusive| motion.
-						*[M*
-[M			Go to [count] previous end of a method (for Java or
-			similar structured language).  When not after the
-			end of a method, jump to the start or end of the
-			class.  When no '}' is found before the cursor this is
-			an error. |exclusive| motion.
-
-The above two commands assume that the file contains a class with methods.
-The class definition is surrounded in '{' and '}'.  Each method in the class
-is also surrounded with '{' and '}'.  This applies to the Java language.  The
-file looks like this: >
-
-	// comment
+	// 注释
 	class foo {
 		int method_one() {
 			body_one();
 		}
 		int method_two() {
 			body_two();
-		}
+}
 	}
 
-[To try this out copy the text and put it in a new buffer, the help text above
-confuses the jump commands]
+[要尝试这个，请复制文本并将其放入新缓冲区，上面的帮助文本
+会混淆跳转命令]
 
-Starting with the cursor on "body_two()", using "[m" will jump to the '{' at
-the start of "method_two()" (obviously this is much more useful when the
-method is long!).  Using "2[m" will jump to the start of "method_one()".
-Using "3[m" will jump to the start of the class.
-
-						*[#*
-[#			Go to [count] previous unmatched "#if" or "#else".
-			|exclusive| motion.
+从 "body_two()" 上的光标开始，使用 "[m" 将跳转到
+"method_two()" 开头的 '{'（显然当
+方法很长时，这更有用！）。
+使用 "2[m" 将跳转到 "method_one()" 的开头。
+使用 "3[m" 将跳转到类的开头。
+*[#*
+[#			到 [count] 个之前的未匹配 "#if" 或 "#else"。
+			|exclusive| 移动。
 
 						*]#*
-]#			Go to [count] next unmatched "#else" or "#endif".
-			|exclusive| motion.
-
-These two commands work in C programs that contain #if/#else/#endif
-constructs.  It brings you to the start or end of the #if/#else/#endif where
-the current line is included.  You can then use "%" to go to the matching line.
-
-						*[star* *[/*
-[*  or  [/		Go to [count] previous start of a C comment "/*".
-			|exclusive| motion.
-
-						*]star* *]/*
-]*  or  ]/		Go to [count] next end of a C comment "*/".
-			|exclusive| motion.
-
-
-						*H*
-H			 从窗口顶部（Home）移动到 [count] 行（默认值：窗口上的第一行），在第一个非空白字符处 |linewise|。另请参阅 'startofline' 选项。
-			 光标根据 'scrolloff' 选项进行调整，除非有操作符待处理，在这种情况下文本可能会滚动。例如，“yH”从第一个可见行拉到光标所在行（含）。
-
+]#			到 [count] 个之后的未匹配 "#else" 或 "#endif"。
+			|exclusive| 移动。
+这两个命令在包含 #if/#else/#endif
+构造的 C 程序中工作。
+它将你带到 #if/#else/#endif 的开始或结束，
+其中当前行被包括在内。
+然后你可以使用 "%" 去到匹配的行。
+*[star* *[/*
+[* 或  [/		到 [count] 个之前的 C 注释 "/*" 的开始。
+			|exclusive| 移动。
+*]star* *]/*
+]* 或  ]/		到 [count] 个之后的 C 注释 "*/" 的结束。
+			|exclusive| 移动。
+*H*
+H			到窗口顶部（Home）的第 [count] 行（默认：
+			窗口上的第一行），在该行的第一个非空白
+			字符上 |linewise|。
+另请参阅 'startofline' 选项。
+			光标会根据 'scrolloff' 选项进行调整，除非
+			有待处理的操作符，在这种情况下文本可能
+			会滚动。
+例如 "yH" 复制从第一个可见行
+			到光标行（含）。
 *M*
-M 移动到窗口中间行，在第一个非空白字符处 |linewise|。另请参阅 'startofline' 选项。
-
+M			到窗口的中间行，在该行的第一个非空白
+			字符上 |linewise|。另请参阅 'startofline' 选项。
 *L*
-L 从窗口底部移动到 [count] 行（默认值：窗口上的最后一行），在第一个非空白字符处 |linewise|。另请参阅 'startofline' 选项。
-光标根据 'scrolloff' 选项进行调整，除非有操作符待处理，在这种情况下文本可能会滚动。例如“yL” 从光标处拉至最后一个可见行。
+L			到窗口底部（默认：窗口上的
+			最后一行）的第 [count] 行，在该行的第一个非空白字符上
+			|linewise|。
+另请参阅 'startofline' 选项。
+			光标会根据 'scrolloff' 选项进行调整，除非
+			有待处理的操作符，在这种情况下文本可能
+			会滚动。
+例如 "yL" 从光标复制到最后一个
+			可见行。
+<LeftMouse>		移动到鼠标
+			点击屏幕上的位置 |exclusive|。另请参阅 |<LeftMouse>|。
+如果
+			该位置在状态行中，则该窗口将成为
+			活动窗口，并且光标不移动。
 
-<LeftMouse>		Moves to the position on the screen where the mouse
-			click is |exclusive|.  See also |<LeftMouse>|.  If the
-			position is in a status line, that window is made the
-			active window and the cursor is not moved.
-
- vim:tw=78:ts=8:noet:ft=help:norl:    
+vim:tw=78:ts=8:noet:ft=help:norl:

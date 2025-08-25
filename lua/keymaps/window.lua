@@ -41,9 +41,9 @@ return {
     "<C-w>q",
     "n",
   },
-  ["<C-M-i>"] = {
-    "<cmd>WinShift<cr>",
-    "n",
-  },
-  ["<C-M-o>"] = { "<cmd>only<cr>", "n" },
+  -- ["<C-M-i>"] = {
+  --   "<cmd>WinShift<cr>",
+  --   "n",
+  -- },
+  -- ["<C-M-o>"] = { "<cmd>only<cr>", "n" },
 }

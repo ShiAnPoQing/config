@@ -14,14 +14,27 @@
     table.concat(list:table, sep?:string, i?:integer, j?:integer): string(list[i]..sep..list[i+1] ··· sep..list[j])
 <
 
+  示例:
+>lua
+    local t = {1, 2, 3, 4, 5} 
+    local str1 = table.concat(t, ",") 
+    print(str1)
+    local str2 = table.concat(t, ",", 2, 4) 
+    print(str2) 
+<
+
 *table.insert*
 >lua
     table.insert(list, [pos,] value)
 
     -- insert value at pos(default=#list+1) in list
-    table.insert(list:table, pos?:integer, value:any)
+    table.insert(list:table, pos?:integer, value:any): void
     ... value, list[pos], list[pos+1], ···, list[#list]
     -- value 成为 pos
+<
+
+示例：
+>lua
 <
 
 *table.remove*
@@ -32,8 +45,17 @@
     -- pos 默认为 #list 
     -- 超出边界返回 nil
     -- 不支持负索引
-    table.remove(list:table, pos?:integer)
+    table.remove(list:table, pos?:integer): any
 <
+
+  示例: 
+  >lua
+    local t = {1, 2, 3, 4, 5} 
+    vim.print(table.remove(t, 2))
+    vim.print(t) 
+        
+<
+
 
 *table.move*
 >lua
@@ -43,9 +65,17 @@
     -- a2 的默认值为 a1
     -- 目标区间可以和源区间重叠。 
     -- 索引 f 必须是正数。
-    table.move(a1, f, e, t [,a2])
+    table.move(a1, f, e, t [,a2]): a1
     a2[t],··· = a1[f],···,a1[e]
 <
+
+ 示例: 
+    >lua
+    local t = {1, 2, 3, 4, 5} 
+    local a = {6, 7, 8, 9, 10} 
+    vim.print(t) 
+    vim.print(a)                 
+<                                     
 
 *table.sort*
 >lua
@@ -59,7 +89,7 @@
     -- comp 以 el2 在左, el2 在右
 <
 
-*table.unpack*
+*table.unpack*（neovim 中没有此方法） 
 >lua
 
     -- 返回列表中的元素。
@@ -68,7 +98,14 @@
     table.unpack(list [, i [, j]])
 <
 
-*table.pack*
+  示例：
+>lua
+    -- local t = {1, 2, 3, 4, 5} 
+    -- local a, b, c, d, e = table.unpack(t) 
+    -- vim.print(a, b, c, d, e)                                           
+<
+
+*table.pack*（neovim 中没有此方法） 
 >lua
     -- 返回用所有参数以键 1,2, 等填充的新表， 并将 "n" 这个域设为参数的总数。 注意这张返回的表不一定是一个序列。
     table.pack (···)

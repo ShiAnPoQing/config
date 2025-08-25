@@ -8,6 +8,8 @@ return {
         "options/typescript",
         "options/markdown",
         "options/css",
+        "options/text",
+        "options/help",
       },
     })
   end,

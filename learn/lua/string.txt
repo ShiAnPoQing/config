@@ -1,6 +1,7 @@
 字符串库假定采用单字节字符编码
 第一个字符从 1 开始计算（而不是 C 里的 0 ）。 
-索引可以是负数，它指从字符串末尾反向解析。 即，最后一个字符在 -1 位置处，等等。
+索引可以是负数，它指从字符串末尾反向解析。
+即，最后一个字符在 -1 位置处，等等。
 
 字符串库中的所有函数都在表 |string| 中。 
 它还将其设置为字符串元表的 |__index| 域。 
@@ -78,6 +79,13 @@
     end
 <
 
+  示例：
+>lua
+    local str = "hello world from Lua" 
+    local start_pos, end_pos, capture1, capture2 = string.find(str, "(%w+) (%w+)") 
+    vim.print(start_pos, end_pos, capture1, capture2) 
+<
+
 *string.gsub*
 >lua
     string.gsub (s, pattern, repl [, n])
@@ -105,6 +113,28 @@
                 -- count  => 匹配次数 
     end
 <
+
+  示例: 
+>lua
+    local str = "hello world from Lua" 
+    local new_str1 = string.gsub(str, "(%w+) (%w+)", "%2 %1") 
+    vim.print(new_str1) 
+    vim.print("----------------------")
+    local new_str2 = string.gsub(str, "(%w+) (%w+)", "%2 %1", 1) 
+    vim.print(new_str2) 
+    vim.print("----------------------")
+    local new_str3 = string.gsub(str, "(%w+)", {
+       hello = "HELLO", 
+       world = "WORLD" 
+    }) 
+    vim.print(new_str3) 
+    vim.print("----------------------")
+    local new_str4 = string.gsub(str, "(%w+) (%w+)", function(w1, w2) 
+        return string.upper(w1) .. " " .. string.upper(w2) 
+    end)
+    vim.print(new_str4) 
+    vim.print("----------------------")
+<
     
 
 *string.match*
@@ -123,6 +153,13 @@
                 -- 可使用负数
             ): (string, ...)|nil
     end
+<
+
+  示例:
+>lua
+    local str = "hello world from Lua" 
+    local capture1, capture2 = string.match(str, "(%w+) (%w+)") 
+    vim.print(capture1, capture2) 
 <
 
 *string.sub*
