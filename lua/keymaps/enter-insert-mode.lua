@@ -164,7 +164,6 @@ return {
     { "<Esc>Bi", { "i" } },
     { "Bi", { "n" } },
   },
-
   ["<M-C-o>"] = {
     { "<C-o>w", "i" },
     { "wi", "n" },
@@ -172,6 +171,14 @@ return {
   ["<M-C-i>"] = {
     { "<Esc>gea", "i" },
     { "gea", "n" },
+  },
+  ["<M-C-S-i>"] = {
+    { "<Esc>gEa", "i" },
+    { "gEa", "n" },
+  },
+  ["<M-C-S-o>"] = {
+    { "<C-o>W", "i" },
+    { "Wi", "n" },
   },
   -- normal mode into insert mode: cursor at screen left
   ["aw"] = { "<Esc>g0i", { "n" } },

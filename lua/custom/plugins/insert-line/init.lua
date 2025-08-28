@@ -29,7 +29,6 @@ function M.insert_line(opts)
       "nm",
       true
     )
-    return
   end
 
   if dir == "above" then
@@ -46,7 +45,11 @@ function M.insert_line(opts)
     end
   end
 
-  if mode ~= "n" then
+  if mode == "i" then
+    if dir == "all" then
+      return vim.api.nvim_feedkeys("a", "n", false)
+    end
+
     local key = "A"
     if opts.indent then
       key = key .. vim.api.nvim_replace_termcodes("<C-f>", true, false, true)

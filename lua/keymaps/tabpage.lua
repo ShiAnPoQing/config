@@ -66,6 +66,10 @@ return {
     end,
     "n",
   },
+  ["<tab>p"] = {
+    "g<tab>",
+    "n",
+  },
   ["<tab>1"] = { "<cmd>1tabnext<cr>", "n" },
   ["<tab>2"] = { "<cmd>2tabnext<cr>", "n" },
   ["<tab>3"] = { "<cmd>3tabnext<cr>", "n" },

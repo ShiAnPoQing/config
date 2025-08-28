@@ -1,97 +1,92 @@
-|g_CTRL-G|	g CTRL-G	   显示当前光标位置信息
-|g_CTRL-H|	g CTRL-H	   启动 Select 块模式
-|g_CTRL-]|	g CTRL-]	   |:tjump| 跳转到光标所在的标签
-|g#|		g#		1  like "#", but without using "\<" and "\>"
-|g$|		g$		1  when 'wrap' off go to rightmost character of
-				   the current line that is on the screen;
-				   when 'wrap' on go to the rightmost character
-				   of the current screen line
-|g&|		g&		2  repeat last ":s" on all lines
-|g'|		g'{mark}	1  like |'| but without changing the jumplist
-|g`|		g`{mark}	1  like |`| but without changing the jumplist
-|gstar|		g*		1  like "*", but without using "\<" and "\>"
-|g+|		g+		   go to newer text state N times
-|g,|		g,		1  go to N newer position in change list
-|g-|		g-		   go to older text state N times
-|g0|		g0		1  when 'wrap' off go to leftmost character of
-				   the current line that is on the screen;
-				   when 'wrap' on go to the leftmost character
-				   of the current screen line
-|g8|		g8		   print hex value of bytes used in UTF-8
-				   character under the cursor
-|g;|		g;		1  go to N older position in change list
-|g<|		g<		   display previous command output
-|g?|		g?		2  Rot13 encoding operator
-|g?g?|		g??		2  Rot13 encode current line
-|g?g?|		g?g?		2  Rot13 encode current line
-|gD|		gD		1  go to definition of word under the cursor
-				   in current file
-|gE|		gE		1  go backwards to the end of the previous
-				   WORD
-|gH|		gH		   start Select line mode
-|gI|		gI		2  like "I", but always start in column 1
-|gJ|		gJ		2  join lines without inserting space
-|gN|		gN	      1,2  find the previous match with the last used
-				   search pattern and Visually select it
-|gP|		["x]gP		2  put the text [from register x] before the
-				   cursor N times, leave the cursor after it
-|gQ|		gQ		   switch to "Ex" mode with Vim editing
-|gR|		gR		2  enter Virtual Replace mode
-|gT|		gT		   go to the previous tab page
-|gU|		gU{motion}	2  make Nmove text uppercase
-|gV|		gV		   don't reselect the previous Visual area
-				   when executing a mapping or menu in Select
-				   mode
-|g]|		g]		   :tselect on the tag under the cursor
-|g^|		g^		1  when 'wrap' off go to leftmost non-white
-				   character of the current line that is on
-				   the screen; when 'wrap' on go to the
-				   leftmost non-white character of the current
-				   screen line
-|g_|		g_		1  cursor to the last CHAR N - 1 lines lower
-|ga|		ga		   print ascii value of character under the
-				   cursor
-|gd|		gd		1  go to definition of word under the cursor
-				   in current function
-|ge|		ge		1  go backwards to the end of the previous
-				   word
-|gf|		gf		   start editing the file whose name is under
-				   the cursor
-|gF|		gF		   start editing the file whose name is under
-				   the cursor and jump to the line number
-				   following the filename.
-|gg|		gg		1  cursor to line N, default first line
-|gh|		gh		   start Select mode
-|gi|		gi		2  like "i", but first move to the |'^| mark
-|gj|		gj		1  like "j", but when 'wrap' on go N screen
-				   lines down
-|gk|		gk		1  like "k", but when 'wrap' on go N screen
-				   lines up
-|gm|		gm		1  go to character at middle of the screenline
-|gM|		gM		1  go to character at middle of the text line
-|gn|		gn	      1,2  find the next match with the last used
-				   search pattern and Visually select it
-|go|		go		1  cursor to byte N in the buffer
-|gp|		["x]gp		2  put the text [from register x] after the
-				   cursor N times, leave the cursor after it
-|gq|		gq{motion}	2  format Nmove text
-|gr|		gr{char}	2  virtual replace N chars with {char}
-|gs|		gs		   go to sleep for N seconds (default 1)
-|gt|		gt		   go to the next tab page
-|gu|		gu{motion}	2  make Nmove text lowercase
-|gv|		gv		   reselect the previous Visual area
-|gw|		gw{motion}	2  format Nmove text and keep cursor
-|gx|		gx		   execute application for filepath at cursor
-|g@|		g@{motion}	   call 'operatorfunc'
-|g~|		g~{motion}	2  swap case for Nmove text
-|g<Tab>|	g<Tab>		   go to last accessed tab page
+2.4 以 'g' 开头的命令						*g*
 
-|g<Up>|		g<Up>		1  same as "gk"
-|g<Down>|	g<Down>		1  same as "gj"
-|g<End>|	g<End>		1  same as "g$"
-|g<Home>|	g<Home>		1  same as "g0"
-|g<LeftMouse>|	g<LeftMouse>	   same as <C-LeftMouse>
-		g<MiddleMouse>	   same as <C-MiddleMouse>
-|g<RightMouse>|	g<RightMouse>	   same as <C-RightMouse>
-vim:tw=78:ts=8:noet:ft=help:norl:
+标记		字符	      备注 在普通模式下的动作	~
+------------------------------------------------------------------------------ ~
+|g_CTRL-G|	g CTRL-G	   显示关于当前光标位置的信息
+|g_CTRL-H|	g CTRL-H	   开始选择块模式
+|g_CTRL-]|	g CTRL-]	   |:tjump| 到光标下的标签
+|g#|		g#		1  类似 "#"，但不使用 "\<" 和 "\>"
+|g&|		g&		2  在所有行上重复最后的 ":s" 命令
+|g'|		g'{mark}	1  类似 |'|，但不改变跳转列表
+|g`|		g`{mark}	1  类似 |`|，但不改变跳转列表
+|gstar|		g*		1  类似 "*"，但不使用 "\<" 和 "\>"
+|g+|		g+		   转到较新的文本状态 N 次
+|g,|		g,		1  在更改列表中转到第 N 个较新的位置
+|g-|		g-		   转到较旧的文本状态 N 次
+|g8|		g8		   打印光标下 UTF-8 字符所用字节的十六进制值
+|g;|		g;		1  在更改列表中转到第 N 个较旧的位置
+|g?|		g?		2  Rot13 编码操作符
+|g?g?|		g??		2  对当前行进行 Rot13 编码
+|g?g?|		g?g?		2  对当前行进行 Rot13 编码
+|gD|		gD		1  转到当前文件中光标下单词的定义处
+|gH|		gH		   开始选择行模式
+|gI|		gI		2  类似 "I"，但总是在第 1 列开始插入
+|gJ|		gJ		2  连接行，不插入空格 |gN|		gN	      1,2  使用最后使用的搜索模式查找上一个匹配并对其进行可视化选择
+|gP|		["x]gP		2  将文本 [从寄存器 x] 在光标前放置 N 次，光标留在文本后
+|gQ|		gQ		   切换到使用 Vim 编辑的 "Ex" 模式
+|gR|		gR		2  进入虚拟替换模式
+|g]|		g]		   :tselect 光标下的标签
+|g_|		g_		1  光标移动到向下第 N - 1 行的最后一个字符
+|ga|		ga		   打印光标下字符的 ASCII 值
+|gd|		gd		1  转到当前函数中光标下单词的定义处
+|gf|		gf		   开始编辑光标下的文件名
+|gF|		gF		   开始编辑光标下的文件名并跳转到文件名后的行号
+|gi|		gi		2  类似 "i"，但首先移动到 |'^| 标记
+|gp|		["x]gp		2  将文本 [从寄存器 x] 在光标后放置 N 次，光标留在文本后
+|gq|		gq{motion}	2  格式化 N 个移动操作的文本
+|gr|		gr{char}	2  虚拟替换 N 个字符为 {char}
+|gs|		gs		   休眠 N 秒（默认为 1）
+|gw|		gw{motion}	2  格式化 N 个移动操作的文本并保持光标位置
+|gx|		gx		   执行光标处文件路径的应用程序
+|g~|		g~{motion}	2  对 N 个移动操作的文本进行大小写转换
+|g<LeftMouse>|	g<LeftMouse>	   同 <C-LeftMouse>
+		g<MiddleMouse>	   同 <C-MiddleMouse>
+|g<RightMouse>|	g<RightMouse>	   同 <C-RightMouse>
 
+
+------------------------------------------------------------------------------ ~
+|g@|		g@{motion}	   调用 'operatorfunc'
+
+|gj|		gj		1  类似 "j"，但当 'wrap' 开启时向下移动 N 个屏幕行
+|g<Down>|	g<Down>		1  同 "gj"
+|gk|		gk		1  类似 "k"，但当 'wrap' 开启时向上移动 N 个屏幕行
+|g<Up>|		g<Up>		1  同 "gk"
+
+|ge|		ge		1  向后转到上一个单词的结尾
+|gE|		gE		1  向后转到上一个 WORD 的结尾
+
+|gT|		gT		   转到上一个标签页
+|gt|		gt		   转到下一个标签页
+|g<Tab>|	g<Tab>		   转到最后访问的标签页
+
+|gU|		gU{motion}	2  将 N 个移动操作的文本转换为大写
+|gu|		gu{motion}	2  将 N 个移动操作的文本转换为小写
+
+|gv|		gv		   重新选择先前的可视区域
+
+|g$|		g$		1  当 'wrap' 关闭时，转到当前行在屏幕上最右边的字符；
+				   当 'wrap' 开启时，转到当前屏幕行最右边的字符
+|g<End>|	g<End>		1  同 "g$"
+|g0|		g0		1  当 'wrap' 关闭时，转到当前行在屏幕上最左边的字符；
+				   当 'wrap' 开启时，转到当前屏幕行最左边的字符
+|g<Home>|	g<Home>		1  同 "g0"
+
+?? |gm|		gm		1  转到屏幕行中间的字符
+?? |gM|		gM		1  转到文本行中间的字符
+
+|gh|		gh		   开始选择模式
+
+??|gV|		gV		   在选择模式中执行映射或菜单时，不重新选择先前的可视区域
+
+|gn|		gn	      1,2  使用最后使用的搜索模式查找下一个匹配并对其进行可视化选择
+
+???|g^|		g^		1  当 'wrap' 关闭时，转到当前行在屏幕上最左边的非空白字符；
+				   当 'wrap' 开启时，转到当前屏幕行最左边的非空白字符
+
+|gg|		gg		1  光标移动到第 N 行，默认为第一行
+
+new -> |g<|		g<		   显示上一个命令输出
+
+|go|		go		1  光标移动到缓冲区中的第 N 个字节
+
+ vim:tw=78:ts=8:noet:ft=help:norl:

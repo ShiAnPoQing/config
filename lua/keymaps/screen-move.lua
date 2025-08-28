@@ -11,30 +11,134 @@ local function aam()
   end
 end
 
+local function space_h_omode()
+  vim.api.nvim_exec2(string.format([[exec "normal! v^"]]), {})
+end
+
+-- 0 默认不支持 count
+local function space_space_h()
+  local count = vim.v.count1
+  if count == 1 then
+    vim.api.nvim_feedkeys("0", "n", false)
+  else
+    vim.api.nvim_feedkeys(count - 1 .. "k0", "n", false)
+  end
+end
+
 return {
-  -- normal mode cursor move: screen left
-  -- 支持 count
+  ["<space>H"] = {
+    {
+      function()
+        require("custom.plugins.move").move_start_end("left")
+      end,
+      "n",
+    },
+    { "^", "x" },
+    { space_h_omode, "o" },
+  },
+  ["<space>L"] = {
+    {
+      function()
+        require("custom.plugins.move").move_start_end("right")
+      end,
+      "n",
+    },
+    { "g_", { "x", "o" } },
+  },
+  ["<space>K"] = {
+    "gg",
+    { "n", "x", "o" },
+  },
+  ["<space>J"] = {
+    "G",
+    { "n", "x", "o" },
+  },
+  ["<space><space>H"] = {
+    { space_space_h, "n" },
+    { "0", { "x", "o" } },
+  },
+  ["<space><space>L"] = { "$", { "n", "x", "o" } },
+  ["<space><space>K"] = { "gg", { "n", "x", "o" } },
+  ["<space><space>J"] = { "G", { "n", "x", "o" } },
+
+  ["<space>h"] = {
+    "g^",
+    { "n", "x", "o" },
+    { desc = "Screen First Non-blank Character" },
+  },
+  ["<space>l"] = {
+    {
+      function()
+        if vim.opt.virtualedit:get()[1] == "all" then
+          vim.opt.virtualedit = "none"
+          vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
+          vim.opt.virtualedit = "all"
+          return
+        end
+        vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
+      end,
+      { "n", "x" },
+    },
+    {
+      function()
+        if vim.opt.virtualedit:get()[1] == "all" then
+          vim.opt.virtualedit = "none"
+          vim.api.nvim_feedkeys("vg" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
+          vim.opt.virtualedit = "all"
+          return
+        end
+        vim.api.nvim_feedkeys("vg" .. vim.api.nvim_replace_termcodes("<end>", true, false, true) .. "h", "nx", true)
+      end,
+      "o",
+    },
+    desc = "Screen Last Non-blank Character",
+  },
   ["ah"] = {
     {
       function()
         require("builtin.screen-move").move("left")
       end,
       "n",
+      { desc = "Screen First Character" },
     },
     { "g0", { "x", "o" } },
   },
-  -- normal mode cursor move: screen right
-  -- 支持 count
   ["al"] = {
     {
       function()
         require("builtin.screen-move").move("right")
       end,
       "n",
+      { desc = "Screen Last Character" },
     },
     { "g$", { "x", "o" } },
   },
-  -- normal mode cursor move: screen bottom
+  ["<space><space>h"] = {
+    {
+      function()
+        require("builtin.screen-move").move("left")
+      end,
+      "n",
+      { desc = "Screen First Character" },
+    },
+    { "g0", { "x", "o" } },
+  },
+  ["<space><space>l"] = {
+    {
+      function()
+        if vim.opt.virtualedit:get()[1] == "all" then
+          vim.opt.virtualedit = "none"
+          vim.api.nvim_feedkeys("g$", "nx", true)
+          vim.opt.virtualedit = "all"
+          return
+        end
+        vim.api.nvim_feedkeys("g$", "nx", true)
+      end,
+      "n",
+      { desc = "Screen Last Character" },
+    },
+    { "g$", { "x", "o" } },
+  },
   ["aj"] = {
     {
       function()
@@ -122,14 +226,18 @@ return {
     "n",
   },
   -- normal mode view move: cursor word position at screen right
-  ["aal"] = { "ze", { "n", "x" } },
-  -- normal mode view move: cursor word position at screen left
-  ["aah"] = { "zs", { "n", "x" } },
-  -- normal mode view move: cursor line position at screen top col
-  ["aak"] = { "zt", { "n", "x" } },
-  -- normal mode view move: cursor line position at screen bottom col
-  ["aaj"] = { "zb", { "n", "x" } },
+  -- ["aal"] = { "ze", { "n", "x" } },
+  -- -- normal mode view move: cursor word position at screen left
+  -- ["aah"] = { "zs", { "n", "x" } },
+  -- -- normal mode view move: cursor line position at screen top col
+  -- ["aak"] = { "zt", { "n", "x" } },
+  -- -- normal mode view move: cursor line position at screen bottom col
+  -- ["aaj"] = { "zb", { "n", "x" } },
   -- normal mode view move: cursor line position at screen center col
+  ["aL"] = { "ze", { "n", "x" } },
+  ["aH"] = { "zs", { "n", "x" } },
+  ["aK"] = { "zt", { "n", "x" } },
+  ["aJ"] = { "zb", { "n", "x" } },
   ["aan"] = { "zz", { "n", "x" } },
   -- normal mode view move: cursor line position at screen center row
   ["aam"] = { aam, { "n" } },

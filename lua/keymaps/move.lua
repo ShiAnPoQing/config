@@ -1,17 +1,3 @@
-local function space_h_omode()
-  vim.api.nvim_exec2(string.format([[exec "normal! v^"]]), {})
-end
-
--- 0 默认不支持 count
-local function space_space_h()
-  local count = vim.v.count1
-  if count == 1 then
-    vim.api.nvim_feedkeys("0", "n", false)
-  else
-    vim.api.nvim_feedkeys(count - 1 .. "k0", "n", false)
-  end
-end
-
 local function space_k_Omode()
   local count = vim.v.count1
   vim.api.nvim_exec2(string.format([[exec "normal! v%d\<Up>g_"]], count), {})
@@ -56,18 +42,6 @@ return {
     { "x", "n" },
     { desc = "Right move" },
   },
-
-  -- 支持 count 可以向上
-  ["<space>h"] = {
-    {
-      function()
-        require("custom.plugins.move").move_start_end("left")
-      end,
-      "n",
-    },
-    { "^", "x" },
-    { space_h_omode, "o" },
-  },
   -- ["0<space>h"] = {
   -- 	function()
   -- 		require("custom.plugins.move").magic.move_start_end("left")
@@ -89,16 +63,6 @@ return {
     "n",
     { noremap = true },
   },
-  -- 支持 count 可以向下
-  ["<space>l"] = {
-    {
-      function()
-        require("custom.plugins.move").move_start_end("right")
-      end,
-      "n",
-    },
-    { "g_", { "x", "o" } },
-  },
   ["<space><M-l>"] = {
     "A",
     "n",
@@ -119,14 +83,6 @@ return {
   ["<M-space><M-m>"] = { "<C-o>gM", { "i" } },
   ["<M-space><M-n>"] = { "<C-o>gM", { "i" } },
 
-  -- 支持 count 向上
-  ["<space><space>h"] = {
-    { space_space_h, "n" },
-    { "0", { "x", "o" } },
-  },
-  -- 支持 count 向下
-  ["<space><space>l"] = { "$", { "n", "x", "o" } },
-
   -- 缺少： up down to first 空白字符
   ["<space><space>j"] = { "+", { "n", "x", "o" } },
   ["<space><space>k"] = { "-", { "n", "x", "o" } },
@@ -141,10 +97,13 @@ return {
   -- insert mode move: k,
   ["<M-k>"] = {
     { "<Up>", { "i", "c", "s" }, { silent = false } },
-    -- { "<C-W>k^", { "n" } },
-    -- {""},
+    -- { "kg_", { "n" } },
     { "<up>", "t" },
   },
+  -- ["<C-k>"] = {
+  --   "-",
+  --   "n",
+  -- },
   -- ["<M-C-k>"] = {
   --   "<C-W>k^",
   --   "n"
@@ -152,8 +111,28 @@ return {
   -- insert mode move: j,
   ["<M-j>"] = {
     { "<Down>", { "i", "c", "s" }, { silent = false } },
-    -- { "<C-W>j^", { "n" } },
+    -- { "jg_", { "n" } },
     { "<down>", "t" },
+  },
+  -- ["<C-j>"] = {
+  --   "+",
+  --   "n",
+  -- },
+  ["<M-w><M-k>"] = {
+    "<C-o>-",
+    "i",
+  },
+  ["<M-e><M-k>"] = {
+    "<Esc>kg_a",
+    "i",
+  },
+  ["<M-w><M-j>"] = {
+    "<C-o>+",
+    "i",
+  },
+  ["<M-e><M-j>"] = {
+    "<Esc>jg_a",
+    "i",
   },
   -- ["<M-C-j>"] = {
   --   "<C-W>j^",
@@ -162,8 +141,7 @@ return {
   -- insert mode move: h,
   ["<M-h>"] = {
     { "<left>", { "i", "c", "s" }, { silent = false } },
-    -- { "<C-W>h^", { "n" } },
-    -- { "i", "n" },
+    -- { "hi", { "n" } },
     { "<left>", "t" },
   },
   -- ["<M-C-h>"] = {
@@ -173,7 +151,7 @@ return {
   -- insert mode move: l,
   ["<M-l>"] = {
     { "<right>", { "i", "c", "s" }, { silent = false } },
-    -- { "a", "n" },
+    -- { "la", "n" },
     -- { "<C-W>l^", { "n" } },
     { "<right>", "t" },
   },

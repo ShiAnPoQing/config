@@ -102,9 +102,9 @@ return {
         end,
       })
     end,
-    "n",
+    { "n", "i" },
   },
-  ["<space><C-b>"] = {
+  ["<C-S-b>"] = {
     function()
       require("custom.plugins.insert-line").insert_line({
         dir = "above",
@@ -120,9 +120,9 @@ return {
         end,
       })
     end,
-    "n",
+    { "n", "i" },
   },
-  ["<space><M-b>"] = {
+  ["<M-S-b>"] = {
     function()
       require("custom.plugins.insert-line").insert_line({
         dir = "below",
@@ -138,6 +138,6 @@ return {
         end,
       })
     end,
-    "n",
+    { "n", "i" },
   },
 }

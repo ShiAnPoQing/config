@@ -124,8 +124,14 @@ end
 --- @param lhs string
 --- @param more table<integer, table>
 local function addMoreRhsKeymap(lhs, more)
-  for _, one in pairs(more) do
-    addOneRhsKeymap(one[2], { lhs = lhs, rhs = one[1], opts = one[3] or {} })
+  local opts = {}
+  for key, one in pairs(more) do
+    if type(key) ~= "number" then
+      opts[key] = one
+    end
+  end
+  for _, one in ipairs(more) do
+    addOneRhsKeymap(one[2], { lhs = lhs, rhs = one[1], opts = vim.tbl_extend("force", opts, one[3] or {}) })
   end
 end
 
