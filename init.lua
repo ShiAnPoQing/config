@@ -33,7 +33,7 @@ require("lazy-setup").setup({
   require("plugins.download.misc.todo-comments"),
   require("plugins.download.misc.hop"),
   require("plugins.download.misc.undotree"),
-  require("plugins.download.misc.numb"),
+  -- require("plugins.download.misc.numb"),
   require("plugins.download.misc.nvim-possession"),
   -- require("plugins.download.misc.showkey"),
   require("plugins.download.git.gitsigns"),

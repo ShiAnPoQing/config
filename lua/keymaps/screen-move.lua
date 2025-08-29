@@ -62,7 +62,15 @@ return {
   ["<space><space>J"] = { "G", { "n", "x", "o" } },
 
   ["<space>h"] = {
-    "g^",
+    function()
+      local before_cursor = vim.api.nvim_win_get_cursor(0)
+      vim.api.nvim_feedkeys("g^", "nx", true)
+      local after_cursor = vim.api.nvim_win_get_cursor(0)
+
+      if before_cursor[2] == after_cursor[2] then
+        vim.api.nvim_feedkeys("g0", "nx", true)
+      end
+    end,
     { "n", "x", "o" },
     { desc = "Screen First Non-blank Character" },
   },
