@@ -121,6 +121,34 @@ return {
       { "x", "s" },
     },
   },
+  ["<S-space>w"] = { "g0i", { "n" } },
+  ["<S-space>W"] = { "g0i", { "n" } },
+  ["<S-space>e"] = {
+    function()
+      if vim.opt.virtualedit:get()[1] == "all" then
+        vim.opt.virtualedit = "none"
+        vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
+        vim.opt.virtualedit = "all"
+        vim.api.nvim_feedkeys("a", "n", true)
+        return
+      end
+      vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true) .. "a", "n", true)
+    end,
+    { "n" },
+  },
+  ["<S-space>E"] = {
+    function()
+      if vim.opt.virtualedit:get()[1] == "all" then
+        vim.opt.virtualedit = "none"
+        vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
+        vim.opt.virtualedit = "all"
+        vim.api.nvim_feedkeys("a", "n", true)
+        return
+      end
+      vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true) .. "a", "n", true)
+    end,
+    { "n" },
+  },
   -- ["<space><space>w"] = { "0i", { "n" } },
   ["<space><space>w"] = { "gI", { "n" } },
   ["<space><space>e"] = { "$a", { "n" } },

@@ -26,7 +26,7 @@ local function space_space_h()
 end
 
 return {
-  ["<space>H"] = {
+  ["<space>h"] = {
     {
       function()
         require("custom.plugins.move").move_start_end("left")
@@ -36,7 +36,7 @@ return {
     { "^", "x" },
     { space_h_omode, "o" },
   },
-  ["<space>L"] = {
+  ["<space>l"] = {
     {
       function()
         require("custom.plugins.move").move_start_end("right")
@@ -45,23 +45,22 @@ return {
     },
     { "g_", { "x", "o" } },
   },
-  ["<space>K"] = {
-    "gg",
-    { "n", "x", "o" },
-  },
-  ["<space>J"] = {
-    "G",
-    { "n", "x", "o" },
-  },
-  ["<space><space>H"] = {
+  ["<space>k"] = { "<nop>", "n" },
+  ["<space>j"] = { "<nop>", "n" },
+  -- ["<space>K"] = {
+  --   "gg",
+  --   { "n", "x", "o" },
+  -- },
+  -- ["<space>J"] = {
+  --   "G",
+  --   { "n", "x", "o" },
+  -- },
+  ["<space><space>h"] = {
     { space_space_h, "n" },
     { "0", { "x", "o" } },
   },
-  ["<space><space>L"] = { "$", { "n", "x", "o" } },
-  ["<space><space>K"] = { "gg", { "n", "x", "o" } },
-  ["<space><space>J"] = { "G", { "n", "x", "o" } },
-
-  ["<space>h"] = {
+  ["<space><space>l"] = { "$", { "n", "x", "o" } },
+  ["<S-space>h"] = {
     function()
       local before_cursor = vim.api.nvim_win_get_cursor(0)
       vim.api.nvim_feedkeys("g^", "nx", true)
@@ -74,7 +73,47 @@ return {
     { "n", "x", "o" },
     { desc = "Screen First Non-blank Character" },
   },
-  ["<space>l"] = {
+  ["<S-space>H"] = {
+    function()
+      local before_cursor = vim.api.nvim_win_get_cursor(0)
+      vim.api.nvim_feedkeys("g^", "nx", true)
+      local after_cursor = vim.api.nvim_win_get_cursor(0)
+
+      if before_cursor[2] == after_cursor[2] then
+        vim.api.nvim_feedkeys("g0", "nx", true)
+      end
+    end,
+    { "n", "x", "o" },
+    { desc = "Screen First Non-blank Character" },
+  },
+  ["<S-space>l"] = {
+    {
+      function()
+        if vim.opt.virtualedit:get()[1] == "all" then
+          vim.opt.virtualedit = "none"
+          vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
+          vim.opt.virtualedit = "all"
+          return
+        end
+        vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
+      end,
+      { "n", "x" },
+    },
+    {
+      function()
+        if vim.opt.virtualedit:get()[1] == "all" then
+          vim.opt.virtualedit = "none"
+          vim.api.nvim_feedkeys("vg" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
+          vim.opt.virtualedit = "all"
+          return
+        end
+        vim.api.nvim_feedkeys("vg" .. vim.api.nvim_replace_termcodes("<end>", true, false, true) .. "h", "nx", true)
+      end,
+      "o",
+    },
+    desc = "Screen Last Non-blank Character",
+  },
+  ["<S-space>L"] = {
     {
       function()
         if vim.opt.virtualedit:get()[1] == "all" then
@@ -121,7 +160,7 @@ return {
     },
     { "g$", { "x", "o" } },
   },
-  ["<space><space>h"] = {
+  ["<S-space><S-space>h"] = {
     {
       function()
         require("builtin.screen-move").move("left")
@@ -131,7 +170,7 @@ return {
     },
     { "g0", { "x", "o" } },
   },
-  ["<space><space>l"] = {
+  ["<S-space><S-space>l"] = {
     {
       function()
         if vim.opt.virtualedit:get()[1] == "all" then
