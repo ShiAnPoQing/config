@@ -86,7 +86,7 @@ function M.float_win_boundary_move(dir)
 end
 
 function M.load(buf, opt)
-  require("parse-keymap").add({
+  require("simple-keymap").add({
     ["<Esc>"] = {
       function()
         if opt.on_close then
@@ -94,7 +94,7 @@ function M.load(buf, opt)
         end
       end,
       "n",
-      { buffer = buf },
+      buffer = buf,
     },
     ["q"] = {
       function()
@@ -103,84 +103,84 @@ function M.load(buf, opt)
         end
       end,
       "n",
-      { buffer = buf },
+      buffer = buf,
     },
     ["<C-M-j>"] = {
       function()
         M.float_win_move("j", 2)
       end,
       "n",
-      { buffer = buf },
+      buffer = buf,
     },
     ["<C-M-k>"] = {
       function()
         M.float_win_move("k", 2)
       end,
       "n",
-      { buffer = buf },
+      buffer = buf,
     },
     ["<C-M-h>"] = {
       function()
         M.float_win_move("h", 2)
       end,
       "n",
-      { buffer = buf },
+      buffer = buf,
     },
     ["<C-M-l>"] = {
       function()
         M.float_win_move("l", 2)
       end,
       "n",
-      { buffer = buf },
+      buffer = buf,
     },
     ["<C-M-space><C-M-j>"] = {
       function()
         M.float_win_boundary_move("j")
       end,
       "n",
-      { buffer = buf },
+      buffer = buf,
     },
     ["<C-M-space><C-M-k>"] = {
       function()
         M.float_win_boundary_move("k")
       end,
       "n",
-      { buffer = buf },
+      buffer = buf,
     },
     ["<C-M-space><C-M-h>"] = {
       function()
         M.float_win_boundary_move("h")
       end,
       "n",
-      { buffer = buf },
+      buffer = buf,
     },
     ["<C-M-space><C-M-l>"] = {
       function()
         M.float_win_boundary_move("l")
       end,
       "n",
-      { buffer = buf },
+      buffer = buf,
     },
     ["<C-M-space><C-M-n>"] = {
       function()
         M.float_win_boundary_move("n")
       end,
       "n",
-      { buffer = buf },
+      buffer = buf,
     },
     ["<C-M-space><C-M-m>"] = {
       function()
         M.float_win_boundary_move("m")
       end,
       "n",
-      { buffer = buf },
+      buffer = buf,
     },
     ["<C-M-space><C-M-space>"] = {
       function()
         M.float_win_boundary_move("c")
       end,
       "n",
-      { buffer = buf },
+      buffer = buf,
     },
   })
 end

@@ -1,6 +1,6 @@
 local M = {}
 
-local function _delete_surround_match(count, mc)
+local function delete_surround_match(count, mc)
   if count == 0 then
     return
   end
@@ -29,12 +29,12 @@ local function _delete_surround_match(count, mc)
       vim.api.nvim_win_set_cursor(0, start_pos)
     end
 
-    _delete_surround_match(count - 1, mc)
+    delete_surround_match(count - 1, mc)
   end)
 end
 
 function M.surround_delete(mc)
-  _delete_surround_match(vim.v.count1, mc)
+  delete_surround_match(vim.v.count1, mc)
 end
 
 return M

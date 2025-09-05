@@ -78,8 +78,8 @@ return {
   ["et"] = { "it", { "x", "o" } },
 
   ["<space>fn"] = create_js_treesitter_textobject_keymap("function_name"),
-  ["<space>eh"] = create_js_treesitter_textobject_keymap("variable_name"),
-  ["<spae>el"] = create_js_treesitter_textobject_keymap("variable_value"),
+  -- ["<space>eh"] = create_js_treesitter_textobject_keymap("variable_name"),
+  -- ["<spae>el"] = create_js_treesitter_textobject_keymap("variable_value"),
   ["<leader>ims"] = create_js_treesitter_textobject_keymap("import_source"),
   ["<leader>imn"] = create_js_treesitter_textobject_keymap("import_clause"),
 

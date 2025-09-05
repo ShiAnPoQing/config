@@ -1,5 +1,5 @@
 return {
-  [";k"] = {
+  ["<leader>k"] = {
     function()
       vim.lsp.buf.hover()
     end,

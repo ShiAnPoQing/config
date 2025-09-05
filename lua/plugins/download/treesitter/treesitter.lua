@@ -73,10 +73,10 @@ return {
             ["<space>ci"] = "@comment.inner",
             ["<space>co"] = "@comment.outer",
 
-            [";li"] = "@loop.inner",
-            [";lo"] = "@loop.outer",
-            [";ki"] = "@conditional.inner",
-            [";ko"] = "@conditional.outer",
+            -- [";li"] = "@loop.inner",
+            -- [";lo"] = "@loop.outer",
+            -- [";ki"] = "@conditional.inner",
+            -- [";ko"] = "@conditional.outer",
 
             ["<space>bi"] = "@block.inner",
             ["<space>bo"] = "@block.outer",
@@ -87,9 +87,9 @@ return {
             -- [";el"] = "@assignment.inner",
             -- [";eh"] = "@assignment.lhs",
             -- [";ee"] = "@assignment.outer",
-            [";sm"] = "@statement.outer",
-
-            [";nm"] = "@number.inner",
+            -- [";sm"] = "@statement.outer",
+            --
+            -- [";nm"] = "@number.inner",
           },
           selection_modes = {
             ["@parameter.outer"] = "v", -- charwise

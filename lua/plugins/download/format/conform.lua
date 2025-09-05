@@ -34,13 +34,13 @@ return {
     conform.formatters.latexindent = {
       prepend_args = { "-l", vim.fn.expand("~/.config/latexindent/indentconfig.yaml"), "-m" },
     }
-    require("parse-keymap").add({
+    require("simple-keymap").add({
       ["<leader>="] = {
         function()
           conform.format({ async = true, lsp_fallback = true })
         end,
         { "n", "x" },
-        { desc = "Format the current buffer" },
+        desc = "Format the current buffer",
       },
     })
   end,

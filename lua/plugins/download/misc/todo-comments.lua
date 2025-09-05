@@ -22,25 +22,25 @@ return {
       },
     })
 
-    require("parse-keymap").add({
+    require("simple-keymap").add({
       ["]t"] = {
         function()
           require("todo-comments").jump_next()
         end,
         "n",
-        { desc = "Next todo comment" },
+        desc = "Next todo comment",
       },
       ["[t"] = {
         function()
           require("todo-comments").jump_prev()
         end,
         "n",
-        { desc = "Previous todo comment" },
+        desc = "Previous todo comment",
       },
       ["<leader>fm"] = {
         "<cmd>TodoTelescope<cr>",
         "n",
-        { desc = "TodoTelescope" },
+        desc = "TodoTelescope",
       },
     })
     -- You can also specify a list of valid jump keywords

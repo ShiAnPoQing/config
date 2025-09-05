@@ -1,5 +1,5 @@
 return {
-  [";fd"] = {
+  ["<leader>fd"] = {
     "<cmd>FzFDirectories<CR>",
     "n",
   },

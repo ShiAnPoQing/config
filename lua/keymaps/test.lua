@@ -16,7 +16,7 @@
 --   },
 --   [";;a"] = {
 --     function()
---       require("utils.get-window-size").get_window_size()
+--       require("utils.ffget-window-size").get_window_size()
 --     end,
 --     "n",
 --   },
@@ -48,7 +48,7 @@ return {
   --   "i",
   --   "n",
   -- },
-  [";;z"] = {
+  ["<leader><leader>z"] = {
     function()
       require("builtin.sreen-move").move("left")
     end,
@@ -57,18 +57,29 @@ return {
   -- ["s"] = { "<nop>", "n" },
   -- ["sk"] = { "-", "n" },
   -- ["sj"] = { "+", "n" },
-  -- ["t"] = { "d", { "n", "x", "o" } },
+  -- ["t"] = { "f", { "n", "x", "o" } },
+  -- ["f"] = { "d", { "n", "x", "o" } },
   -- ["d"] = { "<nop>", { "n" } },
   -- ["dk"] = { "kg_", "n" },
   -- ["dj"] = { "jg_", "n" },
-  -- ["sh"] = { "^", "n" },
-  -- ["ssh"] = { "0", "n" },
+  -- ["sh"] = { "6zl", "n" },
+  -- ["sl"] = { "6zh", "n" },
+  -- ["ssh"] = { "", "n" },
   -- ["dl"] = { "g_", "n" },
   -- ["ddl"] = { "$", "n" },
+  -- ["a"] = { "i", "n" },
+  -- [";"] = { "a", "n" },
+
+  -- ["w"] = { "b", "n" },
+  -- ["i"] = { "ge", "n" },
+  -- ["e"] = { "w", "n" },
+  -- ["o"] = { "e", "n" },
+
   -- ["so"] = { "w", "n" },
   -- ["si"] = { "b", "n" },
   -- ["do"] = { "e", "n" },
   -- ["di"] = { "ge", "n" },
+
   -- ["<S-Space>"] = {
   --   function()
   --     print("vim")

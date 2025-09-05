@@ -12,6 +12,7 @@
 local M = {
   keymaps = {},
   filetypes = {},
+  events = {},
 }
 
 local KeymapOptsMap = {
@@ -25,6 +26,12 @@ local KeymapOptsMap = {
   desc = true,
   replace_keycodes = true,
 }
+
+--- @param rhs any
+--- @return boolean
+local function is_rhs(rhs)
+  return type(rhs) == "string" or type(rhs) == "function"
+end
 
 local function get_keymap_opts(opts)
   local keymap_opts = {}
@@ -45,8 +52,42 @@ local function get_file_path(base, path)
   return path
 end
 
+local function collect_filetype_keymap(filetype, mode, lhs, rhs, keymap_opts)
+  if type(filetype) == "string" then
+    M.filetypes[filetype] = M.filetypes[filetype] or {}
+    table.insert(M.filetypes[filetype], function()
+      pcall(vim.keymap.set, mode, lhs, rhs, keymap_opts)
+    end)
+    return
+  end
+
+  if type(filetype) == "table" then
+    for _, ft in ipairs(filetype) do
+      collect_filetype_keymap(ft, mode, lhs, rhs, keymap_opts)
+    end
+  end
+end
+
+local function collect_event_keymap(event, mode, lhs, rhs, keymap_opts)
+  if type(event) ~= "string" then
+    M.events[event] = M.events[event] or {}
+    table.insert(M.events[event], function()
+      pcall(vim.keymap.set, mode, lhs, rhs, keymap_opts)
+    end)
+    return
+  end
+
+  if type(event) == "table" then
+    for _, e in ipairs(event) do
+      if type(e) == "string" then
+        collect_event_keymap(e, mode, lhs, rhs, keymap_opts)
+      end
+    end
+  end
+end
+
 local function set_keymap(lhs, rhs, mode, opts)
-  if not (type(rhs) == "string" or type(rhs) == "function") then
+  if not is_rhs(rhs) then
     vim.notify("simple-keymap: rhs must be string or function")
     return
   end
@@ -73,10 +114,12 @@ local function set_keymap(lhs, rhs, mode, opts)
   M.keymaps[lhs][mode] = vim.tbl_extend("force", M.keymaps[lhs][mode], opts)
 
   if opts.filetype then
-    M.filetypes[opts.filetype] = M.filetypes[opts.filetype] or {}
-    table.insert(M.filetypes[opts.filetype], function()
-      pcall(vim.keymap.set, mode, lhs, rhs, keymap_opts)
-    end)
+    collect_filetype_keymap(opts.filetype, mode, lhs, rhs, keymap_opts)
+    return
+  end
+  if opts.event then
+    collect_event_keymap(opts.event, mode, lhs, rhs, keymap_opts)
+    return
   end
 
   pcall(vim.keymap.set, mode, lhs, rhs, keymap_opts)
@@ -133,7 +176,7 @@ local function parse(lhs, data)
 
   if type(data[1]) == "table" then
     parse_more_rhs(lhs, data, opts)
-  elseif type(data[1]) == "string" then
+  elseif is_rhs(data[1]) then
     parse_one_rhs(lhs, data, opts)
   end
 end
@@ -192,11 +235,25 @@ function M.filetype_load()
       if not callbacks then
         return
       end
+
       for _, cb in ipairs(callbacks) do
         cb()
       end
     end,
   })
+end
+
+function M.event_load()
+  for event, callbacks in pairs(M.events) do
+    vim.api.nvim_create_autocmd(event, {
+      group = vim.api.nvim_create_augroup("simple-keymap-event", {}),
+      callback = function()
+        for _, cb in ipairs(callbacks) do
+          cb()
+        end
+      end,
+    })
+  end
 end
 
 --- @param opts? SimpleKeymapOpts
@@ -205,6 +262,7 @@ function M.load(opts)
   M.add(opts.add or {})
   M.del(opts.del or {})
   M.filetype_load()
+  M.event_load()
 end
 
 return M

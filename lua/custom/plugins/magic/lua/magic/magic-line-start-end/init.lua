@@ -22,10 +22,11 @@ local function get_col(position, line, wininfo, blank)
   if position == 1 then
     if not blank then
       col = l:find("%S") - 1 - leftcol
+      cursor_col = l:find("%S") - 1
     else
       col = 0 - leftcol
+      cursor_col = l:find("%s") - 1
     end
-    cursor_col = l:find("%S") - 1
   elseif position == 2 then
     if not blank then
       l = l:gsub("%s*$", "")

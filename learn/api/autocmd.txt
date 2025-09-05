@@ -1,6 +1,7 @@
 ==============================================================================
 自动命令函数                                                *api-autocmd*
 
+
 nvim_clear_autocmds({opts})                            *nvim_clear_autocmds()*
     清除由 {opts} 选择的所有自动命令。要删除自动命令，请参见 |nvim_del_autocmd()|。
 
@@ -212,3 +213,4 @@ nvim_get_autocmds({opts})                                *nvim_get_autocmds()*
         • pattern: (string) 自动命令模式。如果自动命令是缓冲区本地的 |autocmd-buffer-local|：
 
 vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
+

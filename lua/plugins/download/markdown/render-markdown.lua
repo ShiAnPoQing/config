@@ -9,7 +9,7 @@ return {
   opts = {},
   ft = { "markdown" },
   keys = {
-    { ";md", "<cmd>RenderMarkdown toggle<cr>", desc = "Toggle Markdown Render" },
+    { "<leader>md", "<cmd>RenderMarkdown toggle<cr>", desc = "Toggle Markdown Render" },
   },
   config = function()
     require("render-markdown").setup({

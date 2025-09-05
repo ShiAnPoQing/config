@@ -2,8 +2,11 @@ local M = {}
 local Key = require("magic.key")
 local Line_hl = require("magic.line-hl")
 
---- @param dir "up" | "down"
-function M.magic_line(dir)
+--- @class MagicLineOpts
+--- @field dir "up" | "down"
+--- @field callback fun()
+function M.magic_line(opts)
+  local dir = opts.dir
   local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
   local topline = wininfo.topline
   local botline = wininfo.botline
@@ -25,7 +28,10 @@ function M.magic_line(dir)
   for line = startline, endline do
     key.register({
       callback = function()
-        vim.api.nvim_win_set_cursor(0, { line, virt_col })
+        opts.callback({
+          line = line,
+          virt_col = virt_col,
+        })
       end,
       one_key = {
         line = line - 1,

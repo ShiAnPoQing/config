@@ -36,7 +36,7 @@ return {
   -- },
 
   -- show press key
-  [";sk"] = {
+  ["<leader>sk"] = {
     function()
       local K = require("key-show")
       K.keyShow()
@@ -44,14 +44,14 @@ return {
     "n",
   },
   -- hidden press key show
-  [";hk"] = {
+  ["<leader>hk"] = {
     function()
       require("key-show").keyHide()
     end,
     "n",
   },
   -- open myvimrc
-  [";<F5>"] = {
+  ["<leader><F5>"] = {
     function()
       local path = vim.fn.expand("$MYVIMRC"):gsub("init.lua", "")
       vim.fn.chdir(path)
@@ -86,7 +86,7 @@ return {
     { "n" },
   },
   -- del line start space
-  [";db<space>"] = {
+  ["<leader>db<space>"] = {
     {
       function()
         local D = require("del-space")

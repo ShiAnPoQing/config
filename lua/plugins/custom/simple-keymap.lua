@@ -4,13 +4,7 @@ return {
   config = function()
     require("simple-keymap").setup({
       add = {
-        -- "keymaps/view",
-        -- ["lhs"] = {
-        --   "rhs",
-        --   "n",
-        --   desc = "aa",
-        --   filetype = "lua",
-        -- },
+        "keymaps/",
       },
     })
   end,

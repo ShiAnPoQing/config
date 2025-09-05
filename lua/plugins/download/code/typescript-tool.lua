@@ -5,8 +5,8 @@ return {
   ft = "typescript",
   config = function()
     require("typescript-tools").setup({})
-    vim.keymap.set("n", ";oi", "<cmd>TSToolsOrganizeImports<cr>")
-    vim.keymap.set("n", ";si", "<cmd>TSToolsSortImports<cr>")
-    vim.keymap.set("n", ";mi", "<cmd>TSToolsAddMissingImports<cr>")
+    vim.keymap.set("n", "<leader>oi", "<cmd>TSToolsOrganizeImports<cr>")
+    vim.keymap.set("n", "<leader>si", "<cmd>TSToolsSortImports<cr>")
+    vim.keymap.set("n", "<leader>mi", "<cmd>TSToolsAddMissingImports<cr>")
   end,
 }

@@ -71,20 +71,7 @@ return {
       end
     end,
     { "n", "x", "o" },
-    { desc = "Screen First Non-blank Character" },
-  },
-  ["<S-space>H"] = {
-    function()
-      local before_cursor = vim.api.nvim_win_get_cursor(0)
-      vim.api.nvim_feedkeys("g^", "nx", true)
-      local after_cursor = vim.api.nvim_win_get_cursor(0)
-
-      if before_cursor[2] == after_cursor[2] then
-        vim.api.nvim_feedkeys("g0", "nx", true)
-      end
-    end,
-    { "n", "x", "o" },
-    { desc = "Screen First Non-blank Character" },
+    desc = "Screen First Non-blank Character",
   },
   ["<S-space>l"] = {
     {
@@ -113,34 +100,7 @@ return {
     },
     desc = "Screen Last Non-blank Character",
   },
-  ["<S-space>L"] = {
-    {
-      function()
-        if vim.opt.virtualedit:get()[1] == "all" then
-          vim.opt.virtualedit = "none"
-          vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
-          vim.opt.virtualedit = "all"
-          return
-        end
-        vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
-      end,
-      { "n", "x" },
-    },
-    {
-      function()
-        if vim.opt.virtualedit:get()[1] == "all" then
-          vim.opt.virtualedit = "none"
-          vim.api.nvim_feedkeys("vg" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
-          vim.opt.virtualedit = "all"
-          return
-        end
-        vim.api.nvim_feedkeys("vg" .. vim.api.nvim_replace_termcodes("<end>", true, false, true) .. "h", "nx", true)
-      end,
-      "o",
-    },
-    desc = "Screen Last Non-blank Character",
-  },
-  ["ah"] = {
+  ["zh"] = {
     {
       function()
         require("builtin.screen-move").move("left")
@@ -150,7 +110,7 @@ return {
     },
     { "g0", { "x", "o" } },
   },
-  ["al"] = {
+  ["zl"] = {
     {
       function()
         require("builtin.screen-move").move("right")
@@ -186,7 +146,7 @@ return {
     },
     { "g$", { "x", "o" } },
   },
-  ["aj"] = {
+  ["zj"] = {
     {
       function()
         require("builtin.screen-move").move("bottom")
@@ -204,7 +164,7 @@ return {
     },
   },
   -- normal mode cursor move: screen top
-  ["ak"] = {
+  ["zk"] = {
     {
       function()
         require("builtin.screen-move").move("top")
@@ -222,7 +182,7 @@ return {
     },
   },
   -- normal mode cursor move: screen center
-  ["am"] = {
+  ["zm"] = {
     {
       function()
         require("builtin.screen-move").move("h_center")
@@ -240,7 +200,7 @@ return {
     },
   },
   -- normal mode cursor move: screen center col
-  ["an"] = {
+  ["zn"] = {
     {
       function()
         require("builtin.screen-move").move("v_center")
@@ -255,7 +215,7 @@ return {
     end,
     "n",
   },
-  ["ac"] = {
+  ["zc"] = {
     "gmM",
     "n",
   },
@@ -281,13 +241,13 @@ return {
   -- -- normal mode view move: cursor line position at screen bottom col
   -- ["aaj"] = { "zb", { "n", "x" } },
   -- normal mode view move: cursor line position at screen center col
-  ["aL"] = { "ze", { "n", "x" } },
-  ["aH"] = { "zs", { "n", "x" } },
-  ["aK"] = { "zt", { "n", "x" } },
-  ["aJ"] = { "zb", { "n", "x" } },
-  ["aan"] = { "zz", { "n", "x" } },
+  ["zL"] = { "ze", { "n", "x" } },
+  ["zH"] = { "zs", { "n", "x" } },
+  ["zK"] = { "zt", { "n", "x" } },
+  ["zJ"] = { "zb", { "n", "x" } },
+  ["zzn"] = { "zz", { "n", "x" } },
   -- normal mode view move: cursor line position at screen center row
-  ["aam"] = { aam, { "n" } },
+  ["zzm"] = { aam, { "n" } },
 
   -- normal mode view move: cursor word position at screen right
   ["<M-1><M-1><M-l>"] = { "<C-o>zs", { "i" } },

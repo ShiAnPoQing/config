@@ -19,28 +19,28 @@ return {
       large_move("h")
     end,
     { "x", "n" },
-    { desc = "3 Char Left move" },
+    desc = "3 Char Left move",
   },
   ["J"] = {
     function()
       large_move("j")
     end,
     { "x", "n" },
-    { desc = "3 Char Down move" },
+    desc = "3 Char Down move",
   },
   ["K"] = {
     function()
       large_move("k")
     end,
     { "x", "n" },
-    { desc = "3 Char Up move" },
+    desc = "3 Char Up move",
   },
   ["L"] = {
     function()
       large_move("l")
     end,
     { "x", "n" },
-    { desc = "Right move" },
+    desc = "Right move",
   },
   -- ["0<space>h"] = {
   -- 	function()
@@ -61,7 +61,7 @@ return {
   ["<space>D"] = {
     "xd^",
     "n",
-    { noremap = true },
+    noremap = true,
   },
   ["<space><M-l>"] = {
     "A",
@@ -72,14 +72,14 @@ return {
     { "<Down>g_", { "n", "x" } },
   },
   ["<space>k"] = {
-    { space_k_Omode, "o", { noremap = true } },
+    { space_k_Omode, "o", noremap = true },
     { "<Up>g_", { "n", "x" } },
   },
 
   -- 支持百分比 count
   ["<space>m"] = { "gM", { "n", "x", "o" } },
   -- 支持百分比 count
-  ["<space>n"] = { "gM", { "n", "x", "o" } },
+  ["<space>n"] = { "M", { "n", "x", "o" } },
   ["<M-space><M-m>"] = { "<C-o>gM", { "i" } },
   ["<M-space><M-n>"] = { "<C-o>gM", { "i" } },
 

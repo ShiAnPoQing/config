@@ -5,7 +5,7 @@ local function switch(option)
 end
 
 return {
-  [";st"] = {
+  ["<leader>st"] = {
     function()
       local value = vim.opt.laststatus:get()
       if value == 0 then
@@ -16,7 +16,7 @@ return {
     end,
     "n",
   },
-  [";vt"] = {
+  ["<leader>vt"] = {
     function()
       local value = vim.opt.virtualedit:get()[1]
       if value == "all" then
@@ -27,7 +27,7 @@ return {
     end,
     "n",
   },
-  [";csl"] = {
+  ["<leader>csl"] = {
     function()
       vim.opt.cursorline = not vim.opt.cursorline:get()
     end,
@@ -57,7 +57,7 @@ return {
     end,
     "n",
   },
-  [";sh"] = {
+  ["<leader>sh"] = {
     function()
       local value = vim.opt["signcolumn"]:get()
       if string.sub(value, 1, 1) == "y" then
@@ -68,7 +68,7 @@ return {
     end,
     "n",
   },
-  [";nb"] = {
+  ["<leader>nb"] = {
     function()
       if vim.opt["number"]:get() then
         vim.opt.number = false
@@ -78,7 +78,7 @@ return {
     end,
     "n",
   },
-  [";rnb"] = {
+  ["<leader>rnb"] = {
     function()
       if vim.opt["relativenumber"]:get() then
         vim.opt.relativenumber = false
@@ -88,7 +88,7 @@ return {
     end,
     "n",
   },
-  [";tnb"] = {
+  ["<leader>tnb"] = {
     function()
       if vim.opt["relativenumber"]:get() or vim.opt.number:get() then
         vim.opt.relativenumber = false
@@ -103,28 +103,28 @@ return {
     end,
     "n",
   },
-  [";cl"] = {
+  ["<leader>cl"] = {
     function()
       color_column = color_column == "72" and "" or "72"
       vim.opt.colorcolumn = color_column
     end,
     "n",
   },
-  [";ig"] = {
+  ["<leader>ig"] = {
     function()
       switch("ignorecase")
     end,
     { "n" },
   },
   -- toggle list icon
-  [";li"] = {
+  ["<leader>li"] = {
     function()
       switch("list")
     end,
     { "n" },
   },
   -- toggle hlsearch highlight
-  [";hl"] = {
+  ["<leader>hl"] = {
     function()
       switch("hlsearch")
     end,

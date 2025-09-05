@@ -98,6 +98,24 @@ local function get_colors(bg)
       bg20 = "#D3D9F2",
       bg21 = "#DEE5FF",
       bg22 = "#E3E9FF",
+
+      _bg1 = "#08080b",
+      _bg2 = "#0f0f13",
+      _bg3 = "#18181e",
+      _bg4 = "#1f1f27",
+      _bg5 = "#26262f",
+      _bg6 = "#2f2f3b",
+      _bg7 = "#363643",
+      _bg8 = "#3c3c4c",
+      _bg9 = "#454557",
+      _bg10 = "#4c4c60",
+      _bg11 = "#535368",
+      _bg12 = "#5c5c74",
+      _bg13 = "#63637c",
+      _bg14 = "#6a6a85",
+      _bg15 = "#737390",
+      _bg16 = "#7b7b96",
+      _bg17 = "#84849d",
     },
     light = {
       hue1 = "#ac4339", -- 5
@@ -183,17 +201,19 @@ local function get_groups()
   local groups = {
     dark = {
       CustomVisual = { bg = colors.bg7, reverse = false },
-      Normal = { fg = colors.bg15, bg = colors.bg5 }, -- 普通文本
+      -- Normal = { fg = colors.bg15, bg = colors.bg5 }, -- 普通文本
+      -- Normal = { fg = colors.bg15, bg = "#1F1F27" }, -- 普通文本
+      Normal = { fg = colors.bg15, bg = colors._bg4 }, -- 普通文本
       NormalFloat = { fg = colors.bg15, bg = colors.bg3 }, --- 浮动窗口的普通文本
       NormalNC = { link = "Normal" }, -- 非当前窗口的普通文本
       MoreMsg = { link = "Normal" }, -- More Message
       ModeMsg = { link = "Normal" }, -- Mode Message
-      LineNr = { fg = colors.bg9, bg = colors.bg5, bold = false }, -- 行号
+      LineNr = { fg = colors.bg9, bg = colors._bg4, bold = false }, -- 行号
       Search = { reverse = true }, -- 搜索结果
       IncSearch = { link = "Search" },
       CurSearch = { link = "IncSearch" },
       StatusLine = { bg = colors.bg5, fg = colors.bg15, reverse = true }, -- 状态栏
-      SignColumn = { bg = colors.bg5 }, -- 符号列
+      SignColumn = { bg = colors._bg4 }, -- 符号列
       CursorLine = { bg = colors.bg6 }, -- 光标行
       CursorLineNr = { fg = colors.bg15, bold = true },
       ColorColumn = { bg = colors.bg6 },
@@ -210,7 +230,7 @@ local function get_groups()
       Keyword = { fg = colors.hue52, bold = true },
       Function = { fg = colors.hue45, bold = true },
       String = { fg = colors.hue20 },
-      Number = { bg = colors.bg5, fg = colors.hue1 },
+      Number = { bg = colors._bg4, fg = colors.hue1 },
       Operator = { fg = colors.hue40 },
       Delimiter = { fg = colors.bg15 },
       Comment = { fg = colors.bg9 },

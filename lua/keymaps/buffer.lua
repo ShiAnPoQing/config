@@ -1,6 +1,5 @@
 return {
-  -- buffer
-  ["<Tab>j"] = { "<cmd>bn<CR>", "n" },
-  ["<Tab>k"] = { "<cmd>bp<CR>", "n" },
-  ["<Tab>d"] = { "<cmd>bd<cr>", "n" },
+  ["<Tab>j"] = { "<cmd>bn<CR>", "n", desc = "Next Buffer" },
+  ["<Tab>k"] = { "<cmd>bp<CR>", "n", desc = "Previous Buffer" },
+  ["<Tab>d"] = { "<cmd>bd<cr>", "n", desc = "Delete Buffer" },
 }
