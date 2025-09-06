@@ -35,5 +35,6 @@ return {
       end
     end,
     "n",
+    desc = "Toggle QuickFix List",
   },
 }

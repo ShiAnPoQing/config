@@ -139,10 +139,8 @@ return {
       ]],
         {}
       )
-
-      local group = vim.api.nvim_create_augroup("CustomModeChanged", { clear = true })
       vim.api.nvim_create_autocmd("ModeChanged", {
-        group = group,
+        group = vim.api.nvim_create_augroup("CustomModeChanged", { clear = true }),
         callback = function(ev)
           vim.opt.virtualedit = "all"
           vim.api.nvim_del_autocmd(ev.id)

@@ -12,18 +12,22 @@ return {
   ["i"] = {
     "b",
     { "n", "x", "o" },
+    desc = "Move to the beginning of the word(left)",
   },
   ["o"] = {
     "e",
     { "n", "x", "o" },
+    desc = "Move to the end of the word(right)",
   },
   ["I"] = {
     "B",
     { "n", "x", "o" },
+    desc = "Move to the beginning of the WORD(left)",
   },
   ["O"] = {
     "E",
     { "n", "x", "o" },
+    desc = "Move to the end of the WORD(right)",
   },
   ["<C-i>"] = {
     "ge",

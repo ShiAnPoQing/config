@@ -50,14 +50,13 @@ return {
   ["<tab>o"] = { "<cmd>on<cr>", "n" },
   ["<tab>O"] = { "<cmd>tabonly<cr>", "n" },
   ["<tab>n"] = { "<cmd>tabnew<cr>", "n" },
-  ["<tab><S-l>"] = { tabpage_move_right, "n" },
-  ["<tab><S-h>"] = { tabpage_move_left, "n" },
   -- gT
   ["<Tab>h"] = {
     function()
       tabpage_goto("left")
     end,
     "n",
+    desc = "Go to previous tab",
   },
   -- gt
   ["<Tab>l"] = {
@@ -65,20 +64,24 @@ return {
       tabpage_goto("right")
     end,
     "n",
+    desc = "Go to next tab",
   },
+  ["<tab><S-l>"] = { tabpage_move_right, "n", desc = "Move tab right" },
+  ["<tab><S-h>"] = { tabpage_move_left, "n", desc = "Move tab left" },
   ["<tab>p"] = {
     "g<tab>",
     "n",
+    desc = "Go to previous tab",
   },
-  ["<tab>1"] = { "<cmd>1tabnext<cr>", "n" },
-  ["<tab>2"] = { "<cmd>2tabnext<cr>", "n" },
-  ["<tab>3"] = { "<cmd>3tabnext<cr>", "n" },
-  ["<tab>4"] = { "<cmd>4tabnext<cr>", "n" },
-  ["<tab>5"] = { "<cmd>5tabnext<cr>", "n" },
-  ["<tab>6"] = { "<cmd>6tabnext<cr>", "n" },
-  ["<tab>7"] = { "<cmd>7tabnext<cr>", "n" },
-  ["<tab>8"] = { "<cmd>8tabnext<cr>", "n" },
-  ["<tab>9"] = { "<cmd>9tabnext<cr>", "n" },
-  ["<tab><space>h"] = { "<cmd>tabfirst<cr>", "n" },
-  ["<tab><space>l"] = { "<cmd>tablast<cr>", "n" },
+  ["<tab>1"] = { "<cmd>1tabnext<cr>", "n", desc = "Tab 1" },
+  ["<tab>2"] = { "<cmd>2tabnext<cr>", "n", desc = "Tab 2" },
+  ["<tab>3"] = { "<cmd>3tabnext<cr>", "n", desc = "Tab 3" },
+  ["<tab>4"] = { "<cmd>4tabnext<cr>", "n", desc = "Tab 4" },
+  ["<tab>5"] = { "<cmd>5tabnext<cr>", "n", desc = "Tab 5" },
+  ["<tab>6"] = { "<cmd>6tabnext<cr>", "n", desc = "Tab 6" },
+  ["<tab>7"] = { "<cmd>7tabnext<cr>", "n", desc = "Tab 7" },
+  ["<tab>8"] = { "<cmd>8tabnext<cr>", "n", desc = "Tab 8" },
+  ["<tab>9"] = { "<cmd>9tabnext<cr>", "n", desc = "Tab 9" },
+  ["<tab><space>h"] = { "<cmd>tabfirst<cr>", "n", desc = "Go to first tab" },
+  ["<tab><space>l"] = { "<cmd>tablast<cr>", "n", desc = "Go to last tab" },
 }

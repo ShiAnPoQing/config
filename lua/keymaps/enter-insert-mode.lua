@@ -379,6 +379,14 @@ return {
     desc = "Start insert mode to the far right character of the screen window",
   },
 
-  ["gw"] = { "gi", "n" },
-  ["ge"] = { "gi", "n" },
+  ["gw"] = {
+    "gi",
+    "n",
+    desc = "Insert text in the same position as where Insert mode was stopped last time in the current buffer.",
+  },
+  ["ge"] = {
+    "gi",
+    "n",
+    desc = "Insert text in the same position as where Insert mode was stopped last time in the current buffer.",
+  },
 }

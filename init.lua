@@ -53,7 +53,7 @@ require("lazy-setup").setup({
   require("plugins.download.misc.undotree"),
   -- require("plugins.download.misc.numb"),
   require("plugins.download.misc.nvim-possession"),
-  require("plugins.download.misc.showkey"),
+  -- require("plugins.download.misc.showkey"),
   require("plugins.download.git.gitsigns"),
   -- require("plugins.download.treesitter.nvim-treesitter-context"),
   -- require("plugins.download.telescope.telescope"),

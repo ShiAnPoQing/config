@@ -4,6 +4,7 @@ return {
       vim.lsp.buf.hover()
     end,
     "n",
+    desc = "LSP Hover",
   },
   -- Run lsp codelens
   ["<leader>lc"] = {
@@ -11,7 +12,7 @@ return {
       vim.lsp.codelens.run()
     end,
     "n",
-    { desc = "[L]sp [C]odelens" },
+    desc = "[L]sp [C]odelens",
   },
   -- Refresh lsp codelens
   ["<leader>cR"] = {
@@ -20,12 +21,12 @@ return {
     end,
     "n",
   },
-  -- QuickFix List show diagnostic
   ["<leader>dq"] = {
     function()
       vim.diagnostic.setqflist()
     end,
     "n",
+    desc = "Show diagnostic in quickfix list",
   },
   -- Open diagnostic Float Win
   ["<leader>df"] = {
@@ -43,6 +44,7 @@ return {
       vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
+    desc = "Goto prev WARN diagnostic",
   },
   -- Goto next WARN diagnostic
   ["]w"] = {
@@ -51,6 +53,7 @@ return {
       vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
+    desc = "Goto next WARN diagnostic",
   },
   -- Goto next error diagnostic
   ["]e"] = {
@@ -59,6 +62,7 @@ return {
       vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
+    desc = "Goto next error diagnostic",
   },
   -- Goto previous error diagnostic
   ["[e"] = {
@@ -67,6 +71,7 @@ return {
       vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
+    desc = "Goto prev ERROR diagnostic",
   },
   ["[d"] = {
     function()
@@ -74,6 +79,7 @@ return {
       vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
+    desc = "Goto prev diagnostic",
   },
   ["]d"] = {
     function()
@@ -81,6 +87,7 @@ return {
       vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
+    desc = "Goto next diagnostic",
   },
   -- show inlay_hint
   ["<leader>ih"] = {
@@ -88,5 +95,6 @@ return {
       vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({}))
     end,
     "n",
+    desc = "Toggle inlay hint",
   },
 }

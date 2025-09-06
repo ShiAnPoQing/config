@@ -141,7 +141,7 @@ return {
   -- insert mode move: h,
   ["<M-h>"] = {
     { "<left>", { "i", "c", "s" }, { silent = false } },
-    -- { "hi", { "n" } },
+    { "hi", { "n" } },
     { "<left>", "t" },
   },
   -- ["<M-C-h>"] = {
@@ -151,7 +151,7 @@ return {
   -- insert mode move: l,
   ["<M-l>"] = {
     { "<right>", { "i", "c", "s" }, { silent = false } },
-    -- { "la", "n" },
+    { "la", "n" },
     -- { "<C-W>l^", { "n" } },
     { "<right>", "t" },
   },

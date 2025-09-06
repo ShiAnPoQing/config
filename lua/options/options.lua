@@ -122,7 +122,4 @@ return {
       matchpairs = { "【:】", "<:>", "《:》", "（:）", "`:`" },
     },
   },
-  -- javascript = {
-  --   termguicolors = false
-  -- }
 }
