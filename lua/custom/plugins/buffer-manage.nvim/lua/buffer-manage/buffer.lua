@@ -1,4 +1,5 @@
 local M = {}
+local Mark = require("buffer-manage.mark")
 
 local default_buf_option = {
   buftype = "acwrite",
@@ -46,18 +47,18 @@ end
 
 --- @param opts? table<string, any>
 function M:create(opts)
-  if not self.buf then
-    self.buf = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_buf_set_name(self.buf, "Buffer Manage")
-    set_buf_options(opts)
+  if self.buf then
+    return
   end
+  self.buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_name(self.buf, "Buffer Manage")
+  set_buf_options(opts)
 end
 
 function M:update(win, current_buf)
   if not is_buf_valid(current_buf) or not vim.api.nvim_win_is_valid(win) or not vim.api.nvim_buf_is_valid(self.buf) then
     return
   end
-
   self.bufs = get_bufs(current_buf)
   vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, self.bufs.lines)
   vim.api.nvim_set_option_value("modified", false, {
@@ -67,17 +68,8 @@ function M:update(win, current_buf)
   if not self.bufs.cursor_line then
     return
   end
-
-  if not self.sign_id then
-    self.sign_id = vim.api.nvim_create_namespace("buffer-manage-current-buffer")
-  end
-
   vim.api.nvim_win_set_cursor(win, { self.bufs.cursor_line, 0 })
-  vim.api.nvim_buf_set_extmark(self.buf, self.sign_id, self.bufs.cursor_line - 1, 0, {
-    sign_text = "",
-    sign_hl_group = "Type",
-    invalidate = true,
-  })
+  Mark:set_mark(self.buf, self.bufs.cursor_line - 1)
 end
 
 return M

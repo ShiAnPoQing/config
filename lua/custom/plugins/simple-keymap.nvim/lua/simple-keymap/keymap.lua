@@ -13,6 +13,7 @@ local M = {
   keymaps = {},
   filetypes = {},
   events = {},
+  delete_keymaps = {},
 }
 
 local KeymapOptsMap = {
@@ -25,6 +26,12 @@ local KeymapOptsMap = {
   callback = true,
   desc = true,
   replace_keycodes = true,
+  buffer = true,
+  remap = true,
+}
+
+local DeleteKeymapOptsMap = {
+  buffer = true,
 }
 
 --- @param rhs any
@@ -43,6 +50,16 @@ local function get_keymap_opts(opts)
   return keymap_opts
 end
 
+local function get_delete_keymap_opts(opts)
+  local keymap_opts = {}
+  for key, value in pairs(opts) do
+    if DeleteKeymapOptsMap[key] then
+      keymap_opts[key] = value
+    end
+  end
+  return keymap_opts
+end
+
 local function get_file_path(base, path)
   if vim.endswith(path, "/") then
     path = base .. path .. "*.lua"
@@ -52,36 +69,32 @@ local function get_file_path(base, path)
   return path
 end
 
-local function collect_filetype_keymap(filetype, mode, lhs, rhs, keymap_opts)
+local function collect_filetype_keymap(filetype, callback)
   if type(filetype) == "string" then
     M.filetypes[filetype] = M.filetypes[filetype] or {}
     table.insert(M.filetypes[filetype], function()
-      pcall(vim.keymap.set, mode, lhs, rhs, keymap_opts)
+      callback()
     end)
     return
   end
 
   if type(filetype) == "table" then
     for _, ft in ipairs(filetype) do
-      collect_filetype_keymap(ft, mode, lhs, rhs, keymap_opts)
+      collect_filetype_keymap(ft, callback)
     end
   end
 end
 
-local function collect_event_keymap(event, mode, lhs, rhs, keymap_opts)
-  if type(event) ~= "string" then
+local function collect_event_keymap(event, callback)
+  if type(event) == "string" then
     M.events[event] = M.events[event] or {}
-    table.insert(M.events[event], function()
-      pcall(vim.keymap.set, mode, lhs, rhs, keymap_opts)
-    end)
+    table.insert(M.events[event], callback)
     return
   end
 
   if type(event) == "table" then
     for _, e in ipairs(event) do
-      if type(e) == "string" then
-        collect_event_keymap(e, mode, lhs, rhs, keymap_opts)
-      end
+      collect_event_keymap(e, callback)
     end
   end
 end
@@ -114,11 +127,16 @@ local function set_keymap(lhs, rhs, mode, opts)
   M.keymaps[lhs][mode] = vim.tbl_extend("force", M.keymaps[lhs][mode], opts)
 
   if opts.filetype then
-    collect_filetype_keymap(opts.filetype, mode, lhs, rhs, keymap_opts)
+    collect_filetype_keymap(opts.filetype, function()
+      pcall(vim.keymap.set, mode, lhs, rhs, keymap_opts)
+    end)
     return
   end
+
   if opts.event then
-    collect_event_keymap(opts.event, mode, lhs, rhs, keymap_opts)
+    collect_event_keymap(opts.event, function()
+      pcall(vim.keymap.set, mode, lhs, rhs, keymap_opts)
+    end)
     return
   end
 
@@ -166,7 +184,28 @@ local function parse_more_rhs(lhs, data, parent_opts)
   end
 end
 
-local function parse(lhs, data)
+local function del_keymap(lhs, mode, opts)
+  M.delete_keymaps[lhs] = M.delete_keymaps[lhs] or {}
+  M.delete_keymaps[lhs][mode] = opts
+  local keymap_opts = get_delete_keymap_opts(opts)
+  pcall(vim.keymap.del, mode, lhs, keymap_opts)
+end
+
+local function parse_delete_keymap(lhs, data)
+  local opts = get_opts(data)
+
+  for _, mode in ipairs(data) do
+    if type(mode) == "string" then
+      collect_event_keymap("BufReadPre", function()
+        del_keymap(lhs, mode, opts)
+      end)
+    elseif type(mode) == "table" then
+      parse_delete_keymap(lhs, vim.tbl_extend("force", opts, mode))
+    end
+  end
+end
+
+local function parse_add_keymap(lhs, data)
   if type(data) ~= "table" then
     vim.notify("simple-keymap: lhs = value must be table")
     return
@@ -205,7 +244,7 @@ function M.add(source)
         M.add(s)
       end)
     else
-      parse(lhs, data)
+      parse_add_keymap(lhs, data)
     end
   end
 end
@@ -221,7 +260,7 @@ function M.del(source)
         M.del(s)
       end)
     else
-      parse(lhs, data)
+      parse_delete_keymap(lhs, data)
     end
   end
 end
@@ -231,11 +270,7 @@ function M.filetype_load()
     group = vim.api.nvim_create_augroup("simple-keymap-filetype", {}),
     pattern = vim.tbl_keys(M.filetypes),
     callback = function()
-      local callbacks = M.filetypes[vim.bo.filetype]
-      if not callbacks then
-        return
-      end
-
+      local callbacks = M.filetypes[vim.bo.filetype] or {}
       for _, cb in ipairs(callbacks) do
         cb()
       end

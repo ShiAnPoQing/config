@@ -8,7 +8,7 @@ local function create_treesitter_textobject_keymap(opts)
       })
     end,
     { "o", "x" },
-    { filetype = opts.filetype },
+    filetype = opts.filetype,
   }
 end
 
@@ -28,6 +28,11 @@ local function create_js_treesitter_textobject_keymap(query)
       language = "javascript",
       query = query,
       filetype = "javascript",
+    }),
+    create_treesitter_textobject_keymap({
+      language = "lua",
+      query = query,
+      filetype = "lua",
     }),
   }
 end
@@ -71,8 +76,26 @@ return {
   ["e'"] = { "i'", { "x", "o" } },
   ["w`"] = { "a`", { "x", "o" } },
   ["e`"] = { "i`", { "x", "o" } },
-  ["wl"] = { "^o$h", { "x" } },
-
+  ["el"] = {
+    { "^og_", "x" },
+    {
+      function()
+        vim.api.nvim_feedkeys("^vg_", "nx", false)
+      end,
+      "o",
+    },
+    desc = "inner line(non br)",
+  },
+  ["wl"] = {
+    { "0o$h", "x" },
+    {
+      function()
+        vim.api.nvim_feedkeys("0v$h", "nx", false)
+      end,
+      "o",
+    },
+    desc = "outer line(non br)",
+  },
   -- <div> </div>
   ["wt"] = { "at", { "x", "o" } },
   ["et"] = { "it", { "x", "o" } },

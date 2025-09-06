@@ -2,6 +2,7 @@ local M = {}
 
 local Float = require("buffer-manage.float")
 local Buffer = require("buffer-manage.buffer")
+local Mark = require("buffer-manage.mark")
 
 --- @param cmds integer[]
 local function del_autocmd(cmds)
@@ -86,11 +87,7 @@ function M.buffer_manage()
       return
     end
     vim.api.nvim_win_set_buf(current_win, bufnr)
-    vim.api.nvim_buf_clear_namespace(Buffer.buf, Buffer.sign_id, 0, -1)
-    vim.api.nvim_buf_set_extmark(Buffer.buf, Buffer.sign_id, cursor[1] - 1, 0, {
-      sign_text = "",
-      sign_hl_group = "Type",
-    })
+    Mark:set_mark(Buffer.buf, cursor[1] - 1)
   end, { buffer = Buffer.buf })
 
   vim.keymap.set("n", "<C-s>", function() end, { buffer = Buffer.buf })

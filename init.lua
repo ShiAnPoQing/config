@@ -1,24 +1,5 @@
 vim.g.mapleader = ";"
 require("command")
-
--- vim.o.complete = ".,o"
--- vim.o.completeopt = "fuzzy,menuone,noselect,popup"
--- vim.o.autocomplete = true
--- vim.o.pumheight = 7
---
--- vim.api.nvim_create_autocmd("LspAttach", {
---   callback = function(ev)
---     vim.lsp.completion.enable(true, ev.data.client_id, ev.buf, {
---       autocomplete = true,
---       convert = function(item)
---         local menu = item.detail or ""
---         menu = #menu > 15 and menu:sub(1, 14) .. "…" or menu
---         return { abbr = item.label, word = item.label, menu = menu, info = "# nihoa" }
---       end,
---     })
---   end,
--- })
-
 require("lazy-setup").setup({
   require("plugins.custom.repeat"),
   require("plugins.custom.parse-option"),
