@@ -3,16 +3,19 @@ return {
   ["<leader>qn"] = {
     "<cmd>cnext<cr>zz",
     "n",
+    desc = "Goto next in QuickFix List",
   },
   -- Goto prev in QuickFix List
   ["<leader>qp"] = {
     "<cmd>cprevious<cr>zz",
     "n",
+    desc = "Goto prev in QuickFix List",
   },
   -- Open QuickFix List
   ["<leader>qo"] = {
     "<cmd>copen<cr>zz",
     "n",
+    desc = "Open QuickFix List",
   },
   -- Toggle QuickFix List
   ["<leader>qq"] = {

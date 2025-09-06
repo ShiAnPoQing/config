@@ -6,7 +6,7 @@ return {
     {
       "<leader>bm",
       function()
-        require("buffer-manage").buffers()
+        require("buffer-manage").buffer_manage()
       end,
     },
   },

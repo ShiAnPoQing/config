@@ -14,6 +14,12 @@ local function set_buf_options(option)
   end
 end
 
+local function is_buf_valid(buf)
+  return vim.api.nvim_get_option_value("buflisted", {
+    buf = buf,
+  }) and vim.api.nvim_buf_is_valid(buf)
+end
+
 local function get_bufs(current_buf)
   local bufs = vim.api.nvim_list_bufs()
   local lines = {}
@@ -21,9 +27,7 @@ local function get_bufs(current_buf)
   local map = {}
 
   for _, buf in ipairs(bufs) do
-    if vim.api.nvim_get_option_value("buflisted", {
-      buf = buf,
-    }) and vim.api.nvim_buf_is_valid(buf) then
+    if is_buf_valid(buf) then
       if buf == current_buf then
         cursor_line = #lines + 1
       end
@@ -50,9 +54,10 @@ function M:create(opts)
 end
 
 function M:update(win, current_buf)
-  if not vim.api.nvim_buf_is_valid(self.buf) then
+  if not is_buf_valid(current_buf) or not vim.api.nvim_win_is_valid(win) or not vim.api.nvim_buf_is_valid(self.buf) then
     return
   end
+
   self.bufs = get_bufs(current_buf)
   vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, self.bufs.lines)
   vim.api.nvim_set_option_value("modified", false, {
@@ -71,6 +76,7 @@ function M:update(win, current_buf)
   vim.api.nvim_buf_set_extmark(self.buf, self.sign_id, self.bufs.cursor_line - 1, 0, {
     sign_text = "",
     sign_hl_group = "Type",
+    invalidate = true,
   })
 end
 

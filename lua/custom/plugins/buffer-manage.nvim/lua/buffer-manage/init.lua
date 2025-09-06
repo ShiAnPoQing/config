@@ -3,32 +3,43 @@ local M = {}
 local Float = require("buffer-manage.float")
 local Buffer = require("buffer-manage.buffer")
 
+--- @param cmds integer[]
+local function del_autocmd(cmds)
+  for _, value in ipairs(cmds) do
+    vim.api.nvim_del_autocmd(value)
+  end
+end
+
 --- @class BufferManageOptions
 
 --- @param opts? BufferManageOptions
 function M.setup(opts) end
 
-function M.buffers()
+function M.buffer_manage()
+  if Float.win and vim.api.nvim_win_is_valid(Float.win) then
+    vim.api.nvim_win_close(Float.win, true)
+    return
+  end
+
   local current_buf = vim.api.nvim_get_current_buf()
   local current_win = vim.api.nvim_get_current_win()
+
   Buffer:create()
   Float:create(Buffer.buf)
   Buffer:update(Float.win, current_buf)
 
+  local VimResized = vim.api.nvim_create_autocmd("VimResized", {
+    callback = function()
+      Float:update()
+    end,
+  })
   local BufWinEnter = vim.api.nvim_create_autocmd("BufWinEnter", {
     callback = function(ev)
-      if vim.o.filetype == "neo-tree" or vim.o.filetype == "blink-cmp-menu" then
-        return
-      end
       Buffer:update(Float.win, ev.buf)
     end,
   })
-
   local WinEnter = vim.api.nvim_create_autocmd("WinEnter", {
     callback = function(ev)
-      if vim.o.filetype == "neo-tree" or vim.o.filetype == "blink-cmp-menu" then
-        return
-      end
       if ev.buf == Buffer.buf then
         return
       end
@@ -39,8 +50,7 @@ function M.buffers()
 
   vim.api.nvim_create_autocmd("BufHidden", {
     callback = function(ev)
-      vim.api.nvim_del_autocmd(BufWinEnter)
-      vim.api.nvim_del_autocmd(WinEnter)
+      del_autocmd({ BufWinEnter, WinEnter, VimResized })
       return true
     end,
     buffer = Buffer.buf,
@@ -51,10 +61,16 @@ function M.buffers()
       local lines = vim.api.nvim_buf_get_lines(Buffer.buf, 0, -1, false)
       for bufname, bufnr in pairs(Buffer.bufs.map) do
         if not vim.list_contains(lines, bufname) then
-          vim.api.nvim_set_option_value("buflisted", false, {
-            buf = bufnr,
-          })
-          vim.api.nvim_buf_delete(bufnr, { unload = true })
+          if bufnr == vim.api.nvim_win_get_buf(current_win) then
+            vim.api.nvim_buf_call(bufnr, function()
+              vim.cmd("bd")
+            end)
+          else
+            vim.api.nvim_set_option_value("buflisted", false, {
+              buf = bufnr,
+            })
+            vim.api.nvim_buf_delete(bufnr, { force = true })
+          end
         end
       end
       Buffer:update(Float.win, vim.api.nvim_win_get_buf(current_win))

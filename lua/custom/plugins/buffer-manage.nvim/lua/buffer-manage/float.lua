@@ -25,20 +25,37 @@ local function set_win_options(option)
   end
 end
 
+local function get_config(config)
+  config = vim.tbl_deep_extend("force", default_config, config or {})
+  config.width = vim.opt.columns:get()
+  config.row = vim.opt.lines:get() - vim.opt.cmdheight:get() - 1 - 10
+  return config
+end
+
+local function get_option(option)
+  return vim.tbl_deep_extend("force", default_win_option, option or {})
+end
+
 --- @class BufferManageFloatOptions
---- @field config? table<string, any>
---- @field option? vim.api.keyset.win_config
+--- @field config? vim.api.keyset.win_config
+--- @field option? table<string, any>
 
 --- @param buf integer
 --- @param opts? BufferManageFloatOptions
 function M:create(buf, opts)
   opts = opts or {}
-  local config = vim.tbl_deep_extend("force", default_config, opts.config or {})
-  local option = vim.tbl_deep_extend("force", default_win_option, opts.option or {})
-  config.width = vim.opt.columns:get()
-  config.row = vim.opt.lines:get() - vim.opt.cmdheight:get() - 1 - 10
-
+  local config = get_config(opts.config)
+  local option = get_option(opts.option)
   self.win = vim.api.nvim_open_win(buf, true, config)
+  set_win_options(option)
+end
+
+--- @param opts? BufferManageFloatOptions
+function M:update(opts)
+  opts = opts or {}
+  local config = get_config(opts.config)
+  local option = get_option(opts.option)
+  vim.api.nvim_win_set_config(self.win, config)
   set_win_options(option)
 end
 

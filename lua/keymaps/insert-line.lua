@@ -1,14 +1,35 @@
 return {
-  ["b"] = { "o", { "n", "x" } },
-  ["B"] = { "O", { "n", "x" } },
+  ["b"] = {
+    "o",
+    {
+      { "n", desc = "Begin a new line below the cursor and insert text" },
+      { "x", desc = "Go to Other end of highlighted text" },
+    },
+  },
+  ["B"] = {
+    "O",
+    {
+      { "n", desc = "Begin a new line above the cursor and insert text" },
+      { "x", desc = "Go to Other end of highlighted text" },
+    },
+  },
   -- no blank
-  ["<space>b"] = { "o<C-u>", { "n" } },
+  ["<space>b"] = {
+    "o<C-u>",
+    "n",
+    desc = "Begin a new line below the cursor and insert text(non-blank)",
+  },
   -- no blank
-  ["<space>B"] = { "O<C-u>", { "n" } },
+  ["<space>B"] = {
+    "O<C-u>",
+    "n",
+    desc = "Begin a new line above the cursor and insert text(non-blank)",
+  },
   -- no blank
   ["<S-CR>"] = {
     "<CR><C-U>",
     "i",
+    desc = "Begin new line(non-blank)",
   },
   ["<C-b>"] = {
     function()

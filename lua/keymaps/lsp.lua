@@ -39,7 +39,7 @@ return {
   -- Goto prev WARN diagnostic
   ["[w"] = {
     function()
-      vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.WARN })
+      vim.diagnostic.jump({ severity = vim.diagnostic.severity.WARN, count = -1 })
       vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
@@ -47,7 +47,7 @@ return {
   -- Goto next WARN diagnostic
   ["]w"] = {
     function()
-      vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.WARN })
+      vim.diagnostic.jump({ severity = vim.diagnostic.severity.WARN, count = 1 })
       vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
@@ -55,7 +55,7 @@ return {
   -- Goto next error diagnostic
   ["]e"] = {
     function()
-      vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR })
+      vim.diagnostic.jump({ severity = vim.diagnostic.severity.ERROR, count = 1 })
       vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
@@ -63,21 +63,21 @@ return {
   -- Goto previous error diagnostic
   ["[e"] = {
     function()
-      vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })
+      vim.diagnostic.jump({ severity = vim.diagnostic.severity.ERROR, count = -1 })
       vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
   },
   ["[d"] = {
     function()
-      vim.diagnostic.goto_prev({})
+      vim.diagnostic.jump({ count = -1 })
       vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
   },
   ["]d"] = {
     function()
-      vim.diagnostic.goto_next({})
+      vim.diagnostic.jump({ count = 1 })
       vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
