@@ -27,8 +27,12 @@ end
 
 local function get_config(config)
   config = vim.tbl_deep_extend("force", default_config, config or {})
-  config.width = vim.opt.columns:get()
-  config.row = vim.opt.lines:get() - vim.opt.cmdheight:get() - 1 - 10
+  local max_width = vim.opt.columns:get()
+  local max_height = vim.opt.lines:get() - vim.opt.cmdheight:get() - 1
+  config.width = math.floor(max_width * 0.7)
+  config.col = math.floor((max_width - config.width) / 2)
+  -- config.row = vim.opt.lines:get() - vim.opt.cmdheight:get() - 1 - 10
+  config.row = math.floor((max_height - config.height) / 2)
   return config
 end
 

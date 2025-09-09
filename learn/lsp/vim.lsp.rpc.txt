@@ -1,0 +1,98 @@
+==============================================================================
+Lua module: vim.lsp.rpc                                              *lsp-rpc*
+
+*vim.lsp.rpc.PublicClient*
+    客户端 RPC 对象
+
+    字段: ~
+      • {request}     (`fun(method: string, params: table?, callback: fun(err?: lsp.ResponseError, result: any), notify_reply_callback?: fun(message_id: integer)):boolean,integer?`)
+                      参见 |vim.lsp.rpc.request()|
+      • {notify}      (`fun(method: string, params: any): boolean`) 参见 |vim.lsp.rpc.notify()|
+      • {is_closing}  (`fun(): boolean`) 是否正在关闭 RPC
+      • {terminate}   (`fun()`) 终止 RPC 客户端
+
+connect({host_or_path}, {port})                        *vim.lsp.rpc.connect()*
+    创建一个 LSP RPC 客户端工厂，可连接到：
+    • 命名管道（windows）
+    • 域套接字（unix）
+    • 主机和端口（TCP）
+
+    返回可传递给 |vim.lsp.start()| 的 cmd 字段的函数。
+
+    参数: ~
+      • {host_or_path}  (`string`) 主机或管道/域套接字路径
+      • {port}          (`integer?`) TCP 端口，若省略则第一个参数必须为管道
+
+    返回值: ~
+        (`fun(dispatchers: vim.lsp.rpc.Dispatchers): vim.lsp.rpc.PublicClient`)
+
+format_rpc_error({err})                       *vim.lsp.rpc.format_rpc_error()*
+    从 LSP 错误对象构造错误消息。
+
+    参数: ~
+      • {err}  (`table`) 错误对象
+
+    返回值: ~
+        (`string`) 格式化后的错误消息
+
+notify({method}, {params})                              *vim.lsp.rpc.notify()*
+    向 LSP 服务器发送通知。
+
+    参数: ~
+      • {method}  (`string`) 调用的 LSP 方法
+      • {params}  (`table?`) 方法参数
+
+    返回值: ~
+        (`boolean`) 若通知已发送则为 true，否则为 false
+
+                                                       *vim.lsp.rpc.request()*
+request({method}, {params}, {callback}, {notify_reply_callback})
+    向 LSP 服务器发送请求，收到响应后运行 {callback}。
+
+    参数: ~
+      • {method}                 (`string`) 调用的 LSP 方法
+      • {params}                 (`table?`) 方法参数
+      • {callback}               (`fun(err: lsp.ResponseError?, result: any)`) 响应回调
+      • {notify_reply_callback}  (`fun(message_id: integer)?`) 请求不再挂起时调用
+
+    返回（多值）: ~
+        (`boolean`) 若请求已发送则为 true，否则为 false
+        (`integer?`) 若请求已发送则为消息 id，否则为 nil
+
+                                            *vim.lsp.rpc.rpc_response_error()*
+rpc_response_error({code}, {message}, {data})
+    创建要发送给 LSP 响应的 RPC 错误表。
+
+    参数: ~
+      • {code}     (`integer`) RPC 错误码，见 `vim.lsp.protocol.ErrorCodes`
+      • {message}  (`string?`) 要发送给服务器的任意消息
+      • {data}     (`any?`) 要发送给服务器的任意数据
+
+    返回值: ~
+        (`lsp.ResponseError`)
+
+    参见: ~
+      • lsp.ErrorCodes 见 `vim.lsp.protocol.ErrorCodes`
+
+start({cmd}, {dispatchers}, {extra_spawn_params})        *vim.lsp.rpc.start()*
+    启动 LSP 服务器进程并创建 LSP RPC 客户端对象。与子进程通过 stdio 通信。若需 TCP 通信，请手动启动进程并用 |vim.lsp.rpc.connect()|。
+
+    参数: ~
+      • {cmd}                 (`string[]`) 启动 LSP 服务器的命令
+      • {dispatchers}         (`table?`) LSP 消息类型的分发器
+                              • {notification}
+                                (`fun(method: string, params: table)`)
+                              • {server_request}
+                                (`fun(method: string, params: table): any?, lsp.ResponseError?`)
+                              • {on_exit}
+                                (`fun(code: integer, signal: integer)`)
+                              • {on_error} (`fun(code: integer, err: any)`)
+      • {extra_spawn_params}  (`table?`) LSP 服务器进程的额外上下文
+                              • {cwd}? (`string`) 工作目录
+                              • {detached}? (`boolean`) 是否分离进程
+                              • {env}? (`table<string,string>`) 额外环境变量，见 |vim.system()|
+
+    返回值: ~
+        (`vim.lsp.rpc.PublicClient`) 参见 |vim.lsp.rpc.PublicClient|。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

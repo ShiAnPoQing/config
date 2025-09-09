@@ -318,11 +318,13 @@ Blob操作：blob-functions
   getcmdwintype() 返回当前命令行窗口类型
   getcompletion() 命令行补全匹配列表
   fullcommand() 获取完整命令名
-  快速修复和位置列表：quickfix-functions
+
+快速修复和位置列表：quickfix-functions
   getqflist() 快速修复错误列表
   setqflist() 修改快速修复列表
   getloclist() 位置列表项
   setloclist() 修改位置列表
+
 插入模式补全：completion-functions
   complete() 设置找到的匹配项
   complete_add() 添加到找到的匹配项
@@ -448,7 +450,7 @@ Vim服务器：server-functions
   timer_stopall() 停止所有计时器
   timer_info() 获取计时器信息
   wait() 等待条件
-  标签：tag-functions
+标签：tag-functions
   taglist() 获取匹配标签的列表
   tagfiles() 获取标签文件的列表
   gettagstack() 获取窗口的标签堆栈

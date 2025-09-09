@@ -77,3 +77,5 @@ require("lazy-setup").setup({
   require("plugins.custom.surround"),
   require("plugins.custom.buffer-manage"),
 })
+vim.opt.rtp:append("~/vimcdoc-2.5.0")
+vim.o.helplang = "cn"

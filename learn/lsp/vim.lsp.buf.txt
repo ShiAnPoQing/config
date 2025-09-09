@@ -1,0 +1,220 @@
+==============================================================================
+Lua module: vim.lsp.buf                                              *lsp-buf*
+
+`vim.lsp.buf_…` 函数为附加到当前缓冲区的 LSP 客户端执行操作。
+
+*vim.lsp.ListOpts*
+
+    字段: ~
+      • {on_list}?  (`fun(t: vim.lsp.LocationOpts.OnList)`) 替换默认处理器的列表处理器。对任何非空结果调用。此表可与 |setqflist()| 或 |setloclist()| 一起使用。例如: >lua
+                        local function on_list(options)
+                          vim.fn.setqflist({}, ' ', options)
+                          vim.cmd.cfirst()
+                        end
+
+                        vim.lsp.buf.definition({ on_list = on_list })
+                        vim.lsp.buf.references(nil, { on_list = on_list })
+<
+      • {loclist}?  (`boolean`) 是否在默认处理器中使用 |location-list| 或 |quickfix| 列表。>lua
+                        vim.lsp.buf.definition({ loclist = true })
+                        vim.lsp.buf.references(nil, { loclist = false })
+<
+
+*vim.lsp.LocationOpts*
+    扩展自: |vim.lsp.ListOpts|
+
+
+    字段: ~
+      • {reuse_win}?  (`boolean`) 若缓冲区已打开则跳转到已有窗口。
+
+*vim.lsp.LocationOpts.OnList*
+
+    字段: ~
+      • {items}     (`table[]`) 结构同 |setqflist-what|
+      • {title}?    (`string`) 列表标题。
+      • {context}?  (`{ bufnr: integer, method: string }`) |lsp-handler| 的 ctx 子集。
+
+*vim.lsp.buf.hover.Opts*
+    扩展自: |vim.lsp.util.open_floating_preview.Opts|
+
+
+    字段: ~
+      • {silent}?  (`boolean`)
+
+*vim.lsp.buf.signature_help.Opts*
+    扩展自: |vim.lsp.util.open_floating_preview.Opts|
+
+
+    字段: ~
+      • {silent}?  (`boolean`)
+
+
+                                          *vim.lsp.buf.add_workspace_folder()*
+add_workspace_folder({workspace_folder})
+    将路径下的文件夹添加到工作区文件夹。若未提供 {path}，则会用 |input()| 提示用户输入路径。
+
+    参数: ~
+      • {workspace_folder}  (`string?`)
+
+clear_references()                            *vim.lsp.buf.clear_references()*
+    移除当前缓冲区的文档高亮。
+
+code_action({opts})                                *vim.lsp.buf.code_action()*
+    选择当前光标位置可用的代码操作。
+
+    参数: ~
+      • {opts}  (`table?`) 包含以下字段:
+                • {context}? (`lsp.CodeActionContext`) 对应 LSP 规范的 `CodeActionContext`:
+                  • {diagnostics}? (`table`) LSP `Diagnostic[]`。若未提供则从当前位置推断。
+                  • {only}? (`table`) 用于过滤代码操作的 LSP `CodeActionKind` 列表。大多数语言服务器支持如 `refactor` 或 `quickfix`。
+                  • {triggerKind}? (`integer`) 请求代码操作的原因。
+                • {filter}? (`fun(x: lsp.CodeAction|lsp.Command):boolean`)
+                  以 `CodeAction` 为参数并返回布尔值的谓词。
+                • {apply}? (`boolean`) 若仅剩一个操作（过滤后），则自动应用而不提示用户。
+                • {range}? (`{start: integer[], end: integer[]}`) 请求代码操作的范围。可视模式下默认为活动选择。表需包含 {row,col} 元组的 start 和 end 键，使用 mark-like 索引。见 |api-indexing|
+
+    另见: ~
+      • https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_codeAction
+      • vim.lsp.protocol.CodeActionTriggerKind
+
+declaration({opts})                                *vim.lsp.buf.declaration()*
+    跳转到光标下符号的声明。
+
+    注意: ~
+      • 许多服务器未实现此方法。通常请参见 |vim.lsp.buf.definition()|。
+
+    参数: ~
+      • {opts}  (`vim.lsp.LocationOpts?`) 见 |vim.lsp.LocationOpts|。
+
+definition({opts})                                  *vim.lsp.buf.definition()*
+    跳转到光标下符号的定义。
+
+    参数: ~
+      • {opts}  (`vim.lsp.LocationOpts?`) 见 |vim.lsp.LocationOpts|。
+
+document_highlight()                        *vim.lsp.buf.document_highlight()*
+    向服务器发送请求，解析当前文档位置的高亮。可通过按键映射或事件（如 `CursorHold`）触发，例如: >vim
+        autocmd CursorHold  <buffer> lua vim.lsp.buf.document_highlight()
+        autocmd CursorHoldI <buffer> lua vim.lsp.buf.document_highlight()
+        autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+<
+
+    注意: 使用 |vim.lsp.buf.document_highlight()| 需定义以下高亮组，否则无法看到实际高亮。|hl-LspReferenceText| |hl-LspReferenceRead|
+    |hl-LspReferenceWrite|
+
+document_symbol({opts})                        *vim.lsp.buf.document_symbol()*
+    在 |location-list| 中列出当前缓冲区的所有符号。
+
+    参数: ~
+      • {opts}  (`vim.lsp.ListOpts?`) 见 |vim.lsp.ListOpts|。
+
+format({opts})                                          *vim.lsp.buf.format()*
+    使用附加（可选过滤）的语言服务器客户端格式化缓冲区。
+
+    参数: ~
+      • {opts}  (`table?`) 包含以下字段:
+                • {formatting_options}? (`table`) 可用于指定 FormattingOptions。部分未指定选项会自动从当前 Nvim 选项推导。见
+                  https://microsoft.github.io/language-server-protocol/specification/#formattingOptions
+                • {timeout_ms}? (`integer`, 默认: `1000`) 格式化请求的阻塞时间（毫秒）。async=true 时无效。
+                • {bufnr}? (`integer`, 默认: 当前缓冲区) 仅对给定缓冲区的客户端进行格式化。
+                • {filter}? (`fun(client: vim.lsp.Client): boolean?`)
+                  用于过滤客户端的谓词。以客户端为参数并返回布尔值。匹配的客户端会被包含。例如: >lua
+                    -- 永不请求 typescript-language-server 格式化
+                    vim.lsp.buf.format {
+                      filter = function(client) return client.name ~= "ts_ls" end
+                    }
+<
+                • {async}? (`boolean`, 默认: false) 若为 true，则方法不会阻塞。异步格式化时编辑缓冲区可能导致意外更改。
+                • {id}? (`integer`) 仅对 id 匹配的客户端（client.id）格式化。
+                • {name}? (`string`) 仅对名称匹配的客户端（client.name）格式化。
+                • {range}?
+                  (`{start:[integer,integer],end:[integer, integer]}|{start:[integer,integer],end:[integer,integer]}[]`,
+                  默认: 可视模式下为当前选择，其他模式下为 nil，格式化整个缓冲区) 要格式化的范围。表需包含 {row,col} 元组的 start 和 end 键，使用 (1,0) 索引。也可为包含上述表的列表，此时需支持 `textDocument/rangesFormatting`。
+
+hover({config})                                          *vim.lsp.buf.hover()*
+    在浮动窗口中显示光标下符号的悬停信息。移动光标时窗口会关闭。调用两次会跳入浮动窗口（因此默认 "KK" 会打开并聚焦悬停窗口）。在浮动窗口中，所有命令和映射均可用，"q" 关闭窗口。内容可像普通缓冲区一样滚动。
+
+    注意: 若要禁用悬停高亮，在配置中添加如下内容: >lua
+        vim.api.nvim_create_autocmd('ColorScheme', {
+          callback = function()
+            vim.api.nvim_set_hl(0, 'LspReferenceTarget', {})
+          end,
+        })
+<
+
+    参数: ~
+      • {config}  (`vim.lsp.buf.hover.Opts?`) 见 |vim.lsp.buf.hover.Opts|。
+
+implementation({opts})                          *vim.lsp.buf.implementation()*
+    在 quickfix 窗口中列出光标下符号的所有实现。
+
+    参数: ~
+      • {opts}  (`vim.lsp.LocationOpts?`) 见 |vim.lsp.LocationOpts|。
+
+incoming_calls()                                *vim.lsp.buf.incoming_calls()*
+    在 |quickfix| 窗口中列出光标下符号的所有调用点。若符号可解析为多个条目，用户可在 |inputlist()| 中选择。
+
+list_workspace_folders()                *vim.lsp.buf.list_workspace_folders()*
+    列出工作区文件夹。
+
+outgoing_calls()                                *vim.lsp.buf.outgoing_calls()*
+    在 |quickfix| 窗口中列出光标下符号调用的所有项。若符号可解析为多个条目，用户可在 |inputlist()| 中选择。
+
+references({context}, {opts})                       *vim.lsp.buf.references()*
+    在 quickfix 窗口中列出光标下符号的所有引用。
+
+    参数: ~
+      • {context}  (`lsp.ReferenceContext?`) 请求上下文
+      • {opts}     (`vim.lsp.ListOpts?`) 见 |vim.lsp.ListOpts|。
+
+    另见: ~
+      • https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_references
+
+                                       *vim.lsp.buf.remove_workspace_folder()*
+remove_workspace_folder({workspace_folder})
+    从工作区文件夹中移除路径下的文件夹。若未提供 {path}，则会用 |input()| 提示用户输入路径。
+
+    参数: ~
+      • {workspace_folder}  (`string?`)
+
+rename({new_name}, {opts})                              *vim.lsp.buf.rename()*
+    重命名光标下符号的所有引用。
+
+    参数: ~
+      • {new_name}  (`string?`) 若未提供，则用 |vim.ui.input()| 提示用户输入新名称。
+      • {opts}      (`table?`) 其他选项:
+                    • {filter}? (`fun(client: vim.lsp.Client): boolean?`)
+                      用于过滤客户端的谓词。以客户端为参数并返回布尔值。匹配的客户端会被包含。
+                    • {name}? (`string`) 仅对名称匹配的客户端进行重命名。
+                    • {bufnr}? (`integer`) （默认: 当前缓冲区）
+
+signature_help({config})                        *vim.lsp.buf.signature_help()*
+    在浮动窗口中显示光标下符号的签名信息。
+
+    参数: ~
+      • {config}  (`vim.lsp.buf.signature_help.Opts?`) 见 |vim.lsp.buf.signature_help.Opts|。
+
+type_definition({opts})                        *vim.lsp.buf.type_definition()*
+    跳转到光标下符号类型的定义。
+
+    参数: ~
+      • {opts}  (`vim.lsp.LocationOpts?`) 见 |vim.lsp.LocationOpts|。
+
+typehierarchy({kind})                            *vim.lsp.buf.typehierarchy()*
+    在 |quickfix| 窗口中列出光标下符号的所有子类型或父类型。若符号可解析为多个条目，用户可用 |vim.ui.select()| 选择。
+
+    参数: ~
+      • {kind}  (`"subtypes"|"supertypes"`)
+
+workspace_symbol({query}, {opts})             *vim.lsp.buf.workspace_symbol()*
+    在 quickfix 窗口中列出当前工作区的所有符号。
+
+    列表会根据 {query} 过滤；若调用时省略该参数，则会在命令行提示用户输入字符串。空字符串表示不做过滤。
+
+    参数: ~
+      • {query}  (`string?`) 可选
+      • {opts}   (`vim.lsp.ListOpts?`) 见 |vim.lsp.ListOpts|。
+
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

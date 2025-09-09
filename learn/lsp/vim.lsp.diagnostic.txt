@@ -1,0 +1,43 @@
+==============================================================================
+Lua module: vim.lsp.diagnostic                                *lsp-diagnostic*
+
+from({diagnostics})                                *vim.lsp.diagnostic.from()*
+    将输入的 `vim.Diagnostic` 转换为 LSP 诊断。
+
+    参数: ~
+      • {diagnostics}  (`vim.Diagnostic[]`)
+
+    返回: ~
+        (`lsp.Diagnostic[]`)
+
+                                          *vim.lsp.diagnostic.get_namespace()*
+get_namespace({client_id}, {is_pull})
+    获取与 LSP 客户端关联的诊断命名空间
+    |vim.diagnostic| 用于诊断
+
+    参数: ~
+      • {client_id}  (`integer`) LSP 客户端 id
+      • {is_pull}    (`boolean?`) 命名空间是否用于 pull 客户端。默认为 push
+
+                                          *vim.lsp.diagnostic.on_diagnostic()*
+on_diagnostic({error}, {result}, {ctx})
+    方法 "textDocument/diagnostic" 的 |lsp-handler|
+
+    见 |vim.diagnostic.config()| 获取配置选项。
+
+    参数: ~
+      • {error}   (`lsp.ResponseError?`)
+      • {result}  (`lsp.DocumentDiagnosticReport`)
+      • {ctx}     (`lsp.HandlerContext`)
+
+                                 *vim.lsp.diagnostic.on_publish_diagnostics()*
+on_publish_diagnostics({_}, {params}, {ctx})
+    方法 "textDocument/publishDiagnostics" 的 |lsp-handler|
+
+    见 |vim.diagnostic.config()| 获取配置选项。
+
+    参数: ~
+      • {params}  (`lsp.PublishDiagnosticsParams`)
+      • {ctx}     (`lsp.HandlerContext`)
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

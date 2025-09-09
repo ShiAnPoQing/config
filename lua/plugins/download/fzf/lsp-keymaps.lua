@@ -93,8 +93,11 @@ return {
   {
     "<leader>lca",
     function()
-      require("fzf-lua").register_ui_select()
-      require("fzf-lua").lsp_code_actions()
+      -- require("fzf-lua").register_ui_select()
+      require("fzf-lua").lsp_code_actions({
+        previewer = false,
+        silent = true,
+      })
     end,
     desc = "Lsp Code Actions",
   },

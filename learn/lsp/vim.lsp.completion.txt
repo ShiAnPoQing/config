@@ -1,0 +1,73 @@
+==============================================================================
+Lua 模块: vim.lsp.completion                                *lsp-completion*
+
+`vim.lsp.completion` 模块通过 LSP 服务器启用插入模式下的补全功能。调用 `enable()` 使其通过 Nvim 内置补全（通过 |CompleteDone| 事件）可用。指定 `autotrigger=true` 以在输入服务器定义的 `triggerCharacters` 中的任何字符时激活"自动补全"。使用 CTRL-Y 从补全菜单中选择项目。
+|complete_CTRL-Y|
+
+示例：激活 LSP 驱动的自动补全: >lua
+    -- 最好与 completeopt=noselect 一起使用。
+    -- 使用 CTRL-Y 选择项目。|complete_CTRL-Y|
+    vim.cmd[[set completeopt+=menuone,noselect,popup]]
+    vim.lsp.start({
+      name = 'ts_ls',
+      cmd = …,
+      on_attach = function(client, bufnr)
+        vim.lsp.completion.enable(true, client.id, bufnr, {
+          autotrigger = true,
+          convert = function(item)
+            return { abbr = item.label:gsub('%b()', '') }
+          end,
+        })
+      end,
+    })
+<
+
+                                                          *lsp-autocompletion*
+
+LSP 的 `triggerCharacters` 字段决定何时触发自动补全。如果您想在每次按键时都触发，您可以：
+• 在 `LspAttach` 上扩展 `client.server_capabilities.completionProvider.triggerCharacters`，在调用
+  `vim.lsp.completion.enable(… {autotrigger=true})` 之前。参见 |lsp-attach| 示例。
+• 从 |compl-autocomplete| 中描述的处理器调用 `vim.lsp.completion.get()`。
+
+
+                                                 *vim.lsp.completion.enable()*
+enable({enable}, {client_id}, {bufnr}, {opts})
+    启用或禁用给定语言客户端在给定缓冲区中的补全功能。启用补全的效果是：
+    • 调用 |vim.lsp.completion.get()| 使用启用的客户端来获取补全候选项
+    • 使用 `<c-y>` 接受补全候选项会应用副作用，如展开代码片段、文本编辑（例如插入导入语句）和执行相关命令。这适用于通过自动触发、omnifunc 或 completion.get() 触发的补全
+
+    示例: |lsp-attach| |lsp-completion|
+
+    注意：`autotrigger=true` 的行为由 LSP 的 `triggerCharacters` 字段控制。您可以在 LspAttach 上覆盖它，参见 |lsp-autocompletion|。
+
+    参数: ~
+      • {enable}     (`boolean`) 为 true 时启用，为 false 时禁用
+      • {client_id}  (`integer`) 客户端 ID
+      • {bufnr}      (`integer`) 缓冲区句柄，或 0 表示当前缓冲区
+      • {opts}       (`table?`) 包含以下字段的表：
+                     • {autotrigger}? (`boolean`) (默认: false) 当为 true 时，
+                       根据服务器的 `triggerCharacters` 自动触发补全。
+                     • {convert}? (`fun(item: lsp.CompletionItem): table`)
+                       将 LSP CompletionItem 转换为 |complete-items|。
+
+get({opts})                                         *vim.lsp.completion.get()*
+    在当前缓冲区中触发一次 LSP 补全，如果 LSP 补全已启用（参见 |lsp-attach| |lsp-completion|）。
+
+    由默认的 LSP |omnicompletion| 提供者 |vim.lsp.omnifunc()| 使用，
+    因此 |i_CTRL-X_CTRL-O| 在启用 LSP 的缓冲区中调用此函数。使用 CTRL-Y 从补全菜单中选择项目。|complete_CTRL-Y|
+
+    要使用 CTRL-space 手动调用，请使用此映射: >lua
+        -- 使用 CTRL-space 触发 LSP 补全。
+        -- 使用 CTRL-Y 选择项目。|complete_CTRL-Y|
+        vim.keymap.set('i', '<c-space>', function()
+          vim.lsp.completion.get()
+        end)
+<
+
+    参数: ~
+      • {opts}  (`table?`) 包含以下字段的表：
+                • {ctx}? (`lsp.CompletionContext`) 补全上下文。
+                  默认为 `invoked` 类型的触发。
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

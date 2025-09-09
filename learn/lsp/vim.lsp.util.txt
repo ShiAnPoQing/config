@@ -1,0 +1,335 @@
+==============================================================================
+Lua module: vim.lsp.util                                            *lsp-util*
+
+*vim.lsp.util.open_floating_preview.Opts*
+
+    字段: ~
+      • {height}?        (`integer`) 浮动窗口高度
+      • {width}?         (`integer`) 浮动窗口宽度
+      • {wrap}?          (`boolean`, 默认: `true`) 是否自动换行长行
+      • {wrap_at}?       (`integer`) 计算高度时换行的字符数（wrap 启用时）
+      • {max_width}?     (`integer`) 浮动窗口最大宽度
+      • {max_height}?    (`integer`) 浮动窗口最大高度
+      • {focus_id}?      (`string`) 如果已打开带此 id 的弹窗，则聚焦它
+      • {close_events}?  (`table`) 关闭浮动窗口的事件列表
+      • {focusable}?     (`boolean`, 默认: `true`) 是否可聚焦
+      • {focus}?         (`boolean`, 默认: `true`) 如果为 true，且 {focusable} 也为 true，则聚焦同 {focus_id} 的已存在浮窗
+      • {offset_x}?      (`integer`) 相对于 `col` 的偏移
+      • {offset_y}?      (`integer`) 相对于 `row` 的偏移
+      • {border}?        (`string|(string|[string,string])[]`) 覆盖 `border`
+      • {zindex}?        (`integer`) 覆盖 `zindex`，默认 50
+      • {title}?         (`string|[string,string][]`)
+      • {title_pos}?     (`'left'|'center'|'right'`)
+      • {relative}?      (`'mouse'|'cursor'|'editor'`)（默认: `'cursor'`）
+      • {anchor_bias}?   (`'auto'|'above'|'below'`, 默认: `'auto'`) 调整相对光标的显示位置
+                         • "auto": 根据光标哪一侧剩余行数多决定
+                         • "above": 尽量显示在光标上方
+                         • "below": 尽量显示在光标下方
+
+                                     *vim.lsp.util.apply_text_document_edit()*
+apply_text_document_edit({text_document_edit}, {index}, {position_encoding})
+    应用一个 `TextDocumentEdit`，即对单个文档的一组更改。
+
+    参数: ~
+      • {text_document_edit}  (`lsp.TextDocumentEdit`)
+      • {index}               (`integer?`) 可选，若来自编辑列表则为索引，否则为 nil
+      • {position_encoding}   (`'utf-8'|'utf-16'|'utf-32'`)
+
+    参见: ~
+      • https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocumentEdit
+
+                                             *vim.lsp.util.apply_text_edits()*
+apply_text_edits({text_edits}, {bufnr}, {position_encoding})
+    对缓冲区应用一组文本编辑。
+
+    参数: ~
+      • {text_edits}         (`lsp.TextEdit[]`)
+      • {bufnr}              (`integer`) 缓冲区编号
+      • {position_encoding}  (`'utf-8'|'utf-16'|'utf-32'`)
+
+    参见: ~
+      • https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textEdit
+
+                                         *vim.lsp.util.apply_workspace_edit()*
+apply_workspace_edit({workspace_edit}, {position_encoding})
+    应用一个 `WorkspaceEdit`。
+
+    参数: ~
+      • {workspace_edit}     (`lsp.WorkspaceEdit`)
+      • {position_encoding}  (`'utf-8'|'utf-16'|'utf-32'`)（必填）
+
+    参见: ~
+      • https://microsoft.github.io/language-server-protocol/specifications/specification-current/#workspace_applyEdit
+
+buf_clear_references({bufnr})            *vim.lsp.util.buf_clear_references()*
+    移除缓冲区中的文档高亮。
+
+    参数: ~
+      • {bufnr}  (`integer?`) 缓冲区编号
+
+                                     *vim.lsp.util.buf_highlight_references()*
+buf_highlight_references({bufnr}, {references}, {position_encoding})
+    为某个缓冲区显示一组文档高亮。
+
+    参数: ~
+      • {bufnr}              (`integer`) 缓冲区编号
+      • {references}         (`lsp.DocumentHighlight[]`) 需要高亮的对象
+      • {position_encoding}  (`'utf-8'|'utf-16'|'utf-32'`)
+
+    参见: ~
+      • https://microsoft.github.io/language-server-protocol/specification/#textDocumentContentChangeEvent
+
+                                             *vim.lsp.util.character_offset()*
+character_offset({buf}, {row}, {col}, {offset_encoding})
+    返回某缓冲区某位置的 UTF-32 和 UTF-16 偏移量。
+
+    参数: ~
+      • {buf}              (`integer`) 缓冲区编号（0 表示当前）
+      • {row}              (`integer`) 0 起始的行号
+      • {col}              (`integer`) 行内 0 起始的字节偏移
+      • {offset_encoding}  (`'utf-8'|'utf-16'|'utf-32'?`) 默认为该缓冲区第一个客户端的 offset_encoding
+
+    返回值: ~
+        (`integer`) 该位置在 {offset_encoding} 下的索引
+
+                              *vim.lsp.util.convert_input_to_markdown_lines()*
+convert_input_to_markdown_lines({input}, {contents})
+    将 `MarkedString` | `MarkedString[]` | `MarkupContent` 转换为有效 markdown 的行列表。用于 hover 窗口、signatureHelp 等。
+
+    注意：如果输入类型为 `MarkupContent` 且 kind 为 `plaintext`，则直接返回原值。
+
+    参数: ~
+      • {input}     (`lsp.MarkedString|lsp.MarkedString[]|lsp.MarkupContent`)
+      • {contents}  (`string[]?`) 可选，追加到的字符串列表，默认为 {}
+
+    返回值: ~
+        (`string[]`) 追加了转换后 markdown 行的列表
+
+    参见: ~
+      • https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_hover
+
+                     *vim.lsp.util.convert_signature_help_to_markdown_lines()*
+convert_signature_help_to_markdown_lines({signature_help}, {ft}, {triggers})
+    将 `textDocument/signatureHelp` 响应转换为 markdown 行。
+
+    参数: ~
+      • {signature_help}  (`lsp.SignatureHelp`) `textDocument/SignatureHelp` 的响应
+      • {ft}              (`string?`) 用作 label markdown 代码块的 filetype
+      • {triggers}        (`string[]?`) lsp 服务器的触发字符列表，用于更好地确定参数偏移
+
+    返回（多值）: ~
+        (`string[]?`) 转换后的 markdown 行
+        (`Range4?`) 活动参数的高亮范围
+
+    参见: ~
+      • https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_signatureHelp
+
+get_effective_tabstop({bufnr})          *vim.lsp.util.get_effective_tabstop()*
+    返回缩进宽度。
+
+    参数: ~
+      • {bufnr}  (`integer?`) 缓冲区编号，默认为当前
+
+    返回值: ~
+        (`integer`) 缩进宽度
+
+    参见: ~
+      • 'shiftwidth'
+
+
+                                           *vim.lsp.util.locations_to_items()*
+locations_to_items({locations}, {position_encoding})
+    返回带有正确字节位置并已排序的条目，用于 quickfix 和 location 列表。
+
+    每个结果的 `user_data` 字段会包含其原始的 Location 或 LocationLink。
+
+    结果可传递给 |setqflist()| 或 |setloclist()| 的 {list} 参数。
+
+    参数: ~
+      • {locations}          (`lsp.Location[]|lsp.LocationLink[]`)
+      • {position_encoding}  (`'utf-8'|'utf-16'|'utf-32'?`) 默认为缓冲区第一个客户端
+
+    返回值: ~
+        (`vim.quickfix.entry[]`) 参见 |setqflist()| 的格式
+
+                                  *vim.lsp.util.make_floating_popup_options()*
+make_floating_popup_options({width}, {height}, {opts})
+    创建带有合理默认值的浮动窗口配置表。可传递给 |nvim_open_win()|。
+
+    参数: ~
+      • {width}   (`integer`) 窗口宽度（字符数）
+      • {height}  (`integer`) 窗口高度（字符数）
+      • {opts}    (`vim.lsp.util.open_floating_preview.Opts?`) 参见 |vim.lsp.util.open_floating_preview.Opts|。
+
+    返回值: ~
+        (`vim.api.keyset.win_config`)
+
+                                       *vim.lsp.util.make_formatting_params()*
+make_formatting_params({options})
+    为当前缓冲区和光标位置创建 `DocumentFormattingParams` 对象。
+
+    参数: ~
+      • {options}  (`lsp.FormattingOptions?`) 有效的格式化选项
+
+    返回值: ~
+        (`lsp.DocumentFormattingParams`) 对象
+
+    参见: ~
+      • https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_formatting
+
+                                      *vim.lsp.util.make_given_range_params()*
+make_given_range_params({start_pos}, {end_pos}, {bufnr}, {position_encoding})
+    使用当前缓冲区给定范围，创建类似 |vim.lsp.util.make_range_params()| 的对象。
+
+    参数: ~
+      • {start_pos}          (`[integer,integer]?`) {row,col} 标记索引位置，默认为上次可视选择的起始
+      • {end_pos}            (`[integer,integer]?`) {row,col} 标记索引位置，默认为上次可视选择的结束
+      • {bufnr}              (`integer?`) 缓冲区编号或 0 表示当前，默认为当前
+      • {position_encoding}  (`'utf-8'|'utf-16'|'utf-32'`)
+
+    返回值: ~
+        (`{ textDocument: { uri: lsp.DocumentUri }, range: lsp.Range }`)
+
+                                         *vim.lsp.util.make_position_params()*
+make_position_params({window}, {position_encoding})
+    为当前缓冲区和光标位置创建 `TextDocumentPositionParams` 对象。
+
+    参数: ~
+      • {window}             (`integer?`) |window-ID| 或 0 表示当前，默认为当前
+      • {position_encoding}  (`'utf-8'|'utf-16'|'utf-32'`)
+
+    返回值: ~
+        (`lsp.TextDocumentPositionParams`)
+
+    参见: ~
+      • https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocumentPositionParams
+
+                                            *vim.lsp.util.make_range_params()*
+make_range_params({window}, {position_encoding})
+    使用当前缓冲区当前位置，创建可用于多种 LSP 请求的对象，如 `textDocument/codeAction`、`textDocument/colorPresentation`、`textDocument/rangeFormatting`。
+
+    参数: ~
+      • {window}             (`integer?`) |window-ID| 或 0 表示当前，默认为当前
+      • {position_encoding}  (`"utf-8"|"utf-16"|"utf-32"`)
+
+    返回值: ~
+        (`{ textDocument: { uri: lsp.DocumentUri }, range: lsp.Range }`)
+
+                                    *vim.lsp.util.make_text_document_params()*
+make_text_document_params({bufnr})
+    为当前缓冲区创建 `TextDocumentIdentifier` 对象。
+
+    参数: ~
+      • {bufnr}  (`integer?`) 缓冲区编号，默认为当前
+
+    返回值: ~
+        (`lsp.TextDocumentIdentifier`)
+
+    参见: ~
+      • https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocumentIdentifier
+
+                                        *vim.lsp.util.make_workspace_params()*
+make_workspace_params({added}, {removed})
+    创建工作区参数
+
+    参数: ~
+      • {added}    (`lsp.WorkspaceFolder[]`)
+      • {removed}  (`lsp.WorkspaceFolder[]`)
+
+    返回值: ~
+        (`lsp.WorkspaceFoldersChangeEvent`)
+
+                                        *vim.lsp.util.open_floating_preview()*
+open_floating_preview({contents}, {syntax}, {opts})
+    在浮动窗口中显示内容。
+
+    参数: ~
+      • {contents}  (`table`) 要显示的行
+      • {syntax}    (`string`) 设置的语法
+      • {opts}      (`vim.lsp.util.open_floating_preview.Opts?`) 可选字段（多余的键会被 |vim.lsp.util.make_floating_popup_options()| 过滤后传递给 |nvim_open_win()|）。参见 |vim.lsp.util.open_floating_preview.Opts|。
+
+    返回（多值）: ~
+        (`integer`) 新建浮窗的 bufnr
+        (`integer`) 新建浮窗的 winid
+
+preview_location({location}, {opts})         *vim.lsp.util.preview_location()*
+    在浮动窗口中预览一个位置
+
+    行为取决于 location 类型：
+    • 对于 Location，显示范围（如函数定义）
+    • 对于 LocationLink，显示 targetRange（如函数体）
+
+    参数: ~
+      • {location}  (`lsp.Location|lsp.LocationLink`)
+      • {opts}      (`vim.lsp.util.open_floating_preview.Opts?`) 参见 |vim.lsp.util.open_floating_preview.Opts|。
+
+    返回（多值）: ~
+        (`integer?`) 浮窗的 buffer id
+        (`integer?`) 浮窗的 window id
+
+rename({old_fname}, {new_fname}, {opts})               *vim.lsp.util.rename()*
+    将 old_fname 重命名为 new_fname
+
+    现有缓冲区也会被重命名，并保持其 bufnr。
+
+    仅当
+    • `opts` 请求覆盖；或
+    • 冲突的缓冲区未加载（删除不会导致数据丢失）
+    时，才会删除与新文件名冲突的缓冲区。
+
+    参数: ~
+      • {old_fname}  (`string`)
+      • {new_fname}  (`string`)
+      • {opts}       (`table?`) 选项：
+                     • {overwrite}? (`boolean`)
+                     • {ignoreIfExists}? (`boolean`)
+
+                                                *vim.lsp.util.show_document()*
+show_document({location}, {position_encoding}, {opts})
+    显示文档并可选地跳转到该位置。
+
+    参数: ~
+      • {location}           (`lsp.Location|lsp.LocationLink`)
+      • {position_encoding}  (`'utf-8'|'utf-16'|'utf-32'?`)
+      • {opts}               (`table?`) 具有以下字段的表：
+                             • {reuse_win}? (`boolean`) 如果缓冲区已打开则跳转到已存在窗口
+                             • {focus}? (`boolean`) 是否聚焦/跳转到该位置（默认: true）
+
+    返回值: ~
+        (`boolean`) 成功返回 true
+
+                                             *vim.lsp.util.stylize_markdown()*
+stylize_markdown({bufnr}, {contents}, {opts})
+    将 markdown 转换为带语法高亮的区域，通过去除代码块并将其转换为高亮代码。默认会在这些代码块后插入空行以提升可读性。
+
+    此方法会配置给定缓冲区并返回要设置的行。
+
+    如果想用 fancy markdown 打开弹窗，请用 open_floating_preview
+
+    参数: ~
+      • {bufnr}     (`integer`)
+      • {contents}  (`string[]`) 要显示的行
+      • {opts}      (`table?`) 可选字段
+                    • height 浮动窗口高度
+                    • width 浮动窗口宽度
+                    • wrap_at 计算高度时换行的字符
+                    • max_width 浮动窗口最大宽度
+                    • max_height 浮动窗口最大高度
+                    • separator 代码块后插入分隔符
+
+    返回值: ~
+        (`table`) 处理后的内容
+
+                                             *vim.lsp.util.symbols_to_items()*
+symbols_to_items({symbols}, {bufnr}, {position_encoding})
+    将符号转换为 quickfix 列表条目。
+
+    参数: ~
+      • {symbols}            (`lsp.DocumentSymbol[]|lsp.SymbolInformation[]`) 符号列表
+      • {bufnr}              (`integer?`) 缓冲区编号，0 表示当前，默认为当前
+      • {position_encoding}  (`'utf-8'|'utf-16'|'utf-32'?`) 默认为缓冲区第一个客户端
+
+    返回值: ~
+        (`vim.quickfix.entry[]`) 参见 |setqflist()| 的格式
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

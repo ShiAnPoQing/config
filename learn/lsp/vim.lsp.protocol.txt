@@ -1,0 +1,27 @@
+==============================================================================
+Lua module: vim.lsp.protocol                                    *lsp-protocol*
+
+                                 *vim.lsp.protocol.make_client_capabilities()*
+make_client_capabilities()
+    获取描述 LSP 客户端能力的新 ClientCapabilities 对象。
+
+    返回值: ~
+        (`lsp.ClientCapabilities`)
+
+Methods                                             *vim.lsp.protocol.Methods*
+    LSP 方法名。
+
+    参见: ~
+      • https://microsoft.github.io/language-server-protocol/specification/#metaModel
+
+                                     *vim.lsp.protocol.resolve_capabilities()*
+resolve_capabilities({server_capabilities})
+    创建描述 LSP 服务器能力的标准化对象。
+
+    参数: ~
+      • {server_capabilities}  (`table`) 服务器支持的能力表
+
+    返回值: ~
+        (`lsp.ServerCapabilities?`) 标准化能力表
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

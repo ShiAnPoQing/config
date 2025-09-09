@@ -1,0 +1,203 @@
+==============================================================================
+Lua module: vim.lsp.client                                        *lsp-client*
+
+*vim.lsp.Client*
+
+    字段: ~
+      • {id}                    (`integer`) 分配给客户端的 id。
+      • {name}                  (`string`) 若创建时指定了名称，则使用该名称。否则仅为客户端 id。用于日志和消息。
+      • {rpc}                   (`vim.lsp.rpc.PublicClient`) RPC 客户端对象，用于与客户端的底层交互。见 |vim.lsp.rpc.start()|。
+      • {offset_encoding}       (`string`) LSP 规范中称为“position encoding”，用于与服务器通信的编码。可在配置的 `on_init` 方法中修改，在文本发送到服务器前。
+      • {handlers}              (`table<string,lsp.Handler>`) 客户端使用的处理器，如 |lsp-handler| 所述。
+      • {requests}              (`table<integer,{ type: string, bufnr: integer, method: string}?>`)
+                                当前发送到服务器的挂起请求。键为请求 id，值为包含 `type`、`bufnr` 和 `method` 的表。`type` 为活动请求时为 "pending"，取消请求时为 "cancel"。当服务器回复时，在执行 |LspRequest| 自动命令期间会短暂为 "complete"。
+      • {config}                (`vim.lsp.ClientConfig`) 用户传递给 |vim.lsp.start()| 的配置表副本。见 |vim.lsp.ClientConfig|。
+      • {server_capabilities}   (`lsp.ServerCapabilities?`) 服务器在 `initialize` 时发送的能力响应。
+      • {server_info}           (`lsp.ServerInfo?`) 服务器在 `initialize` 时发送的服务器信息响应。
+      • {progress}              (`vim.lsp.Client.Progress`) 包含服务器发送的进度消息的环形缓冲区（|vim.ringbuf()|）。见 |vim.lsp.Client.Progress|。
+      • {initialized}           (`true?`)
+      • {workspace_folders}     (`lsp.WorkspaceFolder[]?`) 服务器启动时客户端配置的工作区文件夹。仅当客户端支持工作区文件夹时可用。若客户端支持但未配置，则可为 null。
+      • {root_dir}              (`string?`)
+      • {attached_buffers}      (`table<integer,true>`)
+      • {commands}              (`table<string,fun(command: lsp.Command, ctx: table)>`)
+                                命令名到函数的表，当任何 LSP 动作（代码操作、代码透镜等）触发命令时调用。客户端命令优先于全局命令注册表。
+      • {settings}              (`lsp.LSPObject`) 语言服务器特定设置的映射。若服务器通过 `workspace/configuration` 请求，则返回这些设置。键区分大小写。
+      • {flags}                 (`table`) 客户端的标志表。当前（实验性）标志有：
+                                • {allow_incremental_sync}? (`boolean`, 默认: `true`) 允许对缓冲区编辑使用增量同步
+                                • {debounce_text_changes} (`integer`, 默认: `150`) 向服务器发送 `didChange` 通知的去抖时间（毫秒）。若为 nil 则不去抖。
+                                • {exit_timeout} (`integer|false`, 默认: `false`) 发送 "shutdown" 请求后等待服务器干净退出的毫秒数，然后发送 kill -15。若为 false，nvim 发送 "shutdown" 后立即退出。
+      • {get_language_id}       (`fun(bufnr: integer, filetype: string): string`)
+      • {capabilities}          (`lsp.ClientCapabilities`) 客户端（编辑器或工具）提供的能力
+      • {dynamic_capabilities}  (`lsp.DynamicCapabilities`)
+      • {request}               (`fun(self: vim.lsp.Client, method: string, params: table?, handler: lsp.Handler?, bufnr: integer?): boolean, integer?`)
+                                见 |Client:request()|。
+      • {request_sync}          (`fun(self: vim.lsp.Client, method: string, params: table, timeout_ms: integer?, bufnr: integer?): {err: lsp.ResponseError?, result:any}?, string?`)
+                                见 |Client:request_sync()|。
+      • {notify}                (`fun(self: vim.lsp.Client, method: string, params: table?): boolean`)
+                                见 |Client:notify()|。
+      • {cancel_request}        (`fun(self: vim.lsp.Client, id: integer): boolean`)
+                                见 |Client:cancel_request()|。
+      • {stop}                  (`fun(self: vim.lsp.Client, force: boolean?)`)
+                                见 |Client:stop()|。
+      • {is_stopped}            (`fun(self: vim.lsp.Client): boolean`) 见 |Client:is_stopped()|。
+      • {exec_cmd}              (`fun(self: vim.lsp.Client, command: lsp.Command, context: {bufnr?: integer}?, handler: lsp.Handler?)`)
+                                见 |Client:exec_cmd()|。
+      • {on_attach}             (`fun(self: vim.lsp.Client, bufnr: integer)`)
+                                见 |Client:on_attach()|。
+      • {supports_method}       (`fun(self: vim.lsp.Client, method: string, bufnr: integer?)`)
+                                见 |Client:supports_method()|。
+
+*vim.lsp.Client.Progress*
+    扩展自: |vim.Ringbuf|
+
+
+    字段: ~
+      • {pending}  (`table<lsp.ProgressToken,lsp.LSPAny>`)
+
+*vim.lsp.ClientConfig*
+
+    字段: ~
+      • {cmd}                  (`string[]|fun(dispatchers: vim.lsp.rpc.Dispatchers): vim.lsp.rpc.PublicClient`)
+                               启动语言服务器的命令字符串数组（如 |jobstart()|，必须为绝对路径或在 `$PATH` 上，shell 构造如 "~" 不会展开），或创建 RPC 客户端的函数。函数接收 `dispatchers` 表并返回包含 `request`、`notify`、`is_closing` 和 `terminate` 成员函数的表。TCP 可用内置 RPC 客户端工厂：|vim.lsp.rpc.connect()|
+      • {cmd_cwd}?             (`string`, 默认: cwd) 启动 `cmd` 进程的目录。与 `root_dir` 无关。
+      • {cmd_env}?             (`table`) 启动 LSP 时传递的环境变量。必须用表指定。非字符串值会被转为字符串。例如: >lua
+                                   { PORT = 8080; HOST = "0.0.0.0"; }
+<
+      • {detached}?            (`boolean`, 默认: true) 使服务器进程在独立进程组中运行。Nvim 退出时会关闭进程，但若 Nvim 未能正常退出，可能会留下孤儿进程。
+      • {workspace_folders}?   (`lsp.WorkspaceFolder[]`) 传递给语言服务器的工作区文件夹列表。为兼容性，rootUri 和 rootPath 会从该列表第一个文件夹派生。见 LSP 规范中的 `workspaceFolders`。
+      • {workspace_required}?  (`boolean`) (默认 false) 服务器需要工作区（不支持“单文件”）。
+      • {capabilities}?        (`lsp.ClientCapabilities`) 覆盖 |vim.lsp.protocol.make_client_capabilities()| 默认能力的映射，在初始化时传递给语言服务器。提示：用 make_client_capabilities() 并修改其结果。
+                               • 注意：要发送空字典请用 |vim.empty_dict()|，否则会被编码为数组。
+      • {handlers}?            (`table<string,function>`) 语言服务器方法名到 |lsp-handler| 的映射
+      • {settings}?            (`lsp.LSPObject`) 语言服务器特定设置的映射。见 |vim.lsp.Client| 的 {settings}。
+      • {commands}?            (`table<string,fun(command: lsp.Command, ctx: table)>`)
+                               将客户端侧命令字符串映射到用户自定义函数的表。传递给 `start()` 的命令优先于全局命令注册表。每个键必须唯一，值为当任何 LSP 动作（代码操作、代码透镜等）触发命令时调用的函数。
+      • {init_options}?        (`lsp.LSPObject`) 作为 `initializationOptions` 传递给初始化请求的值。见 LSP 规范中的 `initialize`。
+      • {name}?                (`string`, 默认: client-id) 日志消息中的名称。
+      • {get_language_id}?     (`fun(bufnr: integer, filetype: string): string`)
+                               语言 ID 字符串。默认为缓冲区文件类型。
+      • {offset_encoding}?     (`'utf-8'|'utf-16'|'utf-32'`) LSP 规范中的“position encoding”，服务器期望的编码。客户端不会验证此项是否正确。
+      • {on_error}?            (`fun(code: integer, err: string)`) 客户端操作抛出错误时调用的回调。`code` 为描述错误的数字。其他参数视错误类型而定。见 `vim.lsp.rpc.client_errors` 获取可能的错误。用
+                                 `vim.lsp.rpc.client_errors[code]` 获取人类可读名称。
+      • {before_init}?         (`fun(params: lsp.InitializeParams, config: vim.lsp.ClientConfig)`)
+                               LSP “initialize” 阶段前调用的回调，`params` 为将要发送给服务器的参数，`config` 为传递给 |vim.lsp.start()| 的配置。可用此回调在参数发送前修改参数。
+      • {on_init}?             (`elem_or_list<fun(client: vim.lsp.Client, init_result: lsp.InitializeResult)>`)
+                               LSP “initialize” 后调用的回调，`result` 为 `capabilities` 及服务器可能发送的其他内容。例如 clangd 会发送 `init_result.offsetEncoding`，若发送了 `capabilities.offsetEncoding`。
+                               你只能在此处修改 `client.offset_encoding`，且要在任何通知发送前。
+      • {on_exit}?             (`elem_or_list<fun(code: integer, signal: integer, client_id: integer)>`)
+                               客户端退出时调用的回调。
+                               • code: 进程退出码
+                               • signal: 用于终止的信号编号（如有）
+                               • client_id: 客户端句柄
+      • {on_attach}?           (`elem_or_list<fun(client: vim.lsp.Client, bufnr: integer)>`)
+                               客户端附加到缓冲区时调用的回调。
+      • {trace}?               (`'off'|'messages'|'verbose'`, 默认: "off")
+                               直接传递给语言服务器的初始化请求。无效/空值将
+      • {flags}?               (`table`) 客户端的标志表。当前（实验性）标志有：
+                               • {allow_incremental_sync}? (`boolean`, 默认: `true`) 允许对缓冲区编辑使用增量同步
+                               • {debounce_text_changes} (`integer`, 默认: `150`) 向服务器发送 `didChange` 通知的去抖时间（毫秒）。若为 nil 则不去抖。
+                               • {exit_timeout} (`integer|false`, 默认: `false`) 发送 "shutdown" 请求后等待服务器干净退出的毫秒数，然后发送 kill -15。若为 false，nvim 发送 "shutdown" 后立即退出。
+      • {root_dir}?            (`string`) LSP 服务器初始化时基于的目录。
+
+
+Client:cancel_request({id})                          *Client:cancel_request()*
+    取消指定请求 id 的请求。
+
+    参数: ~
+      • {id}  (`integer`) 要取消的请求 id
+
+    返回: ~
+        (`boolean`) 表示通知是否成功。
+
+    另见: ~
+      • |Client:notify()|
+
+Client:exec_cmd({command}, {context}, {handler})           *Client:exec_cmd()*
+    执行 lsp 命令，优先通过客户端命令函数（如有），否则通过 workspace/executeCommand（若服务器支持）执行
+
+    参数: ~
+      • {command}  (`lsp.Command`)
+      • {context}  (`{bufnr?: integer}?`)
+      • {handler}  (`lsp.Handler?`) 仅在为服务器命令时调用
+
+Client:is_stopped()                                      *Client:is_stopped()*
+    检查客户端是否已停止。
+
+    返回: ~
+        (`boolean`) 若客户端已停止或正在停止则为 true，否则为 false
+
+Client:notify({method}, {params})                            *Client:notify()*
+    向 LSP 服务器发送通知。
+
+    参数: ~
+      • {method}  (`string`) LSP 方法名。
+      • {params}  (`table?`) LSP 请求参数。
+
+    返回: ~
+        (`boolean`) 表示通知是否成功。若为 false，则客户端已关闭。
+
+Client:on_attach({bufnr})                                 *Client:on_attach()*
+    若定义了 on_attach，则运行客户端配置中的 on_attach 函数。
+    用于缓冲区本地设置。
+
+    参数: ~
+      • {bufnr}  (`integer`) 缓冲区号
+
+                                                            *Client:request()*
+Client:request({method}, {params}, {handler}, {bufnr})
+    向服务器发送请求。
+
+    这是 {client.rpc.request} 的一个薄包装，增加了一些能力和处理器可用性的检查。
+
+    参数: ~
+      • {method}   (`string`) LSP 方法名。
+      • {params}   (`table?`) LSP 请求参数。
+      • {handler}  (`lsp.Handler?`) 此方法的响应 |lsp-handler|。
+      • {bufnr}    (`integer?`) （默认: 0）缓冲区句柄，0 表示当前缓冲区。
+
+    返回（多值）: ~
+        (`boolean`) status 表示请求是否成功。若为 `false`，则总为 `false`（客户端已关闭）。
+        (`integer?`) request_id 可与 |Client:cancel_request()| 一起使用。
+        若请求失败则为 `nil`。
+
+    另见: ~
+      • |vim.lsp.buf_request_all()|
+
+                                                       *Client:request_sync()*
+Client:request_sync({method}, {params}, {timeout_ms}, {bufnr})
+    向服务器发送请求并同步等待响应。
+
+    这是 |Client:request()| 的包装。
+
+    参数: ~
+      • {method}      (`string`) LSP 方法名。
+      • {params}      (`table`) LSP 请求参数。
+      • {timeout_ms}  (`integer?`) 最长等待结果的毫秒数。默认 1000
+      • {bufnr}       (`integer?`) （默认: 0）缓冲区句柄，0 表示当前缓冲区。
+
+    返回（多值）: ~
+        (`{err: lsp.ResponseError?, result:any}?`) |lsp-handler| 的 `result` 和 `err`。若请求不成功则为 `nil`
+        (`string?`) err 超时、取消或出错时，`err` 为描述失败原因的字符串。
+
+    另见: ~
+      • |vim.lsp.buf_request_sync()|
+
+Client:stop({force})                                           *Client:stop()*
+    停止客户端，可选是否强制。
+
+    默认仅请求服务器关闭。若之前已请求关闭，则会自动升级为强制关闭。
+
+    参数: ~
+      • {force}  (`boolean?`)
+
+Client:supports_method({method}, {bufnr})           *Client:supports_method()*
+    检查客户端是否支持给定方法。对于未知的非规范方法总是返回 true。
+
+    注意：某些语言服务器能力可能与文件相关。
+
+    参数: ~
+      • {method}  (`string`)
+      • {bufnr}   (`integer?`)
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

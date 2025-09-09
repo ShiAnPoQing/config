@@ -8,9 +8,6 @@ return {
         "keymaps/select-mode",
         "test",
       },
-      del = {
-        ["w"] = { "n" },
-      },
     })
 
     vim.api.nvim_create_autocmd("BufReadPre", {

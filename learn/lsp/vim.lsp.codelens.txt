@@ -1,0 +1,63 @@
+==============================================================================
+Lua module: vim.lsp.codelens                                    *lsp-codelens*
+
+clear({client_id}, {bufnr})                         *vim.lsp.codelens.clear()*
+    Clear code lens
+
+    参数: ~
+      • {client_id}  (`integer?`) Filter by client_id. If nil, applies to all clients
+      • {bufnr}      (`integer?`) Filter by buffer. If nil, applies to all buffers, 0 means
+                     current buffer
+
+display({lenses}, {bufnr}, {client_id})           *vim.lsp.codelens.display()*
+    Display code lens using virtual text
+
+    参数: ~
+      • {lenses}     (`lsp.CodeLens[]?`) Lenses to display
+      • {bufnr}      (`integer`)
+      • {client_id}  (`integer`)
+
+get({bufnr})                                          *vim.lsp.codelens.get()*
+    Return all lenses for the given buffer
+
+    参数: ~
+      • {bufnr}  (`integer`) Buffer number. 0 can be used for current buffer.
+
+    返回值: ~
+        (`lsp.CodeLens[]`)
+
+on_codelens({err}, {result}, {ctx})           *vim.lsp.codelens.on_codelens()*
+    |lsp-handler| for `textDocument/codeLens` method
+
+    参数: ~
+      • {err}     (`lsp.ResponseError?`)
+      • {result}  (`lsp.CodeLens[]`)
+      • {ctx}     (`lsp.HandlerContext`)
+
+refresh({opts})                                   *vim.lsp.codelens.refresh()*
+    Refresh lenses.
+
+    It is recommended to trigger this via autocommand or key mapping.
+
+    示例: >vim
+        autocmd BufEnter,CursorHold,InsertLeave <buffer> lua vim.lsp.codelens.refresh({ bufnr = 0 })
+<
+
+    参数: ~
+      • {opts}  (`table?`) Optional fields
+                • {bufnr} (`integer?`) Filter by buffer. If nil, applies to all buffers, 0
+                  means current buffer
+
+run()                                                 *vim.lsp.codelens.run()*
+    Run code lens for the current line
+
+save({lenses}, {bufnr}, {client_id})                 *vim.lsp.codelens.save()*
+    Store lenses for a specific buffer and client
+
+    参数: ~
+      • {lenses}     (`lsp.CodeLens[]?`) Lenses to store
+      • {bufnr}      (`integer`)
+      • {client_id}  (`integer`)
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

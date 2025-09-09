@@ -1,0 +1,66 @@
+==============================================================================
+Lua module: vim.lsp.inlay_hint                                *lsp-inlay_hint*
+
+enable({enable}, {filter})                       *vim.lsp.inlay_hint.enable()*
+    为 {filter} 指定的范围启用或禁用内联提示。
+
+    要"切换"，传递 `is_enabled()` 的反值: >lua
+        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+<
+
+    Attributes: ~
+        Since: 0.10.0
+
+    Parameters: ~
+      • {enable}  (`boolean?`) true/nil 表示启用，false 表示禁用
+      • {filter}  (`table?`) 可选的过滤器 |kwargs|，或 `nil` 表示全部。
+                  • {bufnr} (`integer?`) 缓冲区编号，或 0 表示当前
+                    缓冲区，或 nil 表示全部。
+
+get({filter})                                       *vim.lsp.inlay_hint.get()*
+    获取内联提示列表，可选地按缓冲区或范围过滤。
+
+    示例用法: >lua
+        local hint = vim.lsp.inlay_hint.get({ bufnr = 0 })[1] -- 0 表示当前缓冲区
+
+        local client = vim.lsp.get_client_by_id(hint.client_id)
+        local resp = client:request_sync('inlayHint/resolve', hint.inlay_hint, 100, 0)
+        local resolved_hint = assert(resp and resp.result, resp.err)
+        vim.lsp.util.apply_text_edits(resolved_hint.textEdits, 0, client.encoding)
+
+        location = resolved_hint.label[1].location
+        client:request('textDocument/hover', {
+          textDocument = { uri = location.uri },
+          position = location.range.start,
+        })
+<
+
+    Attributes: ~
+        Since: 0.10.0
+
+    Parameters: ~
+      • {filter}  (`table?`) 可选过滤器 |kwargs|:
+                  • {bufnr} (`integer?`)
+                  • {range} (`lsp.Range?`)
+
+    Return: ~
+        (`table[]`) 返回包含以下字段的对象列表:
+        • {bufnr} (`integer`)
+        • {client_id} (`integer`)
+        • {inlay_hint} (`lsp.InlayHint`)
+
+is_enabled({filter})                         *vim.lsp.inlay_hint.is_enabled()*
+    查询在 {filter} 过滤范围内内联提示是否启用
+
+    Attributes: ~
+        Since: 0.10.0
+
+    Parameters: ~
+      • {filter}  (`table?`) 可选过滤器 |kwargs|，或 `nil` 表示全部。
+                  • {bufnr} (`integer?`) 缓冲区编号，0 表示当前
+                    缓冲区，nil 表示全部。
+
+    Return: ~
+        (`boolean`)
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

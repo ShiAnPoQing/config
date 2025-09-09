@@ -1,0 +1,119 @@
+================================================================================
+LSP HIGHLIGHT                                                    *lsp-highlight*
+
+引用高亮：
+
+用于 |vim.lsp.buf.document_highlight()| 的高亮组。
+
+你可以在此处查看更多类型的区别：
+https://microsoft.github.io/language-server-protocol/specification#textDocument_documentHighlight
+
+                                                         *hl-LspReferenceText*
+LspReferenceText          用于高亮“文本”引用
+                                                         *hl-LspReferenceRead*
+LspReferenceRead          用于高亮“读取”引用
+                                                        *hl-LspReferenceWrite*
+LspReferenceWrite         用于高亮“写入”引用
+                                                       *hl-LspReferenceTarget*
+LspReferenceTarget        用于高亮引用目标（例如在悬停范围内）
+                                                             *hl-LspInlayHint*
+LspInlayHint              用于高亮 inlay hints（内联提示）
+
+
+                                                      *lsp-highlight-codelens*
+
+与 |lsp-codelens| 功能相关的高亮组。
+
+                                                              *hl-LspCodeLens*
+LspCodeLens
+    用于为 codelens 的虚拟文本着色。见
+    |nvim_buf_set_extmark()|。
+
+LspCodeLensSeparator                                 *hl-LspCodeLensSeparator*
+    用于为两个或多个代码透镜之间的分隔符着色。
+
+                                                     *lsp-highlight-signature*
+
+与 |vim.lsp.handlers.signature_help()| 相关的高亮组。
+
+                                              *hl-LspSignatureActiveParameter*
+LspSignatureActiveParameter
+    用于高亮签名帮助中的活动参数。见
+    |vim.lsp.handlers.signature_help()|。
+
+
+------------------------------------------------------------------------------
+LSP SEMANTIC HIGHLIGHTS                               *lsp-semantic-highlight*
+
+如有可用，LSP 客户端会使用 |lsp-semantic_tokens| 高亮代码，这是一种 LSP 服务器可以提供源码信息的方式。注意，这属于对 treesitter 语法高亮的补充；语义高亮不会替代语法高亮。
+
+服务器通常会为源码中的每个标识符提供一个 token。该 token 会有一个 `type`，如“function”或“variable”，以及 0 个或多个 `modifier`，如“readonly”或“deprecated”。标准类型和修饰符在此描述：
+https://microsoft.github.io/language-server-protocol/specification/#textDocument_semanticTokens
+LSP 服务器也可能使用非标准的类型和修饰符。
+
+LSP 客户端会为每个 token 添加一个或多个高亮。高亮组由 token 的类型和修饰符派生：
+  • `@lsp.type.<type>.<ft>` 表示类型
+  • `@lsp.mod.<mod>.<ft>` 表示每个修饰符
+  • `@lsp.typemod.<type>.<mod>.<ft>` 表示每个修饰符
+使用 |:Inspect| 查看特定 token 的高亮。使用 |:hi| 或 |nvim_set_hl()| 更改语义高亮的外观： >vim
+
+    hi @lsp.type.function guifg=Yellow        " 函数名为黄色
+    hi @lsp.type.variable.lua guifg=Green     " lua 变量为绿色
+    hi @lsp.mod.deprecated gui=strikethrough  " 弃用项加删除线
+    hi @lsp.typemod.function.async guifg=Blue " async 函数为蓝色
+<
+|vim.hl.priorities|`.semantic_tokens` 是 `@lsp.type.*` 高亮的优先级。`@lsp.mod.*` 和 `@lsp.typemod.*` 高亮的优先级分别高一和高二。
+
+你可以通过清空高亮组来禁用语义高亮： >lua
+
+    -- 隐藏函数的语义高亮
+    vim.api.nvim_set_hl(0, '@lsp.type.function', {})
+
+    -- 隐藏所有语义高亮
+    for _, group in ipairs(vim.fn.getcompletion("@lsp", "highlight")) do
+      vim.api.nvim_set_hl(0, group, {})
+    end
+<
+你可能希望将这些放在 |ColorScheme| 自动命令中。
+
+对于更复杂的高亮，使用 |LspTokenUpdate| 和 |vim.lsp.semantic_tokens.highlight_token()|。
+
+以下是 Nvim 查询中使用的标准捕获列表，按当前配色方案高亮（用 |:Inspect| 查看具体定义）：
+
+@lsp.type.class          声明或引用类类型的标识符
+@lsp.type.comment        表示注释的 token
+@lsp.type.decorator      声明或引用装饰器和注解的标识符
+@lsp.type.enum           声明或引用枚举类型的标识符
+@lsp.type.enumMember     声明或引用枚举属性、常量或成员的标识符
+@lsp.type.event          声明事件属性的标识符
+@lsp.type.function       声明函数的标识符
+@lsp.type.interface      声明或引用接口类型的标识符
+@lsp.type.keyword        表示语言关键字的 token
+@lsp.type.macro          声明宏的标识符
+@lsp.type.method         声明成员函数或方法的标识符
+@lsp.type.modifier       表示修饰符的 token
+@lsp.type.namespace      声明或引用命名空间、模块或包的标识符
+@lsp.type.number         表示数字字面量的 token
+@lsp.type.operator       表示操作符的 token
+@lsp.type.parameter      声明或引用函数或方法参数的标识符
+@lsp.type.property       声明或引用成员属性、成员字段或成员变量的标识符
+@lsp.type.regexp         表示正则表达式字面量的 token
+@lsp.type.string         表示字符串字面量的 token
+@lsp.type.struct         声明或引用结构体类型的标识符
+@lsp.type.type           声明或引用未被覆盖的类型的标识符
+@lsp.type.typeParameter  声明或引用类型参数的标识符
+@lsp.type.variable       声明或引用局部或全局变量的标识符
+
+@lsp.mod.abstract        抽象类型和成员函数
+@lsp.mod.async           被标记为 async 的函数
+@lsp.mod.declaration     符号的声明
+@lsp.mod.defaultLibrary  属于标准库的符号
+@lsp.mod.definition      符号的定义，例如头文件中的定义
+@lsp.mod.deprecated      不应再使用的符号
+@lsp.mod.documentation   文档中的符号出现
+@lsp.mod.modification    变量被赋值的引用
+@lsp.mod.readonly        只读变量和成员字段（常量）
+@lsp.mod.static          类成员（静态成员）
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

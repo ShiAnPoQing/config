@@ -1,0 +1,122 @@
+==============================================================================
+EVENTS                                                            *lsp-events*
+
+LspAttach                                                          *LspAttach*
+    当 LSP 客户端执行“initialize”并附加到缓冲区后触发。
+    |autocmd-pattern| 是缓冲区名。客户端 ID 通过 Lua 处理器的 |event-data| 参数传递。
+
+    注意：如果 LSP 服务器执行动态注册，能力可能在 LspAttach 之后的任意时间注册。在这种情况下，你可能需要处理 "registerCapability" 事件。例如： >lua
+
+    vim.lsp.handlers['client/registerCapability'] = (function(overridden)
+      return function(err, res, ctx)
+        local result = overridden(err, res, ctx)
+        local client = vim.lsp.get_client_by_id(ctx.client_id)
+        if not client then
+          return
+        end
+        -- 调用你的自定义 on_attach 逻辑...
+        -- my_on_attach(client, vim.api.nvim_get_current_buf())
+        return result
+      end
+    end)(vim.lsp.handlers['client/registerCapability'])
+
+LspDetach                                                          *LspDetach*
+    就在 LSP 客户端从缓冲区分离之前触发。|autocmd-pattern| 是缓冲区名。客户端 ID 通过 Lua 处理器的 |event-data| 参数传递。例如： >lua
+
+    vim.api.nvim_create_autocmd('LspDetach', {
+      callback = function(args)
+        -- 获取正在分离的客户端
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+
+        -- 如果支持格式化，移除保存时格式化的自动命令
+        if client:supports_method('textDocument/formatting') then
+          vim.api.nvim_clear_autocmds({
+            event = 'BufWritePre',
+            buffer = args.buf,
+          })
+        end
+      end,
+    })
+<
+
+LspNotify                                                          *LspNotify*
+    每次成功向 LSP 服务器发送通知后触发。
+
+    client_id、LSP 方法和参数通过 Lua 处理器 |event-data| 表参数传递。例如： >lua
+
+    vim.api.nvim_create_autocmd('LspNotify', {
+      callback = function(args)
+        local bufnr = args.buf
+        local client_id = args.data.client_id
+        local method = args.data.method
+        local params = args.data.params
+
+        -- 对通知做一些处理
+        if method == 'textDocument/...' then
+          update_buffer(bufnr)
+        end
+      end,
+    })
+<
+
+LspProgress                                                       *LspProgress*
+    收到来自服务器的进度通知时触发。通知可从 |vim.lsp.Client| 的 `progress` 环形缓冲区轮询，或使用 |vim.lsp.status()| 获取聚合消息。
+
+    如果服务器发送“work done progress”，则 `pattern` 被设置为 `kind`
+    （`begin`、`report` 或 `end` 之一）。
+
+    Lua 处理器 |event-data| 参数有 `client_id` 和 `params` 属性，`params` 是服务器发送的请求参数（见 `lsp.ProgressParams`）。
+
+    示例： >vim
+        autocmd LspProgress * redrawstatus
+<
+
+LspRequest                                                        *LspRequest*
+    每当向 LSP 服务器发送请求时，该事件会在请求状态每次变化时触发。
+    状态可以是 `pending`、`complete` 或 `cancel`，作为 "data" 表传递给回调函数的 {type}。
+
+    当初始请求发送时（{type} == `pending`）和 LSP 服务器响应时（{type} == `complete`）会触发。如果使用 client.cancel_request(request_id) 请求取消，则该事件会以 {type} == `cancel` 触发。
+
+    Lua 处理器 |event-data| 参数有 client ID、request ID 和
+    请求（见 |vim.lsp.Client|，{requests} 字段）。如果请求类型为 `complete`，则在处理事件处理器后，该挂起请求条目将被从客户端的挂起请求表中移除。例如： >lua
+
+    vim.api.nvim_create_autocmd('LspRequest', {
+      callback = function(args)
+        local bufnr = args.buf
+        local client_id = args.data.client_id
+        local request_id = args.data.request_id
+        local request = args.data.request
+        if request.type == 'pending' then
+          -- 处理挂起请求
+          track_pending(client_id, bufnr, request_id, request)
+        elseif request.type == 'cancel' then
+          -- 处理取消请求
+          track_canceling(client_id, bufnr, request_id, request)
+        elseif request.type == 'complete' then
+          -- 处理已完成请求。该挂起请求条目即将被移除
+          track_finish(client_id, bufnr, request_id, request)
+        end
+      end,
+    })
+<
+
+LspTokenUpdate                                                *LspTokenUpdate*
+    当 LSP 服务器发送或更新可见语义 token，或已有 token 首次变为可见时触发。|autocmd-pattern| 是缓冲区名。Lua 处理器 |event-data| 参数有 client ID 和 token（见
+    |vim.lsp.semantic_tokens.get_at_pos()|）。例如： >lua
+
+    vim.api.nvim_create_autocmd('LspTokenUpdate', {
+      callback = function(args)
+        local token = args.data.token
+        if token.type == 'variable' and not token.modifiers.readonly then
+          vim.lsp.semantic_tokens.highlight_token(
+            token, args.buf, args.data.client_id, 'MyMutableVariableHighlight'
+          )
+        end
+      end,
+    })
+<
+    注意：除调用
+    |vim.lsp.semantic_tokens.highlight_token()| 外的其他操作均为实验性。
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

@@ -1,0 +1,37 @@
+==============================================================================
+Lua module: vim.lsp.log                                              *lsp-log*
+
+get_filename()                                    *vim.lsp.log.get_filename()*
+    返回日志文件名。
+
+    返回值: ~
+        (`string`) 日志文件名
+
+get_level()                                          *vim.lsp.log.get_level()*
+    获取当前日志级别。
+
+    返回值: ~
+        (`integer`) 当前日志级别
+
+set_format_func({handle})                      *vim.lsp.log.set_format_func()*
+    设置用于格式化日志的函数
+
+    参数: ~
+      • {handle}  (`function`) 应用于日志参数的函数，传递 vim.inspect 可多行格式化
+
+set_level({level})                                   *vim.lsp.log.set_level()*
+    设置当前日志级别。
+
+    参数: ~
+      • {level}  (`string|integer`) 取值之一 |vim.log.levels|
+
+should_log({level})                                 *vim.lsp.log.should_log()*
+    检查该级别是否足够记录日志。
+
+    参数: ~
+      • {level}  (`integer`) 日志级别
+
+    返回值: ~
+        (`boolean`) 若会记录则为 true，否则为 false
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
