@@ -6,7 +6,9 @@
 
 未加载的缓冲区：~
 
-缓冲区可以通过 |:bunload| 命令或缓冲区的 |'bufhidden'| 选项卸载。当缓冲区被卸载时，其文件内容将从内存中释放，vim 无法对缓冲区行进行操作，直到重新加载（通常通过在新窗口中再次打开缓冲区）。API 方法如 |nvim_buf_get_lines()| 和 |nvim_buf_line_count()| 将受到影响。
+缓冲区可以通过 |:bunload| 命令或缓冲区的 |'bufhidden'| 选项卸载。
+
+当缓冲区被卸载时，其文件内容将从内存中释放，vim 无法对缓冲区行进行操作，直到重新加载（通常通过在新窗口中再次打开缓冲区）。API 方法如 |nvim_buf_get_lines()| 和 |nvim_buf_line_count()| 将受到影响。
 
 您可以使用 |nvim_buf_is_loaded()| 或 |nvim_buf_line_count()| 检查缓冲区是否已加载。
 

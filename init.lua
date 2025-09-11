@@ -76,6 +76,7 @@ require("lazy-setup").setup({
   require("plugins.custom.simple-keymap"),
   require("plugins.custom.surround"),
   require("plugins.custom.buffer-manage"),
+  require("plugins.custom.code-action"),
 })
 vim.opt.rtp:append("~/vimcdoc-2.5.0")
 vim.o.helplang = "cn"

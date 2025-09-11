@@ -206,7 +206,8 @@ make_position_params({window}, {position_encoding})
 
                                             *vim.lsp.util.make_range_params()*
 make_range_params({window}, {position_encoding})
-    使用当前缓冲区当前位置，创建可用于多种 LSP 请求的对象，如 `textDocument/codeAction`、`textDocument/colorPresentation`、`textDocument/rangeFormatting`。
+    使用当前缓冲区当前位置，创建可用于多种 LSP 请求的对象，
+    如 `textDocument/codeAction`、 `textDocument/colorPresentation`、 `textDocument/rangeFormatting`。
 
     参数: ~
       • {window}             (`integer?`) |window-ID| 或 0 表示当前，默认为当前

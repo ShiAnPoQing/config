@@ -99,6 +99,7 @@ local function get_colors(bg)
       bg21 = "#DEE5FF",
       bg22 = "#E3E9FF",
 
+      _bg0 = "#000000",
       _bg1 = "#08080b",
       _bg2 = "#0f0f13",
       _bg3 = "#18181e",
@@ -116,6 +117,19 @@ local function get_colors(bg)
       _bg15 = "#737390",
       _bg16 = "#7b7b96",
       _bg17 = "#84849d",
+      _bg18 = "#8f8fa6",
+      _bg19 = "#9898ad",
+      _bg20 = "#a0a0b4",
+      _bg21 = "#acacbd",
+      _bg22 = "#b4b4c4",
+      _bg23 = "#bdbdca",
+      _bg24 = "#c8c8d3",
+      _bg25 = "#d1d1da",
+      _bg26 = "#d9d9e1",
+      _bg27 = "#e5e5ea",
+      _bg28 = "#ededf1",
+      _bg29 = "#f6f6f8",
+      _bg30 = "#ffffff",
     },
     light = {
       hue1 = "#ac4339", -- 5
@@ -203,19 +217,19 @@ local function get_groups()
       CustomVisual = { bg = colors.bg7, reverse = false },
       -- Normal = { fg = colors.bg15, bg = colors.bg5 }, -- 普通文本
       -- Normal = { fg = colors.bg15, bg = "#1F1F27" }, -- 普通文本
-      Normal = { fg = colors.bg15, bg = colors._bg4 }, -- 普通文本
-      NormalFloat = { fg = colors.bg15, bg = colors.bg3 }, --- 浮动窗口的普通文本
+      Normal = { fg = colors._bg18, bg = colors._bg4 }, -- 普通文本
+      NormalFloat = { fg = colors._bg18, bg = colors.bg3 }, --- 浮动窗口的普通文本
       NormalNC = { link = "Normal" }, -- 非当前窗口的普通文本
       MoreMsg = { link = "Normal" }, -- More Message
       ModeMsg = { link = "Normal" }, -- Mode Message
-      LineNr = { fg = colors.bg9, bg = colors._bg4, bold = false }, -- 行号
+      LineNr = { fg = colors._bg10, bg = colors._bg4, bold = false }, -- 行号
       Search = { reverse = true }, -- 搜索结果
       IncSearch = { link = "Search" },
       CurSearch = { link = "IncSearch" },
-      StatusLine = { bg = colors.bg5, fg = colors.bg15, reverse = true }, -- 状态栏
+      StatusLine = { bg = colors.bg5, fg = colors._bg18, reverse = true }, -- 状态栏
       SignColumn = { bg = colors._bg4 }, -- 符号列
-      CursorLine = { bg = colors.bg6 }, -- 光标行
-      CursorLineNr = { fg = colors.bg15, bold = true },
+      CursorLine = { bg = colors._bg4 }, -- 光标行
+      CursorLineNr = { fg = colors._bg18, bold = true },
       ColorColumn = { bg = colors.bg6 },
       Visual = { link = "CustomVisual" },
       VisualNOS = { link = "Visual" },
@@ -228,15 +242,15 @@ local function get_groups()
       MatchParen = { reverse = true },
       -- Conceal = { fg =  },
       Keyword = { fg = colors.hue52, bold = false },
-      Function = { fg = colors.hue45, bold = false },
+      Function = { fg = colors.hue46, bold = false },
       String = { fg = colors.hue20 },
       Number = { bg = colors._bg4, fg = colors.hue1 },
       Operator = { fg = colors.hue40 },
-      Delimiter = { fg = colors.bg15 },
+      Delimiter = { fg = colors._bg18 },
       Comment = { fg = colors.bg9 },
       Boolean = { fg = colors.hue72, bold = true },
       Type = { fg = colors.hue36, bold = true },
-      Constant = { fg = colors.hue1, bold = true },
+      Constant = { fg = colors.hue1, bold = false },
       Directory = { fg = colors.hue45, bold = true },
       Label = { fg = colors.hue50, bold = true },
       Special = { fg = colors.hue35 },
@@ -245,15 +259,15 @@ local function get_groups()
 
       -- Underlined = { fg = colors.blue, underline = config.underline }, -- 突出的文本，HTML链接
 
-      ["@variable"] = { fg = colors.bg15 },
+      ["@variable"] = { fg = colors._bg18 },
       ["@variable.parameter"] = { fg = colors.hue6, bold = false },
-      ["@variable.builtin"] = { fg = colors.hue72, bold = true },
+      ["@variable.builtin"] = { fg = colors.hue72, bold = false },
       -- ["@variable.member"] = { fg = "" },
       ["@module.builtin"] = { link = "@variable.builtin" },
       ["@property"] = { fg = colors.hue48 },
       ["@keyword"] = { link = "Keyword" },
       ["@keyword.function"] = { fg = colors.hue52, bold = false },
-      ["@keyword.return"] = { fg = colors.hue52, bold = true },
+      ["@keyword.return"] = { fg = colors.hue52, bold = false },
       -- ["@keyword.conditional"] = { bg = "", fg = "", bold = true },
       -- ["@keyword.repeat"] = { bg = "", fg = "", bold = true },
       -- ["@keyword.debug"] = { link = "Debug" },
@@ -430,13 +444,13 @@ local function get_groups()
     },
     light = {
       Normal = { fg = "#2D3142", bg = "#B0B6CC" }, -- 普通文本
-      ["@variable"] = { fg = "#2D3142" },
-      -- ["@variable.builtin"] = { fg = "#6a40bf" },
       Keyword = { fg = colors.hue55, bold = true },
       Function = { fg = colors.hue50, bold = true },
       Special = { fg = "#007373" },
       String = { fg = "#4d7300" },
       Boolean = { fg = colors.hue1, bold = true },
+      ["@variable"] = { fg = "#2D3142" },
+      -- ["@variable.builtin"] = { fg = "#6a40bf" },
       ["@property"] = { fg = "#007373" },
       ["@lsp.type.property"] = { link = "@property" },
     },
@@ -444,8 +458,6 @@ local function get_groups()
 
   return groups[bg]
 end
-
-function M.setup(opts) end
 
 function M.loader()
   vim.cmd("highlight clear")
@@ -456,5 +468,7 @@ function M.loader()
     vim.api.nvim_set_hl(0, group, colors)
   end
 end
+
+function M.setup(opts) end
 
 return M

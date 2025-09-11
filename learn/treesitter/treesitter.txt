@@ -29,8 +29,7 @@ Nvim 包含以下解析器：
 - Vimdoc
 - Treesitter 查询文件 |ft-query-plugin|
 
-你可以手动安装更多解析器，或使用插件如
-https://github.com/nvim-treesitter/nvim-treesitter 。
+你可以手动安装更多解析器，或使用插件如 https://github.com/nvim-treesitter/nvim-treesitter 。
 
 解析器在 'runtimepath' 目录中作为 `parser/{lang}.*` 被搜索。
 如果找到同一语言的多个解析器，将使用第一个。

@@ -99,3 +99,13 @@ vim.api.nvim_create_user_command("LineConcatInput", function()
 end, {
   range = true,
 })
+
+vim.api.nvim_create_user_command("CodeActions", function()
+  local params = vim.lsp.util.make_range_params(0, "utf-8")
+  params.context = { diagnostics = vim.lsp.diagnostic.get_line_diagnostics() }
+  vim.lsp.buf_request_all(0, "textDocument/codeAction", params, function(results)
+    vim.print(results)
+  end)
+end, {})
+
+local test = function() end

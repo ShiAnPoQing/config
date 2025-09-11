@@ -100,10 +100,12 @@ Nvim 启动时无条件创建以下按键映射：
 ==============================================================================
 CONFIG                                                  *lsp-config*
 
-你可以通过 vim.lsp.config() 静态配置 LSP 行为，也可以通过 |lsp-attach| 或 |Client:on_attach()| 动态配置。
+你可以通过 vim.lsp.config() 静态配置 LSP 行为，
+也可以通过 |lsp-attach| 或 |Client:on_attach()| 动态配置。
 
 使用 |vim.lsp.config()| 定义并有选择地启用 LSP 配置。
-这基本上是 |vim.lsp.start()| 的一个包装器，允许你共享和合并配置（这些配置可能由 Nvim 或第三方插件提供）。
+这基本上是 |vim.lsp.start()| 的一个包装器，
+允许你共享和合并配置（这些配置可能由 Nvim 或第三方插件提供）。
 
 当 LSP 客户端启动时，它会通过以下方式合并配置（优先级递增）：
 
@@ -162,7 +164,8 @@ CONFIG                                                  *lsp-config*
   }
 <
                                                         *lsp-attach*
-要使用 Nvim 提供之外的 LSP 功能（见 |lsp-buf|），你可以在 |Client:on_attach()| 或 |LspAttach| 上设置按键映射和选项。
+要使用 Nvim 提供之外的 LSP 功能（见 |lsp-buf|），
+你可以在 |Client:on_attach()| 或 |LspAttach| 上设置按键映射和选项。
 并非所有语言服务器都提供相同的能力；请在你的 LspAttach 处理器中检查 `supports_method()`。
                                                         *lsp-lint* *lsp-format*
 示例：启用自动补全和自动格式化（“linting”）： >lua
@@ -333,7 +336,8 @@ LSP 处理器是处理 Nvim 向服务器发出的请求的 |lsp-response| 的函
       },
     }
 
-- 向 |vim.lsp.buf_request_all()| 传递 {handler} 参数。这仅为给定请求设置 |lsp-handler|。
+- 向 |vim.lsp.buf_request_all()| 传递 {handler} 参数。
+    这仅为给定请求设置 |lsp-handler|。
   示例： >lua
     vim.lsp.buf_request_all(
       0,
