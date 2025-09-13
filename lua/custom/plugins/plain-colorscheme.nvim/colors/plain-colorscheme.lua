@@ -1,0 +1,1 @@
+require("plain-colorscheme").loader()

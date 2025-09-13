@@ -1,7 +1,3 @@
--- local function test()
---
--- end
-
 return {
   dir = vim.fn.stdpath("config") .. "/lua/custom/plugins/code-action.nvim",
   name = "code-action.nvim",

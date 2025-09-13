@@ -64,6 +64,7 @@ require("lazy-setup").setup({
   -- require("plugins.download.style.theme.onenord"),
   -- require("plugins.download.style.theme.rose-pine-neovim"),
   require("plugins.custom.colorscheme"),
+  -- require("plugins.custom.plain-colorscheme"),
   require("plugins.custom.lsp"),
   require("plugins.custom.magic"),
   require("plugins.custom.move-line"),
