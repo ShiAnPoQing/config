@@ -102,7 +102,7 @@ return {
 
     fillchars = {
       vert = "│",
-      horiz = "",
+      horiz = "─",
     },
     -- formatoptions = { "o/qwjb" },
     formatoptions = {

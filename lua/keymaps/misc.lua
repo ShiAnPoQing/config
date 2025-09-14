@@ -1,4 +1,8 @@
 return {
+  -- t 的优先级低，单独占用一个键，不合适
+  ["t"] = { "<nop>", { "n", "o", "x" } },
+  ["<space>f"] = { "t", { "n", "o", "x" } },
+  ["<space>F"] = { "T", { "n", "o", "x" } },
   -- ["<C-\\>"] = { "gcc", { "n", "i" } },
   ["<C-[>"] = { "<C-O>", "n" },
   ["<M-->"] = { "J", "x" },
@@ -10,10 +14,6 @@ return {
     "<nop>",
     "n",
   },
-  -- ["s"] = {
-  --   "<nop>",
-  --   "n"
-  -- },
   ["<S-bs>"] = {
     "x",
     "n",
@@ -106,14 +106,17 @@ return {
   },
   -- gh: normal mode into select mode
   -- normal mode into select block mode
-  ["<space>gh"] = { "g<C-h>", { "n" } },
+  ["<space>gh"] = { "g<C-h>", "n" },
   -- visual mode and select mode exchange
   ["gh"] = {
-    { "<C-g>", { "x" } },
-    { "<C-g>", { "s" } },
+    { "<C-g>", "x" },
+    { "<C-g>", "s" },
   },
   -- select mode select line
-  ["gH"] = { "<C-g>gH", { "s" } },
+  ["gH"] = {
+    { "<C-g>", "s" },
+    { "<C-g>", "x" },
+  },
   -- select mode delete select text
   ["<BS>"] = {
     { "<C-g>s", "s" },

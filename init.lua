@@ -38,6 +38,7 @@ require("lazy-setup").setup({
   require("plugins.download.git.gitsigns"),
   -- require("plugins.download.treesitter.nvim-treesitter-context"),
   -- require("plugins.download.telescope.telescope"),
+  -- require("plugins.download.lsp.lspsaga"),
   -- require("plugins.download.misc.augment"),
   -- require("plugins.code.windsurf"),
   -- require("plugins.download.style.theme.vague"),
