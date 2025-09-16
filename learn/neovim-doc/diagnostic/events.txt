@@ -1,0 +1,20 @@
+==============================================================================
+事件 *diagnostic-events*
+
+                                                           *DiagnosticChanged* 
+DiagnosticChanged     在诊断更改后 。
+                      从 Lua 中使用时，新的诊断将作为“data”表中的
+                      “diagnostics”传递给 autocmd 回调 。
+                      每个缓冲区触发 。
+
+示例：
+>lua
+    vim.api.nvim_create_autocmd('DiagnosticChanged', {
+      callback = function(args)
+        local diagnostics = args.data.diagnostics
+        vim.print(diagnostics)
+      end,
+    })
+<
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

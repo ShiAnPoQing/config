@@ -83,3 +83,5 @@ require("lazy-setup").setup({
 })
 vim.opt.rtp:append("~/vimcdoc-2.5.0")
 vim.o.helplang = "cn"
+
+vim.fn.setcmdline("nihao")

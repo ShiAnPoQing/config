@@ -1,0 +1,13 @@
+get({bufnr}, {opts}) *vim.diagnostic.get()*
+    获取当前诊断 。
+    修改返回表中的诊断无效 。要设置缓冲区中的诊断，请使用 |vim.diagnostic.set()| 。
+    参数：~
+      • {bufnr}  (`integer?`)
+                 要获取诊断的缓冲区编号 。使用 0 表示当前缓冲区，或 nil 表示所有缓冲区 。
+      • {opts}   (`vim.diagnostic.GetOpts?`)
+                 参见 |vim.diagnostic.GetOpts| 。
+    返回：~
+        (`vim.Diagnostic[]`)
+        保证存在字段 `bufnr`、`end_lnum`、`end_col` 和 `severity` 。参见 |vim.Diagnostic| 。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

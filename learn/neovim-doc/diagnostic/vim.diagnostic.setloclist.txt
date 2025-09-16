@@ -1,0 +1,21 @@
+setloclist({opts}) *vim.diagnostic.setloclist()*
+    将缓冲区诊断添加到位置列表 。
+    参数：~
+      • {opts}  (`table?`)
+                包含以下键的配置表：
+                • {namespace}? (`integer[]|integer`)
+                  仅添加来自给定命名空间的诊断 。
+                • {winnr}? (`integer`, 默认值：`0`)
+                  要设置位置列表的窗口编号 。
+                • {open}? (`boolean`, 默认值：`true`)
+                  设置后打开位置列表 。
+                • {title}? (`string`)
+                  位置列表的标题 。默认为“Diagnostics”。
+                • {severity}? (`vim.diagnostic.SeverityFilter`)
+                  参见 |diagnostic-severity| 。
+                • {format}? (`fun(diagnostic:vim.Diagnostic): string?`)
+                  一个函数，它接受一个诊断作为输入并返回一个字符串或 nil 。
+                  如果返回值为 nil，则该诊断不会显示在位置列表中 。
+                  否则，使用输出文本来显示诊断 。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

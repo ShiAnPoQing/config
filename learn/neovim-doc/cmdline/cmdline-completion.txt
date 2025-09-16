@@ -1,0 +1,168 @@
+==============================================================================
+2. 命令行补全				*cmdline-completion*
+
+编辑命令行时，可以使用一些命令来补全
+光标前的单词。这适用于：
+
+- 命令名：在命令行开头。
+- |++opt| 值。
+- 标签：仅在 ":tag" 命令后。
+- 文件名：仅在接受文件名的命令后或可以
+  设置为文件名的选项设置后。这称为文件名
+  补全。
+- Shell命令名：在 ":!cmd"、":r !cmd" 和 ":w !cmd" 后。使用 $PATH。
+- 选项：仅在 ":set" 命令后。
+- 映射：仅在 ":map" 或类似命令后。
+- 变量和函数名：仅在 ":if"、":call" 或类似命令后。
+
+帮助项匹配的数量是有限的（当前为300）以避免在
+有很多匹配时长时间延迟。
+
+可以使用这些命令：
+
+							*c_CTRL-D*
+CTRL-D		列出匹配光标前模式的名称。
+		显示文件名时，目录被高亮显示（参见
+		|highlight-groups|）。'suffixes' 匹配的名称被移到
+		末尾。
+		'wildoptions' 选项可以设置为 "tagfile" 来列出
+		匹配标签的文件。
+				*c_CTRL-I* *c_wildchar* *c_<Tab>* */_<Tab>*
+'wildchar' option
+		对光标前的模式进行匹配。
+		匹配（如果有多个，第一个匹配）被插入
+		到模式的位置。（注意：在宏内不工作，
+		因为 <Tab> 或 <Esc> 大多用作 'wildchar'，
+		在某些宏中这些有特殊含义。）当再次键入
+		且有多个匹配时，插入下一个
+		匹配。在最后一个匹配后，再次使用第一个
+		（环绕）。
+
+		在搜索上下文中使用 <CTRL-V><Tab> 或 "\t" 搜索
+		字面的 <Tab> 而不是触发补全。
+
+		行为可以用 'wildmode' 选项更改。
+							*c_<S-Tab>*
+<S-Tab>		像 'wildchar' 或 <Tab>，但从最后一个匹配开始，
+		然后转到上一个匹配。
+							*c_CTRL-N*
+CTRL-N		在使用获得多个匹配的 'wildchar' 后，转到下一个
+		匹配。否则从历史记录中调用更近的命令行。
+							*c_CTRL-P*
+CTRL-P		在使用获得多个匹配的 'wildchar' 后，转到
+		上一个匹配。否则从历史记录中调用更旧的命令行。
+							*c_CTRL-A*
+CTRL-A		插入所有匹配光标前模式的名称。
+							*c_CTRL-L*
+CTRL-L		对光标前的模式进行匹配。如果
+		有一个匹配，它被插入到模式的位置。
+		如果有多个匹配，插入最长的公共部分
+		到模式的位置。如果结果比
+		模式短，不进行补全。
+							*/_CTRL-L*
+		当设置了 'incsearch' 时，为 "/" 或
+		"?" 输入搜索模式且显示当前匹配时，CTRL-L 将从
+		当前匹配的末尾添加一个字符。如果
+		设置了 'ignorecase' 和 'smartcase' 且命令行没有
+		大写字符，添加的字符被转换为小写。
+	                                            *c_CTRL-G* */_CTRL-G*
+CTRL-G		当设置了 'incsearch' 时，为 "/" 或
+		"?" 输入搜索模式且显示当前匹配时，CTRL-G 将移动
+		到下一个匹配（不考虑 |search-offset|）
+		使用 CTRL-T 移动到上一个匹配。提示：在普通
+		键盘上 G 在 T 下面。
+	                                            *c_CTRL-T* */_CTRL-T*
+CTRL-T		当设置了 'incsearch' 时，为 "/" 或
+		"?" 输入搜索模式且显示当前匹配时，CTRL-T 将移动
+		到上一个匹配（不考虑 |search-offset|）。
+		使用 CTRL-G 移动到下一个匹配。提示：在普通
+		键盘上 T 在 G 上面。
+
+'wildchar' 选项默认为 <Tab>（在Vi兼容模式下为CTRL-E；在
+早期版本中使用 <Esc>）。在模式中匹配文件名时接受标准 |wildcards|。
+
+重复 'wildchar' 或 CTRL-N 时，您循环遍历匹配，最终
+回到键入的内容。如果第一个匹配不是您想要的，
+您可以使用 <S-Tab> 或 CTRL-P 直接回到您键入的内容。
+
+另请参见 |wildtrigger()|。
+
+可以设置 'wildmenu' 选项在命令行上方显示匹配。
+
+'wildoptions' 选项为 'wildmenu' 提供额外配置以使用弹出菜单，
+以及使用模糊匹配。
+
+可以设置 'wildignorecase' 选项忽略文件名中的大小写。对于
+补全其他文本（例如命令名），使用 'ignorecase' 选项
+（但模糊匹配总是忽略大小写）。
+
+如果您喜欢tcsh的自动列表补全，可以使用此映射： >
+	:cnoremap X <C-L><C-D>
+（其中 X 是要使用的命令键，<C-L> 是 CTRL-L，<C-D> 是 CTRL-D）
+这将找到最长匹配，然后列出所有匹配的文件。
+
+如果您喜欢tcsh的自动列表补全，可以使用 'wildmode' 选项来
+模拟它。例如，这模拟 autolist=ambiguous： >
+	:set wildmode=longest,list
+这将用第一个 'wildchar' 找到最长匹配，然后用下一个
+列出所有匹配的文件。
+
+					*complete-script-local-functions*
+补全用户函数名时，在前面加上 "s:" 以找到脚本本地
+函数。
+
+							*suffixes*
+对于文件名补全，您可以使用 'suffixes' 选项在
+几乎同名的文件之间设置优先级。如果有多个匹配，
+扩展名在 'suffixes' 选项中的那些文件被忽略。
+默认值是 ".bak,~,.o,.h,.info,.swp,.obj"，这意味着结尾为
+".bak"、"~"、".o"、".h"、".info"、".swp" 和 ".obj" 的文件有时被忽略。
+
+空条目，两个连续的逗号，匹配不包含
+"." 的文件名，因此没有后缀。这对于忽略 "prog" 并偏好
+"prog.c" 很有用。
+
+示例：
+
+  pattern:	files:				match:	~
+   test*	test.c test.h test.o		test.c
+   test*	test.h test.o			test.h and test.o
+   test*	test.i test.h test.c		test.i and test.c
+
+不可能忽略有两个点的后缀。
+
+如果有多个匹配文件（在忽略匹配
+'suffixes' 选项的文件后），插入第一个文件名。当您
+两次键入 'wildchar' 且完成的匹配保持不变时，您可以看到
+只有一个匹配。您可以通过输入
+'wildchar'、CTRL-N 或 CTRL-P 到达其他匹配。包含所有文件，
+也包括扩展名匹配 'suffixes' 选项的文件。
+
+要完全忽略某些扩展名的文件，使用 'wildignore'。
+
+要只匹配在键入文本末尾结束的文件，追加 "$"。例如，
+要只匹配以 ".c" 结尾的文件： >
+	:e *.c$
+这不会匹配以 ".cpp" 结尾的文件。没有 "$" 时它会匹配。
+
+如果您想在xterm中使用 <S-Tab> 作为 CTRL-P，在您的 .cshrc 中放入此命令： >
+	xmodmap -e "keysym Tab = Tab Find"
+在您的vimrc中放入： >
+	:cmap <Esc>[1~ <C-P>
+<						*complete-set-option*
+使用 |:set=| 设置选项时，可以通过在 '=' 后立即按 'wildchar'
+获得选项的旧值。例如，在 ":set dir=" 后键入
+'wildchar' 将插入 'dir' 的当前值。这会覆盖
+接受文件名的选项的文件名补全。
+
+使用 |:set=|、|:set+=| 或 |:set^=| 时，有
+预定义名称或语法（例如 'diffopt'、'listchars'）或是
+单字符标志列表（例如 'shortmess'）的字符串选项
+在使用 'wildchar' 时也会显示可能值的列表进行补全。
+
+使用 |:set-=| 时，像 'diffopt' 或 'backupdir' 这样的逗号分隔选项
+将分别显示每个项目。像 'shortmess' 这样的标志列表选项将显示
+整个旧值和单个标志。否则补全将
+只填入整个旧值。
+
+ vim:tw=78:ts=8:noet:ft=help:norl:

@@ -1,0 +1,13 @@
+is_enabled({filter}) *vim.diagnostic.is_enabled()*
+    检查诊断是否已启用 。
+    属性：~
+        自：0.10.0 
+    参数：~
+      • {filter}  (`table?`)
+                  可选过滤器 |kwargs|，或 `nil` 表示全部 。
+                  • {ns_id}? (`integer`) 诊断命名空间，或 `nil` 表示全部 。
+                  • {bufnr}? (`integer`) 缓冲区编号，或 0 表示当前缓冲区，或 `nil` 表示所有缓冲区 。
+    返回：~
+        (`boolean`) 
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

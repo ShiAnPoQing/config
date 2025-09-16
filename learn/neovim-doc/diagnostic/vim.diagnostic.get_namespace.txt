@@ -1,0 +1,10 @@
+get_namespace({namespace}) *vim.diagnostic.get_namespace()*
+    获取命名空间元数据 。
+    参数：~
+      • {namespace}  (`integer`)
+                     诊断命名空间 
+    返回：~
+        (`vim.diagnostic.NS`)
+        命名空间元数据 。参见 |vim.diagnostic.NS| 。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

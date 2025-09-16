@@ -66,6 +66,12 @@ return {
   --   "i",
   --   "n",
   -- },
+  ["<leader><leader>o"] = {
+    function()
+      vim.fn.setcmdline("e")
+    end,
+    "c",
+  },
   ["<leader><leader>z"] = {
     function()
       -- 获取当前 buffer 的 parser

@@ -15,6 +15,7 @@ local default_config = {
   style = "minimal",
   border = "single",
   title = "Buffer Manage",
+  title_pos = "center",
 }
 
 local function set_win_options(option)

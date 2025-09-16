@@ -1,0 +1,15 @@
+status({bufnr}) *vim.diagnostic.status()*
+    返回包含当前缓冲区诊断的格式化字符串 。
+    诊断数量为 0 的严重性被省略 。示例 `E:2 W:3 I:4 H:5` 
+    要自定义外观，请使用以下代码设置诊断标志文本 ：>lua
+        `vim.diagnostic.config({`
+          `signs = { text = { [vim.diagnostic.severity.ERROR] = 'e', ... } }`
+        `})`
+`<
+    参数：~
+      • {bufnr}  (`integer?`)
+                 要获取诊断的缓冲区编号 。默认为 0，表示当前缓冲区 。
+    返回：~
+        (`string`) 
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

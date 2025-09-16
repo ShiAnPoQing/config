@@ -1,0 +1,22 @@
+setqflist({opts})                                 *vim.diagnostic.setqflist()* 
+    将所有诊断添加到快速修复列表 。
+
+    参数：~
+      • {opts}  (`table?`)
+                包含以下键的配置表：
+                • {namespace}? (`integer[]|integer`)
+                  仅添加来自给定命名空间的诊断 。
+                • {open}? (`boolean`, 默认值：`true`)
+                  设置后打开快速修复列表 。
+                • {title}? (`string`)
+                  快速修复列表的标题 。默认为“Diagnostics”。
+                  如果已存在具有此标题的快速修复列表，则会更新它 。
+                  如果不存在，则会创建一个新的快速修复列表 。
+                • {severity}? (`vim.diagnostic.SeverityFilter`)
+                  参见 |diagnostic-severity| 。
+                • {format}? (`fun(diagnostic:vim.Diagnostic): string?`)
+                  一个函数，它接受一个诊断作为输入并返回一个字符串或 nil 。
+                  如果返回值为 nil，则该诊断不会显示在快速修复列表中 。
+                  否则，使用输出文本来显示诊断 。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

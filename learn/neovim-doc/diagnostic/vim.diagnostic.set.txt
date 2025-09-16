@@ -1,0 +1,13 @@
+set({namespace}, {bufnr}, {diagnostics}, {opts}) *vim.diagnostic.set()*
+    为给定命名空间和缓冲区设置诊断 。
+    参数：~
+      • {namespace}    (`integer`)
+                       诊断命名空间 
+      • {bufnr}        (`integer`)
+                       缓冲区编号 
+      • {diagnostics}  (`vim.Diagnostic.Set[]`)
+                       参见 |vim.Diagnostic.Set| 。
+      • {opts}         (`vim.diagnostic.Opts?`)
+                       要传递给 |vim.diagnostic.show()| 的显示选项 。参见 |vim.diagnostic.Opts| 。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

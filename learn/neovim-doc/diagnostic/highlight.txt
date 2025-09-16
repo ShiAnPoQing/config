@@ -1,0 +1,125 @@
+==============================================================================
+高亮 *diagnostic-highlights*
+
+为诊断定义的所有高亮都以 `Diagnostic` 开头，后跟高亮的类型（例如 `Sign`、`Underline` 等）和严重性（例如 `Error`、`Warn` 等）。
+
+默认情况下，标志、浮动窗口和虚拟文本的高亮链接到相应的默认高亮 。下划线高亮不链接，并使用自己的默认高亮组 。
+
+例如，|hl-DiagnosticSignError|  的默认高亮链接到 |hl-DiagnosticError| 。要更改默认值（从而更改链接的高亮），请使用 |:highlight| 命令 ：
+>vim
+
+    highlight DiagnosticError guifg="BrightRed"
+<
+
+                                                          *hl-DiagnosticError* 
+DiagnosticError
+    用作基础高亮组 。默认情况下，其他 Diagnostic 高亮链接到此（下划线除外）
+
+                                                           *hl-DiagnosticWarn* 
+DiagnosticWarn
+    用作基础高亮组 。默认情况下，其他 Diagnostic 高亮链接到此（下划线除外）
+
+                                                           *hl-DiagnosticInfo* 
+DiagnosticInfo
+    用作基础高亮组 。默认情况下，其他 Diagnostic 高亮链接到此（下划线除外）
+
+                                                           *hl-DiagnosticHint* 
+DiagnosticHint
+    用作基础高亮组 。默认情况下，其他 Diagnostic 高亮链接到此（下划线除外）
+
+                                                             *hl-DiagnosticOk* 
+DiagnosticOk
+    用作基础高亮组 。默认情况下，其他 Diagnostic 高亮链接到此（下划线除外）
+
+                                               *hl-DiagnosticVirtualTextError* 
+DiagnosticVirtualTextError
+    用于“Error”诊断虚拟文本 。
+                                                *hl-DiagnosticVirtualTextWarn* 
+DiagnosticVirtualTextWarn
+    用于“Warn”诊断虚拟文本 。
+
+                                                *hl-DiagnosticVirtualTextInfo* 
+DiagnosticVirtualTextInfo
+    用于“Info”诊断虚拟文本 。
+                                                *hl-DiagnosticVirtualTextHint* 
+DiagnosticVirtualTextHint
+    用于“Hint”诊断虚拟文本 。
+
+                                                  *hl-DiagnosticVirtualTextOk* 
+DiagnosticVirtualTextOk
+    用于“Ok”诊断虚拟文本 。
+                                              *hl-DiagnosticVirtualLinesError* 
+DiagnosticVirtualLinesError
+    用于“Error”诊断虚拟行 。
+
+                                               *hl-DiagnosticVirtualLinesWarn* 
+DiagnosticVirtualLinesWarn
+    用于“Warn”诊断虚拟行 。
+                                               *hl-DiagnosticVirtualLinesInfo* 
+DiagnosticVirtualLinesInfo
+    用于“Info”诊断虚拟行 。
+
+                                               *hl-DiagnosticVirtualLinesHint* 
+DiagnosticVirtualLinesHint
+    用于“Hint”诊断虚拟行 。
+                                                 *hl-DiagnosticVirtualLinesOk* 
+DiagnosticVirtualLinesOk
+    用于“Ok”诊断虚拟行 。
+
+                                                 *hl-DiagnosticUnderlineError* 
+DiagnosticUnderlineError
+    用于下划线“Error”诊断 。
+                                                  *hl-DiagnosticUnderlineWarn* 
+DiagnosticUnderlineWarn
+    用于下划线“Warn”诊断 。
+
+                                                  *hl-DiagnosticUnderlineInfo* 
+DiagnosticUnderlineInfo
+    用于下划线“Info”诊断 。
+                                                  *hl-DiagnosticUnderlineHint* 
+DiagnosticUnderlineHint
+    用于下划线“Hint”诊断 。
+
+                                                    *hl-DiagnosticUnderlineOk* 
+DiagnosticUnderlineOk
+    用于下划线“Ok”诊断 。
+                                                  *hl-DiagnosticFloatingError* 
+DiagnosticFloatingError
+    用于在诊断浮动窗口中为“Error”诊断消息着色 。
+    参见 |vim.diagnostic.open_float()| 
+                                                   *hl-DiagnosticFloatingWarn* 
+DiagnosticFloatingWarn
+    用于在诊断浮动窗口中为“Warn”诊断消息着色 。
+                                                   *hl-DiagnosticFloatingInfo* 
+DiagnosticFloatingInfo
+    用于在诊断浮动窗口中为“Info”诊断消息着色 。
+                                                   *hl-DiagnosticFloatingHint* 
+DiagnosticFloatingHint
+    用于在诊断浮动窗口中为“Hint”诊断消息着色 。
+                                                     *hl-DiagnosticFloatingOk* 
+DiagnosticFloatingOk
+    用于在诊断浮动窗口中为“Ok”诊断消息着色 。
+                                                      *hl-DiagnosticSignError* 
+DiagnosticSignError
+    用于标志列中的“Error”标志 。
+                                                       *hl-DiagnosticSignWarn* 
+DiagnosticSignWarn
+    用于标志列中的“Warn”标志 。
+                                                       *hl-DiagnosticSignInfo* 
+DiagnosticSignInfo
+    用于标志列中的“Info”标志 。
+                                                       *hl-DiagnosticSignHint* 
+DiagnosticSignHint
+    用于标志列中的“Hint”标志 。
+                                                         *hl-DiagnosticSignOk* 
+DiagnosticSignOk
+    用于标志列中的“Ok”标志 。
+                                                     *hl-DiagnosticDeprecated* 
+DiagnosticDeprecated
+    用于已弃用或过时的代码 。
+
+                                                    *hl-DiagnosticUnnecessary* 
+DiagnosticUnnecessary
+    用于不必要或未使用的代码 。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

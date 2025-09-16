@@ -1,0 +1,10 @@
+toqflist({diagnostics}) *vim.diagnostic.toqflist()*
+    将诊断列表转换为 quickfix 项目列表，可传递给 |setqflist()| 或 |setloclist()| 。
+    参数：~
+      • {diagnostics}  (`vim.Diagnostic[]`)
+                       参见 |vim.Diagnostic| 。
+    返回：~
+        (`table[]`)
+        Quickfix 列表项 |setqflist-what| 
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

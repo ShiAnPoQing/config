@@ -1,0 +1,27 @@
+match({str}, {pat}, {groups}, {severity_map}, {defaults}) *vim.diagnostic.match()*
+    从字符串中解析诊断 。
+    例如，考虑来自 linter 的一行输出：>
+        `WARNING filename:27:3: Variable 'foo' does not exist`
+<
+    这可以解析为 |vim.Diagnostic|  结构，如下所示：>lua
+        `local s = "WARNING filename:27:3: Variable 'foo' does not exist"`
+        `local pattern = "^(%w+) %w+:(%d+):(%d+): (.+)$"`
+        `local groups = { "severity", "lnum", "col", "message" }`
+        `vim.diagnostic.match(s, pattern, groups, { WARNING = vim.diagnostic.WARN })`
+`<
+    参数：~
+      • {str}           (`string`)
+                        要从中解析诊断的字符串 。
+      • {pat}           (`string`)
+                        带有捕获组的 Lua 模式 。
+      • {groups}        (`string[]`)
+                        |vim.Diagnostic| 结构中要与 {pat} 的捕获关联的字段列表 。
+      • {severity_map}  (`table`)
+                        一个表，将来自 {groups} 的严重性字段与来自 |vim.diagnostic.severity| 的项进行映射 。
+      • {defaults}      (`table?`)
+                        未在 {groups} 中列出的任何字段的默认值表 。省略时，数值默认为 0，"severity" 默认为 ERROR 。
+    返回：~
+        (`vim.Diagnostic?`)
+        如果 {pat} 未能匹配 {str}，则返回 |vim.Diagnostic|  结构或 `nil` 。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

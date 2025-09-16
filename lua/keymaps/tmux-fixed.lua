@@ -1,7 +1,7 @@
 return {
   -- tmux fixed
   ["<F32>"] = {
-    { "<Del>", { "i" } },
+    { "<Del>", { "i", "c", "t" } },
     { "lxh", "n" },
   },
   -- tmux fixed

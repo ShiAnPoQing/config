@@ -1,0 +1,11 @@
+reset({namespace}, {bufnr}) *vim.diagnostic.reset()*
+    从给定命名空间中移除所有诊断 。
+    与 |vim.diagnostic.hide()| 不同，此函数移除所有已保存的诊断 。它们不能使用 |vim.diagnostic.show()| 重新显示 。
+    要以可重新显示的方式简单地移除诊断装饰，请使用 |vim.diagnostic.hide()| 。
+    参数：~
+      • {namespace}  (`integer?`)
+                     诊断命名空间 。省略时，移除所有命名空间的诊断 。
+      • {bufnr}      (`integer?`)
+                     移除给定缓冲区的诊断 。省略时，移除所有缓冲区的诊断 。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

@@ -1,0 +1,15 @@
+show({namespace}, {bufnr}, {diagnostics}, {opts}) *vim.diagnostic.show()*
+    显示给定命名空间和缓冲区的诊断 。
+    参数：~
+      • {namespace}    (`integer?`)
+                       诊断命名空间 。省略时，显示所有命名空间的诊断 。
+      • {bufnr}        (`integer?`)
+                       缓冲区编号，或 0 表示当前缓冲区 。省略时，显示所有缓冲区中的诊断 。
+      • {diagnostics}  (`vim.Diagnostic[]?`)
+                       要显示的诊断 。省略时，使用给定命名空间和缓冲区的已保存诊断 。
+                       这可用于显示诊断列表而不保存它们，或仅显示诊断的子集 。
+                       当 {namespace} 或 {bufnr} 为 nil 时不能使用 。参见 |vim.Diagnostic| 。
+      • {opts}         (`vim.diagnostic.Opts?`)
+                       显示选项 。参见 |vim.diagnostic.Opts| 。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

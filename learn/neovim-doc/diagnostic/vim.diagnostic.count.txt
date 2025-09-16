@@ -1,0 +1,12 @@
+count({bufnr}, {opts}) *vim.diagnostic.count()*
+    获取当前诊断计数 。
+    参数：~
+      • {bufnr}  (`integer?`)
+                 要获取诊断的缓冲区编号 。使用 0 表示当前缓冲区，或 nil 表示所有缓冲区 。
+      • {opts}   (`vim.diagnostic.GetOpts?`)
+                 参见 |vim.diagnostic.GetOpts| 。
+    返回：~
+        (`table`)
+        表，其中实际存在的严重性值作为键（参见 |diagnostic-severity|），整数计数作为值 。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

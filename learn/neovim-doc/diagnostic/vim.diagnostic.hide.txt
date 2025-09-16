@@ -1,0 +1,12 @@
+hide({namespace}, {bufnr}) *vim.diagnostic.hide()*
+    隐藏当前显示的诊断 。
+    这只会清除缓冲区中显示的装饰 。可以使用 |vim.diagnostic.show()| 重新显示诊断 。
+    要完全移除诊断，请使用 |vim.diagnostic.reset()| 。
+    要隐藏诊断并防止它们重新显示，请使用 |vim.diagnostic.enable()| 。
+    参数：~
+      • {namespace}  (`integer?`)
+                     诊断命名空间 。省略时，隐藏所有命名空间的诊断 。
+      • {bufnr}      (`integer?`)
+                     缓冲区编号，或 0 表示当前缓冲区 。省略时，隐藏所有缓冲区中的诊断 。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

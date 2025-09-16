@@ -1,0 +1,22 @@
+config({opts}, {namespace}) *vim.diagnostic.config()*
+    全局或为特定诊断命名空间配置诊断选项 。
+    配置可以全局、按命名空间或临时指定（即，仅用于对 |vim.diagnostic.set()| 或 |vim.diagnostic.show()| 的单个调用）。
+    临时配置优先级最高，其次是命名空间配置，最后是全局配置 。
+    例如，如果用户全局启用虚拟文本 ：>lua
+        `vim.diagnostic.config({ virtual_text = true })`
+`<
+    并且诊断生产者使用以下代码设置诊断 ：>lua
+        `vim.diagnostic.set(ns, 0, diagnostics, { virtual_text = false })`
+`<
+    那么这些诊断将不会启用虚拟文本 。
+    参数：~
+      • {opts}       (`vim.diagnostic.Opts?`)
+                     省略或为 `nil` 时，检索当前配置 。
+                     否则，为配置表（参见 |vim.diagnostic.Opts|）。
+      • {namespace}  (`integer?`)
+                     更新给定命名空间的选项 。省略时，更新全局诊断选项 。
+    返回：~
+        (`vim.diagnostic.Opts?`)
+        如果 {opts} 被省略，则返回当前诊断配置 。参见 |vim.diagnostic.Opts| 。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

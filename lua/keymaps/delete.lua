@@ -34,7 +34,7 @@ end
 
 return {
   ["<S-BS>"] = {
-    { "<Del>", "i" },
+    { "<Del>", { "i", "c", "t" } },
     { "lxh", "n" },
     desc = "Delete char after cursor",
   },

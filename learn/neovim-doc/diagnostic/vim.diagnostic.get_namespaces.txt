@@ -1,0 +1,7 @@
+get_namespaces() *vim.diagnostic.get_namespaces()*
+    获取当前诊断命名空间 。
+    返回：~
+        (`table<integer,vim.diagnostic.NS>`)
+        活动诊断命名空间的列表 |vim.diagnostic| 。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

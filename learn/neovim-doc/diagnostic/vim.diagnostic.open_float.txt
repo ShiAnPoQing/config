@@ -1,0 +1,10 @@
+open_float({opts}) *vim.diagnostic.open_float()*
+    在浮动窗口中显示诊断 。
+    参数：~
+      • {opts}  (`vim.diagnostic.Opts.Float?`)
+                参见 |vim.diagnostic.Opts.Float| 。
+    返回（多个）：~
+        (`integer?`) float_bufnr
+        (`integer?`) winid 
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
