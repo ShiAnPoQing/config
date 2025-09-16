@@ -24,14 +24,17 @@ function M:open(options)
   local config = vim.tbl_deep_extend("force", default_config, options.config or {})
   local buf = vim.api.nvim_create_buf(false, true)
   local ok, win = pcall(vim.api.nvim_open_win, buf, true, config)
-  if ok then
-    self.win = win
-    self.buf = buf
-    vim.api.nvim_set_option_value("number", true, { win = win })
-    vim.api.nvim_set_option_value("cursorline", true, { win = win })
-    vim.api.nvim_buf_set_lines(buf, 0, -1, false, options.lines or {})
-    vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
+
+  if not ok then
+    return
   end
+
+  self.win = win
+  self.buf = buf
+  vim.api.nvim_set_option_value("number", true, { win = win })
+  vim.api.nvim_set_option_value("cursorline", true, { win = win })
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, options.lines or {})
+  vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
 end
 
 function M:close()

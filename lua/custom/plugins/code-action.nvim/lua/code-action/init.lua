@@ -43,7 +43,16 @@ end
 --- @param options RequestCodeActionOptions
 function M.request_code_action(options)
   local params = vim.lsp.util.make_range_params(0, "utf-8")
-  params.context = { diagnostics = vim.diagnostic.get(options.bufnr) }
+  local diagnostics = vim.diagnostic.get(options.bufnr)
+  local current_line = vim.api.nvim_win_get_cursor(0)[1]
+  local diagnostic
+  for _, v in ipairs(diagnostics) do
+    if v.lnum + 1 >= current_line then
+      diagnostic = v
+      break
+    end
+  end
+  params.context = { diagnostics = { diagnostic } }
   vim.lsp.buf_request_all(0, "textDocument/codeAction", params, function(results)
     local actions = {}
     for _, v in ipairs(results) do
@@ -98,6 +107,13 @@ function M.code_action(actions)
   vim.keymap.set("n", "<esc>", function()
     Win:close()
   end, { buffer = Win.buf })
+
+  vim.api.nvim_create_autocmd("WinLeave", {
+    callback = function()
+      Win:close()
+      return true
+    end,
+  })
 end
 
 --- @param options? CodeActionOptions

@@ -3,7 +3,7 @@ return {
   name = "code-action.nvim",
   keys = {
     {
-      "<leader>zz",
+      "<leader>ca",
       function()
         require("code-action").show()
       end,

@@ -3,6 +3,7 @@
     "diagnostics.disable": [
         "unused-local",
         "inject-field",
-        "unused-function"
+        "unused-function",
+        "need-check-nil"
     ]
 }

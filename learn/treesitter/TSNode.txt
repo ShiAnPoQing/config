@@ -61,14 +61,6 @@ TSNode:descendant_for_range({start_row}, {start_col}, {end_row}, {end_col})
     返回： ~
         (`TSNode?`)
 
-TSNode:end_()                                                  *TSNode:end_()*
-    获取节点的结束位置。返回三个值：行、列和总字节数
-    （都从零开始）。
-
-    返回（多个）： ~
-        (`integer`)
-        (`integer`)
-        (`integer`)
 
 TSNode:equal({node})                                          *TSNode:equal()*
     检查 {node} 是否引用同一树中的同一节点。
@@ -80,8 +72,8 @@ TSNode:equal({node})                                          *TSNode:equal()*
         (`boolean`)
 
 TSNode:extra()                                                *TSNode:extra()*
-    检查节点是否是额外的。额外节点表示像注释这样的东西，
-    它们不是语法所必需的，但可以出现在任何地方。
+    检查节点是否是额外的。
+    额外节点表示像注释这样的东西，它们不是语法所必需的，但可以出现在任何地方。
 
     返回： ~
         (`boolean`)
@@ -114,7 +106,7 @@ TSNode:id()                                                      *TSNode:id()*
     具有值相等性的原始 Lua 类型（所以不是表）。
     目前它是一个（不可打印的）字符串。
 
-    注意：`id` 不保证对于来自不同树的节点是唯一的。
+    注意： `id` 不保证对于来自不同树的节点是唯一的。
 
     返回： ~
         (`string`)
@@ -127,22 +119,21 @@ TSNode:iter_children()                                *TSNode:iter_children()*
         (`fun(): TSNode, string`)
 
 TSNode:missing()                                            *TSNode:missing()*
-    检查节点是否缺失。缺失节点由解析器插入以从
-    某些类型的语法错误中恢复。
+    检查节点是否缺失。
+    缺失节点由解析器插入以从某些类型的语法错误中恢复。
 
     返回： ~
         (`boolean`)
 
 TSNode:named()                                                *TSNode:named()*
-    检查节点是否命名。命名节点对应于语法中的命名规则，
-    而匿名节点对应于语法中的字符串字面量。
+    检查节点是否命名。
+    命名节点对应于语法中的命名规则，而匿名节点对应于语法中的字符串字面量。
 
     返回： ~
         (`boolean`)
 
 TSNode:named_child({index})                             *TSNode:named_child()*
-    获取给定 {index} 处的节点的命名子节点，其中零表示
-    第一个命名子节点。
+    获取给定 {index} 处的节点的命名子节点，其中零表示第一个命名子节点。
 
     参数： ~
       • {index}  (`integer`)
@@ -241,6 +232,16 @@ TSNode:start()                                                *TSNode:start()*
         (`integer`)
         (`integer`)
         (`integer`)
+
+TSNode:end_()                                                  *TSNode:end_()*
+    获取节点的结束位置。返回三个值：行、列和总字节数
+    （都从零开始）。
+
+    返回（多个）： ~
+        (`integer`)
+        (`integer`)
+        (`integer`)
+
 
 TSNode:symbol()                                              *TSNode:symbol()*
     获取节点的类型作为数字 id。

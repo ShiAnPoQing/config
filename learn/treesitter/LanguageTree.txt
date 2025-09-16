@@ -3,34 +3,39 @@
 Lua 模块：vim.treesitter.languagetree              *treesitter-languagetree*
 
 *LanguageTree* 包含解析器树：{lang} 的根 treesitter 解析器
-和任何"注入"的语言解析器，它们本身可能递归地注入其他
-语言。例如，包含一些 Vimscript 命令的 Lua 缓冲区需要
-多个解析器来完全理解其内容。
+和任何"注入"的语言解析器，它们本身可能递归地注入其他语言。
+
+例如，包含一些 Vimscript 命令的 Lua 缓冲区需要多个解析器来完全理解其内容。
 
 要为给定缓冲区和语言创建 LanguageTree（解析器对象），请使用： >lua
+
     local parser = vim.treesitter.get_parser(bufnr, lang)
 <
 
-（其中 `bufnr=0` 表示当前缓冲区）。`lang` 默认为 'filetype'。
-注意：目前解析器在缓冲区的生命周期内保留，但这可能
-改变；如果插件想要增量更新，应该保留对解析器对象的
-引用。
+（其中 `bufnr=0` 表示当前缓冲区）。
+`lang` 默认为 'filetype'。
+
+注意：目前解析器在缓冲区的生命周期内保留，但这可能改变；
+如果插件想要增量更新，应该保留对解析器对象的引用。
 
 每当需要访问当前语法树时，解析缓冲区： >lua
+
     local tree = parser:parse({ start_row, end_row })
 <
 
-这返回表示缓冲区当前状态的不可变 |treesitter-tree| 对象
-表。当插件想要在（可能的）编辑后访问状态时，它必须
-再次调用 `parse()`。如果缓冲区未被编辑，将再次返回
-相同的树，无需额外工作。如果缓冲区之前被解析过，
-将对更改的部分进行增量解析。
+这返回表示缓冲区当前状态的不可变 |treesitter-tree| 对象表。
 
-注意：要在 |nvim_buf_attach()| Lua 回调中直接使用解析器，
-你必须在注册回调之前调用 |vim.treesitter.get_parser()|。
-但最好解析不应该直接在更改回调中完成，因为它们会
-非常频繁。相反，对树进行任何分析的插件应该使用
-计时器来限制过于频繁的更新。
+当插件想要在（可能的）编辑后访问状态时，它必须再次调用 `parse()`。
+
+如果缓冲区未被编辑，将再次返回相同的树，无需额外工作。
+
+如果缓冲区之前被解析过，将对更改的部分进行增量解析。
+
+注意：要在 |nvim_buf_attach()| Lua 回调中直接使用解析器，你必须在注册回调之前调用 |vim.treesitter.get_parser()|。
+
+但最好解析不应该直接在更改回调中完成，因为它们会非常频繁。
+
+相反，对树进行任何分析的插件应该使用计时器来限制过于频繁的更新。
 
 
 LanguageTree:children()                              *LanguageTree:children()*
@@ -57,8 +62,8 @@ LanguageTree:destroy()                                *LanguageTree:destroy()*
 
     应在此处执行任何清理逻辑。
 
-    注意：这不会从父节点中删除此树。相反，必须在
-    父节点上调用 `remove_child` 来删除它。
+    注意：这不会从父节点中删除此树。
+    相反，必须在父节点上调用 `remove_child` 来删除它。
 
 LanguageTree:for_each_tree({fn})                *LanguageTree:for_each_tree()*
     递归地为每个 |LanguageTree| 调用回调。
@@ -69,8 +74,8 @@ LanguageTree:for_each_tree({fn})                *LanguageTree:for_each_tree()*
       • {fn}  (`fun(tree: TSTree, ltree: vim.treesitter.LanguageTree)`)
 
 LanguageTree:included_regions()              *LanguageTree:included_regions()*
-    获取由此 LanguageTree 管理的包含区域集。这可能与
-    注入查询设置的区域不同，因为部分 |LanguageTree:parse()|
+    获取由此 LanguageTree 管理的包含区域集。
+    这可能与注入查询设置的区域不同，因为部分 |LanguageTree:parse()|
     会丢弃请求范围之外的区域。每个列表表示一个范围，
     形式为 { {start_row}, {start_col}, {start_bytes},
     {end_row}, {end_col}, {end_bytes} }。
@@ -90,9 +95,8 @@ LanguageTree:invalidate({reload})                  *LanguageTree:invalidate()*
 
                                                      *LanguageTree:is_valid()*
 LanguageTree:is_valid({exclude_children}, {range})
-    返回此 LanguageTree 是否有效，即 |LanguageTree:trees()|
-    反映源的最新状态。如果无效，用户应该调用
-    |LanguageTree:parse()|。
+    返回此 LanguageTree 是否有效，即 |LanguageTree:trees()| 反映源的最新状态。
+    如果无效，用户应该调用 |LanguageTree:parse()|。
 
     参数： ~
       • {exclude_children}  (`boolean?`) 是否忽略子节点的

@@ -3,8 +3,8 @@ return {
   filetypes = {
     "typescript",
     "javascript",
-    "javascriptreact",
-    "typescriptreact",
+    -- "javascriptreact",
+    -- "typescriptreact",
     "vue",
   },
   root_markers = { "tsconfig.json", "package.json", "jsconfig.json", ".git" },

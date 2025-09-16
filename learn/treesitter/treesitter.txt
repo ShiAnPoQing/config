@@ -17,8 +17,8 @@ https://tree-sitter.github.io/tree-sitter/
 ==============================================================================
 解析器文件                                              *treesitter-parsers*
 
-解析器是 treesitter 的核心。它们是 treesitter 将在 `parser` 运行时目录中
-搜索的库。
+解析器是 treesitter 的核心。
+它们是 treesitter 将在 `parser` 运行时目录中搜索的库。
 
 Nvim 包含以下解析器：
 
@@ -42,8 +42,8 @@ Nvim 包含以下解析器：
 如果文件系统区分大小写，解析器名称假定为小写。
 
 要将某些 |filetypes| 与 treesitter 语言（解析器名称）关联，
-使用 |vim.treesitter.language.register()|。例如，要对文件类型为
-`svg` 或 `xslt` 的缓冲区使用 `xml` treesitter 解析器： >lua
+使用 |vim.treesitter.language.register()|。
+例如，要对文件类型为 `svg` 或 `xslt` 的缓冲区使用 `xml` treesitter 解析器： >lua
 
     vim.treesitter.language.register('xml', { 'svg', 'xslt' })
 <
