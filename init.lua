@@ -22,7 +22,7 @@ require("lazy-setup").setup({
   require("plugins.download.tmux.vim-tmux-navigator"),
   require("plugins.download.window.winshift"),
   require("plugins.download.misc.harpoon"),
-  require("plugins.download.misc.toggle-term"),
+  -- require("plugins.download.misc.toggle-term"),
   require("plugins.download.misc.grug-far"),
   -- require("plugins.download.misc.flash"),
   require("plugins.download.misc.autopairs"),
@@ -79,6 +79,7 @@ require("lazy-setup").setup({
   require("plugins.custom.surround"),
   require("plugins.custom.buffer-manage"),
   require("plugins.custom.code-action"),
+  require("plugins.custom.open-terminal"),
 })
 vim.opt.rtp:append("~/vimcdoc-2.5.0")
 vim.o.helplang = "cn"

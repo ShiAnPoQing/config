@@ -228,7 +228,7 @@ local function get_groups()
       CurSearch = { link = "IncSearch" },
       StatusLine = { bg = colors.bg5, fg = colors._bg18, reverse = true }, -- 状态栏
       SignColumn = { bg = colors._bg4 }, -- 符号列
-      CursorLine = { bg = colors._bg4 }, -- 光标行
+      CursorLine = { bg = colors._bg5 }, -- 光标行
       CursorLineNr = { fg = colors._bg18, bold = true },
       ColorColumn = { bg = colors.bg6 },
       Visual = { link = "CustomVisual" },

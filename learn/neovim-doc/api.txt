@@ -545,7 +545,9 @@ nvim_list_runtime_paths()                          *nvim_list_runtime_paths()*
 nvim_open_term({buffer}, {opts})                            *nvim_open_term()*
     在缓冲区中打开一个终端实例
 
-    默认情况下（也是目前唯一的选项），终端不会连接到外部进程。相反，通道上发送的输入将由终端直接回显。这对于显示作为 rpc 消息一部分返回的 ANSI 终端序列或类似内容很有用。
+    默认情况下（也是目前唯一的选项），终端不会连接到外部进程。
+    相反，通道上发送的输入将由终端直接回显。
+    这对于显示作为 rpc 消息一部分返回的 ANSI 终端序列或类似内容很有用。
 
     注意：要直接使用正确的大小启动终端，请在调用此函数之前在配置的窗口中显示缓冲区。例如，对于浮动显示，首先使用 |nvim_create_buf()| 创建一个空缓冲区，然后使用 |nvim_open_win()| 显示它，然后调用此函数。然后可以立即调用 |nvim_chan_send()| 以在具有预期大小的虚拟终端中处理序列。
 
@@ -553,7 +555,7 @@ nvim_open_term({buffer}, {opts})                            *nvim_open_term()*
         vim.api.nvim_create_user_command('TermHl', function()
           local b = vim.api.nvim_create_buf(false, true)
           local chan = vim.api.nvim_open_term(b, {})
-          vim.api.nvim_chan_send(chan, table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), '\n'))
+          -- vim.api.nvim_chan_send(chan, table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), '\n'))
           vim.api.nvim_win_set_buf(0, b)
         end, { desc = 'Highlights ANSI termcodes in curbuf' })
 <
