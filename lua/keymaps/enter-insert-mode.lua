@@ -322,20 +322,18 @@ return {
   },
   -- normal mode into insert mode: ei
   ["<M-o>"] = {
-    { "<Esc>ea", { "i" } },
-    { "<S-right>", { "c" } },
-    { "ea", { "n" } },
+    { "<Esc>ea", "i" },
+    { "ea", "n" },
     { "<C-right>", "t" },
   },
   -- normal mode into insert mode: Ei
   ["<M-S-o>"] = {
-    { "<Esc>Ea", { "i" } },
-    { "Ea", { "n" } },
+    { "<Esc>Ea", "i" },
+    { "Ea", "n" },
   },
   -- normal mode into insert mode: bi
   ["<M-i>"] = {
     { "<Esc>bi", { "i" } },
-    { "<S-left>", { "c" } },
     { "bi", { "n" } },
     { "<C-left>", "t" },
   },

@@ -31,6 +31,17 @@ function M.create(options)
       row = math.floor((vim.o.lines - height) / 2),
       col = math.floor((vim.o.columns - width) / 2),
     }
+    vim.api.nvim_create_autocmd("VimResized", {
+      callback = function()
+        local w = math.floor(vim.o.columns * 0.8)
+        local h = math.floor(vim.o.lines * 0.8)
+        config.width = w
+        config.height = h
+        config.row = math.floor((vim.o.lines - h) / 2)
+        config.col = math.floor((vim.o.columns - w) / 2)
+        vim.api.nvim_win_set_config(M.win, config)
+      end,
+    })
   end
 
   if
