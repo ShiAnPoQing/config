@@ -1,11 +1,13 @@
 local M = {}
 local Terminal = require("open-terminal.terminal")
 
+--- @alias OpenTerminalDirection "below" | "above" | "left" | "right" | "float"
+
 --- @class OpenTerminalOptions
---- @field direction? "below" | "above" | "left" | "right" | "float"
+--- @field direction? OpenTerminalOptions
 
 --- @class OpenTerminal.Open
---- @field direction? "below" | "above" | "left" | "right" | "float"
+--- @field direction? OpenTerminalDirection
 
 --- @param options OpenTerminal.Open
 function M.open_terminal(options)

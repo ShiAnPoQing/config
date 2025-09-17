@@ -5,7 +5,7 @@ local function is_buf_valid()
 end
 
 --- @class OpenTerminal.Create
---- @field direction "below" | "above" | "left" | "right" | "float"
+--- @field direction OpenTerminalDirection
 --- @field buf_options? vim.api.keyset.option
 --- @field win_options? vim.api.keyset.option
 

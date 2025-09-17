@@ -63,6 +63,7 @@ function M.request_code_action(options)
           callback = function()
             exec_code_action(v.context.client_id, code_action)
           end,
+          disabled = code_action.disabled,
         }
       end
     end
@@ -72,18 +73,21 @@ end
 
 function M.code_action(actions)
   local lines = {}
+  local disabled_actions = {}
   local max_width = 0
   for _, action in ipairs(actions) do
-    lines[#lines + 1] = action.title
+    if not action.disabled then
+      lines[#lines + 1] = action.title
+    end
     max_width = math.max(max_width, #action.title)
   end
   max_width = max_width + 4
-  local max_height = math.min(vim.o.lines - vim.o.cmdheight - 1, #actions)
+  local max_height = math.min(vim.o.lines - vim.o.cmdheight - 1, #lines)
 
   local config = {
     width = max_width,
     height = max_height,
-    title = "Code Actions[" .. #actions .. "]",
+    title = "Code Actions[" .. #lines .. "]",
     title_pos = "center",
   }
   local row = fixed_row(max_height)
