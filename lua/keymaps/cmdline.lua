@@ -126,6 +126,7 @@ return {
       vim.fn.setcmdline(cmd, new_pos == pos and 1 or new_pos)
     end,
     "c",
+    desc = "Move to the first non-blank character of the cmdline",
   },
   ["<M-Space><M-l>"] = {
     function()
@@ -145,14 +146,17 @@ return {
       end
     end,
     "c",
+    desc = "Move to the last non-blank character of the cmdline",
   },
   ["<M-Space><M-Space><M-h>"] = {
     "<Home>",
     "c",
+    desc = "Move to <Home>",
   },
   ["<M-Space><M-Space><M-l>"] = {
     "<End>",
     "c",
+    desc = "Move to <End>",
   },
   ["<M-o>"] = {
     function()
@@ -161,6 +165,7 @@ return {
       end)
     end,
     "c",
+    desc = "Move to the end of next word",
   },
   ["<M-i>"] = {
     function()
@@ -169,6 +174,7 @@ return {
       end)
     end,
     "c",
+    desc = "Move to the start of next word",
   },
   ["<C-M-o>"] = {
     function()
@@ -177,6 +183,7 @@ return {
       end)
     end,
     "c",
+    desc = "Move to the start of next word",
   },
   ["<C-M-i>"] = {
     function()
@@ -185,6 +192,7 @@ return {
       end)
     end,
     "c",
+    desc = "Move to the end of previous word",
   },
   ["<M-Space><M-o>"] = {
     function()
@@ -193,6 +201,7 @@ return {
       end)
     end,
     "c",
+    desc = "Move to the start of next word",
   },
   ["<M-Space><M-i>"] = {
     function()
@@ -201,6 +210,7 @@ return {
       end)
     end,
     "c",
+    desc = "Move to the end of previous word",
   },
   ["<C-o>"] = {
     function()
@@ -209,10 +219,12 @@ return {
       end)
     end,
     "c",
+    desc = "Delete to the end of next word",
   },
   ["<C-i>"] = {
     "<C-w>",
     "c",
+    desc = "Delete to the start of previous word",
   },
   ["<C-Space><C-o>"] = {
     function()
@@ -221,6 +233,7 @@ return {
       end)
     end,
     "c",
+    desc = "Delete to the start of next word",
   },
   ["<C-Space><C-i>"] = {
     function()
@@ -228,6 +241,90 @@ return {
         vim.fn.setcmdline(data.cmd:sub(0, data.new_pos - 1) .. data.cmd:sub(data.pos), data.new_pos)
       end)
     end,
+    "c",
+    desc = "Delete to the end of previous word",
+  },
+  --- <C-BS>
+  ["<F31>"] = {
+    function()
+      local cmd = vim.fn.getcmdline()
+      local pos = vim.fn.getcmdpos()
+
+      local base = 0
+      local del_start
+      local del_end
+
+      for value1, value2 in cmd:gmatch("(%s*)(%w*)") do
+        base = base + #value1
+
+        if base >= pos - 1 then
+          del_start = base - #value1
+          del_end = base
+          break
+        end
+
+        base = base + #value2
+
+        if base >= pos - 1 then
+          del_start = base - #value2
+          del_end = base
+          break
+        end
+      end
+
+      if not del_start then
+        return
+      end
+
+      local new_cmd = cmd:sub(1, del_start) .. cmd:sub(del_end + 1)
+      vim.fn.setcmdline(new_cmd, del_start + 1)
+    end,
+    "c",
+    desc = "Delete current word(before)",
+  },
+  ["<M-BS>"] = {
+    function()
+      local cmd = vim.fn.getcmdline()
+      local pos = vim.fn.getcmdpos()
+
+      local base = 0
+      local del_start
+      local del_end
+
+      for value1, value2 in cmd:gmatch("(%s*)(%w*)") do
+        base = base + #value1
+
+        if base >= pos then
+          del_start = base - #value1
+          del_end = base
+          break
+        end
+
+        base = base + #value2
+
+        if base >= pos then
+          del_start = base - #value2
+          del_end = base
+          break
+        end
+      end
+
+      if not del_start then
+        return
+      end
+
+      local new_cmd = cmd:sub(1, del_start) .. cmd:sub(del_end + 1)
+      vim.fn.setcmdline(new_cmd, del_start + 1)
+    end,
+    "c",
+    desc = "Delete current word(after)",
+  },
+  ["<M-S-h>"] = {
+    "<left><left><left>",
+    "c",
+  },
+  ["<M-S-l>"] = {
+    "<right><right><right>",
     "c",
   },
 }

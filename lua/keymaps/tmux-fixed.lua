@@ -12,5 +12,7 @@ return {
     "n",
   },
   -- tmux fixed
-  ["<F31>"] = { "<Left><C-o>diw", { "i" } },
+  ["<F31>"] = {
+    { "<Left><C-o>diw", "i" },
+  },
 }
