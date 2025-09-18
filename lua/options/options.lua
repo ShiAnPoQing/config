@@ -114,12 +114,25 @@ return {
       l = true,
       ["/"] = true,
     },
-    foldmethod = "indent",
-    -- foldexpr = "nvim_treesitter#foldexpr()",
-    foldenable = false,
+    -- foldmethod = "indent",
+    foldmethod = "expr",
+    foldexpr = "nvim_treesitter#foldexpr()",
+    -- 打开文件时启用折叠
+    foldenable = true,
+    -- 默认展开所有
+    foldlevel = 99,
+    -- 打开文件时不折叠
+    foldlevelstart = 99,
+    -- 最大嵌套折叠层数
+    foldnestmax = 3,
+    -- foldenable = false,
     pumheight = 8,
     append = {
       matchpairs = { "【:】", "<:>", "《:》", "（:）", "`:`" },
+      rtp = { "~/vimcdoc-2.5.0" },
+    },
+    prepend = {
+      helplang = { "cn" },
     },
   },
 }

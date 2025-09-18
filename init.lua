@@ -30,10 +30,10 @@ require("lazy-setup").setup({
   require("plugins.download.misc.zen-mode"),
   require("plugins.download.misc.colorizer"),
   require("plugins.download.misc.todo-comments"),
-  require("plugins.download.misc.hop"),
+  -- require("plugins.download.misc.hop"),
   require("plugins.download.misc.undotree"),
   -- require("plugins.download.misc.numb"),
-  require("plugins.download.misc.nvim-possession"),
+  -- require("plugins.download.misc.nvim-possession"),
   -- require("plugins.download.misc.showkey"),
   require("plugins.download.git.gitsigns"),
   -- require("plugins.download.treesitter.nvim-treesitter-context"),
@@ -64,8 +64,8 @@ require("lazy-setup").setup({
   -- require("plugins.download.style.theme.onedarkpro"),
   -- require("plugins.download.style.theme.onenord"),
   -- require("plugins.download.style.theme.rose-pine-neovim"),
-  require("plugins.custom.colorscheme"),
-  -- require("plugins.custom.plain-colorscheme"),
+  -- require("plugins.custom.colorscheme"),
+  require("plugins.custom.plain-colorscheme"),
   require("plugins.custom.lsp"),
   require("plugins.custom.magic"),
   require("plugins.custom.move-line"),
@@ -78,10 +78,7 @@ require("lazy-setup").setup({
   require("plugins.custom.simple-keymap"),
   require("plugins.custom.surround"),
   require("plugins.custom.buffer-manage"),
+  require("plugins.custom.tabpage-manage"),
   require("plugins.custom.code-action"),
   require("plugins.custom.open-terminal"),
 })
-vim.opt.rtp:append("~/vimcdoc-2.5.0")
-vim.o.helplang = "cn"
-
-vim.fn.setcmdline("nihao")

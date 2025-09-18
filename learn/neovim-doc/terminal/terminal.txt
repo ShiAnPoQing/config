@@ -6,8 +6,8 @@
 
 终端模拟器				*terminal* *terminal-emulator*
 
-Nvim 嵌入了一个基于 libvterm 的 VT220/xterm 终端模拟器。终端作为特殊的 'buftype' 呈现，
-随着从连接程序接收到的数据异步更新。
+Nvim 嵌入了一个基于 libvterm 的 VT220/xterm 终端模拟器。
+终端作为特殊的 'buftype' 呈现，随着从连接程序接收到的数据异步更新。
 
 终端缓冲区的行为类似于普通缓冲区，除了：
 - 使用 'modifiable' 时，可以编辑但不能删除行。
@@ -43,8 +43,8 @@ Nvim 嵌入了一个基于 libvterm 的 VT220/xterm 终端模拟器。终端作�
 输入						*terminal-input*
 
 要发送输入，使用 |i|、|I|、|a|、|A| 或 |:startinsert| 进入 |Terminal-mode|。
-在此模式下，除了 <C-\> 之外的所有按键都会发送到底层程序。如果按下 <C-\>，
-下一个按键会被发送，除非它是 <C-N> 或 <C-O>。
+在此模式下，除了 <C-\> 之外的所有按键都会发送到底层程序。
+如果按下 <C-\>，下一个按键会被发送，除非它是 <C-N> 或 <C-O>。
 使用 <C-\><C-N> 返回普通模式。|CTRL-\_CTRL-N|
 使用 <C-\><C-O> 执行一个普通模式命令，然后返回终端模式。*t_CTRL-\_CTRL-O*
 
@@ -124,7 +124,8 @@ Nvim 嵌入了一个基于 libvterm 的 VT220/xterm 终端模拟器。终端作�
 
 OSC 7：更改工作目录			*terminal-osc7*
 
-要处理从 :terminal 进程发出的 OSC 7，这段代码将 :cd 到请求中指示的目录。>lua
+要处理从 :terminal 进程发出的 OSC 7，这段代码将 :cd 到请求中指示的目录。
+>lua
 
   vim.api.nvim_create_autocmd({ 'TermRequest' }, {
     desc = '处理 OSC 7 目录更改请求',
@@ -188,7 +189,8 @@ Shell 可以发出语义转义序列（OSC 133）来标记每个提示符的开�
 如果您的 shell 如上所述发出 OSC 133，|]]| 和 |[[| 动作将跳转到下一个/上一个提示符。
 
 						*shell-prompt-signs*
-要从 |TermRequest| 处理程序中用标记注释每个终端提示符，调用 |nvim_buf_set_extmark()|：>lua
+要从 |TermRequest| 处理程序中用标记注释每个终端提示符，调用 |nvim_buf_set_extmark()|：
+>lua
 
     vim.api.nvim_create_autocmd('TermOpen', {
       command = 'setlocal signcolumn=auto',

@@ -62,9 +62,31 @@ local function append_options(source)
   end
 end
 
+local function prepend_options(source)
+  for name, value in pairs(source) do
+    local opt_type = get_option_type(name)
+    if opt_type ~= "table" then
+      break
+    end
+    if type(value) == "table" then
+      for _, v in ipairs(value) do
+        vim.opt[name]:prepend(v)
+      end
+    else
+      vim.opt[name]:prepend(value)
+    end
+    print_ok(name)
+  end
+end
+
 local function set_option(name, value)
   if name == "append" then
     append_options(value)
+    return
+  end
+
+  if name == "prepend" then
+    prepend_options(value)
     return
   end
 

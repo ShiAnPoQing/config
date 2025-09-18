@@ -100,7 +100,7 @@ return {
     },
     desc = "Screen Last Non-blank Character",
   },
-  ["zh"] = {
+  ["ah"] = {
     {
       function()
         require("builtin.screen-move").move("left")
@@ -110,7 +110,7 @@ return {
     },
     { "g0", { "x", "o" } },
   },
-  ["zl"] = {
+  ["al"] = {
     {
       function()
         require("builtin.screen-move").move("right")
@@ -146,7 +146,7 @@ return {
     },
     { "g$", { "x", "o" } },
   },
-  ["zj"] = {
+  ["aj"] = {
     {
       function()
         require("builtin.screen-move").move("bottom")
@@ -164,7 +164,7 @@ return {
     },
   },
   -- normal mode cursor move: screen top
-  ["zk"] = {
+  ["ak"] = {
     {
       function()
         require("builtin.screen-move").move("top")
@@ -182,7 +182,7 @@ return {
     },
   },
   -- normal mode cursor move: screen center
-  ["zm"] = {
+  ["am"] = {
     {
       function()
         require("builtin.screen-move").move("h_center")
@@ -200,7 +200,7 @@ return {
     },
   },
   -- normal mode cursor move: screen center col
-  ["zn"] = {
+  ["an"] = {
     {
       function()
         require("builtin.screen-move").move("v_center")
@@ -215,7 +215,7 @@ return {
     end,
     "n",
   },
-  ["zc"] = {
+  ["ac"] = {
     "gmM",
     "n",
   },
@@ -241,13 +241,13 @@ return {
   -- -- normal mode view move: cursor line position at screen bottom col
   -- ["aaj"] = { "zb", { "n", "x" } },
   -- normal mode view move: cursor line position at screen center col
-  ["zL"] = { "ze", { "n", "x" } },
-  ["zH"] = { "zs", { "n", "x" } },
-  ["zK"] = { "zt", { "n", "x" } },
-  ["zJ"] = { "zb", { "n", "x" } },
-  ["zzn"] = { "zz", { "n", "x" } },
+  ["aL"] = { "ze", { "n", "x" } },
+  ["aH"] = { "zs", { "n", "x" } },
+  ["aK"] = { "zt", { "n", "x" } },
+  ["aJ"] = { "zb", { "n", "x" } },
+  ["aan"] = { "zz", { "n", "x" } },
   -- normal mode view move: cursor line position at screen center row
-  ["zzm"] = { aam, { "n" } },
+  ["aam"] = { aam, { "n" } },
 
   -- normal mode view move: cursor word position at screen right
   ["<M-1><M-1><M-l>"] = { "<C-o>zs", { "i" } },

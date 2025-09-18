@@ -449,6 +449,10 @@ local function get_groups()
       Special = { fg = "#007373" },
       String = { fg = "#4d7300" },
       Boolean = { fg = colors.hue1, bold = true },
+
+      ["@function"] = { link = "Function" },
+      ["@function.call"] = { link = "Function" },
+      ["@function.builtin"] = { link = "Function" },
       ["@variable"] = { fg = "#2D3142" },
       -- ["@variable.builtin"] = { fg = "#6a40bf" },
       ["@property"] = { fg = "#007373" },

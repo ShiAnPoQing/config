@@ -358,7 +358,7 @@ return {
     { "Wi", "n" },
   },
 
-  ["zw"] = {
+  ["aw"] = {
     function()
       local count = vim.v.count1
       local esc = vim.api.nvim_replace_termcodes("<Esc>", true, true, true)
@@ -367,7 +367,7 @@ return {
     "n",
     desc = "Start insert mode to the far left character of the screen window",
   },
-  ["ze"] = {
+  ["ae"] = {
     function()
       local count = vim.v.count1
       local esc = vim.api.nvim_replace_termcodes("<Esc>", true, true, true)

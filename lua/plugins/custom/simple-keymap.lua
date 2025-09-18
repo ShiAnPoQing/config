@@ -8,25 +8,11 @@ return {
         "keymaps/select-mode",
         "test",
       },
-    })
-
-    vim.api.nvim_create_autocmd("BufReadPre", {
-      pattern = "*",
-      callback = function()
-        pcall(vim.keymap.del, "x", "in")
-        pcall(vim.keymap.del, "n", "d0i")
-        pcall(vim.keymap.del, "n", "d0o")
-        pcall(vim.keymap.del, "n", "ds>")
-        pcall(vim.keymap.del, "n", "ds<")
-        pcall(vim.keymap.del, "n", 'ds"')
-        pcall(vim.keymap.del, "n", "ds'")
-        pcall(vim.keymap.del, "n", "ds}")
-        pcall(vim.keymap.del, "n", "ds{")
-        pcall(vim.keymap.del, "n", "ds[")
-        pcall(vim.keymap.del, "n", "ds]")
-        pcall(vim.keymap.del, "n", "ds(")
-        pcall(vim.keymap.del, "n", "ds)")
-      end,
+      del = {
+        ["in"] = { "x" },
+        ["d0i"] = { "n" },
+        ["d0o"] = { "n" },
+      },
     })
   end,
 }
