@@ -13,6 +13,14 @@ local default_opts = {
 
 --- @param opts InsertLineOptions
 function M.insert_line(opts)
+  local modifable = vim.api.nvim_get_option_value("modifiable", {
+    buf = vim.api.nvim_get_current_buf(),
+  })
+  if modifable == false then
+    vim.notify("Buffer is not modifiable", vim.log.levels.WARN)
+    return
+  end
+
   opts = vim.tbl_deep_extend("force", default_opts, opts or {})
   local dir = opts.dir
   local cursor = opts.cursor

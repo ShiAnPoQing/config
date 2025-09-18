@@ -79,13 +79,13 @@ return {
   },
 
   border2 = {
-    { "┌", "Special" },
-    { "─", "Special" },
-    { "┐", "Special" },
-    { "│", "Special" },
-    { "┘", "Special" },
-    { "─", "Special" },
-    { "└", "Special" },
-    { "│", "Special" },
+    { "┌", "Normal" },
+    { "─", "Normal" },
+    { "┐", "Normal" },
+    { "│", "Normal" },
+    { "┘", "Normal" },
+    { "─", "Normal" },
+    { "└", "Normal" },
+    { "│", "Normal" },
   },
 }

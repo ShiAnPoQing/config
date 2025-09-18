@@ -284,6 +284,7 @@ end
 
 function Key:on_key(keymap)
   vim.schedule(function()
+    ---@diagnostic disable-next-line: param-type-mismatch
     local char = vim.fn.nr2char(vim.fn.getchar())
     local child_keymap = keymap.child[char]
     if child_keymap and child_keymap.callback then
@@ -322,6 +323,7 @@ function M.move()
   local cursor = vim.api.nvim_win_get_cursor(0)
   local virtcol = vim.fn.virtcol(".")
   local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+  ---@diagnostic disable-next-line: undefined-field
   local leftcol = wininfo.leftcol
   local topline = wininfo.topline
   local botline = wininfo.botline

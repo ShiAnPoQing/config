@@ -180,29 +180,29 @@ return {
     -- 警告信息也将打开quickfix列表
     vim.g.vimtex_quickfix_open_on_warning = 1
 
-    require("parse-keymap").add({
-      [";vv"] = {
-        "<cmd>VimtexView<cr>",
-        "n",
-        { desc = "[V]imtex [V]iew" },
-      },
-      [";vc"] = {
-        function()
-          vim.cmd("wa")
-          vim.cmd("VimtexCompile")
-        end,
-        "n",
-        { desc = "[V]imtex [C]ompile" },
-      },
-      ["wc"] = { "<Plug>(vimtex-ac)", { "x", "o" } },
-      ["we"] = { "<Plug>(vimtex-ae)", { "x", "o" } },
-      ["ec"] = { "<Plug>(vimtex-ic)", { "x", "o" } },
-      ["ee"] = { "<Plug>(vimtex-ie)", { "x", "o" } },
-      ["em"] = { "<Plug>(vimtex-im)", { "x", "o" } },
-      ["eP"] = { "<Plug>(vimtex-iP)", { "x", "o" } },
-      ["e$"] = { "<Plug>(vimtex-i$)", { "x", "o" } },
-      ["ed"] = { "<Plug>(vimtex-id)", { "x", "o" } },
-    })
+    -- require("parse-keymap").add({
+    --   [";vv"] = {
+    --     "<cmd>VimtexView<cr>",
+    --     "n",
+    --     { desc = "[V]imtex [V]iew" },
+    --   },
+    --   [";vc"] = {
+    --     function()
+    --       vim.cmd("wa")
+    --       vim.cmd("VimtexCompile")
+    --     end,
+    --     "n",
+    --     { desc = "[V]imtex [C]ompile" },
+    --   },
+    --   ["wc"] = { "<Plug>(vimtex-ac)", { "x", "o" } },
+    --   ["we"] = { "<Plug>(vimtex-ae)", { "x", "o" } },
+    --   ["ec"] = { "<Plug>(vimtex-ic)", { "x", "o" } },
+    --   ["ee"] = { "<Plug>(vimtex-ie)", { "x", "o" } },
+    --   ["em"] = { "<Plug>(vimtex-im)", { "x", "o" } },
+    --   ["eP"] = { "<Plug>(vimtex-iP)", { "x", "o" } },
+    --   ["e$"] = { "<Plug>(vimtex-i$)", { "x", "o" } },
+    --   ["ed"] = { "<Plug>(vimtex-id)", { "x", "o" } },
+    -- })
     vim.opt.cmdheight = 2
 
     vim.keymap.set("n", "cem", "<Plug>(vimtex-delim-change-math)")
