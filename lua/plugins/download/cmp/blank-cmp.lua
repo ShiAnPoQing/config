@@ -7,6 +7,7 @@ return {
   build = "cargo +nightly build --release",
 
   event = { "InsertEnter", "CmdlineEnter" },
+
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
   opts = {
@@ -47,7 +48,7 @@ return {
     },
 
     completion = {
-      documentation = { auto_show = true, auto_show_delay_ms = 500 },
+      documentation = { auto_show = true, auto_show_delay_ms = 0 },
       menu = {
         draw = {
           columns = { { "kind_icon" }, { "label" }, { "source_name" } },
@@ -68,9 +69,52 @@ return {
       },
     },
     cmdline = {
+      keymap = {
+        preset = "none",
+        ["<C-c>"] = {
+          function(cmp)
+            if cmp.is_menu_visible() then
+              cmp.cancel()
+            else
+              cmp.show()
+            end
+          end,
+        },
+        ["<C-e>"] = {
+          function(cmp)
+            if cmp.is_menu_visible() then
+              cmp.hide()
+            else
+              cmp.show()
+            end
+          end,
+        },
+        ["<C-n>"] = {
+          function(cmp)
+            if cmp.is_menu_visible() then
+              cmp.select_next()
+            else
+              cmp.show()
+            end
+          end,
+        },
+        ["<C-p>"] = {
+          function(cmp)
+            if cmp.is_menu_visible() then
+              cmp.select_prev()
+            else
+              cmp.show()
+            end
+          end,
+        },
+        ["<Tab>"] = {
+          "select_and_accept",
+          "fallback",
+        },
+      },
       completion = {
         menu = {
-          auto_show = false,
+          auto_show = true,
         },
         list = {
           selection = {
@@ -98,6 +142,15 @@ return {
           end
         end,
       },
+      ["<C-e>"] = {
+        function(cmp)
+          if cmp.is_menu_visible() then
+            cmp.hide()
+          else
+            cmp.show()
+          end
+        end,
+      },
       ["<C-n>"] = {
         function(cmp)
           if cmp.is_menu_visible() then
@@ -117,12 +170,29 @@ return {
         end,
       },
       ["<CR>"] = { "accept", "fallback" },
+      -- 我选择 Snippet 优先级最高
+      -- 即使 Snippet 没在 menu 中，
+      -- 也会优先触发 Snippet，而不是选中 menu 第一项
       ["<Tab>"] = {
+        function(cmp)
+          local expandable = require("luasnip").expandable()
+
+          if expandable then
+            vim.schedule(function()
+              require("luasnip").expand()
+            end)
+            return true
+          end
+        end,
         "select_and_accept",
         "snippet_forward",
         "fallback",
       },
       ["<S-Tab>"] = { "snippet_backward", "fallback" },
+      ["<C-S-n>"] = { "scroll_documentation_up", "fallback" },
+      ["<C-S-p>"] = { "scroll_documentation_down", "fallback" },
+      ["<Up>"] = { "select_prev", "fallback" },
+      ["<Down>"] = { "select_next", "fallback" },
     },
   },
   opts_extend = { "sources.default" },

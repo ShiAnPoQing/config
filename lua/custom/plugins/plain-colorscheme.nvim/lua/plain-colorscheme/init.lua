@@ -121,6 +121,10 @@ local function get_groups()
       Title = { fg = colors.hue45 },
       ModeMsg = { link = "Normal", bold = true },
 
+      TabLineFill = { bg = colors.bg1 }, -- 标签栏
+      TabLine = { link = "TabLineFill" }, -- 非当前标签
+      TabLineSel = { fg = colors.hue44, bg = colors.bg2, bold = true }, -- 当前标签选中
+
       Error = { fg = colors.hue72 },
       ErrorMsg = { fg = colors.bg2, bg = colors.hue72 },
 

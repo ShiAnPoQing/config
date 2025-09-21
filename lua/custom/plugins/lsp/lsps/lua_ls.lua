@@ -25,6 +25,11 @@ return {
         path = {
           "lua/?.lua",
           "lua/?/init.lua",
+
+          -- "lua/?.lua",
+          -- "lua/?/init.lua",
+          "/usr/share/lua/5.4/?.lua", -- LuaSocket
+          "/usr/share/lua/5.4/?/init.lua",
         },
       },
       -- Make the server aware of Neovim runtime files
@@ -32,6 +37,7 @@ return {
         checkThirdParty = false,
         library = {
           vim.env.VIMRUNTIME,
+          "/usr/share/lua/5.4",
           -- Depending on the usage, you might want to add additional paths
           -- here.
           -- '${3rd}/luv/library'

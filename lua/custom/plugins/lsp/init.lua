@@ -33,6 +33,7 @@ local lsp_collects = {
   html = "html",
   css = "cssls",
   json = "jsonls",
+  qml = "qmlls",
 }
 
 local function require_lspconfig(source)

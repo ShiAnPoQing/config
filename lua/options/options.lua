@@ -116,7 +116,7 @@ return {
     },
     -- foldmethod = "indent",
     foldmethod = "expr",
-    foldexpr = "nvim_treesitter#foldexpr()",
+    foldexpr = "v:lua.vim.treesitter.foldexpr()",
     -- 打开文件时启用折叠
     foldenable = true,
     -- 默认展开所有

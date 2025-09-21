@@ -27,6 +27,12 @@ local parse = require("luasnip.util.parser").parse_snippet
 local utils = require("snippets.utils")
 
 local snippets = {
+  s({
+    trig = "functi",
+    hidden = true,
+  }, {
+    t("你好 "),
+  }),
   s("pi", {
     t("print(vim.inspect("),
     i(1),

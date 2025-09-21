@@ -209,6 +209,12 @@ return {
   --   end,
   --   "n",
   -- },
+  ["<C-w>"] = {
+    function()
+      require("luasnip").expand()
+    end,
+    "i",
+  },
 
   -- ["<C-j>"] = { "+", "n" },
   -- ["<C-k>"] = { "-", "n" },
