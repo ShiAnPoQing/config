@@ -3,7 +3,7 @@ local Key = require("magic.key")
 local Line_hl = require("magic.line-hl")
 
 --- @class MagicLineOpts
---- @field dir "up" | "down"
+--- @field dir "up" | "down" | "all"
 --- @field callback fun()
 function M.magic_line(opts)
   local dir = opts.dir
@@ -17,8 +17,11 @@ function M.magic_line(opts)
   if dir == "up" then
     startline = topline
     endline = cursor[1] - 1
-  else
+  elseif dir == "down" then
     startline = cursor[1] + 1
+    endline = botline
+  elseif dir == "all" then
+    startline = topline
     endline = botline
   end
 

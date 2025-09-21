@@ -46,11 +46,19 @@ local function get_col(position, line, wininfo, blank)
 
   if position == 1 then
     if not blank then
-      col = l:find("%S") - 1 - leftcol
-      cursor_col = l:find("%S") - 1
+      local f = l:find("%S")
+
+      if f == nil then
+        f = 0
+      else
+        f = f - 1
+      end
+
+      col = f - leftcol
+      cursor_col = f
     else
       col = 0 - leftcol
-      cursor_col = l:find("%s") - 1
+      cursor_col = 0
     end
   elseif position == 2 then
     if not blank then
