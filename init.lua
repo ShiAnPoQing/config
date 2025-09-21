@@ -23,7 +23,7 @@ require("lazy-setup").setup({
   require("plugins.download.window.winshift"),
   require("plugins.download.misc.harpoon"),
   require("plugins.download.misc.grug-far"),
-  -- require("plugins.download.misc.flash"),
+  require("plugins.download.misc.flash"),
   require("plugins.download.misc.autopairs"),
   require("plugins.download.misc.nvim-ts-autotag"),
   require("plugins.download.misc.zen-mode"),
@@ -82,3 +82,24 @@ require("lazy-setup").setup({
   require("plugins.custom.code-action"),
   require("plugins.custom.open-terminal"),
 })
+
+-- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  download  donload  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- donload  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- donload  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- donload  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  donload  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  donload  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  download  donload  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
+-- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download

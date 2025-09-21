@@ -3,7 +3,6 @@ return {
   lazy = false,
   branch = "main",
   build = ":TSUpdate",
-  -- dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
   config = function()
     local langs = {
       "c",
