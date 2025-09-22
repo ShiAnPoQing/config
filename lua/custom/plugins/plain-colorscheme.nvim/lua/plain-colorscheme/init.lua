@@ -142,6 +142,7 @@ local function get_groups()
       Delimiter = { fg = colors.bg12 },
       Type = { fg = colors.hue30 },
       Structure = { fg = colors.hue72 },
+      Folded = { bg = colors.bg3, fg = colors.hue36 },
 
       cString = { link = "String" },
       cType = { fg = colors.hue52 },

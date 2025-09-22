@@ -31,6 +31,7 @@ require("lazy-setup").setup({
   require("plugins.download.misc.todo-comments"),
   -- require("plugins.download.misc.hop"),
   require("plugins.download.misc.undotree"),
+  -- require("plugins.download.snacks.snacks"),
   -- require("plugins.download.misc.numb"),
   -- require("plugins.download.misc.nvim-possession"),
   -- require("plugins.download.misc.showkey"),
@@ -40,7 +41,6 @@ require("lazy-setup").setup({
   -- require("plugins.download.lsp.lspsaga"),
   -- require("plugins.download.misc.augment"),
   -- require("plugins.code.windsurf"),
-
   require("plugins.download.style.mini-statusline"),
   -- require("plugins.download.style.lualine"),
   -- require("plugins.download.style.dashboard-nvim"),

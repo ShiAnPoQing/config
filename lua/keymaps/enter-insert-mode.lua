@@ -1,21 +1,23 @@
 local function first_non_blank_line_start_insert_mode()
-  local count = vim.v.count1
   local line = vim.api.nvim_get_current_line()
+  local key
   if #line == 0 then
-    vim.api.nvim_feedkeys(count .. "I" .. vim.api.nvim_replace_termcodes("<C-f>", true, true, true), "n", false)
+    key = "I<C-f>"
   else
-    vim.api.nvim_feedkeys(count .. "I", "n", false)
+    key = "I"
   end
+  return key
 end
 
 local function last_non_blank_line_start_insert_mode()
-  local count = vim.v.count1
   local line = vim.api.nvim_get_current_line()
+  local key
   if #line == 0 then
-    vim.api.nvim_feedkeys(count .. "A" .. vim.api.nvim_replace_termcodes("<C-f>", true, true, true), "n", false)
+    key = "A<C-f>"
   else
-    vim.api.nvim_feedkeys(count .. "A", "n", false)
+    key = "A"
   end
+  return key
 end
 
 local function visual_first_non_blank_start_insert_mode()
@@ -120,31 +122,6 @@ local function visual_last_character_start_insert_mode()
   end
 end
 
-local function W()
-  local mode = vim.api.nvim_get_mode().mode
-  local count = vim.v.count1
-
-  if mode == "n" then
-    vim.api.nvim_feedkeys(count .. "I", "n", false)
-  elseif mode == "V" or mode == "v" then
-    local esc = vim.api.nvim_replace_termcodes("<Esc>", true, true, true)
-    vim.api.nvim_feedkeys(esc .. count .. "I", "n", true)
-  end
-end
-
-local function E()
-  local mode = vim.api.nvim_get_mode().mode
-  local count = vim.v.count1
-
-  if mode == "n" then
-    vim.api.nvim_feedkeys(count .. "A", "n", false)
-  elseif mode == "V" or mode == "v" then
-    local esc = vim.api.nvim_replace_termcodes("<Esc>", true, true, true)
-    vim.api.nvim_feedkeys(esc .. count .. "A", "n", true)
-  elseif mode == "" then
-  end
-end
-
 return {
   ["w"] = {
     "i",
@@ -157,22 +134,45 @@ return {
     desc = "Cursor right start insert mode",
   },
   ["W"] = {
-    W,
-    { "n", "x" },
+    {
+      function()
+        return "I"
+      end,
+      "n",
+    },
+    {
+      function()
+        local count = vim.v.count1
+        return "<Esc>" .. count .. "I"
+      end,
+      "x",
+    },
     desc = "Start enter insert mode",
+    expr = true,
   },
   ["E"] = {
-    E,
-    { "n", "x" },
+    {
+      function()
+        return "A"
+      end,
+      "n",
+    },
+    {
+      function()
+        local count = vim.v.count1
+        return "<esc>" .. count .. "A"
+      end,
+      "x",
+    },
     desc = "End enter insert mode",
+    expr = true,
   },
   ["<space>w"] = {
     {
-      function()
-        first_non_blank_line_start_insert_mode()
-      end,
+      first_non_blank_line_start_insert_mode,
       "n",
       desc = "Start insert mode to the left of the first non-blank character in the current line",
+      expr = true,
     },
     {
       function()
@@ -183,11 +183,10 @@ return {
   },
   ["<space>e"] = {
     {
-      function()
-        last_non_blank_line_start_insert_mode()
-      end,
+      last_non_blank_line_start_insert_mode,
       "n",
       desc = "Start insert mode to the right of the last non-blank character in the current line",
+      expr = true,
     },
     {
       function()
@@ -213,10 +212,12 @@ return {
     {
       function()
         local count = vim.v.count1
-        vim.api.nvim_feedkeys("$" .. count .. "a", "n", false)
+        -- <Esc> used to clear count
+        return "<Esc>$" .. count .. "a"
       end,
       "n",
       desc = "Start insert mode to the right of the last character in the current line",
+      expr = true,
     },
     {
       function()
@@ -228,12 +229,12 @@ return {
   ["<space>W"] = {
     function()
       local count = vim.v.count1
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, true, true), "nx", true)
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, false, true), "nx", true)
       local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
-      vim.api.nvim_win_set_cursor(0, { start_row, start_col })
-      vim.api.nvim_feedkeys(count .. "I", "n", false)
+      return start_row .. "G" .. count .. "I"
     end,
     "x",
+    expr = true,
   },
   ["<space>E"] = {
     function()
@@ -248,26 +249,27 @@ return {
   ["<space><space>W"] = {
     function()
       local count = vim.v.count1
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, true, true), "nx", true)
-      vim.api.nvim_feedkeys(count .. "gI", "n", false)
+      return "<esc>" .. count .. "gI"
     end,
     "x",
+    expr = true,
   },
   ["<space><space>E"] = {
     function()
       local count = vim.v.count1
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, true, true), "nx", true)
-      vim.api.nvim_feedkeys("$" .. count .. "a", "n", false)
+      return "<esc>$" .. count .. "a"
     end,
     "x",
+    expr = true,
   },
   ["<S-space>w"] = {
     function()
       local count = vim.v.count1
-      vim.api.nvim_feedkeys("g^" .. count .. "i", "n", true)
+      return "g^" .. count .. "i"
     end,
     "n",
     desc = "Start insert mode to the left of the first non-blank character in the screen line",
+    expr = true,
   },
   ["<S-space>e"] = {
     function()
@@ -291,17 +293,19 @@ return {
   ["<S-space><S-space>w"] = {
     function()
       local count = vim.v.count1
-      vim.api.nvim_feedkeys("g0" .. count .. "i", "nx", true)
+      return "g0" .. count .. "i"
     end,
     "n",
+    expr = true,
     desc = "Start insert mode to the left of the first character in the screen line",
   },
   ["<S-space><S-space>e"] = {
     function()
       local count = vim.v.count1
-      vim.api.nvim_feedkeys("g$" .. count .. "a", "n", false)
+      return "<esc>g$" .. count .. "a"
     end,
     "n",
+    expr = true,
     desc = "Start insert mode to the right of the last character in the screen line",
   },
   -- normal mode into insert mode ea
@@ -361,20 +365,22 @@ return {
   ["aw"] = {
     function()
       local count = vim.v.count1
-      local esc = vim.api.nvim_replace_termcodes("<Esc>", true, true, true)
-      vim.api.nvim_feedkeys(esc .. "g0" .. count .. "i", "n", false)
+      -- <Esc> used to clear count(虽然 g0 不支持计数)
+      return "<esc>g0" .. count .. "i"
     end,
     "n",
     desc = "Start insert mode to the far left character of the screen window",
+    expr = true,
   },
   ["ae"] = {
     function()
       local count = vim.v.count1
-      local esc = vim.api.nvim_replace_termcodes("<Esc>", true, true, true)
-      vim.api.nvim_feedkeys(esc .. "g$" .. count .. "a", "n", false)
+      -- <Esc> used to clear count
+      return "<esc>g$" .. count .. "a"
     end,
     "n",
     desc = "Start insert mode to the far right character of the screen window",
+    expr = true,
   },
 
   ["gw"] = {

@@ -242,6 +242,14 @@ return {
     end,
     "n",
   },
+  ["<M-e>"] = {
+    function()
+      vim.on_key(function(key, typed)
+        print(key, typed)
+      end)
+    end,
+    "n",
+  },
 
   -- ["<C-j>"] = { "+", "n" },
   -- ["<C-k>"] = { "-", "n" },

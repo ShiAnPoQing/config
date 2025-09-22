@@ -4,6 +4,7 @@ return {
   --   "e",
   --   "o",
   -- },
+
   -- -- For insert mode: like <M-d><M-i>
   -- ["<M-i>"] = {
   --   "b",
