@@ -11,7 +11,6 @@
 --       autocomplete = true,
 --       convert = function(item)
 --         local menu = item.detail or ""
---         menu = #menu > 15 and menu:sub(1, 14) .. "…" or menu
 --         return { abbr = item.label, word = item.label, menu = menu, info = "# nihoa" }
 --       end,
 --     })
@@ -209,11 +208,39 @@ return {
   --   end,
   --   "n",
   -- },
-  ["<C-w>"] = {
+  ["<M-w>"] = {
     function()
-      require("luasnip").expand()
+      local function taglist_to_qf(tagname)
+        local tags = vim.fn.taglist(tagname)
+        if #tags == 0 then
+          vim.api.nvim_echo({ { "No tags found for " .. tagname, "WarningMsg" } }, true, {})
+          return
+        end
+
+        local qf_items = {}
+
+        for _, t in ipairs(tags) do
+          -- 从 cmd 提取行列信息: "/\%336l\%10c/"
+          local lnum, col = t.cmd:match("\\%%(%d+)l\\%%(%d+)c")
+          lnum = tonumber(lnum) or 1
+          col = tonumber(col) or 0
+
+          table.insert(qf_items, {
+            filename = t.filename,
+            lnum = lnum,
+            col = col,
+            text = t.name,
+          })
+        end
+
+        -- 设置 quickfix list 并跳到第一个条目
+        vim.fn.setqflist(qf_items, "r")
+        vim.cmd("cfirst")
+        print("Quickfix list populated with " .. #qf_items .. " matches for tag: " .. tagname)
+      end
+      taglist_to_qf("tags")
     end,
-    "i",
+    "n",
   },
 
   -- ["<C-j>"] = { "+", "n" },

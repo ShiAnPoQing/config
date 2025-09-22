@@ -6,12 +6,9 @@ return {
       "<C-down>",
       function()
         require("move-line").move_line("down")
-        require("repeat").record({
-          name = "move-line",
-          callback = function()
-            require("move-line").move_line("down")
-          end,
-        })
+        require("repeat"):set(function()
+          require("move-line").move_line("down")
+        end)
       end,
       mode = { "n", "i", "x" },
     },
@@ -19,12 +16,9 @@ return {
       "<C-up>",
       function()
         require("move-line").move_line("up")
-        require("repeat").record({
-          name = "move-line",
-          callback = function()
-            require("move-line").move_line("up")
-          end,
-        })
+        require("repeat"):set(function()
+          require("move-line").move_line("up")
+        end)
       end,
       mode = { "n", "i", "x" },
     },

@@ -37,15 +37,12 @@ return {
         dir = "above",
         cursor = "move",
       })
-      require("repeat").record({
-        name = "insert-line",
-        callback = function()
-          require("custom.plugins.insert-line").insert_line({
-            dir = "above",
-            cursor = "move",
-          })
-        end,
-      })
+      require("repeat"):set(function()
+        require("custom.plugins.insert-line").insert_line({
+          dir = "above",
+          cursor = "move",
+        })
+      end)
     end,
     { "n", "i" },
   },
@@ -56,16 +53,13 @@ return {
         cursor = "move",
         indent = false,
       })
-      require("repeat").record({
-        name = "insert-line",
-        callback = function()
-          require("custom.plugins.insert-line").insert_line({
-            dir = "above",
-            cursor = "move",
-            indent = false,
-          })
-        end,
-      })
+      require("repeat"):set(function()
+        require("custom.plugins.insert-line").insert_line({
+          dir = "above",
+          cursor = "move",
+          indent = false,
+        })
+      end)
     end,
     "i",
   },
@@ -75,15 +69,12 @@ return {
         dir = "below",
         cursor = "move",
       })
-      require("repeat").record({
-        name = "insert-line",
-        callback = function()
-          require("custom.plugins.insert-line").insert_line({
-            dir = "below",
-            cursor = "move",
-          })
-        end,
-      })
+      require("repeat"):set(function()
+        require("custom.plugins.insert-line").insert_line({
+          dir = "below",
+          cursor = "move",
+        })
+      end)
     end,
     { "n", "i" },
   },
@@ -94,16 +85,13 @@ return {
         cursor = "move",
         indent = false,
       })
-      require("repeat").record({
-        name = "insert-line",
-        callback = function()
-          require("custom.plugins.insert-line").insert_line({
-            dir = "below",
-            cursor = "move",
-            indent = false,
-          })
-        end,
-      })
+      require("repeat"):set(function()
+        require("custom.plugins.insert-line").insert_line({
+          dir = "below",
+          cursor = "move",
+          indent = false,
+        })
+      end)
     end,
     "i",
   },
@@ -113,15 +101,12 @@ return {
         dir = "all",
         cursor = "move",
       })
-      require("repeat").record({
-        name = "insert-line",
-        callback = function()
-          require("custom.plugins.insert-line").insert_line({
-            dir = "all",
-            cursor = "move",
-          })
-        end,
-      })
+      require("repeat"):set(function()
+        require("custom.plugins.insert-line").insert_line({
+          dir = "all",
+          cursor = "move",
+        })
+      end)
     end,
     { "n", "i" },
   },
@@ -131,15 +116,12 @@ return {
         dir = "above",
         cursor = "keep",
       })
-      require("repeat").record({
-        name = "insert-line",
-        callback = function()
-          require("custom.plugins.insert-line").insert_line({
-            dir = "above",
-            cursor = "keep",
-          })
-        end,
-      })
+      require("repeat"):set(function()
+        require("custom.plugins.insert-line").insert_line({
+          dir = "above",
+          cursor = "keep",
+        })
+      end)
     end,
     { "n", "i" },
   },
@@ -149,15 +131,12 @@ return {
         dir = "below",
         cursor = "keep",
       })
-      require("repeat").record({
-        name = "insert-line",
-        callback = function()
-          require("custom.plugins.insert-line").insert_line({
-            dir = "below",
-            cursor = "keep",
-          })
-        end,
-      })
+      require("repeat"):set(function()
+        require("custom.plugins.insert-line").insert_line({
+          dir = "below",
+          cursor = "keep",
+        })
+      end)
     end,
     { "n", "i" },
   },

@@ -1,34 +1,40 @@
 local M = {}
 
-local current_record
+M.tick = -1
 
-function M.vim_repeat()
-  if not current_record then
+function M:update_tick()
+  self.tick = vim.b.changedtick
+end
+
+function M:fallback()
+  vim.api.nvim_feedkeys(".", "nx", false)
+  self:update_tick()
+end
+
+function M:run()
+  if self.repeat_callback == nil then
+    self:fallback()
     return
   end
-  current_record.callback()
+
+  if self.tick == vim.b.changedtick then
+    self.repeat_callback()
+    self:update_tick()
+  else
+    self:fallback()
+    self.repeat_callback = nil
+  end
 end
 
---- @class RecordOptions
---- @field callback fun()
---- @field name string
-
---- @param opts RecordOptions
-function M.record(opts)
-  current_record = opts
+function M:set(callback)
+  self.repeat_callback = callback
+  self.tick = vim.b.changedtick
 end
 
-function M.reset()
-  current_record = nil
-end
-
---- @class RepeatOptions
-
---- @param opts RepeatOptions
 function M.setup(opts)
-  vim.keymap.set({ "n", "i" }, "<M-.>", function()
-    M.vim_repeat()
-  end, { noremap = true })
+  vim.keymap.set("n", ".", function()
+    M:run()
+  end)
 end
 
 return M

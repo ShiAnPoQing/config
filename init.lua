@@ -81,25 +81,5 @@ require("lazy-setup").setup({
   require("plugins.custom.tabpage-manage"),
   require("plugins.custom.code-action"),
   require("plugins.custom.open-terminal"),
+  require("plugins.custom.tag-peek"),
 })
-
--- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  download  donload  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- donload  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- donload  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- donload  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  donload  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  donload  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  download  donload  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download
--- download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download  download

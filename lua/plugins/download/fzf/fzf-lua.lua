@@ -7,6 +7,13 @@ local complete = require("plugins.download.fzf.complete-keymaps")
 
 local fc = {
   {
+    "<leader>fO",
+    function()
+      require("fzf-lua").resume()
+    end,
+    desc = "Fzf Resume",
+  },
+  {
     "<leader>fcc",
     function()
       require("fzf-lua").commands()

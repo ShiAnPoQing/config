@@ -2,6 +2,7 @@ return {
   {
     "<leader>tt",
     function()
+      -- require("fzf-lua").tags({ cwd = vim.fn.fnamemodify(vim.fn.tagfiles()[1], ":p:h") })
       require("fzf-lua").tags()
     end,
     desc = "Tags",

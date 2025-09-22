@@ -142,9 +142,7 @@ function M:compute(total)
 
   local result = run(1)
 
-  -- print(total)
   if result == nil then
-    -- print(total, "chucuo")
     return
   end
 

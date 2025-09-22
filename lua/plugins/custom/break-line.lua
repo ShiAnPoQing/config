@@ -6,12 +6,9 @@ return {
       "<space><CR>",
       function()
         require("break-line").break_line(vim.v.count1)
-        require("repeat").record({
-          name = "break_line",
-          callback = function()
-            require("break-line").break_line(vim.v.count1)
-          end,
-        })
+        require("repeat"):set(function()
+          require("break-line").break_line(vim.v.count1)
+        end)
       end,
       mode = { "n", "x" },
       expr = true,
