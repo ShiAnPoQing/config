@@ -13,7 +13,8 @@ function M.peek()
     float.float()
     local lines = {}
     local data = {}
-    for i, tag in ipairs(tags) do
+
+    for _, tag in ipairs(tags) do
       local lnum, col = tag.cmd:match("\\%%(%d+)l\\%%(%d+)c")
       data[#data + 1] = {
         text = tag.filename .. ":" .. lnum .. ":" .. col,
@@ -24,6 +25,7 @@ function M.peek()
       }
       table.insert(lines, tag.name)
     end
+
     vim.api.nvim_buf_set_lines(float.buf, 0, -1, false, lines)
 
     local ns_id = vim.api.nvim_create_namespace("tag-peek-cursor-line")
@@ -34,7 +36,7 @@ function M.peek()
         virt_text = { { " ", "Special" } },
       })
     end
-    local cursor_move = vim.api.nvim_create_autocmd("CursorMoved", {
+    vim.api.nvim_create_autocmd("CursorMoved", {
       callback = function()
         local cursor = vim.api.nvim_win_get_cursor(0)
         local line = cursor[1]

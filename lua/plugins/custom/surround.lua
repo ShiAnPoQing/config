@@ -1,3 +1,17 @@
+local function surround_delete(match)
+  require("surround").surround_delete(match)
+  require("repeat"):set(function()
+    require("surround").surround_delete(match)
+  end)
+end
+
+local function surround_exchange(match)
+  require("surround").surround_exchange(match)
+  require("repeat"):set(function()
+    require("surround").surround_exchange(match)
+  end)
+end
+
 return {
   dir = vim.fn.stdpath("config") .. "/lua/custom/plugins/surround",
   name = "surround",
@@ -5,121 +19,121 @@ return {
     {
       "ds)",
       function()
-        require("surround").surround_delete(")")
+        surround_delete(")")
       end,
     },
     {
       "ds(",
       function()
-        require("surround").surround_delete("(")
+        surround_delete("(")
       end,
     },
     {
       "ds]",
       function()
-        require("surround").surround_delete("]")
+        surround_delete("]")
       end,
     },
     {
       "ds[",
       function()
-        require("surround").surround_delete("[")
+        surround_delete("[")
       end,
     },
     {
       "ds{",
       function()
-        require("surround").surround_delete("{")
+        surround_delete("{")
       end,
     },
     {
       "ds}",
       function()
-        require("surround").surround_delete("{")
+        surround_delete("}")
       end,
     },
     {
       "ds'",
       function()
-        require("surround").surround_delete("'")
+        surround_delete("'")
       end,
     },
     {
       'ds"',
       function()
-        require("surround").surround_delete('"')
+        surround_delete('"')
       end,
     },
     {
       "ds<",
       function()
-        require("surround").surround_delete("<")
+        surround_delete("<")
       end,
     },
     {
       "ds>",
       function()
-        require("surround").surround_delete(">")
+        surround_delete(">")
       end,
     },
     {
       "cs)",
       function()
-        require("surround").surround_exchange(")")
+        surround_exchange(")")
       end,
     },
     {
       "cs(",
       function()
-        require("surround").surround_exchange("(")
+        surround_exchange("(")
       end,
     },
     {
       "cs{",
       function()
-        require("surround").surround_exchange("{")
+        surround_exchange("{")
       end,
     },
     {
       "cs}",
       function()
-        require("surround").surround_exchange("}")
+        surround_exchange("}")
       end,
     },
     {
       "cs[",
       function()
-        require("surround").surround_exchange("[")
+        surround_exchange("[")
       end,
     },
     {
       "cs]",
       function()
-        require("surround").surround_exchange("]")
+        surround_exchange("]")
       end,
     },
     {
       "cs<",
       function()
-        require("surround").surround_exchange("<")
+        surround_exchange("<")
       end,
     },
     {
       "cs>",
       function()
-        require("surround").surround_exchange(">")
+        surround_exchange(">")
       end,
     },
     {
       "cs'",
       function()
-        require("surround").surround_exchange("'")
+        surround_exchange("'")
       end,
     },
     {
       'cs"',
       function()
-        require("surround").surround_exchange('"')
+        surround_exchange('"')
       end,
     },
   },

@@ -7,7 +7,7 @@ local S = {
 }
 
 local function esc()
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", false)
+  return vim.api.nvim_replace_termcodes("<Esc>", true, true, true)
 end
 
 function S:collect(start_mark, end_mark)
@@ -62,42 +62,20 @@ function S:line_match_mark_sort()
   end
 end
 
-function S:get_marks(count, mc, callback)
-  local after
-
-  local function get_mark(_count)
-    if _count == 0 then
-      esc()
-      after()
-      return
-    end
-    vim.api.nvim_feedkeys("a" .. mc, "nx", false)
-    vim.schedule(function()
-      esc()
-      callback(vim.api.nvim_buf_get_mark(0, "<"), vim.api.nvim_buf_get_mark(0, ">"))
-      vim.api.nvim_feedkeys("gv", "nx", false)
-      get_mark(_count - 1)
-    end)
-  end
-
-  vim.api.nvim_feedkeys("v", "nx", false)
-  get_mark(count)
-
-  return {
-    after = function(cb)
-      after = cb
-    end,
-  }
+function S:get_marks(count, mc)
+  vim.api.nvim_feedkeys("v" .. count .. "a" .. mc .. esc(), "nx", false)
+  self:collect(vim.api.nvim_buf_get_mark(0, "<"), vim.api.nvim_buf_get_mark(0, ">"))
+  vim.api.nvim_feedkeys("gv", "nx", false)
 end
 
 function M.surround_exchange(mc)
   local pos = vim.api.nvim_win_get_cursor(0)
 
-  S:get_marks(vim.v.count1, mc, function(start_mark, end_mark)
-    S:collect(start_mark, end_mark)
-  end).after(function()
+  S:get_marks(vim.v.count1, mc)
+  vim.schedule(function()
     local input = vim.fn.input("将匹配的 " .. mc .. " 改成：")
     S:exchange(Matchs.get_match(input))
+    vim.api.nvim_feedkeys(esc(), "nx", false)
     vim.api.nvim_win_set_cursor(0, pos)
   end)
 end

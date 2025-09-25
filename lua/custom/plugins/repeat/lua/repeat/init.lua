@@ -3,7 +3,10 @@ local M = {}
 M.tick = -1
 
 function M:update_tick()
-  self.tick = vim.b.changedtick
+  -- 必须保证 repeat_callback 完全执行完毕，才能更新 tick
+  vim.schedule(function()
+    self.tick = vim.b.changedtick
+  end)
 end
 
 function M:fallback()
@@ -28,7 +31,7 @@ end
 
 function M:set(callback)
   self.repeat_callback = callback
-  self.tick = vim.b.changedtick
+  self:update_tick()
 end
 
 function M.setup(opts)

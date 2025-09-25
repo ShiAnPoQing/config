@@ -1,9 +1,5 @@
 {
-    "completion.autoRequire": false,
-    "diagnostics.disable": [
-        "unused-local",
-        "inject-field",
-        "unused-function",
-        "need-check-nil"
-    ]
+  "completion.autoRequire": false,
+  "diagnostics.disable": ["inject-field", "need-check-nil"]
 }
+

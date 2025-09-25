@@ -244,11 +244,19 @@ return {
   },
   ["<M-e>"] = {
     function()
-      vim.on_key(function(key, typed)
-        print(key, typed)
+      vim.print("1")
+      vim.schedule(function()
+        vim.print("3")
+        vim.schedule(function()
+          vim.print("5")
+        end)
       end)
+      vim.schedule(function()
+        vim.print("4")
+      end)
+      vim.print("2")
     end,
-    "n",
+    { "n", "x", "o" },
   },
 
   -- ["<C-j>"] = { "+", "n" },
