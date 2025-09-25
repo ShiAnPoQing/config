@@ -1,6 +1,6 @@
 ; extends
 (function_declaration
- name: (identifier) @function_name)
+ name: (identifier) @function.name)
 
 (function_declaration
  parameters: (formal_parameters) @function.params
@@ -8,20 +8,20 @@
 
 ; extends
 (variable_declarator
- name: (identifier) @variable_name)
+ name: (identifier) @variable.name)
 
 ; extends
 (variable_declarator
   name: (identifier)
-  (_) @variable_value)
+  (_) @variable.value)
 
 
 (import_statement
   source: (string
-    (string_fragment) @import_source))
+    (string_fragment) @import.source))
 
 (import_statement
-  (import_clause) @import_clause)
+  (import_clause) @import.clause)
 
 
 (import_statement) @import

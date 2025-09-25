@@ -68,7 +68,7 @@ function S:get_marks(count, mc)
   vim.api.nvim_feedkeys("gv", "nx", false)
 end
 
-function M.surround_exchange(mc)
+function M.exchange(mc)
   local pos = vim.api.nvim_win_get_cursor(0)
 
   S:get_marks(vim.v.count1, mc)

@@ -1,14 +1,14 @@
 local function surround_delete(match)
-  require("surround").surround_delete(match)
+  require("surround").delete(match)
   require("repeat"):set(function()
-    require("surround").surround_delete(match)
+    require("surround").delete(match)
   end)
 end
 
 local function surround_exchange(match)
-  require("surround").surround_exchange(match)
+  require("surround").exchange(match)
   require("repeat"):set(function()
-    require("surround").surround_exchange(match)
+    require("surround").exchange(match)
   end)
 end
 

@@ -2,12 +2,12 @@ local M = {}
 
 function M.setup() end
 
-M.surround_delete = function(mc)
-  return require("surround.delete").surround_delete(mc)
+M.delete = function(mc)
+  return require("surround.delete").delete(mc)
 end
 
-M.surround_exchange = function(mc)
-  return require("surround.exchange").surround_exchange(mc)
+M.exchange = function(mc)
+  return require("surround.exchange").exchange(mc)
 end
 
 return M

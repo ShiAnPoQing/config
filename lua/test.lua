@@ -244,17 +244,11 @@ return {
   },
   ["<M-e>"] = {
     function()
-      vim.print("1")
-      vim.schedule(function()
-        vim.print("3")
-        vim.schedule(function()
-          vim.print("5")
-        end)
-      end)
-      vim.schedule(function()
-        vim.print("4")
-      end)
-      vim.print("2")
+      require("custom.plugins.treesitter-query.treesitter-textobject").textobject({
+        language = "lua",
+        scm = "textobjects",
+        query = "function.outer",
+      })
     end,
     { "n", "x", "o" },
   },

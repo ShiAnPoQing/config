@@ -19,18 +19,18 @@ end
 
 --- @param opts textobject_options
 function M.textobject(opts)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local tree = vim.treesitter.get_parser(bufnr, opts.language):parse()[1]
+
   local query = vim.treesitter.query.get(opts.language, opts.scm)
   if query == nil then
     return
   end
 
-  local bufnr = vim.api.nvim_get_current_buf()
-  local tree = vim.treesitter.get_parser(bufnr, opts.language):parse()[1]
-
   local pos = vim.api.nvim_win_get_cursor(0)
   local cur_row = pos[1] - 1
 
-  for id, node, metadata, match in query:iter_captures(tree:root(), bufnr, 0, -1) do
+  for id, node, _, _ in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local name = query.captures[id]
 
     if name == opts.query then

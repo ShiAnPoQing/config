@@ -3,7 +3,7 @@ local function create_treesitter_textobject_keymap(opts)
     function()
       require("custom.plugins.treesitter-query.treesitter-textobject").textobject({
         language = opts.language,
-        scm = "mytextobjects",
+        scm = "textobjects",
         query = opts.query,
       })
     end,
@@ -100,15 +100,15 @@ return {
   ["wt"] = { "at", { "x", "o" } },
   ["et"] = { "it", { "x", "o" } },
 
-  ["<space>fn"] = create_js_treesitter_textobject_keymap("function_name"),
+  ["<space>fn"] = create_js_treesitter_textobject_keymap("function.name"),
   -- ["<space>eh"] = create_js_treesitter_textobject_keymap("variable_name"),
   -- ["<spae>el"] = create_js_treesitter_textobject_keymap("variable_value"),
-  ["<leader>ims"] = create_js_treesitter_textobject_keymap("import_source"),
-  ["<leader>imn"] = create_js_treesitter_textobject_keymap("import_clause"),
+  ["<leader>ims"] = create_js_treesitter_textobject_keymap("import.source"),
+  ["<leader>imn"] = create_js_treesitter_textobject_keymap("import.clause"),
 
-  ["<space>tn"] = create_js_treesitter_textobject_keymap("type_name"),
-  ["<space>tv"] = create_js_treesitter_textobject_keymap("type_value"),
-  ["<space>tin"] = create_js_treesitter_textobject_keymap("interface_name"),
-  ["<space>tiv"] = create_js_treesitter_textobject_keymap("interface_body"),
-  ["<space>af"] = create_js_treesitter_textobject_keymap("arrow_function"),
+  ["<space>tn"] = create_js_treesitter_textobject_keymap("type.name"),
+  ["<space>tv"] = create_js_treesitter_textobject_keymap("type.value"),
+  ["<space>tin"] = create_js_treesitter_textobject_keymap("interface.name"),
+  ["<space>tiv"] = create_js_treesitter_textobject_keymap("interface.body"),
+  ["<space>af"] = create_js_treesitter_textobject_keymap("arrow.function"),
 }
