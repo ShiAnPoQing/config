@@ -12,7 +12,7 @@ return {
       })
       :wait()
   end,
-  event = { "InsertEnter" },
+  event = { "InsertEnter", "CmdlineEnter" },
   config = function()
     require("blink-cmp").setup({
       ---@module 'blink.cmp'

@@ -12,6 +12,18 @@ end
 local function last_non_blank_line_start_insert_mode()
   local line = vim.api.nvim_get_current_line()
   local key
+  local count = vim.v.count1
+  if #line == 0 then
+    key = "<Esc>g_" .. count .. "a<C-f>"
+  else
+    key = "<Esc>g_" .. count .. "a"
+  end
+  return key
+end
+
+local function last_line_start_insert_mode()
+  local line = vim.api.nvim_get_current_line()
+  local key
   if #line == 0 then
     key = "A<C-f>"
   else
@@ -210,11 +222,7 @@ return {
   },
   ["<space><space>e"] = {
     {
-      function()
-        local count = vim.v.count1
-        -- <Esc> used to clear count
-        return "<Esc>$" .. count .. "a"
-      end,
+      last_line_start_insert_mode,
       "n",
       desc = "Start insert mode to the right of the last character in the current line",
       expr = true,

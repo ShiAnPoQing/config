@@ -14,6 +14,34 @@ local function large_move(key)
 end
 
 return {
+  ["j"] = {
+    function()
+      return vim.v.count == 0 and "gj" or "j"
+    end,
+    "n",
+    expr = true,
+  },
+  ["k"] = {
+    function()
+      return vim.v.count == 0 and "gk" or "k"
+    end,
+    "n",
+    expr = true,
+  },
+  ["<down>"] = {
+    function()
+      return vim.v.count == 0 and "gj" or "j"
+    end,
+    "n",
+    expr = true,
+  },
+  ["<up>"] = {
+    function()
+      return vim.v.count == 0 and "gk" or "k"
+    end,
+    "n",
+    expr = true,
+  },
   ["H"] = {
     function()
       large_move("h")
