@@ -100,15 +100,8 @@ return {
   ["wt"] = { "at", { "x", "o" } },
   ["et"] = { "it", { "x", "o" } },
 
-  ["<space>fn"] = create_js_treesitter_textobject_keymap("function.name"),
-  -- ["<space>eh"] = create_js_treesitter_textobject_keymap("variable_name"),
-  -- ["<spae>el"] = create_js_treesitter_textobject_keymap("variable_value"),
-  ["<leader>ims"] = create_js_treesitter_textobject_keymap("import.source"),
-  ["<leader>imn"] = create_js_treesitter_textobject_keymap("import.clause"),
-
-  ["<space>tn"] = create_js_treesitter_textobject_keymap("type.name"),
-  ["<space>tv"] = create_js_treesitter_textobject_keymap("type.value"),
-  ["<space>tin"] = create_js_treesitter_textobject_keymap("interface.name"),
-  ["<space>tiv"] = create_js_treesitter_textobject_keymap("interface.body"),
-  ["<space>af"] = create_js_treesitter_textobject_keymap("arrow.function"),
+  -- -- ["<space>eh"] = create_js_treesitter_textobject_keymap("variable_name"),
+  -- -- ["<spae>el"] = create_js_treesitter_textobject_keymap("variable_value"),
+  -- ["<space>tin"] = create_js_treesitter_textobject_keymap("interface.name"),
+  -- ["<space>tiv"] = create_js_treesitter_textobject_keymap("interface.body"),
 }

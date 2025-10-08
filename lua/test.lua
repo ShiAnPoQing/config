@@ -1,18 +1,18 @@
 -- local utils = require("utils.mark")
 
 -- vim.o.complete = ".,o"
--- vim.o.completeopt = "fuzzy,noselect,popup"
+-- vim.o.completeopt = "fuzzy,noselect,menu,popup"
 -- vim.o.autocomplete = true
 -- vim.o.pumheight = 7
 --
 -- vim.api.nvim_create_autocmd("LspAttach", {
 --   callback = function(ev)
 --     vim.lsp.completion.enable(true, ev.data.client_id, ev.buf, {
---       autocomplete = true,
---       convert = function(item)
---         local menu = item.detail or ""
---         return { abbr = item.label, word = item.label, menu = menu, info = "# nihoa" }
---       end,
+--       autocomplete = false,
+--       -- convert = function(item)
+--       --   local menu = item.detail or ""
+--       --   return { abbr = item.label, word = item.label, menu = menu, info = "# nihoa" }
+--       -- end,
 --     })
 --   end,
 -- })

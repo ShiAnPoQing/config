@@ -64,7 +64,8 @@ Iter:any({pred})                                                  *Iter:any()*
     若迭代器中任一项目满足给定谓词，则返回 true。
 
     参数: ~
-      • {pred}  (`fun(...):boolean`) 谓词函数。接收上阶段管道返回的所有值，返回 true 表示匹配。
+      • {pred}  (`fun(...):boolean`) 谓词函数。
+                接收上阶段管道返回的所有值，返回 true 表示匹配。
 
 Iter:each({f})                                                   *Iter:each()*
     对管道中每个项目调用一次函数，耗尽迭代器。

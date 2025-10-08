@@ -2,11 +2,9 @@
 (function_declaration
  name: (identifier) @function.name)
 
-; extends
 (variable_declarator
  name: (identifier) @variable.name)
 
-; extends
 (variable_declarator
  name: (identifier)
   (_) @variable.value)
@@ -29,4 +27,12 @@
 
 (interface_declaration
   (interface_body) @interface.body)
+
+(jsx_element) @jsx_element.outer
+
+(jsx_opening_element
+  name: (identifier) @jsx_opening_element.name)
+
+(jsx_element
+  (jsx_element) @jsx_element.inner)
 

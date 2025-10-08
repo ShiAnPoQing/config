@@ -6,11 +6,9 @@
  parameters: (formal_parameters) @function.params
 )
 
-; extends
 (variable_declarator
  name: (identifier) @variable.name)
 
-; extends
 (variable_declarator
   name: (identifier)
   (_) @variable.value)
