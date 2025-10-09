@@ -19,7 +19,10 @@ local function visual(start_row, start_col, end_row, end_col)
 
   vim.api.nvim_win_set_cursor(0, { start_row + 1, start_col })
   vim.cmd("normal! v")
-  vim.api.nvim_win_set_cursor(0, { end_row + 1, end_col - 1 })
+  if end_col > 0 then
+    end_col = end_col - 1
+  end
+  vim.api.nvim_win_set_cursor(0, { end_row + 1, end_col })
 end
 
 --- @param config? TreesitterTextobject.textobject

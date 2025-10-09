@@ -1,139 +1,3 @@
-local function first_non_blank_line_start_insert_mode()
-  local line = vim.api.nvim_get_current_line()
-  local key
-  if #line == 0 then
-    key = "I<C-f>"
-  else
-    key = "I"
-  end
-  return key
-end
-
-local function last_non_blank_line_start_insert_mode()
-  local line = vim.api.nvim_get_current_line()
-  local key
-  local count = vim.v.count1
-  if #line == 0 then
-    key = "<Esc>g_" .. count .. "a<C-f>"
-  else
-    key = "<Esc>g_" .. count .. "a"
-  end
-  return key
-end
-
-local function last_line_start_insert_mode()
-  local line = vim.api.nvim_get_current_line()
-  local key
-  if #line == 0 then
-    key = "A<C-f>"
-  else
-    key = "A"
-  end
-  return key
-end
-
-local function visual_first_non_blank_start_insert_mode()
-  local count = vim.v.count1
-  local mode = vim.api.nvim_get_mode().mode
-
-  if mode == "V" or mode == "v" or mode == "s" or mode == "S" then
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, true, true), "nx", true)
-    local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
-    local end_row, end_col = unpack(vim.api.nvim_buf_get_mark(0, ">"))
-    local text = vim.api.nvim_buf_get_text(0, start_row - 1, start_col, end_row - 1, end_col + 1, {})
-    local first_text = text[1]
-    local sc = first_text:find("%S") - 1
-    vim.api.nvim_win_set_cursor(0, { start_row, sc + start_col })
-    vim.api.nvim_feedkeys(count .. "i", "n", false)
-    return
-  end
-
-  if mode == "" then
-    vim.api.nvim_feedkeys(count .. "I", "n", false)
-    return
-  end
-
-  if mode == "" then
-    local ctrl_g = vim.api.nvim_replace_termcodes("<C-g>", true, true, true)
-    vim.api.nvim_feedkeys(ctrl_g .. count .. "I", "n", false)
-    return
-  end
-end
-
-local function visual_last_non_blank_start_insert_mode()
-  local count = vim.v.count1
-  local mode = vim.api.nvim_get_mode().mode
-
-  if mode == "v" or mode == "V" or mode == "s" or mode == "S" then
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, true, true), "nx", true)
-    local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
-    local end_row, end_col = unpack(vim.api.nvim_buf_get_mark(0, ">"))
-    local text = vim.api.nvim_buf_get_text(0, start_row - 1, start_col, end_row - 1, end_col + 1, {})
-    local last_text = text[#text]
-    local sc = last_text:reverse():find("%S") - 1
-    vim.api.nvim_win_set_cursor(0, { end_row, end_col - sc })
-    vim.api.nvim_feedkeys(count .. "a", "n", false)
-  end
-
-  if mode == "" then
-    vim.api.nvim_feedkeys(count .. "A", "n", false)
-    return
-  end
-
-  if mode == "" then
-    local ctrl_g = vim.api.nvim_replace_termcodes("<C-g>", true, true, true)
-    vim.api.nvim_feedkeys(ctrl_g .. count .. "A", "n", false)
-  end
-end
-
-local function visual_first_character_start_insert_mode()
-  local count = vim.v.count1
-  local mode = vim.api.nvim_get_mode().mode
-
-  if mode == "V" or mode == "v" or mode == "s" or mode == "S" then
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, true, true), "nx", true)
-    local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
-    vim.api.nvim_win_set_cursor(0, { start_row, start_col })
-    vim.api.nvim_feedkeys(count .. "i", "n", false)
-    return
-  end
-
-  if mode == "" then
-    vim.api.nvim_feedkeys(count .. "I", "n", false)
-    return
-  end
-
-  if mode == "" then
-    local ctrl_g = vim.api.nvim_replace_termcodes("<C-g>", true, true, true)
-    vim.api.nvim_feedkeys(ctrl_g .. count .. "I", "n", false)
-    return
-  end
-end
-
-local function visual_last_character_start_insert_mode()
-  local count = vim.v.count1
-  local mode = vim.api.nvim_get_mode().mode
-
-  if mode == "v" or mode == "V" or mode == "s" or mode == "S" then
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, true, true), "nx", true)
-    local end_row, end_col = unpack(vim.api.nvim_buf_get_mark(0, ">"))
-    vim.api.nvim_win_set_cursor(0, { end_row, end_col })
-    vim.api.nvim_feedkeys(count .. "a", "n", false)
-    return
-  end
-
-  if mode == "" then
-    vim.api.nvim_feedkeys(count .. "A", "n", false)
-    return
-  end
-
-  if mode == "" then
-    local ctrl_g = vim.api.nvim_replace_termcodes("<C-g>", true, true, true)
-    vim.api.nvim_feedkeys(ctrl_g .. count .. "A", "n", false)
-    return
-  end
-end
-
 return {
   ["w"] = {
     "i",
@@ -181,30 +45,36 @@ return {
   },
   ["<space>w"] = {
     {
-      first_non_blank_line_start_insert_mode,
+      function()
+        require("builtin.start_insert_mode.normal-mode").first_non_blank_character()
+      end,
       "n",
       desc = "Start insert mode to the left of the first non-blank character in the current line",
       expr = true,
     },
     {
       function()
-        visual_first_non_blank_start_insert_mode()
+        require("builtin.start_insert_mode.visual-mode").first_non_black_character()
       end,
       { "x", "s" },
+      desc = "Start insert mode to the left of the first non-blank character in the visual area",
     },
   },
   ["<space>e"] = {
     {
-      last_non_blank_line_start_insert_mode,
+      function()
+        require("builtin.start_insert_mode.normal-mode").last_non_blank_character()
+      end,
       "n",
       desc = "Start insert mode to the right of the last non-blank character in the current line",
       expr = true,
     },
     {
       function()
-        visual_last_non_blank_start_insert_mode()
+        require("builtin.start_insert_mode.visual-mode").last_non_black_character()
       end,
       { "x", "s" },
+      desc = "Start insert mode to the right of the last non-blank character in the visual area",
     },
   },
   ["<space><space>w"] = {
@@ -215,22 +85,26 @@ return {
     },
     {
       function()
-        visual_first_character_start_insert_mode()
+        require("builtin.start_insert_mode.visual-mode").first_character()
       end,
       { "x", "s" },
+      desc = "Start insert mode to the left of the first character in the visual area",
     },
   },
   ["<space><space>e"] = {
     {
-      last_line_start_insert_mode,
+      function()
+        require("builtin.start_insert_mode.normal-mode").last_character()
+      end,
       "n",
       desc = "Start insert mode to the right of the last character in the current line",
       expr = true,
     },
     {
       function()
-        visual_last_character_start_insert_mode()
+        require("builtin.start_insert_mode.visual-mode").last_character()
       end,
+      desc = "Start insert mode to the right of the last character in the visual area",
       { "x", "s" },
     },
   },
@@ -238,7 +112,7 @@ return {
     function()
       local count = vim.v.count1
       vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, false, true), "nx", true)
-      local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
+      local start_row = unpack(vim.api.nvim_buf_get_mark(0, "<"))
       return start_row .. "G" .. count .. "I"
     end,
     "x",
@@ -270,6 +144,7 @@ return {
     "x",
     expr = true,
   },
+  -- screen line
   ["<S-space>w"] = {
     function()
       local count = vim.v.count1
@@ -282,6 +157,7 @@ return {
   ["<S-space>e"] = {
     function()
       local count = vim.v.count1
+      ---@diagnostic disable-next-line: undefined-field
       if vim.opt.virtualedit:get()[1] == "all" then
         vim.opt.virtualedit = "none"
         vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
@@ -318,58 +194,57 @@ return {
   },
   -- normal mode into insert mode ea
   ["<space><M-i>"] = {
-    { "gea", { "n" } },
+    { "gea", "n", desc = "Start insert mode at previous word end" },
   },
   -- normal mode into insert mode Ea
   ["<space><M-S-i>"] = {
-    { "gEa", { "n" } },
+    { "gEa", "n", desc = "Start insert mode at previous WORD end" },
   },
   -- normal mode into insert mode: wi
   ["<space><M-o>"] = {
-    { "wi", { "n" } },
+    { "wi", "n", desc = "Start insert mode at next word start" },
   },
   -- normal mode into insert mode: Wi
   ["<space><M-S-o>"] = {
-    { "Wi", { "n" } },
+    { "Wi", "n", desc = "Start insert mode at next WORD start" },
   },
   -- normal mode into insert mode: ei
   ["<M-o>"] = {
-    { "<Esc>ea", "i" },
-    { "ea", "n" },
-    { "<C-right>", "t" },
+    { "<Esc>ea", "i", desc = "Move to the current word or next word end" },
+    { "ea", "n", desc = "Start insert mode at the current word or next word end" },
+    { "<C-right>", "t", desc = "Move to the current word or next word end" },
   },
   -- normal mode into insert mode: Ei
   ["<M-S-o>"] = {
-    { "<Esc>Ea", "i" },
-    { "Ea", "n" },
+    { "<Esc>Ea", "i", desc = "Move to the current WORD or next WORD end" },
+    { "Ea", "n", desc = "Start insert mode at the current WORD or next WORD end" },
   },
   -- normal mode into insert mode: bi
   ["<M-i>"] = {
-    { "<Esc>bi", { "i" } },
-    { "bi", { "n" } },
-    { "<C-left>", "t" },
+    { "<Esc>bi", "i", desc = "Move to the current word or previous word start" },
+    { "bi", "n", desc = "Start insert mode at the current word or previous word start" },
+    { "<C-left>", "t", desc = "Move to the current word or previous word start" },
   },
   ["<M-S-i>"] = {
-    { "<Esc>Bi", { "i" } },
-    { "Bi", { "n" } },
+    { "<Esc>Bi", "i", desc = "Move to the current WORD or previous WORD start" },
+    { "Bi", "n", desc = "Start insert mode at the current WORD or previous WORD start" },
   },
   ["<M-C-o>"] = {
-    { "<C-o>w", "i" },
-    { "wi", "n" },
+    { "<C-o>w", "i", desc = "Move to the next word start" },
+    { "wi", "n", desc = "Start insert mode at the next word start" },
   },
   ["<M-C-i>"] = {
-    { "<Esc>gea", "i" },
-    { "gea", "n" },
+    { "<Esc>gea", "i", desc = "Move to the previous word end" },
+    { "gea", "n", desc = "Start insert mode at the previous word end" },
   },
   ["<M-C-S-i>"] = {
-    { "<Esc>gEa", "i" },
-    { "gEa", "n" },
+    { "<Esc>gEa", "i", desc = "Move to the previous WORD end" },
+    { "gEa", "n", desc = "Start insert mode at the previous WORD end" },
   },
   ["<M-C-S-o>"] = {
-    { "<C-o>W", "i" },
-    { "Wi", "n" },
+    { "<C-o>W", "i", desc = "Move to the next WORD start" },
+    { "Wi", "n", desc = "Start insert mode at the next WORD start" },
   },
-
   ["aw"] = {
     function()
       local count = vim.v.count1
@@ -390,7 +265,6 @@ return {
     desc = "Start insert mode to the far right character of the screen window",
     expr = true,
   },
-
   ["gw"] = {
     "gi",
     "n",

@@ -67,9 +67,11 @@ return {
   -- },
   ["<leader><leader>o"] = {
     function()
-      vim.fn.setcmdline("e")
+      local node = vim.treesitter.get_node()
+      local cursor = vim.api.nvim_win_get_cursor(0)
+      -- vim.print(node:named_descendant_for_range(cursor[1] - 1, cursor[2], cursor[1], 1):type())
     end,
-    "c",
+    "n",
   },
   ["<leader><leader>z"] = {
     function()
@@ -262,3 +264,27 @@ return {
   --   "n",
   -- },
 }
+
+-- -- 获取光标下变量的引用
+-- local function highlight_references()
+--   local params = vim.lsp.util.make_position_params(nil, "utf-16")
+--   -- vim.print(params)
+--   params.context = params.context or { includeDeclaration = true }
+--   vim.lsp.buf_request(0, "textDocument/references", params, function(err, result, ctx, _)
+--     vim.print(err)
+--     if err or not result then
+--       return
+--     end
+--     vim.print(result)
+--
+--     -- -- 清除之前的高亮
+--     -- vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+--     --
+--     -- for _, loc in ipairs(result) do
+--     -- end
+--   end)
+-- end
+
+-- vim.api.nvim_create_autocmd("CursorMoved", {
+--   callback = highlight_references,
+-- })

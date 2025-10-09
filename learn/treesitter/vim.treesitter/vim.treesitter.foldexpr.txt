@@ -1,0 +1,16 @@
+foldexpr({lnum})                                   *vim.treesitter.foldexpr()*
+    返回当前缓冲区中 {lnum} 的折叠级别。可以直接设置
+    到 'foldexpr'： >lua
+        vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+<
+
+    属性： ~
+        自：0.9.0
+
+    参数： ~
+      • {lnum}  (`integer?`) 要计算折叠级别的行号
+
+    返回： ~
+        (`string`)
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

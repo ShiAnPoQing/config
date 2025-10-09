@@ -196,15 +196,15 @@ local upper_lower_keys = require("_plugins.local.magic.upper-lowercase")
 local screen_keys = require("_plugins.local.magic.screen")
 local move_line_keys = require("_plugins.local.magic.move-line")
 local put_keys = require("_plugins.local.magic.put")
---
-vim.list_extend(keys, delete_keys)
-vim.list_extend(keys, visual_keys)
-vim.list_extend(keys, yank_keys)
-vim.list_extend(keys, change_keys)
-vim.list_extend(keys, upper_lower_keys)
-vim.list_extend(keys, screen_keys)
-vim.list_extend(keys, move_line_keys)
-vim.list_extend(keys, put_keys)
+
+local function merge(sources)
+  for _, source in ipairs(sources) do
+    for k, v in pairs(source) do
+      keys[k] = v
+    end
+  end
+end
+merge({ delete_keys, visual_keys, yank_keys, change_keys, upper_lower_keys, screen_keys, move_line_keys, put_keys })
 
 return {
   name = "magic",

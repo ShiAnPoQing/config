@@ -31,6 +31,7 @@ require("neo-packer").setup({
   require("_plugins.download.misc.supermaven"),
   require("_plugins.download.misc.nvim-ts-autotag"),
   require("_plugins.download.misc.grug-far"),
+  require("_plugins.download.misc.todo-comments"),
   require("_plugins.download.git.gitsigns"),
   require("_plugins.download.window.winshift"),
   require("_plugins.download.tmux.vim-tmux-navigator"),
@@ -38,6 +39,7 @@ require("neo-packer").setup({
   require("_plugins.download.markdown.markdown-preview"),
   require("_plugins.download.markdown.render-markdown"),
   require("_plugins.download.style.mini-statusline"),
+  -- require("_plugins.download.misc.lspsaga"),
 })
 
 -- require("lazy-setup").setup({

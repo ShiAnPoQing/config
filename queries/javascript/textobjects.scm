@@ -2,6 +2,11 @@
 (function_declaration
  name: (identifier) @function.name)
 
+(function_declaration) @function.outer
+
+(function_declaration
+    body: (_) @function.inner) 
+
 (function_declaration
  parameters: (formal_parameters) @function.params
 )

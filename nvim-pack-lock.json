@@ -25,6 +25,10 @@
       "src": "https://github.com/lewis6991/gitsigns.nvim"
     },
     "grug-far.nvim": [],
+    "lspsaga.nvim": {
+      "rev": "8efe00d",
+      "src": "https://github.com/nvimdev/lspsaga.nvim"
+    },
     "lualine.nvim": {
       "rev": "b8c2315",
       "src": "https://github.com/nvim-lualine/lualine.nvim"
@@ -96,6 +100,10 @@
     "tiny-inline-diagnostic.nvim": {
       "rev": "6d8dc61",
       "src": "https://github.com/rachartier/tiny-inline-diagnostic.nvim"
+    },
+    "todo-comments.nvim": {
+      "rev": "19d461d",
+      "src": "https://github.com/folke/todo-comments.nvim"
     },
     "undotree": {
       "rev": "0f1c981",

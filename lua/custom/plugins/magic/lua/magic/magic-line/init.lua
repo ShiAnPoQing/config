@@ -3,7 +3,8 @@ local Key = require("magic.key")
 local Line_hl = require("magic.line-hl")
 
 --- @class MagicLineOpts
---- @field dir "up" | "down" | "all"
+--- @diagnostic disable-next-line: duplicate-doc-field
+--- @field dir "up"|"down"|"all"
 --- @field callback fun()
 function M.magic_line(opts)
   local dir = opts.dir
