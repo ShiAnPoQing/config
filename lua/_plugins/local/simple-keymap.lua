@@ -1,7 +1,6 @@
 return {
   name = "simple-keymap.nvim",
   config = function()
-    vim.print("simple-keymap config")
     require("simple-keymap").setup({
       add = {
         "keymaps/",

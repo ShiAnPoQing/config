@@ -67,6 +67,10 @@
       "rev": "23320e7",
       "src": "https://github.com/windwp/nvim-autopairs"
     },
+    "nvim-navic": {
+      "rev": "f887d79",
+      "src": "https://github.com/SmiteshP/nvim-navic"
+    },
     "nvim-treesitter": {
       "rev": "0594d1ba",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter",

@@ -49,7 +49,23 @@ return {
   ["<tab><tab>c"] = { "<cmd>tabclose!<cr>", "n" },
   ["<tab>o"] = { "<cmd>on<cr>", "n" },
   ["<tab>O"] = { "<cmd>tabonly<cr>", "n" },
-  ["<tab>n"] = { "<cmd>tabnew<cr>", "n" },
+  -- TODO: tabnew more options
+  ["<tab>n"] = {
+    function()
+      vim.ui.input({
+        prompt = "New Tab Edit: ",
+        completion = "file",
+        -- highlight = function(input) end,
+      }, function(input)
+        if not input then
+          return
+        end
+        local count = vim.v.count1
+        vim.cmd(count .. "tabnew " .. input)
+      end)
+    end,
+    "n",
+  },
   -- gT
   ["<Tab>h"] = {
     function()

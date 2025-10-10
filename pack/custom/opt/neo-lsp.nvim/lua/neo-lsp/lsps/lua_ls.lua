@@ -66,6 +66,9 @@ return {
   --     end,
   --   })
   -- end,
+  on_attach = function(client, bufnr)
+    require("neo-winbar.winbar").attach(client, bufnr)
+  end,
 }
 
 -- vim.lsp.config["luals"] = {

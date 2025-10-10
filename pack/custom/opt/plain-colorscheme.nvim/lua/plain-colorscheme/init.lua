@@ -130,6 +130,8 @@ local function get_groups()
 
       Added = { fg = colors.hue36 },
       Removed = { fg = colors.hue72 },
+      WinBar = { bg = colors.bg2 },
+      WinBarNC = { link = "WinBar" },
 
       Constant = { fg = colors.hue1 },
       Function = { fg = colors.hue46 },
@@ -278,6 +280,81 @@ local function get_groups()
       -- * `MiniStatuslineFilename` - for |MiniStatusline.section_filename| section.
       -- * `MiniStatuslineFileinfo` - for |MiniStatusline.section_fileinfo| section.
       -- * `MiniStatuslineInactive` - highliting in not focused window.
+      NeoWinbarFile = { fg = colors.hue60 },
+      NavicIconsFile = {
+        fg = colors.hue48,
+      },
+      NavicIconsModule = {
+        fg = colors.hue52,
+      },
+      NavicIconsNamespace = {
+        fg = colors.hue48,
+      },
+      NavicIconsPackage = {
+        fg = colors.hue52,
+      },
+      NavicIconsClass = {
+        fg = colors.hue48,
+      },
+      NavicIconsMethod = {
+        fg = colors.hue48,
+      },
+      NavicIconsProperty = {
+        fg = colors.hue48,
+      },
+      NavicIconsField = {
+        fg = colors.hue48,
+      },
+      NavicIconsConstructor = {
+        fg = colors.hue48,
+      },
+      NavicIconsEnum = {
+        fg = colors.hue48,
+      },
+      NavicIconsInterface = {
+        fg = colors.hue48,
+      },
+      NavicIconsFunction = {
+        fg = colors.hue46,
+      },
+      NavicIconsVariable = {
+        fg = colors.hue48,
+      },
+      NavicIconsConstant = {
+        link = "Constant",
+      },
+      NavicIconsString = { link = "String" },
+      NavicIconsNumber = { link = "Number" },
+      NavicIconsBoolean = { link = "Boolean" },
+      NavicIconsArray = {
+        fg = colors.hue48,
+      },
+      NavicIconsObject = {
+        fg = colors.hue5,
+      },
+      NavicIconsKey = {
+        fg = colors.hue48,
+      },
+      NavicIconsNull = {
+        fg = colors.hue48,
+      },
+      NavicIconsEnumMember = {
+        fg = colors.hue48,
+      },
+      NavicIconsStruct = {
+        fg = colors.hue48,
+      },
+      NavicIconsEvent = {
+        fg = colors.hue48,
+      },
+      NavicIconsOperator = { link = "Operator" },
+      NavicIconsTypeParameter = {
+        fg = colors.hue48,
+      },
+      NavicText = {
+        -- fg = colors.hue48,
+      },
+      NavicSeparator = {},
     },
     light = {},
   }

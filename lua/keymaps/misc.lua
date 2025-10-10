@@ -1,4 +1,21 @@
 return {
+  ["<leader>X"] = {
+    "<cmd>source %<cr>",
+    "n",
+    { desc = "Source ths lua file" },
+  },
+  ["<leader>x"] = {
+    {
+      ":.lua<cr>",
+      "n",
+      { desc = "Run cursor line" },
+    },
+    {
+      ":lua<cr>",
+      "x",
+      { desc = "Run selected" },
+    },
+  },
   -- t 的优先级低，单独占用一个键，不合适
   ["t"] = { "<nop>", { "n", "o", "x" } },
   ["<space>f"] = { "t", { "n", "o", "x" } },
