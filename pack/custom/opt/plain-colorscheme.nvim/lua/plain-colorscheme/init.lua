@@ -108,7 +108,8 @@ local function get_groups()
       NormalFloat = { link = "Normal" },
       NormalNC = { fg = "", bg = "" },
       CursorLine = { bg = colors.bg3 },
-      CursorLineNr = { fg = colors.bg11, bold = true },
+      -- CursorLineNr = { fg = colors.bg11, bg = colors.bg3, bold = true },
+      CursorLineNr = { fg = colors.bg11, bg = colors.bg3, bold = true },
       ColorColumn = { bg = colors.bg3 },
       LineNr = { fg = colors.bg6 },
       Search = { reverse = true },
@@ -280,7 +281,7 @@ local function get_groups()
       -- * `MiniStatuslineFilename` - for |MiniStatusline.section_filename| section.
       -- * `MiniStatuslineFileinfo` - for |MiniStatusline.section_fileinfo| section.
       -- * `MiniStatuslineInactive` - highliting in not focused window.
-      NeoWinbarFile = { fg = colors.hue60 },
+      NeoWinbarFile = {},
       NavicIconsFile = {
         fg = colors.hue48,
       },
@@ -354,7 +355,7 @@ local function get_groups()
       NavicText = {
         -- fg = colors.hue48,
       },
-      NavicSeparator = {},
+      NavicSeparator = { fg = colors.bg7 },
     },
     light = {},
   }

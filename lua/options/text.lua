@@ -1,5 +1,0 @@
-return {
-  text = {
-    concealcursor = {},
-  },
-}

@@ -49,7 +49,6 @@ return {
   ["<tab><tab>c"] = { "<cmd>tabclose!<cr>", "n" },
   ["<tab>o"] = { "<cmd>on<cr>", "n" },
   ["<tab>O"] = { "<cmd>tabonly<cr>", "n" },
-  -- TODO: tabnew more options
   ["<tab>n"] = {
     function()
       vim.ui.input({

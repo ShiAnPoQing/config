@@ -1,5 +1,0 @@
-return {
-  typescript = {
-    number = true,
-  },
-}

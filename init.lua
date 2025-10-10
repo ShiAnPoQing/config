@@ -1,10 +1,11 @@
 vim.g.mapleader = ";"
 require("command")
+require("autocmds")
 
 vim.pack.add({ "https://github.com/BrokenSunny/neo-packer" }, { confirm = false })
 require("neo-packer").setup({
   require("_plugins.local.simple-keymap"),
-  require("_plugins.local.parse-option"),
+  require("_plugins.local.neo-option"),
   require("_plugins.local.repeat"),
   require("_plugins.local.plain-colorscheme"),
   require("_plugins.local.neo-lsp"),
@@ -14,6 +15,7 @@ require("neo-packer").setup({
   require("_plugins.local.code-action"),
   require("_plugins.local.treesitter-textobject"),
   require("_plugins.local.move-line"),
+  require("_plugins.local.concat-line"),
   require("_plugins.local.tag-peek"),
   require("_plugins.local.file-details"),
   require("_plugins.local.surround"),
