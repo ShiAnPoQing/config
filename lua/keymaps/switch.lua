@@ -27,9 +27,11 @@ return {
     end,
     "n",
   },
+  -- Toggle cursorline
+  -- Only in cursor window
   ["<leader>csl"] = {
     function()
-      vim.opt.cursorline = not vim.opt.cursorline:get()
+      require("builtin.toggle_cursorline").toggle_cursorline()
     end,
     "n",
   },

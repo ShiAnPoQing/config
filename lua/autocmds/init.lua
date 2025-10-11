@@ -20,10 +20,3 @@ vim.api.nvim_create_autocmd("BufReadPost", {
     vim.api.nvim_exec2([[silent! normal! g`"zv]], { output = false })
   end,
 })
-
--- vim.api.nvim_create_autocmd("FileType", {
---   pattern = "typescript",
---   callback = function()
---
---   end
--- })

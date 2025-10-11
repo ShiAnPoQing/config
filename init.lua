@@ -45,7 +45,6 @@ require("neo-packer").setup({
   require("_plugins.download.style.mini-statusline"),
   -- require("_plugins.download.misc.lspsaga"),
 })
-
 -- require("lazy-setup").setup({
 --   require("plugins.custom.repeat"),
 --   require("plugins.custom.parse-option"),
