@@ -1,11 +1,18 @@
 return {
   "iamcco/markdown-preview.nvim",
   cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-  build = "cd app && yarn install",
-  init = function()
+  ft = { "markdown" },
+  run = function(plug)
+    vim
+      .system({ "yarn", "install" }, {
+        cwd = plug.path .. "/app",
+        text = true,
+      })
+      :wait()
+  end,
+  before = function()
     vim.g.mkdp_filetypes = { "markdown" }
   end,
-  ft = { "markdown" },
   config = function()
     vim.g.mkdp_auto_close = true
     vim.g.mkdp_open_to_the_world = false

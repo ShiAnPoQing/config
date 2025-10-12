@@ -17,8 +17,7 @@ function M.toggle_cursorline()
         vim.opt.cursorline = true
       end,
     })
-    table.insert(autocmds, winleave)
-    table.insert(autocmds, winenter)
+    autocmds = { winleave, winenter }
   else
     vim.opt.cursorline = false
     on = nil

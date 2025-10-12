@@ -1,10 +1,8 @@
 return {
   "MagicDuck/grug-far.nvim",
-  opts = { headerMaxWidth = 80 },
   cmd = "GrugFar",
   keys = {
-    {
-      "<leader>sr",
+    ["<leader>sr"] = {
       function()
         local grug = require("grug-far")
         local ext = vim.bo.buftype == "" and vim.fn.expand("%:e")
@@ -15,8 +13,13 @@ return {
           },
         })
       end,
-      mode = { "n", "v" },
+      { "n", "v" },
       desc = "Search and Replace",
     },
   },
+  config = function()
+    require("grug-far").setup({
+      headerMaxWidth = 80,
+    })
+  end,
 }

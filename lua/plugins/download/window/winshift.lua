@@ -54,8 +54,8 @@ return {
             bufname = {}, -- List of vim regex patterns matching ignored buffer names
           },
           ---A function used to filter the list of selectable windows.
-          ---@param winids integer[] # The list of selectable window IDs.
-          ---@return integer[] filtered # The filtered list of window IDs.
+          -----@param winids integer[] # The list of selectable window IDs.
+          ----@return integer[] filtered # The filtered list of window IDs.
           filter_func = nil,
         })
       end,

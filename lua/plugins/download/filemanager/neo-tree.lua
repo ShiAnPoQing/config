@@ -1,30 +1,28 @@
 return {
   "nvim-neo-tree/neo-tree.nvim",
-  enabled = true,
-  branch = "v3.x",
-  dependencies = {
+  version = "v3.x",
+  depend = {
     "nvim-lua/plenary.nvim",
-    "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+    "nvim-tree/nvim-web-devicons",
     "MunifTanjim/nui.nvim",
-    -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
+  },
+  keys = {
+    ["<leader>e"] = {
+      function()
+        require("neo-tree.command").execute({ toggle = true, reveal_force_cwd = false })
+      end,
+      "n",
+      desc = "Explorer NeoTree (Root Dir)",
+    },
+    ["<leader>be"] = {
+      function()
+        require("neo-tree.command").execute({ source = "buffers", toggle = true })
+      end,
+      "n",
+      desc = "Buffer Explorer",
+    },
   },
   config = function()
-    require("simple-keymap").add({
-      ["<leader>be"] = {
-        function()
-          require("neo-tree.command").execute({ source = "buffers", toggle = true })
-        end,
-        "n",
-        desc = "Buffer Explorer",
-      },
-      ["<leader>e"] = {
-        function()
-          -- require("neo-tree.command").execute({ toggle = true, dir = vim.uv.cwd() })
-          require("neo-tree.command").execute({ toggle = true, reveal_force_cwd = false })
-        end,
-        "n",
-        desc = "Explorer NeoTree (Root Dir)",
-      },
-    })
+    require("neo-tree").setup({})
   end,
 }

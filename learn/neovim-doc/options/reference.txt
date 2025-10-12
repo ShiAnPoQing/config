@@ -1,0 +1,448 @@
+*options.txt*	Nvim
+
+
+		  VIM 参考手册	  by Bram Moolenaar
+
+
+选项							*options*
+
+关于选项的概述请参阅 quickref.txt |option-list|。
+
+Vim 有许多内部变量和开关，可以通过设置它们来实现特殊效果。这些选项有三种形式：
+	布尔型		只能是打开或关闭		*boolean* *toggle*
+	数值型		具有数值
+	字符串型		具有字符串值
+
+				      输入 |gO| 查看目录。
+
+==============================================================================
+1. 设置选项					*set-option* *E764*
+
+							*:se* *:set*
+:se[t][!]		显示所有与默认值不同的选项。
+			当存在 [!] 时，每个选项单独占一行。
+
+:se[t][!] all		显示所有选项。
+			当存在 [!] 时，每个选项单独占一行。
+
+								*E518* *E519*
+:se[t] {option}?	显示 {option} 的值。
+			注意：一些旧版选项已被移除。|nvim-removed|
+
+:se[t] {option}		切换选项：设置，打开它。
+			数值选项：显示值。
+			字符串选项：显示值。
+
+:se[t] no{option}	切换选项：重置，关闭它。
+
+							   *:set-!* *:set-inv*
+:se[t] {option}!   或
+:se[t] inv{option}	切换选项：反转值。
+
+				*:set-default* *:set-&* *:set-&vi* *:set-&vim*
+:se[t] {option}&	将选项重置为其默认值。
+:se[t] {option}&vi	将选项重置为其 Vi 默认值。
+:se[t] {option}&vim	将选项重置为其 Vim 默认值。
+
+:se[t] all&		将所有选项设置为其默认值。以下选项的值不会改变：
+			  'columns'
+			  'lines'
+			警告：这可能会产生很多副作用。
+
+					    *:set-args* *:set=* *E487* *E521*
+:se[t] {option}={value}		或
+:se[t] {option}:{value}
+			将字符串或数值选项设置为 {value}。
+			对于数值选项，值可以以十进制、十六进制（以 0x 开头）或八进制（以 '0' 或 '0o' 开头）给出。
+			可以通过输入 'wildchar'（默认为 <Tab>）来插入旧值。许多具有固定语法的字符串选项也支持补全已知值。
+			参阅 |cmdline-completion| 和 |complete-set-option|。
+			{option} 和 '=' 之间的空白字符是允许的，并且将被忽略。'=' 和 {value} 之间的空白字符是不允许的。
+			关于在 {value} 中使用空白字符和反斜杠，请参阅 |option-backslash|。
+
+:se[t] {option}+={value}				*:set+=*
+			将 {value} 加到数值选项上，或将 {value} 附加到字符串选项上。当选项是逗号分隔的列表时，会添加一个逗号，除非该值为空。
+			如果选项是一个标志列表，则会移除多余的标志。当添加一个已经存在的标志时，选项值不会改变。
+			同时参阅上面的 |:set-args|。
+
+:se[t] {option}^={value}				*:set^=*
+			将数值选项乘以 {value}，或将 {value} 前置到字符串选项。当选项是逗号分隔的列表时，会添加一个逗号，除非该值为空。
+			同时参阅上面的 |:set-args|。
+
+:se[t] {option}-={value}				*:set-=*
+			从数值选项中减去 {value}，或者如果存在，则从字符串选项中移除 {value}。
+			如果在字符串选项中找不到 {value}，则不会报错或警告。当选项是逗号分隔的列表时，会删除一个逗号，除非选项变为空。
+			当选项是一个标志列表时，{value} 必须与选项中的显示完全一致。请逐个移除标志以避免问题。
+			可以通过输入 'wildchar' 来插入逗号分隔列表或标志列表中的各个值。
+			参阅 |complete-set-option|。
+			同时参阅上面的 |:set-args|。
+
+":set" 的 {option} 参数可以重复。例如： >
+	:set ai nosi sw=3 ts=3
+如果你在其中一个参数中出错，会给出错误信息，并且后续的参数将被忽略。
+
+							*:set-verbose*
+当 'verbose' 非零时，显示选项值也会说明它最后是在哪里设置的。示例： >
+	:verbose set shiftwidth cindent?
+<  shiftwidth=4 ~
+	  最后在模型行第 1 行设置 ~
+  cindent ~
+	  最后在 /usr/local/share/vim/vim60/ftplugin/c.vim 第 30 行设置 ~
+这仅在请求特定选项值时执行，而不是在 ":verbose set all" 或没有参数的 ":verbose set" 时。
+当选项是手动设置时，没有"最后设置"的消息。
+当选项是在执行函数、用户命令或自动命令时设置的，会报告定义它的脚本。
+一些特殊文本：
+	最后在模型行第 1 行设置 ~
+		选项是在 |modeline| 中设置的。
+	最后在 --cmd 参数中设置 ~
+		选项是使用命令行参数 |--cmd| 或 + 设置的。
+	最后在 -c 参数中设置 ~
+		选项是使用命令行参数 |-c|, +, |-S| 或 |-q| 设置的。
+	最后在环境变量中设置 ~
+		选项是从 $VIMINIT 设置的。
+	最后在错误处理程序中设置 ~
+		选项在求值导致错误时被清除。
+
+							*option-backslash*
+要在字符串选项值中包含空白字符，必须在它前面加上反斜杠。要包含一个反斜杠，你必须使用两个。实际上，这意味着选项值中的反斜杠数量减半（向下取整）。
+在选项 'path', 'cdpath', 和 'tags' 中，空格必须用三个反斜杠代替，因为它们可以用逗号或空格分隔。
+逗号分隔的选项如 'backupdir' 和 'tags' 也需要用两个反斜杠转义逗号，而对于非逗号分隔的选项如 'makeprg' 则不需要。
+当使用 |:let| 和 |literal-string| 设置选项时，你需要少用一层反斜杠。
+一些例子： >
+   :set makeprg=make\ file	    结果是 "make file"
+   :let &makeprg='make file'	    (同上)
+   :set makeprg=make\\\ file	    结果是 "make\ file"
+   :set tags=tags\ /usr/tags	    结果是 "tags" 和 "/usr/tags"
+   :set tags=tags\\\ file	    结果是 "tags file"
+   :let &tags='tags\ file'	    (同上)
+
+   :set makeprg=make,file	    结果是 "make,file"
+   :set makeprg=make\\,file	    结果是 "make\,file"
+   :set tags=tags,file		    结果是 "tags" 和 "file"
+   :set tags=tags\\,file	    结果是 "tags\,file"
+   :let &tags='tags\,file'	    (同上)
+
+"|" 字符将 ":set" 命令与后续命令分隔开。要在选项值中包含 "|"，请改用 "\|"。这个例子将 'titlestring' 选项设置为 "hi|there"： >
+   :set titlestring=hi\|there
+这个例子将 'titlestring' 选项设置为 "hi"，将 'iconstring' 设置为 "there"： >
+   :set titlestring=hi|set iconstring=there
+
+类似地，双引号字符开始一个注释。要在选项值中包含 '"'，请改用 '\"'。这个例子将 'titlestring' 选项设置为 "hi "there""： >
+   :set titlestring=hi\ \"there\"
+
+对于 Win32，文件名中的反斜杠大多不会被移除。更准确地说：对于期望文件名的选项（那些会展开环境变量的选项），在普通文件名字符前的反斜杠不会被移除。但是在特殊字符（空格、反斜杠、逗号等）前的反斜杠会按照上述方式使用。
+有一个特殊情况，当值以 "\\" 开头时： >
+   :set dir=\\machine\path	    结果是 "\\machine\path"
+   :set dir=\\\\machine\\path	    结果是 "\\machine\path"
+   :set dir=\\path\\file	    结果是 "\\path\file" (错误！)
+对于第一个，开头被保留，但对于第二个，反斜杠数量减半。这确保了无论你期望反斜杠减半还是保留都能工作。第三个给出的结果可能不是你想要的。请避免这种情况。
+
+				*add-option-flags* *remove-option-flags*
+				*E539*
+有些选项是标志列表。当你想向这样的选项添加一个标志，而不改变现有的标志时，你可以这样做： >
+   :set guioptions+=a
+像这样从选项中移除一个标志： >
+   :set guioptions-=a
+这会从 'guioptions' 中移除 'a' 标志。
+注意你应该一次添加或移除一个标志。如果 'guioptions' 的值是 "ab"，使用 "set guioptions-=ba" 将不起作用，因为字符串 "ba" 没有出现。
+
+			   *:set_env* *expand-env* *expand-environment-var*
+特定字符串选项中的环境变量会被展开。如果环境变量存在，则 '$' 和后面的环境变量名会被替换为其值。如果不存在，则 '$' 和名称不会被修改。任何非标识字符（不是字母、数字或 '_'）可以跟在环境变量名后面。该字符及其后面的内容会附加到环境变量的值上。示例： >
+   :set term=$TERM.new
+   :set path=/usr/$INCLUDE,$HOME/include,.
+当使用 ":set opt-=val" 或 ":set opt+=val" 从选项中添加或移除字符串时，展开在添加或移除之前进行。
+
+
+处理局部选项			*local-options*
+
+注意：以下内容也适用于 |global-local| 选项。
+
+有些选项仅适用于窗口或缓冲区。每个窗口或缓冲区都有此选项的自己的副本，因此每个都可以有自己的值。这允许你在一个窗口中设置 'list' 而在另一个中不设置。并且在一个缓冲区中将 'shiftwidth' 设置为 3，在另一个中设置为 4。
+
+以下解释了在特定情况下这些局部选项会发生什么。你并不真的需要了解所有这些，因为 Vim 大多会使用你期望的选项值。不幸的是，满足用户的期望有点复杂...
+
+当分割窗口时，局部选项被复制到新窗口。因此，在分割后，两个窗口的内容看起来相同。
+
+当编辑新缓冲区时，其局部选项值必须被初始化。由于当前缓冲区的局部选项可能专门针对该缓冲区，因此不会使用它们。相反，对于每个缓冲区局部选项，还有一个全局值，用于新缓冲区。使用 ":set" 会同时改变局部值和全局值。使用 "setlocal" 只改变局部值，因此在编辑新缓冲区时不会使用此值。
+
+当编辑一个之前编辑过的缓冲区时，会再次使用最后关闭的窗口中的选项。如果此缓冲区曾在此窗口中编辑过，则使用当时的数值。否则，使用最后关闭的、该缓冲区最后被编辑的窗口中的数值。
+
+可以为特定类型的缓冲区专门设置窗口局部选项。当你在同一窗口中编辑另一个缓冲区时，你不想继续使用这些窗口局部选项。因此 Vim 保留了窗口局部选项的全局值，在编辑另一个缓冲区时使用。每个窗口都有这些值的自己的副本。因此这些值对窗口是局部的，但对窗口中的所有缓冲区是全局的。通过这个，你可以这样做： >
+	:e one
+	:set list
+	:e two
+现在 "two" 中的 'list' 选项也将被设置，因为通过 ":set list" 命令你也设置了全局值。 >
+	:set nolist
+	:e one
+	:setlocal list
+	:e two
+现在 'list' 选项没有被设置，因为 ":set nolist" 重置了全局值，":setlocal list" 只改变了局部值，而 ":e two" 获取了全局值。注意，如果你接下来这样做： >
+	:e one
+你将得到上次编辑 "one" 时的 'list' 值。
+窗口的局部选项会被每个缓冲区记住。即使缓冲区未加载时也会发生，但当缓冲区被擦除 |:bwipe| 时，它们会丢失。
+
+特殊的窗口局部选项			*local-noglobal*
+
+以下窗口局部选项在创建新窗口时不会被复制，因此它们的行为略有不同：
+
+	选项		原因	~
+	'previewwindow'	只能有一个
+	'scroll'	特定于现有窗口
+	'winfixbuf'	特定于现有窗口
+	'winfixheight'	特定于现有窗口
+	'winfixwidth'	特定于现有窗口
+
+特殊的缓冲区局部选项
+
+以下缓冲区局部选项在创建新缓冲区时不会被复制，因此它们的行为略有不同：
+
+	选项		原因	~
+	'filetype'	由自动命令显式设置
+	'syntax'	由自动命令显式设置
+	'bufhidden'	表示 |special-buffers|
+	'buftype'	表示 |special-buffers|
+	'readonly'	将自动检测
+	'modified'	将自动检测
+
+							*:setl* *:setlocal*
+:setl[ocal][!] ...	类似于 ":set" 但只设置当前缓冲区或窗口的局部值。并非所有选项都有局部值。如果选项没有局部值，则设置全局值。
+			使用 "all" 参数：显示所有局部选项的局部值。
+			无参数：显示所有与默认值不同的局部选项的局部值。
+			当显示特定局部选项时，显示局部值。对于全局/局部布尔选项，当正在使用全局值时，选项名前会显示 "--"。
+			对于全局选项，显示全局值（但这在未来可能会改变）。
+
+:se[t] {option}<	将 {option} 的有效值设置为其全局值。
+			对于 |global-local| 选项，移除局部值，以便使用全局值。
+			对于所有其他选项，将全局值复制到局部值。
+
+:setl[ocal] {option}<	通过将全局值复制到局部值，将 {option} 的有效值设置为其全局值。
+
+注意，对于 |global-local| 选项，字符串和基于数值的选项的行为略有不同。
+
+							*:setg* *:setglobal*
+:setg[lobal][!] ...	类似于 ":set" 但只设置局部选项的全局值，而不改变局部值。
+			当显示选项时，显示全局值。
+			使用 "all" 参数：显示所有局部选项的全局值。
+			无参数：显示所有与默认值不同的局部选项的全局值。
+
+对于缓冲区局部和窗口局部选项：
+	命令		 全局值	  局部值	       条件 ~
+      :set option=value	     设置	      设置
+ :setlocal option=value	      -	      设置
+:setglobal option=value	     设置	       -
+      :set option?	      -	     显示	 设置了局部值
+      :set option?	    显示	      -	 未设置局部值
+ :setlocal option?	      -	     显示
+:setglobal option?	    显示	      -
+
+
+具有局部值的全局选项			*global-local*
+
+当你为所有缓冲区和窗口大多使用一个值时，选项是全局的。对于某些全局选项，有时拥有不同的局部值很有用。你可以用 ":setlocal" 设置局部值。该缓冲区或窗口将使用局部值，而其他缓冲区和窗口继续使用全局值。
+
+例如，你有两个窗口，都打开 C 源代码。它们使用全局的 'makeprg' 选项。如果你在其中一个窗口中执行： >
+	:set makeprg=gmake
+那么另一个窗口将切换到相同的值。不需要在另一个 C 源文件窗口中也设置 'makeprg' 选项。
+但是，如果你在新窗口中开始编辑 Perl 文件，你想为它使用另一个 'makeprg'，而不改变用于 C 源文件的值。你使用这个命令： >
+	:setlocal makeprg=perlmake
+你可以通过使局部值为空来切换回使用全局值： >
+	:setlocal makeprg=
+这只适用于字符串选项。对于数值或布尔选项，你需要使用 "<" 标志，像这样： >
+	:setlocal autoread<
+注意，对于非布尔和非数值选项，使用 "<" 会将全局值复制到局部值，它不会切换回使用全局值（当全局值后来改变时这很重要）。你也可以使用： >
+	:set path<
+这将使 'path' 的局部值为空，从而使用全局值。因此它与以下作用相同： >
+	:setlocal path=
+注意：将来更多的全局选项可以变为 |global-local|。在全局选项上使用 ":setlocal" 到时可能会工作不同。
+
+						*option-value-function*
+一些选项（'completefunc', 'findfunc', 'omnifunc', 'operatorfunc', 'quickfixtextfunc', 'tagfunc' 和 'thesaurusfunc'）被设置为函数名或函数引用或 lambda 函数。当使用 lambda 时，它将被转换为名称，例如 "<lambda>123"。
+示例：
+>
+	set opfunc=MyOpFunc
+	set opfunc=function('MyOpFunc')
+	set opfunc=funcref('MyOpFunc')
+	set opfunc={a\ ->\ MyOpFunc(a)}
+
+设置为脚本局部函数： >
+	set opfunc=s:MyLocalFunc
+	set opfunc=<SID>MyLocalFunc
+
+使用 funcref 变量设置： >
+	let Fn = function('MyTagFunc')
+	let &tagfunc = Fn
+
+使用 lambda 表达式设置： >
+	let &tagfunc = {t -> MyTagFunc(t)}
+
+使用带有 lambda 表达式的变量设置： >
+	let L = {a, b, c -> MyTagFunc(a, b , c)}
+	let &tagfunc = L
+
+在表达式选项中调用函数			*expr-option-function*
+
+少数选项（如 'foldexpr'）的值是一个被求值以获取值的表达式。求值可能会有相当大的开销。最小化开销的一种方法，同时也是保持选项值非常简单的方法，是定义一个函数并将选项设置为不带参数调用它。也可以使用 |v:lua-call|。示例： >vim
+	lua << EOF
+	  function _G.MyFoldFunc()
+	    -- ... 为行 v:lnum 计算折叠级别
+	    return level
+	  end
+	EOF
+	set foldexpr=v:lua.MyFoldFunc()
+
+
+设置文件类型
+
+:setf[iletype] [FALLBACK] {filetype}			*:setf* *:setfiletype*
+			将 'filetype' 选项设置为 {filetype}，但前提是在一系列（嵌套的）自动命令中尚未设置。
+			这是以下命令的简写： >
+				:if !did_filetype()
+				:  setlocal filetype={filetype}
+				:endif
+<			此命令用于 filetype.vim 文件中，以避免两次设置 'filetype' 选项，导致加载不同的设置和语法文件。
+
+			当存在可选的 FALLBACK 参数时，后续的 :setfiletype 命令将覆盖 'filetype'。这用于那些只是猜测的文件类型检测。此命令后 |did_filetype()| 将返回 false。
+
+				*option-window* *optwin*
+:bro[wse] se[t]			*:set-browse* *:browse-set* *:opt* *:options*
+:opt[ions]		打开一个窗口用于查看和设置所有选项。
+			选项按功能分组。
+			为每个选项提供简短帮助。在简短帮助上点击 <CR> 可以打开一个帮助窗口，显示该选项的更多帮助。
+			修改选项的值，并在 "set" 行上点击 <CR> 来设置新值。对于窗口和缓冲区特定选项，将使用最后访问的窗口来设置选项值，除非这是一个帮助窗口，在这种情况下将使用帮助窗口下面的窗口（跳过选项窗口）。
+
+								*$HOME*
+使用 "~" 类似于使用 "$HOME"，但它只在选项的开头以及空格或逗号之后被识别。
+
+在 Unix 系统上也可以使用 "~user"。它被替换为用户 "user" 的主目录。示例： >
+    :set path=~mool/include,/usr/include,.
+
+在 Unix 系统上也可以使用 "${HOME}" 形式。这样 {} 之间的名称可以包含非标识字符。注意，如果你想在 "gf" 命令中使用这个，你需要将 '{' 和 '}' 字符添加到 'isfname' 中。
+
+注意：展开环境变量和 "~/" 仅在 ":set" 命令中执行，而不是在使用 ":let" 为选项赋值时。
+
+							*$HOME-windows*
+在 MS-Windows 上，如果 $HOME 没有定义为环境变量，那么在运行时 Vim 会将其设置为 $HOMEDRIVE$HOMEPATH 的展开。
+如果 $HOMEDRIVE 未设置，则使用 $USERPROFILE。
+
+这个展开的值不会导出到环境中，这在运行外部命令时很重要： >
+	:echo system('set | findstr ^HOME=')
+和 >
+	:echo luaeval('os.getenv("HOME")')
+应该回显空（空字符串），尽管 exists('$HOME') 为真。
+当将 $HOME 设置为非空字符串时，它将被导出到子进程中。
+
+注意展开选项的最大长度是有限的。取决于系统，大多为 256 或 1024 个字符。
+
+==============================================================================
+2. 自动设置选项			*auto-setting*
+
+除了使用 ":set" 命令更改选项外，你还可以通过多种方式自动设置选项：
+
+1. 使用 |config| 文件或 |startup| 参数。你可以使用 |:mkvimrc|, |:mkview| 和 |:mksession| 创建初始化文件。
+2. 编辑文件时执行的 |autocommand|。
+3. 如果 'exrc' 启用，当前目录中的 ".nvim.lua" 文件。
+4. 当前缓冲区目录或其祖先目录中的 |editorconfig|。
+5. 在文件开头或结尾找到的 'modeline' 设置。见下文。
+
+					*modeline* *vim:* *vi:* *ex:* *E520*
+有两种形式的模型行。第一种形式：
+	[文本{空白}]{vi:|vim:|ex:}[空白]{选项}
+
+[文本{空白}]		空或任何文本后跟至少一个空白字符（<Space> 或 <Tab>）；"ex:" 总是要求至少一个空白字符
+{vi:|vim:|ex:}		字符串 "vi:", "vim:" 或 "ex:"
+[空白]			可选的空白
+{选项}			选项设置的列表，用空白或 ':' 分隔，其中每个 ':' 之间的部分是 ":set" 命令的参数（可以为空）
+
+示例：
+   vi:noai:sw=3 ts=6 ~
+   vim: tw=77 ~
+
+第二种形式（这与某些版本的 Vi 兼容）：
+
+	[文本{空白}]{vi:|vim:|Vim:|ex:}[空白]se[t] {选项}:[文本]
+
+[文本{空白}]		空或任何文本后跟至少一个空白字符（<Space> 或 <Tab>）；"ex:" 总是要求至少一个空白字符
+{vi:|vim:|Vim:|ex:}	字符串 "vi:", "vim:", "Vim:" 或 "ex:"
+[空白]			可选的空白
+se[t]			字符串 "set " 或 "se "（注意空格）；当使用 "Vim" 时，必须是 "set"。
+{选项}			选项的列表，用空白分隔，这是 ":set" 命令的参数
+:			一个冒号
+[文本]			任何文本或空
+
+示例： >
+   /* vim: set ai tw=75: */
+   /* Vim: set ai tw=75: */
+
+{vi:|vim:|Vim:|ex:} 之前的空白是必需的。这最小化了像 "lex:" 这样的普通单词被捕获的机会。有一个例外："vi:" 和 "vim:" 也可以出现在行首（为了与版本 3.0 兼容）。行首的 "ex:" 将被忽略（这可能是 "example:" 的缩写）。
+
+如果在模型行中禁用了模型行，后续的模型行将被忽略。这允许基于每个文件关闭模型行。当一个行看起来像模型行但实际上不是时，这很有用。例如，在包含像 "vim:" 这样的字符串的 YAML 文件开头加上
+    # vim: nomodeline ~
+是好的，以避免模型行误检测。同一行上在模型行停用之后的选项（如果有）仍然会被求值（但你通常不会有任何）。
+
+							*modeline-local*
+选项的设置方式类似于 ":setlocal"：新值仅适用于包含该文件的缓冲区和窗口。虽然可以从模型行设置全局选项，但这并不常见。如果你打开了两个窗口，并且其中的文件将同一个全局选项设置为不同的值，结果取决于哪个是最后打开的。
+
+当编辑一个已经加载的文件时，只使用模型行中的窗口局部选项。因此，如果你在打开文件后手动更改了缓冲区局部选项，当你在另一个窗口中编辑同一个缓冲区时，它不会被更改。但是窗口局部选项会被设置。
+
+							*modeline-version*
+如果模型行仅用于某些版本的 Vim，可以在使用 "vim:" 或 "Vim:" 的地方指定版本号：
+	vim{vers}:	版本 {vers} 或更高
+	vim<{vers}:	版本早于 {vers}
+	vim={vers}:	版本 {vers}
+	vim>{vers}:	版本晚于 {vers}
+{vers} 对于 Vim 7.0 是 700（主版本乘以 100 加上次版本）。
+例如，要仅对 Vim 7.0 使用模型行： >
+	/* vim700: set foldmethod=marker */
+要对 Vim 7.2 之后的版本使用模型行： >
+	/* vim>702: set cole=2: */
+"vim" 和 ":" 之间不能有空格。
+如果 {vers} 不适合整数，则忽略模型行。
+
+检查的行数可以通过 'modelines' 选项设置。如果 'modeline' 关闭或 'modelines' 为 0，则不检查任何行。
+
+注意，对于第一种形式，行的其余部分都会被使用，因此像这样的行： >
+   /* vi:ts=4: */
+将因为尾部的 "*/" 而给出错误信息。这行是 OK 的： >
+   /* vi:set ts=4: */
+
+如果检测到错误，行的其余部分将被跳过。
+
+如果你想在 set 命令中包含 ':'，请在它前面加上 '\'。'：' 前的反斜杠将被移除。示例： >
+   /* vi:set fillchars=stl\:^,vert\:\|: */
+这将 'fillchars' 选项设置为 "stl:^,vert:\|"。只有 '：' 前的单个反斜杠被移除。因此要包含 "\:"，你必须指定 "\\:"。
+							*E992*
+出于安全原因（有人可能创建带有模型行的特洛伊木马文本文件），不支持 "set" 以外的其他命令。并且不是所有选项都可以设置。对于某些选项，设置了一个标志，以便在使用该值时 |sandbox| 生效。某些选项只有在设置了 'modelineexpr' 时才能从模型行设置（默认为关闭）。
+
+尽管如此，总是存在模型行引起麻烦的小风险。例如，当某个恶作剧者将 'textwidth' 设置为 5 时，你所有的行都会意外换行。所以在编辑不受信任的文本之前禁用模型行。例如，邮件 ftplugin 就是这样做的。
+
+提示：如果你想做设置选项以外的其他事情，你可以定义一个自动命令来检查文件中的特定字符串。例如： >
+	au BufReadPost * if getline(1) =~ "VAR" | call SetVar() | endif
+并定义一个函数 SetVar() 来处理包含 "VAR" 的行。
+
+==============================================================================
+3. 选项摘要					*option-summary*
+
+在下面的列表中，所有选项都提到了它们的全名以及缩写（如果有）。两种形式都可以使用。
+
+在本文档中，当布尔选项被"设置"时，意味着输入了 ":set option"。当选项被"重置"时，使用了 ":set nooption"。
+
+大多数选项在所有窗口和缓冲区中都是相同的。有一些选项特定于文本在窗口中的呈现方式。这些可以在每个窗口中设置为不同的值。例如，'list' 选项可以在一个窗口中设置，在另一个窗口中为同一文本重置，从而同时提供两种类型的视图。有一些选项特定于某个文件。这些可以为每个文件或缓冲区设置不同的值。例如，'textwidth' 选项对于普通文本文件可以是 78，对于 C 程序可以是 0。
+
+	全局			所有缓冲区和窗口一个选项
+	窗口局部		每个窗口都有此选项的自己的副本
+	缓冲区局部		每个缓冲区都有此选项的自己的副本
+
+创建新窗口时，当前活动窗口的选项值用作窗口特定选项的默认值。对于缓冲区特定选项，这取决于 'cpoptions' 选项中的 's' 和 'S' 标志。如果包含 's'（这是默认值），则在首次进入缓冲区时，缓冲区选项的值从当前活动缓冲区复制。如果存在 'S'，则每次进入缓冲区时都会复制选项，这几乎就像拥有全局选项一样。如果 's' 和 'S' 不存在，则在创建缓冲区时从当前活动缓冲区复制选项。
+
+隐藏选项						*hidden-options*
+
+并非所有选项在所有版本中都受支持。这取决于支持的功能，有时也取决于系统。下面的大括号中有关于此的备注。当选项不受支持时，它被称为隐藏选项。尝试获取隐藏选项的值不会出错，而是返回该选项的默认值。你无法更改隐藏选项的值。
+
+要测试 "foo" 是否是有效的选项名，使用类似这样的方法： >
+	if exists('&foo')
+对于隐藏选项，这也返回 true。要测试选项 "foo" 是否真的被支持，使用类似这样的方法： >
+	if exists('+foo')
+<
+							*E355*
+带有简短描述的选项的跳转表可以在 |Q_op| 找到。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

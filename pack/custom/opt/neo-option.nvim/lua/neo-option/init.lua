@@ -62,4 +62,34 @@ function M.setlocal(options)
   end
 end
 
+---- 1. 全局
+---- 2. 局部
+---- 3. 光标窗口
+
+-- local GLOBAL_OPTION_MAP = {
+--   writedelay = true,
+--   writebackup = true,
+--   writeany = true,
+--   write = true,
+--   wrapscan = true,
+--   winwidth = true,
+-- }
+
+function M.toggle_global(name, values)
+  for _, value in ipairs(values) do
+    vim.opt[name] = value
+  end
+end
+
 return M
+
+--[[
+	      Command		       global value	   local value	       condition ~
+      :set option=value	     set	          set
+ :setlocal option=value	      -		          set
+:setglobal option=value	     set	           -
+      :set option?	          -		        display	    local value is set
+      :set option?	       display	         -	      local value is not set
+ :setlocal option?	          -		        display
+:setglobal option?	       display	         -
+--]]

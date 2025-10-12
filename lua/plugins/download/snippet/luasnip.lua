@@ -2,9 +2,16 @@ return {
   "L3MON4D3/LuaSnip",
   event = "InsertEnter",
   -- version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
+  run = function(plug)
+    vim
+      .system({ "make", "install_jsregexp" }, {
+        cwd = plug.path,
+        text = true,
+      })
+      :wait()
+  end,
   build = "make install_jsregexp",
-  opts = {},
-  dependencies = {
+  depend = {
     "rafamadriz/friendly-snippets",
   },
   config = function()
