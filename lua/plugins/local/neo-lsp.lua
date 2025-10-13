@@ -13,6 +13,7 @@ return {
           opts.css,
           opts.json,
           opts.qml,
+          opts.rust,
         }
       end,
     })

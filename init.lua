@@ -9,6 +9,7 @@ require("neo-packer").setup({
   require("plugins.local.repeat"),
   require("plugins.local.plain-colorscheme"),
   require("plugins.local.neo-lsp"),
+  require("plugins.local.neo-buffer"),
   require("plugins.local.buffer-manage"),
   require("plugins.local.magic"),
   require("plugins.local.break-line"),

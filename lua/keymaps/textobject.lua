@@ -1,42 +1,3 @@
-local function create_treesitter_textobject_keymap(opts)
-  return {
-    function()
-      require("custom.plugins.treesitter-query.treesitter-textobject").textobject({
-        language = opts.language,
-        scm = "textobjects",
-        query = opts.query,
-      })
-    end,
-    { "o", "x" },
-    filetype = opts.filetype,
-  }
-end
-
-local function create_js_treesitter_textobject_keymap(query)
-  return {
-    create_treesitter_textobject_keymap({
-      language = "tsx",
-      query = query,
-      filetype = "typescriptreact",
-    }),
-    create_treesitter_textobject_keymap({
-      language = "typescript",
-      query = query,
-      filetype = "typescript",
-    }),
-    create_treesitter_textobject_keymap({
-      language = "javascript",
-      query = query,
-      filetype = "javascript",
-    }),
-    create_treesitter_textobject_keymap({
-      language = "lua",
-      query = query,
-      filetype = "lua",
-    }),
-  }
-end
-
 return {
   -- textobject
   ["ww"] = { "aw", { "x", "o" } },
@@ -99,9 +60,24 @@ return {
   -- <div> </div>
   ["wt"] = { "at", { "x", "o" } },
   ["et"] = { "it", { "x", "o" } },
-
-  -- -- ["<space>eh"] = create_js_treesitter_textobject_keymap("variable_name"),
-  -- -- ["<spae>el"] = create_js_treesitter_textobject_keymap("variable_value"),
-  -- ["<space>tin"] = create_js_treesitter_textobject_keymap("interface.name"),
-  -- ["<space>tiv"] = create_js_treesitter_textobject_keymap("interface.body"),
+  ["wa"] = {
+    { "vggVG", "x" },
+    {
+      function()
+        vim.api.nvim_feedkeys("ggVG", "nx", false)
+      end,
+      "o",
+    },
+    desc = "all(line)",
+  },
+  ["ea"] = {
+    { "vgovG", "x" },
+    {
+      function()
+        vim.api.nvim_feedkeys("goVG", "nx", false)
+      end,
+      "o",
+    },
+    desc = "all",
+  },
 }
