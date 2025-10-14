@@ -71,7 +71,7 @@ return {
     desc = "all(line)",
   },
   ["ea"] = {
-    { "vgovG", "x" },
+    { "vgovG$", "x" },
     {
       function()
         vim.api.nvim_feedkeys("goVG", "nx", false)

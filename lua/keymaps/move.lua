@@ -20,6 +20,7 @@ return {
     end,
     "n",
     expr = true,
+    silent = true,
   },
   ["k"] = {
     function()
@@ -27,6 +28,7 @@ return {
     end,
     "n",
     expr = true,
+    silent = true,
   },
   ["<down>"] = {
     function()
@@ -34,6 +36,7 @@ return {
     end,
     "n",
     expr = true,
+    silent = true,
   },
   ["<up>"] = {
     function()
@@ -41,6 +44,7 @@ return {
     end,
     "n",
     expr = true,
+    silent = true,
   },
   ["H"] = {
     function()

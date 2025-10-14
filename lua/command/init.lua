@@ -1,7 +1,17 @@
 vim.api.nvim_create_user_command("ChangeDirectoryToFile", function()
   local path = vim.fn.expand("%:p:h")
-  vim.fn.chdir(path)
-  vim.api.nvim_echo({ { "cd: ", "Special" }, { path, "String" } }, true, {})
+  if path ~= nil and vim.uv.fs_stat(path) then
+    vim.fn.chdir(path)
+    vim.api.nvim_echo({ { "cd: ", "Special" }, { path, "String" } }, true, {})
+  end
+end, {})
+
+vim.api.nvim_create_user_command("ChangeTabDirectoryToFile", function()
+  local path = vim.fn.expand("%:p:h")
+  if path ~= nil and vim.uv.fs_stat(path) then
+    vim.cmd.tcd(path)
+    vim.api.nvim_echo({ { "tcd: ", "Special" }, { path, "String" } }, true, {})
+  end
 end, {})
 
 local function fzf_dirs(opts)

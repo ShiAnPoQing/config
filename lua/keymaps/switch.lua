@@ -38,22 +38,8 @@ return {
   ["<space><space>-"] = {
     function()
       if vim.opt["wrap"]:get() then
-        require("parse-keymap").add({
-          ["J"] = { "3j", { "n", "x" } },
-          ["K"] = { "3k", { "n", "x" } },
-        })
-        require("parse-keymap").del({
-          ["j"] = { "n", "x" },
-          ["k"] = { "n", "x" },
-        })
         vim.opt.wrap = false
       else
-        require("parse-keymap").add({
-          ["j"] = { "gj", { "n", "x" } },
-          ["k"] = { "gk", { "n", "x" } },
-          ["J"] = { "3gj", { "n", "x" } },
-          ["K"] = { "3gk", { "n", "x" } },
-        })
         vim.opt.wrap = true
       end
     end,

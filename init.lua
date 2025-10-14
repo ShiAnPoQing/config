@@ -14,6 +14,7 @@ require("neo-packer").setup({
   require("plugins.local.magic"),
   require("plugins.local.break-line"),
   require("plugins.local.code-action"),
+  require("plugins.local.op-register"),
   require("plugins.local.treesitter-textobject"),
   require("plugins.local.move-line"),
   require("plugins.local.concat-line"),

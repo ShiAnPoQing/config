@@ -1,4 +1,8 @@
 return {
+  ["x"] = {
+    '"_x',
+    "n",
+  },
   ["<leader>X"] = {
     "<cmd>source %<cr>",
     "n",
@@ -77,50 +81,6 @@ return {
     "n",
     { desc = "Edit my neovim config" },
   },
-  -- enlarge base cursor move
-  ["m+"] = {
-    function()
-      local M = require("move-size")
-      local count = vim.v.count1
-      M.ChangeMoveSize(count, "up")
-    end,
-    { "n" },
-  },
-  -- reduce base cursor move
-  ["m-"] = {
-    function()
-      local M = require("move-size")
-      local count = vim.v.count1
-      M.ChangeMoveSize(count, "down")
-    end,
-    { "n" },
-  },
-  -- reset base cursor move
-  ["m<BS>"] = {
-    function()
-      require("move-size").ChangeMoveSize_reset()
-    end,
-    { "n" },
-  },
-  -- del line start space
-  ["<leader>db<space>"] = {
-    {
-      function()
-        local D = require("del-space")
-        local count = vim.vim.count1
-        D.delSpace(count, "n")
-      end,
-      { "n" },
-    },
-    {
-      function()
-        local D = require("del-space")
-        local count = vim.vim.count1
-        D.delSpace(count, "v")
-      end,
-      { "v" },
-    },
-  },
   -- gh: normal mode into select mode
   -- normal mode into select block mode
   ["<space>gh"] = { "g<C-h>", "n" },
@@ -145,32 +105,6 @@ return {
   ["<M-f>"] = { ";", { "n" } },
   -- repeat latest F
   ["<M-S-f>"] = { ",", { "n" } },
-  -- block visual
-  ["<space>gv"] = { "`[v`]", { "n" } },
-  -- virtualedit = "all"
-  ["<space>v"] = { "<C-v>", { "n", "x" } },
-  -- virtualedit = "none"
-  ["<space><space>v"] = {
-    function()
-      vim.opt.virtualedit = ""
-      vim.api.nvim_exec2(
-        [[
-      execute "normal! $\<C-v>"
-      ]],
-        {}
-      )
-      vim.api.nvim_create_autocmd("ModeChanged", {
-        group = vim.api.nvim_create_augroup("CustomModeChanged", { clear = true }),
-        callback = function(ev)
-          vim.opt.virtualedit = "all"
-          vim.api.nvim_del_autocmd(ev.id)
-        end,
-      })
-    end,
-    "n",
-  },
-  ["<C-Space><C-K>"] = {
-    "<C-K>",
-    "i",
-  },
+  -- 输入二合字母
+  ["<C-Space><C-K>"] = { "<C-K>", "i" },
 }

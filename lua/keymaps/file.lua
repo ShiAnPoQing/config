@@ -1,3 +1,6 @@
+--1. Yank buffer's relative path to clipboard
+--2. Yank absolute path
+
 return {
   -- copy file name
   ["<leader>yfn"] = {
@@ -13,6 +16,11 @@ return {
   },
   ["<leader>cd"] = {
     "<cmd>ChangeDirectoryToFile<CR>",
+    "n",
+    desc = "Change directory to file",
+  },
+  ["<leader>tcd"] = {
+    "<cmd>ChangeTabDirectoryToFile<CR>",
     "n",
     desc = "Change directory to file",
   },

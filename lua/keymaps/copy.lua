@@ -1,5 +1,4 @@
 return {
-  -- ["Y"] = { "y$", "n" },
   -- yank/paste/del Outer register text
   ["<space><space>y"] = { '"+y', { "n", "x" } },
   ["<space><space>Y"] = { '"+Y', { "n", "x" } },

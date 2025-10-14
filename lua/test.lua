@@ -65,6 +65,10 @@ return {
   --   "i",
   --   "n",
   -- },
+  ["<leader>8"] = {
+    ":move '>+1<CR>gv",
+    "x",
+  },
   ["<leader><leader>o"] = {
     function()
       local node = vim.treesitter.get_node()
@@ -210,6 +214,7 @@ return {
   --   end,
   --   "n",
   -- },
+
   ["<M-w>"] = {
     function()
       local function taglist_to_qf(tagname)
@@ -243,16 +248,6 @@ return {
       taglist_to_qf("tags")
     end,
     "n",
-  },
-  ["<M-e>"] = {
-    function()
-      require("custom.plugins.treesitter-query.treesitter-textobject").textobject({
-        language = "lua",
-        scm = "textobjects",
-        query = "function.outer",
-      })
-    end,
-    { "n", "x", "o" },
   },
 
   -- ["<C-j>"] = { "+", "n" },

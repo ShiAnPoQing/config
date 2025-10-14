@@ -32,12 +32,12 @@ return {
   ["<Tab><Tab>sj"] = {
     "<cmd>sbl<cr>",
     "n",
-    desc = "Goto the last buffer",
+    desc = "Split and Goto the last buffer",
   },
   ["<Tab><Tab>vj"] = {
     "<cmd>vertical sbl<cr>",
     "n",
-    desc = "Goto the last buffer",
+    desc = "Vertical Split and Goto the last buffer",
   },
   ["<Tab>k"] = {
     function()
@@ -101,5 +101,10 @@ return {
     end,
     "n",
     desc = "Vertical split and open all buffer[limit count windows]",
+  },
+  ["<tab>b"] = {
+    "<cmd>buffer#<cr>",
+    "n",
+    desc = "Go to the most recently accessed buffer",
   },
 }
