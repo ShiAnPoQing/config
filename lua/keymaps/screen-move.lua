@@ -1,8 +1,10 @@
 local function aam()
   local win_info = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
   local screen_width = win_info.width - win_info.textoff
-  local screent_cursor_rol = vim.fn.virtcol(".") - win_info.leftcol
-  local offset = math.ceil(screen_width / 2) - screent_cursor_rol
+  ---@diagnostic disable-next-line: undefined-field
+  local leftcol = win_info.leftcol
+  local screent_cursor_rol = vim.fn.virtcol(".") - leftcol
+  local offset = math.ceil(screen_width / 2) - screent_cursor_rol + 1
 
   if offset > 0 then
     vim.api.nvim_feedkeys(offset .. "zh", "n", false)
@@ -28,7 +30,9 @@ return {
   ["<S-space>l"] = {
     {
       function()
-        if vim.opt.virtualedit:get()[1] == "all" then
+        ---@diagnostic disable-next-line: undefined-field
+        local v = vim.opt.virtualedit:get()
+        if v[1] == "all" then
           vim.opt.virtualedit = "none"
           vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
           vim.opt.virtualedit = "all"
@@ -40,7 +44,9 @@ return {
     },
     {
       function()
-        if vim.opt.virtualedit:get()[1] == "all" then
+        ---@diagnostic disable-next-line: undefined-field
+        local v = vim.opt.virtualedit:get()
+        if v[1] == "all" then
           vim.opt.virtualedit = "none"
           vim.api.nvim_feedkeys("vg" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
           vim.opt.virtualedit = "all"
@@ -85,7 +91,9 @@ return {
   ["<S-space><S-space>l"] = {
     {
       function()
-        if vim.opt.virtualedit:get()[1] == "all" then
+        ---@diagnostic disable-next-line: undefined-field
+        local v = vim.opt.virtualedit:get()
+        if v[1] == "all" then
           vim.opt.virtualedit = "none"
           vim.api.nvim_feedkeys("g$", "nx", true)
           vim.opt.virtualedit = "all"
@@ -185,13 +193,46 @@ return {
     "n",
   },
   ["aal"] = {
-    "ze",
+    function()
+      local virt_col = vim.fn.virtcol(".")
+      local line = vim.api.nvim_get_current_line()
+      local display_width = vim.fn.strdisplaywidth(line)
+      if virt_col <= display_width then
+        return "ze"
+      else
+        local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+        local width = wininfo.width - wininfo.textoff
+        ---@diagnostic disable-next-line: undefined-field
+        local leftcol = wininfo.leftcol
+        local win_virt_col = virt_col - leftcol
+        local count = width - win_virt_col
+        if count > 0 then
+          return count .. "zh"
+        end
+      end
+    end,
     { "n", "x" },
+    expr = true,
     desc = "Scroll the text horizontally to position the cursor at the end (right side) of the screen.",
   },
   ["aah"] = {
-    "zs",
+    function()
+      local virt_col = vim.fn.virtcol(".")
+      local line = vim.api.nvim_get_current_line()
+      local display_width = vim.fn.strdisplaywidth(line)
+      if virt_col <= display_width then
+        return "zs"
+      else
+        local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+        ---@diagnostic disable-next-line: undefined-field
+        local leftcol = wininfo.leftcol
+        if virt_col - leftcol > 1 then
+          return (virt_col - leftcol - 1) .. "zl"
+        end
+      end
+    end,
     { "n", "x" },
+    expr = true,
     desc = "Scroll the text horizontally to position the cursor at the start (left side) of the screen.",
   },
   ["aak"] = {
