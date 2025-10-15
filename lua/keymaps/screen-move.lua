@@ -11,55 +11,7 @@ local function aam()
   end
 end
 
-local function space_h_omode()
-  vim.api.nvim_exec2(string.format([[exec "normal! v^"]]), {})
-end
-
--- 0 默认不支持 count
-local function space_space_h()
-  local count = vim.v.count1
-  if count == 1 then
-    vim.api.nvim_feedkeys("0", "n", false)
-  else
-    vim.api.nvim_feedkeys(count - 1 .. "k0", "n", false)
-  end
-end
-
 return {
-  ["<space>h"] = {
-    {
-      function()
-        require("custom.plugins.move").move_start_end("left")
-      end,
-      "n",
-    },
-    { "^", "x" },
-    { space_h_omode, "o" },
-  },
-  ["<space>l"] = {
-    {
-      function()
-        require("custom.plugins.move").move_start_end("right")
-      end,
-      "n",
-    },
-    { "g_", { "x", "o" } },
-  },
-  ["<space>k"] = { "<nop>", "n" },
-  ["<space>j"] = { "<nop>", "n" },
-  -- ["<space>K"] = {
-  --   "gg",
-  --   { "n", "x", "o" },
-  -- },
-  -- ["<space>J"] = {
-  --   "G",
-  --   { "n", "x", "o" },
-  -- },
-  ["<space><space>h"] = {
-    { space_space_h, "n" },
-    { "0", { "x", "o" } },
-  },
-  ["<space><space>l"] = { "$", { "n", "x", "o" } },
   ["<S-space>h"] = {
     function()
       local before_cursor = vim.api.nvim_win_get_cursor(0)
@@ -232,31 +184,62 @@ return {
     end,
     "n",
   },
-  -- normal mode view move: cursor word position at screen right
-  -- ["aal"] = { "ze", { "n", "x" } },
-  -- -- normal mode view move: cursor word position at screen left
-  -- ["aah"] = { "zs", { "n", "x" } },
-  -- -- normal mode view move: cursor line position at screen top col
-  -- ["aak"] = { "zt", { "n", "x" } },
-  -- -- normal mode view move: cursor line position at screen bottom col
-  -- ["aaj"] = { "zb", { "n", "x" } },
-  -- normal mode view move: cursor line position at screen center col
-  ["aL"] = { "ze", { "n", "x" } },
-  ["aH"] = { "zs", { "n", "x" } },
-  ["aK"] = { "zt", { "n", "x" } },
-  ["aJ"] = { "zb", { "n", "x" } },
-  ["aan"] = { "zz", { "n", "x" } },
+  ["aal"] = {
+    "ze",
+    { "n", "x" },
+    desc = "Scroll the text horizontally to position the cursor at the end (right side) of the screen.",
+  },
+  ["aah"] = {
+    "zs",
+    { "n", "x" },
+    desc = "Scroll the text horizontally to position the cursor at the start (left side) of the screen.",
+  },
+  ["aak"] = {
+    "zt",
+    { "n", "x" },
+    desc = "line [count] at top of window (default cursor line)(leave the cursor in the same column).",
+  },
+  ["aaj"] = {
+    "zb",
+    { "n", "x" },
+    desc = "line [count] at bottom of window (default cursor line)(leave the cursor in the same column).",
+  },
+  ["aan"] = {
+    "zz",
+    { "n", "x" },
+    desc = "line [count] at center of window (default cursor line)(leave the cursor in the same column).",
+  },
   -- normal mode view move: cursor line position at screen center row
-  ["aam"] = { aam, { "n" } },
+  ["aam"] = { aam, { "n" }, desc = "col at center of window" },
 
   -- normal mode view move: cursor word position at screen right
-  ["<M-1><M-1><M-l>"] = { "<C-o>zs", { "i" } },
+  ["<M-a><M-a><M-l>"] = {
+    "<C-o>ze",
+    "i",
+    desc = "Scroll the text horizontally to position the cursor at the end (right side) of the screen.",
+  },
   -- normal mode view move: cursor word position at screen left
-  ["<M-1><M-1><M-h>"] = { "<C-o>ze", { "i" } },
+  ["<M-a><M-a><M-h>"] = {
+    "<C-o>zs",
+    "i",
+    desc = "Scroll the text horizontally to position the cursor at the start (left side) of the screen.",
+  },
   -- normal mode view move: cursor line position at screen top col
-  ["<M-1><M-1><M-k>"] = { "<C-o>zb", { "i" } },
+  ["<M-a><M-a><M-k>"] = {
+    "<C-o>zt",
+    "i",
+    desc = "line [count] at top of window (default cursor line)(leave the cursor in the same column).",
+  },
   -- normal mode view move: cursor line position at screen bottom col
-  ["<M-1><M-1><M-j>"] = { "<C-o>zt", { "i" } },
+  ["<M-a><M-a><M-j>"] = {
+    "<C-o>zb",
+    "i",
+    desc = "line [count] at bottom of window (default cursor line)(leave the cursor in the same column).",
+  },
   -- normal mode view move: cursor line position at screen center col
-  ["<M-1><M-1><M-n>"] = { "<C-o>zz", { "i" } },
+  ["<M-a><M-a><M-n>"] = {
+    "<C-o>zz",
+    "i",
+    desc = "line [count] at center of window (default cursor line)(leave the cursor in the same column).",
+  },
 }

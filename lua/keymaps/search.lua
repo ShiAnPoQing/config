@@ -45,14 +45,15 @@ return {
     },
   },
 
-  -- Keep window centered when going up/down
   ["n"] = {
     "nzzzv",
     "n",
+    desc = "Search result shown at the middle",
   },
   ["N"] = {
     "Nzzzv",
     "n",
+    desc = "Search result shown at the middle",
   },
 }
 

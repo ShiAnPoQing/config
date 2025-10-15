@@ -5,7 +5,7 @@ return {
   -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
   ft = { "markdown" },
   keys = {
-    ["<leader>md"] = {
+    ["<leader>rd"] = {
       "<cmd>RenderMarkdown toggle<cr>",
       "n",
       desc = "Toggle Markdown Render",

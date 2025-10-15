@@ -304,4 +304,55 @@ return {
     end,
     "n",
   },
+  ["<space>h"] = {
+    {
+      function()
+        require("builtin.start_end_move").first_non_blank_character()
+      end,
+      "n",
+    },
+    { "^", "x" },
+    --- contains the character under the cursor
+    { "v^", "o" },
+    desc = "Move to the first non-blank character of the line",
+  },
+  ["<space>l"] = {
+    {
+      function()
+        require("builtin.start_end_move").last_non_blank_character()
+      end,
+      "n",
+    },
+    { "g_", { "x", "o" } },
+    desc = "Move to the last non-blank character of the line",
+  },
+  ["<space><space>h"] = {
+    {
+      function()
+        require("builtin.start_end_move").first_character()
+      end,
+      "n",
+    },
+    { "0", "x" },
+    --- contains the character under the cursor
+    { "v0", "o" },
+    desc = "Move to the first character of the line",
+  },
+  ["<space><space>l"] = {
+    {
+      function()
+        require("builtin.start_end_move").last_character()
+      end,
+      "n",
+    },
+    {
+      "$",
+      "o",
+    },
+    {
+      "$h",
+      "x",
+    },
+    desc = "Move to the last character of the line",
+  },
 }

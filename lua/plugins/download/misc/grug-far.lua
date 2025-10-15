@@ -2,20 +2,26 @@ return {
   "MagicDuck/grug-far.nvim",
   cmd = "GrugFar",
   keys = {
-    ["<leader>sr"] = {
+    ["<leader>GFw"] = {
       function()
-        local grug = require("grug-far")
-        local ext = vim.bo.buftype == "" and vim.fn.expand("%:e")
-        grug.grug_far({
-          transient = true,
-          prefills = {
-            filesFilter = ext and ext ~= "" and "*." .. ext or nil,
-          },
-        })
+        require("grug-far").open({ prefills = { search = vim.fn.expand("<cword>") } })
       end,
-      { "n", "v" },
-      desc = "Search and Replace",
+      "n",
     },
+    -- ["<leader>sr"] = {
+    --   function()
+    --     local grug = require("grug-far")
+    --     local ext = vim.bo.buftype == "" and vim.fn.expand("%:e")
+    --     grug.grug_far({
+    --       transient = true,
+    --       prefills = {
+    --         filesFilter = ext and ext ~= "" and "*." .. ext or nil,
+    --       },
+    --     })
+    --   end,
+    --   { "n", "v" },
+    --   desc = "Search and Replace",
+    -- },
   },
   config = function()
     require("grug-far").setup({
