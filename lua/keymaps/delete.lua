@@ -35,7 +35,7 @@ end
 return {
   ["<S-BS>"] = {
     { "<Del>", { "i", "c", "t" } },
-    { "lxh", "n" },
+    { "x", "n" },
     desc = "Delete char after cursor",
   },
   ["<C-BS>"] = {
@@ -52,6 +52,10 @@ return {
     "<nop>",
     "i",
     desc = "待定",
+  },
+  ["<space><bs>"] = {
+    "s",
+    "n",
   },
 
   ["<C-i>"] = {

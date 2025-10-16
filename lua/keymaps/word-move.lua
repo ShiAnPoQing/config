@@ -1,15 +1,4 @@
 return {
-  -- For insert mode: like <M-d><M-o>
-  -- ["<M-o>"] = {
-  --   "e",
-  --   "o",
-  -- },
-
-  -- -- For insert mode: like <M-d><M-i>
-  -- ["<M-i>"] = {
-  --   "b",
-  --   "o",
-  -- },
   ["i"] = {
     "b",
     { "n", "x", "o" },
@@ -33,33 +22,41 @@ return {
   ["<C-i>"] = {
     "ge",
     { "n", "x", "o" },
+    desc = "Backward to the end of word [count]",
   },
   ["<C-o>"] = {
     "w",
     { "n", "x", "o" },
+    desc = "[count] words forward",
   },
   ["<space>i"] = {
     "ge",
     { "n", "x", "o" },
+    desc = "Backward to the end of word [count]",
   },
   ["<space>o"] = {
     "w",
     { "n", "x", "o" },
+    desc = "[count] words forward",
   },
   ["<space>I"] = {
     "gE",
     { "n", "x", "o" },
+    desc = "Backward to the end of WORD [count]",
   },
   ["<space>O"] = {
     "W",
     { "n", "x", "o" },
+    desc = "[count] WORDS forward",
   },
-  -- ["<C-S-i>"] = {
-  --   "gE",
-  --   { "n", "x", "o" },
-  -- },
-  -- ["<C-S-o>"] = {
-  --   "W",
-  --   { "n", "x", "o" },
-  -- },
+  ["<C-S-i>"] = {
+    "gE",
+    { "n", "x", "o" },
+    desc = "Backward to the end of WORD [count]",
+  },
+  ["<C-S-o>"] = {
+    "W",
+    { "n", "x", "o" },
+    desc = "[count] WORDS forward",
+  },
 }

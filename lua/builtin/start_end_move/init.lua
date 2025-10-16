@@ -11,6 +11,7 @@ end
 
 local function on_key(count, key)
   local c = vim.fn.getchar()
+  ---@diagnostic disable-next-line: param-type-mismatch
   local char = vim.fn.nr2char(c)
   if char == "j" then
     vim.api.nvim_feedkeys(count .. "j" .. key, "nx", false)
@@ -38,6 +39,7 @@ end
 
 local function get_screen_col(LR, up_line_start, down_line_start)
   local wininfo = get_win_info()
+  ---@diagnostic disable-next-line: undefined-field
   local leftcol = wininfo.leftcol
   local up_line = vim.api.nvim_buf_get_lines(0, up_line_start, up_line_start + 1, false)[1]
   local down_line = vim.api.nvim_buf_get_lines(0, down_line_start, down_line_start + 1, false)[1]
@@ -109,7 +111,7 @@ function M.last_non_blank_character()
   local cursor_row = get_cursor_row()
   local up_line_start = cursor_row - count - 1
   local down_line_start = cursor_row + count - 1
-  local up_col, down_col = get_virt_col("right", up_line_start, down_line_start)
+  local up_col, down_col = get_screen_col("right", up_line_start, down_line_start)
   local clear = set_extmark(up_col, down_col, up_line_start, down_line_start)
   on_key(count, "g_")
   clear()
@@ -123,6 +125,7 @@ function M.first_character()
   end
 
   local wininfo = get_win_info()
+  ---@diagnostic disable-next-line: undefined-field
   local leftcol = wininfo.leftcol
   local cursor_row = get_cursor_row()
   local up_line_start = cursor_row - count - 1
@@ -146,6 +149,7 @@ function M.last_character()
   local down_line = vim.api.nvim_buf_get_lines(0, down_line_start, down_line_start + 1, false)[1]
 
   local wininfo = get_win_info()
+  ---@diagnostic disable-next-line: undefined-field
   local leftcol = wininfo.leftcol
   local width = wininfo.width - wininfo.textoff
   local up_col = vim.fn.strdisplaywidth(up_line) - leftcol

@@ -38,17 +38,10 @@ return {
   ["<M-b>"] = {
     "<C-G>o<C-G>",
     "s",
+    desc = "Go to Other end of highlighted text",
   },
   ["a"] = {
     "<nop>",
-    "n",
-  },
-  ["<S-bs>"] = {
-    "x",
-    "n",
-  },
-  ["<space><bs>"] = {
-    "s",
     "n",
   },
   -- ["<M-bs>"] = {
@@ -63,22 +56,6 @@ return {
   --   "v0c",
   --   "n"
   -- },
-
-  -- show press key
-  ["<leader>sk"] = {
-    function()
-      local K = require("key-show")
-      K.keyShow()
-    end,
-    "n",
-  },
-  -- hidden press key show
-  ["<leader>hk"] = {
-    function()
-      require("key-show").keyHide()
-    end,
-    "n",
-  },
   -- open myvimrc
   ["<leader><F5>"] = {
     function()
@@ -113,6 +90,5 @@ return {
   ["<M-f>"] = { ";", { "n" } },
   -- repeat latest F
   ["<M-S-f>"] = { ",", { "n" } },
-  -- 输入二合字母
   ["<C-Space><C-K>"] = { "<C-K>", "i" },
 }

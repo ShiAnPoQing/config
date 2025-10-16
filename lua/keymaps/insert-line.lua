@@ -33,28 +33,29 @@ return {
   },
   ["<C-b>"] = {
     function()
-      require("custom.plugins.insert-line").insert_line({
+      require("builtin.insert_line").insert_line({
         dir = "above",
         cursor = "move",
       })
       require("repeat"):set(function()
-        require("custom.plugins.insert-line").insert_line({
+        require("builtin.insert_line").insert_line({
           dir = "above",
           cursor = "move",
         })
       end)
     end,
     { "n", "i" },
+    desc = "Above insert new line(cursor follow)",
   },
   ["<C-space><C-b>"] = {
     function()
-      require("custom.plugins.insert-line").insert_line({
+      require("builtin.insert_line").insert_line({
         dir = "above",
         cursor = "move",
         indent = false,
       })
       require("repeat"):set(function()
-        require("custom.plugins.insert-line").insert_line({
+        require("builtin.insert_line").insert_line({
           dir = "above",
           cursor = "move",
           indent = false,
@@ -62,31 +63,33 @@ return {
       end)
     end,
     "i",
+    desc = "Above insert new line(cursor follow)(no indent)",
   },
   ["<M-b>"] = {
     function()
-      require("custom.plugins.insert-line").insert_line({
+      require("builtin.insert_line").insert_line({
         dir = "below",
         cursor = "move",
       })
       require("repeat"):set(function()
-        require("custom.plugins.insert-line").insert_line({
+        require("builtin.insert_line").insert_line({
           dir = "below",
           cursor = "move",
         })
       end)
     end,
     { "n", "i" },
+    desc = "Below insert new line(cursor follow)",
   },
   ["<M-space><M-b>"] = {
     function()
-      require("custom.plugins.insert-line").insert_line({
+      require("builtin.insert_line").insert_line({
         dir = "below",
         cursor = "move",
         indent = false,
       })
       require("repeat"):set(function()
-        require("custom.plugins.insert-line").insert_line({
+        require("builtin.insert_line").insert_line({
           dir = "below",
           cursor = "move",
           indent = false,
@@ -94,50 +97,54 @@ return {
       end)
     end,
     "i",
+    desc = "Below insert new line(cursor follow)(no indent)",
   },
   ["<C-M-b>"] = {
     function()
-      require("custom.plugins.insert-line").insert_line({
+      require("builtin.insert_line").insert_line({
         dir = "all",
         cursor = "move",
       })
       require("repeat"):set(function()
-        require("custom.plugins.insert-line").insert_line({
+        require("builtin.insert_line").insert_line({
           dir = "all",
           cursor = "move",
         })
       end)
     end,
     { "n", "i" },
+    desc = "Below and Above insert new line",
   },
   ["<C-S-b>"] = {
     function()
-      require("custom.plugins.insert-line").insert_line({
+      require("builtin.insert_line").insert_line({
         dir = "above",
         cursor = "keep",
       })
       require("repeat"):set(function()
-        require("custom.plugins.insert-line").insert_line({
+        require("builtin.insert_line").insert_line({
           dir = "above",
           cursor = "keep",
         })
       end)
     end,
     { "n", "i" },
+    desc = "Above insert new line(cursor don't follow)",
   },
   ["<M-S-b>"] = {
     function()
-      require("custom.plugins.insert-line").insert_line({
+      require("builtin.insert_line").insert_line({
         dir = "below",
         cursor = "keep",
       })
       require("repeat"):set(function()
-        require("custom.plugins.insert-line").insert_line({
+        require("builtin.insert_line").insert_line({
           dir = "below",
           cursor = "keep",
         })
       end)
     end,
     { "n", "i" },
+    desc = "Below insert new line(cursor don't follow)",
   },
 }

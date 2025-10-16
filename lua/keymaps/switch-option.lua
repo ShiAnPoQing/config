@@ -7,6 +7,7 @@ end
 return {
   ["<leader>st"] = {
     function()
+      ---@diagnostic disable-next-line: undefined-field
       local value = vim.opt.laststatus:get()
       if value == 0 then
         vim.opt.laststatus = 3
@@ -15,9 +16,11 @@ return {
       end
     end,
     "n",
+    desc = "Switch laststatus",
   },
   ["<leader>vt"] = {
     function()
+      ---@diagnostic disable-next-line: undefined-field
       local value = vim.opt.virtualedit:get()[1]
       if value == "all" then
         vim.opt.virtualedit = "none"
@@ -26,6 +29,7 @@ return {
       end
     end,
     "n",
+    desc = "Switch virtualedit",
   },
   -- Toggle cursorline
   -- Only in cursor window
@@ -34,9 +38,11 @@ return {
       require("builtin.toggle_cursorline").toggle_cursorline()
     end,
     "n",
+    desc = "Switch cursor line",
   },
   ["<space><space>-"] = {
     function()
+      ---@diagnostic disable-next-line: undefined-field
       if vim.opt["wrap"]:get() then
         vim.opt.wrap = false
       else
@@ -44,9 +50,11 @@ return {
       end
     end,
     "n",
+    desc = "Switch wrap",
   },
   ["<leader>sh"] = {
     function()
+      ---@diagnostic disable-next-line: undefined-field
       local value = vim.opt["signcolumn"]:get()
       if string.sub(value, 1, 1) == "y" then
         vim.opt["signcolumn"] = "no"
@@ -55,9 +63,11 @@ return {
       end
     end,
     "n",
+    desc = "Switch signcolumn",
   },
   ["<leader>nb"] = {
     function()
+      ---@diagnostic disable-next-line: undefined-field
       if vim.opt["number"]:get() then
         vim.opt.number = false
       else
@@ -65,9 +75,11 @@ return {
       end
     end,
     "n",
+    desc = "Switch number",
   },
   ["<leader>rnb"] = {
     function()
+      ---@diagnostic disable-next-line: undefined-field
       if vim.opt["relativenumber"]:get() then
         vim.opt.relativenumber = false
       else
@@ -75,9 +87,11 @@ return {
       end
     end,
     "n",
+    desc = "Switch relativenumber",
   },
   ["<leader>tnb"] = {
     function()
+      ---@diagnostic disable-next-line: undefined-field
       if vim.opt["relativenumber"]:get() or vim.opt.number:get() then
         vim.opt.relativenumber = false
         vim.opt.number = false
@@ -90,6 +104,7 @@ return {
       end
     end,
     "n",
+    desc = "Switch number column",
   },
   ["<leader>cl"] = {
     function()
@@ -97,25 +112,27 @@ return {
       vim.opt.colorcolumn = color_column
     end,
     "n",
+    desc = "Switch color column",
   },
   ["<leader>ig"] = {
     function()
       switch("ignorecase")
     end,
-    { "n" },
+    "n",
+    desc = "Switch ignorecase",
   },
-  -- toggle list icon
   ["<leader>li"] = {
     function()
       switch("list")
     end,
-    { "n" },
+    "n",
+    desc = "Switch list",
   },
-  -- toggle hlsearch highlight
   ["<leader>hl"] = {
     function()
       switch("hlsearch")
     end,
-    { "n" },
+    "n",
+    desc = "Switch hlsearch",
   },
 }

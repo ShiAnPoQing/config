@@ -20,7 +20,6 @@ return {
     end,
     "n",
     expr = true,
-    silent = true,
   },
   ["k"] = {
     function()
@@ -28,7 +27,6 @@ return {
     end,
     "n",
     expr = true,
-    silent = true,
   },
   ["<down>"] = {
     function()
@@ -36,7 +34,6 @@ return {
     end,
     "n",
     expr = true,
-    silent = true,
   },
   ["<up>"] = {
     function()
@@ -44,7 +41,6 @@ return {
     end,
     "n",
     expr = true,
-    silent = true,
   },
   ["H"] = {
     function()
@@ -74,18 +70,6 @@ return {
     { "x", "n" },
     desc = "Right move",
   },
-  -- ["0<space>h"] = {
-  -- 	function()
-  -- 		require("custom.plugins.move").magic.move_start_end("left")
-  -- 	end,
-  -- 	"n",
-  -- },
-  ["0<space>l"] = {
-    function()
-      require("custom.plugins.move").magic.move_start_end("right")
-    end,
-    "n",
-  },
   ["<space><M-h>"] = {
     "I",
     "n",
@@ -108,9 +92,7 @@ return {
     { "<Up>g_", { "n", "x" } },
   },
 
-  -- 支持百分比 count
   ["<space>m"] = { "gM", { "n", "x", "o" } },
-  -- 支持百分比 count
   ["<space>n"] = { "M", { "n", "x", "o" } },
   ["<M-space><M-m>"] = { "<C-o>gM", { "i" } },
   ["<M-space><M-n>"] = { "<C-o>gM", { "i" } },
