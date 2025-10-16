@@ -9,7 +9,6 @@ return {
     "n",
     desc = "Swap adjacent windows",
   },
-  --? split current file top-bottom
   ["<M-S-V>"] = {
     "<cmd>split<cr>",
     "n",
@@ -45,5 +44,57 @@ return {
     "<C-w>q",
     "n",
     desc = "Quit current window",
+  },
+  ["<M-right>"] = {
+    function()
+      require("builtin.win_resize").resize("increase", "horizontal")
+    end,
+    "n",
+  },
+  ["<M-left>"] = {
+    function()
+      require("builtin.win_resize").resize("decrease", "horizontal")
+    end,
+    "n",
+  },
+  ["<M-up>"] = {
+    function()
+      require("builtin.win_resize").resize("decrease", "vertical")
+    end,
+    "n",
+  },
+  ["<M-down>"] = {
+    function()
+      require("builtin.win_resize").resize("increase", "vertical")
+    end,
+    "n",
+  },
+  ["<M-S-h>"] = {
+    function()
+      require("builtin.win_exchange").window_exchange("left")
+    end,
+    "n",
+    desc = "Swap with the window on the left",
+  },
+  ["<M-S-l>"] = {
+    function()
+      require("builtin.win_exchange").window_exchange("right")
+    end,
+    "n",
+    desc = "Swap with the window on the right",
+  },
+  ["<M-S-j>"] = {
+    function()
+      require("builtin.win_exchange").window_exchange("down")
+    end,
+    "n",
+    desc = "Swap with the window below",
+  },
+  ["<M-S-k>"] = {
+    function()
+      require("builtin.win_exchange").window_exchange("up")
+    end,
+    "n",
+    desc = "Swap with the window above",
   },
 }

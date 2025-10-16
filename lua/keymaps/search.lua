@@ -2,7 +2,7 @@ local function get_visual_texts()
   local start_mark = vim.api.nvim_buf_get_mark(0, "<")
   local end_mark = vim.api.nvim_buf_get_mark(0, ">")
 
-  return vim.api.nvim_buf_get_text(0, start_mark[1] - 1, start_mark[2], end_mark[1] - 1, end_mark[2] + 1, {})[1]
+  return vim.api.nvim_buf_get_text(0, start_mark[1] - 1, start_mark[2], end_mark[1] - 1, end_mark[2] + 1, {})
 end
 return {
   -- Search cursor text

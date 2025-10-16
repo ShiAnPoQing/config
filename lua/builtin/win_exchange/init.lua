@@ -218,6 +218,4 @@ function M.window_exchange(action)
   end
 end
 
-function M.setup() end
-
 return M

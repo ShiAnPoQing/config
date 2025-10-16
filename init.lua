@@ -7,6 +7,8 @@ require("neo-packer").setup({
   require("plugins.local.simple-keymap"),
   require("plugins.local.neo-option"),
   require("plugins.local.repeat"),
+  require("plugins.local.neo-clone"),
+  require("plugins.local.visual-move"),
   require("plugins.local.plain-colorscheme"),
   require("plugins.local.neo-lsp"),
   require("plugins.local.neo-buffer"),
@@ -45,5 +47,4 @@ require("neo-packer").setup({
   require("plugins.download.markdown.markdown-preview"),
   require("plugins.download.markdown.render-markdown"),
   require("plugins.download.style.mini-statusline"),
-  -- require("plugins.download.misc.lspsaga"),
 })

@@ -81,7 +81,16 @@ function M.file_details()
     title = { { " File Details ", "Normal" } },
     title_pos = "center",
     style = "minimal",
-    border = require("custom.style.float.border").border2,
+    border = {
+      { "┌", "Normal" },
+      { "─", "Normal" },
+      { "┐", "Normal" },
+      { "│", "Normal" },
+      { "┘", "Normal" },
+      { "─", "Normal" },
+      { "└", "Normal" },
+      { "│", "Normal" },
+    },
   }
   local buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_lines(buf, 0, 1, false, lines)

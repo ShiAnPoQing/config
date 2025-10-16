@@ -287,3 +287,139 @@ return {
 -- vim.api.nvim_create_autocmd("CursorMoved", {
 --   callback = highlight_references,
 -- })
+
+-- return {
+--   border1 = { "╔", "═", "╗", "║", "╝", "═", "╚", "║" },
+--   fancy = {
+--     { "🭽", "FloatBorder" },
+--     { "▔", "FloatBorder" },
+--     { "🭾", "FloatBorder" },
+--     { "▕", "FloatBorder" },
+--     { "🭿", "FloatBorder" },
+--     { "▁", "FloatBorder" },
+--     { "🭼", "FloatBorder" },
+--     { "▏", "FloatBorder" },
+--   },
+--   dashed = {
+--     { "┄", "FloatBorder" },
+--     { "┄", "FloatBorder" },
+--     { "┄", "FloatBorder" },
+--     { "┆", "FloatBorder" },
+--     { "┄", "FloatBorder" },
+--     { "┄", "FloatBorder" },
+--     { "┄", "FloatBorder" },
+--     { "┆", "FloatBorder" },
+--   },
+--   -- 简单边框
+--   simple = {
+--     { "+", "FloatBorder" },
+--     { "-", "FloatBorder" },
+--     { "+", "FloatBorder" },
+--     { "|", "FloatBorder" },
+--     { "+", "FloatBorder" },
+--     { "-", "FloatBorder" },
+--     { "+", "FloatBorder" },
+--     { "|", "FloatBorder" },
+--   },
+--
+--   -- 粗边框
+--   bold = {
+--     { "▄", "FloatBorder" },
+--     { "▄", "FloatBorder" },
+--     { "▄", "FloatBorder" },
+--     { "█", "FloatBorder" },
+--     { "▀", "FloatBorder" },
+--     { "▀", "FloatBorder" },
+--     { "▀", "FloatBorder" },
+--     { "█", "FloatBorder" },
+--   },
+--   -- 点线边框
+--   dotted = {
+--     { "·", "FloatBorder" },
+--     { "·", "FloatBorder" },
+--     { "·", "FloatBorder" },
+--     { "·", "FloatBorder" },
+--     { "·", "FloatBorder" },
+--     { "·", "FloatBorder" },
+--     { "·", "FloatBorder" },
+--     { "·", "FloatBorder" },
+--   },
+--   -- 圆角边框
+--   rounded = {
+--     { "╭", "FloatBorder" },
+--     { "─", "FloatBorder" },
+--     { "╮", "FloatBorder" },
+--     { "│", "FloatBorder" },
+--     { "╯", "FloatBorder" },
+--     { "─", "FloatBorder" },
+--     { "╰", "FloatBorder" },
+--     { "│", "FloatBorder" },
+--   },
+--
+--   -- 实心边框
+--   solid = {
+--     { "█", "Normal" },
+--     { "█", "Normal" },
+--     { "█", "Normal" },
+--     { "█", "Normal" },
+--     { "█", "Normal" },
+--     { "█", "Normal" },
+--     { "█", "Normal" },
+--     { "█", "Normal" },
+--   },
+--
+--   border2 = {
+--     { "┌", "Normal" },
+--     { "─", "Normal" },
+--     { "┐", "Normal" },
+--     { "│", "Normal" },
+--     { "┘", "Normal" },
+--     { "─", "Normal" },
+--     { "└", "Normal" },
+--     { "│", "Normal" },
+--   },
+-- }
+
+-- -- When you do joins with J it will keep your cursor at the beginning instead of at the end
+-- vim.keymap.set("n", "J", "mzJ`z")
+
+-- -- Replaces the word I'm currently on, opens a terminal so that I start typing the new word
+-- -- It replaces the word globally across the entire file
+-- vim.keymap.set(
+--   "n",
+--   "<leader>su",
+--   [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+--   { desc = "[P]Replace word I'm currently on GLOBALLY" }
+-- )
+
+-- -- Replaces the current word with the same word in uppercase, globally
+-- vim.keymap.set(
+--   "n",
+--   "<leader>sU",
+--   [[:%s/\<<C-r><C-w>\>/<C-r>=toupper(expand('<cword>'))<CR>/gI<Left><Left><Left>]],
+--   { desc = "[P]GLOBALLY replace word I'm on with UPPERCASE" }
+-- )
+--
+-- -- Replaces the current word with the same word in lowercase, globally
+-- vim.keymap.set(
+--   "n",
+--   "<leader>sL",
+--   [[:%s/\<<C-r><C-w>\>/<C-r>=tolower(expand('<cword>'))<CR>/gI<Left><Left><Left>]],
+--   { desc = "[P]GLOBALLY replace word I'm on with lowercase" }
+-- )
+
+-- -- Toggle executable permission on current file, previously I had 2 keymaps, to
+-- -- add or remove exec permissions, now it's a toggle using the same keymap
+-- vim.keymap.set("n", "<leader>fx", function()
+--   local file = vim.fn.expand("%")
+--   local perms = vim.fn.getfperm(file)
+--   local is_executable = string.match(perms, "x", -1) ~= nil
+--   local escaped_file = vim.fn.shellescape(file)
+--   if is_executable then
+--     vim.cmd("silent !chmod -x " .. escaped_file)
+--     vim.notify("Removed executable permission", vim.log.levels.INFO)
+--   else
+--     vim.cmd("silent !chmod +x " .. escaped_file)
+--     vim.notify("Added executable permission", vim.log.levels.INFO)
+--   end
+-- end, { desc = "Toggle executable permission" })

@@ -5,7 +5,6 @@ return {
       add = {
         "keymaps/",
         "keymaps/select-mode",
-        "test",
       },
       del = {
         ["in"] = { "x" },
