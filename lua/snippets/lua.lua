@@ -27,12 +27,6 @@ local parse = require("luasnip.util.parser").parse_snippet
 local utils = require("snippets.utils")
 
 local snippets = {
-  s({
-    trig = "functi",
-    hidden = true,
-  }, {
-    t("你好 "),
-  }),
   s("pi", {
     t("print(vim.inspect("),
     i(1),
@@ -65,48 +59,6 @@ local snippets = {
     { trig = "prod", name = "product" },
     "\\prod_{${1:n=${2:1}}}^{${3:\\infty}} ${4:${TM_SELECTED_TEXT:text}} $0"
   ),
-
-  -- s(
-  -- 	"fun",
-  -- 	c(1, {
-  -- 		{
-  -- 			t("function"),
-  -- 			extras.nonempty(1, " ", ""),
-  -- 			r(1, "funcname"),
-  -- 			t("("),
-  -- 			r(2, "args"),
-  -- 			t(")"),
-  -- 			t({ "", "\t" }),
-  -- 			r(3, "return"),
-  -- 			m(3, "return", " ", ""),
-  -- 			r(4, "code"),
-  -- 			t({ "", "end" }),
-  -- 			i(5),
-  -- 		},
-  -- 		{
-  -- 			t("local "),
-  -- 			r(1, "funcname"),
-  -- 			t(" = function("),
-  -- 			r(2, "args"),
-  -- 			t(")"),
-  -- 			t({ "", "\t" }),
-  -- 			r(3, "return"),
-  -- 			m(3, "return", " ", ""),
-  -- 			r(4, "code"),
-  -- 			t({ "", "end" }),
-  -- 			i(5),
-  -- 		},
-  -- 	}),
-  -- 	{
-  -- 		stored = {
-  -- 			["funcname"] = i(1),
-  -- 			["args"] = i(2, "Args"),
-  -- 			["return"] = i(3, "return"),
-  -- 			["code"] = i(4),
-  -- 		},
-  -- 	}
-  -- ),
-
   s("if", {
     t("if "),
     i(1, "true"),

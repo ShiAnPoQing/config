@@ -10,13 +10,17 @@ function M:update_tick()
 end
 
 function M:fallback()
-  vim.api.nvim_feedkeys(".", "nx", false)
+  local count = vim.v.count1
+  vim.api.nvim_feedkeys(count .. ".", "nx", false)
   self:update_tick()
 end
 
 function M:run()
   if self.repeat_callback == nil then
-    self:fallback()
+    local count = vim.v.count1
+    for i = 1, count do
+      self:fallback()
+    end
     return
   end
 

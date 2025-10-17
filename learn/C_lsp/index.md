@@ -1,7 +1,7 @@
 # 如何安装 clangd (arch)
 
 ```powershell
-sudo pacman -S clang
+ssudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangsudo pacman -S clangudo pacman -S clang
 ```
 
 ```lua

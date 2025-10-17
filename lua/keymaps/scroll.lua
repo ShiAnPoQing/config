@@ -144,7 +144,7 @@ return {
   ["<C-S-l>"] = {
     {
       function()
-        scroll_half_screen_right()
+        return scroll_half_screen_right()
       end,
       { "n", "x" },
       expr = true,
@@ -160,7 +160,7 @@ return {
   ["<C-S-h>"] = {
     {
       function()
-        scroll_half_screen_left()
+        return scroll_half_screen_left()
       end,
       { "n", "x" },
       expr = true,

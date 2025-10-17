@@ -1,3 +1,18 @@
+local function visual_mode_textobject(textobject)
+  local mode = vim.api.nvim_get_mode().mode
+  if mode == "" then
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    vim.api.nvim_feedkeys(textobject .. vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
+    local start_row = unpack(vim.api.nvim_buf_get_mark(0, "<"))
+    local end_row = unpack(vim.api.nvim_buf_get_mark(0, ">"))
+
+    vim.api.nvim_win_set_cursor(0, { start_row, cursor[2] })
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-v>", true, false, true), "nx", false)
+    vim.api.nvim_win_set_cursor(0, { end_row, cursor[2] })
+  else
+    vim.api.nvim_feedkeys(textobject, "nx", false)
+  end
+end
 return {
   -- textobject
   ["ww"] = { "aw", { "x", "o" } },
@@ -5,10 +20,48 @@ return {
   ["wW"] = { "aW", { "x", "o" } },
   ["eW"] = { "iW", { "x", "o" } },
 
-  ["ws"] = { "as", { "x", "o" } },
-  ["es"] = { "is", { "x", "o" } },
-  ["wp"] = { "ap", { "x", "o" } },
-  ["ep"] = { "ip", { "x", "o" } },
+  ["ws"] = {
+    { "as", "o" },
+    {
+      function()
+        visual_mode_textobject("as")
+      end,
+      "x",
+    },
+  },
+  ["es"] = {
+    { "is", "o" },
+    {
+      function()
+        visual_mode_textobject("is")
+      end,
+      "x",
+    },
+  },
+  ["wp"] = {
+    {
+      "ap",
+      "o",
+    },
+    {
+      function()
+        visual_mode_textobject("ap")
+      end,
+      "x",
+    },
+  },
+  ["ep"] = {
+    {
+      "ip",
+      "o",
+    },
+    {
+      function()
+        visual_mode_textobject("ip")
+      end,
+      "x",
+    },
+  },
 
   ["w["] = { "a[", { "x", "o" } },
   ["e["] = { "i[", { "x", "o" } },

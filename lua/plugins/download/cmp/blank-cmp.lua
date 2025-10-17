@@ -1,7 +1,6 @@
 return {
   "saghen/blink.cmp",
   depend = {
-    -- 'rafamadriz/friendly-snippets',
     -- { 'L3MON4D3/LuaSnip', version = 'v2.*' },
   },
   run = function(plug)
@@ -181,12 +180,18 @@ return {
         -- 也会优先触发 Snippet，而不是选中 menu 第一项
         ["<Tab>"] = {
           function(cmp)
-            local expandable = require("luasnip").expandable()
+            local luasnip = require("luasnip")
+            local expandable = luasnip.expandable()
 
             if expandable then
               vim.schedule(function()
-                require("luasnip").expand()
+                luasnip.expand()
               end)
+              return true
+            end
+
+            if luasnip.in_snippet() then
+              luasnip.jump(1)
               return true
             end
           end,

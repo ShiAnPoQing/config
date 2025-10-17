@@ -30,6 +30,7 @@ return {
       "vimdoc",
       "xml",
       "qml",
+      "tex",
       "jsdoc",
       "json",
       "jsonc",

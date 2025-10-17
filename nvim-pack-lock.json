@@ -113,14 +113,15 @@
       "rev": "0f1c981",
       "src": "https://github.com/mbbill/undotree"
     },
+    "vim-moonfly-colors": {
+      "rev": "8129169",
+      "src": "https://github.com/bluz71/vim-moonfly-colors"
+    },
     "vim-tmux-navigator": {
       "rev": "c45243d",
       "src": "https://github.com/christoomey/vim-tmux-navigator"
     },
-    "vimtex": {
-      "rev": "088ad457",
-      "src": "https://github.com/lervag/vimtex"
-    },
+    "vimtex": [],
     "winshift.nvim": {
       "rev": "37468ed",
       "src": "https://github.com/sindrets/winshift.nvim"
