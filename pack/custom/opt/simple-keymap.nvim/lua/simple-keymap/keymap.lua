@@ -110,8 +110,6 @@ local function set_keymap(lhs, rhs, mode, opts)
     return
   end
 
-  local keymap_opts = get_keymap_opts(opts)
-
   if not M.keymaps[lhs] then
     M.keymaps[lhs] = {
       [mode] = {
@@ -125,6 +123,7 @@ local function set_keymap(lhs, rhs, mode, opts)
   end
 
   M.keymaps[lhs][mode] = vim.tbl_extend("force", M.keymaps[lhs][mode], opts)
+  local keymap_opts = get_keymap_opts(opts)
 
   if opts.filetype then
     collect_filetype_keymap(opts.filetype, function()
@@ -140,7 +139,13 @@ local function set_keymap(lhs, rhs, mode, opts)
     return
   end
 
-  pcall(vim.keymap.set, mode, lhs, rhs, keymap_opts)
+  if opts.context == true and type(rhs) == "function" then
+    pcall(vim.keymap.set, mode, lhs, function()
+      rhs(opts)
+    end, keymap_opts)
+  else
+    pcall(vim.keymap.set, mode, lhs, rhs, keymap_opts)
+  end
 end
 
 local function get_opts(data)
@@ -169,6 +174,14 @@ local function parse_one_rhs(lhs, data, parent_opts)
   local rhs = data[1]
   local mode = data[2]
   local opts = vim.tbl_extend("force", parent_opts, get_opts(data))
+
+  if not mode then
+    vim.notify(
+      'simple-keymap: ["' .. lhs .. '"] the mode must be provided in the second position!',
+      vim.log.levels.WARN
+    )
+    return
+  end
 
   if type(mode) == "string" then
     set_keymap(lhs, rhs, mode, opts)
@@ -207,7 +220,7 @@ end
 
 local function parse_add_keymap(lhs, data)
   if type(data) ~= "table" then
-    vim.notify("simple-keymap: lhs = value must be table")
+    vim.notify("simple-keymap: rhs value must be table")
     return
   end
 
@@ -263,6 +276,14 @@ function M.del(source)
       parse_delete_keymap(lhs, data)
     end
   end
+end
+
+function M.get(lhs)
+  return M.keymaps[lhs]
+end
+
+function M.get_keymaps()
+  return M.keymaps
 end
 
 function M.filetype_load()

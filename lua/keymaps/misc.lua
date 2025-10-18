@@ -1,4 +1,10 @@
 return {
+  ["@"] = {
+    function()
+      require("builtin.macro-repeat").macro_repeat()
+    end,
+    "n",
+  },
   -- ["X"] = {
   --   '"_X',
   --   "n",
