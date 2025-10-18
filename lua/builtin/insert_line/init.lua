@@ -65,6 +65,12 @@ function M.insert_line(opts)
     key = key .. vim.api.nvim_replace_termcodes("<C-g>u", true, false, true)
     vim.api.nvim_feedkeys(key, "n", false)
   end
+
+  vim.schedule(function()
+    if type(opts.after) == "function" then
+      opts.after()
+    end
+  end)
 end
 
 return M

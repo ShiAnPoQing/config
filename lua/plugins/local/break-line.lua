@@ -3,10 +3,11 @@ return {
   keys = {
     ["<space><CR>"] = {
       function()
-        require("break-line").break_line(vim.v.count1)
-        require("repeat"):set(function()
+        local function callback()
           require("break-line").break_line(vim.v.count1)
-        end)
+          require("repeat"):set(callback)
+        end
+        callback()
       end,
       { "n", "x" },
       expr = true,

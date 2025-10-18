@@ -55,10 +55,11 @@ return {
   -- goto last cursor position
   ["<space><space>["] = {
     function()
-      jump_buffer(-1, true)
-      require("repeat"):set(function()
+      local function callback()
         jump_buffer(-1, true)
-      end)
+        require("repeat"):set(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Go to [count] Older cursor position in jump list (not a motion command)",
@@ -66,10 +67,11 @@ return {
   -- goto new cursor position
   ["<space><space>]"] = {
     function()
-      jump_buffer(1, true)
-      require("repeat"):set(function()
+      local function callback()
         jump_buffer(1, true)
-      end)
+        require("repeat"):set(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Go to [count] newer cursor position in jump list(not a motion command)",
@@ -77,20 +79,22 @@ return {
   },
   ["<space>{"] = {
     function()
-      jump_buffer(-1)
-      require("repeat"):set(function()
+      local function callback()
         jump_buffer(-1)
-      end)
+        require("repeat"):set(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Older Jump(buffer)",
   },
   ["<space>}"] = {
     function()
-      jump_buffer(1)
-      require("repeat"):set(function()
+      local function callback()
         jump_buffer(1)
-      end)
+        require("repeat"):set(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Newer Jump(buffer)",

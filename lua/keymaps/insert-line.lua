@@ -33,116 +33,114 @@ return {
   },
   ["<C-b>"] = {
     function()
-      require("builtin.insert_line").insert_line({
-        dir = "above",
-        cursor = "move",
-      })
-      require("repeat"):set(function()
+      local function insert_line()
         require("builtin.insert_line").insert_line({
           dir = "above",
           cursor = "move",
+          after = function()
+            require("repeat"):set(insert_line)
+          end,
         })
-      end)
+      end
+      insert_line()
     end,
     { "n", "i" },
     desc = "Above insert new line(cursor follow)",
   },
   ["<C-space><C-b>"] = {
     function()
-      require("builtin.insert_line").insert_line({
-        dir = "above",
-        cursor = "move",
-        indent = false,
-      })
-      require("repeat"):set(function()
+      local function insert_line()
         require("builtin.insert_line").insert_line({
           dir = "above",
           cursor = "move",
           indent = false,
+          after = function()
+            require("repeat"):set(insert_line)
+          end,
         })
-      end)
+      end
+      insert_line()
     end,
     "i",
     desc = "Above insert new line(cursor follow)(no indent)",
   },
   ["<M-b>"] = {
     function()
-      require("builtin.insert_line").insert_line({
-        dir = "below",
-        cursor = "move",
-      })
-      require("repeat"):set(function()
+      local function insert_line()
         require("builtin.insert_line").insert_line({
           dir = "below",
           cursor = "move",
+          after = function()
+            require("repeat"):set(insert_line)
+          end,
         })
-      end)
+      end
+      insert_line()
     end,
     { "n", "i" },
     desc = "Below insert new line(cursor follow)",
   },
   ["<M-space><M-b>"] = {
     function()
-      require("builtin.insert_line").insert_line({
-        dir = "below",
-        cursor = "move",
-        indent = false,
-      })
-      require("repeat"):set(function()
+      local function insert_line()
         require("builtin.insert_line").insert_line({
           dir = "below",
           cursor = "move",
           indent = false,
+          after = function()
+            require("repeat"):set(insert_line)
+          end,
         })
-      end)
+      end
+      insert_line()
     end,
     "i",
     desc = "Below insert new line(cursor follow)(no indent)",
   },
   ["<C-M-b>"] = {
     function()
-      require("builtin.insert_line").insert_line({
-        dir = "all",
-        cursor = "move",
-      })
-      require("repeat"):set(function()
+      local function insert_line()
         require("builtin.insert_line").insert_line({
           dir = "all",
           cursor = "move",
+          after = function()
+            require("repeat"):set(insert_line)
+          end,
         })
-      end)
+      end
+      insert_line()
     end,
     { "n", "i" },
     desc = "Below and Above insert new line",
   },
   ["<C-S-b>"] = {
     function()
-      require("builtin.insert_line").insert_line({
-        dir = "above",
-        cursor = "keep",
-      })
-      require("repeat"):set(function()
+      local function insert_line()
         require("builtin.insert_line").insert_line({
           dir = "above",
           cursor = "keep",
+          after = function()
+            require("repeat"):set(insert_line)
+          end,
         })
-      end)
+      end
+      insert_line()
     end,
     { "n", "i" },
     desc = "Above insert new line(cursor don't follow)",
   },
   ["<M-S-b>"] = {
     function()
-      require("builtin.insert_line").insert_line({
-        dir = "below",
-        cursor = "keep",
-      })
-      require("repeat"):set(function()
+      local function insert_line()
         require("builtin.insert_line").insert_line({
           dir = "below",
           cursor = "keep",
+          after = function()
+            require("repeat"):set(insert_line)
+          end,
         })
-      end)
+      end
+      insert_line()
     end,
     { "n", "i" },
     desc = "Below insert new line(cursor don't follow)",

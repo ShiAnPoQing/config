@@ -3,19 +3,17 @@ return {
   keys = {
     ["<leader>bm"] = {
       function()
-        require("buffer-manage").buffer_manage()
-        require("repeat"):set(function()
+        local function callback()
           require("buffer-manage").buffer_manage()
-        end)
+          require("repeat"):set(callback)
+        end
+        callback()
       end,
       "n",
     },
     ["<leader><leader>bm"] = {
       function()
         require("buffer-manage")._buffer_manage({ position = "right" })
-        -- require("repeat"):set(function()
-        --   require("buffer-manage").buffer_manage()
-        -- end)
       end,
       "n",
     },

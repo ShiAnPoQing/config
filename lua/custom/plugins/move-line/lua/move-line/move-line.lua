@@ -7,7 +7,6 @@ function M.move_line(dir)
   local modifiable = vim.api.nvim_get_option_value("modifiable", {
     buf = vim.api.nvim_get_current_buf(),
   })
-  vim.print(modifiable)
   if not modifiable then
     return
   end

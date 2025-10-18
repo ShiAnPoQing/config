@@ -22,15 +22,25 @@ function M:run()
   end
 
   if self.tick == vim.b.changedtick then
-    self.repeat_callback()
+    if self.repeat_callback.manual_update then
+      self.repeat_callback.callback(function()
+        self:update_tick()
+      end)
+    else
+      self.repeat_callback.callback()
+      self:update_tick()
+    end
   else
     self:fallback()
     self.repeat_callback = nil
   end
 end
 
-function M:set(callback)
-  self.repeat_callback = callback
+function M:set(callback, manual_update)
+  self.repeat_callback = {
+    callback = callback,
+    manual_update = manual_update,
+  }
   self:update_tick()
 end
 

@@ -3,19 +3,21 @@ return {
   keys = {
     ["<C-down>"] = {
       function()
-        require("move-line").move_line("down")
-        require("repeat"):set(function()
+        local function callback()
           require("move-line").move_line("down")
-        end)
+          require("repeat"):set(callback)
+        end
+        callback()
       end,
       { "n", "i", "x" },
     },
     ["<C-up>"] = {
       function()
-        require("move-line").move_line("up")
-        require("repeat"):set(function()
+        local function callback()
           require("move-line").move_line("up")
-        end)
+          require("repeat"):set(callback)
+        end
+        callback()
       end,
       { "n", "i", "x" },
     },
