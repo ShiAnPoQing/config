@@ -53,10 +53,16 @@ return {
       expr = true,
     },
     {
-      function()
-        require("builtin.start_insert_mode.visual-mode").first_non_black_character()
+      function(context)
+        require("builtin.start_insert_mode.visual-mode").first_non_black_character(function()
+          if type(context.after) == "function" then
+            context.after()
+          end
+        end)
       end,
       { "x", "s" },
+      after = true,
+      context = true,
       desc = "Start insert mode to the left of the first non-blank character in the visual area",
     },
   },
@@ -70,10 +76,16 @@ return {
       expr = true,
     },
     {
-      function()
-        require("builtin.start_insert_mode.visual-mode").last_non_black_character()
+      function(context)
+        require("builtin.start_insert_mode.visual-mode").last_non_black_character(function()
+          if type(context.after) == "function" then
+            context.after()
+          end
+        end)
       end,
       { "x", "s" },
+      after = true,
+      context = true,
       desc = "Start insert mode to the right of the last non-blank character in the visual area",
     },
   },

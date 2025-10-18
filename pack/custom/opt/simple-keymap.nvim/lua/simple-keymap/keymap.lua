@@ -122,7 +122,8 @@ local function set_keymap(lhs, rhs, mode, opts)
     }
   end
 
-  M.keymaps[lhs][mode] = vim.tbl_extend("force", M.keymaps[lhs][mode], opts)
+  local keymap_mode = vim.tbl_extend("force", M.keymaps[lhs][mode], opts)
+  M.keymaps[lhs][mode] = keymap_mode
   local keymap_opts = get_keymap_opts(opts)
 
   if opts.filetype then
@@ -139,9 +140,9 @@ local function set_keymap(lhs, rhs, mode, opts)
     return
   end
 
-  if opts.context == true and type(rhs) == "function" then
+  if keymap_mode.context == true and type(rhs) == "function" then
     pcall(vim.keymap.set, mode, lhs, function()
-      rhs(opts)
+      rhs(keymap_mode)
     end, keymap_opts)
   else
     pcall(vim.keymap.set, mode, lhs, rhs, keymap_opts)

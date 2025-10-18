@@ -125,9 +125,12 @@ local function get_visual_end_mark_virt_col(start_row, start_col, end_row, end_c
   return virt_col
 end
 
-function M.first_non_black_character()
+function M.first_non_black_character(after)
   local count = get_count()
   local mode = get_mode()
+  vim.schedule(function()
+    after()
+  end)
   if is_visual_or_visual_line_mode(mode) or is_select_or_select_line_mode(mode) then
     esc()
     local start_row, start_col, end_row, end_col = get_visual_mark()
@@ -196,9 +199,13 @@ function M.first_character()
   end
 end
 
-function M.last_non_black_character()
+function M.last_non_black_character(after)
   local count = get_count()
   local mode = get_mode()
+
+  vim.schedule(function()
+    after()
+  end)
 
   if is_visual_or_visual_line_mode(mode) or is_select_or_select_line_mode(mode) then
     esc()

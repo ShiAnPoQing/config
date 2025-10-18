@@ -1,5 +1,9 @@
 local M = {}
 
+local function feedkeys(key)
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true), "m", true)
+end
+
 local function split_keys(seq)
   local result = {}
   local i = 1
@@ -71,6 +75,14 @@ local function get_real_keys(keys)
   return new_keys
 end
 
+local function get_keymap_context(keymap)
+  for _, value in pairs(keymap) do
+    if value.after then
+      return value
+    end
+  end
+end
+
 function M.macro_repeat(register_name)
   if type(register_name) ~= "string" then
     return
@@ -80,12 +92,12 @@ function M.macro_repeat(register_name)
   if reg == "" then
     return
   end
+
   M.last_register_name = register_name
 
   local normalize_reg = vim.fn.keytrans(reg):lower()
   local keys = split_keys(normalize_reg)
   local new_keys = get_real_keys(keys)
-
   local new_keys_copy = vim.tbl_deep_extend("force", {}, new_keys)
   local function run()
     if #new_keys_copy == 0 then
@@ -93,17 +105,17 @@ function M.macro_repeat(register_name)
     end
     local key = table.remove(new_keys_copy, 1)
     local keymap = require("simple-keymap").get(key)
+    feedkeys(key)
+
     if keymap then
-      -- for _, value in ipairs(keymap) do
-      --   if value.after then
-      --     break
-      --   end
-      -- end
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true), "mx", true)
-      run()
+      local context = get_keymap_context(keymap)
+      if context then
+        context.after = run()
+      else
+        vim.schedule(run)
+      end
     else
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true), "mx", true)
-      run()
+      vim.schedule(run)
     end
   end
   run()
