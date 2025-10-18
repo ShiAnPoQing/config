@@ -31,6 +31,23 @@ local util = require("snippets.utils")
 local snippets = {
   s(
     {
+      trig = "``",
+      regTrig = true,
+      hidden = true,
+      wordTrig = false,
+    },
+    d(1, function(_, snip)
+      local function text()
+        if type(snip.env.TM_SELECTED_TEXT) == "table" and next(snip.env.TM_SELECTED_TEXT) ~= nil then
+          return snip.env.TM_SELECTED_TEXT
+        end
+        return "select_text"
+      end
+      return sn(1, { t("`"), i(1, text()), t("`") })
+    end)
+  ),
+  s(
+    {
       trig = '""',
       regTrig = true,
       hidden = true,
@@ -951,6 +968,18 @@ local snippets = {
         ["captures1"] = i(1),
       },
     })
+  ),
+
+  s(
+    {
+      trig = "``([%a%d]+)",
+      regTrig = true,
+      hidden = true,
+      wordTrig = false,
+    },
+    d(1, function(_, snip)
+      return sn(1, { t("`"), i(1, snip.captures[1]), t("`") })
+    end)
   ),
 
   s(

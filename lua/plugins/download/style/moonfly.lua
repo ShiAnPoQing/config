@@ -5,7 +5,7 @@ return {
     vim.g.moonflyTransparent = true
     vim.g.moonflyVirtualTextColor = true
     require("moonfly").custom_colors({
-      bg = "#000000",
+      -- bg = "#000000",
       -- violet = "#ff74b8",
     })
     vim.cmd([[colorscheme moonfly]])

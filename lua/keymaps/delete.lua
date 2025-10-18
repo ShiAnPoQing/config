@@ -1,35 +1,28 @@
 local function ctrl_space_ctrl_i()
   vim.cmd.stopinsert()
-  vim.schedule(function()
-    local end_pos = vim.api.nvim_win_get_cursor(0)
-    local end_row = end_pos[1]
-    local end_col = end_pos[2]
-    vim.api.nvim_exec2(
-      [[
-    exec "normal! ge"
-    ]],
-      {}
-    )
-    local start_pos = vim.api.nvim_win_get_cursor(0)
-    local start_row = start_pos[1]
-    local start_col = start_pos[2]
+  local end_pos = vim.api.nvim_win_get_cursor(0)
+  local end_row = end_pos[1]
+  local end_col = end_pos[2]
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("hgel", true, false, true), "nx", false)
+  local start_pos = vim.api.nvim_win_get_cursor(0)
+  local start_row = start_pos[1]
+  local start_col = start_pos[2]
 
-    if start_row == end_row then
-      vim.api.nvim_buf_set_text(0, start_row - 1, start_col + 1, start_row - 1, end_col + 1, { "" })
-      vim.api.nvim_feedkeys("a", "n", false)
-      return
-    end
+  if start_row == end_row then
+    vim.api.nvim_buf_set_text(0, start_row - 1, start_col, start_row - 1, end_col, { "" })
+    vim.api.nvim_feedkeys("a", "n", false)
+    return
+  end
 
-    if end_col ~= 0 then
-      vim.api.nvim_buf_set_text(0, end_row - 1, 0, end_row - 1, end_col + 1, { "" })
-    end
+  if end_col ~= 0 then
+    vim.api.nvim_buf_set_text(0, end_row - 1, 0, end_row - 1, end_col, { "" })
+  end
 
-    if start_col > 0 then
-      vim.api.nvim_feedkeys("a", "n", false)
-    else
-      vim.api.nvim_feedkeys("i", "n", false)
-    end
-  end)
+  if start_col > 0 then
+    vim.api.nvim_feedkeys("a", "n", false)
+  else
+    vim.api.nvim_feedkeys("i", "n", false)
+  end
 end
 
 return {

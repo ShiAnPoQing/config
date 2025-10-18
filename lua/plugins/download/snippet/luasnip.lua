@@ -28,5 +28,14 @@ return {
 
     ls.config.set_config(options)
     ls.config.setup({ store_selection_keys = "<Tab>" })
+
+    require("simple-keymap").add({
+      ["<leader>sc"] = {
+        function()
+          require("luasnip").cleanup()
+        end,
+        "n",
+      },
+    })
   end,
 }
