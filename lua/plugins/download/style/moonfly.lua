@@ -1,6 +1,7 @@
 return {
   "bluz71/vim-moonfly-colors",
   priority = 1000,
+  colorscheme = "moonfly",
   config = function()
     vim.g.moonflyTransparent = true
     vim.g.moonflyVirtualTextColor = true

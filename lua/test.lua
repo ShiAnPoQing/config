@@ -218,6 +218,15 @@ return {
   --   end,
   --   "n",
   -- },
+  [";2"] = {
+    function()
+      vim.fn.win_splitmove(1000, 1007, {
+        vertical = true,
+        rightbelow = true,
+      })
+    end,
+    "n",
+  },
   ["<M-w>"] = {
     function()
       local function taglist_to_qf(tagname)

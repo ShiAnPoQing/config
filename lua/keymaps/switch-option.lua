@@ -35,7 +35,7 @@ return {
   -- Only in cursor window
   ["<leader>csl"] = {
     function()
-      require("builtin.toggle_cursorline").toggle_cursorline()
+      require("builtin.toggle-cursorline").toggle_cursorline()
     end,
     "n",
     desc = "Switch cursor line",

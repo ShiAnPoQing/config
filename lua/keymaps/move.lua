@@ -284,7 +284,7 @@ return {
   ["<space>h"] = {
     {
       function()
-        require("builtin.start_end_move").first_non_blank_character()
+        require("builtin.start-end-move").first_non_blank_character()
       end,
       "n",
     },
@@ -296,7 +296,7 @@ return {
   ["<space>l"] = {
     {
       function()
-        require("builtin.start_end_move").last_non_blank_character()
+        require("builtin.start-end-move").last_non_blank_character()
       end,
       "n",
     },
@@ -306,7 +306,7 @@ return {
   ["<space><space>h"] = {
     {
       function()
-        require("builtin.start_end_move").first_character()
+        require("builtin.start-end-move").first_character()
       end,
       "n",
     },
@@ -318,7 +318,7 @@ return {
   ["<space><space>l"] = {
     {
       function()
-        require("builtin.start_end_move").last_character()
+        require("builtin.start-end-move").last_character()
       end,
       "n",
     },

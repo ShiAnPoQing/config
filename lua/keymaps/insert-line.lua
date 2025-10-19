@@ -34,7 +34,7 @@ return {
   ["<C-b>"] = {
     function()
       local function insert_line()
-        require("builtin.insert_line").insert_line({
+        require("builtin.insert-line").insert_line({
           dir = "above",
           cursor = "move",
           after = function()
@@ -50,7 +50,7 @@ return {
   ["<C-space><C-b>"] = {
     function()
       local function insert_line()
-        require("builtin.insert_line").insert_line({
+        require("builtin.insert-line").insert_line({
           dir = "above",
           cursor = "move",
           indent = false,
@@ -67,7 +67,7 @@ return {
   ["<M-b>"] = {
     function()
       local function insert_line()
-        require("builtin.insert_line").insert_line({
+        require("builtin.insert-line").insert_line({
           dir = "below",
           cursor = "move",
           after = function()
@@ -83,7 +83,7 @@ return {
   ["<M-space><M-b>"] = {
     function()
       local function insert_line()
-        require("builtin.insert_line").insert_line({
+        require("builtin.insert-line").insert_line({
           dir = "below",
           cursor = "move",
           indent = false,
@@ -100,7 +100,7 @@ return {
   ["<C-M-b>"] = {
     function()
       local function insert_line()
-        require("builtin.insert_line").insert_line({
+        require("builtin.insert-line").insert_line({
           dir = "all",
           cursor = "move",
           after = function()
@@ -116,7 +116,7 @@ return {
   ["<C-S-b>"] = {
     function()
       local function insert_line()
-        require("builtin.insert_line").insert_line({
+        require("builtin.insert-line").insert_line({
           dir = "above",
           cursor = "keep",
           after = function()
@@ -132,7 +132,7 @@ return {
   ["<M-S-b>"] = {
     function()
       local function insert_line()
-        require("builtin.insert_line").insert_line({
+        require("builtin.insert-line").insert_line({
           dir = "below",
           cursor = "keep",
           after = function()

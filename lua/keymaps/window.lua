@@ -6,14 +6,14 @@ return {
   },
   ["<M-c>"] = {
     function()
-      require("builtin.window_swap").window_swap(1)
+      require("builtin.window-swap").window_swap(1)
     end,
     "n",
     desc = "Swap adjacent windows",
   },
   ["<M-x>"] = {
     function()
-      require("builtin.window_swap").window_swap(-1)
+      require("builtin.window-swap").window_swap(-1)
     end,
     "n",
     desc = "Swap adjacent windows",
@@ -56,31 +56,31 @@ return {
   },
   ["<M-right>"] = {
     function()
-      require("builtin.win_resize").resize("increase", "horizontal")
+      require("builtin.window-resize").resize("increase", "horizontal")
     end,
     "n",
   },
   ["<M-left>"] = {
     function()
-      require("builtin.win_resize").resize("decrease", "horizontal")
+      require("builtin.window-resize").resize("decrease", "horizontal")
     end,
     "n",
   },
   ["<M-up>"] = {
     function()
-      require("builtin.win_resize").resize("decrease", "vertical")
+      require("builtin.window-resize").resize("decrease", "vertical")
     end,
     "n",
   },
   ["<M-down>"] = {
     function()
-      require("builtin.win_resize").resize("increase", "vertical")
+      require("builtin.window-resize").resize("increase", "vertical")
     end,
     "n",
   },
   ["<M-S-h>"] = {
     function()
-      require("builtin.buffer_swap").buffer_swap("left")
+      require("builtin.buffer-swap").buffer_swap("left")
     end,
     "n",
 
@@ -88,21 +88,21 @@ return {
   },
   ["<M-S-l>"] = {
     function()
-      require("builtin.buffer_swap").buffer_swap("right")
+      require("builtin.buffer-swap").buffer_swap("right")
     end,
     "n",
     desc = "Swap with the window on the right",
   },
   ["<M-S-j>"] = {
     function()
-      require("builtin.buffer_swap").buffer_swap("down")
+      require("builtin.buffer-swap").buffer_swap("down")
     end,
     "n",
     desc = "Swap with the window below",
   },
   ["<M-S-k>"] = {
     function()
-      require("builtin.buffer_swap").buffer_swap("up")
+      require("builtin.buffer-swap").buffer_swap("up")
     end,
     "n",
     desc = "Swap with the window above",

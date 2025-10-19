@@ -46,7 +46,7 @@ return {
   ["<space>w"] = {
     {
       function()
-        return require("builtin.start_insert_mode.normal-mode").first_non_blank_character()
+        return require("builtin.start-insert-mode.normal-mode").first_non_blank_character()
       end,
       "n",
       desc = "Start insert mode to the left of the first non-blank character in the current line",
@@ -54,7 +54,7 @@ return {
     },
     {
       function(context)
-        require("builtin.start_insert_mode.visual-mode").first_non_black_character(function()
+        require("builtin.start-insert-mode.visual-mode").first_non_black_character(function()
           if type(context.after) == "function" then
             context.after()
           end
@@ -69,7 +69,7 @@ return {
   ["<space>e"] = {
     {
       function()
-        return require("builtin.start_insert_mode.normal-mode").last_non_blank_character()
+        return require("builtin.start-insert-mode.normal-mode").last_non_blank_character()
       end,
       "n",
       desc = "Start insert mode to the right of the last non-blank character in the current line",
@@ -77,7 +77,7 @@ return {
     },
     {
       function(context)
-        require("builtin.start_insert_mode.visual-mode").last_non_black_character(function()
+        require("builtin.start-insert-mode.visual-mode").last_non_black_character(function()
           if type(context.after) == "function" then
             context.after()
           end
@@ -97,7 +97,7 @@ return {
     },
     {
       function()
-        require("builtin.start_insert_mode.visual-mode").first_character()
+        require("builtin.start-insert-mode.visual-mode").first_character()
       end,
       { "x", "s" },
       desc = "Start insert mode to the left of the first character in the visual area",
@@ -106,7 +106,7 @@ return {
   ["<space><space>e"] = {
     {
       function()
-        return require("builtin.start_insert_mode.normal-mode").last_character()
+        return require("builtin.start-insert-mode.normal-mode").last_character()
       end,
       "n",
       desc = "Start insert mode to the right of the last character in the current line",
@@ -114,7 +114,7 @@ return {
     },
     {
       function()
-        require("builtin.start_insert_mode.visual-mode").last_character()
+        require("builtin.start-insert-mode.visual-mode").last_character()
       end,
       desc = "Start insert mode to the right of the last character in the visual area",
       { "x", "s" },
