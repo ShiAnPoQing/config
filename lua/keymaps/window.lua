@@ -4,8 +4,17 @@ return {
     "<cmd>vsplit<cr>",
     "n",
   },
+  ["<M-c>"] = {
+    function()
+      require("builtin.window_swap").window_swap(1)
+    end,
+    "n",
+    desc = "Swap adjacent windows",
+  },
   ["<M-x>"] = {
-    "<C-w>x<C-w>w",
+    function()
+      require("builtin.window_swap").window_swap(-1)
+    end,
     "n",
     desc = "Swap adjacent windows",
   },
@@ -71,30 +80,51 @@ return {
   },
   ["<M-S-h>"] = {
     function()
-      require("builtin.win_exchange").window_exchange("left")
+      require("builtin.buffer_swap").buffer_swap("left")
     end,
     "n",
+
     desc = "Swap with the window on the left",
   },
   ["<M-S-l>"] = {
     function()
-      require("builtin.win_exchange").window_exchange("right")
+      require("builtin.buffer_swap").buffer_swap("right")
     end,
     "n",
     desc = "Swap with the window on the right",
   },
   ["<M-S-j>"] = {
     function()
-      require("builtin.win_exchange").window_exchange("down")
+      require("builtin.buffer_swap").buffer_swap("down")
     end,
     "n",
     desc = "Swap with the window below",
   },
   ["<M-S-k>"] = {
     function()
-      require("builtin.win_exchange").window_exchange("up")
+      require("builtin.buffer_swap").buffer_swap("up")
     end,
     "n",
     desc = "Swap with the window above",
+  },
+  ["<M-space><M-k>"] = {
+    "<C-W>K",
+    { "n", "x" },
+    desc = "Move the current window to be at the very top, using the full width of the screen",
+  },
+  ["<M-space><M-j>"] = {
+    "<C-W>J",
+    { "n", "x" },
+    desc = "Move the current window to be at the very bottom, using the full width of the screen",
+  },
+  ["<M-space><M-h>"] = {
+    "<C-W>H",
+    { "n", "x" },
+    desc = "Move the current window to be at the far left, using the full height of the screen",
+  },
+  ["<M-space><M-l>"] = {
+    "<C-W>L",
+    { "n", "x" },
+    desc = "Move the current window to be at the far right, using the full height of the screen",
   },
 }

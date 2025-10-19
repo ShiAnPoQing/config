@@ -1,0 +1,12 @@
+keytrans({string})					*keytrans()*
+		把键值的内部字节表示方式转换为 |:map| 可接受的形式。如 >
+			:let xx = "\<C-Home>"
+			:echo keytrans(xx)
+<			<C-Home>
+
+		也可用作 |method|: >
+			"\<C-Home>"->keytrans()
+<
+		返回类型: |String|
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

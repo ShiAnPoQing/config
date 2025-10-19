@@ -86,7 +86,11 @@ return {
           return
         end
         local dir = vim.fn.fnamemodify(path, ":h")
-        vim.fn.rename(path, dir .. "/" .. input)
+        local new_name = dir .. "/" .. input
+        local ok = pcall(vim.fn.rename, path, new_name)
+        if ok then
+          vim.cmd("e " .. new_name)
+        end
       end)
     end,
     "n",

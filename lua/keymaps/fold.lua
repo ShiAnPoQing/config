@@ -1,15 +1,12 @@
 return {
   ["<CR>"] = {
-    function()
-      return vim.fn.pumvisible() == 1 and "<CR>" or "za"
-    end,
+    "<CR>",
     "n",
-    expr = true,
-    desc = "Toggle Fold",
+    desc = "Stop same as <C-M>",
   },
-  ["<S-CR>"] = {
-    "zMzv",
-    "n",
-    desc = "Focus current Fold",
-  },
+  -- ["<S-CR>"] = {
+  --   "zMzv",
+  --   "n",
+  --   desc = "Focus current Fold",
+  -- },
 }

@@ -8,7 +8,6 @@ local function space_j_Omode()
   vim.api.nvim_exec2(string.format([[exec "normal! v%d\<Down>g_"]], count), {})
 end
 
---- @param key "h" | "j" | "k" | "l"
 local function large_move(key)
   vim.cmd("normal! " .. vim.v.count1 * 3 .. key)
 end
@@ -51,14 +50,14 @@ return {
   },
   ["J"] = {
     function()
-      large_move("j")
+      large_move(vim.v.count == 0 and "gj" or "j")
     end,
     { "x", "n" },
     desc = "3 Char Down move",
   },
   ["K"] = {
     function()
-      large_move("k")
+      large_move(vim.v.count == 0 and "gk" or "k")
     end,
     { "x", "n" },
     desc = "3 Char Up move",
@@ -249,9 +248,8 @@ return {
   ["<M-space><M-h>"] = {
     { "<C-o>I", "i" },
     { "<C-G>^<C-G>", "s" },
-    { "I", "n" },
+    -- { "I", "n" },
     { "<Home>", "t" },
-    -- { "<C-W>H", "n" },
   },
   -- insert mode move: Home,
   ["<M-space><M-space><M-h>"] = { "<Home>", { "i", "c" }, { silent = false } },
@@ -259,23 +257,20 @@ return {
   ["<M-space><M-l>"] = {
     { "<C-o>A", "i" },
     { "<C-G>g_<C-G>", "s" },
-    { "A", "n" },
+    -- { "A", "n" },
     { "<End>", "t" },
-    -- { "<C-W>L", "n" },
   },
   -- insert mode move: End,
   ["<M-space><M-space><M-l>"] = { "<End>", { "i", "c" }, { silent = false } },
   -- insert mode move: Up End,
   ["<M-space><M-k>"] = {
-    { "<Up><End>", { "i" } },
-    { "<C-W>K", "n" },
+    { "<Up><End>", "i" },
   },
   -- insert mode move: Up Home,
   ["<M-space><M-space><M-k>"] = { "<Up><Home>", { "i" } },
   -- insert mode move: Down End
   ["<M-space><M-j>"] = {
-    { "<Down><End>", { "i" } },
-    { "<C-W>J", "n" },
+    { "<Down><End>", "i" },
   },
   -- insert mode move: Down Home,
   ["<M-space><M-space><M-j>"] = { "<Down><Home>", { "i" } },

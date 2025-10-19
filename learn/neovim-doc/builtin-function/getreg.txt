@@ -1,0 +1,27 @@
+getreg([{regname} [, 1 [, {list}]]])			*getreg()*
+		返回字符串，寄存器 {regname} 的内容。例如: >
+			:let cliptext = getreg('*')
+<		如果 {regname} 对应的寄存器没有设过，返回空串。
+		{regname} 参数必须为字符串。 *E1162*
+
+		getreg('=') 返回最近一次表达式寄存器计算的返回值 (用于映射)。
+		getreg('=', 1) 返回表达式自身，以便用 |setreg()| 恢复。对于其
+		它寄存器，这个额外的参数被忽略，所以给出此参数总是无妨。
+
+		如果 {list} 给出且为 |TRUE|，改变返回值为列表。每个列表项是一
+		个文本行。如果你在意寄存器内可能存在的零字节，可以用这种形式:
+		不用第三个参数时 NL 和零字节都用 NL 表示 (见
+		|NL-used-for-Nul|) 。
+		如果 {regname} 对应的寄存器没有设过，返回空列表。
+
+		如果 {regname} 为 ""，使用无名寄存器 '"'。
+		如果没有指定 {regname}，使用 |v:register|。
+		|Vim9-script| 中 {regname} 必须为单个字符。
+
+		也可用作 |method|: >
+			GetRegname()->getreg()
+<
+		返回类型: |String|
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

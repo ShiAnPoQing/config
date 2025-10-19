@@ -1,0 +1,42 @@
+virtcol({expr} [, {list} [, {winid}]])                               *virtcol()*
+		结果是一个数字（Number），它是给定 {expr} 文件位置所在的屏幕列。也就是说，当屏幕宽度无限时，该位置字符占据的最后一个屏幕位置。
+		如果该位置是一个 <Tab>，返回的数字将是 <Tab> 末尾的列。例如，对于位于第 1 列的 <Tab>，且 'ts' 设置为 8，它将返回 8。|conceal| 被忽略。
+		关于字节位置，请使用 |col()|。
+
+		关于 {expr} 的使用，请参阅 |getpos()| 和 |col()|。
+		当 {expr} 是 "$" 时，它表示光标行的末尾，因此结果是光标行中的单元格数加一。
+
+		当使用 'virtualedit' 时，{expr} 可以是 [lnum, col, off]，其中 "off" 是从字符起始处算起的屏幕列偏移量。例如，位于 <Tab> 内或最后一个字符之后的位置。当省略 "off" 时，使用零。
+		当虚拟编辑在当前模式下激活时，可以返回超出行尾的位置。另请参阅 'virtualedit'
+
+		如果 {list} 存在且非零，则 virtcol() 返回一个列表，包含该字符占据的第一个和最后一个屏幕位置。
+
+		使用可选的 {winid} 参数，可以获取该窗口的值，而不是当前窗口的值。
+
+		注意只能使用当前文件中的标记。
+		示例: >vim
+			" 文本为 "foo^Lbar" 且光标在 "^L" 上:
+
+			echo virtcol(".")	" 返回 5
+			echo virtcol(".", 1)	" 返回 [4, 5]
+			echo virtcol("$")	" 返回 9
+
+			" 文本为 "	  there"，光标在 'h' 上 (标记 't'):
+
+			echo virtcol("'t")	" 返回 6
+<
+		第一列是 1。出错时返回 0 或 [0, 0]。
+
+		一个更高级的示例，回显所有行的最大长度: >vim
+		    echo max(map(range(1, line('$')), "virtcol([v:val, '$'])"))
+<
+
+                参数: ~
+                  • {expr} (`string|any[]`)
+                  • {list} (`boolean?`)
+                  • {winid} (`integer?`)
+
+                返回值: ~
+                  (`integer|[integer, integer]`)
+
+ vim:tw=78:ts=8:noet:ft=help:norl:

@@ -194,7 +194,7 @@ function M.exchange(current_win_id, win_id)
 end
 
 --- @param action "up"|"down"|"left"|"right"
-function M.window_exchange(action)
+function M.buffer_swap(action)
   local current_win_id = vim.api.nvim_get_current_win()
   local cursor_pos = vim.api.nvim_win_get_cursor(current_win_id)
   local current_win_pos = get_win_pos(current_win_id)
@@ -204,7 +204,7 @@ function M.window_exchange(action)
   end
 
   local match_win_pos_list =
-    get_match_win_pos_list(vim.api.nvim_list_wins(), current_win_pos, Action[action].match_condition)
+    get_match_win_pos_list(vim.api.nvim_tabpage_list_wins(0), current_win_pos, Action[action].match_condition)
 
   if #match_win_pos_list == 0 then
     return
