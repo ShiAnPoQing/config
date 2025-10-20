@@ -50,3 +50,7 @@ require("neo-packer").setup({
   require("plugins.download.style.mini-statusline"),
   require("plugins.download.style.moonfly"),
 })
+
+-- <M-Esc>
+-- <C-Esc>
+-- <C-6> <C-^>

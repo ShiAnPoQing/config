@@ -1,4 +1,15 @@
 local keys = {
+  ["0dd"] = {
+    function()
+      require("magic.magic-line").magic_line({
+        dir = "all",
+        callback = function(opts)
+          vim.api.nvim_buf_set_lines(0, opts.line - 1, opts.line, false, { "" })
+        end,
+      })
+    end,
+    "n",
+  },
   ["0k"] = {
     function()
       require("magic.magic-line").magic_line({

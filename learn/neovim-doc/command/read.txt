@@ -1,0 +1,86 @@
+							*:r* *:re* *:read*
+:r[ead] [++opt] [name]
+			在光标下方插入文件 [name] (缺省: 当前文件)。
+			|++opt| 说明 [++opt] 可能的取值。
+
+:{range}r[ead] [++opt] [name]
+			在指定行下方插入文件 [name] (缺省: 当前文件)。
+			|++opt| 说明 [++opt] 可能的取值。
+
+							*:r!* *:read!*
+:[range]r[ead] [++opt] !{cmd}
+			执行 {cmd} 并把它的标准输出插入到光标下方。临时文件会
+			建立来保存命令输出的结果，并被读到缓冲区里。
+			'shellredir' 用来保存命令的输出结果，它可以设置是否包
+			含标准错误的输出。{cmd} 的执行和 ":!{cmd}" 类似，任何
+			的 '!' 会被替换成以前的命令 |:!|。
+			|++opt| 说明 [++opt] 可能的取值。
+
+这些命令插入文件的内容，或者命令的输出结果到缓冲区里。
+两者都可以撤销。
+但不能用"." 命令重复。它们是基于行工作的，插入从光标所在行或指定行的下方开始。
+要在第一行之上插入文本，使用命令 ":0r {name}"。
+
+在 ":read" 命令之后，光标留在第一个新行的第一个非空白处。
+Ex 模式下，光标留在最后一个新行上 (对不起，那是为了和 Vi 兼容)。
+
+如果文件名字通过 ":r" 给出，它成为轮换文件。这可以用来，比如说，你想编辑那个文
+件的时候: ":e! #"。该特性可以通过删除 'cpoptions' 选项里的 'a' 标志位来关闭。
+
+[++opt] 参数里，有一个是 ":read" 专用的: ++edit 参数。当 ":read" 命令就像编辑
+文件一样把文件读入到缓冲区时，这个参数很有用。在空缓冲区上使用如下命令: >
+	:read ++edit filename
+效果是 'fileformat'、'fileencoding'、'bomb' 等选项根据 "filename" 的检测进行设
+置。注意 会留下一行空行，你也许想把它删掉。
+
+							*file-read*
+'fileformat' 选项设置文件的 <EOL> 风格:
+'fileformat'    字符		   名称				~
+  "dos"		<CR><NL> 或 <NL>   DOS 格式
+  "unix"	<NL>		   Unix 格式
+  "mac"		<CR>		   Mac 格式
+以前使用 'textmode'。现在已经废弃了。
+
+如果 'fileformat' 为 "dos"，在 <NL> 之前的 <CR> 被忽略，而在文件尾部的 CTRL-Z
+被忽略。
+
+如果 'fileformat' 为 "mac"，文件里的 <NL> 被内部表示为 <CR>。这是为了避免和用
+来表示 <NUL> 的 <NL> 引起混淆。见 |CR-used-for-NL|。
+
+如果 'fileformats' 选项不为空，Vim 试图识别 <EOL> 的类型 (见 |file-formats|)。
+不过，'fileformat' 选项的值不会被改变，检测到的格式只会在读入文件时使用。
+'fileencodings' 与此情形类似。
+
+非 Win32 系统上，读入 DOS 格式的文件时给出消息 "[dos format]"，以提醒你发生了
+不寻常的事情。
+Macintosh 和 Win32 系统上，读入 Unix 格式的文件时给出消息 "[unix format]"。
+非 Macintosh 的系统上，读入 Mac 格式的文件时给出消息 "[mac format]"。
+
+关于如何使用 ":r !" 的一个例子: >
+	:r !uuencode binfile binfile
+该命令读入 "binfile"，用 uuencode 进行编码，并读入当前缓冲区。可以用于编辑包含
+附带的二进制的文件的 e-mail。
+
+							*read-messages*
+在读入文件时，Vim 会显示消息，显示读入文件的相关信息。以下的表格给出一些项目的
+解释。其它的项目都不言自明。使用长格式还是短格式取决于 'shortmess' 选项的设
+置。
+
+	长		短		含义 ~
+	[readonly]	{RO}		文件被写保护
+	[fifo/socket]			使用流
+	[fifo]				使用 fifo 流
+	[socket]			使用套接字 (socket) 流
+	[CR missing]			使用 "dos" 'fileformat' 读入文件的时候
+					出现没有前导的 CR 的 NL
+	[NL found]			使用 "mac" 'fileformat' 读入文件的时候
+					出现 NL (可能是 "unix" 格式)
+	[long lines split]		至少一行以上被分割
+	[NOT converted]			期待从 'fileencoding' 到 'encoding' 的
+					转换但是做不到
+	[converted]			从 'fileencoding' 到 'encoding' 的转换
+					完成
+	[crypted]			文件被解密
+	[READ ERRORS]			不是文件所有部分都被成功读入
+
+vim:tw=78:ts=8:noet:ft=help:norl:

@@ -1,0 +1,6 @@
+
+							*:up* *:update*
+:[range]up[date][!] [++opt] [>>] [file]
+			类似 ":write"，但仅在缓冲区已被修改时写入，或者当缓冲区表示磁盘上不存在的新文件时。
+
+vim:tw=78:ts=8:noet:ft=help:norl:

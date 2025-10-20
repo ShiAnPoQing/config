@@ -1,0 +1,21 @@
+*:so* *:source*
+:so[urce] {file}	执行来自 {file} 的 |Ex-commands| 或 Lua 代码（".lua" 文件）。
+			触发 |SourcePre| 自动命令。
+
+:[range]so[urce]	从当前缓冲区的 [range] 行范围读取 Ex 命令或 Lua 代码。
+			当省略 [range] 时，读取所有行。
+			如果缓冲区的 'filetype' 是 "lua" 或其文件名以 ".lua" 结尾，则该缓冲区被视为 Lua 代码。
+
+			当从当前缓冲区执行命令或 Lua 代码时，即使缓冲区被多次执行，也使用相同的脚本 ID |<SID>|。
+			如果一个缓冲区被执行多次，则缓冲区中的函数会被重新定义。
+
+			实现细节：当执行一个位于折叠区域内的 [range] 行范围时，该范围将被调整到折叠的起始和结束位置，
+			但仅当使用双行说明符的范围时才会如此。
+
+							*:source!*
+:so[urce]! {file}	运行来自 {file} 的 |Normal-mode| 命令。
+			当在 |:global|、|:argdo|、|:windo|、|:bufdo| 之后使用，
+			或在循环中，或当另一个命令跟随其后时，在执行命令期间显示不会更新。
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:

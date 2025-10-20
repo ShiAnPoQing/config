@@ -1,0 +1,14 @@
+							*:qa* *:qall*
+:qa[ll]			退出 Vim，除非有一些缓冲区已被更改。（使用 ":bmod" 转到下一个已修改的缓冲区）。
+			当设置了 'autowriteall' 时，所有已更改的缓冲区将被写入，如同 |:wqall|。
+
+:conf[irm] qa[ll]
+			退出 Vim。当一些缓冲区已被更改时，显示提示。请参阅 |:confirm|。
+
+:qa[ll]!		退出 Vim。对缓冲区的任何更改都将丢失。
+			另请参阅 |:cquit|，它执行相同的操作但以非零值退出。
+
+							*:quita* *:quitall*
+:quita[ll][!]		与 ":qall" 相同。
+
+vim:tw=78:ts=8:noet:ft=help:norl:

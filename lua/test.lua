@@ -69,10 +69,14 @@ return {
     ":move '>+1<CR>gv",
     "x",
   },
-  -- ["<leader>7"] = {
-  --   "<C-r>=nr2char(0x)<Left>",
-  --   "i",
-  -- },
+  ["<leader>7"] = {
+    function()
+      vim.system({ "wl-paste", "--primary" }, { text = true }, function(out)
+        vim.print(out.stdout)
+      end)
+    end,
+    "n",
+  },
   ["<leader><leader>o"] = {
     function()
       local node = vim.treesitter.get_node()

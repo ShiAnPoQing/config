@@ -1,0 +1,63 @@
+*:lua=* *:lua*
+:lua {chunk}
+    执行 Lua 代码块 {chunk}。如果 {chunk} 以 "=" 开头，则代码块的其余部分将作为表达式求值并打印。`:lua =expr` 和 `:=expr`
+    等同于 `:lua print(vim.inspect(expr))`。
+
+    示例: >vim
+        :lua vim.api.nvim_command('echo "Hello, Nvim!"')
+<    查看 Lua 版本: >vim
+        :lua print(_VERSION)
+<    查看 LuaJIT 版本: >vim
+        :lua =jit.version
+<
+:{range}lua
+    将 {range} 范围内的缓冲区行作为 Lua 代码执行。与 |:source| 不同，此命令
+    始终将这些行视为 Lua 代码。
+
+    示例：选择以下代码并输入 ":lua<Enter>" 来执行它: >lua
+        print(string.format(
+            'unix time: %s', os.time()))
+<
+                                                                *:lua-heredoc*
+:lua << [trim] [{endmarker}]
+{script}
+{endmarker}
+    在 Vimscript 内部执行 Lua 脚本 {script}。你可以在 "<<" 之后省略
+    [endmarker] 并在 {script} 之后使用一个点 "."（类似于 |:append|, |:insert|）。更多信息请参考 |:let-heredoc|。
+
+    示例: >vim
+        function! CurrentLineInfo()
+        lua << EOF
+        local linenr = vim.api.nvim_win_get_cursor(0)[1]
+        local curline = vim.api.nvim_buf_get_lines(0, linenr - 1, linenr, false)[1]
+        print(string.format('Line [%d] has %d bytes', linenr, #curline))
+        EOF
+        endfunction
+<
+    注意，`local` 变量将在代码块结束时消失。但全局变量不会。
+
+                                                                      *:luado*
+:[range]luado {body}
+    对 [range] 范围内的每个缓冲区行执行 Lua 代码块 "function(line, linenr) {body} end"，
+    其中 `line` 是当前行的文本（不带 <EOL>），`linenr` 是当前行号。如果函数返回一个字符串，
+    则该字符串将成为相应缓冲区行的文本。默认的 [range] 是整个文件："1,$"。
+
+    示例: >vim
+        :luado return string.format("%s\t%d", line:reverse(), #line)
+
+        :lua require"lpeg"
+        :lua -- 平衡括号语法：
+        :lua bp = lpeg.P{ "(" * ((1 - lpeg.S"()") + lpeg.V(1))^0 * ")" }
+        :luado if bp:match(line) then return "=>\t" .. line end
+<
+                                                                    *:luafile*
+:luafile {file}
+    执行 {file} 中的 Lua 脚本。
+    整个参数被用作文件名（类似于 |:edit|），空格不需要转义。或者，你也可以 |:source| Lua 文件。
+
+    示例: >vim
+        :luafile script.lua
+        :luafile %
+<
+
+vim:tw=78:ts=8:noet:ft=help:norl:

@@ -15,13 +15,13 @@ return {
   },
   -- no blank
   ["<space>b"] = {
-    "o<C-u>",
+    "o^<C-d>",
     "n",
     desc = "Begin a new line below the cursor and insert text(non-blank)",
   },
   -- no blank
   ["<space>B"] = {
-    "O<C-u>",
+    "O^<C-d>",
     "n",
     desc = "Begin a new line above the cursor and insert text(non-blank)",
   },

@@ -1152,18 +1152,6 @@ local snippets = {
     t("false"),
     i(1),
   }),
-
-  -- insert mode register p
-  s({
-    trig = "%.(%w)",
-    regTrig = true,
-    hidden = true,
-  }, {
-    f(function(args, snip)
-      local text = vim.fn.getreg(snip.captures[1])
-      return text
-    end, {}),
-  }),
 }
 
 return snippets

@@ -1,0 +1,19 @@
+CTRL-G		或				*CTRL-G* *:f* *:fi* *:file*
+:f[ile]			打印当前文件名（按输入时的样子，除非使用了 ":cd"），光标位置（除非设置了 'ruler' 选项）和文件状态（只读，已修改，读取错误，新文件）。关于如何使此消息更短，请参阅 'shortmess' 选项。
+
+:f[ile]!			类似 |:file|，但即使 'shortmess' 指示截断，也不截断名称。
+
+							*:file_f*
+:f[ile][!] {name}	将当前文件名设置为 {name}。可选的 !
+			避免截断消息，如同 |:file|。
+			如果缓冲区已有名称，则该名称成为 |alternate-file| 名称。会创建一个未列出的缓冲区来保存旧名称。
+							*:0file*
+:0f[ile][!]		移除当前缓冲区的名称。可选的 !
+			避免截断消息，如同 |:file|。
+
+前提: name buffer don't existed
+
+
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:

@@ -1,0 +1,18 @@
+:fin[d][!] [++opt] [+cmd] {file}
+			在 'path' 中查找 {file} 然后 |:edit| 它。
+			另请参阅：'findfunc'。
+
+:{count}fin[d][!] [++opt] [+cmd] {file}
+			类似于 ":find"，但使用 'path' 中的第 {count} 个匹配项。因此 ":2find file" 将查找在 'path' 中找到的第二个 "file"。如果 'path' 中文件的匹配项少于要求的数量，你将收到错误消息。
+
+示例： >
+  :fin file
+<
+示例： >
+  :sp | fin file 
+<
+示例： >
+  :vsp | fin file 
+<
+
+vim:tw=78:ts=8:noet:ft=help:norl:

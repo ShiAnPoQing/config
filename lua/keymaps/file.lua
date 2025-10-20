@@ -108,14 +108,4 @@ return {
     "n",
     desc = "Copy file path",
   },
-  ["<leader>cd"] = {
-    "<cmd>ChangeDirectoryToFile<CR>",
-    "n",
-    desc = "Change directory to file",
-  },
-  ["<leader>tcd"] = {
-    "<cmd>ChangeTabDirectoryToFile<CR>",
-    "n",
-    desc = "Change directory to file",
-  },
 }

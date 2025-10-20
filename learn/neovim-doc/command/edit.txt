@@ -1,0 +1,54 @@
+							*:ex*
+:ex [++opt] [+cmd] [file]
+			与 |:edit| 相同。
+
+							*:e* *:edit* *reload*
+:e[dit] [++opt] [+cmd]	编辑当前文件。
+			可用于在它被 Vim 之外的程序所改变的时候
+			重新编辑当前文件。
+			如果当前缓冲区已经被修改而且没有置位 'autowriteall'，或者文件不能被写入，本命令失败。
+			另见 |++opt| 和 |+cmd|。
+
+							*:edit!* *discard*
+:e[dit]! [++opt] [+cmd]
+			总是编辑当前文件。放弃当前缓冲区任何已有的改变。
+			如果你 想从头来过，这就会很有用。
+			另见 |++opt| 和 |+cmd|。
+
+							*:edit_f*
+:e[dit] [++opt] [+cmd] {file}
+			编辑文件 {file}。
+			如果当前缓冲区已被修改，这会失败，除非置位了 'hidden' 或者 'autowriteall' 并且文件能够写入。
+			另见 |++opt| 和 |+cmd|。
+
+							*:edit!_f*
+:e[dit]! [++opt] [+cmd] {file}
+			总是编辑文件 {file}。放弃当前缓冲区任何已有的改变。
+			另见 |++opt| 和 |+cmd|。
+							*:edit_#* *:e#*
+:e[dit] [++opt] [+cmd] #[count]
+			编辑第 [count] 个缓冲区 (根据 :files 显示的结果)。
+			该命令和 [count] CTRL-^ 一样，但是 ":e #" 在轮换缓冲区
+			没有文件名时不能工作，而 CTRL-^ 则可以。
+			另见 |++opt| 和 |+cmd|。
+
+
+示例1： 编辑当前文件(如果当前缓冲区已被修改或未置位 'hidden' 或 'autowriteall' 则失败) >
+  :e
+<
+
+示例2: 放弃当前缓冲区任何已有的改变 >
+  :e!
+<
+
+示例3: 编辑指定文件(如果当前缓冲区已被修改或未置位 'hidden' 或 'autowriteall' 则失败) >
+  :e test.txt
+<
+
+示例4: 放弃当前缓冲区任何已有的改变 >
+  :e! test.txt
+<
+
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:

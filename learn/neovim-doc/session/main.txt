@@ -1,0 +1,150 @@
+==============================================================================
+会话
+
+示例：
+>
+  :mksession vimbook.vim
+<
+
+>
+  :source vimbook.vim
+<
+
+>
+  vim -S vimbook.vim 
+<
+
+-S 可以获取任何 vim/lua 脚本
+
+
+
+							*:mks* *:mksession*
+:mks[ession][!] [file]	写入一个 Vim 脚本，该脚本能够恢复当前的编辑会话。
+			如果包含 [!]，已有的文件会被覆盖。如果不提供 [file]，
+			使用 "Session.vim"。
+
+":mksession" 的输出结果类似于 ":mkvimrc"，但文件里附加更多的命令。这取决于
+'sessionoptions' 选项的值。产生的文件在用 ":source" 命令执行时:
+1. 如果 'sessionoptions' 包含 "options" 的话，恢复全局映射和选项。局部于脚本的
+   映射不会被写入。
+2. 如果 'sessionoptions' 包含 "globals" 的话，恢复大写字母开始并至少包含一个小
+   写字母的全局变量。
+3. 关闭当前标签页里除了当前窗口以外的其它窗口；
+   关闭除了当前标签页以外的其它标签页 (这会导致当前载入的缓冲区被卸载，
+   通过置位 'hidden' 或其它等价方式的的可能会被隐藏)；
+   如果当前缓冲区为空且未命名，真正删除之。
+4. 如果 'sessionoptions' 包含 "curdir" 的话，恢复当前目录。或者如果
+   'sessionoptions' 包含 "sesdir" 的话，设置当前目录为会话文件所在的位置。
+5. 如果 'sessionoptions' 包含 "winpos" 的话，恢复 GUI Vim 的窗口位置。
+6. 如果 'sessionoptions' 包含 "resize" 的话，恢复屏幕大小。
+7. 恢复缓冲区列表，还有它们最后的光标位置。如果 'sessionoptions' 包含
+   "buffers" 的话，恢复所有的缓冲区，包括隐藏和未载入的。不然，只有窗口里打开
+   的缓冲区才被恢复。
+8. 恢复所有窗口并使用和过去相同的布局。如果 'sessionoptions' 包含 "help" 的
+   话，帮助窗口也被恢复。如果 'sessionoptions' 包含 "blank" 的话，编辑无名缓冲
+   区的窗口也被恢复。如果 'sessionoptions' 包含 "winsize" 并且没有任何 (帮助/
+   空白) 窗口被放弃的话，则恢复窗口大小 (相对于屏幕大小)。否则，只为窗口给定合
+   适的大小。
+9. 如同 |:mkview| 那样，恢复各个窗口的所有视图。但使用 'sessionoptions' 而不是
+   'viewoptions'。
+10.如果存在和会话文件同名，但以 "x.vim" (x 代表 "附加" eXtra) 结尾的文件，也同
+   时执行之。你可以用 *x.vim 文件来指定和给出会话相关的附加设置和动作，比如在
+   GUI 版本里创立菜单项目。
+
+在恢复会话后，当前会话的完整文件名可以通过内部变量 "v:this_session" 得到
+|this_session-variable|。映射示例: >
+  :nmap <F2> :wa<Bar>exe "mksession! " .. v:this_session<CR>:so ~/sessions/
+<
+这会保存当前会话，并启动载入另外一个会话的命令。
+
+会话包含所有标签页，除非从 'sessionoptions' 里删除了 "tabpages"。 |tab-page|
+
+|SessionLoadPost| 自动命令事件在会话文件载入/执行后被激活。
+						*SessionLoad-variable*
+会话文件载入期间，SessionLoad 全局变量被设为 1。用此变量，插件可以推迟部分工
+作，直到激活 SessionLoadPost 事件时才执行。
+
+
+*创建会话*：
+
+  示例1：no file use "Session.vim" >
+    :mks
+<
+
+  示例2：use bang use "Session.vim" and overwrite it!: >
+    :mks!
+<
+
+  示例3: >
+    :mks test.vim 
+<
+
+  示例4: >
+    :mks ~/.config/nvim/test.vim 
+<
+
+
+*恢复会话*: 
+
+  示例1: >
+    :source ~/.config/nvim/test.vim 
+<
+
+*注意*：
+
+会话不存储标记的位置、寄存器的内容和命令行历史
+
+'sessionoptions' 可以设置会话选项 
+
+ 默认：
+
+"blank,buffers,curdir,folds,help,options,tabpages,winsize,terminal"。
+
+	blank		保留空窗口
+	buffers		所有缓冲区，不仅仅是窗口中的缓冲区
+	curdir		当前目录
+	folds		折叠，包括手动创建的折叠
+	help		帮助窗口
+	options		所有选项和映射
+	tabpages	所有标签页
+	winsize		窗口大小
+	terminal	包括终端窗口
+
+						*'sessionoptions'* *'ssop'*
+'sessionoptions' 'ssop'	字符串	(缺省: "blank,buffers,curdir,folds,
+					 help,options,tabpages,winsize,terminal")
+			全局
+			{仅当编译时加入 |+mksession| 特性才有效}
+	改变 |:mksession| 命令的效果。这是逗号分隔的单词列表。每个单词允许保存
+	和恢复某种设置:
+	   单词		保存和恢复 ~
+	   blank	空窗口
+	   buffers	隐藏和卸载的缓冲区，不光是那些在窗口里的
+	   curdir	当前目录
+	   folds	手动建立的折叠、打开/关闭的折叠和局部折叠选项
+	   globals	大写字母开头且包含至少一个小写字母的全局变量。只保存字
+			符串和数值类型。
+	   help		帮助窗口
+	   localoptions	局部于窗口或缓冲区的选项和映射 (不是局部选项的全局值)
+	   options	所有的选项和映射 (也包括局部选项的全局值)
+	   skiprtp	以选项中排除 'runtimepath' 和 'packpath'
+	   resize	Vim 窗口的大小: 'lines' 和 'columns'
+	   sesdir	会话文件所在的目录会成为当前目录 (用于通过网络访问别的
+			系统的项目)
+	   slash	文件名里的反斜杠被替换成正斜杠
+	   tabpages	所有标签页；如果不包含，只恢复当前标签页。这样你可以为
+			每个标签页分别保存一个会话
+	   terminal	包含终端窗口，可以恢复其中的命令
+	   unix		使用 Unix 换行格式 (单个 <NL>)，即使在 Windows 或 DOS
+			上也是如此
+	   winpos	整个 Vim 窗口的位置
+	   winsize	窗口大小
+
+	不要同时包含 "curdir" 和 "sesdir"。
+	如果既没有包含 "curdir" 也没有包含 "sesdir"，使用绝对路径保存文件名。
+	如果不包含 "options"，恢复会话后会有很多问题。
+	"slash" 和 "unix" 可用于 Windows 系统中，如果要和 Unix 共享会话文件的
+	话。Unix 版本的 Vim 不能执行 dos 格式的脚本，但是 Windows 版本的 Vim
+	可以执行 unix 版本的脚本。
+
+vim:tw=78:ts=8:noet:ft=help:norl:

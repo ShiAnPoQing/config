@@ -1,0 +1,14 @@
+							*:wq*
+:wq [++opt]		写入当前文件并关闭窗口。如果这是最后一个 |edit-window|，Vim 退出。
+			当文件为只读或缓冲区没有名称时，写入失败。当参数列表中的最后一个文件尚未编辑时，退出失败。
+
+:wq! [++opt]		写入当前文件并关闭窗口。如果这是最后一个 |edit-window|，Vim 退出。当当前缓冲区没有名称时，写入失败。
+
+:wq [++opt] {file}	写入 {file} 并关闭窗口。如果这是最后一个 |edit-window|，Vim 退出。当参数列表中的最后一个文件尚未编辑时，退出失败。
+
+:wq! [++opt] {file}	写入 {file} 并关闭当前窗口。如果这是最后一个 |edit-window|，则退出 Vim。
+
+:[range]wq[!] [++opt] [file]
+			同上，但仅写入 [range] 中的行。
+
+vim:tw=78:ts=8:noet:ft=help:norl:

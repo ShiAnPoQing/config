@@ -1,4 +1,4 @@
-vim.api.nvim_create_user_command("ChangeDirectoryToFile", function()
+vim.api.nvim_create_user_command("CdFileDir", function()
   local path = vim.fn.expand("%:p:h")
   if path ~= nil and vim.uv.fs_stat(path) then
     vim.fn.chdir(path)
@@ -6,11 +6,19 @@ vim.api.nvim_create_user_command("ChangeDirectoryToFile", function()
   end
 end, {})
 
-vim.api.nvim_create_user_command("ChangeTabDirectoryToFile", function()
+vim.api.nvim_create_user_command("TcdFileDir", function()
   local path = vim.fn.expand("%:p:h")
   if path ~= nil and vim.uv.fs_stat(path) then
     vim.cmd.tcd(path)
     vim.api.nvim_echo({ { "tcd: ", "Special" }, { path, "String" } }, true, {})
+  end
+end, {})
+
+vim.api.nvim_create_user_command("LcdFileDir", function()
+  local path = vim.fn.expand("%:p:h")
+  if path ~= nil and vim.uv.fs_stat(path) then
+    vim.cmd.lcd(path)
+    vim.api.nvim_echo({ { "lcd: ", "Special" }, { path, "String" } }, true, {})
   end
 end, {})
 

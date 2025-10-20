@@ -106,7 +106,6 @@ return {
         vert = "│",
         horiz = "─",
       },
-      -- formatoptions = { "o/qwjb" },
       formatoptions = {
         j = true,
         c = true,
@@ -116,7 +115,6 @@ return {
         l = true,
         ["/"] = true,
       },
-      -- foldmethod = "indent",
       foldcolumn = "0",
       foldmethod = "expr",
       foldexpr = "v:lua.vim.treesitter.foldexpr()",

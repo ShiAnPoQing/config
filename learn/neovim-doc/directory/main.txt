@@ -1,0 +1,61 @@
+==============================================================================
+*22.2*	当前目录
+
+与 shell 一样，Vim 也有当前目录的概念。假设你在你的主目录中，想要编辑目录 "VeryLongFileName" 中的几个文件。你可以这样做： >
+
+	:edit VeryLongFileName/file1.txt
+	:edit VeryLongFileName/file2.txt
+	:edit VeryLongFileName/file3.txt
+
+为了避免输入太多，可以这样做： >
+
+	:cd VeryLongFileName
+	:edit file1.txt
+	:edit file2.txt
+	:edit file3.txt
+
+":cd" 命令更改当前目录。你可以使用 ":pwd" 命令查看当前目录是什么： >
+
+	:pwd
+	/home/Bram/VeryLongFileName
+
+Vim 会记住你使用的上一个目录。使用 "cd -" 返回该目录。示例： >
+
+	:pwd
+	/home/Bram/VeryLongFileName
+	:cd /etc
+	:pwd
+	/etc
+	:cd -
+	:pwd
+	/home/Bram/VeryLongFileName
+	:cd -
+	:pwd
+	/etc
+
+
+窗口本地目录
+
+当你分割窗口时，两个窗口使用相同的当前目录。
+当你想在新窗口中编辑位于别处的一些文件时，你可以让它使用不同的目录，而不改变另一个窗口中的当前目录。这称为本地目录。 >
+
+	:pwd
+	/home/Bram/VeryLongFileName
+	:split
+	:lcd /etc
+	:pwd
+	/etc
+	CTRL-W w
+	:pwd
+	/home/Bram/VeryLongFileName
+
+只要没有使用过 `:lcd` 命令，所有窗口共享相同的当前目录。在一个窗口中执行 `:cd` 命令也会改变另一个窗口的当前目录。
+   对于使用过 `:lcd` 的窗口，会记住一个不同的当前目录。在其他窗口中使用 `:cd` 或 `:lcd` 不会改变它。
+   在使用不同当前目录的窗口中使用 `:cd` 命令时，它将恢复使用共享目录。
+
+
+标签页本地目录
+
+当你打开一个新的标签页时，它使用从中打开新标签页的前一个标签页中窗口的目录。你可以使用 `:tcd` 命令更改当前标签页的目录。标签页中的所有窗口共享此目录，除非窗口具有窗口本地目录。在此标签页中打开的任何新窗口都将使用此目录作为当前工作目录。在标签页中使用 `:cd` 命令不会更改具有标签页本地目录的标签页的工作目录。当在标签页中使用 `:cd` 命令更改全局工作目录时，它也会更改当前标签页的工作目录。
+
+vim:tw=78:ts=8:noet:ft=help:norl:

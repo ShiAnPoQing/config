@@ -1,0 +1,109 @@
+							*:w* *:write*
+					*E502* *E503* *E504* *E505*
+					*E512* *E514* *E667* *E949*
+:w[rite] [++opt]	将整个缓冲区写入当前文件。
+			这是保存文件更动最普通的方式。
+			如果置位了 'readonly' 选项或者其他原因不能写入文 件，它会失败。
+			关于 ++opt 可见 |++opt|，但只有 ++bin、++nobin、++ff 和 ++enc 有效。
+
+:w[rite]! [++opt]	和 ":write" 类似，但即使 'readonly' 已置位或者有其他原因写入被拒绝，还是强制写入。
+			注意: 这可能会改变文件的权限和所有者，或者破坏 (符号) 连接。
+			在 'cpoptions' 里加上 'W' 标志位可以避免这一点。
+
+:[range]w[rite][!] [++opt]
+			将指定行写入当前文件。
+			这是很特别的，因为文件里将不会包含缓冲区的所有行。
+
+							*:w_f* *:write_f*
+:[range]w[rite] [++opt]	{file}
+			将指定行写入文件 {file}，除非该文件已存在并且未置位 'writeany' 选项。
+
+							*:w!*
+:[range]w[rite]! [++opt] {file}
+			将指定行写入文件 {file}。覆盖已存在的文件。
+
+						*:w_a* *:write_a* *E494*
+:[range]w[rite][!] [++opt] >>
+			将指定行附加到当前文件后。
+
+:[range]w[rite][!] [++opt] >> {file}
+			将指定行附加到文件 {file} 之后。'!' 强制写入，即使该文件还不存在。
+
+							*:w_c* *:write_c*
+:[range]w[rite] [++opt] !{cmd}
+			执行命令 {cmd}，以 [range] 指定的行作为它的标准输入。
+			(注意 ! 之前的空格)。{cmd} 以 ":!{cmd}" 类似的方式被执
+			行，任何 '!' 被替换成前一个命令 |:!|。
+
+":w" 命令缺省的 [range] 是整个缓冲区 (1,$)。如果写回整个缓冲区，缓冲区不再被认
+为已改变。用 ":w somefile" 写到别的文件的情形则取决于 'cpoptions' 的 "+" 标志
+位。如果包含，即便缓冲区本身和其关联的文件可能已不同，该写命令还是复位
+"modified" 标志位。
+
+如果 ":w" 给出一个文件名，它成为轮换文件。这可以用来，比如说，当写入失败而你想
+再迟些再试一次: ":w #"。该功能可以通过从 'cpoptions' 选项里去掉 'A' 标志位来关
+闭。
+
+注意 'fsync' 选项如果置位，写操作会变慢 (但更安全)。
+
+
+示例1: 将整个缓冲区写入当前文件 >
+  :w
+<
+示例2: 强制将整个缓冲区写入当前文件 >
+  :w!
+<
+示例3: 将指定行写入当前文件 >
+  :1,2w
+<
+示例4: >
+  :w test.txt
+<
+示例5: >
+  :1,2w test.txt
+<
+示例6: 覆盖 >
+  :1,2w! test.txt
+<
+示例7: 附加到当前文件 >
+  :w >
+<
+示例8: 附加到指定文件（该文件不能load buffer） >
+  :w >> file
+<
+示例9: 标准输入 >
+  :1,$w !cat
+<
+
+
+1. New buffer named A
+>
+  :w
+<
+结果：create A file
+>
+  :w test
+<
+结果：
+  1. test buffer exsited: error
+  2. test buffer don't exsited:
+      1.test file exsited: use ! cover(# is test)
+      2.test file don't exsited:  create test file(# is test)
+
+2. New buffer named A
+>
+  :saveas
+<
+结果： create A file
+>
+  :saveas test
+<
+结果:
+  1. test buffer exsited: error
+  2. test buffer don't exsited:
+      1.test file exsited: use ! cover and edit test file(# is A)
+      2.test file don't exsited:  create test file and edit test file(# is A)(如果 A 文件是一个new buffer 则清空了)
+
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:
