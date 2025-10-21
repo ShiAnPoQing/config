@@ -1,0 +1,17 @@
+
+:[count]tab {cmd}					*:tab*
+		执行 {cmd}，如果它打开新窗口，使用新标签页代替。不能用于
+		|:diffsplit|、 |:diffpatch|、 |:execute| 和 |:normal|。
+		如果给出 [count]，新标签页出现在第 [count] 个标签页之后，否则
+		新标签页出现在当前页之后。
+		例如: >
+		    :tab split	    " 在新标签页上打开当前缓冲区
+		    :tab help gt    " 打开标签页显示 "gt" 的帮助
+		    :.tab help gt   " 同上
+		    :+tab help	    " 在下页之后打开标签页显示帮助
+		    :-tab help	    " 在当前页之前打开标签页显示帮助
+		    :0tab help	    " 在首页之前打开标签页显示帮助
+		    :$tab help	    " 在末页之后打开标签页显示帮助
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:

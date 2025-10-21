@@ -1,0 +1,89 @@
+|:range|	:{range}	go to last line in {range}
+|:!|		:!		filter lines or execute an external command
+|:!!|		:!!		repeat last ":!" command
+|:#|		:#		same as ":number"
+|:star|		:*		use the last Visual area, like ":'<,'>"
+|:=|		:=		print the last line number
+|:@|		:@		execute contents of a register
+|:@@|		:@@		repeat the previous ":@"
+|:breakadd|	:breaka[dd]	add a debugger breakpoint
+|:breakdel|	:breakd[el]	delete a debugger breakpoint
+|:breaklist|	:breakl[ist]	list debugger breakpoints
+|:changes|	:changes	print the change list
+|:clearjumps|	:cle[arjumps]	clear the jump list
+|:comclear|	:comc[lear]	clear all user-defined commands
+|:debug|	:deb[ug]	run a command in debugging mode
+|:debuggreedy|	:debugg[reedy]	read debug mode commands from normal input
+|:defer|	:defe[r]	call function when current function is done
+|:detach|	:detach		detach the current UI
+|:display|	:di[splay]	display registers
+|:edit|		:e[dit]		edit a file
+|:earlier|	:ea[rlier]	go to older change, undo
+|:eval|		:ev[al]		evaluate an expression and discard the result
+|:ex|		:ex		same as ":edit"
+|:execute|	:exe[cute]	execute result of expressions
+|:exit|		:exi[t]		same as ":xit"
+|:file|		:f[ile]		show or set the current file name
+|:files|	:files		list all files in the buffer list
+|:filter|	:filt[er]	filter output of following command
+|:find|		:fin[d]		find file in 'path' and edit it
+|:global|	:g[lobal]	execute commands for matching lines
+|:highlight|	:hi[ghlight]	specify highlighting methods
+|:history|	:his[tory]	print a history list
+|:horizontal|	:hor[izontal]	following window command work horizontally
+|:jumps|	:ju[mps]	print the jump list
+|:keepalt|	:keepa[lt]	following command keeps the alternate file
+|:keepjumps|	:keepj[umps]	following command keeps jumplist and marks
+|:keeppatterns|	:keepp[atterns]	following command keeps search pattern history
+|:lNfile|	:lNf[ile]	go to last entry in previous file
+|:later|	:lat[er]	go to newer change, redo
+|:lmake|	:lmak[e]	execute external command 'makeprg' and parse
+				error messages
+|:loadkeymap|	:loadk[eymap]	load the following keymaps until EOF
+|:loadview|	:lo[adview]	load view for current window from a file
+|:make|		:mak[e]		execute external command 'makeprg' and parse
+				error messages
+|:mkexrc|	:mk[exrc]	write current mappings and settings to a file
+|:mksession|	:mks[ession]	write session info to a file
+|:mkview|	:mkvie[w]	write view of current window to a file
+|:oldfiles|	:ol[dfiles]	list files that have marks in the |shada| file
+|:only|		:on[ly]		close all windows except the current one
+|:quitall|	:quita[ll]	quit Vim
+|:qall|		:qa[ll]		quit Vim
+|:read|		:r[ead]		read file into the text
+|:redo|		:red[o]		redo one undone change
+|:redir|	:redi[r]	redirect messages to a file or register
+|:redrawstatus|	:redraws[tatus]	force a redraw of the status line(s) and
+				window bar(s)
+|:registers|	:reg[isters]	display the contents of registers
+|:runtime|	:ru[ntime]	source vim scripts in 'runtimepath'
+|:saveas|	:sav[eas]	save file under another name.
+|:scriptnames|	:scr[iptnames]	list names of all sourced Vim scripts
+|:scriptencoding| :scripte[ncoding]  encoding used in sourced Vim script
+|:source|	:so[urce]	read Vim or Ex commands from a file
+|:stop|		:st[op]		suspend the editor or escape to a shell
+|:startinsert|	:star[tinsert]	start Insert mode
+|:startgreplace|  :startg[replace] start Virtual Replace mode
+|:startreplace|	:startr[eplace]	start Replace mode
+|:stopinsert|	:stopi[nsert]	stop Insert mode
+|:sunhide|	:sun[hide]	same as ":unhide"
+|:suspend|	:sus[pend]	same as ":stop"
+|:unhide|	:unh[ide]	open a window for each loaded file in the
+				buffer list
+|:update|	:up[date]	write buffer if modified
+|:vglobal|	:v[global]	execute commands for not matching lines
+|:vertical|	:vert[ical]	make following command split vertically
+|:visual|	:vi[sual]	same as ":edit", but turns off "Ex" mode
+|:view|		:vie[w]		edit a file read-only
+|:write|	:w[rite]	write to a file
+|:wall|		:wa[ll]		write all (changed) buffers
+|:wq|		:wq		write to a file and quit window or Vim
+|:wqall|	:wqa[ll]	write all changed buffers and quit Vim
+|:xit|		:x[it]		write if buffer changed and close window
+|:xall|		:xa[ll]		same as ":wqall"
+|:z|		:z		print some lines
+|:list|		:l[ist]		print lines
+|:print|	:p[rint]	print lines
+
+vim:tw=78:ts=8:noet:ft=help:norl:
+

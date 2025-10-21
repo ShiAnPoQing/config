@@ -1,0 +1,22 @@
+:tabn[ext]				*:tabn* *:tabnext* *gt*
+<C-PageDown>				*CTRL-<PageDown>* *<C-PageDown>*
+gt					*i_CTRL-<PageDown>* *i_<C-PageDown>*
+		转到下一个标签页。最后一个标签页则回绕到第一个。
+
+:{count}tabn[ext]
+:tabn[ext] {count}
+		转到第 {count} 个标签页。首个标签页编号为一。 >
+		    :-tabnext	" 转到上个标签页
+		    :+tabnext	" 转到下个标签页
+		    :+2tabnext	" 转到往后第二个标签页
+		    :1tabnext	" 转到首个标签页
+		    :$tabnext	" 转到末个标签页
+		    :tabnext $	" 同上
+		    :tabnext #	" 转到最近访问的标签页
+		    :tabnext -	" 转到上个标签页
+		    :tabnext -1	" 同上
+		    :tabnext +	" 转到下个标签页
+		    :tabnext +1	" 同上
+
+
+    vim:tw=78:ts=8:noet:ft=help:norl:

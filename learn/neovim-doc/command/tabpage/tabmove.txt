@@ -1,0 +1,29 @@
+:tabm[ove] [N]						*:tabm* *:tabmove*
+:[N]tabm[ove]
+		把当前标签页移到第 N 个标签页之后。用 0 使当前标签页成为首个标
+		签页。计算 N 是在移动前，所以如果第二个标签页是当前标签页，
+		`:tabmove 1` 和 `:tabmove 2` 没有效果。
+		如果没有 N，当前标签页成为最后一个。 >
+		    :.tabmove	" 什么都不做
+		    :-tabmove	" 往左移动当前标签页
+		    :+tabmove	" 往右移动当前标签页
+		    :0tabmove	" 移动当前标签页到标签页之首
+		    :tabmove 0	" 同上
+		    :tabmove	" 移动当前标签页到标签页之末
+		    :$tabmove	" 同上
+		    :tabmove $	" 同上
+		    :tabmove #	" 移动当前标签页到最近访问的标签页之后
+
+:tabm[ove] +[N]
+:tabm[ove] -[N]
+		移动当前标签页向右 (用 + 的话) 或向左 (用 - 的话) N 个位置。 >
+		    :tabmove -	" 往左移动当前标签页
+		    :tabmove -1	" 同上
+		    :tabmove +	" 往右移动当前标签页
+		    :tabmove +1	" 同上
+
+注意 可以用 :Ntabmove 来移动标签页到第 N 个标签页之后，也可用 :+Ntabmove 来移
+动 N 个位置。在此情形下 +N 的实际含义可见 |[range]| 处的解释。
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:

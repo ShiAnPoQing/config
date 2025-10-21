@@ -1,0 +1,16 @@
+|:pbuffer|	:pb[uffer]	edit buffer in the preview window
+|:pclose|	:pc[lose]	close preview window
+|:pedit|	:ped[it]	edit file in the preview window
+|:ppop|		:pp[op]		":pop" in preview window
+|:psearch|	:ps[earch]	like ":ijump" but shows match in preview window
+|:ptag|		:pt[ag]		show tag in preview window
+|:ptNext|	:ptN[ext]	|:tNext| in preview window
+|:ptfirst|	:ptf[irst]	|:trewind| in preview window
+|:ptjump|	:ptj[ump]	|:tjump| and show tag in preview window
+|:ptlast|	:ptl[ast]	|:tlast| in preview window
+|:ptnext|	:ptn[ext]	|:tnext| in preview window
+|:ptprevious|	:ptp[revious]	|:tprevious| in preview window
+|:ptrewind|	:ptr[ewind]	|:trewind| in preview window
+|:ptselect|	:pts[elect]	|:tselect| and show tag in preview window
+
+vim:tw=78:ts=8:noet:ft=help:norl:

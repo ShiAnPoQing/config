@@ -1,0 +1,52 @@
+|:browse|	:bro[wse]	use file selection dialog
+|:confirm|	:conf[irm]	prompt user when confirmation required
+|:digraphs|	:dig[raphs]	show or enter digraphs
+|:gui|		:gu[i]		start the GUI
+|:ascii|	:as[cii]	print ascii value of character under the cursor
+|:terminal|	:te[rminal]	open a terminal buffer
+|:version|	:ve[rsion]	print version number and other info
+|:verbose|	:verb[ose]	execute command with 'verbose' set
+|:retab|	:ret[ab]	change tab size
+|:restart|	:restart	restart the Nvim server
+|:redraw|	:redr[aw]	force a redraw of the display
+|:colorscheme|	:colo[rscheme]	load a specific color scheme
+|:intro|	:int[ro]	print the introductory message
+|:sandbox|	:san[dbox]	execute a command in the sandbox
+|:nohlsearch|	:noh[lsearch]	suspend 'hlsearch' highlighting
+|:mode|		:mod[e]		show or change the screen mode
+|:perl|		:pe[rl]		execute perl command
+|:perldo|	:perld[o]	execute perl command for each line
+|:perlfile|	:perlf[ile]	execute perl script file
+|:normal|	:norm[al]	execute Normal mode commands
+|:number|	:nu[mber]	print lines with line number
+|:redrawtabline|  :redrawt[abline]  force a redraw of the tabline
+|:sign|		:sig[n]		manipulate signs
+|:sleep|	:sl[eep]	do nothing for a few seconds
+|:sleep!|	:sl[eep]!	do nothing for a few seconds, without the
+				cursor visible
+|:language|	:lan[guage]	set the language (locale)
+|:compiler|	:comp[iler]	do settings for a specific compiler
+|:checkhealth|	:che[ckhealth]	run healthchecks
+|:syncbind|	:sync[bind]	sync scroll binding
+|:filetype|	:filet[ype]	switch file type detection on/off
+|:syntime|	:synti[me]	measure syntax highlighting speed
+|:options|	:opt[ions]	open the options-window
+|:messages|	:mes[sages]	view previously displayed messages
+|:gvim|		:gv[im]		start the GUI
+|:checkpath|	:checkp[ath]	list included files
+|:checktime|	:checkt[ime]	check timestamp of loaded buffers
+|:silent|	:sil[ent]	run a command silently
+|:unsilent|	:uns[ilent]	run a command not silently
+|:viusage|	:viu[sage]	overview of Normal mode commands
+|:packadd|	:pa[ckadd]	add a plugin from 'packpath'
+|:packloadall|	:packl[oadall]	load all packages under 'packpath'
+|:syntax|	:sy[ntax]	syntax highlighting
+|:exusage|	:exu[sage]	overview of Ex commands
+|:mkspell|	:mksp[ell]	produce .spl spell file
+|:mkvimrc|	:mkv[imrc]	write current mappings and settings to a file
+|:trust|	:trust		add or remove file from trust database
+|:uniq|		:uni[q]		uniq lines
+|:profdel|	:profd[el]	stop profiling a function or script
+|:profile|	:prof[ile]	profiling functions and scripts
+
+vim:tw=78:ts=8:noet:ft=help:norl:

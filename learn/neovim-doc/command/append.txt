@@ -1,0 +1,28 @@
+*:a* *:append*
+:{range}a[ppend][!]	在指定行下方插入多行文本。
+			如果省略 {range}，文本将在当前行之后插入。
+			添加 [!] 将在执行此命令期间切换 'autoindent' 选项。
+
+							*:i* *:in* *:insert*
+:{range}i[nsert][!]	在指定行上方插入多行文本。
+			如果省略 {range}，文本将在当前行之前插入。
+			添加 [!] 将在执行此命令期间切换 'autoindent' 选项。
+
+这两个命令将持续询问输入行，直到你输入一个仅包含 "." 的行为止。
+
+注意以反斜杠开头的行，参见 |line-continuation|。
+
+在 "|" 命令分隔符后键入的文本会被首先使用。因此，在 ex 模式下的以下命令：>
+	:a|one
+	two
+	.
+	:visual
+会在光标行后附加以下文本：>
+	one
+	two
+<
+
+注意：这些命令不能与 |:global| 或 |:vglobal| 一起使用。
+在 ":if" 和 ":endif"、":for" 和 ":endfor"、":while" 和 ":endwhile" 之间，":append" 和 ":insert" 无法正常工作。
+
+vim:tw=78:ts=8:noet:ft=help:norl:

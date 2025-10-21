@@ -1,0 +1,34 @@
+|:labove|	:lab[ove]	go to location above current line
+|:laddexpr|	:lad[dexpr]	add locations from expr
+|:laddbuffer|	:laddb[uffer]	add locations from buffer
+|:laddfile|	:laddf[ile]	add locations to current location list
+|:lafter|	:laf[ter]	go to location after current cursor
+|:lbefore|	:lbe[fore]	go to location before current cursor
+|:lbelow|	:lbel[ow]	go to location below current line
+|:lNext|	:lN[ext]	go to previous entry in location list
+|:lbottom|	:lbo[ttom]	scroll to the bottom of the location window
+|:lbuffer|	:lb[uffer]	parse locations and jump to first location
+|:lclose|	:lcl[ose]	close location window
+|:ldo|		:ld[o]		execute command in valid location list entries
+|:lfdo|		:lfd[o]		execute command in each file in location list
+|:lexpr|	:lex[pr]	read locations from expr and jump to first
+|:lfile|	:lf[ile]	read file with locations and jump to first
+|:lfirst|	:lfir[st]	go to the specified location, default first one
+|:lgetbuffer|	:lgetb[uffer]	get locations from buffer
+|:lgetexpr|	:lgete[xpr]	get locations from expr
+|:lgetfile|	:lg[etfile]	read file with locations
+|:lhistory|	:lhi[story]	list the location lists
+|:ll|		:ll		go to specific location
+|:llast|	:lla[st]	go to the specified location, default last one
+|:llist|	:lli[st]	list all locations
+|:lnext|	:lne[xt]	go to next location
+|:lnewer|	:lnew[er]	go to newer location list
+|:lnfile|	:lnf[ile]	go to first location in next file
+|:lolder|	:lol[der]	go to older location list
+|:lopen|	:lop[en]	open location window
+|:lprevious|	:lp[revious]	go to previous location
+|:lpfile|	:lpf[ile]	go to last location in previous file
+|:lwindow|	:lw[indow]	open or close location window
+|:lrewind|	:lr[ewind]	go to the specified location, default first one
+
+vim:tw=78:ts=8:noet:ft=help:norl:

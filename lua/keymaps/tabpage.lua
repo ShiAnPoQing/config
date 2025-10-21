@@ -5,6 +5,7 @@ local function tabpage_move_right()
   if tabpage ~= tabs[#tabs] then
     vim.cmd("tabm +1")
   end
+  require("repeat"):set(tabpage_move_right)
 end
 
 local function tabpage_move_left()
@@ -14,6 +15,7 @@ local function tabpage_move_left()
   if tabpage ~= tabs[1] then
     vim.cmd("tabm -1")
   end
+  require("repeat"):set(tabpage_move_left)
 end
 
 --- @param total integer
@@ -45,7 +47,10 @@ local function tabpage_goto(dir)
 end
 
 return {
-  ["<tab>c"] = { "<cmd>tabclose<cr>", "n" },
+  ["<tab>c"] = {
+    "<cmd>tabclose<cr>",
+    "n",
+  },
   ["<tab><tab>c"] = { "<cmd>tabclose!<cr>", "n" },
   ["<tab>o"] = { "<cmd>on<cr>", "n" },
   ["<tab>O"] = { "<cmd>tabonly<cr>", "n" },

@@ -1,0 +1,5 @@
+|:help|		:h[elp]		open a help window
+|:helpclose|	:helpc[lose]	close one help window
+|:helptags|	:helpt[ags]	generate help tags for a directory
+
+vim:tw=78:ts=8:noet:ft=help:norl:

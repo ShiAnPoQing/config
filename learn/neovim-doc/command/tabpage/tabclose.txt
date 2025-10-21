@@ -1,0 +1,27 @@
+*:tabc* *:tabclose*
+:tabc[lose][!]	关闭当前标签页。
+		此命令在以下情况下会失败：
+		- 屏幕上只有一个标签页。		*E784*
+		- 当 'hidden' 未设置、未使用 [!]、缓冲区有更改，
+		  且该缓冲区没有其他窗口时。
+		对缓冲区的更改不会被写入也不会丢失，因此
+		这是一个"安全"的命令。 >
+                    :tabclose   " 关闭当前标签页
+
+:{count}tabc[lose][!]
+:tabc[lose][!] {count}
+		关闭第 {count} 个标签页。失败条件与上述 `:tabclose` 相同。 >
+		    :-tabclose	    " 关闭前一个标签页
+		    :+tabclose	    " 关闭下一个标签页
+		    :1tabclose	    " 关闭第一个标签页
+		    :$tabclose	    " 关闭最后一个标签页
+		    :tabclose -2    " 关闭前第二个标签页
+		    :tabclose +	    " 关闭下一个标签页
+		    :tabclose 3	    " 关闭第三个标签页
+		    :tabclose $	    " 关闭最后一个标签页
+		    :tabclose #     " 关闭最后访问的标签页
+
+当一个标签页被关闭时，下一个标签页将成为当前标签页。此
+行为可以使用 'tabclose' 选项进行自定义。
+
+vim:tw=78:ts=8:noet:ft=help:norl:

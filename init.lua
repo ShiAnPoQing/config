@@ -49,8 +49,11 @@ require("neo-packer").setup({
   require("plugins.download.markdown.render-markdown"),
   require("plugins.download.style.mini-statusline"),
   require("plugins.download.style.moonfly"),
+  require("plugins.local.neo-snippet"),
 })
 
 -- <M-Esc>
 -- <C-Esc>
 -- <C-6> <C-^>
+--
+-- clear register

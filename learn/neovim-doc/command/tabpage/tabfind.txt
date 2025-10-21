@@ -1,0 +1,5 @@
+:[count]tabf[ind] [++opt] [+cmd] {file}			*:tabf* *:tabfind*
+		打开新标签页并编辑 'path' 里的 {file}，其余和 |:find| 类同。关
+		于 [count] 见上面的 |:tabnew|。
+
+vim:tw=78:ts=8:noet:ft=help:norl:

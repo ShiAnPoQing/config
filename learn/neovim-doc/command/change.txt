@@ -1,0 +1,7 @@
+*:c* *:ch* *:change*
+:{range}c[hange][!]	将文本行替换为其他文本。
+			输入一个仅包含 "." 的行以停止替换。
+			如果没有指定 {range}，此命令仅更改当前行。
+			添加 [!] 将在执行此命令期间切换 'autoindent' 选项。
+
+vim:tw=78:ts=8:noet:ft=help:norl:

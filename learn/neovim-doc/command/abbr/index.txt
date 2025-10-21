@@ -1,0 +1,15 @@
+|:abbreviate|	:ab[breviate]	enter abbreviation
+|:abclear|	:abc[lear]	remove all abbreviations
+|:cabclear|	:cabc[lear]	clear all abbreviations for Command-line mode
+|:noreabbrev|	:norea[bbrev]	enter an abbreviation that will not be
+				remapped
+|:unabbreviate|	:una[bbreviate]	remove abbreviation
+|:cabbrev|	:ca[bbrev]	like ":abbreviate" but for Command-line mode
+|:iabbrev|	:ia[bbrev]	like ":abbrev" but for Insert mode
+|:iabclear|	:iabc[lear]	like ":abclear" but for Insert mode
+|:inoreabbrev|	:inorea[bbrev]	like ":noreabbrev" but for Insert mode
+|:iunabbrev|	:iuna[bbrev]	like ":unabbrev" but for Insert mode
+|:cnoreabbrev|	:cnorea[bbrev]	like ":noreabbrev" but for Command-line mode
+|:cunabbrev|	:cuna[bbrev]	like ":unabbrev" but for Command-line mode
+
+vim:tw=78:ts=8:noet:ft=help:norl:

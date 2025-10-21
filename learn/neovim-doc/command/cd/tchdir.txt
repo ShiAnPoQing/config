@@ -1,0 +1,1 @@
+|:tchdir|	:tch[dir]	change directory for tab page

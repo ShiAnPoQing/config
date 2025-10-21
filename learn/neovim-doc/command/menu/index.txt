@@ -1,0 +1,37 @@
+|:amenu|	:am[enu]	enter new menu item for all modes
+|:anoremenu|	:an[oremenu]	enter a new menu for all modes that will not
+|:aunmenu|	:aun[menu]	remove menu for all modes
+|:cmenu|	:cme[nu]	add menu for Command-line mode
+|:cnoremenu|	:cnoreme[nu]	like ":noremenu" but for Command-line mode
+|:cunmenu|	:cunme[nu]	remove menu for Command-line mode
+|:emenu|	:em[enu]	execute a menu by name
+|:imenu|	:ime[nu]	add menu for Insert mode
+|:inoremenu|	:inoreme[nu]	like ":noremenu" but for Insert mode
+|:iunmenu|	:iunme[nu]	remove menu for Insert mode
+|:menu|		:me[nu]		enter a new menu item
+|:menutranslate|  :menut[ranslate] add a menu translation item
+|:nmenu|	:nme[nu]	add menu for Normal mode
+|:nnoremenu|	:nnoreme[nu]	like ":noremenu" but for Normal mode
+|:noremenu|	:noreme[nu]	enter a menu that will not be remapped
+|:nunmenu|	:nunme[nu]	remove menu for Normal mode
+|:omenu|	:ome[nu]	add menu for Operator-pending mode
+|:onoremenu|	:onoreme[nu]	like ":noremenu" but for Operator-pending mode
+|:ounmenu|	:ounme[nu]	remove menu for Operator-pending mode
+|:popup|	:popu[p]	popup a menu by name
+|:smenu|	:sme[nu]	add menu for Select mode
+|:snoremenu|	:snoreme[nu]	like ":noremenu" but for Select mode
+|:sunmenu|	:sunme[nu]	remove menu for Select mode
+|:tlmenu|	:tlm[enu]	add menu for |Terminal-mode|
+|:tlnoremenu|	:tln[oremenu]	like ":noremenu" but for |Terminal-mode|
+|:tlunmenu|	:tlu[nmenu]	remove menu for |Terminal-mode|
+|:tmenu|	:tm[enu]	define menu tooltip
+|:tunmenu|	:tu[nmenu]	remove menu tooltip
+|:unmenu|	:unme[nu]	remove menu
+|:vmenu|	:vme[nu]	add menu for Visual+Select mode
+|:vnoremenu|	:vnoreme[nu]	like ":noremenu" but for Visual+Select mode
+|:vunmenu|	:vunme[nu]	remove menu for Visual+Select mode
+|:xmenu|	:xme[nu]	add menu for Visual mode
+|:xnoremenu|	:xnoreme[nu]	like ":noremenu" but for Visual mode
+|:xunmenu|	:xunme[nu]	remove menu for Visual mode
+
+vim:tw=78:ts=8:noet:ft=help:norl:

@@ -1,0 +1,6 @@
+:wqa[ll] [++opt]				*:wqa* *:wqall* *:xa* *:xall*
+:xa[ll]		写入所有更改的缓冲区并退出 Vim。如果有
+		没有文件名的缓冲区、只读缓冲区或由于其他原因
+		无法写入的缓冲区，Vim 将不会退出。
+
+    vim:tw=78:ts=8:noet:ft=help:norl:

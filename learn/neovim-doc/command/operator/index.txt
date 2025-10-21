@@ -1,0 +1,21 @@
+|:put|		:pu[t]		insert contents of register in the text
+|:iput|		:ip[ut]		like |:put|, but adjust the indent to the
+				current line
+|:delete|	:d[elete]	delete lines
+|:yank|		:y[ank]		yank lines into a register
+|:copy|		:co[py]		copy lines
+|:t|		:t		same as ":copy"
+|:dl|		:dl		short for |:delete| with the 'l' flag
+|:dp|		:d[elete]p	short for |:delete| with the 'p' flag
+|:drop|		:dr[op]		jump to window editing file or edit file in
+				current window
+|:insert|	:i[nsert]	insert text
+|:join|		:j[oin]		join lines
+|:move|		:m[ove]		move lines
+|:sort|		:sor[t]		sort lines
+|:<|		:<		shift lines one 'shiftwidth' left
+|:>|		:>		shift lines one 'shiftwidth' right
+|:change|	:c[hange]	replace a line or series of lines
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:

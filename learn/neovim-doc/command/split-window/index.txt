@@ -1,0 +1,9 @@
+|:belowright|	:bel[owright]	make split window appear right or below
+				been modified
+|:botright|	:bo[tright]	make split window appear at bottom or far right
+|:rightbelow|	:rightb[elow]	make split window appear right or below
+|:aboveleft|	:abo[veleft]	make split window appear left or above
+|:leftabove|	:lefta[bove]	make split window appear left or above
+|:topleft|	:to[pleft]	make split window appear at top or far left
+
+vim:tw=78:ts=8:noet:ft=help:norl:

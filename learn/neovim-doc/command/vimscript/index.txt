@@ -1,0 +1,29 @@
+|:break|	:brea[k]	break out of while loop
+|:endif|	:en[dif]	end previous :if
+|:endfor|	:endfo[r]	end previous :for
+|:endfunction|	:endf[unction]	end of a user function started with :function
+|:endtry|	:endt[ry]	end previous :try
+|:endwhile|	:endw[hile]	end previous :while
+|:return|	:retu[rn]	return from a user function
+|:try|		:try		execute commands, abort on error or exception
+|:while|	:wh[ile]	execute loop for as long as condition met
+|:call|		:cal[l]		call a function
+|:catch|	:cat[ch]	part of a :try command
+|:const|	:cons[t]	create a variable as a constant
+|:continue|	:con[tinue]	go back to :while
+|:else|		:el[se]		part of an :if command
+|:elseif|	:elsei[f]	part of an :if command
+|:finally|	:fina[lly]	part of a :try command
+|:for|		:for		for loop
+|:function|	:fu[nction]	define a user function
+|:if|		:if		execute commands when condition met
+|:let|		:let		assign a value to a variable or option
+|:goto|		:go[to]		go to byte in the buffer
+|:unlet|	:unl[et]	delete variable
+|:unlockvar|	:unlo[ckvar]	unlock variables
+|:throw|	:th[row]	throw an exception
+|:lockvar|	:lockv[ar]	lock variables
+|:finish|	:fini[sh]	quit sourcing a Vim script
+|:delfunction|	:delf[unction]	delete a user function
+
+vim:tw=78:ts=8:noet:ft=help:norl:

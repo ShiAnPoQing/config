@@ -1,0 +1,13 @@
+|:py3|		:py3		execute Python 3 command
+|:python3|	:python3	same as :py3
+|:py3do|	:py3d[o]	execute Python 3 command for each line
+|:py3file|	:py3f[ile]	execute Python 3 script file
+|:python|	:py[thon]	execute Python command
+|:pydo|		:pyd[o]		execute Python command for each line
+|:pyfile|	:pyf[ile]	execute Python script file
+|:pyx|		:pyx		execute |python_x| command
+|:pythonx|	:pythonx	same as :pyx
+|:pyxdo|	:pyxd[o]	execute |python_x| command for each line
+|:pyxfile|	:pyxf[ile]	execute |python_x| script file
+
+vim:tw=78:ts=8:noet:ft=help:norl:

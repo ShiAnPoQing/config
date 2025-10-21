@@ -77,7 +77,7 @@ return {
     "n",
     desc = "Switch number",
   },
-  ["<leader>rnb"] = {
+  ["<leader>Nb"] = {
     function()
       ---@diagnostic disable-next-line: undefined-field
       if vim.opt["relativenumber"]:get() then
@@ -89,7 +89,7 @@ return {
     "n",
     desc = "Switch relativenumber",
   },
-  ["<leader>tnb"] = {
+  ["<leader>NB"] = {
     function()
       ---@diagnostic disable-next-line: undefined-field
       if vim.opt["relativenumber"]:get() or vim.opt.number:get() then
