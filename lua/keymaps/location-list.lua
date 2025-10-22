@@ -1,10 +1,10 @@
 return {
-  ["<leader>ao"] = {
+  ["<leader>lo"] = {
     "<cmd>lopen<cr>zz",
     "n",
     desc = "Open location list",
   },
-  ["]a"] = {
+  ["]l"] = {
     function()
       local fq = vim.fn.getloclist(0, { idx = 0, size = 0 })
       local current_idx = fq.idx
@@ -21,7 +21,7 @@ return {
     "n",
     desc = "Next location list",
   },
-  ["[a"] = {
+  ["[l"] = {
     function()
       local current_idx = vim.fn.getloclist(0, { idx = 0 }).idx
       local count = vim.v.count1
@@ -36,7 +36,7 @@ return {
     "n",
     desc = "Previous location list",
   },
-  ["<leader>aa"] = {
+  ["<leader>ll"] = {
     function()
       for _, win in pairs(vim.api.nvim_tabpage_list_wins(0)) do
         if vim.api.nvim_win_is_valid(win) and vim.fn.win_gettype(win) == "loclist" then

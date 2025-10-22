@@ -3,6 +3,7 @@ return {
   depend = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" }, -- if you use the mini.nvim suite
   -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.icons' }, -- if you use standalone mini plugins
   -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+  enabled = false,
   ft = { "markdown" },
   keys = {
     ["<leader>rd"] = {
@@ -13,8 +14,11 @@ return {
   },
   config = function()
     require("render-markdown").setup({
-      completions = { blink = { enabled = true } },
+      -- completions = { lsp = { enabled = true } },
       enabled = false,
+      ignore = function(a)
+        return false
+      end,
     })
   end,
 }

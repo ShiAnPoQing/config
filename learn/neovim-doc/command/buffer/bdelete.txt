@@ -24,6 +24,7 @@
 :N,Mbdelete[!]	对 N 到 M 号 (包含 N 和 M |inclusive|) 缓冲区执行
 		":bdelete[!]"。
 
+
 示例： >
   :bd
 <

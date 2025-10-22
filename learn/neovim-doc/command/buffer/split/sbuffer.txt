@@ -1,0 +1,20 @@
+|:sbuffer|	:sb[uffer]	split window and go to specific file in the
+				buffer list
+
+:[N]sb[uffer] [+cmd] [N]				*:sb* *:sbuffer*
+		分割窗口并从缓冲区列表编辑缓冲区 [N]。
+		如果 [N] 未给出，则编辑当前缓冲区。
+		分割时遵循 'switchbuf' 的 "useopen" 设置。
+		这也会编辑不在缓冲区列表中的缓冲区，
+		而不设置 'buflisted' 标志。
+		另见 |+cmd|。
+
+:[N]sb[uffer] [+cmd] {bufname}
+		分割窗口并从缓冲区列表编辑 |{bufname}| 对应的缓冲区。
+		这也会编辑不在缓冲区列表中的缓冲区，而不设置 'buflisted' 标志。
+		注意：如果你想做的是分割缓冲区，制作一个副本
+		并另存为其他名称，你可以这样做： >
+			:w foobar | sp #
+<		另见 |+cmd|。
+
+vim:tw=78:ts=8:noet:ft=help:norl:

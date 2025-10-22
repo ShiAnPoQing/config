@@ -52,4 +52,28 @@ return {
     "n",
     desc = "Display the [count] next error in the list that includes a file name.",
   },
+  ["[fq"] = {
+    function()
+      local count = vim.v.count1
+      --- @diagnostic disable-next-line
+      local ok = pcall(vim.cmd, count .. "cpfile")
+      if not ok then
+        vim.cmd("clast")
+      end
+    end,
+    "n",
+    desc = "Display the last error in the [count] previous file in the list that includes a file name.",
+  },
+  ["]fq"] = {
+    function()
+      local count = vim.v.count1
+      --- @diagnostic disable-next-line
+      local ok = pcall(vim.cmd, count .. "cnfile")
+      if not ok then
+        vim.cmd("cfirst")
+      end
+    end,
+    "n",
+    desc = "Display the first error in the [count] next file in the list that includes a file name.",
+  },
 }

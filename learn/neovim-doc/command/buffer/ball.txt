@@ -1,0 +1,12 @@
+:[N]ba[ll] [N]					*:ba* *:ball* *:sba* *:sball*
+:[N]sba[ll] [N]	重新排列屏幕，为缓冲区列表中的每个缓冲区
+		打开一个窗口。当给出计数时，这是要打开的
+		最大窗口数。'winheight' 也限制打开的窗口数
+		（如果前面加了 |:vertical|，则使用 'winwidth'）。
+		此处不为新窗口执行 Buf/Win Enter/Leave 自动命令，
+		只有当它们真正进入时才会执行。
+		当使用 |:tab| 修饰符时，新窗口在新标签页中打开，
+		最多打开 'tabpagemax' 个。
+
+
+    vim:tw=78:ts=8:noet:ft=help:norl:

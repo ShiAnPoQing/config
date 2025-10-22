@@ -1,0 +1,7 @@
+
+:[N]bm[odified][!] [+cmd] [N]			*:bm* *:bmodified* *E84*
+		转到第 [N] 个下一个已修改的缓冲区。注意：此命令也
+		查找未列出的缓冲区。如果没有已修改的缓冲区，则
+		命令失败。
+
+    vim:tw=78:ts=8:noet:ft=help:norl:

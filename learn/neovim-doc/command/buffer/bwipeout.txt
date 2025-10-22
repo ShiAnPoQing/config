@@ -1,0 +1,13 @@
+:[N]bw[ipeout][!]			*:bw* *:bwipe* *:bwipeout* *E517*
+:bw[ipeout][!] {bufname}
+:N,Mbw[ipeout][!]
+:bw[ipeout][!] N1 N2 ...
+		类似 |:bdelete|，但真正删除缓冲区。与缓冲区相关的所有内容
+		都会丢失。此缓冲区中的所有标记变为无效，选项设置丢失，
+		跳转列表和标签堆栈数据将被清除，等等。除非你知道
+		你在做什么，否则不要使用此命令。示例： >
+		    :.+,$bwipeout   " 擦除当前缓冲区之后的所有缓冲区
+		    :%bwipeout	    " 擦除所有缓冲区
+<
+
+vim:tw=78:ts=8:noet:ft=help:norl:
