@@ -26,6 +26,7 @@ require("neo-packer").setup({
   require("plugins.local.surround"),
   require("plugins.local.open-terminal"),
   require("plugins.local.neo-winbar"),
+  require("plugins.download.misc.lazydev"),
   require("plugins.download.treesitter"),
   require("plugins.download.snippet.luasnip"),
   require("plugins.download.cmp.blank-cmp"),
@@ -54,6 +55,3 @@ require("neo-packer").setup({
 
 -- <M-Esc>
 -- <C-Esc>
--- <C-6> <C-^>
---
--- clear register

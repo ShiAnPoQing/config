@@ -25,6 +25,10 @@
       "src": "https://github.com/lewis6991/gitsigns.nvim"
     },
     "grug-far.nvim": [],
+    "lazydev.nvim": {
+      "rev": "e28ce52",
+      "src": "https://github.com/folke/lazydev.nvim"
+    },
     "lspsaga.nvim": {
       "rev": "8efe00d",
       "src": "https://github.com/nvimdev/lspsaga.nvim"

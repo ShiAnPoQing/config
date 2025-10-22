@@ -53,8 +53,8 @@ return {
       ignorecase = true,
       smartcase = true,
       concealcursor = {},
-
-      updatetime = 100,
+      --
+      -- updatetime = 100,
       -- 0: never
       -- 1: only if there are at least two tab pages
       -- 2: always
@@ -68,14 +68,14 @@ return {
       scrolloff = 0,
       splitright = true,
       splitbelow = true,
-      -- cursorline = true,
+      -- -- cursorline = true,
       swapfile = false,
       backup = false,
       undofile = true,
       timeout = false,
-      --imdisable = true,
-      -- 是否自动切换工作目录
-      -- autochdir = true,
+      -- --imdisable = true,
+      -- -- 是否自动切换工作目录
+      -- -- autochdir = true,
       autoread = true,
       signcolumn = "no",
       -- signcolumn = "yes:1",
@@ -87,7 +87,7 @@ return {
       shiftwidth = 2,
       expandtab = true,
       smarttab = true,
-
+      --
       display = { "truncate" },
       conceallevel = 0,
       -- colorcolumn = "72",

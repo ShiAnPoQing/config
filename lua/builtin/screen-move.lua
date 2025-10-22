@@ -31,6 +31,7 @@ local function set_extmark(ns_id, opts)
 end
 
 local function on_key()
+  ---@diagnostic disable-next-line: param-type-mismatch
   return vim.fn.nr2char(vim.fn.getchar())
 end
 
@@ -51,8 +52,10 @@ function Direction:init(dir)
   local wininfo = vim.fn.getwininfo(current_win)[1]
   local cursor_row, _ = unpack(api.nvim_win_get_cursor(0))
   local virt_col = vim.fn.virtcol(".") - 1
+  ---@diagnostic disable-next-line: undefined-field
+  local leftcol = wininfo.leftcol
   self.wininfo = wininfo
-  self.virt_win_col = virt_col - wininfo.leftcol
+  self.virt_win_col = virt_col - leftcol
   self.cursor_row = cursor_row
   self.count = vim.v.count
   self.Dir = Direction[dir]

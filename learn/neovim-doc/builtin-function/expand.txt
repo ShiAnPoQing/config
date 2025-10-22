@@ -1,0 +1,84 @@
+expand({string} [, {nosuf} [, {list}]])                               *expand()*
+		在 {string} 中展开通配符和以下特殊关键字。
+		'wildignorecase' 适用。
+
+		如果给出了 {list} 且为 |TRUE|，将返回一个 List。
+		否则结果是一个 String，当有多个匹配项时，它们由 <NL> 字符分隔。
+
+		如果展开失败，结果是一个空字符串。不存在的文件的名称
+		不包括在内，除非 {string} 不以 '%'、'#' 或 '<' 开头，见下文。
+
+		当 {string} 以 '%'、'#' 或 '<' 开头时，展开方式类似于
+		带有相关修饰符的 |cmdline-special| 变量。这里是一个简要概述：
+
+			%		当前文件名
+			#		备用文件名
+			#n		备用文件名 n
+			<cfile>		光标下的文件名
+			<afile>		自动命令文件名
+			<abuf>		自动命令缓冲区编号（作为字符串！）
+			<amatch>	自动命令匹配的名称
+			<cexpr>		光标下的 C 表达式
+			<sfile>		已弃用，使用 <script> 或 <stack>
+			<slnum>		源脚本行号或函数行号
+			<sflnum>	脚本文件行号，在函数内时也是
+			<SID>		"<SNR>123_" 其中 "123" 是当前脚本 ID |<SID>|
+			<script>	源脚本文件，或定义当前函数的脚本文件。
+					对于 Lua 参见 |lua-script-location|。
+			<stack>		调用堆栈
+			<cword>		光标下的单词
+			<cWORD>		光标下的 WORD
+			<client>	最后接收消息的 {clientid}
+		修饰符：
+			:p		展开为完整路径
+			:h		头部（移除最后一个路径组成部分）
+			:t		尾部（仅最后一个路径组成部分）
+			:r		根（移除一个扩展名）
+			:e		仅扩展名
+
+		支持更多修饰符，完整列表参见 |filename-modifiers|。
+
+		示例： >vim
+			let &tags = expand("%:p:h") .. "/tags"
+<		注意当展开以 '%'、'#' 或 '<' 开头的字符串时，任何后续文本都会被忽略。
+		这不起作用： >vim
+			let doesntwork = expand("%:h.bak")
+<		使用这个： >vim
+			let doeswork = expand("%:h") .. ".bak"
+<		还要注意展开 "<cfile>" 和其他项仅返回引用的文件名，没有进一步展开。
+		如果 "<cfile>" 是 "~/.cshrc"，你需要进行另一个 expand() 来将 "~/"
+		展开为家目录的路径： >vim
+			echo expand(expand("<cfile>"))
+<
+
+		变量和后面的修饰符之间不能有空格。
+		|fnamemodify()| 函数可用于修改普通文件名。
+
+		当使用 '%' 或 '#'，且当前或备用文件名未定义时，使用空字符串。
+		在无名称的缓冲区中使用 "%:p"，结果是当前目录，并添加了一个 '/'。
+		当设置了 'verbose' 时，如果参数无法展开，展开 '%'、'#' 和 <> 项
+		将导致错误消息。
+
+		当 {string} 不以 '%'、'#' 或 '<' 开头时，它像命令行上的文件名一样展开。
+		使用 'suffixes' 和 'wildignore'，除非给出了可选的 {nosuf} 参数且为 |TRUE|。
+		不存在的文件的名称被包括在内。"**" 项可用于在目录树中搜索。
+		例如，查找当前目录及子目录下的所有 "README" 文件： >vim
+			echo expand("**/README")
+<
+
+		expand() 也可用于展开仅在 shell 中已知的变量和环境变量。
+		但这可能很慢，因为可能使用 shell 来进行展开。参见 |expr-env-expand|。
+		展开后的变量仍然像文件名列表一样处理。当环境变量无法展开时，它保持不变。
+		因此 ":echo expand('$FOOBAR')" 结果是 "$FOOBAR"。
+
+		查找现有文件参见 |glob()|。获取外部命令的原始输出参见 |system()|。
+
+                参数: ~
+                  • {string} (`string`)
+                  • {nosuf} (`boolean?`)
+                  • {list} (`nil|false?`)
+
+                返回: ~
+                  (`string`)
+
+vim:tw=78:ts=8:noet:ft=help:norl:

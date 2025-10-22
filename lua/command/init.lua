@@ -22,34 +22,6 @@ vim.api.nvim_create_user_command("LcdFileDir", function()
   end
 end, {})
 
-local function fzf_dirs(opts)
-  local fzf_lua = require("fzf-lua")
-  opts = opts or {}
-  local path = vim.fn.getcwd(0)
-  opts.prompt = path .. "> "
-
-  opts.fn_transform = function(x)
-    local ansi_codes = require("fzf-lua.utils").ansi_codes
-    return ansi_codes.magenta(x)
-  end
-
-  opts.fzf_opts = {
-    ["--preview"] = "tree {}",
-    ["--preview-window"] = "nohidden,down,50%",
-  }
-
-  opts.actions = {
-    ["default"] = function(selected)
-      vim.cmd("cd " .. selected[1])
-    end,
-  }
-  fzf_lua.fzf_exec("fd --type d ", opts)
-end
-
-vim.api.nvim_create_user_command("FzFDirectories", function()
-  fzf_dirs()
-end, {})
-
 -- -- 创建工作区目录列表
 -- local workspaces = {
 --   "~/Project",

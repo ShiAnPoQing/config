@@ -113,7 +113,17 @@ return {
             end,
           },
           ["<Tab>"] = {
-            "select_and_accept",
+            function(cmp)
+              if cmp.is_menu_visible() then
+                cmp.select_and_accept()
+                return true
+              else
+                cmp.show()
+                cmp.select_and_accept()
+                return true
+              end
+            end,
+            -- "select_and_accept",
             "fallback",
           },
         },
@@ -132,6 +142,17 @@ return {
       },
       sources = {
         default = { "snippets", "lsp", "path", "buffer" },
+        per_filetype = {
+          lua = { inherit_defaults = true, "lazydev" },
+          -- vim = { inherit_defaults = true, 'cmdline' },
+        },
+        providers = {
+          lazydev = {
+            name = "LazyDev",
+            module = "lazydev.integrations.blink",
+            score_offset = 100,
+          },
+        },
       },
       fuzzy = { implementation = "prefer_rust_with_warning" },
       snippets = { preset = "luasnip" },

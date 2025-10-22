@@ -156,6 +156,7 @@ local function get_groups()
       cConditional = { fg = colors.hue72 },
       cStatement = { fg = colors.hue72 },
       cInclude = { fg = colors.hue72 },
+      StatusLineNc = { fg = colors.bg11, bg = colors.bg3 },
 
       ["@function"] = { link = "Function" },
       ["@function.call"] = { link = "Function" },

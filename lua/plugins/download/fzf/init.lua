@@ -3,6 +3,10 @@ return {
   -- dependencies = { "echasnovski/mini.icons" },
   depend = { "nvim-tree/nvim-web-devicons" },
   keys = {
+    ["<leader>fd"] = {
+      "<cmd>FzFDirectories<CR>",
+      "n",
+    },
     -- Hot
     ["<leader>ff"] = {
       function()
@@ -508,6 +512,7 @@ return {
       function()
         -- require("fzf-lua").register_ui_select()
         require("fzf-lua").lsp_code_actions({
+          ---@diagnostic disable-next-line: assign-type-mismatch
           previewer = false,
           silent = true,
         })
@@ -520,6 +525,34 @@ return {
     local fzf = require("fzf-lua")
     vim.api.nvim_create_user_command("FzfFileTypes", function()
       fzf.filetypes()
+    end, {})
+    require("fzf-lua").setup({
+      winopts = {
+        split = "belowright new",
+      },
+    })
+    vim.api.nvim_create_user_command("FzFDirectories", function()
+      local fzf_lua = require("fzf-lua")
+      opts = opts or {}
+      local path = vim.fn.getcwd(0)
+      opts.prompt = path .. "> "
+
+      opts.fn_transform = function(x)
+        local ansi_codes = require("fzf-lua.utils").ansi_codes
+        return ansi_codes.magenta(x)
+      end
+
+      opts.fzf_opts = {
+        ["--preview"] = "tree {}",
+        ["--preview-window"] = "nohidden,right,50%",
+      }
+
+      opts.actions = {
+        ["default"] = function(selected)
+          vim.cmd("cd " .. selected[1])
+        end,
+      }
+      fzf_lua.fzf_exec("fd --type d ", opts)
     end, {})
   end,
 }
