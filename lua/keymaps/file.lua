@@ -1,12 +1,25 @@
---1. Yank buffer's relative path to clipboard
---2. Yank absolute path
+local function get_current_win_cwd()
+  local win = vim.api.nvim_get_current_win()
+  local cwd = vim.fn.getcwd(win)
+  return cwd
+end
 
 return {
+  ["<leader>ms"] = {
+    function()
+      vim.system({ "tree" }, { text = true }, function(out)
+        vim.print(out.stdout)
+      end)
+    end,
+    "n",
+    desc = "Show Current Directory Tree",
+  },
   ["<leader>md"] = {
     function()
-      local cwd = vim.fn.getcwd()
+      local cwd = get_current_win_cwd()
       vim.ui.input({
         prompt = "Create New Directory: " .. cwd .. "/",
+        completion = "dir_in_path",
       }, function(input)
         if input then
           local name = cwd .. "/" .. input
@@ -20,9 +33,10 @@ return {
   },
   ["<leader>mf"] = {
     function()
-      local cwd = vim.fn.getcwd()
+      local cwd = get_current_win_cwd()
       vim.ui.input({
         prompt = "Create New File: " .. cwd .. "/",
+        completion = "dir_in_path",
       }, function(input)
         if not input then
           return
@@ -38,11 +52,11 @@ return {
   },
   ["<leader>mF"] = {
     function()
-      local cwd = vim.fn.getcwd()
+      local cwd = get_current_win_cwd()
       -- vim.cmd.echohl("Operator")
       vim.ui.input({
         prompt = "Delete File: " .. cwd .. "/",
-        completion = "file",
+        completion = "file_in_path",
         -- highlight = function(input)
         -- return { { 0, 1, "ErrorMsg" } }
         -- end,
@@ -60,10 +74,10 @@ return {
   },
   ["<leader>mD"] = {
     function()
-      local cwd = vim.fn.getcwd()
+      local cwd = get_current_win_cwd()
       vim.ui.input({
         prompt = "Delete Directory: " .. cwd .. "/",
-        completion = "dir",
+        completion = "dir_in_path",
       }, function(input)
         if not input then
           return
@@ -80,7 +94,6 @@ return {
       local path = vim.fn.expand("%:p")
       vim.ui.input({
         prompt = "Rename Current File " .. path .. " → ",
-        completion = "dir",
       }, function(input)
         if not input then
           return

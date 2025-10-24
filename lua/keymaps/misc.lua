@@ -28,8 +28,6 @@ return {
       { desc = "Run selected" },
     },
   },
-  -- t 的优先级低，单独占用一个键，不合适
-  ["t"] = { "<nop>", { "n", "o", "x" } },
   ["<space>f"] = { "t", { "n", "o", "x" } },
   ["<space>F"] = { "T", { "n", "o", "x" } },
   -- ["<C-\\>"] = { "gcc", { "n", "i" } },
@@ -39,10 +37,6 @@ return {
     "<C-G>o<C-G>",
     "s",
     desc = "Go to Other end of highlighted text",
-  },
-  ["a"] = {
-    "<nop>",
-    "n",
   },
   -- ["<M-bs>"] = {
   --   "s",
@@ -82,7 +76,8 @@ return {
   -- select mode delete select text
   ["<BS>"] = {
     { "<C-g>s", "s" },
-    { "X", "n" },
+    -- { "X", "n" },
+    { "s", "n" },
     { "d", "v" },
   },
   ["<space>r"] = { "gR", "n" },

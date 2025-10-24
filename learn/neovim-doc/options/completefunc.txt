@@ -1,0 +1,8 @@
+*'completefunc'* *'cfu'*
+'completefunc' 'cfu'	string（默认 ""）
+			局部于缓冲区
+	此选项指定一个函数，用于通过 CTRL-X CTRL-U 进行插入模式补全。|i_CTRL-X_CTRL-U|
+	有关如何调用该函数及其应返回内容的说明，请参阅 |complete-functions|。该值可以是函数名、|lambda| 或 |Funcref|。更多信息请参阅 |option-value-function|。
+	出于安全原因，无法从 |modeline| 或在 |sandbox| 中设置此选项。
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

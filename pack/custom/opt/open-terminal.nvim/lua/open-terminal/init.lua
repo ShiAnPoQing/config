@@ -9,22 +9,19 @@ local Terminal = require("open-terminal.terminal")
 --- @class OpenTerminal.Open
 --- @field direction? OpenTerminalDirection
 
+local function is_win_valid()
+  return Terminal.win ~= nil and vim.api.nvim_win_is_valid(Terminal.win)
+end
+
 --- @param options OpenTerminal.Open
 function M.open_terminal(options)
-  if not Terminal.win then
-    Terminal.create({
-      direction = options.direction,
-    })
+  if is_win_valid() then
+    vim.api.nvim_win_close(Terminal.win, true)
     return
   end
-
-  if not vim.api.nvim_win_is_valid(Terminal.win) then
-    Terminal.create({
-      direction = options.direction,
-    })
-  else
-    vim.api.nvim_win_close(Terminal.win, true)
-  end
+  Terminal.create({
+    direction = options.direction,
+  })
 end
 
 --- @param options? OpenTerminalOptions

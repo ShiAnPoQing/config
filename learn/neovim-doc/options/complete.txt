@@ -1,0 +1,35 @@
+						*'complete'* *'cpt'* *E535*
+'complete' 'cpt'	string	（默认 ".,w,b,u,t"）
+			局部于缓冲区
+	此选项控制在使用 CTRL-P、CTRL-N 或 |ins-autocompletion| 时补全 |ins-completion| 的行为。它也用于整行补全 |i_CTRL-X_CTRL-L|。它指示补全的类型和要扫描的位置。它是一个逗号分隔的标志列表：
+	.	扫描当前缓冲区（忽略 'wrapscan'）
+	w	扫描来自其他窗口的缓冲区
+	b	扫描缓冲区列表中其他已加载的缓冲区
+	u	扫描缓冲区列表中未加载的缓冲区
+	U	扫描不在缓冲区列表中的缓冲区
+	k	扫描由 'dictionary' 选项给定的文件
+	kspell  使用当前活动的拼写检查 |spell|
+	k{dict}	扫描文件 {dict}。可以给出多个 "k" 标志，模式也有效。例如： >vim
+			set cpt=k/usr/dict/*,k~/spanish
+<	s	扫描由 'thesaurus' 选项给定的文件
+	s{tsr}	扫描文件 {tsr}。可以给出多个 "s" 标志，模式也有效。
+	i	扫描当前文件和包含的文件
+	d	扫描当前文件和包含的文件以查找定义的名称或宏
+		|i_CTRL-X_CTRL-D|
+	]	标签补全
+	t	同 "]"
+	f	扫描缓冲区名称（与缓冲区内容相对）
+	F{func}	调用函数 {func}。可以指定多个 "F" 标志。有关如何调用函数及其应返回内容的详细信息，请参阅 |complete-functions|。该值可以是函数名或 |Funcref|。对于 |Funcref| 值，空格必须用反斜杠 ('\') 转义，逗号用双反斜杠 ('\\') 转义（参见 |option-backslash|）。与其他源不同，函数可以提供从光标前的非关键字字符开始的补全，并且它们用于替换文本的起始位置可能与其他源不同。如果 {func} 返回的 Dict 包含 `{"refresh": "always"}`，则每当前导文本更改时，将再次调用该函数。
+		如果生成匹配项可能很慢，请定期调用 |complete_check()| 以保持 Vim 的响应性。这对于 |ins-autocompletion| 尤其重要。
+	F	等效于使用 "F{func}"，其中函数取自 'completefunc' 选项。
+	o	等效于使用 "F{func}"，其中函数取自 'omnifunc' 选项。
+
+	未加载的缓冲区不会被加载，因此它们的自动命令 |:autocmd| 不会执行，这可能导致来自某些文件（例如 gzip 压缩文件）的意外补全。整行补全不扫描未加载的缓冲区。
+
+	CTRL-N、CTRL-P 和 |ins-autocompletion| 可用于任何基于 'iskeyword' 的补全（字典 |i_CTRL-X_CTRL-K|、包含的模式 |i_CTRL-X_CTRL-I|、标签 |i_CTRL-X_CTRL-]| 和常规扩展）。在 'complete' 中使用 "F" 和 "o" 标志，也可以补全非关键字。
+
+	可以通过在源标志后附加一个插入符号 ("^") 后跟一个 {count} 来为补全源指定可选的匹配限制。例如：".^9,w,u,t^5" 将来自当前缓冲区的匹配限制为 9，来自标签的匹配限制为 5。其他源保持无限制。
+	注意：匹配限制仅在正向补全（CTRL-N）期间生效，在反向补全（CTRL-P）期间被忽略。
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

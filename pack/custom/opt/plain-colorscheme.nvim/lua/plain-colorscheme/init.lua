@@ -147,6 +147,8 @@ local function get_groups()
       Structure = { fg = colors.hue72 },
       Folded = { bg = colors.bg3, fg = colors.hue36 },
 
+      PmenuThumb = { bg = colors.hue5 },
+
       cString = { link = "String" },
       cType = { fg = colors.hue52 },
       cTypedef = { fg = colors.hue35 },

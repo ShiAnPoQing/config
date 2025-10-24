@@ -116,7 +116,7 @@ return {
   ["<M-Space><M-h>"] = {
     function()
       local cmd = vim.fn.getcmdline()
-      local _, new_pos = cmd:find("^%s*%w")
+      local _, new_pos = cmd:find("^%s*[^%s]")
 
       if not new_pos then
         return
@@ -131,7 +131,7 @@ return {
   ["<M-Space><M-l>"] = {
     function()
       local cmd = vim.fn.getcmdline()
-      local new_pos = cmd:find("%w%s*$")
+      local new_pos = cmd:find("[^%s]%s*$")
 
       if not new_pos then
         return
@@ -225,6 +225,7 @@ return {
     "<C-w>",
     "c",
     desc = "Delete to the start of previous word",
+    replace_keycodes = true,
   },
   ["<C-Space><C-o>"] = {
     function()

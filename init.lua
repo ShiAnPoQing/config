@@ -52,4 +52,5 @@ require("neo-packer").setup({
   require("plugins.download.style.moonfly"),
   require("plugins.download.format.indent-blankline"),
   require("plugins.local.neo-snippet"),
+  -- require("plugins.local.neo-completion"),
 })

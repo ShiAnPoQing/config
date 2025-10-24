@@ -1,10 +1,5 @@
 -- local utils = require("utils.mark")
 
--- vim.o.complete = ".,o"
--- vim.o.completeopt = "fuzzy,noselect,menu,popup"
--- vim.o.autocomplete = true
--- vim.o.pumheight = 7
---
 -- vim.api.nvim_create_autocmd("LspAttach", {
 --   callback = function(ev)
 --     vim.lsp.completion.enable(true, ev.data.client_id, ev.buf, {
@@ -221,6 +216,18 @@ return {
   --     print("vim")
   --   end,
   --   "n",
+  -- },
+
+  -- ["<tab>"] = {
+  --   "<F13>",
+  --   "c",
+  -- },
+
+  -- ["<C-n>"] = {
+  --   function()
+  --     vim.fn.completion
+  --   end,
+  --   { "i", "c" },
   -- },
   [";2"] = {
     function()

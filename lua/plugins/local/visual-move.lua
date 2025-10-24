@@ -1,12 +1,12 @@
 return {
   name = "visual-move.nvim",
   keys = {
-    ["<M-l>"] = {
-      function()
-        require("visual-move").visual_move("right")
-      end,
-      "v",
-    },
+    -- ["<M-l>"] = {
+    --   function()
+    --     require("visual-move").visual_move("right")
+    --   end,
+    --   "v",
+    -- },
     ["<C-l>"] = {
       function()
         require("visual-move").visual_move("right")
@@ -19,24 +19,24 @@ return {
       end,
       "s",
     },
-    ["<M-h>"] = {
-      function()
-        require("visual-move").visual_move("left")
-      end,
-      "v",
-    },
-    ["<M-k>"] = {
-      function()
-        require("visual-move").visual_move("up")
-      end,
-      "v",
-    },
-    ["<M-j>"] = {
-      function()
-        require("visual-move").visual_move("down")
-      end,
-      "v",
-    },
+    -- ["<M-h>"] = {
+    --   function()
+    --     require("visual-move").visual_move("left")
+    --   end,
+    --   "v",
+    -- },
+    -- ["<M-k>"] = {
+    --   function()
+    --     require("visual-move").visual_move("up")
+    --   end,
+    --   "v",
+    -- },
+    -- ["<M-j>"] = {
+    --   function()
+    --     require("visual-move").visual_move("down")
+    --   end,
+    --   "v",
+    -- },
     ["<M-S-l>"] = {
       function()
         vim.v.count1 = 3

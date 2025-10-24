@@ -12,7 +12,41 @@ local function large_move(key)
   vim.cmd("normal! " .. vim.v.count1 * 3 .. key)
 end
 
+local function switch_virtualedit()
+  ---@diagnostic disable-next-line: undefined-field
+  local virt = vim.opt_local.virtualedit:get()[1]
+  if virt == "all" then
+    vim.opt_local.virtualedit = "none"
+  else
+    vim.opt_local.virtualedit = "all"
+  end
+end
+
 return {
+  ["gj"] = {
+    function()
+      switch_virtualedit()
+      return vim.v.count == 0 and "gj" or "j"
+    end,
+    "n",
+    expr = true,
+  },
+  ["gk"] = {
+    function()
+      switch_virtualedit()
+      return vim.v.count == 0 and "gk" or "k"
+    end,
+    "n",
+    expr = true,
+  },
+  ["gl"] = {
+    function()
+      switch_virtualedit()
+      return "l"
+    end,
+    "n",
+    expr = true,
+  },
   ["j"] = {
     function()
       return vim.v.count == 0 and "gj" or "j"
@@ -46,41 +80,41 @@ return {
       large_move("h")
     end,
     { "x", "n" },
-    desc = "3 Char Left move",
+    desc = "3h",
   },
   ["J"] = {
     function()
       large_move(vim.v.count == 0 and "gj" or "j")
     end,
     { "x", "n" },
-    desc = "3 Char Down move",
+    desc = "3j",
   },
   ["K"] = {
     function()
       large_move(vim.v.count == 0 and "gk" or "k")
     end,
     { "x", "n" },
-    desc = "3 Char Up move",
+    desc = "3k",
   },
   ["L"] = {
     function()
       large_move("l")
     end,
     { "x", "n" },
-    desc = "Right move",
+    desc = "3l",
   },
   ["<space><M-h>"] = {
     "I",
+    "n",
+  },
+  ["<space><M-l>"] = {
+    "A",
     "n",
   },
   ["<space>D"] = {
     "xd^",
     "n",
     noremap = true,
-  },
-  ["<space><M-l>"] = {
-    "A",
-    "n",
   },
   ["<space>j"] = {
     { space_j_Omode, "o" },
@@ -109,7 +143,7 @@ return {
   ["<space><space>gg"] = { "gg0", { "n", "x", "o" } },
   -- insert mode move: k,
   ["<M-k>"] = {
-    { "<Up>", { "i", "c", "s" }, { silent = false } },
+    { "<Up>", { "i", "c", "s" } },
     -- { "kg_", { "n" } },
     { "<up>", "t" },
   },
@@ -123,7 +157,7 @@ return {
   -- },
   -- insert mode move: j,
   ["<M-j>"] = {
-    { "<Down>", { "i", "c", "s" }, { silent = false } },
+    { "<Down>", { "i", "c", "s" } },
     -- { "jg_", { "n" } },
     { "<down>", "t" },
   },
@@ -153,7 +187,7 @@ return {
   -- },
   -- insert mode move: h,
   ["<M-h>"] = {
-    { "<left>", { "i", "c", "s" }, { silent = false } },
+    { "<left>", { "i", "c", "s" } },
     -- { "hi", { "n" } },
     { "<left>", "t" },
   },
@@ -163,7 +197,7 @@ return {
   -- },
   -- insert mode move: l,
   ["<M-l>"] = {
-    { "<right>", { "i", "c", "s" }, { silent = false } },
+    { "<right>", { "i", "c", "s" } },
     -- { "la", "n" },
     -- { "<C-W>l^", { "n" } },
     { "<right>", "t" },
@@ -183,11 +217,11 @@ return {
   },
   -- insert mode move: exclusive words like w,
   ["<M-space><M-o>"] = {
-    { "<S-right>", { "i" } },
+    { "<S-right>", "i" },
   },
   -- insert mode move: exclusive words like W,
   ["<M-space><M-S-o>"] = {
-    { "<C-o>W", { "i" } },
+    { "<C-o>W", "i" },
   },
   -- -- insert mode move: exclusive words like e,
   -- ["<M-C-i>"] = {
@@ -207,62 +241,64 @@ return {
   -- },
   -- insert mode move: like H,
   ["<M-S-h>"] = {
-    { "<C-o>3h", { "i" }, { silent = false } },
+    { "<C-o>3h", "i" },
     { "<left><left><left><left><left>", "t" },
   },
   -- insert mode move: like J,
   ["<M-S-j>"] = {
-    { "<C-o>3j", { "i" }, { silent = false } },
+    { "<C-o>3j", "i" },
     { "<down><down><down><down><down>", "t" },
   },
 
   -- insert mode move: like K,
   ["<M-S-k>"] = {
-    { "<C-o>3k", { "i" }, { silent = false } },
+    { "<C-o>3k", "i" },
     { "<up><up><up><up><up>", "t" },
   },
   -- insert mode move: like L,
   ["<M-S-l>"] = {
-    { "<C-o>3l", { "i" }, { silent = false } },
+    { "<C-o>3l", { "i" } },
     { "<right><right><right><right><right>", "t" },
   },
   -- insert mode move: screen left,
-  ["<M-1><M-h>"] = { "<C-o>g0", { "i" } },
+  ["<M-1><M-h>"] = { "<C-o>g0", "i" },
   ["<M-space>h"] = { "<C-o>g0", "i" },
   -- insert mode move: screen right,
-  ["<M-1><M-l>"] = { "<C-o>g$", { "i" } },
+  ["<M-1><M-l>"] = { "<C-o>g$", "i" },
   ["<M-space>l"] = { "<C-o>g$", "i" },
   -- insert mode move: screen bottom,
-  ["<M-1><M-j>"] = { "<C-o>L", { "i" } },
+  ["<M-1><M-j>"] = { "<C-o>L", "i" },
   ["<M-space>j"] = { "<C-o>L", "i" },
   -- insert mode move: screen top,
-  ["<M-1><M-k>"] = { "<C-o>H", { "i" } },
+  ["<M-1><M-k>"] = { "<C-o>H", "i" },
   ["<M-space>k"] = { "<C-o>H", "i" },
   -- insert mode move: screen center,
-  ["<M-1><M-m>"] = { "<C-o>gm", { "i" } },
+  ["<M-1><M-m>"] = { "<C-o>gm", "i" },
   ["<M-space>m"] = { "<C-o>gm", "i" },
   -- insert mode move: screen center col,
-  ["<M-1><M-n>"] = { "<C-o>M", { "i" } },
+  ["<M-1><M-n>"] = { "<C-o>M", "i" },
   ["<M-space>n"] = { "<C-o>M", "i" },
   -- insert mode move: Home(ignore space),
   ["<M-space><M-h>"] = {
     { "<C-o>I", "i" },
     { "<C-G>^<C-G>", "s" },
-    -- { "I", "n" },
     { "<Home>", "t" },
   },
-  -- insert mode move: Home,
-  ["<M-space><M-space><M-h>"] = { "<Home>", { "i", "c" }, { silent = false } },
   -- insert mode move: End,
   ["<M-space><M-l>"] = {
     { "<C-o>A", "i" },
     { "<C-G>g_<C-G>", "s" },
-    -- { "A", "n" },
     { "<End>", "t" },
   },
-  -- insert mode move: End,
-  ["<M-space><M-space><M-l>"] = { "<End>", { "i", "c" }, { silent = false } },
-  -- insert mode move: Up End,
+  ["<M-space><M-space><M-l>"] = {
+    "<End>",
+    { "i", "c", "s" },
+  },
+  -- insert mode move: Home,
+  ["<M-space><M-space><M-h>"] = {
+    "<Home>",
+    { "i", "c", "s" },
+  },
   ["<M-space><M-k>"] = {
     { "<Up><End>", "i" },
   },

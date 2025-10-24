@@ -63,7 +63,7 @@ return {
 
       linebreak = false,
       ruler = true,
-      virtualedit = { "all" },
+      virtualedit = { "none" },
       wrap = false,
       scrolloff = 0,
       splitright = true,

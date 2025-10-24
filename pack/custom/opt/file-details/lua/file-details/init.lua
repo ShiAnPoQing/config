@@ -62,7 +62,7 @@ function M.file_details()
   table.insert(lines, "  Modified: " .. file_modified .. " ")
   table.insert(lines, " LineCount: " .. line_count .. " lines ")
   table.insert(lines, "")
-  table.insert(lines, " Press <Esc> or q to close ")
+  table.insert(lines, " Press |<Esc>| or |q| to close ")
 
   local width = get_max_width(lines)
   local parent_width = vim.api.nvim_win_get_width(0)
@@ -97,6 +97,9 @@ function M.file_details()
 
   WIN_ID = vim.api.nvim_open_win(buf, true, opts)
   vim.api.nvim_set_option_value("modifiable", false, {
+    buf = buf,
+  })
+  vim.api.nvim_set_option_value("filetype", "help", {
     buf = buf,
   })
   require("utils.float.win-move").load(buf, {
