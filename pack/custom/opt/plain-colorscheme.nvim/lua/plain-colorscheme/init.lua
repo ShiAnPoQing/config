@@ -148,6 +148,7 @@ local function get_groups()
       Folded = { bg = colors.bg3, fg = colors.hue36 },
 
       PmenuThumb = { bg = colors.hue5 },
+      -- WinSeparator = { fg = colors.hue5 },
 
       cString = { link = "String" },
       cType = { fg = colors.hue52 },

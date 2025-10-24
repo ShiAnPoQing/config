@@ -40,20 +40,20 @@ end
 
 return {
   -- goto last cursor position
-  ["<space>["] = {
+  ["<M-[>"] = {
     "<C-o>",
     { "n", "x" },
     desc = "Go to [count] Older cursor position in jump list (not a motion command)",
   },
   -- goto new cursor position
-  ["<space>]"] = {
+  ["<M-]>"] = {
     "<C-i>",
     { "n", "x" },
     desc = "Go to [count] newer cursor position in jump list(not a motion command)",
     noremap = true,
   },
   -- goto last cursor position
-  ["<space><space>["] = {
+  ["<M-Space><M-[>"] = {
     function()
       local function callback()
         jump_buffer(-1, true)
@@ -65,7 +65,7 @@ return {
     desc = "Go to [count] Older cursor position in jump list (not a motion command)",
   },
   -- goto new cursor position
-  ["<space><space>]"] = {
+  ["<M-Space><M-]>"] = {
     function()
       local function callback()
         jump_buffer(1, true)
@@ -77,7 +77,7 @@ return {
     desc = "Go to [count] newer cursor position in jump list(not a motion command)",
     noremap = true,
   },
-  ["<space>{"] = {
+  ["<M-S-[>"] = {
     function()
       local function callback()
         jump_buffer(-1)
@@ -88,7 +88,7 @@ return {
     "n",
     desc = "Older Jump(buffer)",
   },
-  ["<space>}"] = {
+  ["<M-S-]>"] = {
     function()
       local function callback()
         jump_buffer(1)

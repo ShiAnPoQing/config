@@ -44,16 +44,32 @@ return {
       "x",
     },
   },
-
-  ["n"] = {
-    "nzzzv",
+  --
+  -- ["n"] = {
+  --   "nzzzv",
+  --   "n",
+  --   desc = "Search result shown at the middle",
+  -- },
+  -- ["N"] = {
+  --   "Nzzzv",
+  --   "n",
+  --   desc = "Search result shown at the middle",
+  -- },
+  ["b"] = {
     "n",
-    desc = "Search result shown at the middle",
+    { "n", "x" },
   },
-  ["N"] = {
-    "Nzzzv",
-    "n",
-    desc = "Search result shown at the middle",
+  ["B"] = {
+    "N",
+    { "n", "x" },
+  },
+  ["gb"] = {
+    "gn",
+    { "n", "x" },
+  },
+  ["gB"] = {
+    "gN",
+    { "n", "x" },
   },
 }
 

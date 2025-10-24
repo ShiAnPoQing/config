@@ -15,45 +15,31 @@ end
 
 return {
   ["<S-space>h"] = {
-    function()
-      local before_cursor = vim.api.nvim_win_get_cursor(0)
-      vim.api.nvim_feedkeys("g^", "nx", true)
-      local after_cursor = vim.api.nvim_win_get_cursor(0)
-
-      if before_cursor[2] == after_cursor[2] then
-        vim.api.nvim_feedkeys("g0", "nx", true)
-      end
-    end,
-    { "n", "x", "o" },
+    {
+      function()
+        require("builtin.screen-start-end-move").first_non_blank_character()
+      end,
+      "n",
+    },
+    { "g^", "x" },
+    -- contains the character under the cursor
+    { "vg^", "o" },
     desc = "Screen First Non-blank Character",
   },
   ["<S-space>l"] = {
     {
       function()
-        ---@diagnostic disable-next-line: undefined-field
-        local v = vim.opt.virtualedit:get()
-        if v[1] == "all" then
-          vim.opt.virtualedit = "none"
-          vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
-          vim.opt.virtualedit = "all"
-          return
-        end
-        vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
+        require("builtin.screen-start-end-move").last_non_blank_character()
       end,
-      { "n", "x" },
+      "n",
     },
     {
-      function()
-        ---@diagnostic disable-next-line: undefined-field
-        local v = vim.opt.virtualedit:get()
-        if v[1] == "all" then
-          vim.opt.virtualedit = "none"
-          vim.api.nvim_feedkeys("vg" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
-          vim.opt.virtualedit = "all"
-          return
-        end
-        vim.api.nvim_feedkeys("vg" .. vim.api.nvim_replace_termcodes("<end>", true, false, true) .. "h", "nx", true)
-      end,
+      "g<end>",
+      "x",
+    },
+    -- contains the character under the cursor
+    {
+      "vg<end>",
       "o",
     },
     desc = "Screen Last Non-blank Character",

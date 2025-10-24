@@ -1,3 +1,51 @@
+local first_non_blank_character = {
+  {
+    function()
+      return require("builtin.start-insert-mode.normal-mode").first_non_blank_character()
+    end,
+    "n",
+    desc = "Start insert mode to the left of the first non-blank character in the current line",
+    expr = true,
+  },
+  {
+    function(context)
+      require("builtin.start-insert-mode.visual-mode").first_non_black_character(function()
+        if type(context.after) == "function" then
+          context.after()
+        end
+      end)
+    end,
+    { "x", "s" },
+    after = true,
+    context = true,
+    desc = "Start insert mode to the left of the first non-blank character in the visual area",
+  },
+}
+
+local last_non_blank_character = {
+  {
+    function()
+      return require("builtin.start-insert-mode.normal-mode").last_non_blank_character()
+    end,
+    "n",
+    desc = "Start insert mode to the right of the last non-blank character in the current line",
+    expr = true,
+  },
+  {
+    function(context)
+      require("builtin.start-insert-mode.visual-mode").last_non_black_character(function()
+        if type(context.after) == "function" then
+          context.after()
+        end
+      end)
+    end,
+    { "x", "s" },
+    after = true,
+    context = true,
+    desc = "Start insert mode to the right of the last non-blank character in the visual area",
+  },
+}
+
 return {
   ["w"] = {
     "i",
@@ -7,88 +55,12 @@ return {
   ["e"] = {
     "a",
     "n",
-    desc = "Cursor right start insert mode",
+    desc = "Cursor right start in  sert mode",
   },
-  ["W"] = {
-    {
-      function()
-        return "I"
-      end,
-      "n",
-    },
-    {
-      function()
-        local count = vim.v.count1
-        return "<Esc>" .. count .. "I"
-      end,
-      "x",
-    },
-    desc = "Start enter insert mode",
-    expr = true,
-  },
-  ["E"] = {
-    {
-      function()
-        return "A"
-      end,
-      "n",
-    },
-    {
-      function()
-        local count = vim.v.count1
-        return "<esc>" .. count .. "A"
-      end,
-      "x",
-    },
-    desc = "End enter insert mode",
-    expr = true,
-  },
-  ["<space>w"] = {
-    {
-      function()
-        return require("builtin.start-insert-mode.normal-mode").first_non_blank_character()
-      end,
-      "n",
-      desc = "Start insert mode to the left of the first non-blank character in the current line",
-      expr = true,
-    },
-    {
-      function(context)
-        require("builtin.start-insert-mode.visual-mode").first_non_black_character(function()
-          if type(context.after) == "function" then
-            context.after()
-          end
-        end)
-      end,
-      { "x", "s" },
-      after = true,
-      context = true,
-      desc = "Start insert mode to the left of the first non-blank character in the visual area",
-    },
-  },
-  ["<space>e"] = {
-    {
-      function()
-        return require("builtin.start-insert-mode.normal-mode").last_non_blank_character()
-      end,
-      "n",
-      desc = "Start insert mode to the right of the last non-blank character in the current line",
-      expr = true,
-    },
-    {
-      function(context)
-        require("builtin.start-insert-mode.visual-mode").last_non_black_character(function()
-          if type(context.after) == "function" then
-            context.after()
-          end
-        end)
-      end,
-      { "x", "s" },
-      after = true,
-      context = true,
-      desc = "Start insert mode to the right of the last non-blank character in the visual area",
-    },
-  },
+  ["W"] = first_non_blank_character,
+  ["E"] = last_non_blank_character,
+  ["<space>w"] = first_non_blank_character,
+  ["<space>e"] = last_non_blank_character,
   ["<space><space>w"] = {
     {
       "gI",
@@ -140,70 +112,70 @@ return {
     end,
     "x",
   },
-  ["<space><space>W"] = {
-    function()
-      local count = vim.v.count1
-      return "<esc>" .. count .. "gI"
-    end,
-    "x",
-    expr = true,
-  },
-  ["<space><space>E"] = {
-    function()
-      local count = vim.v.count1
-      return "<esc>$" .. count .. "a"
-    end,
-    "x",
-    expr = true,
-  },
+  -- ["<space><space>W"] = {
+  --   function()
+  --     local count = vim.v.count1
+  --     return "<esc>" .. count .. "gI"
+  --   end,
+  --   "x",
+  --   expr = true,
+  -- },
+  -- ["<space><space>E"] = {
+  --   function()
+  --     local count = vim.v.count1
+  --     return "<esc>$" .. count .. "a"
+  --   end,
+  --   "x",
+  --   expr = true,
+  -- },
   -- screen line
-  ["<S-space>w"] = {
-    function()
-      local count = vim.v.count1
-      return "g^" .. count .. "i"
-    end,
-    "n",
-    desc = "Start insert mode to the left of the first non-blank character in the screen line",
-    expr = true,
-  },
-  ["<S-space>e"] = {
-    function()
-      local count = vim.v.count1
-      ---@diagnostic disable-next-line: undefined-field
-      if vim.opt.virtualedit:get()[1] == "all" then
-        vim.opt.virtualedit = "none"
-        vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
-        vim.opt.virtualedit = "all"
-        vim.api.nvim_feedkeys(count .. "a", "n", true)
-        return
-      end
-      vim.api.nvim_feedkeys(
-        "g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true) .. count .. "a",
-        "n",
-        true
-      )
-    end,
-    "n",
-    desc = "Start insert mode to the right of the last non-blank character in the screen line",
-  },
-  ["<S-space><S-space>w"] = {
-    function()
-      local count = vim.v.count1
-      return "g0" .. count .. "i"
-    end,
-    "n",
-    expr = true,
-    desc = "Start insert mode to the left of the first character in the screen line",
-  },
-  ["<S-space><S-space>e"] = {
-    function()
-      local count = vim.v.count1
-      return "<esc>g$" .. count .. "a"
-    end,
-    "n",
-    expr = true,
-    desc = "Start insert mode to the right of the last character in the screen line",
-  },
+  -- ["<S-space>W"] = {
+  --   function()
+  --     local count = vim.v.count1
+  --     return "g^" .. count .. "i"
+  --   end,
+  --   "n",
+  --   desc = "Start insert mode to the left of the first non-blank character in the screen line",
+  --   expr = true,
+  -- },
+  -- ["<S-space>E"] = {
+  --   function()
+  --     local count = vim.v.count1
+  --     ---@diagnostic disable-next-line: undefined-field
+  --     if vim.opt.virtualedit:get()[1] == "all" then
+  --       vim.opt.virtualedit = "none"
+  --       vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
+  --       vim.opt.virtualedit = "all"
+  --       vim.api.nvim_feedkeys(count .. "a", "n", true)
+  --       return
+  --     end
+  --     vim.api.nvim_feedkeys(
+  --       "g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true) .. count .. "a",
+  --       "n",
+  --       true
+  --     )
+  --   end,
+  --   "n",
+  --   desc = "Start insert mode to the right of the last non-blank character in the screen line",
+  -- },
+  -- ["<S-space><S-space>W"] = {
+  --   function()
+  --     local count = vim.v.count1
+  --     return "g0" .. count .. "i"
+  --   end,
+  --   "n",
+  --   expr = true,
+  --   desc = "Start insert mode to the left of the first character in the screen line",
+  -- },
+  -- ["<S-space><S-space>E"] = {
+  --   function()
+  --     local count = vim.v.count1
+  --     return "<esc>g$" .. count .. "a"
+  --   end,
+  --   "n",
+  --   expr = true,
+  --   desc = "Start insert mode to the right of the last character in the screen line",
+  -- },
   -- normal mode into insert mode ea
   ["<space><M-i>"] = {
     { "gea", "n", desc = "Start insert mode at previous word end" },

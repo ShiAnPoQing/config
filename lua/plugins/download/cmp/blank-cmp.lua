@@ -56,7 +56,11 @@ return {
         documentation = { auto_show = true, auto_show_delay_ms = 0 },
         menu = {
           draw = {
-            columns = { { "kind_icon" }, { "label" }, { "source_name" } },
+            padding = 1,
+            columns = {
+              { "kind_icon", "label", gap = 2 },
+              { "source_name" },
+            },
           },
         },
         list = {

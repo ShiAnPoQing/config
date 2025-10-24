@@ -1,5 +1,6 @@
 {
   "completion.autoRequire": false,
-  "diagnostics.disable": ["inject-field", "need-check-nil"]
+  "diagnostics.disable": ["inject-field", "need-check-nil",
+        "trailing-space"]
 }
 

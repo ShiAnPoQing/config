@@ -1,7 +1,6 @@
 vim.g.mapleader = ";"
 require("command")
 require("autocmds")
-
 vim.pack.add({ "https://github.com/BrokenSunny/neo-packer" }, { confirm = false })
 require("neo-packer").setup({
   require("plugins.local.simple-keymap"),

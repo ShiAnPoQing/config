@@ -41,38 +41,80 @@ return {
     "i",
     desc = "Delete the word where the cursor is(after)",
   },
-  ["<C-M-BS>"] = {
-    "<nop>",
-    "i",
-    desc = "待定",
-  },
-  ["<space><bs>"] = {
-    "s",
-    "n",
-  },
-
+  -- ["<C-M-BS>"] = {
+  --   "<nop>",
+  --   "i",
+  --   desc = "待定",
+  -- },
+  -- ["<space><bs>"] = {
+  --   "s",
+  --   "n",
+  -- },
   ["<C-i>"] = {
-    "<Esc>ldbi",
+    function()
+      local function delete()
+        local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+        vim.api.nvim_feedkeys(esc .. "ldbi", "n", false)
+      end
+
+      local cursor = vim.api.nvim_win_get_cursor(0)
+      local line = vim.api.nvim_get_current_line()
+      if cursor[2] == #line then
+        ---@diagnostic disable-next-line: undefined-field
+        local virtualedit = vim.opt.virtualedit:get()[1]
+        if virtualedit ~= "all" then
+          vim.opt.virtualedit = "all"
+          delete()
+          vim.schedule(function()
+            vim.opt.virtualedit = virtualedit
+          end)
+          return
+        end
+      end
+      delete()
+    end,
     "i",
-    noremap = true,
     desc = "Delete to the beginning of the word",
   },
   ["<C-o>"] = {
-    "<C-o>de",
+    function()
+      local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+      vim.api.nvim_feedkeys(esc .. "veolc", "n", false)
+    end,
     "i",
-    noremap = true,
     desc = "Delete to the end of the word",
   },
   ["<C-S-i>"] = {
-    "<C-o>dB",
+    function()
+      local function delete()
+        local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+        vim.api.nvim_feedkeys(esc .. "ldBi", "n", false)
+      end
+      local cursor = vim.api.nvim_win_get_cursor(0)
+      local line = vim.api.nvim_get_current_line()
+      if cursor[2] == #line then
+        ---@diagnostic disable-next-line: undefined-field
+        local virtualedit = vim.opt.virtualedit:get()[1]
+        if virtualedit ~= "all" then
+          vim.opt.virtualedit = "all"
+          delete()
+          vim.schedule(function()
+            vim.opt.virtualedit = virtualedit
+          end)
+          return
+        end
+      end
+      delete()
+    end,
     "i",
-    noremap = true,
     desc = "Delete to the beginning of the WORD",
   },
   ["<C-S-o>"] = {
-    "<C-o>dE",
+    function()
+      local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+      vim.api.nvim_feedkeys(esc .. "vEolc", "n", false)
+    end,
     "i",
-    noremap = true,
     desc = "Delete to the end of the WORD",
   },
   ["<C-Space><C-i>"] = {
@@ -141,7 +183,6 @@ return {
     "i",
     desc = "Delete to the end character of the current line",
   },
-
   ["<C-S-Space><C-S-h>"] = {
     "<C-o>dg^",
     "i",
@@ -162,7 +203,6 @@ return {
     "i",
     desc = "Delete to the end character of the screen line",
   },
-
   ["<C-M-u>"] = {
     "<C-G>u<C-u><C-o>d$",
     "i",

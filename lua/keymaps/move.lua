@@ -351,7 +351,36 @@ return {
     { "v0", "o" },
     desc = "Move to the first character of the line",
   },
+  ["<space>H"] = {
+    {
+      function()
+        require("builtin.start-end-move").first_character()
+      end,
+      "n",
+    },
+    { "0", "x" },
+    --- contains the character under the cursor
+    { "v0", "o" },
+    desc = "Move to the first character of the line",
+  },
   ["<space><space>l"] = {
+    {
+      function()
+        require("builtin.start-end-move").last_character()
+      end,
+      "n",
+    },
+    {
+      "$",
+      "o",
+    },
+    {
+      "$h",
+      "x",
+    },
+    desc = "Move to the last character of the line",
+  },
+  ["<space>L"] = {
     {
       function()
         require("builtin.start-end-move").last_character()

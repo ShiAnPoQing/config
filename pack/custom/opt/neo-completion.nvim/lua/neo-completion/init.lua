@@ -28,8 +28,6 @@ function M.setup()
       then
         local insert_text = completed.user_data.nvim.lsp.completion_item.insertText
         if type(insert_text) == "string" then
-          -- local line = vim.api.nvim_get_current_line()
-          -- vim.api.nvim_set_current_line()
           vim.snippet.expand(insert_text)
         end
       end
