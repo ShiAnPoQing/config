@@ -19,16 +19,16 @@ return {
     { "n", "x", "o" },
     desc = "Move to the end of the WORD(right)",
   },
-  ["<C-i>"] = {
-    "ge",
-    { "n", "x", "o" },
-    desc = "Backward to the end of word [count]",
-  },
-  ["<C-o>"] = {
-    "w",
-    { "n", "x", "o" },
-    desc = "[count] words forward",
-  },
+  -- ["<C-i>"] = {
+  --   "ge",
+  --   { "n", "x", "o" },
+  --   desc = "Backward to the end of word [count]",
+  -- },
+  -- ["<C-o>"] = {
+  --   "w",
+  --   { "n", "x", "o" },
+  --   desc = "[count] words forward",
+  -- },
   ["<space>i"] = {
     "ge",
     { "n", "x", "o" },
@@ -49,14 +49,14 @@ return {
     { "n", "x", "o" },
     desc = "[count] WORDS forward",
   },
-  ["<C-S-i>"] = {
-    "gE",
-    { "n", "x", "o" },
-    desc = "Backward to the end of WORD [count]",
-  },
-  ["<C-S-o>"] = {
-    "W",
-    { "n", "x", "o" },
-    desc = "[count] WORDS forward",
-  },
+  -- ["<C-S-i>"] = {
+  --   "gE",
+  --   { "n", "x", "o" },
+  --   desc = "Backward to the end of WORD [count]",
+  -- },
+  -- ["<C-S-o>"] = {
+  --   "W",
+  --   { "n", "x", "o" },
+  --   desc = "[count] WORDS forward",
+  -- },
 }

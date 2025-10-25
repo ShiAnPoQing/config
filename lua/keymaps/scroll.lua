@@ -85,23 +85,71 @@ local function scroll_half_screen_left_i_mode()
 end
 
 return {
+  ["<space><C-j>"] = {
+    function()
+      require("builtin.scroll").toggle_cursor_follow("down")
+    end,
+    "n",
+  },
+  ["<space><C-k>"] = {
+    function()
+      require("builtin.scroll").toggle_cursor_follow("up")
+    end,
+    "n",
+  },
+  ["<space><C-l>"] = {
+    function()
+      require("builtin.scroll").toggle_cursor_follow("right")
+    end,
+    "n",
+  },
+  ["<space><C-h>"] = {
+    function()
+      require("builtin.scroll").toggle_cursor_follow("left")
+    end,
+    "n",
+  },
   ["<C-j>"] = {
-    { "<C-y>", { "n", "x" } },
+    {
+      function()
+        require("builtin.scroll").scroll_down()
+      end,
+      "n",
+    },
+    { "<C-y>", "x" },
     { "<C-o><C-y>", "i" },
     desc = "Scroll window [count] lines upwards in the buffer",
   },
   ["<C-k>"] = {
-    { "<C-e>", { "n", "x" } },
+    {
+      function()
+        require("builtin.scroll").scroll_up()
+      end,
+      "n",
+    },
+    { "<C-e>", "x" },
     { "<C-o><C-e>", "i" },
     desc = "Scroll window [count] lines downwards in the buffer.",
   },
   ["<C-h>"] = {
-    { "2zl", { "n", "x" } },
+    {
+      function()
+        require("builtin.scroll").scroll_left()
+      end,
+      "n",
+    },
+    { "2zl", "x" },
     { "<C-o>2zl", "i" },
     desc = "Move the view on the text [count] characters to the right",
   },
   ["<C-l>"] = {
-    { "2zh", { "n", "x" } },
+    {
+      function()
+        require("builtin.scroll").scroll_right()
+      end,
+      "n",
+    },
+    { "2zh", "x" },
     { "<C-o>2zh", "i" },
     desc = "Move the view on the text [count] characters to the left",
   },

@@ -52,14 +52,6 @@
 --
 
 return {
-  -- ["<M-l>"] = {
-  --   "a",
-  --   "n",
-  -- },
-  -- ["<M-h>"] = {
-  --   "i",
-  --   "n",
-  -- },
   ["<leader>9"] = {
     function()
       local cursor1 = vim.fn.getpos(".")
@@ -225,27 +217,15 @@ return {
   --   end,
   --   "n",
   -- },
-
-  -- ["<tab>"] = {
-  --   "<F13>",
-  --   "c",
-  -- },
-
-  -- ["<C-n>"] = {
+  -- [";2"] = {
   --   function()
-  --     vim.fn.completion
+  --     vim.fn.win_splitmove(1000, 1007, {
+  --       vertical = true,
+  --       rightbelow = true,
+  --     })
   --   end,
-  --   { "i", "c" },
+  --   "n",
   -- },
-  [";2"] = {
-    function()
-      vim.fn.win_splitmove(1000, 1007, {
-        vertical = true,
-        rightbelow = true,
-      })
-    end,
-    "n",
-  },
   ["<M-w>"] = {
     function()
       local function taglist_to_qf(tagname)
@@ -280,15 +260,6 @@ return {
     end,
     "n",
   },
-
-  -- ["<C-j>"] = { "+", "n" },
-  -- ["<C-k>"] = { "-", "n" },
-  -- ["<M-j>"] = { "<down>g_", "n" },
-  -- ["<M-k>"] = { "<up>g_", "n" },
-  -- ["<CR>"] = {
-  --   "<nop>",
-  --   "n",
-  -- },
 }
 
 -- -- 获取光标下变量的引用

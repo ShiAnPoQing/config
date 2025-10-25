@@ -4,11 +4,6 @@ return {
     "n",
     desc = "Jump to [count] older entry in the tag stack (default 1)",
   },
-  ["<Esc>"] = {
-    "<Esc>",
-    "n",
-    desc = "Stop <Esc> same as <C-[>",
-  },
   ["<C-]>"] = {
     "<C-]>",
     "n",

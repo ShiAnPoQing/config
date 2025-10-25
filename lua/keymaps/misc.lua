@@ -1,4 +1,17 @@
 return {
+  ["<esc>"] = {
+    function()
+      ---@diagnostic disable-next-line: undefined-field
+      vim.opt.hlsearch = not vim.opt.hlsearch:get()
+    end,
+    "n",
+    desc = "Toggle highlight search",
+  },
+  -- ["<Esc>"] = {
+  --   "<Esc>",
+  --   "n",
+  --   desc = "Stop <Esc> same as <C-[>",
+  -- },
   ["<leader>X"] = {
     "<cmd>source %<cr>",
     "n",
@@ -18,8 +31,6 @@ return {
   },
   ["<space>f"] = { "t", { "n", "o", "x" } },
   ["<space>F"] = { "T", { "n", "o", "x" } },
-  -- ["<C-\\>"] = { "gcc", { "n", "i" } },
-  -- ["<C-[>"] = { "<C-O>", "n" },
   ["<M-->"] = { "J", "x" },
   ["<M-b>"] = {
     "<C-G>o<C-G>",
