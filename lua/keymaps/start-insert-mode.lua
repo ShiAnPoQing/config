@@ -112,32 +112,23 @@ return {
     end,
     "x",
   },
-  -- ["<space><space>W"] = {
-  --   function()
-  --     local count = vim.v.count1
-  --     return "<esc>" .. count .. "gI"
-  --   end,
-  --   "x",
-  --   expr = true,
-  -- },
-  -- ["<space><space>E"] = {
-  --   function()
-  --     local count = vim.v.count1
-  --     return "<esc>$" .. count .. "a"
-  --   end,
-  --   "x",
-  --   expr = true,
-  -- },
+  ["<space><space>W"] = {
+    function()
+      local count = vim.v.count1
+      return "<esc>" .. count .. "gI"
+    end,
+    "x",
+    expr = true,
+  },
+  ["<space><space>E"] = {
+    function()
+      local count = vim.v.count1
+      return "<esc>$" .. count .. "a"
+    end,
+    "x",
+    expr = true,
+  },
   -- screen line
-  -- ["<S-space>W"] = {
-  --   function()
-  --     local count = vim.v.count1
-  --     return "g^" .. count .. "i"
-  --   end,
-  --   "n",
-  --   desc = "Start insert mode to the left of the first non-blank character in the screen line",
-  --   expr = true,
-  -- },
   -- ["<S-space>E"] = {
   --   function()
   --     local count = vim.v.count1
@@ -232,22 +223,60 @@ return {
   ["aw"] = {
     function()
       local count = vim.v.count1
-      -- <Esc> used to clear count(虽然 g0 不支持计数)
-      return "<esc>g0" .. count .. "i"
+      -- <Esc> used to clear count
+      return "<esc>g^" .. count .. "i"
     end,
     "n",
-    desc = "Start insert mode to the far left character of the screen window",
     expr = true,
   },
   ["ae"] = {
     function()
       local count = vim.v.count1
       -- <Esc> used to clear count
+      return "<esc>g<end>" .. count .. "a"
+    end,
+    "n",
+    expr = true,
+  },
+  ["aaw"] = {
+    function()
+      local count = vim.v.count1
+      -- <Esc> used to clear count(虽然 g0 不支持计数)
+      return "<esc>g0" .. count .. "i"
+    end,
+    "n",
+    expr = true,
+    desc = "Start insert mode to the far left character of the screen window",
+  },
+  ["aae"] = {
+    function()
+      local count = vim.v.count1
+      -- <Esc> used to clear count
       return "<esc>g$" .. count .. "a"
     end,
     "n",
-    desc = "Start insert mode to the far right character of the screen window",
     expr = true,
+    desc = "Start insert mode to the far right character of the screen window",
+  },
+  ["aW"] = {
+    function()
+      local count = vim.v.count1
+      -- <Esc> used to clear count(虽然 g0 不支持计数)
+      return "<esc>g0" .. count .. "i"
+    end,
+    "n",
+    expr = true,
+    desc = "Start insert mode to the far left character of the screen window",
+  },
+  ["aE"] = {
+    function()
+      local count = vim.v.count1
+      -- <Esc> used to clear count
+      return "<esc>g$" .. count .. "a"
+    end,
+    "n",
+    expr = true,
+    desc = "Start insert mode to the far right character of the screen window",
   },
   ["gw"] = {
     "gi",

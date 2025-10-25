@@ -3,7 +3,6 @@ function MyTabLabel(n)
   local winnr = vim.fn.tabpagewinnr(n)
   local full_path = vim.fn.bufname(buflist[winnr])
   local filename = vim.fn.fnamemodify(full_path, ":t")
-
   if filename == "" then
     return "[No Name]"
   else
@@ -96,12 +95,13 @@ return {
       -- inccommand = "split",
       listchars = {
         eol = "",
-        -- space = "∙",
+        space = " ",
         extends = "⭆",
-        trail = "»",
-        tab = "| ",
+        -- trail = "»",
+        trail = "·",
+        -- tab = "│",
+        multispace = "   │",
       },
-
       fillchars = {
         vert = "│",
         horiz = "─",

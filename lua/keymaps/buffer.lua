@@ -17,16 +17,14 @@
 return {
   ["<Tab>j"] = {
     function()
-      local count = vim.v.count1
-      vim.cmd(count .. "bn")
+      vim.cmd({ cmd = "bn", count = vim.v.count1 })
     end,
     "n",
     desc = "Goto the next[count] buffer",
   },
   ["<Tab>sj"] = {
     function()
-      local count = vim.v.count1
-      vim.cmd(count .. "sbn")
+      vim.cmd({ cmd = "sbn", count = vim.v.count1 })
     end,
     "n",
     desc = "Split and goto the next[count] buffer",
@@ -56,16 +54,14 @@ return {
   },
   ["<Tab>k"] = {
     function()
-      local count = vim.v.count1
-      vim.cmd(count .. "bp")
+      vim.cmd({ cmd = "bp", count = vim.v.count1 })
     end,
     "n",
     desc = "Goto the previous[count] buffer",
   },
   ["<Tab>sk"] = {
     function()
-      local count = vim.v.count1
-      vim.cmd(count .. "sbp")
+      vim.cmd({ cmd = "sbp", count = vim.v.count1 })
     end,
     "n",
     desc = "Split and goto the previous[count] buffer",
@@ -95,16 +91,14 @@ return {
   },
   ["<Tab>d"] = {
     function()
-      local count = vim.v.count1
-      vim.cmd(count .. "bd")
+      vim.cmd({ cmd = "bd", count = vim.v.count1 })
     end,
     "n",
     desc = "Delete buffer",
   },
   ["<Tab>sa"] = {
     function()
-      local count = vim.v.count1
-      vim.cmd(count .. "sba")
+      vim.cmd({ cmd = "sba", count = vim.v.count1 })
     end,
     "n",
     desc = "Split and open all buffer[limit count windows]",
@@ -121,5 +115,21 @@ return {
     "<cmd>buffer#<cr>",
     "n",
     desc = "Go to the most recently accessed buffer",
+  },
+  ["<tab>m"] = {
+    function()
+      ---@diagnostic disable-next-line: param-type-mismatch
+      pcall(vim.cmd, { cmd = "bm", count = vim.v.count1 })
+    end,
+    "n",
+    desc = "Go to [N]th next modified buffer.",
+  },
+  ["<tab>sm"] = {
+    function()
+      ---@diagnostic disable-next-line: param-type-mismatch
+      pcall(vim.cmd, { cmd = "sbm", count = vim.v.count1 })
+    end,
+    "n",
+    desc = "Split window and go to [N]th next modified buffer.",
   },
 }

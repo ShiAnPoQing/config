@@ -1,12 +1,12 @@
 return {
-  ["n"] = {
+  ["b"] = {
     "o",
     {
       { "n", desc = "Begin a new line below the cursor and insert text" },
       { "x", desc = "Go to Other end of highlighted text" },
     },
   },
-  ["N"] = {
+  ["B"] = {
     "O",
     {
       { "n", desc = "Begin a new line above the cursor and insert text" },
@@ -14,13 +14,13 @@ return {
     },
   },
   -- no blank
-  ["<space>n"] = {
+  ["<space>b"] = {
     "o^<C-d>",
     "n",
     desc = "Begin a new line below the cursor and insert text(non-blank)",
   },
   -- no blank
-  ["<space>N"] = {
+  ["<space>B"] = {
     "O^<C-d>",
     "n",
     desc = "Begin a new line above the cursor and insert text(non-blank)",
@@ -31,7 +31,7 @@ return {
     "i",
     desc = "Begin new line(non-blank)",
   },
-  ["<C-n>"] = {
+  ["<C-b>"] = {
     function()
       local function insert_line()
         require("builtin.insert-line").insert_line({
@@ -47,7 +47,7 @@ return {
     { "n", "i" },
     desc = "Above insert new line(cursor follow)",
   },
-  ["<C-space><C-n>"] = {
+  ["<C-space><C-b>"] = {
     function()
       local function insert_line()
         require("builtin.insert-line").insert_line({
@@ -64,7 +64,7 @@ return {
     "i",
     desc = "Above insert new line(cursor follow)(no indent)",
   },
-  ["<M-n>"] = {
+  ["<M-b>"] = {
     function()
       local function insert_line()
         require("builtin.insert-line").insert_line({
@@ -80,7 +80,7 @@ return {
     { "n", "i" },
     desc = "Below insert new line(cursor follow)",
   },
-  ["<M-space><M-n>"] = {
+  ["<M-space><M-b>"] = {
     function()
       local function insert_line()
         require("builtin.insert-line").insert_line({
@@ -97,7 +97,7 @@ return {
     "i",
     desc = "Below insert new line(cursor follow)(no indent)",
   },
-  ["<C-M-n>"] = {
+  ["<C-M-b>"] = {
     function()
       local function insert_line()
         require("builtin.insert-line").insert_line({
@@ -113,7 +113,7 @@ return {
     { "n", "i" },
     desc = "Below and Above insert new line",
   },
-  ["<C-S-n>"] = {
+  ["<C-S-b>"] = {
     function()
       local function insert_line()
         require("builtin.insert-line").insert_line({
@@ -129,7 +129,7 @@ return {
     { "n", "i" },
     desc = "Above insert new line(cursor don't follow)",
   },
-  ["<M-S-n>"] = {
+  ["<M-S-b>"] = {
     function()
       local function insert_line()
         require("builtin.insert-line").insert_line({

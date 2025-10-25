@@ -60,6 +60,14 @@ return {
   --   "i",
   --   "n",
   -- },
+  ["<leader>9"] = {
+    function()
+      local cursor1 = vim.fn.getpos(".")
+      local cursor2 = vim.fn.getpos("v")
+      vim.print(cursor1, cursor2)
+    end,
+    "x",
+  },
   ["<leader>8"] = {
     ":move '>+1<CR>gv",
     "x",

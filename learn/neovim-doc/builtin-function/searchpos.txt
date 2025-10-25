@@ -1,0 +1,21 @@
+*searchpos()*
+searchpos({pattern} [, {flags} [, {stopline} [, {timeout} [, {skip}]]]])
+		与 |search()| 相同，但返回一个包含匹配行和列位置的 |List|。该 |List| 的第一个元素是行号，第二个元素是匹配列位置的字节索引。如果未找到匹配，返回 [0, 0]。
+		示例： >vim
+			let [lnum, col] = searchpos('mypattern', 'n')
+
+<		当给出 'p' 标志时，会有一个额外的项包含子模式匹配编号 |search()-sub-match|。示例： >vim
+			let [lnum, col, submatch] = searchpos('\(\l\)\|\(\u\)', 'np')
+<		在此示例中，当找到小写字母 |/\l| 时 "submatch" 为 2，当找到大写字母 |/\u| 时 "submatch" 为 3。
+
+                参数： ~
+                  • {pattern} (`string`)
+                  • {flags} (`string?`)
+                  • {stopline} (`integer?`)
+                  • {timeout} (`integer?`)
+                  • {skip} (`string|function?`)
+
+                返回： ~
+                  (`any`)
+
+vim:tw=78:ts=8:noet:ft=help:norl:
