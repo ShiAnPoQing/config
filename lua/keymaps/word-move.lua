@@ -19,44 +19,63 @@ return {
     { "n", "x", "o" },
     desc = "Move to the end of the WORD(right)",
   },
-  -- ["<C-i>"] = {
-  --   "ge",
-  --   { "n", "x", "o" },
-  --   desc = "Backward to the end of word [count]",
-  -- },
-  -- ["<C-o>"] = {
-  --   "w",
-  --   { "n", "x", "o" },
-  --   desc = "[count] words forward",
-  -- },
   ["<space>i"] = {
-    "ge",
-    { "n", "x", "o" },
+    {
+      "ge",
+      "n",
+    },
+    {
+      function()
+        vim.api.nvim_feedkeys("vgeloh", "nx", false)
+      end,
+      "o",
+      desc = "Backward to the end of word [count](Left Exclusion)",
+    },
+    {
+      "hgel",
+      "x",
+      desc = "Backward to the end of word [count](Left Exclusion)",
+    },
     desc = "Backward to the end of word [count]",
   },
   ["<space>o"] = {
-    "w",
-    { "n", "x", "o" },
+    {
+      "w",
+      { "n", "o" },
+    },
+    {
+      "lwh",
+      "x",
+      desc = "[count] words forward(Right Exclusion)",
+    },
     desc = "[count] words forward",
   },
   ["<space>I"] = {
-    "gE",
-    { "n", "x", "o" },
+    {
+      "gE",
+      "n",
+    },
+    {
+      function()
+        vim.api.nvim_feedkeys("vgEloh", "nx", false)
+      end,
+      "o",
+    },
+    {
+      "hgEl",
+      "x",
+    },
     desc = "Backward to the end of WORD [count]",
   },
   ["<space>O"] = {
-    "W",
-    { "n", "x", "o" },
+    {
+      "W",
+      { "n", "o" },
+    },
+    {
+      "lWh",
+      "x",
+    },
     desc = "[count] WORDS forward",
   },
-  -- ["<C-S-i>"] = {
-  --   "gE",
-  --   { "n", "x", "o" },
-  --   desc = "Backward to the end of WORD [count]",
-  -- },
-  -- ["<C-S-o>"] = {
-  --   "W",
-  --   { "n", "x", "o" },
-  --   desc = "[count] WORDS forward",
-  -- },
 }

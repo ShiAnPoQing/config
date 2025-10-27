@@ -1,3 +1,5 @@
+-- see /usr/share/nvim/runtime/lua/vim/_defaults.lua
+
 return {
   ["<leader>da"] = {
     function()
@@ -13,7 +15,6 @@ return {
     "n",
     desc = "Show diagnostic in quickfix list",
   },
-  -- Open diagnostic Float Win
   ["<leader>df"] = {
     function()
       vim.diagnostic.open_float({
@@ -22,7 +23,6 @@ return {
     end,
     "n",
   },
-  -- Goto prev WARN diagnostic
   ["[w"] = {
     function()
       vim.diagnostic.jump({ severity = vim.diagnostic.severity.WARN, count = -1 })
@@ -60,7 +60,7 @@ return {
   },
   ["[d"] = {
     function()
-      vim.diagnostic.jump({ count = -1 })
+      vim.diagnostic.jump({ count = -vim.v.count1 })
       vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
@@ -68,10 +68,22 @@ return {
   },
   ["]d"] = {
     function()
-      vim.diagnostic.jump({ count = 1 })
+      vim.diagnostic.jump({ count = vim.v.count1 })
       vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
     desc = "Goto next diagnostic",
+  },
+  ["]D"] = {
+    function()
+      vim.diagnostic.jump({ count = vim._maxint, wrap = false })
+    end,
+    "n",
+  },
+  ["[D"] = {
+    function()
+      vim.diagnostic.jump({ count = -vim._maxint, wrap = false })
+    end,
+    "n",
   },
 }

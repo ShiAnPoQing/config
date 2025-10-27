@@ -14,6 +14,20 @@ local function visual_mode_textobject(textobject)
   end
 end
 return {
+  ["wn"] = {
+    function()
+      vim.lsp.buf.selection_range(vim.v.count1)
+    end,
+    "x",
+    desc = "vim.lsp.buf.selection_range(vim.v.count1)",
+  },
+  ["en"] = {
+    function()
+      vim.lsp.buf.selection_range(-vim.v.count1)
+    end,
+    "x",
+    desc = "vim.lsp.buf.selection_range(-vim.v.count1)",
+  },
   -- textobject
   ["ww"] = { "aw", { "x", "o" } },
   ["ew"] = { "iw", { "x", "o" } },

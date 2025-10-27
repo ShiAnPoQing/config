@@ -1,4 +1,4 @@
-local function aam()
+local function screen_col_center()
   local win_info = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
   local screen_width = win_info.width - win_info.textoff
   ---@diagnostic disable-next-line: undefined-field
@@ -14,19 +14,17 @@ local function aam()
 end
 
 return {
-  ["<S-space>h"] = {
+  ["H"] = {
     {
       function()
         require("builtin.screen-start-end-move").first_non_blank_character()
       end,
       "n",
     },
-    { "g^", "x" },
-    -- contains the character under the cursor
-    { "vg^", "o" },
+    { "g^", { "x", "o" } },
     desc = "Screen First Non-blank Character",
   },
-  ["<S-space>l"] = {
+  ["L"] = {
     {
       function()
         require("builtin.screen-start-end-move").last_non_blank_character()
@@ -35,64 +33,11 @@ return {
     },
     {
       "g<end>",
-      "x",
-    },
-    -- contains the character under the cursor
-    {
-      "vg<end>",
-      "o",
+      { "x", "o" },
     },
     desc = "Screen Last Non-blank Character",
   },
-  ["ah"] = {
-    {
-      function()
-        require("builtin.screen-move").move("left")
-      end,
-      "n",
-      { desc = "Screen First Character" },
-    },
-    { "g0", { "x", "o" } },
-  },
-  ["al"] = {
-    {
-      function()
-        require("builtin.screen-move").move("right")
-      end,
-      "n",
-      { desc = "Screen Last Character" },
-    },
-    { "g$", { "x", "o" } },
-  },
-  ["<S-space><S-space>h"] = {
-    {
-      function()
-        require("builtin.screen-move").move("left")
-      end,
-      "n",
-      { desc = "Screen First Character" },
-    },
-    { "g0", { "x", "o" } },
-  },
-  ["<S-space><S-space>l"] = {
-    {
-      function()
-        ---@diagnostic disable-next-line: undefined-field
-        local v = vim.opt.virtualedit:get()
-        if v[1] == "all" then
-          vim.opt.virtualedit = "none"
-          vim.api.nvim_feedkeys("g$", "nx", true)
-          vim.opt.virtualedit = "all"
-          return
-        end
-        vim.api.nvim_feedkeys("g$", "nx", true)
-      end,
-      "n",
-      { desc = "Screen Last Character" },
-    },
-    { "g$", { "x", "o" } },
-  },
-  ["aj"] = {
+  ["J"] = {
     {
       function()
         require("builtin.screen-move").move("bottom")
@@ -100,17 +45,9 @@ return {
       "n",
     },
     { "L", { "x", "o" } },
+    desc = "To line [count] from bottom of window (default: Last line on the window) on the first non-blank character",
   },
-  ["0aj"] = {
-    {
-      function()
-        require("custom.plugins.move.magic-move-viewport-bottom").move_viewport_bottom()
-      end,
-      "n",
-    },
-  },
-  -- normal mode cursor move: screen top
-  ["ak"] = {
+  ["K"] = {
     {
       function()
         require("builtin.screen-move").move("top")
@@ -118,8 +55,141 @@ return {
       "n",
     },
     { "H", { "x", "o" } },
+    desc = "To line [count] from top (Home) of window (default: first line on the window) on the first non-blank character",
   },
-  ["0ak"] = {
+  ["N"] = {
+    "M",
+    "n",
+    desc = "To Middle line of window, on the first non-blank character (linewise)",
+  },
+  ["M"] = {
+    function()
+      ---@diagnostic disable-next-line: undefined-field
+      local virtualedit = vim.opt_local.virtualedit:get()
+      if virtualedit[1] ~= "all" then
+        vim.opt_local.virtualedit = "all"
+      end
+      return "gm"
+    end,
+    "n",
+    expr = true,
+  },
+  ["<S-space>H"] = {
+    function()
+      local virt_col = vim.fn.virtcol(".")
+      local line = vim.api.nvim_get_current_line()
+      local display_width = vim.fn.strdisplaywidth(line)
+      if virt_col <= display_width then
+        return "zs"
+      else
+        local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+        ---@diagnostic disable-next-line: undefined-field
+        local leftcol = wininfo.leftcol
+        if virt_col - leftcol > 1 then
+          return (virt_col - leftcol - 1) .. "zl"
+        end
+      end
+    end,
+    { "n", "x" },
+    expr = true,
+    desc = "Scroll the text horizontally to position the cursor at the start (left side) of the screen.",
+  },
+  ["<S-space>L"] = {
+    function()
+      local virt_col = vim.fn.virtcol(".")
+      local line = vim.api.nvim_get_current_line()
+      local display_width = vim.fn.strdisplaywidth(line)
+      if virt_col <= display_width then
+        return "ze"
+      else
+        local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+        local width = wininfo.width - wininfo.textoff
+        ---@diagnostic disable-next-line: undefined-field
+        local leftcol = wininfo.leftcol
+        local win_virt_col = virt_col - leftcol
+        local count = width - win_virt_col
+        if count > 0 then
+          return count .. "zh"
+        end
+      end
+    end,
+    { "n", "x" },
+    expr = true,
+    desc = "Scroll the text horizontally to position the cursor at the end (right side) of the screen.",
+  },
+  ["<S-space>K"] = {
+    "zt",
+    { "n", "x" },
+    desc = "line [count] at top of window (default cursor line)(leave the cursor in the same column).",
+  },
+  ["<S-space>J"] = {
+    "zb",
+    { "n", "x" },
+    desc = "line [count] at bottom of window (default cursor line)(leave the cursor in the same column).",
+  },
+  ["<S-space>N"] = {
+    "zz",
+    { "n", "x" },
+    desc = "line [count] at center of window (default cursor line)(leave the cursor in the same column).",
+  },
+  ["<S-space>M"] = { screen_col_center, { "n" }, desc = "col at center of window" },
+  -- ["ah"] = {
+  --   {
+  --     function()
+  --       require("builtin.screen-move").move("left")
+  --     end,
+  --     "n",
+  --     { desc = "Screen First Character" },
+  --   },
+  --   { "g0", { "x", "o" } },
+  -- },
+  -- ["al"] = {
+  --   {
+  --     function()
+  --       require("builtin.screen-move").move("right")
+  --     end,
+  --     "n",
+  --     { desc = "Screen Last Character" },
+  --   },
+  --   { "g$", { "x", "o" } },
+  -- },
+  -- ["<S-space><S-space>h"] = {
+  --   {
+  --     function()
+  --       require("builtin.screen-move").move("left")
+  --     end,
+  --     "n",
+  --     { desc = "Screen First Character" },
+  --   },
+  --   { "g0", { "x", "o" } },
+  -- },
+  -- ["<S-space><S-space>l"] = {
+  --   {
+  --     function()
+  --       ---@diagnostic disable-next-line: undefined-field
+  --       local v = vim.opt.virtualedit:get()
+  --       if v[1] == "all" then
+  --         vim.opt.virtualedit = "none"
+  --         vim.api.nvim_feedkeys("g$", "nx", true)
+  --         vim.opt.virtualedit = "all"
+  --         return
+  --       end
+  --       vim.api.nvim_feedkeys("g$", "nx", true)
+  --     end,
+  --     "n",
+  --     { desc = "Screen Last Character" },
+  --   },
+  --   { "g$", { "x", "o" } },
+  -- },
+  ["0J"] = {
+    {
+      function()
+        require("custom.plugins.move.magic-move-viewport-bottom").move_viewport_bottom()
+      end,
+      "n",
+    },
+  },
+  ["0K"] = {
     {
       function()
         require("custom.plugins.move.magic-move-viewport-top").move_viewport_top()
@@ -178,66 +248,6 @@ return {
     end,
     "n",
   },
-  ["aal"] = {
-    function()
-      local virt_col = vim.fn.virtcol(".")
-      local line = vim.api.nvim_get_current_line()
-      local display_width = vim.fn.strdisplaywidth(line)
-      if virt_col <= display_width then
-        return "ze"
-      else
-        local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
-        local width = wininfo.width - wininfo.textoff
-        ---@diagnostic disable-next-line: undefined-field
-        local leftcol = wininfo.leftcol
-        local win_virt_col = virt_col - leftcol
-        local count = width - win_virt_col
-        if count > 0 then
-          return count .. "zh"
-        end
-      end
-    end,
-    { "n", "x" },
-    expr = true,
-    desc = "Scroll the text horizontally to position the cursor at the end (right side) of the screen.",
-  },
-  ["aah"] = {
-    function()
-      local virt_col = vim.fn.virtcol(".")
-      local line = vim.api.nvim_get_current_line()
-      local display_width = vim.fn.strdisplaywidth(line)
-      if virt_col <= display_width then
-        return "zs"
-      else
-        local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
-        ---@diagnostic disable-next-line: undefined-field
-        local leftcol = wininfo.leftcol
-        if virt_col - leftcol > 1 then
-          return (virt_col - leftcol - 1) .. "zl"
-        end
-      end
-    end,
-    { "n", "x" },
-    expr = true,
-    desc = "Scroll the text horizontally to position the cursor at the start (left side) of the screen.",
-  },
-  ["aak"] = {
-    "zt",
-    { "n", "x" },
-    desc = "line [count] at top of window (default cursor line)(leave the cursor in the same column).",
-  },
-  ["aaj"] = {
-    "zb",
-    { "n", "x" },
-    desc = "line [count] at bottom of window (default cursor line)(leave the cursor in the same column).",
-  },
-  ["aan"] = {
-    "zz",
-    { "n", "x" },
-    desc = "line [count] at center of window (default cursor line)(leave the cursor in the same column).",
-  },
-  -- normal mode view move: cursor line position at screen center row
-  ["aam"] = { aam, { "n" }, desc = "col at center of window" },
 
   -- normal mode view move: cursor word position at screen right
   ["<M-a><M-a><M-l>"] = {

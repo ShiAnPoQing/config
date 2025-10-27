@@ -1,112 +1,76 @@
---- @param direction 1 | -1
---- @param only_current_buf? boolean
-local function jump_buffer(direction, only_current_buf)
-  local jumplist, current_jump = unpack(vim.fn.getjumplist())
-  if #jumplist == 0 then
-    return
-  end
-  local current_buf = vim.api.nvim_get_current_buf()
-  local jump_key
-  local range = {}
-
-  if direction > 0 then
-    jump_key = "<C-i>"
-    if current_jump + 2 > #jumplist then
-      return
-    end
-    range = vim.fn.range(current_jump + 2, #jumplist, 1)
-  else
-    jump_key = "<C-o>"
-    range = vim.fn.range(current_jump, 1, -1)
-  end
-
-  local condition = function(bufnr)
-    if only_current_buf then
-      return bufnr == current_buf
-    else
-      return bufnr ~= current_buf
-    end
-  end
-
-  for _, i in ipairs(range) do
-    local bufnr = jumplist[i].bufnr
-    if condition(bufnr) then
-      local count = tostring(math.abs(i - current_jump - 1))
-      vim.api.nvim_feedkeys(count .. vim.api.nvim_replace_termcodes(jump_key, true, false, true), "nx", false)
-      break
-    end
-  end
-end
+---------------------------------------------------------------------------------------------------+
+-- Commands \ Modes | Normal | Insert | Command | Visual | Select | Operator | Terminal | Lang-Arg |
+-- ================================================================================================+
+-- map  / noremap   |    @   |   -    |    -    |   @    |   @    |    @     |    -     |    -     |
+-- nmap / nnoremap  |    @   |   -    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- map! / noremap!  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- imap / inoremap  |    -   |   @    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- cmap / cnoremap  |    -   |   -    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- vmap / vnoremap  |    -   |   -    |    -    |   @    |   @    |    -     |    -     |    -     |
+-- xmap / xnoremap  |    -   |   -    |    -    |   @    |   -    |    -     |    -     |    -     |
+-- smap / snoremap  |    -   |   -    |    -    |   -    |   @    |    -     |    -     |    -     |
+-- omap / onoremap  |    -   |   -    |    -    |   -    |   -    |    @     |    -     |    -     |
+-- tmap / tnoremap  |    -   |   -    |    -    |   -    |   -    |    -     |    @     |    -     |
+-- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
+---------------------------------------------------------------------------------------------------+
 
 return {
-  -- goto last cursor position
-  -- ["<M-[>"] = {
-  --   "<C-o>",
-  --   { "n", "x" },
-  --   desc = "Go to [count] Older cursor position in jump list (not a motion command)",
-  -- },
-  -- -- goto new cursor position
-  -- ["<M-]>"] = {
-  --   "<C-i>",
-  --   { "n", "x" },
-  --   desc = "Go to [count] newer cursor position in jump list(not a motion command)",
-  -- },
-  -- ["<M-Space><M-[>"] = {
   ["<C-i>"] = {
-    "<C-o>",
+    function()
+      require("builtin.jump-list").jump(-1)
+    end,
     "n",
+    desc = "Go to [count] older cursor position in jump list",
   },
   ["<C-o>"] = {
-    "<C-i>",
+    function()
+      require("builtin.jump-list").jump(1)
+    end,
     "n",
+    desc = "Go to [count] newer cursor position in jump list",
+  },
+  ["g<C-i>"] = {
+    function()
+      local function callback()
+        require("builtin.jump-list").switch_lock(-1)
+        require("repeat"):set(callback)
+      end
+      callback()
+    end,
+    "n",
+    desc = "Go to [count] older cursor position in jump list[switch buffer lock]",
+  },
+  ["g<C-o>"] = {
+    function()
+      local function callback()
+        require("builtin.jump-list").switch_lock(1)
+        require("repeat"):set(callback)
+      end
+      callback()
+    end,
+    "n",
+    desc = "Go to [count] newer cursor position in jump list[switch buffer lock]",
   },
   ["<C-S-i>"] = {
     function()
       local function callback()
-        jump_buffer(-1, true)
+        require("builtin.jump-list").jump_buffer(-1)
         require("repeat"):set(callback)
       end
       callback()
     end,
     "n",
-    desc = "Go to [count] Older cursor position in jump list (not a motion command)",
+    desc = "Go to [count] older cursor position in jump list[buffer]",
   },
-  -- goto new cursor position
-  -- ["<M-Space><M-o>"] = {
   ["<C-S-o>"] = {
     function()
       local function callback()
-        jump_buffer(1, true)
+        require("builtin.jump-list").jump_buffer(1)
         require("repeat"):set(callback)
       end
       callback()
     end,
     "n",
-    desc = "Go to [count] newer cursor position in jump list(not a motion command)",
-    noremap = true,
-  },
-  -- ["<M-S-[>"] = {
-  ["<C-Space><C-i>"] = {
-    function()
-      local function callback()
-        jump_buffer(-1)
-        require("repeat"):set(callback)
-      end
-      callback()
-    end,
-    "n",
-    desc = "Older Jump(buffer)",
-  },
-  -- ["<M-S-]>"] = {
-  ["<C-Space><C-o>"] = {
-    function()
-      local function callback()
-        jump_buffer(1)
-        require("repeat"):set(callback)
-      end
-      callback()
-    end,
-    "n",
-    desc = "Newer Jump(buffer)",
+    desc = "Go to [count] newer cursor position in jump list[buffer]",
   },
 }

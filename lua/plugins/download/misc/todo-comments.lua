@@ -22,27 +22,27 @@ return {
       },
     })
 
-    require("simple-keymap").add({
-      ["]t"] = {
-        function()
-          require("todo-comments").jump_next()
-        end,
-        "n",
-        desc = "Next todo comment",
-      },
-      ["[t"] = {
-        function()
-          require("todo-comments").jump_prev()
-        end,
-        "n",
-        desc = "Previous todo comment",
-      },
-      ["<leader>fm"] = {
-        "<cmd>TodoTelescope<cr>",
-        "n",
-        desc = "TodoTelescope",
-      },
-    })
+    -- require("simple-keymap").add({
+    --   ["]t"] = {
+    --     function()
+    --       require("todo-comments").jump_next()
+    --     end,
+    --     "n",
+    --     desc = "Next todo comment",
+    --   },
+    --   ["[t"] = {
+    --     function()
+    --       require("todo-comments").jump_prev()
+    --     end,
+    --     "n",
+    --     desc = "Previous todo comment",
+    --   },
+    --   ["<leader>fm"] = {
+    --     "<cmd>TodoTelescope<cr>",
+    --     "n",
+    --     desc = "TodoTelescope",
+    --   },
+    -- })
     -- You can also specify a list of valid jump keywords
     -- vim.keymap.set("n", "]t", function()
     --   require("todo-comments").jump_next({ keywords = { "ERROR", "WARNING" } })

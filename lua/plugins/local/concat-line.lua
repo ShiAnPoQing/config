@@ -1,7 +1,7 @@
 return {
   name = "concat-line",
   keys = {
-    ["<space>-"] = {
+    ["-"] = {
       function()
         local function callback()
           require("concat-line").line_concat({ join_char = " " })
@@ -12,7 +12,7 @@ return {
       end,
       { "n", "x" },
     },
-    ["<space>--"] = {
+    ["--"] = {
       function()
         local function callback()
           require("concat-line").line_concat({ join_char = " " })
@@ -23,7 +23,7 @@ return {
       end,
       "n",
     },
-    ["g<space>-"] = {
+    ["g-"] = {
       function()
         local function callback()
           require("concat-line").line_concat({ trim_blank = false })
@@ -34,7 +34,7 @@ return {
       end,
       { "n", "x" },
     },
-    ["g<space>--"] = {
+    ["g--"] = {
       function()
         local function callback()
           require("concat-line").line_concat({ trim_blank = false })

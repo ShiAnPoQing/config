@@ -8,10 +8,6 @@ local function space_j_Omode()
   vim.api.nvim_exec2(string.format([[exec "normal! v%d\<Down>g_"]], count), {})
 end
 
-local function large_move(key)
-  vim.cmd("normal! " .. vim.v.count1 * 3 .. key)
-end
-
 local function switch_virtualedit()
   ---@diagnostic disable-next-line: undefined-field
   local virt = vim.opt_local.virtualedit:get()[1]
@@ -75,34 +71,6 @@ return {
     "n",
     expr = true,
   },
-  ["H"] = {
-    function()
-      large_move("h")
-    end,
-    { "x", "n" },
-    desc = "3h",
-  },
-  ["J"] = {
-    function()
-      large_move(vim.v.count == 0 and "gj" or "j")
-    end,
-    { "x", "n" },
-    desc = "3j",
-  },
-  ["K"] = {
-    function()
-      large_move(vim.v.count == 0 and "gk" or "k")
-    end,
-    { "x", "n" },
-    desc = "3k",
-  },
-  ["L"] = {
-    function()
-      large_move("l")
-    end,
-    { "x", "n" },
-    desc = "3l",
-  },
   ["<space><M-h>"] = {
     "I",
     "n",
@@ -116,14 +84,14 @@ return {
     "n",
     noremap = true,
   },
-  ["<space>j"] = {
-    { space_j_Omode, "o" },
-    { "<Down>g_", { "n", "x" } },
-  },
-  ["<space>k"] = {
-    { space_k_Omode, "o", noremap = true },
-    { "<Up>g_", { "n", "x" } },
-  },
+  -- ["<space>j"] = {
+  --   { space_j_Omode, "o" },
+  --   { "<Down>g_", { "n", "x" } },
+  -- },
+  -- ["<space>k"] = {
+  --   { space_k_Omode, "o", noremap = true },
+  --   { "<Up>g_", { "n", "x" } },
+  -- },
 
   ["<space>m"] = { "gM", { "n", "x", "o" } },
   ["<space>n"] = { "M", { "n", "x", "o" } },
@@ -131,11 +99,11 @@ return {
   ["<M-space><M-n>"] = { "<C-o>gM", { "i" } },
 
   -- 缺少： up down to first 空白字符
-  ["<space><space>j"] = { "+", { "n", "x", "o" } },
-  ["<space><space>k"] = { "-", { "n", "x", "o" } },
+  -- ["<space><space>j"] = { "+", { "n", "x", "o" } },
+  -- ["<space><space>k"] = { "-", { "n", "x", "o" } },
 
-  ["{"] = { "{zz", "n" },
-  ["}"] = { "}zz", "n" },
+  -- ["{"] = { "{zz", "n" },
+  -- ["}"] = { "}zz", "n" },
 
   ["<space>G"] = { "<C-End>", { "n", "x", "o" } },
   ["<space><space>G"] = { "G0", { "n", "x", "o" } },

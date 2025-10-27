@@ -5,6 +5,22 @@ local function get_visual_texts()
   return vim.api.nvim_buf_get_text(0, start_mark[1] - 1, start_mark[2], end_mark[1] - 1, end_mark[2] + 1, {})
 end
 return {
+  ["<C-n>"] = {
+    "n",
+    { "n", "x", "o" },
+  },
+  ["<C-p>"] = {
+    "N",
+    { "n", "x", "o" },
+  },
+  ["g<C-n>"] = {
+    "gn",
+    { "n", "x", "o" },
+  },
+  ["g<C-p>"] = {
+    "gN",
+    { "n", "x", "o" },
+  },
   -- Search cursor text
   ["*"] = { "*zz", "n" },
   -- Search cursor text
@@ -13,8 +29,26 @@ return {
   -- Search visual text
   ["<space>/"] = {
     function()
+      local function get_visual_pos(condition)
+        local _, row1, col1 = unpack(vim.fn.getpos("."))
+        local _, row2, col2 = unpack(vim.fn.getpos("v"))
+        if condition(row1, col1, row2, col2) then
+          return row1, col1, row2, col2
+        else
+          return row2, col2, row1, col1
+        end
+      end
+      local start_row, start_col, end_row, end_col = get_visual_pos(function(row1, col1, row2, col2)
+        if row1 < row2 then
+          return true
+        elseif row1 == row2 then
+          if col1 < col2 then
+            return true
+          end
+        end
+      end)
+      local text = vim.api.nvim_buf_get_text(0, start_row - 1, start_col - 1, end_row - 1, end_col, {})[1]
       vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", true)
-      local text = get_visual_texts()[1]
       return "/" .. text .. "<CR>"
     end,
     "x",
@@ -44,16 +78,6 @@ return {
       "x",
     },
   },
-  -- ["n"] = {
-  --   "nzzzv",
-  --   "n",
-  --   desc = "Search result shown at the middle",
-  -- },
-  -- ["N"] = {
-  --   "Nzzzv",
-  --   "n",
-  --   desc = "Search result shown at the middle",
-  -- },
   ["0n"] = {
     function()
       local pattern = vim.fn.getreg("/")
@@ -65,7 +89,6 @@ return {
       local key = require("magic.key"):init()
       key.compute(#matches)
       for _, value in ipairs(matches) do
-        vim.print(value.byteidx)
         key.register({
           callback = function() end,
           one_key = {

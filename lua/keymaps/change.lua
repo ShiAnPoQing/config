@@ -2,6 +2,7 @@ return {
   ["gi"] = {
     function()
       local changelist = vim.fn.getchangelist(vim.api.nvim_get_current_buf())
+
       local idx = changelist[2]
       if idx > 0 then
         return "g;"

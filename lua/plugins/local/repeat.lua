@@ -1,6 +1,6 @@
 return {
   name = "repeat",
-  config = function(opt)
+  config = function()
     require("repeat").setup({})
   end,
 }

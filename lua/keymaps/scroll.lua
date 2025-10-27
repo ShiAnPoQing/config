@@ -252,13 +252,13 @@ return {
     desc = "line [count] at top of window (default cursor line)(leave the cursor in the same column.)",
   },
   ["<C-Space><C-l>"] = {
-    "aal",
+    "<S-Space>L",
     "n",
     remap = true,
     desc = "Scroll the text horizontally to position the cursor at the end (right side) of the screen.",
   },
   ["<C-Space><C-h>"] = {
-    "aah",
+    "<S-space>H",
     "n",
     remap = true,
     desc = "Scroll the text horizontally to position the cursor at the start (left side) of the screen.",
@@ -269,7 +269,7 @@ return {
     desc = "line [count] at center of window (default cursor line)(leave the cursor in the same column)",
   },
   ["<C-Space><C-m>"] = {
-    "aam",
+    "<S-space>M",
     "n",
     remap = true,
     desc = "col at center of window (default cursor col)(leave the cursor in the same row)",
