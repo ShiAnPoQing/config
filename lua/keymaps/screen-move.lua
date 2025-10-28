@@ -17,17 +17,17 @@ return {
   ["H"] = {
     {
       function()
-        require("builtin.screen-start-end-move").first_non_blank_character()
+        require("builtin.screen-move").screen_left()
       end,
       "n",
     },
     { "g^", { "x", "o" } },
-    desc = "Screen First Non-blank Character",
+    desc = "Screen Left",
   },
   ["L"] = {
     {
       function()
-        require("builtin.screen-start-end-move").last_non_blank_character()
+        require("builtin.screen-move").screen_right()
       end,
       "n",
     },
@@ -35,26 +35,26 @@ return {
       "g<end>",
       { "x", "o" },
     },
-    desc = "Screen Last Non-blank Character",
+    desc = "Screen Right",
   },
   ["J"] = {
     {
       function()
-        require("builtin.screen-move").move("bottom")
+        require("builtin.screen-move").screen_bottom()
       end,
-      "n",
+      { "n", "x" },
     },
-    { "L", { "x", "o" } },
+    { "L", "o" },
     desc = "To line [count] from bottom of window (default: Last line on the window) on the first non-blank character",
   },
   ["K"] = {
     {
       function()
-        require("builtin.screen-move").move("top")
+        require("builtin.screen-move").screen_top()
       end,
-      "n",
+      { "n", "x" },
     },
-    { "H", { "x", "o" } },
+    { "H", "o" },
     desc = "To line [count] from top (Home) of window (default: first line on the window) on the first non-blank character",
   },
   ["N"] = {
@@ -67,12 +67,40 @@ return {
       ---@diagnostic disable-next-line: undefined-field
       local virtualedit = vim.opt_local.virtualedit:get()
       if virtualedit[1] ~= "all" then
-        vim.opt_local.virtualedit = "all"
+        return "gM"
       end
       return "gm"
     end,
     "n",
     expr = true,
+  },
+  ["gM"] = {
+    function()
+      ---@diagnostic disable-next-line: undefined-field
+      local virtualedit = vim.opt_local.virtualedit:get()
+      if virtualedit[1] ~= "all" then
+        vim.opt_local.virtualedit = "all"
+        return "gm"
+      else
+        vim.opt_local.virtualedit = "none"
+        return "gM"
+      end
+    end,
+    "n",
+    expr = true,
+  },
+  ["gL"] = {
+    function()
+      ---@diagnostic disable-next-line: undefined-field
+      local virtualedit = vim.opt_local.virtualedit:get()
+      if virtualedit[1] ~= "all" then
+        vim.opt_local.virtualedit = "all"
+      else
+        vim.opt_local.virtualedit = "none"
+      end
+      require("builtin.screen-move").screen_right()
+    end,
+    "n",
   },
   ["<S-space>H"] = {
     function()

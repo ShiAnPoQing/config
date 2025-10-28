@@ -5,6 +5,19 @@ local function switch(option)
 end
 
 return {
+  ["<leader>so"] = {
+    function()
+      ---@diagnostic disable-next-line: undefined-field
+      local scrolloff = vim.opt_local.scrolloff:get()
+      if scrolloff ~= 999 then
+        vim.opt_local.scrolloff = 999
+      else
+        vim.opt_local.scrolloff = 0
+      end
+    end,
+    "n",
+    desc = "Switch the cursor line will always be in the middle of the window or not",
+  },
   ["<leader>st"] = {
     function()
       ---@diagnostic disable-next-line: undefined-field

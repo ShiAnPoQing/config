@@ -49,7 +49,5 @@ require("neo-packer").setup({
   require("plugins.download.markdown.render-markdown"),
   require("plugins.download.style.mini-statusline"),
   require("plugins.download.style.moonfly"),
-  -- require("plugins.download.format.indent-blankline"),
   require("plugins.local.neo-snippet"),
-  -- require("plugins.local.neo-completion"),
 })

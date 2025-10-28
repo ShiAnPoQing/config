@@ -43,7 +43,6 @@ function M.textobject(config)
 
     if name == config.query then
       local start_row, start_col, end_row, end_col = node:range()
-
       if cur_row >= start_row and cur_row <= end_row then
         visual(start_row, start_col, end_row, end_col)
         return

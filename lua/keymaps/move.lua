@@ -92,7 +92,6 @@ return {
   --   { space_k_Omode, "o", noremap = true },
   --   { "<Up>g_", { "n", "x" } },
   -- },
-
   ["<space>m"] = { "gM", { "n", "x", "o" } },
   ["<space>n"] = { "M", { "n", "x", "o" } },
   ["<M-space><M-m>"] = { "<C-o>gM", { "i" } },
@@ -284,6 +283,22 @@ return {
       require("custom.plugins.move.magic-move").move()
     end,
     "n",
+  },
+  ["<space>k"] = {
+    "gg",
+    { "n", "x", "o" },
+  },
+  ["<space><space>k"] = {
+    "<cmd>keepj normal! gg<cr>",
+    { "n", "x", "o" },
+  },
+  ["<space>j"] = {
+    "G",
+    { "n", "x", "o" },
+  },
+  ["<space><space>j"] = {
+    "<cmd>keepj normal! G<cr>",
+    { "n", "x", "o" },
   },
   ["<space>h"] = {
     {

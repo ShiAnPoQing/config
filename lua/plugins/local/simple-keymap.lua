@@ -1,5 +1,6 @@
 return {
   name = "simple-keymap.nvim",
+  priority = 1000,
   config = function()
     require("simple-keymap").setup({
       add = {

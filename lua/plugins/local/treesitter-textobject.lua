@@ -549,7 +549,7 @@ return {
       },
     },
     -- @condition
-    ["<leader>co"] = {
+    ["<leader>cd"] = {
       {
         function()
           require("treesitter-textobject").textobject({
@@ -725,6 +725,32 @@ return {
         end,
         { "x", "o" },
         filetype = "c",
+      },
+    },
+    ["<leader>co"] = {
+      {
+        function()
+          require("treesitter-textobject").textobject({
+            language = "lua",
+            query = "comment.outer",
+            scm = "textobjects",
+          })
+        end,
+        { "x", "o" },
+        filetype = "lua",
+      },
+    },
+    ["<leader>ci"] = {
+      {
+        function()
+          require("treesitter-textobject").textobject({
+            language = "lua",
+            query = "comment.inner",
+            scm = "textobjects",
+          })
+        end,
+        { "x", "o" },
+        filetype = "lua",
       },
     },
   },

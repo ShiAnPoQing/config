@@ -1,89 +1,3 @@
-local function get_win_info()
-  return vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
-end
-
-local function get_virt_col_relative_screen_left()
-  local virt_col = vim.fn.virtcol(".")
-  local wininfo = get_win_info()
-  ---@diagnostic disable-next-line: undefined-field
-  local leftcol = wininfo.leftcol
-  local offset = virt_col - leftcol - 1
-
-  return offset
-end
-
-local function get_virt_col_relative_screen_right()
-  local virt_col = vim.fn.virtcol(".")
-  local wininfo = get_win_info()
-  ---@diagnostic disable-next-line: undefined-field
-  local leftcol = wininfo.leftcol
-  local width = wininfo.width - wininfo.textoff
-  local offset = width - (virt_col - leftcol)
-
-  return offset
-end
-
-local function scroll_forward_one_page()
-  local count = vim.v.count1
-  local wininfo = get_win_info()
-  ---@diagnostic disable-next-line: undefined-field
-  local height = wininfo.height - vim.opt.cmdheight:get()
-  local botline = wininfo.botline
-  local topline = wininfo.topline
-  local cursor = vim.api.nvim_win_get_cursor(0)
-
-  local relative = botline - cursor[1]
-  if botline - topline < height then
-    relative = height + topline - cursor[1]
-  end
-
-  local fixed
-  if relative == 0 then
-    fixed = ""
-  else
-    fixed = relative .. "k"
-  end
-  vim.api.nvim_feedkeys(count .. vim.api.nvim_replace_termcodes("<C-b>", true, false, true) .. fixed, "nx", false)
-end
-
-local function scroll_backward_one_page()
-  local count = vim.v.count1
-  local wininfo = get_win_info()
-  local topline = wininfo.topline
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  local relative = cursor[1] - topline
-
-  local fixed
-  if relative == 0 then
-    fixed = ""
-  else
-    fixed = relative .. "j"
-  end
-  vim.api.nvim_feedkeys(count .. vim.api.nvim_replace_termcodes("<C-f>", true, false, true) .. fixed, "nx", false)
-end
-
-local function scroll_half_screen_right()
-  local offset = get_virt_col_relative_screen_left()
-  return "zLg0" .. offset .. "l"
-end
-
-local function scroll_half_screen_right_i_mode()
-  vim.cmd.stopinsert()
-  local offset = get_virt_col_relative_screen_left()
-  vim.api.nvim_feedkeys("zLg0" .. offset .. "li", "n", false)
-end
-
-local function scroll_half_screen_left()
-  local offset = get_virt_col_relative_screen_right()
-  return "zHg$" .. offset .. "h"
-end
-
-local function scroll_half_screen_left_i_mode()
-  vim.cmd.stopinsert()
-  local offset = get_virt_col_relative_screen_right()
-  vim.api.nvim_feedkeys("zHg$" .. offset .. "hi", "n", false)
-end
-
 return {
   ["<space><C-j>"] = {
     function()
@@ -156,14 +70,14 @@ return {
   ["<C-S-j>"] = {
     {
       function()
-        scroll_backward_one_page()
+        require("builtin.scroll").scroll_backward_one_page()
       end,
       "n",
     },
     {
       function()
         vim.cmd.stopinsert()
-        scroll_backward_one_page()
+        require("builtin.scroll").scroll_backward_one_page()
         vim.cmd.startinsert()
       end,
       "i",
@@ -174,14 +88,14 @@ return {
   ["<C-S-k>"] = {
     {
       function()
-        scroll_forward_one_page()
+        require("builtin.scroll").scroll_forward_one_page()
       end,
       "n",
     },
     {
       function()
         vim.cmd.stopinsert()
-        scroll_forward_one_page()
+        require("builtin.scroll").scroll_forward_one_page()
         vim.cmd.startinsert()
       end,
       "i",
@@ -192,14 +106,14 @@ return {
   ["<C-S-l>"] = {
     {
       function()
-        return scroll_half_screen_right()
+        return require("builtin.scroll").scroll_half_screen_right()
       end,
       { "n", "x" },
       expr = true,
     },
     {
       function()
-        scroll_half_screen_right_i_mode()
+        require("builtin.scroll").scroll_half_screen_right_i_mode()
       end,
       "i",
     },
@@ -208,14 +122,14 @@ return {
   ["<C-S-h>"] = {
     {
       function()
-        return scroll_half_screen_left()
+        return require("builtin.scroll").scroll_half_screen_left()
       end,
       { "n", "x" },
       expr = true,
     },
     {
       function()
-        scroll_half_screen_left_i_mode()
+        require("builtin.scroll").scroll_half_screen_left_i_mode()
       end,
       "i",
     },
@@ -223,7 +137,7 @@ return {
   },
   ["<C-Space><C-j>"] = {
     function()
-      local wininfo = get_win_info()
+      local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]()
       local botline = wininfo.botline
       local line = vim.fn.line(".")
       if botline == line then
@@ -238,7 +152,7 @@ return {
   },
   ["<C-Space><C-k>"] = {
     function()
-      local wininfo = get_win_info()
+      local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]()
       local topline = wininfo.topline
       local line = vim.fn.line(".")
       if topline == line then

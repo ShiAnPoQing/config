@@ -61,12 +61,12 @@ return {
       local line = vim.api.nvim_get_current_line()
       if cursor[2] == #line then
         ---@diagnostic disable-next-line: undefined-field
-        local virtualedit = vim.opt.virtualedit:get()[1]
+        local virtualedit = vim.opt_local.virtualedit:get()[1]
         if virtualedit ~= "all" then
-          vim.opt.virtualedit = "all"
+          vim.opt_local.virtualedit = "all"
           delete()
           vim.schedule(function()
-            vim.opt.virtualedit = virtualedit
+            vim.opt_local.virtualedit = virtualedit
           end)
           return
         end
@@ -94,12 +94,12 @@ return {
       local line = vim.api.nvim_get_current_line()
       if cursor[2] == #line then
         ---@diagnostic disable-next-line: undefined-field
-        local virtualedit = vim.opt.virtualedit:get()[1]
+        local virtualedit = vim.opt_local.virtualedit:get()[1]
         if virtualedit ~= "all" then
-          vim.opt.virtualedit = "all"
+          vim.opt_local.virtualedit = "all"
           delete()
           vim.schedule(function()
-            vim.opt.virtualedit = virtualedit
+            vim.opt_local.virtualedit = virtualedit
           end)
           return
         end

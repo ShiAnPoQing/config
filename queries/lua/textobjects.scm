@@ -5,23 +5,20 @@
 (function_definition body: (_) @function.inner)
 
 (function_declaration
-  name: (identifier)
-  parameters: (parameters)
+  name: (_)
   body: (_) @function.inner) 
 
 [
  (function_definition)
  (function_declaration
-   name: (identifier)
-   parameters: (parameters)
-   body: (_))
+   name: (_))
  ] @function.outer 
 
 (function_call) @function.call 
 
 (function_declaration 
-    body: (block 
-      (return_statement) @function.return)) 
+  body: (block 
+          (return_statement) @function.return)) 
 
 (return_statement) @return 
 
@@ -45,3 +42,6 @@
     name: (_))
   (expression_list 
     value: (_)) @equal.right)
+
+(comment content: (_) @comment.inner)
+(comment) @comment.outer
