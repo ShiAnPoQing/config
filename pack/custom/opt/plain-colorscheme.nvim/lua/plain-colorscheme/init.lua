@@ -139,7 +139,7 @@ local function get_groups()
       Keyword = { fg = colors.hue52 },
       Boolean = { fg = colors.hue72 },
       Number = { fg = colors.hue72 },
-      String = { fg = colors.hue20 },
+      String = { fg = colors.hue17 },
       Comment = { fg = colors.bg7 },
       Operator = { fg = colors.hue72 },
       Delimiter = { fg = colors.bg12 },

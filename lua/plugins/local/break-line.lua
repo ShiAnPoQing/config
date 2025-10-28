@@ -4,7 +4,7 @@ return {
     ["<space><CR>"] = {
       function()
         local function callback()
-          require("break-line").break_line(vim.v.count1)
+          require("break-line").break_line()
           require("repeat"):set(callback)
         end
         callback()

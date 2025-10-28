@@ -97,7 +97,7 @@ local function _line_break()
   end
 end
 
-function M.break_line(count)
+function M.break_line()
   _G.custom_line_break = _line_break()
   vim.opt.operatorfunc = "v:lua.custom_line_break"
   vim.api.nvim_feedkeys("g@", "nx", false)

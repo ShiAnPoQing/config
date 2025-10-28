@@ -47,7 +47,7 @@ require("neo-packer").setup({
   require("plugins.download.tex.vimtex"),
   require("plugins.download.markdown.markdown-preview"),
   require("plugins.download.markdown.render-markdown"),
-  -- require("plugins.download.style.mini-statusline"),
+  require("plugins.download.style.mini-statusline"),
   require("plugins.download.style.moonfly"),
   require("plugins.local.neo-snippet"),
 })

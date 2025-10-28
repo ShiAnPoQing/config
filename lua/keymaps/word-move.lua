@@ -6,6 +6,22 @@ local o_mode_space_I = function()
   vim.api.nvim_feedkeys("vgEloh", "nx", false)
 end
 
+local c_mode_space_i = function()
+  require("builtin.cmdline").word_end_backward()
+end
+
+local c_mode_space_o = function()
+  require("builtin.cmdline").word_start_forward()
+end
+
+local c_mode_i = function()
+  require("builtin.cmdline").word_start_backward()
+end
+
+local c_mode_o = function()
+  require("builtin.cmdline").word_end_forward()
+end
+
 return {
   ["i"] = { "b", { "n", "x", "o" }, desc = "Backward to the start of word[count]" },
   ["o"] = { "e", { "n", "x", "o" }, desc = "Forword to the end of the word[count]" },
@@ -35,16 +51,28 @@ return {
   },
   ["<M-i>"] = {
     { "bi", "n", desc = "Backward to the start of word[count] and start insert mode" },
-    { "<S-left>", "i", desc = "Backward to the start of word" },
-    { "<C-left>", "t", desc = "Backward to the start of word" },
+    { "<S-left>", "i" },
+    { "<C-left>", "t" },
+    { c_mode_i, "c" },
+    desc = "Backward to the start of word",
   },
   ["<M-o>"] = {
-    { "<Esc>ea", "i", desc = "Forword to the end of the word" },
-    { "ea", "n", desc = "Forword to the end of the word and start insert mode" },
-    { "<C-right>", "t", desc = "Forword to the end of the word[count]" },
+    { "ea", "n", desc = "Forword to the end of the word[count] and start insert mode" },
+    { "<Esc>ea", "i" },
+    { "<C-right>", "t" },
+    { c_mode_o, "c" },
+    desc = "Forword to the end of the word",
   },
-  ["<M-space><M-i>"] = { "<Esc>gea", "i", desc = "Backward to the end of word" },
-  ["<M-space><M-o>"] = { "<S-right>", "i", desc = "Forword to the start of the word" },
+  ["<M-space><M-i>"] = {
+    { "<Esc>gea", "i" },
+    { c_mode_space_i, "c" },
+    desc = "Backward to the end of word",
+  },
+  ["<M-space><M-o>"] = {
+    { "<S-right>", "i" },
+    { c_mode_space_o, "c" },
+    desc = "Forword to the start of the word",
+  },
   ["<M-S-i>"] = {
     { "<Esc>Bi", "i", desc = "Backward to the start of WORD" },
     { "Bi", "n", desc = "Backward to the start of WORD and start insert mode" },

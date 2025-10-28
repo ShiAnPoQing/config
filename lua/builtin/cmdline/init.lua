@@ -255,4 +255,10 @@ function M.last_non_blank_character()
   end
 end
 
+function M.middle()
+  local cmd = vim.fn.getcmdline()
+  local new_pos = math.floor(#cmd / 2)
+  vim.fn.setcmdline(cmd, new_pos)
+end
+
 return M

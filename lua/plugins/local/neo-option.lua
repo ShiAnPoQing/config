@@ -44,6 +44,7 @@ return {
       smartindent = true,
       winwidth = 2,
       winaltkeys = "no",
+      -- statusline = "%<%f %{luaeval('vim.api.nvim_get_mode().mode')}",
 
       number = true,
       relativenumber = true,

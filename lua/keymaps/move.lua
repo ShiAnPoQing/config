@@ -31,6 +31,10 @@ local gl = function()
   return "l"
 end
 
+local c_mode_middle = function()
+  require("builtin.cmdline").middle()
+end
+
 return {
   ["j"] = { j, { "n", "x", "o" }, expr = true },
   ["k"] = { k, { "n", "x", "o" }, expr = true },
@@ -45,49 +49,31 @@ return {
   ["<M-l>"] = { "<right>", { "i", "c", "s", "t" }, desc = "Right" },
   ["<M-g><M-j>"] = { "<C-g><C-j>", "i", desc = "Down[insert start column]" },
   ["<M-g><M-k>"] = { "<C-g><C-k>", "i", desc = "Up[insert start column]" },
-  ["<space>D"] = { "xd^", "n", noremap = true },
+  ["<space>D"] = { "xd^", "n" },
   ["<space>m"] = { "gM", { "n", "x", "o" } },
   ["<space>n"] = { "M", { "n", "x", "o" } },
-  ["<M-space><M-m>"] = { "<C-o>gM", { "i" } },
-  ["<M-space><M-n>"] = { "<C-o>gM", { "i" } },
+  ["<M-space><M-m>"] = {
+    { "<C-o>gM", "i" },
+    { c_mode_middle, "c" },
+    desc = "Line Middle",
+  },
+  ["<M-space><M-n>"] = { "<C-o>gM", "i" },
   ["<space>G"] = { "<C-End>", { "n", "x", "o" } },
   ["<space><space>G"] = { "G0", { "n", "x", "o" } },
   ["<M-w><M-k>"] = { "<C-o>-", "i" },
   ["<M-e><M-k>"] = { "<Esc>kg_a", "i" },
   ["<M-w><M-j>"] = { "<C-o>+", "i" },
   ["<M-e><M-j>"] = { "<Esc>jg_a", "i" },
-  ["<M-S-h>"] = {
-    { "<C-o>3h", "i" },
-    { "<left><left><left><left><left>", "t" },
-  },
-  ["<M-S-j>"] = {
-    { "<C-o>3j", "i" },
-    { "<down><down><down><down><down>", "t" },
-  },
-  ["<M-S-k>"] = {
-    { "<C-o>3k", "i" },
-    { "<up><up><up><up><up>", "t" },
-  },
-  ["<M-S-l>"] = {
-    { "<C-o>3l", { "i" } },
-    { "<right><right><right><right><right>", "t" },
-  },
-  ["<M-1><M-h>"] = { "<C-o>g0", "i" },
-  ["<M-space>h"] = { "<C-o>g0", "i" },
-  ["<M-1><M-l>"] = { "<C-o>g$", "i" },
-  ["<M-space>l"] = { "<C-o>g$", "i" },
-  ["<M-1><M-j>"] = { "<C-o>L", "i" },
+  ["<M-S-h>"] = { "<left><left><left>", { "t", "c", "i" } },
+  ["<M-S-j>"] = { "<down><down><down>", { "t", "i", "c" } },
+  ["<M-S-k>"] = { "<up><up><up>", { "t", "i", "c" } },
+  ["<M-S-l>"] = { "<right><right><right>", { "t", "c", "i" } },
   ["<M-space>j"] = { "<C-o>L", "i" },
-  ["<M-1><M-k>"] = { "<C-o>H", "i" },
   ["<M-space>k"] = { "<C-o>H", "i" },
-  ["<M-1><M-m>"] = { "<C-o>gm", "i" },
   ["<M-space>m"] = { "<C-o>gm", "i" },
-  ["<M-1><M-n>"] = { "<C-o>M", "i" },
   ["<M-space>n"] = { "<C-o>M", "i" },
   ["<M-space><M-k>"] = { "<Up><End>", "i" },
   ["<M-space><M-j>"] = { { "<Down><End>", "i" } },
-  ["<M-space><M-space><M-l>"] = { "<End>", { "i", "c", "s", "t" } },
-  ["<M-space><M-space><M-h>"] = { "<Home>", { "i", "c", "s", "t" } },
   ["<M-space><M-space><M-k>"] = { "<Up><Home>", { "i" } },
   ["<M-space><M-space><M-j>"] = { "<Down><Home>", { "i" } },
 
@@ -139,6 +125,13 @@ return {
     },
     { "<C-G>^<C-G>", "s" },
     { "<Home>", "t" },
+    {
+      function()
+        require("builtin.cmdline").first_non_blank_character()
+      end,
+      "c",
+    },
+    desc = "Move to the first non-blank character",
   },
   ["<M-space><M-l>"] = {
     {
@@ -158,6 +151,13 @@ return {
     },
     { "<C-G>g_<C-G>", "s" },
     { "<end>", "t" },
+    {
+      function()
+        require("builtin.cmdline").last_non_blank_character()
+      end,
+      "c",
+    },
+    desc = "Move to the last non-blank character",
   },
   ["<space><space>h"] = {
     {
@@ -194,6 +194,8 @@ return {
     { "$", "o" },
     desc = "Move to the last character of the line",
   },
+  ["<M-space><M-space><M-l>"] = { "<End>", { "i", "c", "s", "t" } },
+  ["<M-space><M-space><M-h>"] = { "<Home>", { "i", "c", "s", "t" } },
   ["<space>L"] = {
     {
       function()
@@ -279,6 +281,14 @@ return {
     { "n", "x", "o" },
     desc = "Screen Bottom",
   },
+  ["<M-1><M-j>"] = { "<C-o>L", "i" },
+  ["<M-1><M-k>"] = { "<C-o>H", "i" },
+  ["<M-1><M-h>"] = { "<C-o>g^", "i" },
+  ["<M-1><M-l>"] = { "<esc>g<end>a", "i" },
+  ["<M-1><M-1><M-j>"] = { "<C-o>L", "i" },
+  ["<M-1><M-1><M-k>"] = { "<C-o>H", "i" },
+  ["<M-1><M-1><M-h>"] = { "<C-o>g0", "i" },
+  ["<M-1><M-1><M-l>"] = { "<C-o>g$", "i" },
   ["H"] = {
     {
       function()

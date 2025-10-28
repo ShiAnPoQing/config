@@ -14,5 +14,12 @@ return {
   -- tmux fixed
   ["<F31>"] = {
     { "<Left><C-o>diw", "i" },
+    {
+      function()
+        require("builtin.cmdline").delete_current_word_before()
+      end,
+      "c",
+      desc = "Delete current word(before)",
+    },
   },
 }

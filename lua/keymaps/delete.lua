@@ -37,8 +37,13 @@ return {
     desc = "Delete the word where the cursor is(before)",
   },
   ["<M-BS>"] = {
-    "<C-o>diw",
-    "i",
+    { "<C-o>diw", "i" },
+    {
+      function()
+        require("builtin.cmdline").delete_current_word_after()
+      end,
+      "c",
+    },
     desc = "Delete the word where the cursor is(after)",
   },
   -- ["<C-M-BS>"] = {
@@ -51,37 +56,52 @@ return {
   --   "n",
   -- },
   ["<C-i>"] = {
-    function()
-      local function delete()
-        local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
-        vim.api.nvim_feedkeys(esc .. "ldbi", "n", false)
-      end
-
-      local cursor = vim.api.nvim_win_get_cursor(0)
-      local line = vim.api.nvim_get_current_line()
-      if cursor[2] == #line then
-        ---@diagnostic disable-next-line: undefined-field
-        local virtualedit = vim.opt_local.virtualedit:get()[1]
-        if virtualedit ~= "all" then
-          vim.opt_local.virtualedit = "all"
-          delete()
-          vim.schedule(function()
-            vim.opt_local.virtualedit = virtualedit
-          end)
-          return
+    {
+      function()
+        local function delete()
+          local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+          vim.api.nvim_feedkeys(esc .. "ldbi", "n", false)
         end
-      end
-      delete()
-    end,
-    "i",
+
+        local cursor = vim.api.nvim_win_get_cursor(0)
+        local line = vim.api.nvim_get_current_line()
+        if cursor[2] == #line then
+          ---@diagnostic disable-next-line: undefined-field
+          local virtualedit = vim.opt_local.virtualedit:get()[1]
+          if virtualedit ~= "all" then
+            vim.opt_local.virtualedit = "all"
+            delete()
+            vim.schedule(function()
+              vim.opt_local.virtualedit = virtualedit
+            end)
+            return
+          end
+        end
+        delete()
+      end,
+      "i",
+    },
+    {
+      "<C-w>",
+      "c",
+      replace_keycodes = true,
+    },
     desc = "Delete to the beginning of the word",
   },
   ["<C-o>"] = {
-    function()
-      local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
-      vim.api.nvim_feedkeys(esc .. "veolc", "n", false)
-    end,
-    "i",
+    {
+      function()
+        local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+        vim.api.nvim_feedkeys(esc .. "veolc", "n", false)
+      end,
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_to_word_end_forward()
+      end,
+      "c",
+    },
     desc = "Delete to the end of the word",
   },
   ["<C-S-i>"] = {
@@ -118,15 +138,29 @@ return {
     desc = "Delete to the end of the WORD",
   },
   ["<C-Space><C-i>"] = {
-    ctrl_space_ctrl_i,
-    "i",
-    noremap = true,
+    {
+      ctrl_space_ctrl_i,
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_to_word_end_backward()
+      end,
+      "c",
+    },
     desc = "Delete to the end of the previous word",
   },
   ["<C-Space><C-o>"] = {
-    "<C-o>dw",
-    "i",
-    noremap = true,
+    {
+      "<C-o>dw",
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_to_word_start_forward()
+      end,
+      "c",
+    },
     desc = "Delete to the beginning of the next word",
   },
   ["<C-Space><C-S-i>"] = {
