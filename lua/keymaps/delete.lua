@@ -1,3 +1,19 @@
+---------------------------------------------------------------------------------------------------+
+-- Commands \ Modes | Normal | Insert | Command | Visual | Select | Operator | Terminal | Lang-Arg |
+-- ================================================================================================+
+-- map  / noremap   |    @   |   -    |    -    |   @    |   @    |    @     |    -     |    -     |
+-- nmap / nnoremap  |    @   |   -    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- map! / noremap!  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- imap / inoremap  |    -   |   @    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- cmap / cnoremap  |    -   |   -    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- vmap / vnoremap  |    -   |   -    |    -    |   @    |   @    |    -     |    -     |    -     |
+-- xmap / xnoremap  |    -   |   -    |    -    |   @    |   -    |    -     |    -     |    -     |
+-- smap / snoremap  |    -   |   -    |    -    |   -    |   @    |    -     |    -     |    -     |
+-- omap / onoremap  |    -   |   -    |    -    |   -    |   -    |    @     |    -     |    -     |
+-- tmap / tnoremap  |    -   |   -    |    -    |   -    |   -    |    -     |    @     |    -     |
+-- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
+---------------------------------------------------------------------------------------------------+
+
 local function ctrl_space_ctrl_i()
   vim.cmd.stopinsert()
   local end_pos = vim.api.nvim_win_get_cursor(0)

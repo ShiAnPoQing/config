@@ -1,3 +1,19 @@
+---------------------------------------------------------------------------------------------------+
+-- Commands \ Modes | Normal | Insert | Command | Visual | Select | Operator | Terminal | Lang-Arg |
+-- ================================================================================================+
+-- map  / noremap   |    @   |   -    |    -    |   @    |   @    |    @     |    -     |    -     |
+-- nmap / nnoremap  |    @   |   -    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- map! / noremap!  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- imap / inoremap  |    -   |   @    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- cmap / cnoremap  |    -   |   -    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- vmap / vnoremap  |    -   |   -    |    -    |   @    |   @    |    -     |    -     |    -     |
+-- xmap / xnoremap  |    -   |   -    |    -    |   @    |   -    |    -     |    -     |    -     |
+-- smap / snoremap  |    -   |   -    |    -    |   -    |   @    |    -     |    -     |    -     |
+-- omap / onoremap  |    -   |   -    |    -    |   -    |   -    |    @     |    -     |    -     |
+-- tmap / tnoremap  |    -   |   -    |    -    |   -    |   -    |    -     |    @     |    -     |
+-- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
+---------------------------------------------------------------------------------------------------+
+
 local o_mode_space_i = function()
   vim.api.nvim_feedkeys("vgeloh", "nx", false)
 end
@@ -51,7 +67,7 @@ return {
   },
   ["<M-i>"] = {
     { "bi", "n", desc = "Backward to the start of word[count] and start insert mode" },
-    { "<S-left>", "i" },
+    { "<S-left>", { "i", "s" } },
     { "<C-left>", "t" },
     { c_mode_i, "c" },
     desc = "Backward to the start of word",
@@ -60,17 +76,20 @@ return {
     { "ea", "n", desc = "Forword to the end of the word[count] and start insert mode" },
     { "<Esc>ea", "i" },
     { "<C-right>", "t" },
+    { "<C-G>e<C-G>", "s" },
     { c_mode_o, "c" },
     desc = "Forword to the end of the word",
   },
   ["<M-space><M-i>"] = {
     { "<Esc>gea", "i" },
     { c_mode_space_i, "c" },
+    { "<C-G>ge<C-G>", "s" },
     desc = "Backward to the end of word",
   },
   ["<M-space><M-o>"] = {
     { "<S-right>", "i" },
     { c_mode_space_o, "c" },
+    { "<C-G>w<C-G>", "s" },
     desc = "Forword to the start of the word",
   },
   ["<M-S-i>"] = {

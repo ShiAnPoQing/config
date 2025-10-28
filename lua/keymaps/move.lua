@@ -1,3 +1,19 @@
+---------------------------------------------------------------------------------------------------+
+-- Commands \ Modes | Normal | Insert | Command | Visual | Select | Operator | Terminal | Lang-Arg |
+-- ================================================================================================+
+-- map  / noremap   |    @   |   -    |    -    |   @    |   @    |    @     |    -     |    -     |
+-- nmap / nnoremap  |    @   |   -    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- map! / noremap!  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- imap / inoremap  |    -   |   @    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- cmap / cnoremap  |    -   |   -    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- vmap / vnoremap  |    -   |   -    |    -    |   @    |   @    |    -     |    -     |    -     |
+-- xmap / xnoremap  |    -   |   -    |    -    |   @    |   -    |    -     |    -     |    -     |
+-- smap / snoremap  |    -   |   -    |    -    |   -    |   @    |    -     |    -     |    -     |
+-- omap / onoremap  |    -   |   -    |    -    |   -    |   -    |    @     |    -     |    -     |
+-- tmap / tnoremap  |    -   |   -    |    -    |   -    |   -    |    -     |    @     |    -     |
+-- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
+---------------------------------------------------------------------------------------------------+
+
 local function switch_virtualedit()
   ---@diagnostic disable-next-line: undefined-field
   local virt = vim.opt_local.virtualedit:get()[1]
@@ -58,8 +74,6 @@ return {
     desc = "Line Middle",
   },
   ["<M-space><M-n>"] = { "<C-o>gM", "i" },
-  ["<space>G"] = { "<C-End>", { "n", "x", "o" } },
-  ["<space><space>G"] = { "G0", { "n", "x", "o" } },
   ["<M-w><M-k>"] = { "<C-o>-", "i" },
   ["<M-e><M-k>"] = { "<Esc>kg_a", "i" },
   ["<M-w><M-j>"] = { "<C-o>+", "i" },
@@ -72,17 +86,10 @@ return {
   ["<M-space>k"] = { "<C-o>H", "i" },
   ["<M-space>m"] = { "<C-o>gm", "i" },
   ["<M-space>n"] = { "<C-o>M", "i" },
-  ["<M-space><M-k>"] = { "<Up><End>", "i" },
-  ["<M-space><M-j>"] = { { "<Down><End>", "i" } },
-  ["<M-space><M-space><M-k>"] = { "<Up><Home>", { "i" } },
-  ["<M-space><M-space><M-j>"] = { "<Down><Home>", { "i" } },
-
-  ["0m"] = {
-    function()
-      require("custom.plugins.move.magic-move").move()
-    end,
-    "n",
-  },
+  ["<M-space><M-k>"] = { "<up><end>", "i" },
+  ["<M-space><M-j>"] = { { "<down><end>", "i" } },
+  ["<M-space><M-space><M-k>"] = { "<up><home>", { "i" } },
+  ["<M-space><M-space><M-j>"] = { "<down><home>", { "i" } },
   ["<space>h"] = {
     {
       function()
@@ -124,7 +131,7 @@ return {
       "i",
     },
     { "<C-G>^<C-G>", "s" },
-    { "<Home>", "t" },
+    { "<Home><C-right>", "t" },
     {
       function()
         require("builtin.cmdline").first_non_blank_character()
@@ -150,7 +157,40 @@ return {
       "i",
     },
     { "<C-G>g_<C-G>", "s" },
-    { "<end>", "t" },
+    {
+      function()
+        vim.cmd.stopinsert()
+        vim.schedule(function()
+          local line_count = vim.api.nvim_buf_line_count(0)
+          local function run(line_count)
+            if line_count == 0 then
+              return
+            end
+            local line = vim.api.nvim_buf_get_lines(0, line_count - 1, line_count, false)[1]
+            if #line > 0 then
+              return line_count, line
+            else
+              return run(line_count - 1)
+            end
+          end
+          local count, line = run(line_count)
+          if count then
+            vim.cmd.startinsert()
+            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<end>", true, false, true), "n", false)
+            vim.schedule(function()
+              local offset = #line - #line:gsub("%s*$", "")
+              if offset == 0 then
+                return
+              end
+              local key = "<left>"
+              key = key:rep(offset)
+              vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, false, true), "n", false)
+            end)
+          end
+        end)
+      end,
+      "t",
+    },
     {
       function()
         require("builtin.cmdline").last_non_blank_character()
@@ -420,5 +460,11 @@ return {
     end,
     { "n" },
     desc = "col at center of window",
+  },
+  ["0m"] = {
+    function()
+      require("custom.plugins.move.magic-move").move()
+    end,
+    "n",
   },
 }

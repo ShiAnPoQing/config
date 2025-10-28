@@ -1,52 +1,51 @@
 return {
-  -- quit insert mode quickly
   ["jk"] = {
     { "<Esc>", "i" },
     { "<C-u><ESC>", { "c" } },
     { "<C-\\><C-N>", "t" },
-    desc = "quit insert mode quickly",
+    desc = "Quit insert mode quickly",
   },
   ["jj"] = {
     { "<Esc>", "i" },
     { "<C-u><ESC>", { "c" } },
     { "<C-\\><C-N>", "t" },
-    desc = "quit insert mode quickly",
+    desc = "Quit insert mode quickly",
   },
   ["kj"] = {
     { "<Esc>l", "i" },
     { "<C-u><ESC>", { "c" } },
     { "<C-\\><C-N>", "t" },
-    desc = "quit insert mode quickly",
+    desc = "Quit insert mode quickly",
   },
   ["kk"] = {
     { "<Esc>l", "i" },
     { "<C-u><ESC>", { "c" } },
     { "<C-\\><C-N>", "t" },
-    desc = "quit insert mode quickly",
+    desc = "Quit insert mode quickly",
   },
-  -- quit insert mode quickly
+  -- Quit insert mode quickly
   ["JK"] = {
     { "<Esc>", "i" },
     { "<C-u><ESC>", { "c" } },
     { "<C-\\><C-N>", "t" },
-    desc = "quit insert mode quickly",
+    desc = "Quit insert mode quickly",
   },
   ["JJ"] = {
     { "<ESC>", "i" },
     { "<C-u><ESC>", { "c" } },
     { "<C-\\><C-N>", "t" },
-    desc = "quit insert mode quickly",
+    desc = "Quit insert mode quickly",
   },
   ["KJ"] = {
     { "<Esc>l", "i" },
     { "<C-u><ESC>", { "c" } },
     { "<C-\\><C-N>", "t" },
-    desc = "quit insert mode quickly",
+    desc = "Quit insert mode quickly",
   },
   ["KK"] = {
     { "<Esc>l", "i" },
     { "<C-u><ESC>", { "c" } },
     { "<C-\\><C-N>", "t" },
-    desc = "quit insert mode quickly",
+    desc = "Quit insert mode quickly",
   },
 }

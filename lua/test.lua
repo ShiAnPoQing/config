@@ -135,11 +135,29 @@ return {
     ":move '>+1<CR>gv",
     "x",
   },
-  ["<leader>7"] = {
+  ["<M-7>"] = {
     function()
-      test()
+      vim.cmd.stopinsert()
+      vim.schedule(function()
+        local cursor = vim.api.nvim_win_get_cursor(0)
+        vim.api.nvim_feedkeys("e", "nx", false)
+        local cursor2 = vim.api.nvim_win_get_cursor(0)
+        local offset
+        if cursor2[2] > cursor[2] then
+          offset = cursor2[2] - cursor[2]
+        end
+        -- vim.schedule(function()
+        vim.cmd.startinsert()
+        vim.schedule(function()
+          local s = "<right>"
+          s = s:rep(offset)
+          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(s, true, false, true), "n", false)
+        end)
+        -- end)
+      end)
+      -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-n>", true, false, true), "nx", false)
     end,
-    "n",
+    "t",
   },
   ["<leader><leader>o"] = {
     function()

@@ -1,9 +1,5 @@
 return {
-  ["<leader>lo"] = {
-    "<cmd>lopen<cr>zz",
-    "n",
-    desc = "Open location list",
-  },
+  ["<leader>lo"] = { "<cmd>lopen<cr>zz", "n", desc = "Open location list" },
   ["]l"] = {
     function()
       local fq = vim.fn.getloclist(0, { idx = 0, size = 0 })

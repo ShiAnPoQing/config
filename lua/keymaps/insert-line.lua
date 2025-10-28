@@ -1,3 +1,18 @@
+---------------------------------------------------------------------------------------------------+
+-- Commands \ Modes | Normal | Insert | Command | Visual | Select | Operator | Terminal | Lang-Arg |
+-- ================================================================================================+
+-- map  / noremap   |    @   |   -    |    -    |   @    |   @    |    @     |    -     |    -     |
+-- nmap / nnoremap  |    @   |   -    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- map! / noremap!  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- imap / inoremap  |    -   |   @    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- cmap / cnoremap  |    -   |   -    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- vmap / vnoremap  |    -   |   -    |    -    |   @    |   @    |    -     |    -     |    -     |
+-- xmap / xnoremap  |    -   |   -    |    -    |   @    |   -    |    -     |    -     |    -     |
+-- smap / snoremap  |    -   |   -    |    -    |   -    |   @    |    -     |    -     |    -     |
+-- omap / onoremap  |    -   |   -    |    -    |   -    |   -    |    @     |    -     |    -     |
+-- tmap / tnoremap  |    -   |   -    |    -    |   -    |   -    |    -     |    @     |    -     |
+-- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
+---------------------------------------------------------------------------------------------------+
 return {
   ["b"] = {
     "o",
@@ -14,23 +29,11 @@ return {
     },
   },
   -- no blank
-  ["<space>b"] = {
-    "o^<C-d>",
-    "n",
-    desc = "Begin a new line below the cursor and insert text(non-blank)",
-  },
+  ["<space>b"] = { "o^<C-d>", "n", desc = "Begin a new line below the cursor and insert text(non-blank)" },
   -- no blank
-  ["<space>B"] = {
-    "O^<C-d>",
-    "n",
-    desc = "Begin a new line above the cursor and insert text(non-blank)",
-  },
+  ["<space>B"] = { "O^<C-d>", "n", desc = "Begin a new line above the cursor and insert text(non-blank)" },
   -- no blank
-  ["<S-CR>"] = {
-    "<CR><C-U>",
-    "i",
-    desc = "Begin new line(non-blank)",
-  },
+  ["<S-CR>"] = { "<CR><C-U>", "i", desc = "Begin new line(non-blank)" },
   ["<C-b>"] = {
     function()
       local function insert_line()

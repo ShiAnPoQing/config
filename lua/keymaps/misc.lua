@@ -7,11 +7,6 @@ return {
     "n",
     desc = "Toggle highlight search",
   },
-  -- ["<Esc>"] = {
-  --   "<Esc>",
-  --   "n",
-  --   desc = "Stop <Esc> same as <C-[>",
-  -- },
   ["<leader>X"] = {
     "<cmd>source %<cr>",
     "n",
@@ -31,12 +26,7 @@ return {
   },
   ["<space>f"] = { "t", { "n", "o", "x" } },
   ["<space>F"] = { "T", { "n", "o", "x" } },
-  ["<M-->"] = { "J", "x" },
-  ["<M-b>"] = {
-    "<C-G>o<C-G>",
-    "s",
-    desc = "Go to Other end of highlighted text",
-  },
+  ["<M-b>"] = { "<C-G>o<C-G>", "s", desc = "Go to Other end of highlighted text" },
   -- ["<M-bs>"] = {
   --   "s",
   --   "n"
@@ -74,15 +64,10 @@ return {
   },
   -- select mode delete select text
   ["<BS>"] = {
-    { "<C-g>s", "s" },
-    -- { "X", "n" },
     { "s", "n" },
     { "d", "v" },
   },
   ["<space>r"] = { "gR", "n" },
-  -- repeat latest f
-  ["<M-f>"] = { ";", { "n" } },
-  -- repeat latest F
-  ["<M-S-f>"] = { ",", { "n" } },
-  -- ["<C-Space><C-K>"] = { "<C-K>", "i" },
+  ["<C-f>"] = { ";", { "n" }, desc = "Repeat latest f, t, F or T [count] times" },
+  ["<C-S-f>"] = { ",", { "n" }, desc = "Repeat latest f, t, F or T in opposite direction [count] times" },
 }

@@ -1,5 +1,4 @@
 return {
-  -- vsplit current file left-right
   ["<M-v>"] = {
     "<cmd>vsplit<cr>",
     "n",

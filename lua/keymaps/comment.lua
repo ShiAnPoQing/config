@@ -17,15 +17,27 @@
 return {
   ["<C-/>"] = {
     {
-      "gcc",
+      function()
+        return require("vim._comment").operator() .. "_"
+      end,
       "n",
-      remap = true,
+      expr = true,
+      desc = "Toggle comment line",
     },
     {
-      "gc",
+      function()
+        return require("vim._comment").operator()
+      end,
       "x",
-      remap = true,
+      expr = true,
+      desc = "Toggle Comment",
     },
-    desc = "Toggle Comment",
+    {
+      function()
+        require("vim._comment").textobject()
+      end,
+      "o",
+      desc = "Comment textobject",
+    },
   },
 }

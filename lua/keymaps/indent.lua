@@ -1,24 +1,22 @@
+---------------------------------------------------------------------------------------------------+
+-- Commands \ Modes | Normal | Insert | Command | Visual | Select | Operator | Terminal | Lang-Arg |
+-- ================================================================================================+
+-- map  / noremap   |    @   |   -    |    -    |   @    |   @    |    @     |    -     |    -     |
+-- nmap / nnoremap  |    @   |   -    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- map! / noremap!  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- imap / inoremap  |    -   |   @    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- cmap / cnoremap  |    -   |   -    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- vmap / vnoremap  |    -   |   -    |    -    |   @    |   @    |    -     |    -     |    -     |
+-- xmap / xnoremap  |    -   |   -    |    -    |   @    |   -    |    -     |    -     |    -     |
+-- smap / snoremap  |    -   |   -    |    -    |   -    |   @    |    -     |    -     |    -     |
+-- omap / onoremap  |    -   |   -    |    -    |   -    |   -    |    @     |    -     |    -     |
+-- tmap / tnoremap  |    -   |   -    |    -    |   -    |   -    |    -     |    @     |    -     |
+-- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
+---------------------------------------------------------------------------------------------------+
+
 return {
-  -- ["<"] = {
-  --   "<gv",
-  --   "v",
-  --   desc = "< and gv",
-  -- },
-  -- [">"] = {
-  --   ">gv",
-  --   "v",
-  --   desc = "> and gv",
-  -- },
-  ["<C-.>"] = {
-    "<C-T>",
-    "i",
-    desc = "Insert one shiftwidth of indent at the start of the current line",
-  },
-  ["<C-,>"] = {
-    "<C-D>",
-    "i",
-    desc = "Delete one shiftwidth of indent at the start of the current line",
-  },
+  ["<C-.>"] = { "<C-T>", "i", desc = "Insert one shiftwidth of indent at the start of the current line" },
+  ["<C-,>"] = { "<C-D>", "i", desc = "Delete one shiftwidth of indent at the start of the current line" },
   -- ["<C-space><C-,>"] = { "0<C-D>", "i", desc = "Delete all indent in the current line" },
   ["<C-space><C-,>"] = { "^<C-D>", "i", desc = "Delete all indent in the current line" },
   ["<C-space><C-.>"] = { "^<C-D>", "i", desc = "Delete all indent in the current line" },
