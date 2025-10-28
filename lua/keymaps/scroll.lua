@@ -137,7 +137,7 @@ return {
   },
   ["<C-Space><C-j>"] = {
     function()
-      local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]()
+      local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
       local botline = wininfo.botline
       local line = vim.fn.line(".")
       if botline == line then
@@ -152,7 +152,7 @@ return {
   },
   ["<C-Space><C-k>"] = {
     function()
-      local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]()
+      local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
       local topline = wininfo.topline
       local line = vim.fn.line(".")
       if topline == line then

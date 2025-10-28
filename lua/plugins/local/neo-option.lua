@@ -37,7 +37,7 @@ return {
       showcmd = true,
       title = true,
       titlestring = "MuHuiXueLuoAnPoQing -neovim",
-      showmode = true,
+      showmode = false,
       cmdheight = 1,
       autoindent = true,
       cindent = true,

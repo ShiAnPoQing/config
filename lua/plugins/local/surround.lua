@@ -11,19 +11,19 @@ end
 return {
   name = "surround",
   keys = {
-    ["ds)"] = {
-      function()
-        surround_delete(")")
-      end,
-      "n",
-    },
-    -- {
-    ["ds("] = {
-      function()
-        surround_delete("(")
-      end,
-      "n",
-    },
+    -- ["ds)"] = {
+    --   function()
+    --     surround_delete(")")
+    --   end,
+    --   "n",
+    -- },
+    -- -- {
+    -- ["ds("] = {
+    --   function()
+    --     surround_delete("(")
+    --   end,
+    --   "n",
+    -- },
     -- {
     --   "ds]",
     --   function()

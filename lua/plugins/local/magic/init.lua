@@ -215,7 +215,7 @@ local function merge(sources)
     end
   end
 end
-merge({ delete_keys, visual_keys, yank_keys, change_keys, upper_lower_keys, screen_keys, move_line_keys, put_keys })
+-- merge({ delete_keys, visual_keys, yank_keys, change_keys, upper_lower_keys, screen_keys, move_line_keys, put_keys })
 
 return {
   name = "magic",

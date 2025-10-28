@@ -1,3 +1,73 @@
+-- local function test()
+--   local cursor = vim.api.nvim_win_get_cursor(0)
+--   local prev_cursor = cursor
+--   local next_cursor = cursor
+--   local scrolled
+--   local stop
+--   local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+--   local s = cursor[1] - wininfo.topline
+--
+--   vim.api.nvim_create_autocmd({ "CursorMoved", "InsertEnter" }, {
+--     callback = function()
+--       if stop then
+--         stop = false
+--         return
+--       end
+--       local current_cursor = vim.api.nvim_win_get_cursor(0)
+--       local offset = current_cursor[1] - prev_cursor[1]
+--       next_cursor = current_cursor
+--       if offset > 0 then
+--         scrolled = true
+--         vim.api.nvim_feedkeys(
+--           vim.api.nvim_replace_termcodes(math.abs(offset) .. "<C-e>", true, false, true),
+--           "nx",
+--           false
+--         )
+--       elseif offset < 0 then
+--         scrolled = true
+--         vim.api.nvim_feedkeys(
+--           vim.api.nvim_replace_termcodes(math.abs(offset) .. "<C-y>", true, false, true),
+--           "nx",
+--           false
+--         )
+--       end
+--     end,
+--   })
+--
+--   vim.api.nvim_create_autocmd("WinScrolled", {
+--     callback = function()
+--       local e = vim.v.event
+--       vim.print(e)
+--       if e.all.topline == 0 then
+--         return
+--       end
+--
+--       local win = vim.api.nvim_get_current_win()
+--       if scrolled then
+--         scrolled = false
+--         prev_cursor = next_cursor
+--       else
+--         -- local scroll = e[tostring(win)].topline
+--         -- local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+--         -- local cursor = vim.api.nvim_win_get_cursor(0)
+--         -- if cursor[1] - wininfo.topline == s then
+--         --   return
+--         -- end
+--         --
+--         -- if scroll > 0 then
+--         --   stop = true
+--         --   vim.api.nvim_win_set_cursor(0, { wininfo.topline + s, 0 })
+--         --   prev_cursor = { wininfo.topline + s, 0 }
+--         -- elseif scroll < 0 then
+--         --   stop = true
+--         --   vim.api.nvim_win_set_cursor(0, { wininfo.topline + s, 0 })
+--         --   prev_cursor = { wininfo.topline + s, 0 }
+--         -- end
+--       end
+--     end,
+--   })
+-- end
+
 -- local utils = require("utils.mark")
 
 -- vim.api.nvim_create_autocmd("LspAttach", {
@@ -8,6 +78,7 @@
 --       --   local menu = item.detail or ""
 --       --   return { abbr = item.label, word = item.label, menu = menu, info = "# nihoa" }
 --       -- end,
+--
 --     })
 --   end,
 -- })
@@ -66,9 +137,7 @@ return {
   },
   ["<leader>7"] = {
     function()
-      vim.system({ "wl-paste", "--primary" }, { text = true }, function(out)
-        vim.print(out.stdout)
-      end)
+      test()
     end,
     "n",
   },

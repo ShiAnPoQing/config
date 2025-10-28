@@ -183,43 +183,22 @@ return {
   ["<space><M-S-o>"] = {
     { "Wi", "n", desc = "Start insert mode at next WORD start" },
   },
-  -- normal mode into insert mode: ei
-  ["<M-o>"] = {
-    { "<Esc>ea", "i", desc = "Move to the current word or next word end" },
-    { "ea", "n", desc = "Start insert mode at the current word or next word end" },
-    { "<C-right>", "t", desc = "Move to the current word or next word end" },
-  },
-  -- normal mode into insert mode: Ei
-  ["<M-S-o>"] = {
-    { "<Esc>Ea", "i", desc = "Move to the current WORD or next WORD end" },
-    { "Ea", "n", desc = "Start insert mode at the current WORD or next WORD end" },
-  },
-  -- normal mode into insert mode: bi
-  ["<M-i>"] = {
-    { "<Esc>bi", "i", desc = "Move to the current word or previous word start" },
-    { "bi", "n", desc = "Start insert mode at the current word or previous word start" },
-    { "<C-left>", "t", desc = "Move to the current word or previous word start" },
-  },
-  ["<M-S-i>"] = {
-    { "<Esc>Bi", "i", desc = "Move to the current WORD or previous WORD start" },
-    { "Bi", "n", desc = "Start insert mode at the current WORD or previous WORD start" },
-  },
-  ["<M-C-o>"] = {
-    { "<C-o>w", "i", desc = "Move to the next word start" },
-    { "wi", "n", desc = "Start insert mode at the next word start" },
-  },
-  ["<M-C-i>"] = {
-    { "<Esc>gea", "i", desc = "Move to the previous word end" },
-    { "gea", "n", desc = "Start insert mode at the previous word end" },
-  },
-  ["<M-C-S-i>"] = {
-    { "<Esc>gEa", "i", desc = "Move to the previous WORD end" },
-    { "gEa", "n", desc = "Start insert mode at the previous WORD end" },
-  },
-  ["<M-C-S-o>"] = {
-    { "<C-o>W", "i", desc = "Move to the next WORD start" },
-    { "Wi", "n", desc = "Start insert mode at the next WORD start" },
-  },
+  -- ["<M-C-o>"] = {
+  --   { "<C-o>w", "i", desc = "Move to the next word start" },
+  --   { "wi", "n", desc = "Start insert mode at the next word start" },
+  -- },
+  -- ["<M-C-i>"] = {
+  --   { "<Esc>gea", "i", desc = "Move to the previous word end" },
+  --   { "gea", "n", desc = "Start insert mode at the previous word end" },
+  -- },
+  -- ["<M-C-S-i>"] = {
+  --   { "<Esc>gEa", "i", desc = "Move to the previous WORD end" },
+  --   { "gEa", "n", desc = "Start insert mode at the previous WORD end" },
+  -- },
+  -- ["<M-C-S-o>"] = {
+  --   { "<C-o>W", "i", desc = "Move to the next WORD start" },
+  --   { "Wi", "n", desc = "Start insert mode at the next WORD start" },
+  -- },
   ["aw"] = {
     function()
       local count = vim.v.count1

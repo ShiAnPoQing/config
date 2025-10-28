@@ -21,14 +21,14 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   end,
 })
 
-vim.api.nvim_create_autocmd("InsertEnter", {
-  callback = function()
-    vim.opt.list = true
-  end,
-})
-
-vim.api.nvim_create_autocmd("InsertLeave", {
-  callback = function()
-    vim.opt.list = false
-  end,
-})
+-- vim.api.nvim_create_autocmd("InsertEnter", {
+--   callback = function()
+--     vim.opt.list = true
+--   end,
+-- })
+--
+-- vim.api.nvim_create_autocmd("InsertLeave", {
+--   callback = function()
+--     vim.opt.list = false
+--   end,
+-- })

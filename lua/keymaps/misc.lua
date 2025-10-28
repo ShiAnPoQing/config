@@ -84,5 +84,5 @@ return {
   ["<M-f>"] = { ";", { "n" } },
   -- repeat latest F
   ["<M-S-f>"] = { ",", { "n" } },
-  ["<C-Space><C-K>"] = { "<C-K>", "i" },
+  -- ["<C-Space><C-K>"] = { "<C-K>", "i" },
 }
