@@ -79,9 +79,25 @@
       "rev": "23320e7",
       "src": "https://github.com/windwp/nvim-autopairs"
     },
+    "nvim-dap": {
+      "rev": "6782b09",
+      "src": "https://github.com/mfussenegger/nvim-dap"
+    },
+    "nvim-dap-ui": {
+      "rev": "cf91d5e",
+      "src": "https://github.com/rcarriga/nvim-dap-ui"
+    },
+    "nvim-dap-virtual-text": {
+      "rev": "fbdb48c",
+      "src": "https://github.com/theHamsta/nvim-dap-virtual-text"
+    },
     "nvim-navic": {
       "rev": "f887d79",
       "src": "https://github.com/SmiteshP/nvim-navic"
+    },
+    "nvim-nio": {
+      "rev": "21f5324",
+      "src": "https://github.com/nvim-neotest/nvim-nio"
     },
     "nvim-treesitter": {
       "rev": "0594d1ba",
@@ -99,6 +115,10 @@
     "oil.nvim": {
       "rev": "919e155",
       "src": "https://github.com/stevearc/oil.nvim"
+    },
+    "one-small-step-for-vimkind": {
+      "rev": "8fdbb4e",
+      "src": "https://github.com/jbyuki/one-small-step-for-vimkind"
     },
     "plenary.nvim": {
       "rev": "b9fd522",

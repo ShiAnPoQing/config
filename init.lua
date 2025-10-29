@@ -39,7 +39,7 @@ require("neo-packer").setup({
   require("plugins.download.misc.supermaven"),
   require("plugins.download.misc.grug-far"),
   require("plugins.download.misc.todo-comments"),
-  require("plugins.download.git.gitsigns"),
+  -- require("plugins.download.git.gitsigns"),
   require("plugins.download.window.winshift"),
   require("plugins.download.tmux.vim-tmux-navigator"),
   require("plugins.download.tex.vimtex"),
@@ -48,4 +48,7 @@ require("neo-packer").setup({
   require("plugins.download.style.mini-statusline"),
   require("plugins.download.style.moonfly"),
   require("plugins.local.neo-snippet"),
+  require("plugins.download.dap.nvim-dap-virtual-text"),
+  require("plugins.download.dap.nvim-dap"),
+  require("plugins.download.dap.nvim-dap-ui"),
 })
