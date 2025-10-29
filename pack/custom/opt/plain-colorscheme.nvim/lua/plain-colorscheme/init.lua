@@ -151,6 +151,10 @@ local function get_groups()
       PmenuMatch = { fg = colors.hue52 },
       Pmenu = { bg = colors.bg3 },
       -- WinSeparator = { fg = colors.hue5 },
+      DiagnosticError = { fg = colors.hue72 },
+      DiagnosticWarn = { fg = colors.hue9 },
+      -- DiagnosticUnderlineError = { sp = colors.hue72, undercurl = true },
+      -- DiagnosticUnderlineWarn = { fg = colors.hue9 },
 
       cString = { link = "String" },
       cType = { fg = colors.hue52 },

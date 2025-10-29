@@ -1,19 +1,60 @@
 local M = {}
 
+local sign = {
+  [vim.diagnostic.severity.ERROR] = " ",
+  [vim.diagnostic.severity.WARN] = " ",
+  [vim.diagnostic.severity.HINT] = " ",
+  [vim.diagnostic.severity.INFO] = " ",
+}
+
+local highlight = {
+  [vim.diagnostic.severity.ERROR] = "DiagnosticError",
+  [vim.diagnostic.severity.WARN] = "DiagnosticWarn",
+  [vim.diagnostic.severity.HINT] = "DiagnosticHint",
+  [vim.diagnostic.severity.INFO] = "DiagnosticInfo",
+}
+
+--- @type vim.diagnostic.Opts.Float
+local float = {
+  border = {
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    { "╔", "DiagnosticInfo" },
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    { "─", "Normal" },
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    { "╗", "DiagnosticInfo" },
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    { "│", "Normal" },
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    { "╝", "DiagnosticInfo" },
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    { "─", "Normal" },
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    { "╚", "DiagnosticInfo" },
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    { "│", "Normal" },
+  },
+  spacing = 4,
+  source = "if_many",
+  prefix = function(diagnostic)
+    return " " .. sign[diagnostic.severity], highlight[diagnostic.severity]
+  end,
+  suffix = function(diagnostic)
+    return " [" .. diagnostic.code .. "]", "WarningMsg"
+  end,
+  header = { "Diagnostics:", "Type" },
+}
+
 vim.diagnostic.config({
-  -- virtual_text = {
-  --   spacing = 4,
-  --   source = "if_many",
-  --   prefix = "●",
-  -- },
-  -- virtual_text = false,
+  underline = true,
+  jump = {
+    float = float,
+  },
+  float = float,
+  virtual_text = false,
+  severity_sort = true,
   signs = {
-    text = {
-      [vim.diagnostic.severity.ERROR] = " ",
-      [vim.diagnostic.severity.WARN] = " ",
-      [vim.diagnostic.severity.HINT] = " ",
-      [vim.diagnostic.severity.INFO] = " ",
-    },
+    text = sign,
   },
 })
 

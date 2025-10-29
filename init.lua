@@ -34,7 +34,7 @@ require("neo-packer").setup({
   require("plugins.download.format.conform"),
   require("plugins.download.filemanager.neo-tree"),
   require("plugins.download.filemanager.oil"),
-  require("plugins.download.misc.tiny-inline-diagnostic"),
+  -- require("plugins.download.misc.tiny-inline-diagnostic"),
   require("plugins.download.misc.autopairs"),
   require("plugins.download.misc.undotree"),
   require("plugins.download.misc.supermaven"),

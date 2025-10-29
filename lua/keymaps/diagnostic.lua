@@ -32,9 +32,7 @@ return {
   },
   ["<leader>df"] = {
     function()
-      vim.diagnostic.open_float({
-        border = "rounded",
-      })
+      vim.diagnostic.open_float({})
     end,
     "n",
   },
@@ -76,7 +74,6 @@ return {
   ["[d"] = {
     function()
       vim.diagnostic.jump({ count = -vim.v.count1 })
-      vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
     desc = "Goto prev diagnostic",
@@ -84,7 +81,6 @@ return {
   ["]d"] = {
     function()
       vim.diagnostic.jump({ count = vim.v.count1 })
-      vim.api.nvim_feedkeys("zz", "n", false)
     end,
     "n",
     desc = "Goto next diagnostic",
@@ -94,11 +90,13 @@ return {
       vim.diagnostic.jump({ count = vim._maxint, wrap = false })
     end,
     "n",
+    desc = "Goto last diagnostic",
   },
   ["[D"] = {
     function()
       vim.diagnostic.jump({ count = -vim._maxint, wrap = false })
     end,
     "n",
+    desc = "Goto first diagnostic",
   },
 }
