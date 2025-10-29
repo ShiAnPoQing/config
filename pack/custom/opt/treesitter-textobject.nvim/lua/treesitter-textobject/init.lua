@@ -41,15 +41,7 @@ local function find_target_node(i, nodes, c_row, c_col)
   return find_target_node(i - 1)
 end
 
---- @param config? TreesitterTextobject.textobject
-function M.textobject(config)
-  local bufnr = vim.api.nvim_get_current_buf()
-  local tree = vim.treesitter.get_parser(bufnr, config.language):parse()[1]
-  local query = vim.treesitter.query.get(config.language, config.scm)
-  if query == nil then
-    return
-  end
-
+local function textobject(config, query, bufnr, tree)
   local mode = vim.api.nvim_get_mode().mode
 
   if not is_visual_mode(mode) then
@@ -112,6 +104,19 @@ function M.textobject(config)
     return
   end
   visual(v_start_row, v_start_col, end_row + 1, end_col)
+end
+
+--- @param config? TreesitterTextobject.textobject
+function M.textobject(config)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local tree = vim.treesitter.get_parser(bufnr, config.language):parse()[1]
+  local query = vim.treesitter.query.get(config.language, config.scm)
+  if query == nil then
+    return
+  end
+  for i = 1, vim.v.count1 do
+    textobject(config, query, bufnr, tree)
+  end
 end
 
 return M

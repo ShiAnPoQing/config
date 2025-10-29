@@ -730,11 +730,15 @@ return {
     ["<leader>co"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
-            language = "lua",
-            query = "comment.outer",
-            scm = "textobjects",
-          })
+          local function callback()
+            require("treesitter-textobject").textobject({
+              language = "lua",
+              query = "comment.outer",
+              scm = "textobjects",
+            })
+            require("repeat"):set(callback)
+          end
+          callback()
         end,
         { "x", "o" },
         filetype = "lua",
