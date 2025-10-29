@@ -45,15 +45,6 @@ local snippets = {
   s("lc", {
     t("local "),
   }),
-  s("(\\)?nod", {
-    d(1, function(args, snip)
-      if snip.captures[1] ~= "\\" then
-        return sn(nil, {
-          t("node"),
-        })
-      end
-    end, {}),
-  }),
 
   ls.parser.parse_snippet(
     { trig = "prod", name = "product" },

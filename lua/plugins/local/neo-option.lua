@@ -32,7 +32,7 @@ return {
   config = function(opt)
     require("neo-option").setup({
       clipboard = { "unnamedplus" },
-      updatetime = 300,
+      updatetime = 500,
       termguicolors = true,
       history = 500,
       showcmd = true,

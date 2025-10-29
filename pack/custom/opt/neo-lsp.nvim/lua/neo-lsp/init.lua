@@ -36,8 +36,14 @@ local float = {
   },
   spacing = 4,
   source = "if_many",
-  prefix = function(diagnostic)
-    return " " .. sign[diagnostic.severity], highlight[diagnostic.severity]
+  prefix = function(diagnostic, i, total)
+    local kind
+    if i == total then
+      kind = "└─"
+    else
+      kind = "├─"
+    end
+    return kind .. sign[diagnostic.severity], highlight[diagnostic.severity]
   end,
   suffix = function(diagnostic)
     return " [" .. diagnostic.code .. "]", "WarningMsg"

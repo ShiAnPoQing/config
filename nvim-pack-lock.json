@@ -67,6 +67,10 @@
       "src": "https://github.com/nvim-neo-tree/neo-tree.nvim",
       "version": "'v3.x'"
     },
+    "nordic.nvim": {
+      "rev": "6afe957",
+      "src": "https://github.com/AlexvZyl/nordic.nvim"
+    },
     "nui.nvim": {
       "rev": "de74099",
       "src": "https://github.com/MunifTanjim/nui.nvim"

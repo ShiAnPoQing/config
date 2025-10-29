@@ -1,4 +1,8 @@
 vim.g.mapleader = ";"
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+vim.cmd("packadd! nvim.undotree")
+vim.cmd("packadd! nvim.difftool")
 require("command")
 require("autocmds")
 vim.pack.add({ "https://github.com/BrokenSunny/neo-packer" }, { confirm = false })
@@ -39,7 +43,7 @@ require("neo-packer").setup({
   require("plugins.download.misc.supermaven"),
   require("plugins.download.misc.grug-far"),
   require("plugins.download.misc.todo-comments"),
-  -- require("plugins.download.git.gitsigns"),
+  require("plugins.download.git.gitsigns"),
   require("plugins.download.window.winshift"),
   require("plugins.download.tmux.vim-tmux-navigator"),
   require("plugins.download.tex.vimtex"),
@@ -47,6 +51,7 @@ require("neo-packer").setup({
   require("plugins.download.markdown.render-markdown"),
   require("plugins.download.style.mini-statusline"),
   require("plugins.download.style.moonfly"),
+  require("plugins.download.style.nordic"),
   require("plugins.local.neo-snippet"),
   require("plugins.download.dap.nvim-dap"),
   require("plugins.download.dap.nvim-dap-ui"),

@@ -5,7 +5,7 @@ return {
   settings = {
     Lua = {
       diagnostics = {
-        globals = { "vim" },
+        globals = { "vim", "require" },
       },
       hint = { enable = true },
       codeLens = { enable = true },

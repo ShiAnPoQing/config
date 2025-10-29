@@ -105,6 +105,7 @@ local function get_groups()
   local groups = {
     dark = {
       Normal = { fg = colors.bg11, bg = colors.bg2 },
+      -- Normal = { fg = colors.bg2, bg = "#f0d2a0" },
       NormalFloat = { link = "Normal" },
       NormalNC = { fg = "", bg = "" },
       CursorLine = { bg = colors.bg3 },
