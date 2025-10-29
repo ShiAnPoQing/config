@@ -312,7 +312,6 @@ return {
   --     })
   --   end,
   --   "n",
-  -- },
   ["<M-w>"] = {
     function()
       local function taglist_to_qf(tagname)
