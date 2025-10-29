@@ -1,6 +1,6 @@
 return {
   "rcarriga/nvim-dap-ui",
-  ft = { "c", "cpp" },
+  lazy = true,
   depend = {
     "nvim-neotest/nvim-nio",
   },

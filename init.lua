@@ -48,7 +48,6 @@ require("neo-packer").setup({
   require("plugins.download.style.mini-statusline"),
   require("plugins.download.style.moonfly"),
   require("plugins.local.neo-snippet"),
-  require("plugins.download.dap.nvim-dap-virtual-text"),
   require("plugins.download.dap.nvim-dap"),
   require("plugins.download.dap.nvim-dap-ui"),
 })

@@ -7,6 +7,7 @@ return {
   },
   ft = { "c", "cpp" },
   config = function()
+    require("nvim-dap-virtual-text").setup({})
     require("dapui").setup()
     local dap = require("dap")
     local dapui = require("dapui")
