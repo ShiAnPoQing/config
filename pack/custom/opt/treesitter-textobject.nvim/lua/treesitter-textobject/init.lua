@@ -55,6 +55,7 @@ function M.textobject(config)
   if not is_visual_mode(mode) then
     vim.api.nvim_feedkeys("v", "nx", false)
     M.textobject(config)
+    return
   end
 
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", true)
