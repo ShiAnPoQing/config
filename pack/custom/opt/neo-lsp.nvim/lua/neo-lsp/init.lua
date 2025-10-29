@@ -6,7 +6,7 @@ vim.diagnostic.config({
   --   source = "if_many",
   --   prefix = "●",
   -- },
-  virtual_text = false,
+  -- virtual_text = false,
   signs = {
     text = {
       [vim.diagnostic.severity.ERROR] = " ",

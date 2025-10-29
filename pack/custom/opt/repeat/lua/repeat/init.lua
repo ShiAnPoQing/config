@@ -35,7 +35,7 @@ function M:set(callback)
 end
 
 function M.setup(opts)
-  vim.keymap.set("n", ".", function()
+  vim.keymap.set({ "n", "x" }, ".", function()
     M:run()
   end)
 end

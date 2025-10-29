@@ -13,6 +13,8 @@
 -- tmap / tnoremap  |    -   |   -    |    -    |   -    |   -    |    -     |    @     |    -     |
 -- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
 ---------------------------------------------------------------------------------------------------+
+local insert_line = require("builtin.insert-line")
+
 return {
   ["b"] = {
     "o",
@@ -34,118 +36,44 @@ return {
   ["<space>B"] = { "O^<C-d>", "n", desc = "Begin a new line above the cursor and insert text(non-blank)" },
   -- no blank
   ["<S-CR>"] = { "<CR><C-U>", "i", desc = "Begin new line(non-blank)" },
-  ["<C-b>"] = {
-    function()
-      local function insert_line()
-        require("builtin.insert-line").insert_line({
-          dir = "above",
-          cursor = "move",
-          after = function()
-            require("repeat"):set(insert_line)
-          end,
-        })
-      end
-      insert_line()
-    end,
-    { "n", "i" },
-    desc = "Above insert new line(cursor follow)",
-  },
+  ["<C-b>"] = { insert_line.above, { "n", "i" }, desc = "Add empty line above cursor[follow]" },
   ["<C-space><C-b>"] = {
-    function()
-      local function insert_line()
-        require("builtin.insert-line").insert_line({
-          dir = "above",
-          cursor = "move",
-          indent = false,
-          after = function()
-            require("repeat"):set(insert_line)
-          end,
-        })
-      end
-      insert_line()
-    end,
+    insert_line.above_no_follow_no_indent,
     "i",
-    desc = "Above insert new line(cursor follow)(no indent)",
+    desc = "Add empty line above cursor[no follow][no indent]",
   },
-  ["<M-b>"] = {
-    function()
-      local function insert_line()
-        require("builtin.insert-line").insert_line({
-          dir = "below",
-          cursor = "move",
-          after = function()
-            require("repeat"):set(insert_line)
-          end,
-        })
-      end
-      insert_line()
-    end,
-    { "n", "i" },
-    desc = "Below insert new line(cursor follow)",
-  },
+  ["<M-b>"] = { insert_line.below, { "n", "i" }, desc = "Add empty line below cursor[follow]" },
   ["<M-space><M-b>"] = {
-    function()
-      local function insert_line()
-        require("builtin.insert-line").insert_line({
-          dir = "below",
-          cursor = "move",
-          indent = false,
-          after = function()
-            require("repeat"):set(insert_line)
-          end,
-        })
-      end
-      insert_line()
-    end,
+    insert_line.below_no_follow_no_indent,
     "i",
-    desc = "Below insert new line(cursor follow)(no indent)",
-  },
-  ["<C-M-b>"] = {
-    function()
-      local function insert_line()
-        require("builtin.insert-line").insert_line({
-          dir = "all",
-          cursor = "move",
-          after = function()
-            require("repeat"):set(insert_line)
-          end,
-        })
-      end
-      insert_line()
-    end,
-    { "n", "i" },
-    desc = "Below and Above insert new line",
+    desc = "Add empty line below cursor[no follow][no indent]",
   },
   ["<C-S-b>"] = {
-    function()
-      local function insert_line()
-        require("builtin.insert-line").insert_line({
-          dir = "above",
-          cursor = "keep",
-          after = function()
-            require("repeat"):set(insert_line)
-          end,
-        })
-      end
-      insert_line()
-    end,
+    insert_line.above_no_follow,
     { "n", "i" },
-    desc = "Above insert new line(cursor don't follow)",
+    desc = "Add empty line above cursor[no follow]",
   },
   ["<M-S-b>"] = {
-    function()
-      local function insert_line()
-        require("builtin.insert-line").insert_line({
-          dir = "below",
-          cursor = "keep",
-          after = function()
-            require("repeat"):set(insert_line)
-          end,
-        })
-      end
-      insert_line()
-    end,
+    insert_line.below_no_follow,
     { "n", "i" },
-    desc = "Below insert new line(cursor don't follow)",
+    desc = "Add empty line below cursor[no follow]",
+  },
+  ["[<space>"] = { insert_line.above, "n", desc = "Add empty line above cursor[follow]" },
+  ["]<space>"] = { insert_line.below, "n", desc = "Add empty line below cursor[follow]" },
+  ["<space>["] = { insert_line.above_no_follow, "n", desc = "Add empty line above cursor[no follow]" },
+  ["<space>]"] = { insert_line.below_no_follow, "n", desc = "Add empty line below cursor[no follow]" },
+  ["<M-[><M-space>"] = { insert_line.above, "i", desc = "Add empty line above cursor[follow]" },
+  ["<M-]><M-space>"] = { insert_line.below, "i", desc = "Add empty line below cursor[follow]" },
+  ["<M-space><M-[>"] = { insert_line.above_no_follow, "i", desc = "Add empty line above cursor[no follow]" },
+  ["<M-space><M-]>"] = { insert_line.below_no_follow, "i", desc = "Add empty line below cursor[no follow]" },
+  ["<M-space><M-space><M-[>"] = {
+    insert_line.above_no_follow_no_indent,
+    "i",
+    desc = "Add empty line above cursor[no follow][no indent]",
+  },
+  ["<M-space><M-space><M-]>"] = {
+    insert_line.below_no_follow_no_indent,
+    "i",
+    desc = "Add empty line below cursor[no follow][no indent]",
   },
 }

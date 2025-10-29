@@ -55,7 +55,11 @@ return {
     })
   end,
   settings = {
-    Lua = {},
+    Lua = {
+      diagnostics = {
+        globals = { "vim" },
+      },
+    },
   },
   -- on_attach = function(client, bufnr)
   -- end,

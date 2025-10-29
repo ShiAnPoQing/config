@@ -1,75 +1,70 @@
 local M = {}
 
---- @class InsertLineOptions
---- @field dir "above" | "below" | "all"
---- @field cursor "keep" | "move"
---- @field indent? boolean
+local function add_blank_line(count, above)
+  local offset = above and 1 or 0
+  local repeated = vim.fn["repeat"]({ "" }, count)
+  local linenr = vim.api.nvim_win_get_cursor(0)[1]
+  vim.api.nvim_buf_set_lines(0, linenr - offset, linenr - offset, true, repeated)
+end
 
-local default_opts = {
-  dir = "below",
-  cursor = "keep",
-  indent = true,
-}
-
---- @param opts InsertLineOptions
-function M.insert_line(opts)
-  local modifable = vim.api.nvim_get_option_value("modifiable", {
-    buf = vim.api.nvim_get_current_buf(),
-  })
-  if modifable == false then
-    vim.notify("Buffer is not modifiable", vim.log.levels.WARN)
+local function insert_line(above, follow, indent)
+  local mode = vim.api.nvim_get_mode().mode
+  local count = vim.v.count1
+  add_blank_line(count, above)
+  if follow then
     return
   end
-
-  opts = vim.tbl_deep_extend("force", default_opts, opts or {})
-  local dir = opts.dir
-  local cursor = opts.cursor
-  local count = vim.v.count1
-  local mode = vim.api.nvim_get_mode().mode
-
-  if mode ~= "n" then
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
-  end
-
-  if dir == "all" then
-    vim.api.nvim_feedkeys(
-      vim.api.nvim_replace_termcodes(count .. "[<space>" .. count .. "]<space>", true, true, true),
-      "nm",
-      true
-    )
-  end
-
-  if dir == "above" then
-    local key = vim.api.nvim_replace_termcodes(count .. "[<space>", true, false, true)
-    vim.api.nvim_feedkeys(key, "nm", false)
-    if cursor == "move" then
-      vim.api.nvim_feedkeys(count .. "k", "n", false)
-    end
-  elseif dir == "below" then
-    local key = vim.api.nvim_replace_termcodes(count .. "]<space>", true, false, true)
-    vim.api.nvim_feedkeys(key, "nm", false)
-    if cursor == "move" then
-      vim.api.nvim_feedkeys(count .. "j", "n", false)
-    end
-  end
+  local key = count .. (above and "k" or "j")
 
   if mode == "i" then
-    if dir == "all" then
-      return vim.api.nvim_feedkeys("a", "n", false)
-    end
-
-    local key = "A"
-    if opts.indent then
-      key = key .. vim.api.nvim_replace_termcodes("<C-f>", true, false, true)
-    end
-    key = key .. vim.api.nvim_replace_termcodes("<C-g>u", true, false, true)
-    vim.api.nvim_feedkeys(key, "n", false)
+    local indent_key = vim.api.nvim_replace_termcodes(indent and "<C-f><C-g>u" or "", true, false, true)
+    local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
+    key = esc .. key .. "A" .. indent_key
   end
 
+  vim.api.nvim_feedkeys(key, "n", true)
+  return key
+end
+
+function M.above()
+  insert_line(true, true, true)
   vim.schedule(function()
-    if type(opts.after) == "function" then
-      opts.after()
-    end
+    require("repeat"):set(M.above)
+  end)
+end
+
+function M.above_no_follow()
+  insert_line(true, false, true)
+  vim.schedule(function()
+    require("repeat"):set(M.above_no_follow)
+  end)
+end
+
+function M.above_no_follow_no_indent()
+  insert_line(true, false, false)
+  vim.schedule(function()
+    require("repeat"):set(M.above_no_follow_no_indent)
+  end)
+end
+
+function M.below()
+  insert_line(false, true, true)
+  vim.schedule(function()
+    require("repeat"):set(M.below)
+  end)
+end
+
+function M.below_no_follow()
+  insert_line(false, false, true)
+  vim.schedule(function()
+    require("repeat"):set(M.below)
+  end)
+end
+
+function M.below_no_follow_no_indent()
+  insert_line(false, false, false)
+  vim.schedule(function()
+    require("repeat"):set(M.below_no_follow_no_indent)
   end)
 end
 

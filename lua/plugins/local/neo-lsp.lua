@@ -1,6 +1,6 @@
 return {
   name = "neo-lsp.nvim",
-  event = "BufReadPre",
+  event = { "BufReadPre", "BufNewFile" },
   config = function(opt)
     require("neo-lsp").setup({
       enable = function(opts)
