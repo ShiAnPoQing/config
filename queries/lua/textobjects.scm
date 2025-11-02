@@ -8,8 +8,11 @@
   name: (_)
   body: (_) @function.inner) 
 
+
 [
  (function_definition)
+ (function_definition 
+   body: (_))
  (function_declaration
    name: (_))
  ] @function.outer 

@@ -82,6 +82,7 @@ local lsp_collects = {
   json = "jsonls",
   qml = "qmlls",
   rust = "rust",
+  tex = "texlab",
 }
 
 local function require_lspconfig(source)

@@ -31,6 +31,9 @@ function M.show()
   M.request_code_action({
     bufnr = vim.api.nvim_get_current_buf(),
     callback = function(actions)
+      if #actions == 0 then
+        vim.notify("No code actions available")
+      end
       M.code_action(actions)
     end,
   })

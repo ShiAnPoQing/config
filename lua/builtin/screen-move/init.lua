@@ -60,11 +60,11 @@ function M.last_character()
   if cursor1[2] ~= cursor3[2] then
     return
   end
-  if virtualedit == "all" then
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("zsg<end>", true, false, true), "nx", false)
-  elseif virtualedit == "none" then
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("g<end>", true, false, true), "nx", false)
-  end
+  -- if virtualedit == "all" then
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("zsg<end>", true, false, true), "nx", false)
+  -- elseif virtualedit == "none" then
+  --   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("g<end>", true, false, true), "nx", false)
+  -- end
 end
 
 return M

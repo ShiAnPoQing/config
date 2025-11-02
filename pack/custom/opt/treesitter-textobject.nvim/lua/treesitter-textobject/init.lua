@@ -38,7 +38,7 @@ local function find_target_node(i, nodes, c_row, c_col)
     return node
   end
 
-  return find_target_node(i - 1)
+  return find_target_node(i - 1, nodes, c_row, c_col)
 end
 
 local function textobject(config, query, bufnr, tree)

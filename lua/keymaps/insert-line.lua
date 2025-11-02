@@ -36,24 +36,24 @@ return {
   ["<space>B"] = { "O^<C-d>", "n", desc = "Begin a new line above the cursor and insert text(non-blank)" },
   -- no blank
   ["<S-CR>"] = { "<CR><C-U>", "i", desc = "Begin new line(non-blank)" },
-  ["<C-b>"] = { insert_line.above, { "n", "i" }, desc = "Add empty line above cursor[follow]" },
+  ["<C-S-b>"] = { insert_line.above, { "n", "i" }, desc = "Add empty line above cursor[follow]" },
   ["<C-space><C-b>"] = {
     insert_line.above_no_follow_no_indent,
     "i",
     desc = "Add empty line above cursor[no follow][no indent]",
   },
-  ["<M-b>"] = { insert_line.below, { "n", "i" }, desc = "Add empty line below cursor[follow]" },
+  ["<M-S-b>"] = { insert_line.below, { "n", "i" }, desc = "Add empty line below cursor[follow]" },
   ["<M-space><M-b>"] = {
     insert_line.below_no_follow_no_indent,
     "i",
     desc = "Add empty line below cursor[no follow][no indent]",
   },
-  ["<C-S-b>"] = {
+  ["<C-b>"] = {
     insert_line.above_no_follow,
     { "n", "i" },
     desc = "Add empty line above cursor[no follow]",
   },
-  ["<M-S-b>"] = {
+  ["<M-b>"] = {
     insert_line.below_no_follow,
     { "n", "i" },
     desc = "Add empty line below cursor[no follow]",

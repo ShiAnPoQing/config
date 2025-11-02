@@ -36,6 +36,7 @@ return {
       "jsonc",
       "diff",
       "query",
+      "vue",
     }
     local TS = require("nvim-treesitter")
     TS.setup({

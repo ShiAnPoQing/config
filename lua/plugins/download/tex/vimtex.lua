@@ -11,27 +11,10 @@ return {
     vim.g.vimtex_view_zathura_options = "--synctex-forward @line:@col:@pdf"
     --vim.g.vimtex_view_general_options_latexmk = '-reuse-instance'
     vim.g.vimtex_compiler_progname = "nvr"
-
-    vim.cmd([[
-    function! s:write_server_name() abort
-    let nvim_server_file = (has('win32') ? $TEMP : '/tmp') . '/vimtexserver.txt'
-    call writefile([v:servername], nvim_server_file)
-    endfunction
-
-    augroup vimtex_common
-    autocmd!
-    autocmd FileType tex call s:write_server_name()
-    augroup END
-    ]])
-
     vim.g.matchup_override_vimtex = 1
-
     vim.g.vimtex_text_obj_enabled = 1
-
     vim.g.tex_conceal = "abdmg"
-
     vim.g.vimtex_flavor = "latex"
-
     vim.g.vimtex_compiler_latexmk_engines = { _ = "-xelatex" }
     vim.g.vimtex_compiler_latexrun_engines = { _ = "-xelatex" }
 
@@ -49,25 +32,25 @@ return {
       \   '-interaction=nonstopmode',
       \ ],
       \}
-
-      " 检查文件中是否包含需要 luatex 编译的指示
-      function! SwitchToLuaTeX()
-      if search('!TEX\s+program\s*=\s*luatex', 'nw')
-        let g:vimtex_compiler_latexmk_engines._ = '-lualatex'
-        let g:vimtex_compiler_latexrun_engines._ = '-lualatex'
-      else
-        let g:vimtex_compiler_latexmk_engines._ = '-xelatex'
-        let g:vimtex_compiler_latexrun_engines._ = '-xelatex'
-      endif
-      endfunction
-
-        " 在打开或保存文件时执行切换操作
-        augroup VimtexCompilerSettings
-        autocmd!
-        autocmd BufRead,BufNewFile * call SwitchToLuaTeX()
-        autocmd BufWritePre * call SwitchToLuaTeX()
-        augroup END
         ]])
+
+    -- " 检查文件中是否包含需要 luatex 编译的指示
+    -- function! SwitchToLuaTeX()
+    -- if search('!TEX\s+program\s*=\s*luatex', 'nw')
+    --   let g:vimtex_compiler_latexmk_engines._ = '-lualatex'
+    --   let g:vimtex_compiler_latexrun_engines._ = '-lualatex'
+    -- else
+    --   let g:vimtex_compiler_latexmk_engines._ = '-xelatex'
+    --   let g:vimtex_compiler_latexrun_engines._ = '-xelatex'
+    -- endif
+    -- endfunction
+    --
+    --   " 在打开或保存文件时执行切换操作
+    --   augroup VimtexCompilerSettings
+    --   autocmd!
+    --   autocmd BufRead,BufNewFile * call SwitchToLuaTeX()
+    --   autocmd BufWritePre * call SwitchToLuaTeX()
+    --   augroup END
 
     vim.g.vimtex_syntax_enabled = 1
 
@@ -88,13 +71,9 @@ return {
     vim.g.vimtex_syntax_custom_cmds = {
       { name = "vspace", concealchar = "M", arg = false, arggreedy = 1 },
     }
-    --
-    -- Vimtex 格式化不影响注释
     vim.g.vimtex_format_enabled = 1
-    -- Vimtex 补全
     -- vim.g.vimtex_complete_enabled = 1
 
-    -- 定义分隔符匹配
     vim.g.vimtex_delim_list = {
       delim_tex = {
         name = {
@@ -142,7 +121,6 @@ return {
               \}
               ]])
 
-    -- 启用 Vimtex 折叠
     vim.g.vimtex_fold_enabled = 1
     -- vim.g.vimtex_fold_manual = 1
 

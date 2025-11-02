@@ -9,6 +9,10 @@ return {
     "n",
     desc = "Jump to [count] older entry in tag stack (default 1)",
   },
+  ["ad"] = {
+    "<C-]>",
+    "n",
+  },
   -- ["<space>]"] = {
   --   function()
   --     return "<C-]>"

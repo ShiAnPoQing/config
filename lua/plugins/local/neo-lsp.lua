@@ -15,6 +15,7 @@ return {
           opts.json,
           opts.qml,
           opts.rust,
+          opts.tex,
         }
       end,
     })
