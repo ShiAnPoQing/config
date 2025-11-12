@@ -5,6 +5,12 @@ local function switch(option)
 end
 
 return {
+  ["<leader>wb"] = {
+    function()
+      local winbar = vim.opt.winbar:get()
+    end,
+    "n",
+  },
   ["<leader>so"] = {
     function()
       ---@diagnostic disable-next-line: undefined-field

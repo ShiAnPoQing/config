@@ -96,7 +96,7 @@ return {
       list = false,
       -- inccommand = "split",
       listchars = {
-        eol = "",
+        -- eol = "",
         space = " ",
         extends = "⭆",
         -- trail = "»",

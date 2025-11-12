@@ -5,7 +5,7 @@ return {
       function()
         local function callback()
           require("move-line").move_line("down")
-          require("repeat"):set(callback)
+          require("repeat").set_operation(callback)
         end
         callback()
       end,
@@ -15,7 +15,7 @@ return {
       function()
         local function callback()
           require("move-line").move_line("up")
-          require("repeat"):set(callback)
+          require("repeat").set_operation(callback)
         end
         callback()
       end,

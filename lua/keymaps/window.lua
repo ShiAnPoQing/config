@@ -3,14 +3,14 @@ return {
     "<cmd>vsplit<cr>",
     "n",
   },
-  ["<M-c>"] = {
+  ["<M-]>"] = {
     function()
       require("builtin.window-swap").window_swap(1)
     end,
     "n",
     desc = "Swap adjacent windows",
   },
-  ["<M-x>"] = {
+  ["<M-[>"] = {
     function()
       require("builtin.window-swap").window_swap(-1)
     end,

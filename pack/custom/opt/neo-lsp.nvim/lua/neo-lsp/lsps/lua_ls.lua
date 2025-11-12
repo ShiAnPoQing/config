@@ -31,6 +31,6 @@ return {
     },
   },
   on_attach = function(client, bufnr)
-    require("neo-winbar.winbar").attach(client, bufnr)
+    -- require("neo-winbar.winbar").attach(client, bufnr)
   end,
 }

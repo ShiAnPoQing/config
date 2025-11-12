@@ -40,17 +40,17 @@ return {
         })
       end,
       [Methods.textDocument_documentHighlight] = function(args)
-        local group = vim.api.nvim_create_augroup("document-highlight", { clear = false })
-        vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI", "InsertLeave" }, {
-          group = group,
-          buffer = args.buf,
-          callback = vim.lsp.buf.document_highlight,
-        })
-        vim.api.nvim_create_autocmd({ "CursorMoved", "InsertEnter" }, {
-          group = group,
-          buffer = args.buf,
-          callback = vim.lsp.buf.clear_references,
-        })
+        -- local group = vim.api.nvim_create_augroup("document-highlight", { clear = false })
+        -- vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI", "InsertLeave" }, {
+        --   group = group,
+        --   buffer = args.buf,
+        --   callback = vim.lsp.buf.document_highlight,
+        -- })
+        -- vim.api.nvim_create_autocmd({ "CursorMoved", "InsertEnter" }, {
+        --   group = group,
+        --   buffer = args.buf,
+        --   callback = vim.lsp.buf.clear_references,
+        -- })
       end,
       [Methods.textDocument_inlayHint] = function(args)
         require("simple-keymap").add({
@@ -132,7 +132,7 @@ return {
       end,
       [Methods.textDocument_hover] = function(args)
         require("simple-keymap").add({
-          ["n"] = {
+          ["<leader>k"] = {
             function()
               vim.lsp.buf.hover()
             end,

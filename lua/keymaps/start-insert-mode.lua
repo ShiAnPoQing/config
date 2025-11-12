@@ -128,46 +128,6 @@ return {
     "x",
     expr = true,
   },
-  -- screen line
-  -- ["<S-space>E"] = {
-  --   function()
-  --     local count = vim.v.count1
-  --     ---@diagnostic disable-next-line: undefined-field
-  --     if vim.opt.virtualedit:get()[1] == "all" then
-  --       vim.opt.virtualedit = "none"
-  --       vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
-  --       vim.opt.virtualedit = "all"
-  --       vim.api.nvim_feedkeys(count .. "a", "n", true)
-  --       return
-  --     end
-  --     vim.api.nvim_feedkeys(
-  --       "g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true) .. count .. "a",
-  --       "n",
-  --       true
-  --     )
-  --   end,
-  --   "n",
-  --   desc = "Start insert mode to the right of the last non-blank character in the screen line",
-  -- },
-  -- ["<S-space><S-space>W"] = {
-  --   function()
-  --     local count = vim.v.count1
-  --     return "g0" .. count .. "i"
-  --   end,
-  --   "n",
-  --   expr = true,
-  --   desc = "Start insert mode to the left of the first character in the screen line",
-  -- },
-  -- ["<S-space><S-space>E"] = {
-  --   function()
-  --     local count = vim.v.count1
-  --     return "<esc>g$" .. count .. "a"
-  --   end,
-  --   "n",
-  --   expr = true,
-  --   desc = "Start insert mode to the right of the last character in the screen line",
-  -- },
-  -- normal mode into insert mode ea
   ["<space><M-i>"] = {
     { "gea", "n", desc = "Start insert mode at previous word end" },
   },
@@ -268,3 +228,43 @@ return {
     desc = "Insert text in the same position as where Insert mode was stopped last time in the current buffer.",
   },
 }
+-- screen line
+-- ["<S-space>E"] = {
+--   function()
+--     local count = vim.v.count1
+--     ---@diagnostic disable-next-line: undefined-field
+--     if vim.opt.virtualedit:get()[1] == "all" then
+--       vim.opt.virtualedit = "none"
+--       vim.api.nvim_feedkeys("g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true), "nx", true)
+--       vim.opt.virtualedit = "all"
+--       vim.api.nvim_feedkeys(count .. "a", "n", true)
+--       return
+--     end
+--     vim.api.nvim_feedkeys(
+--       "g" .. vim.api.nvim_replace_termcodes("<end>", true, false, true) .. count .. "a",
+--       "n",
+--       true
+--     )
+--   end,
+--   "n",
+--   desc = "Start insert mode to the right of the last non-blank character in the screen line",
+-- },
+-- ["<S-space><S-space>W"] = {
+--   function()
+--     local count = vim.v.count1
+--     return "g0" .. count .. "i"
+--   end,
+--   "n",
+--   expr = true,
+--   desc = "Start insert mode to the left of the first character in the screen line",
+-- },
+-- ["<S-space><S-space>E"] = {
+--   function()
+--     local count = vim.v.count1
+--     return "<esc>g$" .. count .. "a"
+--   end,
+--   "n",
+--   expr = true,
+--   desc = "Start insert mode to the right of the last character in the screen line",
+-- },
+-- normal mode into insert mode ea

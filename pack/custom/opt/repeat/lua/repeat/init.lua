@@ -1,43 +1,29 @@
 local M = {}
 
-M.tick = -1
-
-function M:update_tick()
-  self.tick = vim.b.changedtick
-end
-
-function M:fallback()
-  local count = vim.v.count1
-  vim.api.nvim_feedkeys(count .. ".", "nx", false)
-  self:update_tick()
-end
-
-function M:run()
-  if self.repeat_callback == nil then
-    local count = vim.v.count1
-    for i = 1, count do
-      self:fallback()
-    end
-    return
-  end
-
-  if self.tick == vim.b.changedtick then
-    self.repeat_callback()
-  else
-    self:fallback()
-    self.repeat_callback = nil
-  end
-end
-
-function M:set(callback)
-  self.repeat_callback = callback
-  self:update_tick()
-end
-
 function M.setup(opts)
   vim.keymap.set({ "n", "x" }, ".", function()
-    M:run()
-  end)
+    require("repeat.core"):operation()
+  end, {
+    desc = "Repeat operation",
+  })
+  vim.keymap.set({ "n", "x" }, ",", function()
+    require("repeat.core"):motion()
+  end, {
+    desc = "Repeat motion",
+  })
+end
+
+--- @param spec RepeatSpec
+function M.set(spec) end
+
+--- @param callback fun()
+function M.set_operation(callback)
+  require("repeat.core"):set_operation(callback)
+end
+
+--- @param callback fun()
+function M.set_motion(callback)
+  require("repeat.core"):set_motion(callback)
 end
 
 return M

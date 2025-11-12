@@ -5,7 +5,7 @@ return {
       function()
         local function callback()
           require("break-line").break_line()
-          require("repeat"):set(callback)
+          require("repeat").set_operation(callback)
         end
         callback()
       end,

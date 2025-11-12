@@ -21,6 +21,8 @@ return {
       "kdl",
       "latex",
       "cmake",
+      "git_config",
+      "gitignore",
       "make",
       "yaml",
       "markdown",
@@ -39,12 +41,7 @@ return {
       "vue",
     }
     local TS = require("nvim-treesitter")
-    TS.setup({
-      indent = { enable = true },
-      highlight = { enable = true },
-      folds = { enable = true },
-      ensure_installed = langs,
-    })
+    TS.setup({})
     TS.install(langs)
     vim.api.nvim_create_autocmd("FileType", {
       pattern = langs,

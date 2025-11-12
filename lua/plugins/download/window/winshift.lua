@@ -1,5 +1,6 @@
 return {
   "sindrets/winshift.nvim",
+  cmd = "WinShift",
   config = function()
     -- Lua
     require("winshift").setup({

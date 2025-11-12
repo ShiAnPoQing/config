@@ -1,3 +1,20 @@
+---------------------------------------------------------------------------------------------------+
+-- Commands \ Modes | Normal | Insert | Command | Visual | Select | Operator | Terminal | Lang-Arg |
+-- ================================================================================================+
+-- map  / noremap   |    @   |   -    |    -    |   @    |   @    |    @     |    -     |    -     |
+-- nmap / nnoremap  |    @   |   -    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- map! / noremap!  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- imap / inoremap  |    -   |   @    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- cmap / cnoremap  |    -   |   -    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- vmap / vnoremap  |    -   |   -    |    -    |   @    |   @    |    -     |    -     |    -     |
+-- xmap / xnoremap  |    -   |   -    |    -    |   @    |   -    |    -     |    -     |    -     |
+-- smap / snoremap  |    -   |   -    |    -    |   -    |   @    |    -     |    -     |    -     |
+-- omap / onoremap  |    -   |   -    |    -    |   -    |   -    |    @     |    -     |    -     |
+-- tmap / tnoremap  |    -   |   -    |    -    |   -    |   -    |    -     |    @     |    -     |
+-- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
+---------------------------------------------------------------------------------------------------+
+
+--- 兼容 visual block 模式
 local function visual_mode_textobject(textobject)
   local mode = vim.api.nvim_get_mode().mode
   if mode == "" then
@@ -13,27 +30,12 @@ local function visual_mode_textobject(textobject)
     vim.api.nvim_feedkeys(textobject, "nx", false)
   end
 end
-return {
-  ["wn"] = {
-    function()
-      vim.lsp.buf.selection_range(vim.v.count1)
-    end,
-    "x",
-    desc = "vim.lsp.buf.selection_range(vim.v.count1)",
-  },
-  ["en"] = {
-    function()
-      vim.lsp.buf.selection_range(-vim.v.count1)
-    end,
-    "x",
-    desc = "vim.lsp.buf.selection_range(-vim.v.count1)",
-  },
-  -- textobject
-  ["ww"] = { "aw", { "x", "o" } },
-  ["ew"] = { "iw", { "x", "o" } },
-  ["wW"] = { "aW", { "x", "o" } },
-  ["eW"] = { "iW", { "x", "o" } },
 
+return {
+  ["ww"] = { "aw", { "x", "o" }, desc = "outer word" },
+  ["ew"] = { "iw", { "x", "o" }, desc = "inner word" },
+  ["wW"] = { "aW", { "x", "o" }, desc = "outer WORD" },
+  ["eW"] = { "iW", { "x", "o" }, desc = "inner WORD" },
   ["ws"] = {
     { "as", "o" },
     {
@@ -42,6 +44,7 @@ return {
       end,
       "x",
     },
+    desc = "outer sentence",
   },
   ["es"] = {
     { "is", "o" },
@@ -51,6 +54,7 @@ return {
       end,
       "x",
     },
+    desc = "inner sentence",
   },
   ["wp"] = {
     {
@@ -63,6 +67,7 @@ return {
       end,
       "x",
     },
+    desc = "outer paragraph",
   },
   ["ep"] = {
     {
@@ -75,35 +80,30 @@ return {
       end,
       "x",
     },
+    desc = "inner paragraph",
   },
-
-  ["w["] = { "a[", { "x", "o" } },
-  ["e["] = { "i[", { "x", "o" } },
-
-  ["w]"] = { "a]", { "x", "o" } },
-  ["e]"] = { "i]", { "x", "o" } },
-
-  ["w{"] = { "a}", { "x", "o" } },
-  ["w}"] = { "a}", { "x", "o" } },
-  ["e{"] = { "i}", { "x", "o" } },
-  ["e}"] = { "i}", { "x", "o" } },
-
-  ["w("] = { "a)", { "x", "o" } },
-  ["e("] = { "i)", { "x", "o" } },
-
-  ["w)"] = { "a)", { "x", "o" } },
-  ["e)"] = { "i)", { "x", "o" } },
-
-  ["w>"] = { "a>", { "x", "o" } },
-  ["e>"] = { "i>", { "x", "o" } },
-  ["w<"] = { "a>", { "x", "o" } },
-  ["e<"] = { "i>", { "x", "o" } },
-  ['w"'] = { 'a"', { "x", "o" } },
-  ['e"'] = { 'i"', { "x", "o" } },
-  ["w'"] = { "a'", { "x", "o" } },
-  ["e'"] = { "i'", { "x", "o" } },
-  ["w`"] = { "a`", { "x", "o" } },
-  ["e`"] = { "i`", { "x", "o" } },
+  ["w["] = { "a[", { "x", "o" }, desc = "outer []" },
+  ["e["] = { "i[", { "x", "o" }, desc = "inner []" },
+  ["w]"] = { "a]", { "x", "o" }, desc = "outer []" },
+  ["e]"] = { "i]", { "x", "o" }, desc = "inner []" },
+  ["w{"] = { "a}", { "x", "o" }, desc = "outer {}" },
+  ["e{"] = { "i}", { "x", "o" }, desc = "inner {}" },
+  ["w}"] = { "a}", { "x", "o" }, desc = "outer {}" },
+  ["e}"] = { "i}", { "x", "o" }, desc = "inner {}" },
+  ["w("] = { "a)", { "x", "o" }, desc = "outer ()" },
+  ["e("] = { "i)", { "x", "o" }, desc = "inner ()" },
+  ["w)"] = { "a)", { "x", "o" }, desc = "outer ()" },
+  ["e)"] = { "i)", { "x", "o" }, desc = "inner ()" },
+  ["w>"] = { "a>", { "x", "o" }, desc = "outer <>" },
+  ["e>"] = { "i>", { "x", "o" }, desc = "inner <>" },
+  ["w<"] = { "a>", { "x", "o" }, desc = "outer <>" },
+  ["e<"] = { "i>", { "x", "o" }, desc = "inner <>" },
+  ['w"'] = { 'a"', { "x", "o" }, desc = 'outer ""' },
+  ['e"'] = { 'i"', { "x", "o" }, desc = 'inner ""' },
+  ["w'"] = { "a'", { "x", "o" }, desc = "outer ''" },
+  ["e'"] = { "i'", { "x", "o" }, desc = "inner ''" },
+  ["w`"] = { "a`", { "x", "o" }, desc = "outer ``" },
+  ["e`"] = { "i`", { "x", "o" }, desc = "inner ``" },
   ["el"] = {
     { "^og_", "x" },
     {
@@ -112,7 +112,7 @@ return {
       end,
       "o",
     },
-    desc = "inner line(non br)",
+    desc = "inner line",
   },
   ["wl"] = {
     { "0o$h", "x" },
@@ -122,11 +122,10 @@ return {
       end,
       "o",
     },
-    desc = "outer line(non br)",
+    desc = "outer line",
   },
-  -- <div> </div>
-  ["wt"] = { "at", { "x", "o" } },
-  ["et"] = { "it", { "x", "o" } },
+  ["wt"] = { "at", { "x", "o" }, desc = "outer tag block" },
+  ["et"] = { "it", { "x", "o" }, desc = "inner tag block" },
   ["wa"] = {
     { "vggVG", "x" },
     {
@@ -146,5 +145,19 @@ return {
       "o",
     },
     desc = "all",
+  },
+  ["wn"] = {
+    function()
+      vim.lsp.buf.selection_range(vim.v.count1)
+    end,
+    "x",
+    desc = "vim.lsp.buf.selection_range(vim.v.count1)",
+  },
+  ["en"] = {
+    function()
+      vim.lsp.buf.selection_range(-vim.v.count1)
+    end,
+    "x",
+    desc = "vim.lsp.buf.selection_range(-vim.v.count1)",
   },
 }

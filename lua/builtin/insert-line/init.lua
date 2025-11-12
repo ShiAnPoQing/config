@@ -29,42 +29,42 @@ end
 function M.above()
   insert_line(true, true, true)
   vim.schedule(function()
-    require("repeat"):set(M.above)
+    require("repeat").set_operation(M.above)
   end)
 end
 
 function M.above_no_follow()
   insert_line(true, false, true)
   vim.schedule(function()
-    require("repeat"):set(M.above_no_follow)
+    require("repeat").set_operation(M.above_no_follow)
   end)
 end
 
 function M.above_no_follow_no_indent()
   insert_line(true, false, false)
   vim.schedule(function()
-    require("repeat"):set(M.above_no_follow_no_indent)
+    require("repeat").set_operation(M.above_no_follow_no_indent)
   end)
 end
 
 function M.below()
   insert_line(false, true, true)
   vim.schedule(function()
-    require("repeat"):set(M.below)
+    require("repeat").set_operation(M.below)
   end)
 end
 
 function M.below_no_follow()
   insert_line(false, false, true)
   vim.schedule(function()
-    require("repeat"):set(M.below)
+    require("repeat").set_operation(M.below)
   end)
 end
 
 function M.below_no_follow_no_indent()
   insert_line(false, false, false)
   vim.schedule(function()
-    require("repeat"):set(M.below_no_follow_no_indent)
+    require("repeat").set_operation(M.below_no_follow_no_indent)
   end)
 end
 

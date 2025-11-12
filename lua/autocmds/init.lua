@@ -9,8 +9,13 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 
 vim.api.nvim_create_autocmd("VimResized", {
   pattern = "*",
-  callback = function()
-    vim.cmd("wincmd =")
+  command = "wincmd =",
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "help",
+  callback = function(c)
+    vim.cmd("wincmd T")
   end,
 })
 

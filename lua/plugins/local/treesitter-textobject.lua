@@ -736,7 +736,7 @@ return {
               query = "comment.outer",
               scm = "textobjects",
             })
-            require("repeat"):set(callback)
+            require("repeat").set_operation(callback)
           end
           callback()
         end,

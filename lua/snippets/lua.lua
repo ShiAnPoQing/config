@@ -23,10 +23,143 @@ local conds = require("luasnip.extras.expand_conditions")
 local postfix = require("luasnip.extras.postfix").postfix
 local types = require("luasnip.util.types")
 local parse = require("luasnip.util.parser").parse_snippet
-
 local utils = require("snippets.utils")
 
 local snippets = {
+  s("@version", {
+    t("--- @version "),
+    i(1),
+  }),
+  s("@type", {
+    t("--- @type "),
+    i(1, "type"),
+  }),
+  s("@source", {
+    t("--- @source "),
+    i(1, "path"),
+  }),
+  s("@see", {
+    t("--- @see "),
+    i(1, "symbol"),
+  }),
+  s("@protected", {
+    t("--- @protected"),
+  }),
+  s("@private", {
+    t("--- @private"),
+  }),
+  s("@package", {
+    t("--- @package"),
+  }),
+  s("@overload", {
+    t("--- @overload fun("),
+    i(1),
+    t(") "),
+    i(2),
+  }),
+  s("@operator", {
+    t("--- @operator"),
+  }),
+  s("@nodiscard", {
+    t("--- @nodiscard"),
+  }),
+  s("@module", {
+    t("--- @module"),
+    i(1, "name"),
+  }),
+  s("@meta", {
+    t("--- @meta "),
+    i(1, "name"),
+  }),
+  s("@generic", {
+    t("--- @generic "),
+    i(1, "name"),
+  }),
+  s(
+    "@enum",
+    c(1, {
+      {
+        t("--- @enum "),
+        i(1, "name"),
+      },
+      {
+        t("--- @enum (key) "),
+        i(1, "name"),
+      },
+    })
+  ),
+  s("@deprecated", {
+    t("--- @deprecated"),
+  }),
+  s("@cast", {
+    t("--- @cast "),
+    i(1, "value"),
+    t(" "),
+    i(2, "name"),
+  }),
+  s("@async", {
+    t("--- @async"),
+  }),
+  s(
+    "@return",
+    c(1, {
+      {
+        t("--- @return "),
+        i(1, "type"),
+        t(" "),
+        i(2),
+      },
+      {
+        t("--- @return "),
+        i(1, "type"),
+        t(" "),
+        i(2, "name"),
+        t(" "),
+        i(3),
+      },
+    })
+  ),
+  s("@as", {
+    t("--[[@as "),
+    i(1, "type"),
+    t("]]"),
+  }),
+  s("@alias", {
+    t("--- @alias "),
+    i(1, "name"),
+    t(" "),
+    i(2, "type"),
+  }),
+  s("@diagnostic", {
+    t("--- @diagnostic "),
+    i(1),
+  }),
+  s("@field", {
+    t("--- @field "),
+    i(1, "name"),
+    t(" "),
+    i(2, "type"),
+  }),
+  s("@class", {
+    t("--- @class "),
+    i(1),
+  }),
+  s({
+    trig = "@param",
+    condition = function(line_to_start)
+      if line_to_start:find("%s") then
+        return false
+      end
+      return true
+    end,
+  }, {
+    t("--- @param "),
+    i(1, "name"),
+    t(" "),
+    i(2, "type"),
+    t(" "),
+    i(3),
+  }),
   s("pi", {
     t("print(vim.inspect("),
     i(1),
@@ -120,45 +253,28 @@ local snippets = {
     t({ "", "end" }),
   }),
 
-  s("repeat", {
-    t({
-      "if M.save_args_first == nil then",
-      "local arglist = {'Linecount', 'Mode'}",
-      "local argdict = { Linecount = ",
-    }),
-    i(1, "line_count"),
-    t({
-      ", Mode = mode }",
-      "",
-      "",
-      "require('RepeatExeFunc.RepeatExeFunc').MakeRepeatExeFunction(funcname, path, argdict, arglist)",
-      "",
-      "end",
-    }),
-  }),
-
-  s("dfun", {
-    t("d("),
-    i(1, "idx"),
-    t(", function("),
-    i(2, "_"),
-    t(", "),
-    i(3, "snip"),
-    t({ ")", "" }),
-    t("\tif "),
-    i(4, "next(snip.env.TM_SELECTED_TEXT) == nil"),
-    t({ " then", "" }),
-    t("\t\t"),
-    i(5),
-    t({ "", "\t\treturn " }),
-    i(6, 'sn(nil, {i(1, "something")})'),
-    t({ "", "\telse", "" }),
-    t("\t\t"),
-    i(7),
-    t({ "", "\t\treturn " }),
-    i(8, "sn(nil, {i(1, snip.env.TM_SELECTED_TEXT)})"),
-    t({ "", "\tend", "end, {})" }),
-  }),
+  -- s("dfun", {
+  --   t("d("),
+  --   i(1, "idx"),
+  --   t(", function("),
+  --   i(2, "_"),
+  --   t(", "),
+  --   i(3, "snip"),
+  --   t({ ")", "" }),
+  --   t("\tif "),
+  --   i(4, "next(snip.env.TM_SELECTED_TEXT) == nil"),
+  --   t({ " then", "" }),
+  --   t("\t\t"),
+  --   i(5),
+  --   t({ "", "\t\treturn " }),
+  --   i(6, 'sn(nil, {i(1, "something")})'),
+  --   t({ "", "\telse", "" }),
+  --   t("\t\t"),
+  --   i(7),
+  --   t({ "", "\t\treturn " }),
+  --   i(8, "sn(nil, {i(1, snip.env.TM_SELECTED_TEXT)})"),
+  --   t({ "", "\tend", "end, {})" }),
+  -- }),
 }
 return snippets
 

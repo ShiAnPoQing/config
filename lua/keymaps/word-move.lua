@@ -39,29 +39,129 @@ local c_mode_o = function()
 end
 
 return {
-  ["i"] = { "b", { "n", "x", "o" }, desc = "Backward to the start of word[count]" },
-  ["o"] = { "e", { "n", "x", "o" }, desc = "Forword to the end of the word[count]" },
-  ["I"] = { "B", { "n", "x", "o" }, desc = "Backward to the start of WORD[count]" },
-  ["O"] = { "E", { "n", "x", "o" }, desc = "Forword to the end of the WORD[count]" },
+  ["i"] = {
+    {
+      function()
+        local function callback()
+          vim.api.nvim_feedkeys("b", "n", false)
+          require("repeat").set_motion(callback)
+        end
+        callback()
+      end,
+      { "n", "x" },
+    },
+    {
+      "b",
+      "o",
+    },
+    desc = "Backward to the start of word[count]",
+  },
+  ["o"] = {
+    {
+      function()
+        local function callback()
+          vim.api.nvim_feedkeys("e", "n", false)
+          require("repeat").set_motion(callback)
+        end
+        callback()
+      end,
+      { "n", "x" },
+    },
+    {
+      "e",
+      "o",
+    },
+    desc = "Forword to the end of the word[count]",
+  },
+  ["I"] = {
+    {
+      function()
+        local function callback()
+          vim.api.nvim_feedkeys("B", "n", false)
+          require("repeat").set_motion(callback)
+        end
+        callback()
+      end,
+      { "n", "x" },
+    },
+    {
+      "B",
+      "o",
+    },
+    desc = "Backward to the start of WORD[count]",
+  },
+  ["O"] = {
+    {
+      function()
+        local function callback()
+          vim.api.nvim_feedkeys("E", "n", false)
+          require("repeat").set_motion(callback)
+        end
+        callback()
+      end,
+      { "n", "x", "o" },
+    },
+    {
+      "E",
+      "o",
+    },
+    desc = "Forword to the end of the WORD[count]",
+  },
   ["<space>i"] = {
-    { "ge", "n" },
+    {
+      function()
+        local function callback()
+          vim.api.nvim_feedkeys("ge", "n", false)
+          require("repeat").set_motion(callback)
+        end
+        callback()
+      end,
+      "n",
+    },
     { "hgel", "x", desc = "Backward to the end of word[count](left exclusion)" },
     { o_mode_space_i, "o", desc = "Backward to the end of word[count](left exclusion)" },
     desc = "Backward to the end of word[count]",
   },
   ["<space>o"] = {
-    { "w", { "n", "o" } },
+    {
+      function()
+        local function callback()
+          vim.api.nvim_feedkeys("w", "n", false)
+          require("repeat").set_motion(callback)
+        end
+        callback()
+      end,
+      { "n", "o" },
+    },
     { "lwh", "x", desc = "Forword to the start of the word[count](right exclusion)" },
     desc = "Forword to the start of the word[count]",
   },
   ["<space>I"] = {
-    { "gE", "n" },
+    {
+      function()
+        local function callback()
+          vim.api.nvim_feedkeys("gE", "n", false)
+          require("repeat").set_motion(callback)
+        end
+        callback()
+      end,
+      "n",
+    },
     { "hgEl", "x", desc = "Backward to the end of WORD[count](left exclusion)" },
     { o_mode_space_I, "o", desc = "Backward to the end of WORD[count](left exclusion)" },
     desc = "Backward to the end of WORD[count]",
   },
   ["<space>O"] = {
-    { "W", { "n", { "o", desc = "Forword to the start of the WORD[count](right exclusion)" } } },
+    {
+      function()
+        local function callback()
+          vim.api.nvim_feedkeys("W", "n", false)
+          require("repeat").set_motion(callback)
+        end
+        callback()
+      end,
+      { "n", { "o", desc = "Forword to the start of the WORD[count](right exclusion)" } },
+    },
     { "lWh", "x", desc = "Forword to the start of the WORD[count](right exclusion)" },
     desc = "Forword to the start of the WORD[count]",
   },

@@ -30,11 +30,8 @@ return {
       { "x", desc = "Go to Other end of highlighted text" },
     },
   },
-  -- no blank
-  ["<space>b"] = { "o^<C-d>", "n", desc = "Begin a new line below the cursor and insert text(non-blank)" },
-  -- no blank
-  ["<space>B"] = { "O^<C-d>", "n", desc = "Begin a new line above the cursor and insert text(non-blank)" },
-  -- no blank
+  ["<space>b"] = { "o^<C-u>", "n", desc = "Begin a new line below the cursor and insert text(non-blank)(non-comment)" },
+  ["<space>B"] = { "O^<C-u>", "n", desc = "Begin a new line above the cursor and insert text(non-blank)(non-comment)" },
   ["<S-CR>"] = { "<CR><C-U>", "i", desc = "Begin new line(non-blank)" },
   ["<C-S-b>"] = { insert_line.above, { "n", "i" }, desc = "Add empty line above cursor[follow]" },
   ["<C-space><C-b>"] = {

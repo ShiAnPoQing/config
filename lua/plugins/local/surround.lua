@@ -1,11 +1,11 @@
 local function surround_delete(match)
   require("surround").delete(match)
-  require("repeat"):set(surround_delete)
+  require("repeat").set_operation(surround_delete)
 end
 
 local function surround_exchange(match)
   require("surround").exchange(match)
-  require("repeat"):set(surround_exchange)
+  require("repeat").set_operation(surround_exchange)
 end
 
 return {

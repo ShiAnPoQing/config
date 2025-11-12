@@ -5,28 +5,9 @@ local function get_visual_texts()
   return vim.api.nvim_buf_get_text(0, start_mark[1] - 1, start_mark[2], end_mark[1] - 1, end_mark[2] + 1, {})
 end
 return {
-  ["<C-n>"] = {
-    "n",
-    { "n", "x", "o" },
-  },
-  ["<C-p>"] = {
-    "N",
-    { "n", "x", "o" },
-  },
-  ["g<C-n>"] = {
-    "gn",
-    { "n", "x", "o" },
-  },
-  ["g<C-p>"] = {
-    "gN",
-    { "n", "x", "o" },
-  },
-  -- Search cursor text
   ["*"] = { "*zz", "n" },
-  -- Search cursor text
   ["#"] = { "#zz", "n" },
   --["%"] = { "%zz", "n" },
-  -- Search visual text
   ["<space>/"] = {
     function()
       local function get_visual_pos(condition)
@@ -92,11 +73,15 @@ return {
         key.register({
           callback = function() end,
           one_key = {
+            ---@diagnostic disable-next-line: undefined-field
             line = value.lnum - 1,
+            ---@diagnostic disable-next-line: undefined-field
             virt_col = value.byteidx,
           },
           two_key = {
+            ---@diagnostic disable-next-line: undefined-field
             line = value.lnum - 1,
+            ---@diagnostic disable-next-line: undefined-field
             virt_col = value.byteidx,
           },
         })

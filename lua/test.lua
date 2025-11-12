@@ -82,54 +82,34 @@
 --     })
 --   end,
 -- })
-
--- Keymap.add({
---   [";x"] = {
---     function()
---       require("test.test").test()
---     end,
---     "n",
---     { filetype = "javascript" },
---   },
---   [";;cf"] = {
---     function()
---       require("test.typescript_exchange_function").test()
---     end,
---     "n",
---   },
---   [";;a"] = {
---     function()
---       require("utils.ffget-window-size").get_window_size()
---     end,
---     "n",
---   },
---   [";;z"] = {
---     function()
---       local lnum = vim.fn.searchpairpos("{", "", "}", "n")
---       vim.print(lnum)
---     end,
---     "n",
---     -- function()
---     --   vim.ui.input({ prompt = "请输入内容:" }, function(input)
---     --     print(input)
---     --   end)
---     -- end,
---     -- "n",
---   },
--- })
--- vim.cmd([[
---   let g:augment_workspace_folders = ['~/Learn']
--- ]])
---
-
 return {
+  ["<leader>1"] = {
+    function() end,
+    "n",
+  },
+  ["<leader>2"] = {
+    function() end,
+    "n",
+  },
+  ["<leader>3"] = {
+    function() end,
+    "n",
+  },
+  ["<leader>4"] = {
+    function() end,
+    "n",
+  },
+  ["<leader>5"] = {
+    function() end,
+    "n",
+  },
+  ["<leader>6"] = {
+    function() end,
+    "n",
+  },
   ["<leader>9"] = {
-    function()
-      local cursor1 = vim.fn.getpos(".")
-      local cursor2 = vim.fn.getpos("v")
-      vim.print(cursor1, cursor2)
-    end,
-    "x",
+    function() end,
+    "n",
   },
   ["<leader>8"] = {
     ":move '>+1<CR>gv",
@@ -158,14 +138,6 @@ return {
       -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-n>", true, false, true), "nx", false)
     end,
     "t",
-  },
-  ["<leader><leader>o"] = {
-    function()
-      local node = vim.treesitter.get_node()
-      local cursor = vim.api.nvim_win_get_cursor(0)
-      -- vim.print(node:named_descendant_for_range(cursor[1] - 1, cursor[2], cursor[1], 1):type())
-    end,
-    "n",
   },
   ["<leader><leader>z"] = {
     function()
@@ -231,41 +203,6 @@ return {
     end,
     "n",
   },
-
-  -- { {
-  --     from = {
-  --       detail = "",
-  --       kind = 12,
-  --       name = "nihao",
-  --       range = {
-  --         ["end"] = {
-  --           character = 1,
-  --           line = 19
-  --         },
-  --         start = {
-  --           character = 0,
-  --           line = 17
-  --         }
-  --       },
-  --       selectionRange = {
-  --         ["end"] = {
-  --           character = 14,
-  --           line = 17
-  --         },
-  --         start = {
-  --           character = 9,
-  --           line = 17
-  --         }
-  --       },
-  --       uri = "file:///home/luoqing/Project/react-router/src/main.tsx"
-  --     },
-  --     fromRanges = { {
-  --         ["end"] = {
-  --           character = 6,
-  --           line = 18
-  --         },
-  --         start = {
-  --           character = 2,
   -- ["="] = { "+", "n" },
   -- ["+"] = { "jg_", "n" },
   -- ["_"] = { "kg_", "n" },

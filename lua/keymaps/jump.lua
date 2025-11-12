@@ -33,7 +33,7 @@ return {
     function()
       local function callback()
         require("builtin.jump-list").switch_lock(-1)
-        require("repeat"):set(callback)
+        require("repeat").set_operation(callback)
       end
       callback()
     end,
@@ -44,7 +44,7 @@ return {
     function()
       local function callback()
         require("builtin.jump-list").switch_lock(1)
-        require("repeat"):set(callback)
+        require("repeat").set_operation(callback)
       end
       callback()
     end,
@@ -55,7 +55,7 @@ return {
     function()
       local function callback()
         require("builtin.jump-list").jump_buffer(-1)
-        require("repeat"):set(callback)
+        require("repeat").set_operation(callback)
       end
       callback()
     end,
@@ -66,7 +66,7 @@ return {
     function()
       local function callback()
         require("builtin.jump-list").jump_buffer(1)
-        require("repeat"):set(callback)
+        require("repeat").set_operation(callback)
       end
       callback()
     end,

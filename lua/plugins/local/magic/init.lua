@@ -1,15 +1,4 @@
 local keys = {
-  ["0dd"] = {
-    function()
-      require("magic.magic-line").magic_line({
-        dir = "all",
-        callback = function(opts)
-          vim.api.nvim_buf_set_lines(0, opts.line - 1, opts.line, false, { "" })
-        end,
-      })
-    end,
-    "n",
-  },
   ["0k"] = {
     function()
       require("magic.magic-line").magic_line({
@@ -32,82 +21,18 @@ local keys = {
     end,
     { "n", "x" },
   },
-  ["0o"] = {
-    function()
-      require("magic").magic_keyword({
-        position = 2,
-        keyword = function(builtin)
-          return builtin.word_inner
-        end,
-        should_visual = false,
-        callback = function(opts)
-          -- 光标设置必须使用字节位置
-          vim.api.nvim_win_set_cursor(0, { opts.line + 1, opts.col })
-        end,
-      })
-    end,
-    "n",
-  },
-  ["0i"] = {
-    function()
-      require("magic").magic_keyword({
-        position = 1,
-        keyword = function(builtin)
-          return builtin.word_inner
-        end,
-        should_visual = false,
-        callback = function(opts)
-          -- 光标设置必须使用字节位置
-          vim.api.nvim_win_set_cursor(0, { opts.line + 1, opts.col })
-        end,
-      })
-    end,
-    "n",
-  },
-  ["0O"] = {
-    function()
-      require("magic").magic_keyword({
-        position = 2,
-        keyword = function(builtin)
-          return builtin.WORD_inner
-        end,
-        should_visual = false,
-        callback = function(opts)
-          -- 光标设置必须使用字节位置
-          vim.api.nvim_win_set_cursor(0, { opts.line + 1, opts.col })
-        end,
-      })
-    end,
-    "n",
-  },
-  ["0I"] = {
-    function()
-      require("magic").magic_keyword({
-        position = 1,
-        keyword = function(builtin)
-          return builtin.WORD_inner
-        end,
-        should_visual = false,
-        callback = function(opts)
-          -- 光标设置必须使用字节位置
-          vim.api.nvim_win_set_cursor(0, { opts.line + 1, opts.col })
-        end,
-      })
-    end,
-    "n",
-  },
-  ["0<space>h"] = {
-    function()
-      require("magic").magic_line_start_end({
-        position = 1,
-        callback = function(opts)
-          vim.api.nvim_win_set_cursor(0, { opts.line, opts.col })
-        end,
-        blank = false,
-      })
-    end,
-    { "n", "x" },
-  },
+  -- ["0<space>h"] = {
+  --   function()
+  --     require("magic").magic_line_start_end({
+  --       position = 1,
+  --       callback = function(opts)
+  --         vim.api.nvim_win_set_cursor(0, { opts.line, opts.col })
+  --       end,
+  --       blank = false,
+  --     })
+  --   end,
+  --   { "n", "x" },
+  -- },
   ["0<space>l"] = {
     function()
       require("magic").magic_line_start_end({

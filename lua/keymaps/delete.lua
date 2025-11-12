@@ -42,16 +42,8 @@ local function ctrl_space_ctrl_i()
 end
 
 return {
-  ["<S-BS>"] = {
-    { "<Del>", { "i", "c", "t" } },
-    { "x", "n" },
-    desc = "Delete char after cursor",
-  },
-  ["<C-BS>"] = {
-    "<Left><C-o>diw",
-    "i",
-    desc = "Delete the word where the cursor is(before)",
-  },
+  ["<S-BS>"] = { { "<Del>", { "i", "c", "t" } }, { "x", "n" }, desc = "Delete char after cursor" },
+  ["<C-BS>"] = { "<Left><C-o>diw", "i", desc = "Delete the word where the cursor is(before)" },
   ["<M-BS>"] = {
     { "<C-o>diw", "i" },
     {
@@ -62,15 +54,6 @@ return {
     },
     desc = "Delete the word where the cursor is(after)",
   },
-  -- ["<C-M-BS>"] = {
-  --   "<nop>",
-  --   "i",
-  --   desc = "待定",
-  -- },
-  -- ["<space><bs>"] = {
-  --   "s",
-  --   "n",
-  -- },
   ["<C-i>"] = {
     {
       function()
@@ -153,7 +136,7 @@ return {
     "i",
     desc = "Delete to the end of the WORD",
   },
-  ["<C-Space><C-i>"] = {
+  ["<C-space><C-i>"] = {
     {
       ctrl_space_ctrl_i,
       "i",
@@ -166,11 +149,8 @@ return {
     },
     desc = "Delete to the end of the previous word",
   },
-  ["<C-Space><C-o>"] = {
-    {
-      "<C-o>dw",
-      "i",
-    },
+  ["<C-space><C-o>"] = {
+    { "<C-o>dw", "i" },
     {
       function()
         require("builtin.cmdline").delete_to_word_start_forward()
@@ -179,83 +159,19 @@ return {
     },
     desc = "Delete to the beginning of the next word",
   },
-  ["<C-Space><C-S-i>"] = {
-    "<C-o>dgE",
-    "i",
-    desc = "Delete to the end of the previous WORD",
-  },
-  ["<C-Space><C-S-O>"] = {
-    "<C-o>dW",
-    "i",
-    noremap = true,
-    desc = "Delete to the beginning of the next WORD",
-  },
-
-  ["<C-u>"] = {
-    "<C-G>u<C-u>",
-    "i",
-    desc = "Delete to the first non-blank character of the current line",
-  },
-  ["<M-u>"] = {
-    "<C-o>dg_",
-    "i",
-    desc = "Delete to the last non-blank character of the current line",
-  },
-  ["<C-space><C-u>"] = {
-    "<C-o>d0",
-    "i",
-    desc = "Delete to the first character of the current line",
-  },
-  ["<M-space><M-u>"] = {
-    "<C-o>d$",
-    "i",
-    desc = "Delete to the last character of the current line",
-  },
-
-  ["<C-Space><C-h>"] = {
-    "<C-o>d^",
-    "i",
-    desc = "Delete to the first non-blank character of the current line",
-  },
-  ["<C-Space><C-l>"] = {
-    "<C-o>dg_",
-    "i",
-    desc = "Delete to the end non-blank character of the current  line",
-  },
-
-  ["<C-Space><C-Space><C-h>"] = {
-    "<C-o>d0",
-    "i",
-    desc = "Delete to the first character of the current line",
-  },
-  ["<C-Space><C-Space><C-l>"] = {
-    "<C-o>d$",
-    "i",
-    desc = "Delete to the end character of the current line",
-  },
-  ["<C-S-Space><C-S-h>"] = {
-    "<C-o>dg^",
-    "i",
-    desc = "Delete to the first non-blank character of the screen line",
-  },
-  ["<C-S-Space><C-S-l>"] = {
-    "<C-o>dg<End>",
-    "i",
-    desc = "Delete to the end non-blank character of the screen line",
-  },
-  ["<C-S-Space><C-S-Space><C-S-h>"] = {
-    "<C-o>dg0",
-    "i",
-    desc = "Delete to the first character of the screen line",
-  },
-  ["<C-S-Space><C-S-Space><C-S-l>"] = {
-    "<C-o>dg$",
-    "i",
-    desc = "Delete to the end character of the screen line",
-  },
-  ["<C-M-u>"] = {
-    "<C-G>u<C-u><C-o>d$",
-    "i",
-    desc = "Delete the current line",
-  },
+  ["<C-space><C-S-i>"] = { "<C-o>dgE", "i", desc = "Delete to the end of the previous WORD" },
+  ["<C-space><C-S-O>"] = { "<C-o>dW", "i", desc = "Delete to the beginning of the next WORD" },
+  ["<C-u>"] = { "<C-G>u<C-u>", "i", desc = "Delete to the first non-blank character of the current line" },
+  ["<M-u>"] = { "<C-o>dg_", "i", desc = "Delete to the last non-blank character of the current line" },
+  ["<C-space><C-u>"] = { "<C-o>d0", "i", desc = "Delete to the first character of the current line" },
+  ["<M-space><M-u>"] = { "<C-o>d$", "i", desc = "Delete to the last character of the current line" },
+  ["<C-space><C-h>"] = { "<C-o>d^", "i", desc = "Delete to the first non-blank character of the current line" },
+  ["<C-space><C-l>"] = { "<C-o>dg_", "i", desc = "Delete to the end non-blank character of the current  line" },
+  ["<C-space><C-space><C-h>"] = { "<C-o>d0", "i", desc = "Delete to the first character of the current line" },
+  ["<C-space><C-space><C-l>"] = { "<C-o>d$", "i", desc = "Delete to the end character of the current line" },
+  ["<C-a><C-h>"] = { "<C-o>dg^", "i", desc = "Delete to the first non-blank character of the screen line" },
+  ["<C-a><C-l>"] = { "<C-o>dg<End>", "i", desc = "Delete to the end non-blank character of the screen line" },
+  ["<C-a><C-a><C-h>"] = { "<C-o>dg0", "i", desc = "Delete to the first character of the screen line" },
+  ["<C-a><C-a><C-l>"] = { "<C-o>dg$", "i", desc = "Delete to the end character of the screen line" },
+  ["<C-M-u>"] = { "<C-G>u<C-u><C-o>d$", "i", desc = "Delete the current line" },
 }

@@ -47,8 +47,29 @@ local gl = function()
   return "l"
 end
 
+local gh = function()
+  switch_virtualedit()
+  return "h"
+end
+
 local c_mode_middle = function()
   require("builtin.cmdline").middle()
+end
+
+local H = function()
+  vim.api.nvim_feedkeys(vim.v.count1 * 3 .. "h", "n", false)
+end
+
+local L = function()
+  vim.api.nvim_feedkeys(vim.v.count1 * 3 .. "l", "n", false)
+end
+
+local J = function()
+  vim.api.nvim_feedkeys(vim.v.count1 * 3 .. "j", "n", false)
+end
+
+local K = function()
+  vim.api.nvim_feedkeys(vim.v.count1 * 3 .. "k", "n", false)
 end
 
 return {
@@ -59,29 +80,23 @@ return {
   ["gj"] = { gj, { "n", "x", "o" }, expr = true },
   ["gk"] = { gk, { "n", "x", "o" }, expr = true },
   ["gl"] = { gl, { "n", "x", "o" }, expr = true },
+  ["gh"] = { gl, { "n", "x", "o" }, expr = true },
+  ["H"] = { H, { "n", "x", "o" } },
+  ["J"] = { J, { "n", "x", "o" } },
+  ["K"] = { K, { "n", "x", "o" } },
+  ["L"] = { L, { "n", "x", "o" } },
   ["<M-j>"] = { "<down>", { "i", "c", "s", "t" }, desc = "Down" },
   ["<M-k>"] = { "<up>", { "i", "c", "s", "t" }, desc = "Up" },
   ["<M-h>"] = { "<left>", { "i", "c", "s", "t" }, desc = "Left" },
   ["<M-l>"] = { "<right>", { "i", "c", "s", "t" }, desc = "Right" },
   ["<M-g><M-j>"] = { "<C-g><C-j>", "i", desc = "Down[insert start column]" },
   ["<M-g><M-k>"] = { "<C-g><C-k>", "i", desc = "Up[insert start column]" },
-  ["<space>D"] = { "xd^", "n" },
-  ["<space>m"] = { "gM", { "n", "x", "o" } },
-  ["<space>n"] = { "M", { "n", "x", "o" } },
-  ["<M-space><M-m>"] = {
-    { "<C-o>gM", "i" },
-    { c_mode_middle, "c" },
-    desc = "Line Middle",
-  },
-  ["<M-space><M-n>"] = { "<C-o>gM", "i" },
-  ["<M-w><M-k>"] = { "<C-o>-", "i" },
-  ["<M-e><M-k>"] = { "<Esc>kg_a", "i" },
-  ["<M-w><M-j>"] = { "<C-o>+", "i" },
-  ["<M-e><M-j>"] = { "<Esc>jg_a", "i" },
   ["<M-S-h>"] = { "<left><left><left>", { "t", "c", "i" } },
   ["<M-S-j>"] = { "<down><down><down>", { "t", "i", "c" } },
   ["<M-S-k>"] = { "<up><up><up>", { "t", "i", "c" } },
   ["<M-S-l>"] = { "<right><right><right>", { "t", "c", "i" } },
+  ["<M-space><M-m>"] = { { "<C-o>gM", "i" }, { c_mode_middle, "c" }, desc = "Line Middle" },
+  ["<M-space><M-n>"] = { "<C-o>gM", "i" },
   ["<M-space>j"] = { "<C-o>L", "i" },
   ["<M-space>k"] = { "<C-o>H", "i" },
   ["<M-space>m"] = { "<C-o>gm", "i" },
@@ -90,6 +105,8 @@ return {
   ["<M-space><M-j>"] = { { "<down><end>", "i" } },
   ["<M-space><M-space><M-k>"] = { "<up><home>", { "i" } },
   ["<M-space><M-space><M-j>"] = { "<down><home>", { "i" } },
+  ["<space>m"] = { "gM", { "n", "x", "o" } },
+  ["<space>n"] = { "M", { "n", "x", "o" } },
   ["<space>h"] = {
     {
       function()
@@ -264,14 +281,14 @@ return {
       require("builtin.screen-move").first_non_blank_character()
     end,
     { "n", "x", "o" },
-    desc = "Screen First Non Blank Character",
+    desc = "Screen First Character",
   },
   ["al"] = {
     function()
       require("builtin.screen-move").last_non_blank_character()
     end,
     { "n", "x", "o" },
-    desc = "Screen Last Non Blank Character",
+    desc = "Screen Last Character",
   },
   ["ak"] = {
     function()
@@ -286,6 +303,27 @@ return {
     end,
     { "n", "x", "o" },
     desc = "Screen Bottom",
+  },
+  ["am"] = {
+    function()
+      ---@diagnostic disable-next-line: undefined-field
+      local virtualedit = vim.opt_local.virtualedit:get()
+      if virtualedit[1] ~= "all" then
+        return "gM"
+      end
+      return "gm"
+    end,
+    { "n", "x", "o" },
+    expr = true,
+  },
+  ["an"] = {
+    "M",
+    { "n", "x", "o" },
+    desc = "To Middle line of window, on the first non-blank character (linewise)",
+  },
+  ["ac"] = {
+    "gmM",
+    "n",
   },
   ["aah"] = {
     {
@@ -321,71 +359,7 @@ return {
     { "n", "x", "o" },
     desc = "Screen Bottom",
   },
-  ["<M-1><M-j>"] = { "<C-o>L", "i" },
-  ["<M-1><M-k>"] = { "<C-o>H", "i" },
-  ["<M-1><M-h>"] = { "<C-o>g^", "i" },
-  ["<M-1><M-l>"] = { "<esc>g<end>a", "i" },
-  ["<M-1><M-1><M-j>"] = { "<C-o>L", "i" },
-  ["<M-1><M-1><M-k>"] = { "<C-o>H", "i" },
-  ["<M-1><M-1><M-h>"] = { "<C-o>g0", "i" },
-  ["<M-1><M-1><M-l>"] = { "<C-o>g$", "i" },
-  ["H"] = {
-    {
-      function()
-        require("builtin.screen-move").first_character()
-      end,
-      { "n", "x" },
-    },
-    { "g0", "o" },
-    desc = "Screen First Character",
-  },
-  ["L"] = {
-    {
-      function()
-        require("builtin.screen-move").last_character()
-      end,
-      { "n", "x" },
-    },
-    { "g$", "o" },
-    desc = "Screen Last Character",
-  },
-  ["K"] = {
-    {
-      function()
-        require("builtin.screen-move").top()
-      end,
-      { "n", "x", "o" },
-    },
-    desc = "Screen Top",
-  },
-  ["J"] = {
-    {
-      function()
-        require("builtin.screen-move").bottom()
-      end,
-      { "n", "x", "o" },
-    },
-    { "L", "o" },
-    desc = "Screen Bottom",
-  },
-  ["N"] = {
-    "M",
-    { "n", "x", "o" },
-    desc = "To Middle line of window, on the first non-blank character (linewise)",
-  },
-  ["M"] = {
-    function()
-      ---@diagnostic disable-next-line: undefined-field
-      local virtualedit = vim.opt_local.virtualedit:get()
-      if virtualedit[1] ~= "all" then
-        return "gM"
-      end
-      return "gm"
-    end,
-    { "n", "x", "o" },
-    expr = true,
-  },
-  ["<S-space>H"] = {
+  ["sh"] = {
     function()
       local virt_col = vim.fn.virtcol(".")
       local line = vim.api.nvim_get_current_line()
@@ -405,7 +379,7 @@ return {
     expr = true,
     desc = "Scroll the text horizontally to position the cursor at the start (left side) of the screen.",
   },
-  ["<S-space>L"] = {
+  ["sl"] = {
     function()
       local virt_col = vim.fn.virtcol(".")
       local line = vim.api.nvim_get_current_line()
@@ -428,22 +402,23 @@ return {
     expr = true,
     desc = "Scroll the text horizontally to position the cursor at the end (right side) of the screen.",
   },
-  ["<S-space>K"] = {
+  ["sk"] = {
     "zt",
     { "n", "x" },
     desc = "line [count] at top of window (default cursor line)(leave the cursor in the same column).",
   },
-  ["<S-space>J"] = {
+  ["sj"] = {
     "zb",
     { "n", "x" },
     desc = "line [count] at bottom of window (default cursor line)(leave the cursor in the same column).",
   },
-  ["<S-space>N"] = {
+  ["sn"] = {
     "zz",
     { "n", "x" },
     desc = "line [count] at center of window (default cursor line)(leave the cursor in the same column).",
   },
-  ["<S-space>M"] = {
+  -- TODO: Fix virtualedit=none
+  ["sm"] = {
     function()
       local win_info = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
       local screen_width = win_info.width - win_info.textoff
@@ -461,10 +436,108 @@ return {
     { "n" },
     desc = "col at center of window",
   },
-  ["0m"] = {
-    function()
-      require("custom.plugins.move.magic-move").move()
-    end,
-    "n",
+  ["<M-2><M-l>"] = {
+    "<C-o>ze",
+    "i",
+    desc = "Scroll the text horizontally to position the cursor at the end (right side) of the screen.",
   },
+  ["<M-2><M-h>"] = {
+    "<C-o>zs",
+    "i",
+    desc = "Scroll the text horizontally to position the cursor at the start (left side) of the screen.",
+  },
+  ["<M-2><M-k>"] = {
+    "<C-o>zt",
+    "i",
+    desc = "line [count] at top of window (default cursor line)(leave the cursor in the same column).",
+  },
+  ["<M-2><M-j>"] = {
+    "<C-o>zb",
+    "i",
+    desc = "line [count] at bottom of window (default cursor line)(leave the cursor in the same column).",
+  },
+  ["<M-2><M-n>"] = {
+    "<C-o>zz",
+    "i",
+    desc = "line [count] at center of window (default cursor line)(leave the cursor in the same column).",
+  },
+  ["<M-1><M-j>"] = { "<C-o>L", "i" },
+  ["<M-1><M-k>"] = { "<C-o>H", "i" },
+  ["<M-1><M-h>"] = { "<C-o>g^", "i" },
+  ["<M-1><M-l>"] = { "<esc>g<end>a", "i" },
+  ["<M-1><M-1><M-j>"] = { "<C-o>L", "i" },
+  ["<M-1><M-1><M-k>"] = { "<C-o>H", "i" },
+  ["<M-1><M-1><M-h>"] = { "<C-o>g0", "i" },
+  ["<M-1><M-1><M-l>"] = { "<C-o>g$", "i" },
+  ["<M-w><M-k>"] = { "<C-o>-", "i" },
+  ["<M-e><M-k>"] = { "<Esc>kg_a", "i" },
+  ["<M-w><M-j>"] = { "<C-o>+", "i" },
+  ["<M-e><M-j>"] = { "<Esc>jg_a", "i" },
+  ["<M-w><M-w><M-k>"] = { "<Esc>k0i", "i" },
+  ["<M-e><M-e><M-k>"] = { "<Esc>k$a", "i" },
+  ["<M-w><M-w><M-j>"] = { "<C-o>j0i", "i" },
+  ["<M-e><M-e><M-j>"] = { "<Esc>j$a", "i" },
 }
+
+-- ["H"] = {
+--   {
+--     function()
+--       require("builtin.screen-move").first_character()
+--     end,
+--     { "n", "x" },
+--   },
+--   { "g0", "o" },
+--   desc = "Screen First Character",
+-- },
+-- ["L"] = {
+--   {
+--     function()
+--       require("builtin.screen-move").last_character()
+--     end,
+--     { "n", "x" },
+--   },
+--   { "g$", "o" },
+--   desc = "Screen Last Character",
+-- },
+-- ["K"] = {
+--   {
+--     function()
+--       require("builtin.screen-move").top()
+--     end,
+--     { "n", "x", "o" },
+--   },
+--   desc = "Screen Top",
+-- },
+-- ["J"] = {
+--   {
+--     function()
+--       require("builtin.screen-move").bottom()
+--     end,
+--     { "n", "x", "o" },
+--   },
+--   { "L", "o" },
+--   desc = "Screen Bottom",
+-- },
+-- ["N"] = {
+--   "M",
+--   { "n", "x", "o" },
+--   desc = "To Middle line of window, on the first non-blank character (linewise)",
+-- },
+-- ["M"] = {
+--   function()
+--     ---@diagnostic disable-next-line: undefined-field
+--     local virtualedit = vim.opt_local.virtualedit:get()
+--     if virtualedit[1] ~= "all" then
+--       return "gM"
+--     end
+--     return "gm"
+--   end,
+--   { "n", "x", "o" },
+--   expr = true,
+-- },
+-- ["0m"] = {
+--   function()
+--     require("custom.plugins.move.magic-move").move()
+--   end,
+--   "n",
+-- },

@@ -1,0 +1,37 @@
+*:pa* *:packadd* *E919*
+:pa[ckadd][!] {name}	|pack-add| 在 'packpath' 中搜索一个可选的插件目录，
+			源化找到的任何插件文件，并将其添加到 'runtimepath'。
+			目录必须匹配： >
+				pack/*/opt/{name}
+<			如果存在 pack/*/opt/{name}/after 目录，它将被添加到
+			'runtimepath' 的末尾。
+
+			注意：使用 |vim.pack.add()| 从 URL 安装。
+
+			如果跳过了从 "pack/*/start" 加载包，
+			则首先搜索此目录： >
+				pack/*/start/{name}
+<
+			注意 {name} 是目录名，而不是 .vim 文件的名称。
+			所有匹配以下模式的文件 >
+				pack/*/opt/{name}/plugin/**/*.vim
+				pack/*/opt/{name}/plugin/**/*.lua
+<			将被源化。这允许在 "plugin" 下使用子目录，
+			就像在 'runtimepath' 中的插件一样。
+
+			如果文件类型检测已经启用（这通常通过在你的 |vimrc| 中使用
+			`syntax enable` 或 `filetype on` 命令完成，或在 |initialization| 期间
+			自动完成），并且在 "pack/*/opt/{name}" 中找到了包，
+			此命令还将查找 "{name}/ftdetect/*.vim" 文件。
+
+			当给出可选的 "!" 时，不加载 plugin/ 文件或
+			ftdetect/ 脚本，仅将匹配的目录添加到 'runtimepath'。
+			这在你的 |init.vim| 中很有用。插件随后将在 |load-plugins| |initialization| 步骤
+			期间加载（注意加载顺序将相反，因为每个目录都插入到其他目录之前），
+			在加载 ftdetect 脚本之后。
+
+			要在启动时以编程方式决定是否需要 `!`，
+			请检查 |v:vim_did_init|：如果为 0 则使用 `!`（以避免重复 |load-plugins| 步骤），
+			否则不使用 `!`（以强制加载插件文件，否则它们不会自动加载）。
+
+vim:tw=78:ts=8:noet:ft=help:norl:

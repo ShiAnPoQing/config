@@ -5,7 +5,7 @@ return {
       function()
         local function callback()
           require("buffer-manage").buffer_manage()
-          require("repeat"):set(callback)
+          require("repeat").set_operation(callback)
         end
         callback()
       end,

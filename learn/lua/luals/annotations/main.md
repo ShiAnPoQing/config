@@ -272,7 +272,7 @@ function outdated() end
 切换下一行、当前行或整个文件的诊断。
 
 ```
----@diagnostic <table>:<diagnostic>[, diagnostic...]
+--- @diagnostic <table>:<diagnostic>[, diagnostic...]
 ```
 
 `state`选项：
@@ -295,7 +295,7 @@ function outdated() end
 将 Lua 表标记为枚举，使其具有与 `@alias` 类似的功能，但该表在运行时仍然可用。添加(key)属性将使用枚举的键而不是其值。
 
 ```lua
----@enum [(key)] <name>
+--- @enum [(key)] <name>
 ```
 
 ```lua
@@ -519,7 +519,7 @@ local http = require 'http'
 这可以帮助用户理解如何使用该函数，因为如果他们没有捕获返回值，则会引发警告。
 
 ```lua
----@nodiscard
+--- @nodiscard
 ```
 
 ```lua

@@ -167,8 +167,6 @@ function M.line_concat(opts)
       start_row = start_mark[1],
       end_row = end_mark[1] + 1,
     })
-
-    restore_cursor_position(mode, start_mark[1], cursor_pos)
   end
 
   vim.opt.operatorfunc = "v:lua.custom_line_concat"

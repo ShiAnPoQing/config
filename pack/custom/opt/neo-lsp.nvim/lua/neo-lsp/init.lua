@@ -18,19 +18,19 @@ local highlight = {
 local float = {
   border = {
     ---@diagnostic disable-next-line: assign-type-mismatch
-    { "╔", "DiagnosticInfo" },
+    { "╔", "Label" },
     ---@diagnostic disable-next-line: assign-type-mismatch
     { "─", "Normal" },
     ---@diagnostic disable-next-line: assign-type-mismatch
-    { "╗", "DiagnosticInfo" },
+    { "╗", "Label" },
     ---@diagnostic disable-next-line: assign-type-mismatch
     { "│", "Normal" },
     ---@diagnostic disable-next-line: assign-type-mismatch
-    { "╝", "DiagnosticInfo" },
+    { "╝", "Label" },
     ---@diagnostic disable-next-line: assign-type-mismatch
     { "─", "Normal" },
     ---@diagnostic disable-next-line: assign-type-mismatch
-    { "╚", "DiagnosticInfo" },
+    { "╚", "Label" },
     ---@diagnostic disable-next-line: assign-type-mismatch
     { "│", "Normal" },
   },

@@ -36,6 +36,14 @@ return {
         end,
         "n",
       },
+      ["<C-n>"] = {
+        function()
+          if ls.choice_active() then
+            ls.change_choice(1)
+          end
+        end,
+        "i",
+      },
     })
   end,
 }

@@ -144,17 +144,27 @@ return {
           ghost_text = { enabled = false },
         },
       },
+
       sources = {
         default = { "snippets", "lsp", "path", "buffer" },
         per_filetype = {
-          lua = { inherit_defaults = true, "lazydev" },
+          lua = {
+            inherit_defaults = true,
+            "lazydev",
+            -- "annotation"
+          },
           -- vim = { inherit_defaults = true, 'cmdline' },
         },
         providers = {
           lazydev = {
+            enabled = true,
             name = "LazyDev",
             module = "lazydev.integrations.blink",
             score_offset = 100,
+          },
+          annotation = {
+            name = "Annotation",
+            module = "blink-cmp-lua-annotation",
           },
         },
       },
@@ -183,6 +193,13 @@ return {
         },
         ["<C-n>"] = {
           function(cmp)
+            local luasnip = require("luasnip")
+            if luasnip.choice_active() and luasnip.in_snippet() then
+              vim.schedule(function()
+                luasnip.change_choice(1)
+              end)
+              return
+            end
             if cmp.is_menu_visible() then
               cmp.select_next()
             else
@@ -192,6 +209,13 @@ return {
         },
         ["<C-p>"] = {
           function(cmp)
+            local luasnip = require("luasnip")
+            if luasnip.choice_active() and luasnip.in_snippet() then
+              vim.schedule(function()
+                luasnip.change_choice(-1)
+              end)
+              return
+            end
             if cmp.is_menu_visible() then
               cmp.select_prev()
             else
@@ -216,7 +240,9 @@ return {
             end
 
             if luasnip.in_snippet() then
-              luasnip.jump(1)
+              vim.schedule(function()
+                luasnip.jump(1)
+              end)
               return true
             end
           end,
@@ -232,6 +258,9 @@ return {
       },
       -- opts_extend = { "sources.default" },
       -- init = function() end,
+    })
+    vim.api.nvim_set_hl(0, "BlinkCmpLabelMatch", {
+      link = "PmenuKind",
     })
   end,
 }

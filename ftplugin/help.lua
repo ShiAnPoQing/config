@@ -1,5 +1,6 @@
 require("neo-option").setlocal({
   concealcursor = {},
+  formatoptions = { ["t"] = true, ["c"] = true, ["j"] = true, ["q"] = true },
 })
 
 local modifiable = vim.opt_local.modifiable
