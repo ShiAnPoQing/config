@@ -49,6 +49,10 @@
       "src": "https://github.com/BrokenSunny/paradox.nvim"
     },
     "plenary.nvim": [],
+    "showkeys": {
+      "rev": "cb0a502",
+      "src": "https://github.com/nvzone/showkeys"
+    },
     "snacks.nvim": [],
     "supermaven-nvim": {
       "rev": "07d20fc",

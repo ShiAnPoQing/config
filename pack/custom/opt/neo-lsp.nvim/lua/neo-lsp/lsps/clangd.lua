@@ -62,7 +62,12 @@ end
 ---@field offsetEncoding? string
 
 return {
-  cmd = { "clangd" },
+  cmd = {
+    "clangd",
+    "--background-index",
+    "--clang-tidy",
+    "--log=verbose",
+  },
   filetypes = { "c", "cpp", "objc", "objcpp", "cuda" },
   root_markers = {
     ".clangd",

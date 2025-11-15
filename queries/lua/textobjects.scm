@@ -1,4 +1,6 @@
 ; extends
+(function_definition parameters: (parameters) @parameter)
+
 (function_declaration 
   name: (identifier) @function.name)
 

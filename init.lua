@@ -70,6 +70,8 @@ require("neo-packer").setup({
   require("plugins.download.misc.trouble"),
   require("plugins.local.blink-cmp-lua-annotation"),
   require("plugins.download.misc.eye-track"),
+  require("plugins.download.misc.showkey"),
+  require("plugins.local.neo-symbol"),
   -- require("plugins.download.misc.yanky"),
   -- require("plugins.download.misc.fidget"),
 })

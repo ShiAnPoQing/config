@@ -193,13 +193,13 @@ return {
         },
         ["<C-n>"] = {
           function(cmp)
-            local luasnip = require("luasnip")
-            if luasnip.choice_active() and luasnip.in_snippet() then
-              vim.schedule(function()
-                luasnip.change_choice(1)
-              end)
-              return
-            end
+            -- local luasnip = require("luasnip")
+            -- if luasnip.choice_active() and luasnip.in_snippet() then
+            --   vim.schedule(function()
+            --     luasnip.change_choice(1)
+            --   end)
+            --   return
+            -- end
             if cmp.is_menu_visible() then
               cmp.select_next()
             else
@@ -209,13 +209,13 @@ return {
         },
         ["<C-p>"] = {
           function(cmp)
-            local luasnip = require("luasnip")
-            if luasnip.choice_active() and luasnip.in_snippet() then
-              vim.schedule(function()
-                luasnip.change_choice(-1)
-              end)
-              return
-            end
+            -- local luasnip = require("luasnip")
+            -- if luasnip.choice_active() and luasnip.in_snippet() then
+            --   vim.schedule(function()
+            --     luasnip.change_choice(-1)
+            --   end)
+            --   return
+            -- end
             if cmp.is_menu_visible() then
               cmp.select_prev()
             else

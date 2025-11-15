@@ -269,6 +269,19 @@ return {
         filetype = "lua",
       },
     },
+    ["<leader>fp"] = {
+      {
+        function()
+          require("treesitter-textobject").textobject({
+            language = "lua",
+            query = "parameter",
+            scm = "textobjects",
+          })
+        end,
+        { "x", "o" },
+        filetype = "lua",
+      },
+    },
     -- @function.outer
     ["<leader>fo"] = {
       {
@@ -605,6 +618,17 @@ return {
         { "x", "o" },
         filetype = "c",
       },
+      {
+        function()
+          require("treesitter-textobject").textobject({
+            language = "latex",
+            query = "command",
+            scm = "textobjects",
+          })
+        end,
+        { "x", "o" },
+        filetype = "tex",
+      },
     },
     -- @expression_list
     ["<leader>el"] = {
@@ -756,6 +780,61 @@ return {
         { "x", "o" },
         filetype = "lua",
       },
+    },
+    ["ev"] = {
+      function()
+        require("treesitter-textobject").textobject({
+          language = "latex",
+          query = "environment",
+          scm = "textobjects",
+        })
+      end,
+      { "x", "o" },
+      filetype = "tex",
+    },
+    ["eq"] = {
+      function()
+        require("treesitter-textobject").textobject({
+          language = "latex",
+          query = "equation",
+          scm = "textobjects",
+        })
+      end,
+      { "x", "o" },
+      filetype = "tex",
+    },
+    ["<leader>pi"] = {
+      function()
+        require("treesitter-textobject").textobject({
+          language = "latex",
+          query = "package.include",
+          scm = "textobjects",
+        })
+      end,
+      { "x", "o" },
+      filetype = "tex",
+    },
+    ["<leader>cn"] = {
+      function()
+        require("treesitter-textobject").textobject({
+          language = "latex",
+          query = "command.name",
+          scm = "textobjects",
+        })
+      end,
+      { "x", "o" },
+      filetype = "tex",
+    },
+    ["<leader>ca"] = {
+      function()
+        require("treesitter-textobject").textobject({
+          language = "latex",
+          query = "command.arg",
+          scm = "textobjects",
+        })
+      end,
+      { "x", "o" },
+      filetype = "tex",
     },
   },
   config = function(opt)

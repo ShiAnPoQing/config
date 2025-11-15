@@ -40,7 +40,6 @@ return {
   --   "v0c",
   --   "n"
   -- },
-  -- open myvimrc
   ["<leader><F5>"] = {
     function()
       local path = vim.fn.expand("$MYVIMRC"):gsub("init.lua", "")

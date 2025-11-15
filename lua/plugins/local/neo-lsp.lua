@@ -22,6 +22,18 @@ return {
 
     local Methods = vim.lsp.protocol.Methods
     local callbacks = {
+      [Methods.textDocument_documentSymbol] = function(args)
+        require("simple-keymap").add({
+          ["<leader>ds"] = {
+            function()
+              vim.lsp.buf.document_symbol()
+            end,
+            "n",
+            buffer = args.buf,
+            desc = "LSP Document Symbol",
+          },
+        })
+      end,
       [Methods.textDocument_codeAction] = function(args)
         local group = vim.api.nvim_create_augroup("LspCodeLens" .. args.buf, { clear = true })
         vim.api.nvim_create_autocmd("CursorHold", {

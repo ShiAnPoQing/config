@@ -197,5 +197,58 @@ return {
     --   rule = { "tex.comment" },
     --   environment = { "BoxVerb" }
     -- }
+
+    vim.keymap.set("n", "<localleader>lt", function()
+      return require("vimtex.fzf-lua").run()
+    end)
+    vim.keymap.set("n", "<localleader>k", "<Plug>(vimtex-doc-package)")
+
+    vim.keymap.set("n", "<localleader>cse", function()
+      local bufnr = vim.api.nvim_get_current_buf()
+      local Client = vim.lsp.get_clients({
+        bufnr = bufnr,
+      })[1]
+
+      if not Client then
+        return
+      end
+
+      Client:exec_cmd({
+        title = "Change Environment",
+        command = "texlab.findEnvironments",
+        arguments = {
+          {
+            textDocument = { uri = vim.uri_from_bufnr(0) },
+            position = vim.api.nvim_win_get_cursor(0),
+          },
+        },
+      }, { bufnr = bufnr }, function(err, result, ctx)
+        if err or #result == 0 then
+          return
+        end
+        local r = result[#result]
+
+        vim.ui.input({
+          prompt = "Change Environment Name: ",
+          default = r.name.text or "",
+        }, function(input)
+          if input == nil then
+            return
+          end
+
+          Client:exec_cmd({
+            title = "Change Environment",
+            command = "texlab.changeEnvironment",
+            arguments = {
+              {
+                textDocument = { uri = vim.uri_from_bufnr(0) },
+                position = vim.api.nvim_win_get_cursor(0),
+                newName = input,
+              },
+            },
+          })
+        end)
+      end)
+    end)
   end,
 }

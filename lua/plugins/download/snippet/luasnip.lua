@@ -36,10 +36,20 @@ return {
         end,
         "n",
       },
-      ["<C-n>"] = {
+      ["<C-space><C-n>"] = {
         function()
-          if ls.choice_active() then
-            ls.change_choice(1)
+          local luasnip = require("luasnip")
+          if luasnip.choice_active() and luasnip.in_snippet() then
+            luasnip.change_choice(1)
+          end
+        end,
+        "i",
+      },
+      ["<C-space><C-p>"] = {
+        function()
+          local luasnip = require("luasnip")
+          if luasnip.choice_active() and luasnip.in_snippet() then
+            luasnip.change_choice(-1)
           end
         end,
         "i",

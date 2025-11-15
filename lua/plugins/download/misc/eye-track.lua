@@ -1,6 +1,45 @@
 return {
   "BrokenSunny/eye-track.nvim",
   keys = {
+    ["0V"] = {
+      function()
+        local cursor = vim.api.nvim_win_get_cursor(0)
+        require("eye-track.plugins.line")({
+          matched = function(ctx)
+            local line = vim.api.nvim_buf_get_lines(0, ctx.data.row - 1, ctx.data.row, false)[1]
+            local col = cursor[2]
+            if cursor[2] > #line then
+              col = #line
+            end
+            vim.api.nvim_win_set_cursor(0, { ctx.data.row, col })
+            vim.api.nvim_feedkeys("V", "n", false)
+          end,
+        })
+      end,
+      "n",
+    },
+    ["0B"] = {
+      function()
+        require("eye-track.plugins.line")({
+          matched = function(ctx)
+            vim.api.nvim_win_set_cursor(0, { ctx.data.row, 1 })
+            vim.api.nvim_feedkeys("O", "n", false)
+          end,
+        })
+      end,
+      "n",
+    },
+    ["0b"] = {
+      function()
+        require("eye-track.plugins.line")({
+          matched = function(ctx)
+            vim.api.nvim_win_set_cursor(0, { ctx.data.row, 1 })
+            vim.api.nvim_feedkeys("o", "n", false)
+          end,
+        })
+      end,
+      "n",
+    },
     ["0S"] = {
       function()
         require("eye-track.plugins.search")({
@@ -181,6 +220,19 @@ return {
             local cursor = vim.api.nvim_win_get_cursor(0)
             vim.api.nvim_win_set_cursor(0, { ctx.data.row, cursor[2] })
             vim.api.nvim_feedkeys("C", "n", false)
+          end,
+        })
+      end,
+      "n",
+    },
+    ["0Y"] = {
+      function()
+        local cursor = vim.api.nvim_win_get_cursor(0)
+        require("eye-track.plugins.line")({
+          matched = function(ctx)
+            vim.api.nvim_win_set_cursor(0, { ctx.data.row, 1 })
+            vim.api.nvim_feedkeys("Y", "nx", false)
+            vim.api.nvim_win_set_cursor(0, cursor)
           end,
         })
       end,
