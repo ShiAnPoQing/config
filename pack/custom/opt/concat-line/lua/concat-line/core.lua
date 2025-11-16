@@ -1,10 +1,4 @@
-local M = {}
 local api = vim.api
-
---- @class LineConcatOpts
---- @field join_char? string
---- @field trim_blank? boolean
---- @field input? boolean
 
 local default_opts = {
   join_char = "",
@@ -43,7 +37,7 @@ end
 --- @field start_row integer
 --- @field end_row integer
 
-function M.line_concat_char(opts)
+local function line_concat_char(opts)
   local join_char = opts.join_char
   local start_row = opts.start_row
   local end_row = opts.end_row
@@ -76,7 +70,7 @@ end
 --- @field trim_blank boolean
 ---
 --- @param opts LineConcatInputOpts
-function M.line_concat_input_char(opts)
+local function concat_input_char(opts)
   local start_row = opts.start_row
   local end_row = opts.end_row
   local prompt = opts.prompt or "Join Chars: "
@@ -90,7 +84,7 @@ function M.line_concat_input_char(opts)
       return
     end
 
-    M.line_concat_char({
+    line_concat_char({
       join_char = text,
       start_row = start_row,
       end_row = end_row,
@@ -108,10 +102,10 @@ local function line_concat_input_char(opts, mode, start_mark, end_mark, cursor_p
     return
   end
 
-  M.line_concat_input_char({
+  concat_input_char({
     start_row = start_mark[1],
     end_row = end_mark[1] + 1,
-    callback = function(text)
+    callback = function()
       restore_cursor_position(mode, start_mark[1], cursor_pos)
     end,
   })
@@ -119,7 +113,7 @@ local function line_concat_input_char(opts, mode, start_mark, end_mark, cursor_p
   return true
 end
 
-local function line_concat_neovim_native(opts, mode, start_mark, end_mark, cursor_pos)
+local function line_concat_neovim_native(opts, start_mark, end_mark)
   local operator
   if opts.join_char == " " then
     operator = "J"
@@ -127,7 +121,6 @@ local function line_concat_neovim_native(opts, mode, start_mark, end_mark, curso
   if opts.join_char == "" and opts.trim_blank == false then
     operator = "gJ"
   end
-
   if not operator then
     return
   end
@@ -140,40 +133,45 @@ local function line_concat_neovim_native(opts, mode, start_mark, end_mark, curso
   return true
 end
 
+local function _line_concat(opts, mode, start_mark, end_mark, cursor_pos)
+  local function finish()
+    restore_cursor_position(mode, start_mark[1], cursor_pos)
+    require("repeat").set_operation(function()
+      _line_concat(opts, mode, start_mark, end_mark, cursor_pos)
+    end)
+  end
+  if line_concat_input_char(opts, mode, start_mark, end_mark, cursor_pos) then
+    finish()
+    return
+  end
+  if line_concat_neovim_native(opts, start_mark, end_mark) then
+    finish()
+    return
+  end
+  line_concat_char({
+    join_char = opts.join_char,
+    trim_blank = opts.trim_blank,
+    start_row = start_mark[1],
+    end_row = end_mark[1] + 1,
+  })
+  finish()
+end
+
 --- @param opts? LineConcatOpts
-function M.line_concat(opts)
+local function line_concat(opts)
   opts = vim.tbl_extend("force", default_opts, opts or {})
   local mode = api.nvim_get_mode().mode
   local cursor_pos = api.nvim_win_get_cursor(0)
-
+  ---@diagnostic disable-next-line: duplicate-set-field
   _G.custom_line_concat = function(type)
     if type ~= "line" then
       return
     end
     local start_mark = api.nvim_buf_get_mark(0, "[")
     local end_mark = api.nvim_buf_get_mark(0, "]")
-
-    if line_concat_input_char(opts, mode, start_mark, end_mark, cursor_pos) then
-      return
-    end
-
-    if line_concat_neovim_native(opts, mode, start_mark, end_mark, cursor_pos) then
-      return
-    end
-
-    M.line_concat_char({
-      join_char = opts.join_char,
-      trim_blank = opts.trim_blank,
-      start_row = start_mark[1],
-      end_row = end_mark[1] + 1,
-    })
-
-    restore_cursor_position(mode, start_mark[1], cursor_pos)
+    _line_concat(opts, mode, start_mark, end_mark, cursor_pos)
   end
-
   vim.opt.operatorfunc = "v:lua.custom_line_concat"
 end
 
-function M.setup() end
-
-return M
+return line_concat

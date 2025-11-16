@@ -27,7 +27,6 @@
 |:files|	:files		list all files in the buffer list
 |:filter|	:filt[er]	filter output of following command
 |:find|		:fin[d]		find file in 'path' and edit it
-|:global|	:g[lobal]	execute commands for matching lines
 |:highlight|	:hi[ghlight]	specify highlighting methods
 |:history|	:his[tory]	print a history list
 |:horizontal|	:hor[izontal]	following window command work horizontally

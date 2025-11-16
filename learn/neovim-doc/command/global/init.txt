@@ -1,0 +1,101 @@
+|:global|	:g[lobal]	execute commands for matching lines
+
+
+
+ |:h multi-repeat|
+						*:g* *:global* *E148*
+:[range]g[lobal]/{pattern}/[cmd]
+			Execute the Ex command [cmd] (default ":p") on the
+			lines within [range] where {pattern} matches.
+
+:[range]g[lobal]!/{pattern}/[cmd]
+			Execute the Ex command [cmd] (default ":p") on the
+			lines within [range] where {pattern} does NOT match.
+
+							*:v* *:vglobal*
+:[range]v[global]/{pattern}/[cmd]
+			Same as :g!.
+
+Example: >
+	:g/^Obsolete/d _
+Using the underscore after `:d` avoids clobbering registers or the clipboard.
+This also makes it faster.
+
+Instead of the '/' which surrounds the {pattern}, you can use any other
+single byte character, but not an alphabetic character, '\', '"', '|' or '!'.
+This is useful if you want to include a '/' in the search pattern or
+replacement string.
+
+For the definition of a pattern, see |pattern|.
+
+NOTE [cmd] may contain a range; see |collapse| and |edit-paragraph-join| for
+examples.
+
+The global commands work by first scanning through the [range] lines and
+marking each line where a match occurs (for a multi-line pattern, only the
+start of the match matters).
+In a second scan the [cmd] is executed for each marked line, as if the cursor
+was in that line.  For ":v" and ":g!" the command is executed for each not
+marked line.  If a line is deleted its mark disappears.
+The default for [range] is the whole buffer (1,$).  Use "CTRL-C" to interrupt
+the command.  If an error message is given for a line, the command for that
+line is aborted and the global command continues with the next marked or
+unmarked line.
+								*E147*
+When the command is used recursively, it only works on one line.  Giving a
+range is then not allowed.  This is useful to find all lines that match a
+pattern and do not match another pattern: >
+	:g/found/v/notfound/{cmd}
+This first finds all lines containing "found", but only executes {cmd} when
+there is no match for "notfound".
+
+Any Ex command can be used, see |ex-cmd-index|.  To execute a Normal mode
+command, you can use the `:normal` command: >
+	:g/pat/normal {commands}
+Make sure that {commands} ends with a whole command, otherwise Vim will wait
+for you to type the rest of the command for each match.  The screen will not
+have been updated, so you don't know what you are doing.  See |:normal|.
+
+The undo/redo command will undo/redo the whole global command at once.
+The previous context mark will only be set once (with "''" you go back to
+where the cursor was before the global command).
+
+The global command sets both the last used search pattern and the last used
+substitute pattern (this is vi compatible).  This makes it easy to globally
+replace a string: >
+	:g/pat/s//PAT/g
+This replaces all occurrences of "pat" with "PAT".  The same can be done with: >
+	:%s/pat/PAT/g
+Which is two characters shorter!
+
+When using "global" in Ex mode, a special case is using ":visual" as a
+command.  This will move to a matching line, go to Normal mode to let you
+execute commands there until you use |gQ| to return to Ex mode.  This will be
+repeated for each matching line.  While doing this you cannot use ":global".
+To abort this type CTRL-C twice.
+
+
+
+`:g/pattern/d`
+`:g/pattern/d a`
+`:g/pattern/s/foo/bar/g`
+`:g/pattern/normal dd`
+`:g/pattern/execute "normal! Onew text"`
+`:g/pattern/execute "normal! onew text"`
+`:10,50g/TODO/d`
+`:'<,'>g/foo/d`
+`:g//` 
+`:g//d`
+`:g//s/foo/bar/g`
+`:g/TODO/m$`
+`:g/TODO/m0`
+`:g/foo/sort`
+`:g/foo/sort!`
+`:g/pattern/fold`
+`:g/pattern/foldopen`
+`:g/A/g/B/d` 多层过滤
+`:v/foo/g/bar/d`
+
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:
