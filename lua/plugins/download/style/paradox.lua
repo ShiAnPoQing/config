@@ -3,6 +3,7 @@ return {
   priority = 1000,
   -- colorscheme = "paradox",
   config = function(opt)
+vim.print("hao")
     require("paradox").setup()
     local time = tonumber(os.date("%H"))
     if time >= 17 or time < 7 then

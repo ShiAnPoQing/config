@@ -200,6 +200,6 @@ return {
     { "<Esc>Ea", "i", desc = "Forword to the end of the WORD" },
     { "Ea", "n", desc = "Forword to the end of the WORD and start insert mode" },
   },
-  ["<M-space><M-S-i>"] = { "<C-o>gE", "i", desc = "Backward to the end of WORD[count]" },
+  ["<M-space><M-S-i>"] = { "<Esc>gEa", "i", desc = "Backward to the end of WORD[count]" },
   ["<M-space><M-S-o>"] = { "<C-o>W", "i", desc = "Forword to the start of the word[count]" },
 }

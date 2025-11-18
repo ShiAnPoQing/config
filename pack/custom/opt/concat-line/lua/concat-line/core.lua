@@ -137,7 +137,8 @@ local function _line_concat(opts, mode, start_mark, end_mark, cursor_pos)
   local function finish()
     restore_cursor_position(mode, start_mark[1], cursor_pos)
     require("repeat").set_operation(function()
-      _line_concat(opts, mode, start_mark, end_mark, cursor_pos)
+      --- TODO: fix this
+      _line_concat(opts, mode, start_mark, end_mark, api.nvim_win_get_cursor(0))
     end)
   end
   if line_concat_input_char(opts, mode, start_mark, end_mark, cursor_pos) then

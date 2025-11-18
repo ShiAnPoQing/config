@@ -101,6 +101,9 @@ function M.macro_repeat(register_name)
   local new_keys_copy = vim.tbl_deep_extend("force", {}, new_keys)
   local function run()
     if #new_keys_copy == 0 then
+      require("repeat").set_operation(function()
+        M.macro_repeat(register_name)
+      end)
       return
     end
     local key = table.remove(new_keys_copy, 1)

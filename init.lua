@@ -5,7 +5,9 @@ vim.cmd("packadd! nvim.undotree")
 vim.cmd("packadd! nvim.difftool")
 require("command")
 require("autocmds")
-vim.pack.add({ "https://github.com/BrokenSunny/neo-packer" }, { confirm = false })
+vim.pack.add({ "https://github.com/BrokenSunny/neo-packer",
+}, { confirm = false })
+
 require("neo-packer").setup({
   require("plugins.local.simple-keymap"),
   require("plugins.local.neo-option"),
@@ -28,7 +30,7 @@ require("neo-packer").setup({
   require("plugins.local.file-details"),
   require("plugins.local.surround"),
   require("plugins.local.open-terminal"),
-  -- require("plugins.local.neo-winbar"),
+  require("plugins.local.neo-winbar"),
   require("plugins.download.misc.lazydev"),
   require("plugins.download.treesitter"),
   require("plugins.download.snippet.luasnip"),
@@ -72,6 +74,6 @@ require("neo-packer").setup({
   require("plugins.download.misc.eye-track"),
   require("plugins.download.misc.showkey"),
   require("plugins.local.neo-symbol"),
-  -- require("plugins.download.misc.yanky"),
-  -- require("plugins.download.misc.fidget"),
+  require("plugins.download.misc.yanky"),
+  require("plugins.download.misc.fidget"),
 })

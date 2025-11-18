@@ -1485,7 +1485,10 @@ local snippets = {
     show_condition = tex.in_mathzone,
   }),
   s("cha", create_tex_command("chapter")),
-  s("ni", create_tex_command("noindent")),
+  s("ni", {
+    t("\\noindent "),
+    i(1),
+  }),
 
   s("txt", create_tex_command("text"), {
     condition = function()

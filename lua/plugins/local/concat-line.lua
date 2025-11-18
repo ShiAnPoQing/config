@@ -14,7 +14,7 @@ return {
         require("concat-line").line_concat({ join_char = " " })
         return "g@_"
       end,
-      { "n", "x" },
+      { "n" },
       expr = true,
     },
     ["g-"] = {
@@ -30,7 +30,7 @@ return {
         require("concat-line").line_concat({ trim_blank = false })
         return "g@_"
       end,
-      { "n", "x" },
+      { "n" },
       expr = true,
     },
   },
