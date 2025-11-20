@@ -1,16 +1,9 @@
 return {
   "saghen/blink.cmp",
-  depend = {
-    -- { 'L3MON4D3/LuaSnip', version = 'v2.*' },
+  dependencies = {
+    { 'L3MON4D3/LuaSnip', version = 'v2.*' },
   },
-  run = function(plug)
-    vim
-      .system({ "cargo", "+nightly", "build", "--release" }, {
-        cwd = plug.path,
-        text = true,
-      })
-      :wait()
-  end,
+  build = "cargo +nightly build --release",
   event = { "InsertEnter", "CmdlineEnter" },
   config = function()
     require("blink-cmp").setup({

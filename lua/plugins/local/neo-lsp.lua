@@ -1,7 +1,7 @@
 return {
-  name = "neo-lsp.nvim",
+  dir = "~/.config/nvim/pack/custom/opt/neo-lsp.nvim",
   event = { "BufReadPre", "BufNewFile" },
-  depend = { "saghen/blink.cmp" },
+  dependencies = { "saghen/blink.cmp" },
   config = function(opt)
     require("neo-lsp").setup({
       enable = function(opts)

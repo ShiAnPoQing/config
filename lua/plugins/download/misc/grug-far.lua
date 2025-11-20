@@ -2,11 +2,11 @@ return {
   "MagicDuck/grug-far.nvim",
   cmd = "GrugFar",
   keys = {
-    ["<leader>GFw"] = {
+    {
+      "<leader>GFw",
       function()
         require("grug-far").open({ prefills = { search = vim.fn.expand("<cword>") } })
       end,
-      "n",
     },
     -- ["<leader>sr"] = {
     --   function()

@@ -28,7 +28,7 @@ end
 _G.MyTabLine()
 
 return {
-  name = "neo-option.nvim",
+  dir = "~/.config/nvim/pack/custom/opt/neo-option.nvim",
   config = function(opt)
     require("neo-option").setup({
       clipboard = { "unnamedplus" },

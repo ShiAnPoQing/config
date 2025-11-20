@@ -59,37 +59,37 @@ return {
       "x",
     },
   },
-  ["0n"] = {
-    function()
-      local pattern = vim.fn.getreg("/")
-      if pattern == "" then
-        return
-      end
-      local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
-      local matches = vim.fn.matchbufline(vim.api.nvim_get_current_buf(), pattern, wininfo.topline, wininfo.botline)
-      local key = require("magic.key"):init()
-      key.compute(#matches)
-      for _, value in ipairs(matches) do
-        key.register({
-          callback = function() end,
-          one_key = {
-            ---@diagnostic disable-next-line: undefined-field
-            line = value.lnum - 1,
-            ---@diagnostic disable-next-line: undefined-field
-            virt_col = value.byteidx,
-          },
-          two_key = {
-            ---@diagnostic disable-next-line: undefined-field
-            line = value.lnum - 1,
-            ---@diagnostic disable-next-line: undefined-field
-            virt_col = value.byteidx,
-          },
-        })
-      end
-      key.on_key({})
-    end,
-    "n",
-  },
+  -- ["0n"] = {
+  --   function()
+  --     local pattern = vim.fn.getreg("/")
+  --     if pattern == "" then
+  --       return
+  --     end
+  --     local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+  --     local matches = vim.fn.matchbufline(vim.api.nvim_get_current_buf(), pattern, wininfo.topline, wininfo.botline)
+  --     local key = require("magic.key"):init()
+  --     key.compute(#matches)
+  --     for _, value in ipairs(matches) do
+  --       key.register({
+  --         callback = function() end,
+  --         one_key = {
+  --           ---@diagnostic disable-next-line: undefined-field
+  --           line = value.lnum - 1,
+  --           ---@diagnostic disable-next-line: undefined-field
+  --           virt_col = value.byteidx,
+  --         },
+  --         two_key = {
+  --           ---@diagnostic disable-next-line: undefined-field
+  --           line = value.lnum - 1,
+  --           ---@diagnostic disable-next-line: undefined-field
+  --           virt_col = value.byteidx,
+  --         },
+  --       })
+  --     end
+  --     key.on_key({})
+  --   end,
+  --   "n",
+  -- },
 }
 
 -- -- Quick substitute within selected area

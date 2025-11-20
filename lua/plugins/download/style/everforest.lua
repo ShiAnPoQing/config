@@ -1,7 +1,7 @@
 return {
   "sainnhe/everforest",
   priority = 1000,
-  colorscheme = "everforest",
+  lazy = true,
   config = function()
     vim.g.everforest_enable_italic = true
     vim.opt.background = "dark"

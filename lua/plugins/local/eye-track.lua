@@ -1,5 +1,5 @@
 return {
-  name = "eye-track.nvim",
+  "BrokenSunny/eye-track.nvim",
   keys = {
     ["0S"] = {
       function()

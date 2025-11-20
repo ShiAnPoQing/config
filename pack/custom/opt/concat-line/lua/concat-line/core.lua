@@ -1,3 +1,5 @@
+local M = {}
+
 local api = vim.api
 
 local default_opts = {
@@ -129,7 +131,11 @@ local function line_concat_neovim_native(opts, start_mark, end_mark)
   if line_count > 1 then
     line_count = line_count + 1
   end
-  api.nvim_feedkeys(line_count .. operator, "nx", false)
+
+  if line_count >= 1 then
+    api.nvim_feedkeys(line_count .. operator, "nx", false)
+  end
+
   return true
 end
 
@@ -137,10 +143,28 @@ local function _line_concat(opts, mode, start_mark, end_mark, cursor_pos)
   local function finish()
     restore_cursor_position(mode, start_mark[1], cursor_pos)
     require("repeat").set_operation(function()
-      --- TODO: fix this
-      _line_concat(opts, mode, start_mark, end_mark, api.nvim_win_get_cursor(0))
+      local _mode = vim.api.nvim_get_mode().mode
+      if _mode == "V" then
+        M.line_concat(opts)
+        vim.api.nvim_feedkeys("g@", "n", false)
+        return
+      end
+
+      local _cursor_pos = api.nvim_win_get_cursor(0)
+      if mode == "V" then
+        _line_concat(
+          opts,
+          mode,
+          { _cursor_pos[1], 0 },
+          { _cursor_pos[1] + end_mark[1] - start_mark[1], 0 },
+          _cursor_pos
+        )
+      elseif mode == "n" then
+        _line_concat(opts, mode, start_mark, end_mark, _cursor_pos)
+      end
     end)
   end
+
   if line_concat_input_char(opts, mode, start_mark, end_mark, cursor_pos) then
     finish()
     return
@@ -159,11 +183,11 @@ local function _line_concat(opts, mode, start_mark, end_mark, cursor_pos)
 end
 
 --- @param opts? LineConcatOpts
-local function line_concat(opts)
+function M.line_concat(opts)
   opts = vim.tbl_extend("force", default_opts, opts or {})
+  ---@diagnostic disable-next-line: duplicate-set-field
   local mode = api.nvim_get_mode().mode
   local cursor_pos = api.nvim_win_get_cursor(0)
-  ---@diagnostic disable-next-line: duplicate-set-field
   _G.custom_line_concat = function(type)
     if type ~= "line" then
       return
@@ -175,4 +199,4 @@ local function line_concat(opts)
   vim.opt.operatorfunc = "v:lua.custom_line_concat"
 end
 
-return line_concat
+return M

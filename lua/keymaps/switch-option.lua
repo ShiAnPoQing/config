@@ -125,7 +125,7 @@ return {
     "n",
     desc = "Switch number column",
   },
-  ["<leader>cl"] = {
+  ["<leader>cll"] = {
     function()
       color_column = color_column == "72" and "" or "72"
       vim.opt.colorcolumn = color_column

@@ -1,14 +1,23 @@
+function _G.get_oil_winbar()
+  local dir = require("oil").get_current_dir()
+  if dir then
+    return vim.fn.fnamemodify(dir, ":~")
+  else
+    return vim.api.nvim_buf_get_name(0)
+  end
+end
+
 return {
   "stevearc/oil.nvim",
-  depend = { "echasnovski/mini.icons" },
-  -- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if prefer nvim-web-devicons
+  dependencies = { "echasnovski/mini.icons" },
   keys = {
-    ["<leader>oi"] = {
-      "<cmd>Oil<cr>",
-      "n",
-    },
+    { "<leader>oi", "<cmd>Oil<cr>" },
   },
   config = function()
-    require("oil").setup()
+    require("oil").setup({
+      win_options = {
+        winbar = "%!v:lua.get_oil_winbar()",
+      },
+    })
   end,
 }

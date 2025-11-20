@@ -1,9 +1,8 @@
 return {
   "nvim-treesitter/nvim-treesitter",
-  version = "main",
-  run = function()
-    vim.cmd([[TSUpdate]])
-  end,
+  lazy = false,
+  branch = "main",
+  build = ":TSUpdate",
   config = function()
     local langs = {
       "c",

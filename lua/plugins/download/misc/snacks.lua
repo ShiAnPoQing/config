@@ -2,25 +2,25 @@ return {
   "folke/snacks.nvim",
   priority = 1000,
   keys = {
-    ["<leader>e"] = {
+    {
+      "<leader>e",
       function()
         Snacks.explorer()
       end,
-      "n",
       desc = "File Explorer",
     },
-    ["<leader>,"] = {
+    {
+      "<leader>,",
       function()
         Snacks.picker.buffers()
       end,
-      "n",
       desc = "Buffers",
     },
-    ["<leader>z"] = {
+    {
+      "<leader>z",
       function()
         Snacks.zen()
       end,
-      "n",
       desc = "Toggle Zen Mode",
     },
   },
@@ -34,7 +34,7 @@ return {
       picker = { enabled = true },
       notifier = { enabled = true },
       quickfile = { enabled = true },
-      scope = { enabled = true },
+      scope = { enabled = false },
       scroll = { enabled = false },
       statuscolumn = { enabled = true },
       words = { enabled = true },

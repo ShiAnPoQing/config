@@ -1,4 +1,5 @@
 return {
   "theniceboy/nvim-deus",
-  colorscheme = "deus",
+  lazy = true,
+  -- colorscheme = "deus",
 }

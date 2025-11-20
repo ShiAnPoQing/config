@@ -1,11 +1,12 @@
 return {
-  name = "simple-translate.nvim",
+  dir = "~/.config/nvim/pack/custom/opt/simple-translate.nvim",
   keys = {
-    ["<leader>1"] = {
+    {
+      "<leader>1",
       function()
         require("simple-translate").visual_translate()
       end,
-      "x",
+      mode = "x",
     },
   },
   config = function(opt) end,

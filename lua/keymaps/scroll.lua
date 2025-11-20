@@ -1,3 +1,19 @@
+---------------------------------------------------------------------------------------------------+
+-- Commands \ Modes | Normal | Insert | Command | Visual | Select | Operator | Terminal | Lang-Arg |
+-- ================================================================================================+
+-- map  / noremap   |    @   |   -    |    -    |   @    |   @    |    @     |    -     |    -     |
+-- nmap / nnoremap  |    @   |   -    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- map! / noremap!  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- imap / inoremap  |    -   |   @    |    -    |   -    |   -    |    -     |    -     |    -     |
+-- cmap / cnoremap  |    -   |   -    |    @    |   -    |   -    |    -     |    -     |    -     |
+-- vmap / vnoremap  |    -   |   -    |    -    |   @    |   @    |    -     |    -     |    -     |
+-- xmap / xnoremap  |    -   |   -    |    -    |   @    |   -    |    -     |    -     |    -     |
+-- smap / snoremap  |    -   |   -    |    -    |   -    |   @    |    -     |    -     |    -     |
+-- omap / onoremap  |    -   |   -    |    -    |   -    |   -    |    @     |    -     |    -     |
+-- tmap / tnoremap  |    -   |   -    |    -    |   -    |   -    |    -     |    @     |    -     |
+-- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
+---------------------------------------------------------------------------------------------------+
+
 return {
   ["<space><C-j>"] = {
     function()
@@ -113,6 +129,7 @@ return {
     },
     {
       function()
+        -- TODO: Fix this
         require("builtin.scroll").scroll_half_screen_right_i_mode()
       end,
       "i",
@@ -122,6 +139,7 @@ return {
   ["<C-S-h>"] = {
     {
       function()
+        -- TODO: Fix this
         return require("builtin.scroll").scroll_half_screen_left()
       end,
       { "n", "x" },
@@ -137,14 +155,15 @@ return {
   },
   ["<C-Space><C-j>"] = {
     function()
-      local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
-      local botline = wininfo.botline
-      local line = vim.fn.line(".")
-      if botline == line then
-        return "<C-b>zb"
-      else
-        return "zb"
-      end
+      return require("builtin.scroll-cursor").scroll_down()
+    end,
+    "n",
+    expr = true,
+    desc = "line [count] at bottom of window (default cursor line)(leave the cursor in the same column.)",
+  },
+  ["<C-Space>j"] = {
+    function()
+      return require("builtin.scroll-cursor").scroll_down()
     end,
     "n",
     expr = true,
@@ -152,29 +171,50 @@ return {
   },
   ["<C-Space><C-k>"] = {
     function()
-      local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
-      local topline = wininfo.topline
-      local line = vim.fn.line(".")
-      if topline == line then
-        return "<C-f>zt"
-      else
-        return "zt"
-      end
+      return require("builtin.scroll-cursor").scroll_up()
+    end,
+    "n",
+    expr = true,
+    desc = "line [count] at top of window (default cursor line)(leave the cursor in the same column.)",
+  },
+  ["<C-Space>k"] = {
+    function()
+      return require("builtin.scroll-cursor").scroll_up()
     end,
     "n",
     expr = true,
     desc = "line [count] at top of window (default cursor line)(leave the cursor in the same column.)",
   },
   ["<C-Space><C-l>"] = {
-    "<S-Space>L",
+    function()
+      return require("builtin.scroll-cursor").scroll_right()
+    end,
     "n",
-    remap = true,
+    expr = true,
+    desc = "Scroll the text horizontally to position the cursor at the end (right side) of the screen.",
+  },
+  ["<C-Space>l"] = {
+    function()
+      return require("builtin.scroll-cursor").scroll_right()
+    end,
+    "n",
+    expr = true,
     desc = "Scroll the text horizontally to position the cursor at the end (right side) of the screen.",
   },
   ["<C-Space><C-h>"] = {
-    "<S-space>H",
+    function()
+      return require("builtin.scroll-cursor").scroll_left()
+    end,
     "n",
-    remap = true,
+    expr = true,
+    desc = "Scroll the text horizontally to position the cursor at the start (left side) of the screen.",
+  },
+  ["<C-Space>h"] = {
+    function()
+      return require("builtin.scroll-cursor").scroll_left()
+    end,
+    "n",
+    expr = true,
     desc = "Scroll the text horizontally to position the cursor at the start (left side) of the screen.",
   },
   ["<C-Space><C-n>"] = {
@@ -182,10 +222,25 @@ return {
     "n",
     desc = "line [count] at center of window (default cursor line)(leave the cursor in the same column)",
   },
-  ["<C-Space><C-m>"] = {
-    "<S-space>M",
+  ["<C-Space>n"] = {
+    "zz",
     "n",
-    remap = true,
+    desc = "line [count] at center of window (default cursor line)(leave the cursor in the same column)",
+  },
+  ["<C-Space><C-m>"] = {
+    function()
+      return require("builtin.scroll-cursor").scroll_row_center()
+    end,
+    "n",
+    expr = true,
+    desc = "col at center of window (default cursor col)(leave the cursor in the same row)",
+  },
+  ["<C-Space>m"] = {
+    function()
+      return require("builtin.scroll-cursor").scroll_row_center()
+    end,
+    "n",
+    expr = true,
     desc = "col at center of window (default cursor col)(leave the cursor in the same row)",
   },
   ["<S-ScrollWheelDown>"] = {

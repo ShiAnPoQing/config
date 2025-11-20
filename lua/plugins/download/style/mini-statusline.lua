@@ -1,6 +1,6 @@
 return {
   "nvim-mini/mini.statusline",
-  version = "*",
+  branck = "*",
   config = function()
     require("mini.statusline").setup()
   end,

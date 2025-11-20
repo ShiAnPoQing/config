@@ -1,82 +1,16 @@
 {
   "plugins": {
-    "LuaSnip": [],
-    "blink.cmp": {
-      "rev": "b19413d214068f316c78978b08264ed1c41830ec",
-      "src": "https://github.com/saghen/blink.cmp"
+    "native-packer": {
+      "rev": "612dc39e31259ff43b31714126fac89bb3b9c996",
+      "src": "https://github.com/BrokenSunny/native-packer"
     },
-    "conform.nvim": [],
-    "everforest": {
-      "rev": "17f101d",
-      "src": "https://github.com/sainnhe/everforest"
-    },
-    "eye-track.nvim": [],
-    "flash.nvim": {
-      "rev": "fcea7ff883235d9024dc41e638f164a450c14ca2",
-      "src": "https://github.com/folke/flash.nvim"
-    },
-    "friendly-snippets": [],
-    "gitsigns.nvim": [],
-    "grug-far.nvim": [],
-    "gruvbox.nvim": [],
-    "kanagawa.nvim": [],
-    "lazydev.nvim": [],
-    "lualine.nvim": [],
-    "markdown-preview.nvim": [],
-    "mini.icons": [],
-    "neo-packer": {
-      "rev": "f840f36",
-      "src": "https://github.com/BrokenSunny/neo-packer"
-    },
-    "neo-tree.nvim": {
-      "version": "'v3.x'"
-    },
-    "nordic.nvim": [],
-    "nui.nvim": [],
     "nvim-autopairs": {
       "rev": "7a2c97cccd60abc559344042fefb1d5a85b3e33b",
       "src": "https://github.com/windwp/nvim-autopairs"
     },
-    "nvim-dap": [],
-    "nvim-dap-ui": [],
-    "nvim-dap-virtual-text": [],
-    "nvim-deus": [],
-    "nvim-highlite": [],
-    "nvim-navic": [],
-    "nvim-nio": [],
-    "nvim-treesitter": {
-      "version": "'main'"
-    },
-    "nvim-web-devicons": {
-      "rev": "8dcb311b0c92d460fac00eac706abd43d94d68af",
-      "src": "https://github.com/nvim-tree/nvim-web-devicons"
-    },
-    "oil.nvim": [],
-    "one-small-step-for-vimkind": [],
-    "onedarkpro.nvim": [],
-    "onenord.nvim": [],
-    "paradox.nvim": {
-      "rev": "92ce09d",
-      "src": "https://github.com/BrokenSunny/paradox.nvim"
-    },
-    "plenary.nvim": [],
-    "showkeys": {
-      "rev": "cb0a502",
-      "src": "https://github.com/nvzone/showkeys"
-    },
-    "snacks.nvim": [],
-    "supermaven-nvim": {
-      "rev": "07d20fc",
-      "src": "https://github.com/supermaven-inc/supermaven-nvim"
-    },
-    "todo-comments.nvim": [],
-    "tokyonight.nvim": [],
-    "trouble.nvim": [],
-    "undotree": [],
-    "vague.nvim": [],
-    "vim-moonfly-colors": [],
-    "vim-tmux-navigator": [],
-    "vimtex": [],
-    "winshift.nvim": []
+    "yanky.nvim": {
+      "rev": "04775cc6e10ef038c397c407bc17f00a2f52b378",
+      "src": "https://github.com/gbprod/yanky.nvim"
+    }
   }
 }

@@ -1,19 +1,11 @@
 return {
   "L3MON4D3/LuaSnip",
-  event = "InsertEnter",
-  -- version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
-  run = function(plug)
-    vim
-      .system({ "make", "install_jsregexp" }, {
-        cwd = plug.path,
-        text = true,
-      })
-      :wait()
-  end,
-  build = "make install_jsregexp",
-  depend = {
+  dependencies = {
     "rafamadriz/friendly-snippets",
   },
+  event = "InsertEnter",
+  -- version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
+  build = "mark install_jsregexp",
   config = function()
     require("luasnip.loaders.from_lua").lazy_load({ paths = vim.fn.stdpath("config") .. "/lua/snippets/" })
 

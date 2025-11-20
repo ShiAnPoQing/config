@@ -1,6 +1,6 @@
 return {
   "nvim-lualine/lualine.nvim",
-  depend = {
+  dependencies = {
     "nvim-tree/nvim-web-devicons",
     "SmiteshP/nvim-navic",
   },

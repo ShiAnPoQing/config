@@ -9,7 +9,7 @@ function M.setup() end
 
 --- @param opts LineConcatOpts
 function M.line_concat(opts)
-  require("concat-line.core")(opts)
+  require("concat-line.core").line_concat(opts)
 end
 
 return M
