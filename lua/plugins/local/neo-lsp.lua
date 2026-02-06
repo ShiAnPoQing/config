@@ -1,7 +1,7 @@
 return {
-  dir = "~/.config/nvim/pack/custom/opt/neo-lsp.nvim",
+  name = "neo-lsp.nvim",
   event = { "BufReadPre", "BufNewFile" },
-  dependencies = { "saghen/blink.cmp" },
+  depend = { "saghen/blink.cmp" },
   config = function(opt)
     require("neo-lsp").setup({
       enable = function(opts)
@@ -23,7 +23,7 @@ return {
     local Methods = vim.lsp.protocol.Methods
     local callbacks = {
       [Methods.textDocument_documentSymbol] = function(args)
-        require("simple-keymap").add({
+        require("native-packer.key").add({
           ["<leader>ds"] = {
             function()
               vim.lsp.buf.document_symbol()
@@ -34,20 +34,20 @@ return {
           },
         })
       end,
-      [Methods.textDocument_codeAction] = function(args)
+      [Methods.textDocument_codeAction] = function(args, client)
         local group = vim.api.nvim_create_augroup("LspCodeLens" .. args.buf, { clear = true })
         vim.api.nvim_create_autocmd("CursorHold", {
           group = group,
           buffer = args.buf,
           callback = function()
-            vim.lsp.codelens.refresh({ bufnr = args.buf })
+            vim.lsp.codelens.enable(true, { bufnr = args.buf })
           end,
         })
         vim.api.nvim_create_autocmd({ "CursorMoved", "InsertLeave" }, {
           group = group,
           buffer = args.buf,
           callback = function()
-            vim.lsp.codelens.clear(nil, args.buf)
+            vim.lsp.codelens.enable(false, { bufnr = args.buf })
           end,
         })
       end,
@@ -65,7 +65,7 @@ return {
         -- })
       end,
       [Methods.textDocument_inlayHint] = function(args)
-        require("simple-keymap").add({
+        require("native-packer.key").add({
           ["<leader>hi"] = {
             function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({}))
@@ -77,7 +77,7 @@ return {
         })
       end,
       [Methods.callHierarchy_incomingCalls] = function(args)
-        require("simple-keymap").add({
+        require("native-packer.key").add({
           ["<leader>ic"] = {
             function()
               vim.lsp.buf.incoming_calls()
@@ -89,7 +89,7 @@ return {
         })
       end,
       [Methods.textDocument_selectionRange] = function(args)
-        require("simple-keymap").add({
+        require("native-packer.key").add({
           ["er"] = {
             function()
               vim.lsp.buf.selection_range(vim.v.count1)
@@ -101,7 +101,7 @@ return {
         })
       end,
       [Methods.callHierarchy_outgoingCalls] = function(args)
-        require("simple-keymap").add({
+        require("native-packer.key").add({
           ["<leader>oc"] = {
             function()
               vim.lsp.buf.incoming_calls()
@@ -119,7 +119,7 @@ return {
         vim.lsp.linked_editing_range.enable(true, { client_id = client.id })
       end,
       [Methods.textDocument_definition] = function(args)
-        require("simple-keymap").add({
+        require("native-packer.key").add({
           ["gd"] = {
             function()
               vim.lsp.buf.definition()
@@ -131,7 +131,7 @@ return {
         })
       end,
       [Methods.textDocument_typeDefinition] = function(args)
-        require("simple-keymap").add({
+        require("native-packer.key").add({
           ["gy"] = {
             function()
               vim.lsp.buf.type_definition()
@@ -143,7 +143,7 @@ return {
         })
       end,
       [Methods.textDocument_hover] = function(args)
-        require("simple-keymap").add({
+        require("native-packer.key").add({
           ["<leader>k"] = {
             function()
               vim.lsp.buf.hover()
@@ -155,7 +155,7 @@ return {
         })
       end,
       [Methods.textDocument_signatureHelp] = function(args)
-        require("simple-keymap").add({
+        require("native-packer.key").add({
           ["gs"] = {
             function()
               vim.lsp.buf.signature_help()

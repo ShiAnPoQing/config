@@ -1,6 +1,6 @@
 local M = {}
 
-function M.setup(opts)
+function M.setup()
   vim.keymap.set({ "n", "x" }, ".", function()
     require("repeat.core"):operation()
   end, {

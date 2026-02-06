@@ -65,11 +65,11 @@ local L = function()
 end
 
 local J = function()
-  vim.api.nvim_feedkeys(vim.v.count1 * 3 .. "j", "n", false)
+  vim.api.nvim_feedkeys(vim.v.count1 * 3 .. "gj", "n", false)
 end
 
 local K = function()
-  vim.api.nvim_feedkeys(vim.v.count1 * 3 .. "k", "n", false)
+  vim.api.nvim_feedkeys(vim.v.count1 * 3 .. "gk", "n", false)
 end
 
 return {
@@ -305,16 +305,16 @@ return {
     desc = "Screen Bottom",
   },
   ["am"] = {
-    function()
-      ---@diagnostic disable-next-line: undefined-field
-      local virtualedit = vim.opt_local.virtualedit:get()
-      if virtualedit[1] ~= "all" then
-        return "gM"
-      end
-      return "gm"
-    end,
+    "gm",
+    -- function()
+    --   ---@diagnostic disable-next-line: undefined-field
+    --   local virtualedit = vim.opt_local.virtualedit:get()
+    --   if virtualedit[1] ~= "all" then
+    --     return "gM"
+    --   end
+    --   return "gm"
+    -- end,
     { "n", "x", "o" },
-    expr = true,
   },
   ["an"] = {
     "M",
@@ -361,7 +361,7 @@ return {
   },
   ["sh"] = {
     function()
-      require("builtin.scroll-cursor").scroll_left()
+      return require("builtin.scroll-cursor").scroll_left()
     end,
     { "n", "x" },
     expr = true,
@@ -369,7 +369,7 @@ return {
   },
   ["sl"] = {
     function()
-      require("builtin.scroll-cursor").scroll_right()
+      return require("builtin.scroll-cursor").scroll_right()
     end,
     { "n", "x" },
     expr = true,

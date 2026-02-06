@@ -1,9 +1,16 @@
 return {
   "saghen/blink.cmp",
-  dependencies = {
-    { 'L3MON4D3/LuaSnip', version = 'v2.*' },
+  depend = {
+    -- { 'L3MON4D3/LuaSnip', version = 'v2.*' },
   },
-  build = "cargo +nightly build --release",
+  run = function(plug)
+    vim
+      .system({ "cargo", "+nightly", "build", "--release" }, {
+        cwd = plug.path,
+        text = true,
+      })
+      :wait()
+  end,
   event = { "InsertEnter", "CmdlineEnter" },
   config = function()
     require("blink-cmp").setup({
@@ -155,10 +162,10 @@ return {
             module = "lazydev.integrations.blink",
             score_offset = 100,
           },
-          annotation = {
-            name = "Annotation",
-            module = "blink-cmp-lua-annotation",
-          },
+          -- annotation = {
+          --   name = "Annotation",
+          --   module = "blink-cmp-lua-annotation",
+          -- },
         },
       },
       fuzzy = { implementation = "prefer_rust_with_warning" },

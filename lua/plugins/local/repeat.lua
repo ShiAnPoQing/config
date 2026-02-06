@@ -1,6 +1,6 @@
 return {
-  dir = "~/.config/nvim/pack/custom/opt/repeat",
+  name = "repeat",
   config = function()
-    require("repeat").setup({})
+    require("repeat").setup()
   end,
 }

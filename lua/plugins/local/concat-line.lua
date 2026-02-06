@@ -1,38 +1,39 @@
 return {
-  dir = "~/.config/nvim/pack/custom/opt/concat-line",
-  keys = {
-    {
-      "-",
+  name = "concat-line",
+  key = {
+    ["-"] = {
       function()
         require("concat-line").line_concat({ join_char = " " })
         return "g@"
       end,
-      mode = { "n", "x" },
+      { "n", "x" },
       expr = true,
     },
-    {
-      "--",
-      function()
-        require("concat-line").line_concat({ join_char = " " })
-        return "g@j"
-      end,
-      expr = true,
+    ["--"] = {
+      {
+        function()
+          require("concat-line").line_concat({ join_char = " " })
+          return "g@j"
+        end,
+        "n",
+        expr = true,
+        exclude_ft = "oil",
+      },
     },
-    {
-      "g-",
+    ["g-"] = {
       function()
         require("concat-line").line_concat({ trim_blank = false })
         return "g@"
       end,
-      mode = { "n", "x" },
+      { "n", "x" },
       expr = true,
     },
-    {
-      "g--",
+    ["g--"] = {
       function()
         require("concat-line").line_concat({ trim_blank = false })
         return "g@j"
       end,
+      "n",
       expr = true,
     },
   },

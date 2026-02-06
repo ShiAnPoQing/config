@@ -1,14 +1,14 @@
 return {
-  dir = "~/.config/nvim/pack/custom/opt/code-action.nvim",
-  keys = {
-    {
-      "<leader>ca",
+  name = "code-action.nvim",
+  key = {
+    ["<leader>ca"] = {
       function()
         require("code-action").show()
       end,
+      "n",
     },
   },
-  config = function(opt)
+  config = function()
     require("code-action").setup()
   end,
 }

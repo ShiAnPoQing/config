@@ -1,6 +1,6 @@
 return {
   name = "move-line",
-  keys = {
+  key = {
     ["<C-down>"] = {
       function()
         local function callback()

@@ -43,7 +43,7 @@ return {
     {
       function()
         local function callback()
-          vim.api.nvim_feedkeys("b", "n", false)
+          vim.api.nvim_feedkeys(vim.v.count1 .. "b", "n", false)
           require("repeat").set_motion(callback)
         end
         callback()
@@ -60,7 +60,7 @@ return {
     {
       function()
         local function callback()
-          vim.api.nvim_feedkeys("e", "n", false)
+          vim.api.nvim_feedkeys(vim.v.count1 .. "e", "n", false)
           require("repeat").set_motion(callback)
         end
         callback()
@@ -77,7 +77,7 @@ return {
     {
       function()
         local function callback()
-          vim.api.nvim_feedkeys("B", "n", false)
+          vim.api.nvim_feedkeys(vim.v.count1 .. "B", "n", false)
           require("repeat").set_motion(callback)
         end
         callback()
@@ -99,7 +99,7 @@ return {
         end
         callback()
       end,
-      { "n", "x", "o" },
+      { "n", "x" },
     },
     {
       "E",
@@ -111,7 +111,7 @@ return {
     {
       function()
         local function callback()
-          vim.api.nvim_feedkeys("ge", "n", false)
+          vim.api.nvim_feedkeys(vim.v.count1 .. "ge", "n", false)
           require("repeat").set_motion(callback)
         end
         callback()
@@ -126,12 +126,16 @@ return {
     {
       function()
         local function callback()
-          vim.api.nvim_feedkeys("w", "n", false)
+          vim.api.nvim_feedkeys(vim.v.count1 .. "w", "n", false)
           require("repeat").set_motion(callback)
         end
         callback()
       end,
-      { "n", "o" },
+      "n",
+    },
+    {
+      "w",
+      "o",
     },
     { "lwh", "x", desc = "Forword to the start of the word[count](right exclusion)" },
     desc = "Forword to the start of the word[count]",
@@ -140,7 +144,7 @@ return {
     {
       function()
         local function callback()
-          vim.api.nvim_feedkeys("gE", "n", false)
+          vim.api.nvim_feedkeys(vim.v.count1 .. "gE", "n", false)
           require("repeat").set_motion(callback)
         end
         callback()
@@ -155,12 +159,17 @@ return {
     {
       function()
         local function callback()
-          vim.api.nvim_feedkeys("W", "n", false)
+          vim.api.nvim_feedkeys(vim.v.count1 .. "W", "n", false)
           require("repeat").set_motion(callback)
         end
         callback()
       end,
-      { "n", { "o", desc = "Forword to the start of the WORD[count](right exclusion)" } },
+      "n",
+    },
+    {
+      "W",
+      "o",
+      desc = "Forword to the start of the WORD[count](right exclusion)",
     },
     { "lWh", "x", desc = "Forword to the start of the WORD[count](right exclusion)" },
     desc = "Forword to the start of the WORD[count]",

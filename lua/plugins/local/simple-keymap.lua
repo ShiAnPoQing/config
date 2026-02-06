@@ -1,12 +1,11 @@
 return {
-  dir = "~/.config/nvim/pack/custom/opt/simple-keymap.nvim",
+  name = "simple-keymap.nvim",
   priority = 1000,
   config = function()
     require("simple-keymap").setup({
       add = {
-        "keymaps/",
-        "keymaps/select-mode",
-        "test",
+        -- "keymaps/",
+        -- "keymaps/select-mode",
       },
       del = {
         ["in"] = { "x" },

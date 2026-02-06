@@ -1,11 +1,18 @@
 return {
   "L3MON4D3/LuaSnip",
-  dependencies = {
+  depend = {
     "rafamadriz/friendly-snippets",
   },
   event = "InsertEnter",
   -- version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
-  build = "mark install_jsregexp",
+  run = function(plug)
+    vim
+      .system({ "make", "install_jsregexp" }, {
+        cwd = plug.path,
+        text = true,
+      })
+      :wait()
+  end,
   config = function()
     require("luasnip.loaders.from_lua").lazy_load({ paths = vim.fn.stdpath("config") .. "/lua/snippets/" })
 
@@ -21,7 +28,7 @@ return {
     ls.config.set_config(options)
     ls.config.setup({ store_selection_keys = "<Tab>" })
 
-    require("simple-keymap").add({
+    require("native-packer.key").add({
       ["<leader>sc"] = {
         function()
           require("luasnip").cleanup()

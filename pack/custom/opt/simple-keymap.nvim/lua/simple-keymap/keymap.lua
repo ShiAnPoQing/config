@@ -72,8 +72,8 @@ end
 local function collect_filetype_keymap(filetype, callback)
   if type(filetype) == "string" then
     M.filetypes[filetype] = M.filetypes[filetype] or {}
-    table.insert(M.filetypes[filetype], function()
-      callback()
+    table.insert(M.filetypes[filetype], function(buf)
+      callback(buf)
     end)
     return
   end
@@ -127,8 +127,10 @@ local function set_keymap(lhs, rhs, mode, opts)
   local keymap_opts = get_keymap_opts(opts)
 
   if opts.filetype then
-    collect_filetype_keymap(opts.filetype, function()
-      pcall(vim.keymap.set, mode, lhs, rhs, keymap_opts)
+    collect_filetype_keymap(opts.filetype, function(buf)
+      local opt = vim.deepcopy(keymap_opts)
+      opt.buffer = buf
+      pcall(vim.keymap.set, mode, lhs, rhs, opt)
     end)
     return
   end
@@ -294,7 +296,7 @@ function M.filetype_load()
     callback = function()
       local callbacks = M.filetypes[vim.bo.filetype] or {}
       for _, cb in ipairs(callbacks) do
-        cb()
+        cb(vim.api.nvim_get_current_buf())
       end
     end,
   })

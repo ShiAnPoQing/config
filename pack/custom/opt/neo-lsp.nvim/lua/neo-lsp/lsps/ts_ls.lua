@@ -8,6 +8,7 @@ return {
     "typescript",
     "typescriptreact",
     "typescript.jsx",
+    "tsx",
   },
   init_options = {
     hostInfo = "neovim",

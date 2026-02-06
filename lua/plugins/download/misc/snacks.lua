@@ -1,26 +1,26 @@
 return {
   "folke/snacks.nvim",
   priority = 1000,
-  keys = {
-    {
-      "<leader>e",
+  key = {
+    ["<leader>e"] = {
       function()
         Snacks.explorer()
       end,
+      "n",
       desc = "File Explorer",
     },
-    {
-      "<leader>,",
+    ["<leader>,"] = {
       function()
         Snacks.picker.buffers()
       end,
+      "n",
       desc = "Buffers",
     },
-    {
-      "<leader>z",
+    ["<leader>z"] = {
       function()
         Snacks.zen()
       end,
+      "n",
       desc = "Toggle Zen Mode",
     },
   },
@@ -29,10 +29,10 @@ return {
       bigfile = { enabled = true },
       dashboard = { enabled = false },
       explorer = { enabled = true },
-      indent = { enabled = true },
+      indent = { enabled = false },
       input = { enabled = true },
       picker = { enabled = true },
-      notifier = { enabled = true },
+      notifier = { enabled = false },
       quickfile = { enabled = true },
       scope = { enabled = false },
       scroll = { enabled = false },

@@ -75,7 +75,7 @@ return {
       "Marginpar on page",
     }
 
-    require("simple-keymap").add({
+    require("native-packer.key").add({
       ["cem"] = {
         "<Plug>(vimtex-delim-delete)",
         "n",

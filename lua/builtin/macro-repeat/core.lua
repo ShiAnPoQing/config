@@ -36,7 +36,7 @@ end
 
 local function get_real_keys(keys)
   local new_keys = {}
-  local keymaps = require("simple-keymap").get_keymaps()
+  local keymaps = require("native-packer.key").get("ALL")
   local lhs_keys = {}
 
   for key, _ in pairs(keymaps) do
@@ -107,7 +107,7 @@ function M.macro_repeat(register_name)
       return
     end
     local key = table.remove(new_keys_copy, 1)
-    local keymap = require("simple-keymap").get(key)
+    local keymap = require("native-packer.key").get(key)
     feedkeys(key)
 
     if keymap then

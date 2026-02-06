@@ -15,3 +15,6 @@
     command: (_) @command.name
     arg: (_) @command.arg) @command
 
+
+(line_comment) @comment.outer
+(line_comment) @comment.inner

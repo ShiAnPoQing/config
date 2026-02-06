@@ -9,9 +9,10 @@ end
 
 return {
   "stevearc/oil.nvim",
-  dependencies = { "echasnovski/mini.icons" },
-  keys = {
-    { "<leader>oi", "<cmd>Oil<cr>" },
+  depend = { "echasnovski/mini.icons" },
+  cmd = { "Oil" },
+  key = {
+    ["<leader>oi"] = { "<cmd>Oil<cr>", "n" },
   },
   config = function()
     require("oil").setup({

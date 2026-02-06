@@ -28,8 +28,8 @@ end
 _G.MyTabLine()
 
 return {
-  dir = "~/.config/nvim/pack/custom/opt/neo-option.nvim",
-  config = function(opt)
+  name = "neo-option.nvim",
+  config = function()
     require("neo-option").setup({
       clipboard = { "unnamedplus" },
       updatetime = 500,
@@ -48,6 +48,7 @@ return {
       -- statusline = "%<%f %{luaeval('vim.api.nvim_get_mode().mode')}",
 
       number = true,
+      numberwidth = 1,
       relativenumber = true,
       hlsearch = true,
       incsearch = true,
@@ -69,7 +70,6 @@ return {
       scrolloff = 0,
       splitright = true,
       splitbelow = true,
-      -- -- cursorline = true,
       swapfile = false,
       backup = false,
       undofile = true,
@@ -79,7 +79,6 @@ return {
       -- -- autochdir = true,
       autoread = true,
       signcolumn = "no",
-      -- signcolumn = "yes:1",
       -- signcolumn = "yes:2",
       laststatus = 3,
 

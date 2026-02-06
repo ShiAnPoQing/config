@@ -1,8 +1,9 @@
 return {
   "nvim-treesitter/nvim-treesitter",
-  lazy = false,
-  branch = "main",
-  build = ":TSUpdate",
+  version = "main",
+  run = function()
+    vim.cmd("TSUpdate")
+  end,
   config = function()
     local langs = {
       "c",
@@ -15,8 +16,6 @@ return {
       "go",
       "java",
       "rust",
-      "javascriptreact",
-      "typescriptreact",
       "kdl",
       "latex",
       "cmake",
@@ -30,11 +29,8 @@ return {
       "css",
       "vimdoc",
       "xml",
-      "qml",
-      "tex",
       "jsdoc",
       "json",
-      "jsonc",
       "diff",
       "query",
       "vue",
@@ -43,7 +39,7 @@ return {
     TS.setup({})
     TS.install(langs)
     vim.api.nvim_create_autocmd("FileType", {
-      pattern = langs,
+      pattern = vim.list_extend(langs, { "typescriptreact", "javascriptreact", "tex", "jsonc" }),
       callback = function()
         vim.treesitter.start()
       end,

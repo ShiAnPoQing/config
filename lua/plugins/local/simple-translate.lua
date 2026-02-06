@@ -1,13 +1,13 @@
 return {
-  dir = "~/.config/nvim/pack/custom/opt/simple-translate.nvim",
-  keys = {
-    {
-      "<leader>1",
+  name = "simple-translate.nvim",
+  key = {
+    ["<leader>1"] = {
       function()
         require("simple-translate").visual_translate()
       end,
-      mode = "x",
+      "x",
+      desc = "Translate visual selection",
     },
   },
-  config = function(opt) end,
+  config = function() end,
 }

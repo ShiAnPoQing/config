@@ -9,7 +9,7 @@ function M.translate(content, callback)
   end)
 end
 
-function M.visual_translate(opt)
+function M.visual_translate()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, false, true), "nx", true)
   local buf = vim.api.nvim_get_current_buf()
   local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(buf, "<"))

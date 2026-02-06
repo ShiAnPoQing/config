@@ -33,7 +33,7 @@ return {
     conform.formatters.latexindent = {
       prepend_args = { "-l", vim.fn.expand("~/.config/latexindent/indentconfig.yaml"), "-m" },
     }
-    require("simple-keymap").add({
+    require("native-packer.key").add({
       ["<leader>="] = {
         function()
           conform.format({ async = true, lsp_fallback = true })

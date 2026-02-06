@@ -1,8 +1,8 @@
 return {
   cmd = { "vtsls", "--stdio" },
   filetypes = {
-    "typescript",
-    "javascript",
+    -- "typescript",
+    -- "javascript",
     -- "javascriptreact",
     -- "typescriptreact",
     "vue",
