@@ -27,7 +27,7 @@ require("native-packer").setup({
   require("plugins.download.misc.tiny-inline-diagnostic"),
   require("plugins.download.misc.autopairs"),
   -- require("plugins.download.misc.undotree"),
-  require("plugins.download.misc.supermaven"),
+  -- require("plugins.download.misc.supermaven"),
   require("plugins.download.misc.grug-far"),
   require("plugins.download.misc.toggleterm"),
   -- require("plugins.download.misc.todo-comments"),

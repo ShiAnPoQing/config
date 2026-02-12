@@ -10,6 +10,16 @@ return {
     "typescript.jsx",
     "tsx",
   },
+  -- root_dir = function(bufnr, on_dir)
+  -- local root_dir = vim.fn.getcwd()
+  -- local lines = vim.fn.readfile(root_dir .. "/package.json")
+  -- local line = table.concat(lines, "")
+  -- local is_vue_project = line:match("vue")
+  --
+  -- if not is_vue_project then
+  --   on_dir(root_dir)
+  -- end
+  -- end,
   init_options = {
     hostInfo = "neovim",
   },
