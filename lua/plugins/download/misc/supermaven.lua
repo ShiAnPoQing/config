@@ -5,8 +5,8 @@ return {
     require("supermaven-nvim").setup({
       keymaps = {
         accept_suggestion = "<C-\\>",
-        clear_suggestion = "<M-\\>",
-        accept_word = "<C-;>",
+        clear_suggestion = "<C-Space><C-\\>",
+        accept_word = "<M-\\>",
       },
       condition = function()
         local filetype = vim.bo.filetype

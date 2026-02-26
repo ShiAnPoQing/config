@@ -52,5 +52,13 @@ return {
       "o",
       desc = "Comment textobject",
     },
+    {
+      function()
+        return "<Esc>" .. require("vim._comment").operator() .. "_a"
+      end,
+      "i",
+      desc = "Toggle Comment",
+      expr = true,
+    },
   },
 }
