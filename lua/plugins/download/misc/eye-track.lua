@@ -331,6 +331,24 @@ return {
       end,
       { "n", "x", "o" },
     },
+    ["0sn"] = {
+      function()
+        local cursor = vim.api.nvim_win_get_cursor(0)
+        local matched
+        require("eye-track.plugins.line")({
+          matched = function(ctx)
+            matched = true
+            local topline = ctx.data.topline
+            local jump = (topline + ctx.data.offset) .. "zt"
+            vim.cmd("keepjumps normal! " .. jump)
+          end,
+        })
+        if matched then
+          vim.api.nvim_win_set_cursor(0, { cursor[1], cursor[2] })
+        end
+      end,
+      { "n", "x" },
+    },
   },
   config = function()
     require("eye-track").setup({})
@@ -525,7 +543,7 @@ return {
 --       end,
 --       "n",
 --     },
---     ["0k"] = {
+--     ["nk"] = {
 --       {
 --         function()
 --           local jump
