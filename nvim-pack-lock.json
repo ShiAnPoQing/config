@@ -56,6 +56,10 @@
       "rev": "5231c62aa83c2f8dc8e7ba957aa77098cda1257d",
       "src": "https://github.com/folke/lazydev.nvim"
     },
+    "linefuse.nvim": {
+      "rev": "2ccdf06f0068d0ca6b971333f28ead2ff3f26e21",
+      "src": "https://github.com/BrokenSunny/linefuse.nvim"
+    },
     "lualine.nvim": {
       "rev": "47f91c416daef12db467145e16bed5bbfe00add8",
       "src": "https://github.com/nvim-lualine/lualine.nvim"
@@ -161,6 +165,10 @@
     "render-markdown.nvim": {
       "rev": "48b4175dbca8439d30c1f52231cbe5a712c8f9d9",
       "src": "https://github.com/MeanderingProgrammer/render-markdown.nvim"
+    },
+    "repeat.nvim": {
+      "rev": "e6bd5e853ebcc984a0ff42fcbd3bc7e217c1c4c0",
+      "src": "https://github.com/BrokenSunny/repeat.nvim"
     },
     "showkeys": {
       "rev": "cb0a50296f11f1e585acffba8c253b9e8afc1f84",

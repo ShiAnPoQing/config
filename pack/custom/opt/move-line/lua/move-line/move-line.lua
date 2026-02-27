@@ -2,8 +2,8 @@ local utils = require("utils.mark")
 
 local M = {}
 
---- @param dir "up"|"down"
-function M.move_line(dir)
+--- @param count integer
+function M.move_line(count)
   local modifiable = vim.api.nvim_get_option_value("modifiable", {
     buf = vim.api.nvim_get_current_buf(),
   })
@@ -11,7 +11,8 @@ function M.move_line(dir)
     return
   end
   local mode = vim.api.nvim_get_mode().mode
-  local count = vim.v.count1
+  local dir = count > 0 and "down" or "up"
+  count = math.abs(count)
 
   if mode == "n" or mode == "i" then
     local line_count = vim.api.nvim_buf_line_count(0)

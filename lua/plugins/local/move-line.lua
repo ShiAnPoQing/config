@@ -4,7 +4,7 @@ return {
     ["<C-down>"] = {
       function()
         local function callback()
-          require("move-line").move_line("down")
+          require("move-line").move_line(vim.v.count1)
           require("repeat").set_operation(callback)
         end
         callback()
@@ -14,7 +14,7 @@ return {
     ["<C-up>"] = {
       function()
         local function callback()
-          require("move-line").move_line("up")
+          require("move-line").move_line(-vim.v.count1)
           require("repeat").set_operation(callback)
         end
         callback()

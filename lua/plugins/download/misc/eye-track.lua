@@ -1,6 +1,28 @@
 return {
   "BrokenSunny/eye-track.nvim",
   key = {
+    ["0<C-up>"] = {
+      function()
+        require("eye-track.plugins.line")({
+          matched = function(ctx)
+            require("move-line").move_line(ctx.data.offset)
+          end,
+        })
+      end,
+      { "n", "x" },
+      depend = "move-line",
+    },
+    ["0<C-down>"] = {
+      function()
+        require("eye-track.plugins.line")({
+          matched = function(ctx)
+            require("move-line").move_line(ctx.data.offset)
+          end,
+        })
+      end,
+      { "n", "x" },
+      depend = "move-line",
+    },
     ["0V"] = {
       function()
         local cursor = vim.api.nvim_win_get_cursor(0)
@@ -146,7 +168,7 @@ return {
       function()
         require("eye-track.plugins.word")({
           keyword = function(context)
-            return context.word_inner
+            return context.WORD_inner
           end,
           label_position = "0",
           hl_group = "Visual",
@@ -165,6 +187,42 @@ return {
         require("eye-track.plugins.word")({
           keyword = function(context)
             return context.word_inner
+          end,
+          label_position = "0",
+          hl_group = "Visual",
+          matched = function(ctx)
+            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
+            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.start_col })
+            vim.api.nvim_feedkeys("v", "nx", false)
+            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.end_col - 1 })
+          end,
+        })
+      end,
+      { "x", "o" },
+    },
+    ["0el"] = {
+      function()
+        require("eye-track.plugins.word")({
+          keyword = function()
+            return "^\\s*\\zs\\S.*\\S\\ze\\s*$"
+          end,
+          label_position = "0",
+          hl_group = "Visual",
+          matched = function(ctx)
+            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
+            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.start_col })
+            vim.api.nvim_feedkeys("v", "nx", false)
+            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.end_col - 1 })
+          end,
+        })
+      end,
+      { "x", "o" },
+    },
+    ["0wl"] = {
+      function()
+        require("eye-track.plugins.word")({
+          keyword = function()
+            return "^\\zs\\s*\\S.*\\S\\ze\\s*$"
           end,
           label_position = "0",
           hl_group = "Visual",
@@ -238,14 +296,14 @@ return {
       end,
       "n",
     },
-    ["0k"] = {
+    ["0m"] = {
       {
         function()
           local jump
           require("eye-track.plugins.line")({
             matched = function(ctx)
               local offset = ctx.data.offset
-              jump = offset > 0 and "k" or "j"
+              jump = offset < 0 and "k" or "j"
               jump = math.abs(offset) .. jump
             end,
           })
@@ -334,18 +392,14 @@ return {
     ["0sn"] = {
       function()
         local cursor = vim.api.nvim_win_get_cursor(0)
-        local matched
         require("eye-track.plugins.line")({
           matched = function(ctx)
-            matched = true
-            local topline = ctx.data.topline
-            local jump = (topline + ctx.data.offset) .. "zt"
-            vim.cmd("keepjumps normal! " .. jump)
+            local row = ctx.data.topline - ctx.data.offset
+            row = row <= 0 and 1 or row
+            vim.cmd("keepjumps normal! " .. row .. "zt")
           end,
         })
-        if matched then
-          vim.api.nvim_win_set_cursor(0, { cursor[1], cursor[2] })
-        end
+        vim.api.nvim_win_set_cursor(0, { cursor[1], cursor[2] })
       end,
       { "n", "x" },
     },

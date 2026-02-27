@@ -1,9 +1,9 @@
 return {
-  name = "concat-line",
+  "BrokenSunny/linefuse.nvim",
   key = {
     ["-"] = {
       function()
-        require("concat-line").line_concat({ join_char = " " })
+        require("linefuse").linefuse({ join_char = " " })
         return "g@"
       end,
       { "n", "x" },
@@ -12,7 +12,7 @@ return {
     ["--"] = {
       {
         function()
-          require("concat-line").line_concat({ join_char = " " })
+          require("linefuse").linefuse({ join_char = " " })
           return "g@j"
         end,
         "n",
@@ -22,7 +22,7 @@ return {
     },
     ["g-"] = {
       function()
-        require("concat-line").line_concat({ trim_blank = false })
+        require("linefuse").linefuse({ trim_blank = false })
         return "g@"
       end,
       { "n", "x" },
@@ -30,7 +30,7 @@ return {
     },
     ["g--"] = {
       function()
-        require("concat-line").line_concat({ trim_blank = false })
+        require("linefuse").linefuse({ trim_blank = false })
         return "g@j"
       end,
       "n",
@@ -38,6 +38,6 @@ return {
     },
   },
   config = function()
-    require("concat-line").setup()
+    require("linefuse").setup()
   end,
 }

@@ -1,5 +1,5 @@
 return {
-  name = "repeat",
+  "BrokenSunny/repeat.nvim",
   config = function()
     require("repeat").setup()
   end,

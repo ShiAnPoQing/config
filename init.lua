@@ -4,10 +4,10 @@ require("command")
 require("autocmds")
 require("keymaps")
 require("native-packer").setup({
-  require("plugins.local.repeat"),
+  require("plugins.download.misc.repeat"),
   require("plugins.local.undotree"),
   require("plugins.local.neo-option"),
-  require("plugins.local.concat-line"),
+  require("plugins.download.misc.linefuse"),
   require("plugins.local.move-line"),
   require("plugins.local.neo-lsp"),
   require("plugins.download.style"),

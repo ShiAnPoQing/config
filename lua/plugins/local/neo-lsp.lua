@@ -2,7 +2,7 @@ return {
   name = "neo-lsp.nvim",
   event = { "BufReadPre", "BufNewFile" },
   depend = { "saghen/blink.cmp" },
-  config = function(opt)
+  config = function()
     require("neo-lsp").setup({
       enable = function(opts)
         return {
@@ -35,21 +35,21 @@ return {
         })
       end,
       [Methods.textDocument_codeAction] = function(args, client)
-        local group = vim.api.nvim_create_augroup("LspCodeLens" .. args.buf, { clear = true })
-        vim.api.nvim_create_autocmd("CursorHold", {
-          group = group,
-          buffer = args.buf,
-          callback = function()
-            vim.lsp.codelens.enable(true, { bufnr = args.buf })
-          end,
-        })
-        vim.api.nvim_create_autocmd({ "CursorMoved", "InsertLeave" }, {
-          group = group,
-          buffer = args.buf,
-          callback = function()
-            vim.lsp.codelens.enable(false, { bufnr = args.buf })
-          end,
-        })
+        -- local group = vim.api.nvim_create_augroup("LspCodeLens" .. args.buf, { clear = true })
+        -- vim.api.nvim_create_autocmd("CursorHold", {
+        --   group = group,
+        --   buffer = args.buf,
+        --   callback = function()
+        --     vim.lsp.codelens.enable(true, { bufnr = args.buf })
+        --   end,
+        -- })
+        -- vim.api.nvim_create_autocmd({ "CursorMoved", "InsertLeave" }, {
+        --   group = group,
+        --   buffer = args.buf,
+        --   callback = function()
+        --     vim.lsp.codelens.enable(false, { bufnr = args.buf })
+        --   end,
+        -- })
       end,
       [Methods.textDocument_documentHighlight] = function(args)
         -- local group = vim.api.nvim_create_augroup("document-highlight", { clear = false })
