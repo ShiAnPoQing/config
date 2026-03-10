@@ -1,6 +1,7 @@
 local M = {}
 
 --- @class NeovimOptionsSetupParam
+---@diagnostic disable-next-line: duplicate-doc-field
 --- @field paths table<string>
 
 local OPTIONS = {}

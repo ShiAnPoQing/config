@@ -29,6 +29,29 @@ function M.create()
       buf = M.buf,
     })
   end
+
+  vim.api.nvim_create_autocmd("BufWriteCmd", {
+    callback = function()
+      vim.print("hao")
+      -- local lines = vim.api.nvim_buf_get_lines(Buffer.buf, 0, -1, false)
+      -- for bufname, bufnr in pairs(Buffer.bufs.map) do
+      --   if not vim.list_contains(lines, bufname) then
+      --     if bufnr == vim.api.nvim_win_get_buf(current_win) then
+      --       vim.api.nvim_buf_call(bufnr, function()
+      --         vim.cmd("bd")
+      --       end)
+      --     else
+      --       vim.api.nvim_set_option_value("buflisted", false, {
+      --         buf = bufnr,
+      --       })
+      --       vim.api.nvim_buf_delete(bufnr, { force = true })
+      --     end
+      --   end
+      -- end
+      -- Buffer:update(Float.win, vim.api.nvim_win_get_buf(current_win))
+    end,
+    buffer = M.buf,
+  })
 end
 
 function M.delete()

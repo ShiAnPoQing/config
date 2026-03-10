@@ -11,7 +11,7 @@ return {
       pcall(vim.cmd, "cnewer" .. vim.v.count1)
     end,
     "n",
-    desc = "Older QuickFix List",
+    desc = "Newer QuickFix List",
   },
   ["<leader>qi"] = {
     function()
@@ -29,13 +29,13 @@ return {
   ["<leader>qq"] = {
     function()
       local is_open = vim.fn.getqflist({ winid = 0 }).winid ~= 0
-      local count = vim.v.count
-      if count == 0 then
-        count = 10
-      end
       if is_open then
         vim.cmd("cclose")
       else
+        local count = vim.v.count
+        if count == 0 then
+          count = 10
+        end
         vim.cmd("copen " .. count)
       end
     end,

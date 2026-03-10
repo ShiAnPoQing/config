@@ -22,9 +22,10 @@ return {
   -- Refresh lsp codelens
   ["<leader>cR"] = {
     function()
-      vim.lsp.codelens.refresh()
+      vim.lsp.codelens.enable(true)
     end,
     "n",
+    desc = "Refresh lsp codelens",
   },
   ["gd"] = {
     "<C-]>",

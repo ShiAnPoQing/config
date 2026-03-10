@@ -46,4 +46,5 @@ require("native-packer").setup({
   -- require("plugins.download.misc.noice"),
   require("plugins.local.buffer"),
   require("plugins.download.misc.outline"),
+  require("plugins.local.bufferman"),
 })

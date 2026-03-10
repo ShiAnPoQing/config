@@ -2,7 +2,9 @@ local M = {}
 local Buffer = require("buffer.buffer")
 
 local function set_win_option(win)
-  local win_option = {}
+  local win_option = {
+    cursorline = true,
+  }
   for key, value in pairs(win_option) do
     vim.api.nvim_set_option_value(key, value, {
       win = win,

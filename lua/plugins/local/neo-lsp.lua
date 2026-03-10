@@ -35,6 +35,16 @@ return {
         })
       end,
       [Methods.textDocument_codeAction] = function(args, client)
+        require("native-packer.key").add({
+          ["<leader>C"] = {
+            function()
+              vim.lsp.codelens.enable(not vim.lsp.codelens.is_enabled())
+            end,
+            "n",
+            buffer = args.buf,
+            desc = "Toggle codelens",
+          },
+        })
         -- local group = vim.api.nvim_create_augroup("LspCodeLens" .. args.buf, { clear = true })
         -- vim.api.nvim_create_autocmd("CursorHold", {
         --   group = group,
