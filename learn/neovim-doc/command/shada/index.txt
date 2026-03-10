@@ -1,0 +1,1 @@
+|:oldfiles|	:ol[dfiles]	list files that have marks in the |shada| file

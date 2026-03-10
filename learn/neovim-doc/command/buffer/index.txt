@@ -1,0 +1,81 @@
+=============================================================
+Edit buffer
+
+|:enew|		:ene[w]		edit a new, unnamed buffer
+|:ex|		:ex		same as ":edit"
+|:edit|		:e[dit]		edit a file
+
+=============================================================
+Create buffer and Split window
+
+|:new|		:new		create a new empty window
+|:vnew|		:vne[w]		create a new empty window, vertically split
+
+=============================================================
+Switch buffer
+
+|:buffer|	:b[uffer]	go to specific buffer in the buffer list
+|:bNext|	:bN[ext]	go to previous buffer in the buffer list
+|:bnext|	:bn[ext]	go to next buffer in the buffer list
+|:bprevious|	:bp[revious]	go to previous buffer in the buffer list
+|:blast|	:bl[ast]	go to last buffer in the buffer list
+|:bfirst|	:bf[irst]	go to first buffer in the buffer list
+|:brewind|	:br[ewind]	go to first buffer in the buffer list
+|:bmodified|	:bm[odified]	go to next buffer in the buffer list that has been modified
+
+=============================================================
+Split window and Edit buffer
+
+|:sbuffer|	:sb[uffer]	split window and go to specific file in the
+|:sbNext|	:sbN[ext]	split window and go to previous file in the
+|:sball|	:sba[ll]	open a window for each file in the buffer list
+|:sbfirst|	:sbf[irst]	split window and go to first file in the
+|:sblast|	:sbl[ast]	split window and go to last file in buffer
+|:sbmodified|	:sbm[odified]	split window and go to modified file in the
+|:sbnext|	:sbn[ext]	split window and go to next file in the buffer
+|:sbprevious|	:sbp[revious]	split window and go to previous file in the
+|:sbrewind|	:sbr[ewind]	split window and go to first file in the
+
+=============================================================
+Buffer write to file
+
+|:write|	:w[rite]	write to a file
+|:update|	:up[date]	write buffer if modified
+|:saveas|	:sav[eas]	save file under another name.
+|:wq|		:wq		write to a file and quit window or Vim
+|:wqall|	:wqa[ll]	write all changed buffers and quit Vim
+|:xall|		:xa[ll]		same as ":wqall"
+|:xit|		:x[it]		write if buffer changed and close window
+|:exit|		:exi[t]		same as ":xit"
+
+=============================================================
+Print
+
+|:ls|		:ls		list all buffers
+|:buffers|	:buffers	list all files in the buffer list
+|:files|	:files		list all files in the buffer list
+
+=============================================================
+Buffer do 
+
+|:badd|		:bad[d]		add buffer to the buffer list
+|:balt|		:balt		like ":badd" but also set the alternate file
+|:bufdo|	:bufd[o]	execute command in each listed buffer
+
+|:bdelete|	:bd[elete]	remove a buffer from the buffer list
+|:bunload|	:bun[load]	unload a specific buffer
+|:bwipeout|	:bw[ipeout]	really delete a buffer
+
+|:file|		:f[ile]		show or set the current file name
+|:hide|		:hid[e]		hide current buffer for a command
+
+|:doautocmd|	:do[autocmd]	apply autocommands to current buffer
+|:doautoall|	:doautoa[ll]	apply autocommands for all loaded buffers
+
+=============================================================
+Other
+
+|:goto|		:go[to]		go to byte in the buffer
+|:checktime|	:checkt[ime]	check timestamp of loaded buffers
+
+vim:tw=78:ts=8:noet:ft=help:norl:

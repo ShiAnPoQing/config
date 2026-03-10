@@ -1,0 +1,13 @@
+|:=|		:=		print the last line number
+|:ascii|	:as[cii]	print ascii value of character under the cursor
+|:changes|	:changes	print the change list
+|:history|	:his[tory]	print a history list
+|:intro|	:int[ro]	print the introductory message
+|:jumps|	:ju[mps]	print the jump list
+|:number|	:nu[mber]	print lines with line number
+|:print|	:p[rint]	print lines
+|:list|		:l[ist]		print lines
+|:z|		:z		print some lines
+|:version|	:ve[rsion]	print version number and other info
+
+vim:tw=78:ts=8:noet:ft=help:norl:

@@ -1,18 +1,42 @@
 return {
   -- Open QuickFix List
+  -- ["<leader>qo"] = {
+  --   "<cmd>copen<cr>zz",
+  --   "n",
+  --   desc = "Open QuickFix List",
+  -- },
   ["<leader>qo"] = {
-    "<cmd>copen<cr>zz",
+    function()
+      ---@diagnostic disable-next-line: param-type-mismatch
+      pcall(vim.cmd, "cnewer" .. vim.v.count1)
+    end,
     "n",
-    desc = "Open QuickFix List",
+    desc = "Older QuickFix List",
   },
-  -- Toggle QuickFix List
+  ["<leader>qi"] = {
+    function()
+      ---@diagnostic disable-next-line: param-type-mismatch
+      pcall(vim.cmd, "colder" .. vim.v.count1)
+    end,
+    "n",
+    desc = "Older QuickFix List",
+  },
+  ["<leader>qc"] = {
+    "<cmd>cclose<cr>zz",
+    "n",
+    desc = "Close QuickFix List",
+  },
   ["<leader>qq"] = {
     function()
       local is_open = vim.fn.getqflist({ winid = 0 }).winid ~= 0
+      local count = vim.v.count
+      if count == 0 then
+        count = 10
+      end
       if is_open then
         vim.cmd("cclose")
       else
-        vim.cmd("copen")
+        vim.cmd("copen " .. count)
       end
     end,
     "n",
@@ -52,6 +76,8 @@ return {
     "n",
     desc = "Display the [count] next error in the list that includes a file name.",
   },
+  -- "[Q"
+  -- "]Q"
   ["[fq"] = {
     function()
       local count = vim.v.count1

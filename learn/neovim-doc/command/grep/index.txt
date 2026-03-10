@@ -1,0 +1,13 @@
+|:grep|		:gr[ep]		run 'grepprg' and jump to first match
+|:grepadd|	:grepa[dd]	like :grep, but append to current list
+|:helpgrep|	:helpg[rep]	like ":grep" but searches help files
+|:lgrep|	:lgr[ep]	run 'grepprg' and jump to first match
+|:lgrepadd|	:lgrepa[dd]	like :grep, but append to current list
+|:lhelpgrep|	:lh[elpgrep]	like ":helpgrep" but uses location list
+|:lvimgrep|	:lv[imgrep]	search for pattern in files
+|:lvimgrepadd|	:lvimgrepa[dd]	like :vimgrep, but append to current list
+|:startgreplace|  :startg[replace] start Virtual Replace mode
+|:vimgrep|	:vim[grep]	search for pattern in files
+|:vimgrepadd|	:vimgrepa[dd]	like :vimgrep, but append to current list
+
+vim:tw=78:ts=8:noet:ft=help:norl:

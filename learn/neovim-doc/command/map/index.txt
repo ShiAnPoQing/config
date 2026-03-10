@@ -1,0 +1,46 @@
+|:cmap|		:cm[ap]		like ":map" but for Command-line mode
+|:cmapclear|	:cmapc[lear]	clear all mappings for Command-line mode
+|:cnoremap|	:cno[remap]	like ":noremap" but for Command-line mode
+|:cunmap|	:cu[nmap]	like ":unmap" but for Command-line mode
+|:imap|		:im[ap]		like ":map" but for Insert mode
+|:imapclear|	:imapc[lear]	like ":mapclear" but for Insert mode
+|:inoremap|	:ino[remap]	like ":noremap" but for Insert mode
+|:iunmap|	:iu[nmap]	like ":unmap" but for Insert mode
+|:lmap|		:lm[ap]		like ":map!" but includes Lang-Arg mode
+|:lmapclear|	:lmapc[lear]	like ":mapclear!" but includes Lang-Arg mode
+|:lnoremap|	:ln[oremap]	like ":noremap!" but includes Lang-Arg mode
+|:loadkeymap|	:loadk[eymap]	load the following keymaps until EOF
+|:lunmap|	:lu[nmap]	like ":unmap!" but includes Lang-Arg mode
+|:map|		:map		show or enter a mapping
+|:mapclear|	:mapc[lear]	clear all mappings for Normal and Visual mode
+|:mkexrc|	:mk[exrc]	write current mappings and settings to a file
+|:mkvimrc|	:mkv[imrc]	write current mappings and settings to a file
+|:nmap|		:nm[ap]		like ":map" but for Normal mode
+|:nmapclear|	:nmapc[lear]	clear all mappings for Normal mode
+|:nnoremap|	:nn[oremap]	like ":noremap" but for Normal mode
+|:noremap|	:no[remap]	enter a mapping that will not be remapped
+|:noremenu|	:noreme[nu]	enter a menu that will not be remapped
+|:nunmap|	:nun[map]	like ":unmap" but for Normal mode
+|:omap|		:om[ap]		like ":map" but for Operator-pending mode
+|:omapclear|	:omapc[lear]	remove all mappings for Operator-pending mode
+|:onoremap|	:ono[remap]	like ":noremap" but for Operator-pending mode
+|:ounmap|	:ou[nmap]	like ":unmap" but for Operator-pending mode
+|:smap|		:smap		like ":map" but for Select mode
+|:smapclear|	:smapc[lear]	remove all mappings for Select mode
+|:snoremap|	:snor[emap]	like ":noremap" but for Select mode
+|:sunmap|	:sunm[ap]	like ":unmap" but for Select mode
+|:tmapclear|	:tmapc[lear]	remove all mappings for |Terminal-mode|
+|:tmap|		:tma[p]		like ":map" but for |Terminal-mode|
+|:tnoremap|	:tno[remap]	like ":noremap" but for |Terminal-mode|
+|:tunmap|	:tunma[p]	like ":unmap" but for |Terminal-mode|
+|:unmap|	:unm[ap]	remove mapping
+|:vmap|		:vm[ap]		like ":map" but for Visual+Select mode
+|:vmapclear|	:vmapc[lear]	remove all mappings for Visual+Select mode
+|:vnoremap|	:vn[oremap]	like ":noremap" but for Visual+Select mode
+|:vunmap|	:vu[nmap]	like ":unmap" but for Visual+Select mode
+|:xmapclear|	:xmapc[lear]	remove all mappings for Visual mode
+|:xmap|		:xm[ap]		like ":map" but for Visual mode
+|:xnoremap|	:xn[oremap]	like ":noremap" but for Visual mode
+|:xunmap|	:xu[nmap]	like ":unmap" but for Visual mode
+
+vim:tw=78:ts=8:noet:ft=help:norl:

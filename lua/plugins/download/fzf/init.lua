@@ -213,7 +213,6 @@ return {
       "n",
       desc = "Fzf Combine",
     },
-    --- Tag
     -- ["<leader>tt"] = {
     --   function()
     --     -- require("fzf-lua").tags({ cwd = vim.fn.fnamemodify(vim.fn.tagfiles()[,p:h") })

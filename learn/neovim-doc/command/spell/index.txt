@@ -1,0 +1,10 @@
+|:spellgood|	:spe[llgood]	add good word for spelling
+|:spellinfo|	:spelli[nfo]	show info about loaded spell files
+|:spellrare|	:spellra[re]	add rare word for spelling
+|:spellrepall|	:spellr[epall]	replace all bad words like last |z=|
+|:spellundo|	:spellu[ndo]	remove good or bad word
+|:spellwrong|	:spellw[rong]	add spelling mistake
+|:spelldump|	:spelld[ump]	split window and fill with all correct words
+|:mkspell|	:mksp[ell]	produce .spl spell file
+
+vim:tw=78:ts=8:noet:ft=help:norl:

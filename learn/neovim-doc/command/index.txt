@@ -1,0 +1,102 @@
+------------------------------------------------------------------------------ ~
+|:|		:		nothing
+|:range|	:{range}	go to last line in {range}
+|:!|		:!		filter lines or execute an external command
+|:!!|		:!!		repeat last ":!" command
+|:#|		:#		same as ":number"
+|:star|		:*		use the last Visual area, like ":'<,'>"
+|:@|		:@		execute contents of a register
+|:@@|		:@@		repeat the previous ":@"
+|:2match|	:2mat[ch]	define a second match to highlight
+|:3match|	:3mat[ch]	define a third match to highlight
+|:breakadd|	:breaka[dd]	add a debugger breakpoint
+|:breakdel|	:breakd[el]	delete a debugger breakpoint
+|:breaklist|	:breakl[ist]	list debugger breakpoints
+|:browse|	:bro[wse]	use file selection dialog
+|:cabclear|	:cabc[lear]	clear all abbreviations for Command-line mode
+|:caddexpr|	:cadde[xpr]	add errors from expr
+|:cexpr|	:cex[pr]	read errors from expr and jump to first
+|:cfile|	:cf[ile]	read file with error messages and jump to first
+|:cgetexpr|	:cgete[xpr]	get errors from expr
+|:cgetfile|	:cg[etfile]	read file with error messages
+|:comclear|	:comc[lear]	clear all user-defined commands
+|:compiler|	:comp[iler]	do settings for a specific compiler
+|:debug|	:deb[ug]	run a command in debugging mode
+|:debuggreedy|	:debugg[reedy]	read debug mode commands from normal input
+|:defer|	:defe[r]	call function when current function is done
+|:eval|		:ev[al]		evaluate an expression and discard the result
+|:filter|	:filt[er]	filter output of following command
+|:find|		:fin[d]		find file in 'path' and edit it
+|:global|	:g[lobal]	execute commands for matching lines
+|:iabclear|	:iabc[lear]	like ":abclear" but for Insert mode
+|:ijump|	:ij[ump]	jump to definition of identifier
+|:ilist|	:il[ist]	list lines where identifier matches
+|:isearch|	:is[earch]	list one line where identifier matches identifier
+|:keepalt|	:keepa[lt]	following command keeps the alternate file
+|:keeppatterns|	:keepp[atterns]	following command keeps search pattern history
+|:lockmarks|	:loc[kmarks]	following command keeps marks where they are
+|:lsp|		:lsp		language server protocol
+|:match|	:mat[ch]	define a match to highlight
+|:mksession|	:mks[ession]	write session info to a file
+|:profdel|	:profd[el]	stop profiling a function or script
+|:profile|	:prof[ile]	profiling functions and scripts
+|:read|		:r[ead]		read file into the text
+|:redo|		:red[o]		redo one undone change
+|:redir|	:redi[r]	redirect messages to a file or register
+|:redrawstatus|	:redraws[tatus]	force a redraw of the status line(s) and
+|:runtime|	:ru[ntime]	source vim scripts in 'runtimepath'
+|:sandbox|	:san[dbox]	execute a command in the sandbox
+|:sign|		:sig[n]		manipulate signs
+|:sleep|	:sl[eep]	do nothing for a few seconds
+|:sleep!|	:sl[eep]!	do nothing for a few seconds, without the cursor visible
+|:stop|		:st[op]		suspend the editor or escape to a shell
+|:sunhide|	:sun[hide]	same as ":unhide"
+|:suspend|	:sus[pend]	same as ":stop"
+|:syncbind|	:sync[bind]	sync scroll binding
+|:uniq|		:uni[q]		uniq lines
+|:vglobal|	:v[global]	execute commands for not matching lines
+|:verbose|	:verb[ose]	execute command with 'verbose' set
+|:vertical|	:vert[ical]	make following command split vertically
+|:visual|	:vi[sual]	same as ":edit", but turns off "Ex" mode
+|:viusage|	:viu[sage]	overview of Normal mode commands
+|:view|		:vie[w]		edit a file read-only
+
+|:filetype|	:filet[ype]	switch file type detection on/off
+|:syntax|	:sy[ntax]	syntax highlighting
+|:syntime|	:synti[me]	measure syntax highlighting speed
+|:nohlsearch|	:noh[lsearch]	suspend 'hlsearch' highlighting
+|:highlight|	:hi[ghlight]	specify highlighting methods
+|:mode|		:mod[e]		show or change the screen mode
+|:redraw|	:redr[aw]	force a redraw of the display
+|:normal|	:norm[al]	execute Normal mode commands
+|:execute|	:exe[cute]	execute result of expressions
+|:messages|	:mes[sages]	view previously displayed messages
+|:source|	:so[urce]	read Vim or Ex commands from a file
+|:checkhealth|	:che[ckhealth]	run healthchecks
+|:checkpath|	:checkp[ath]	list included files
+|:colorscheme|	:colo[rscheme]	load a specific color scheme
+|:digraphs|	:dig[raphs]	show or enter digraphs
+
+|:silent|	:sil[ent]	run a command silently
+|:unsilent|	:uns[ilent]	run a command not silently
+
+|:restart|	:restart	restart the Nvim server
+
+|:language|	:lan[guage]	set the language (locale)
+|:gui|		:gu[i]		start the GUI
+|:gvim|		:gv[im]		start the GUI
+|:detach|	:detach		detach the current UI
+|:exusage|	:exu[sage]	overview of Ex commands
+|:confirm|	:conf[irm]	prompt user when confirmation required
+|:make|		:mak[e]		execute external command 'makeprg' and parse error messages
+|:lmake|	:lmak[e]	execute external command 'makeprg' and parse error messages
+
+|:djump|	:dj[ump]	jump to #define
+|:dlist|	:dli[st]	list #defines
+|:dsearch|	:ds[earch]	list one #define
+
+|:scriptnames|	:scr[iptnames]	list names of all sourced Vim scripts
+|:scriptencoding| :scripte[ncoding]  encoding used in sourced Vim script
+|:trust|	:trust		add or remove file from trust database
+
+vim:tw=78:ts=8:noet:ft=help:norl:

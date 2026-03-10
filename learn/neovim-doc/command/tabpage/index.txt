@@ -1,0 +1,21 @@
+|:tab|		:tab		create new tab when opening new window
+
+|:tabs|		:tabs		list the tab pages and what they contain
+
+|:redrawtabline|  :redrawt[abline]  force a redraw of the tabline
+|:retab|	:ret[ab]	change tab size
+|:tabNext|	:tabN[ext]	go to previous tab page
+|:tabclose|	:tabc[lose]	close current tab page
+|:tabdo|	:tabd[o]	execute command in each tab page
+|:tabedit|	:tabe[dit]	edit a file in a new tab page
+|:tabfind|	:tabf[ind]	find file in 'path', edit it in a new tab page
+|:tabfirst|	:tabfir[st]	go to first tab page
+|:tablast|	:tabl[ast]	go to last tab page
+|:tabmove|	:tabm[ove]	move tab page to other position
+|:tabnew|	:tabnew		edit a file in a new tab page
+|:tabnext|	:tabn[ext]	go to next tab page
+|:tabonly|	:tabo[nly]	close all tab pages except the current one
+|:tabprevious|	:tabp[revious]	go to previous tab page
+|:tabrewind|	:tabr[ewind]	go to first tab page
+
+vim:tw=78:ts=8:noet:ft=help:norl:

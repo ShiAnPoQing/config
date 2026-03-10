@@ -1,0 +1,54 @@
+=====================================================================================================
+Open or close quickfix window 
+
+|:cclose|	:ccl[ose]	close quickfix window
+|:copen|	:cope[n]	open quickfix window
+|:cwindow|	:cw[indow]	open or close quickfix window
+=====================================================================================================
+Go to specific error 
+
+|:cc|		:cc		go to specific error
+
+|:cnext|	:cn[ext]	go to next error
+|:cprevious|	:cp[revious]	go to previous error
+|:cNext|	:cN[ext]	go to previous error
+
+|:crewind|	:cr[ewind]	go to the specified error, default first one
+|:cfirst|	:cfir[st]	go to the specified error, default first one
+|:clast|	:cla[st]	go to the specified error, default last one
+
+|:cabove|	:cabo[ve]	go to error above current line
+|:cbelow|	:cbel[ow]	go to error below current line
+
+|:cbefore|	:cbe[fore]	go to error before current cursor
+|:cafter|	:caf[ter]	go to error after current cursor
+
+|:cnfile|	:cnf[ile]	go to first error in next file
+
+|:caddfile|	:caddf[ile]	add error message to current quickfix list
+|:cpfile|	:cpf[ile]	go to last error in previous file
+|:cNfile|	:cNf[ile]	go to last error in previous file
+
+|:cfile|	:cf[ile]	read file with error messages and jump to first
+|:cgetfile|	:cg[etfile]	read file with error messages
+|:caddfile|	:caddf[ile]	add error message to current quickfix list
+
+|:cbuffer|	:cb[uffer]	parse error messages and jump to first error
+|:cgetbuffer|	:cgetb[uffer]	get errors from buffer
+
+|:cexpr|	:cex[pr]	read errors from expr and jump to first
+|:cgetexpr|	:cgete[xpr]	get errors from expr
+
+|:clist|	:cl[ist]	list all errors
+
+|:cdo|		:cdo		execute command in each valid error list entry
+|:cfdo|		:cfd[o]		execute command in each file in error list
+
+|:cbottom|	:cbo[ttom]	scroll to the bottom of the quickfix window
+
+|:colder|	:col[der]	go to older error list
+|:cnewer|	:cnew[er]	go to newer error list
+
+|:caddbuffer|	:cad[dbuffer]	add errors from buffer
+
+vim:tw=78:ts=8:noet:ft=help:norl:

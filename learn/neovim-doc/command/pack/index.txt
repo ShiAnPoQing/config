@@ -1,0 +1,4 @@
+|:packadd|	:pa[ckadd]	add a plugin from 'packpath'
+|:packloadall|	:packl[oadall]	load all packages under 'packpath'
+
+vim:tw=78:ts=8:noet:ft=help:norl:
