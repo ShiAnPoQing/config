@@ -17,7 +17,6 @@ local first_non_blank_character = {
     end,
     { "x", "s" },
     after = true,
-    context = true,
     desc = "Start insert mode to the left of the first non-blank character in the visual area",
   },
 }
@@ -41,7 +40,6 @@ local last_non_blank_character = {
     end,
     { "x", "s" },
     after = true,
-    context = true,
     desc = "Start insert mode to the right of the last non-blank character in the visual area",
   },
 }

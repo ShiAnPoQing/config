@@ -16,13 +16,13 @@ return {
       "n",
       desc = "Buffers",
     },
-    ["<leader>z"] = {
-      function()
-        Snacks.zen()
-      end,
-      "n",
-      desc = "Toggle Zen Mode",
-    },
+    -- ["<leader>z"] = {
+    --   function()
+    --     Snacks.zen()
+    --   end,
+    --   "n",
+    --   desc = "Toggle Zen Mode",
+    -- },
   },
   config = function()
     require("snacks").setup({

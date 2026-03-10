@@ -1,0 +1,146 @@
+:ene[w][!]
+:e[dit][!] [file]
+:e[dit][!] #[count]
+:[N]new [file]	    :new ~= :split + :enew('eadirection')
+:[N]vnew [file]	    类似 :new('eadirection')
+:[N]sp[lit] [file]  :split file ~= :split + :edit			
+:[N]vs[plit] [file] 类似 :split('eadirection')
+:[N]sv[iew] [file]  Same as ":split", but set 'readonly' option for this buffer.
+:[N]sf[ind] file    Same as ":split", but search for {file} in 'path' like in |:find|.  
+		    Doesn't split if {file} is not found.
+
+
+======================================================================================================
+Create New Buffer
+
+
+:ene[w]			编辑一个新的无名缓冲区
+			1. 当前缓冲区已被修改
+			   1.置位了 'hidden' 或者 'autowriteall' 并且文件能够写入(成功)
+			   2.否则失败 
+			2. 当前缓冲区未被修改(成功)
+
+			如果 'fileformats' 非空，其给出的第一个格式将用于新的 缓冲区上。
+			如果 'fileformats' 为空，则使用当前缓冲区的 'fileformat'。
+
+							*:ene!* *:enew!*
+:ene[w]!		编辑新的无名缓冲区
+			
+			1. 当前缓冲区已被修改
+			   1.置位了 'hidden' 或者 'autowriteall' 并且文件能够写入(成功)
+			   2.否则放弃当前缓冲区任何已有的改变(成功，但是会丢失该缓冲区) 
+			2. 当前缓冲区未被修改(成功)
+
+			如果 'fileformats' 非空，其给出的第一个格式将用于新的 缓冲区上。
+			如果 'fileformats' 为空，则使用当前缓冲区的 'fileformat'。
+
+CTRL-W n						*CTRL-W_n*
+CTRL-W CTRL-N						*CTRL-W_CTRL-N*
+:[N]new [++opt] [+cmd]					*:new*
+		创建一个新窗口并且开始编辑一个空文件。
+		新窗口的高度为 N (默认值 为现存高度的一半)。
+		减少当前窗口的高度，为新窗口留出空间 (如果 打开了 'equalalways' 选项，并且 'eadirection' 没有设置为 "hor" 的话，其它窗口也会被影响)。
+		如果设置了 'fileformats' 选项，新缓冲区会使用其中的首个格式。
+		如果 'fileformats' 为空，使用当前缓冲区的 'fileformat' 值。该值可被 |++opt| 参数覆盖。
+		自动命令以如下顺序被执行:
+		  1. 在当前窗口执行 WinLeave
+		  2. 在新窗口执行 WinEnter
+		  3. 在当前缓冲区执行 BufLeave
+		  4. 在新缓冲区执行 BufEnter
+		这跟先执行 ":split"，再执行一个 ":enew" 命令的效果类同。
+
+:[N]new [++opt] [+cmd] {file}
+:[N]sp[lit] [++opt] [+cmd] {file}			*:split_f*
+		创建一个新的窗口并且开始编辑文件 {file}。
+		这跟先执行 ":split"，再执行一个 ":edit" 命令的效果大致相同，但原先窗口里的轮换文件名被设为 {file}。
+		如果使用了 [+cmd] 参数，文件加载完毕后会执行命令 |+cmd|。
+		新窗口的高度为 N (默认值为现存高度的一半)。
+		减少当前窗口的高度，为新窗口留出空间 (如果你打开了 'equalalways' 选项，其它窗口也会被影响)。
+
+:[N]vne[w] [++opt] [+cmd] [file]			*:vne* *:vnew*
+		与 |:new| 命令相似，但是它垂直分割窗口，如果打开了
+		'equalalways' 选项，并且选项 'eadirection' 没有设置为 "ver"，
+		窗口会被均匀地水平铺开，除非你给出了指定窗口宽度的参数。
+
+======================================================================================================
+Edit Buffer
+
+:e[!] {file}    
+  1. Hidden or Discard current buffer
+     `set hidden`    -> Hidden current buffer(% -> #) 
+     `set nohidden`  
+		   -> no "!"  -> fail
+		   -> has "!" -> Discard current buffer 
+  2.  
+    buffer named {file} exist -> Set buffer named {file} as current buffer
+      -> current buffer named {file} has not been modified -> Reload this buffer from {file}: Load the latest {file} status to this buffer
+      -> current buffer named {file} has been modified     -> Confirm      
+							      -> yes Discard this buffer, Reload this buffer from {file}: Load the latest {file} status to this buffer
+							      -> no
+    buffer named {file} does not exist -> Create new buffer named {file} as current buffer(%), Load the latest {file} status({file} = path to file)   
+
+
+:e[!] = e[!] current {file}    
+  current buffer named {file} has not been modified -> Reload this buffer from {file}: Load the latest {file} status to this buffer  
+  current buffer named {file} has been modified     
+    -> no "!"  -> fail 
+    -> has "!" -> Discard the current buffer, Reload this buffer from {file}: Load the latest {file} status to this buffer  
+
+注意:
+     buffer name != file name
+     buffer name == path to file(即使该 {file} 不存在)
+
+如果更改了 pwd, 则 buffer name 也会发生变化
+
+:ex [++opt] [+cmd] [file]
+			与 |:edit| 相同。
+							*:e* *:edit* *reload*
+:e[dit] [++opt] [+cmd]	编辑当前文件。
+			可用于在它被 Vim 之外的程序所改变的时候
+			重新编辑当前文件。
+			如果当前缓冲区已经被修改而且没有置位 'autowriteall'，或者文件不能被写入，本命令失败。
+
+							*:edit!* *discard*
+:e[dit]! [++opt] [+cmd]
+			总是编辑当前文件。放弃当前缓冲区任何已有的改变。
+			如果你 想从头来过，这就会很有用。
+
+							*:edit_f*
+:e[dit] [++opt] [+cmd] {file}
+			编辑文件 {file}。
+			如果当前缓冲区已被修改，这会失败，除非置位了 'hidden' 或者 'autowriteall' 并且文件能够写入。
+
+							*:edit!_f*
+:e[dit]! [++opt] [+cmd] {file}
+			总是编辑文件 {file}。放弃当前缓冲区任何已有的改变。
+							*:edit_#* *:e#*
+:e[dit] [++opt] [+cmd] #[count]
+			编辑第 [count] 个缓冲区 (根据 :files 显示的结果)。
+			该命令和 [count] CTRL-^ 一样，但是 ":e #" 在轮换缓冲区
+			没有文件名时不能工作，而 CTRL-^ 则可以。
+
+======================================================================================================
+Rename Buffer
+							*CTRL-G* *:f* *:fi* *:file*
+:f[ile]			打印当前文件名（按输入时的样子，除非使用了 ":cd"），
+			光标位置（除非设置了 'ruler' 选项）和文件状态（只读，已修改，读取错误，新文件）。关于如何使此消息更短，请参阅 'shortmess' 选项。
+:f[ile]!		类似 |:file|，但即使 'shortmess' 指示截断，也不截断名称。
+
+							*:file_f*
+:f[ile][!] {name}	将当前文件名设置为 {name}。可选的 ! 避免截断消息，如同 |:file|。
+			[非预期行为]???如果缓冲区已有名称，则该名称成为 |alternate-file| 名称。
+			[非预期行为]???会创建一个未列出的缓冲区来保存旧名称。
+
+			1. 如果 {name} buffer 已存在，则报错(E95: Buffer with this name already exists)
+			2. 如果 {name} buffer 不存在
+			  1. 如果对应的 {file} 存在 :w 会覆盖 {file}(坑)
+			  2. 如果对应的 {file} 不存在，则更改 current buffer 的 name(不会有 old name buffer) 
+							*:0file*
+:0f[ile][!]		移除当前缓冲区的名称。可选的 !
+			避免截断消息，如同 |:file|。
+
+			current buffer name === [No Name] can not :w
+
+vim:tw=78:ts=8:noet:ft=help:norl:
+
+

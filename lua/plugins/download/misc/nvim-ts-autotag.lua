@@ -1,6 +1,6 @@
 return {
   "windwp/nvim-ts-autotag",
-  ft = { "typescriptreact", "html" },
+  ft = { "typescriptreact", "html", "javascriptreact" },
   config = function()
     require("nvim-ts-autotag").setup({
       opts = {

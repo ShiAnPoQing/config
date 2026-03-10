@@ -38,5 +38,12 @@ return {
       referencesCodeLens = { enabled = false },
       implementationsCodeLens = { enabled = true },
     },
+    -- 诊断设置
+    diagnostics = {
+      -- https://github.com/microsoft/TypeScript/blob/main/src/compiler/diagnosticMessages.json
+      ignoredCodes = {
+        80002,
+      },
+    },
   },
 }

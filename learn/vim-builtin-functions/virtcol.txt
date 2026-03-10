@@ -1,0 +1,2 @@
+virtcol({line, col}): col -> virtcol
+virtcol2col(winid, line, virtcol): virtcol -> col 

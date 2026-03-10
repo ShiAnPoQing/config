@@ -8,7 +8,7 @@ return {
         return {
           opts.lua,
           opts.ts,
-          opts.vue,
+          -- opts.vue,
           opts.clangd,
           opts.html,
           opts.css,

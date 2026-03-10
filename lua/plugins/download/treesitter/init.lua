@@ -34,6 +34,7 @@ return {
       "diff",
       "query",
       "vue",
+      "commonlisp",
     }
     local TS = require("nvim-treesitter")
     TS.setup({})

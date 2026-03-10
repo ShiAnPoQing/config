@@ -57,7 +57,7 @@
       "src": "https://github.com/folke/lazydev.nvim"
     },
     "linefuse.nvim": {
-      "rev": "2ccdf06f0068d0ca6b971333f28ead2ff3f26e21",
+      "rev": "2510a4fddd6facb2427bc16839085f63d8491989",
       "src": "https://github.com/BrokenSunny/linefuse.nvim"
     },
     "lualine.nvim": {
@@ -138,6 +138,10 @@
       "src": "https://github.com/nvim-treesitter/nvim-treesitter",
       "version": "'main'"
     },
+    "nvim-ts-autotag": {
+      "rev": "8e1c0a389f20bf7f5b0dd0e00306c1247bda2595",
+      "src": "https://github.com/windwp/nvim-ts-autotag"
+    },
     "nvim-web-devicons": {
       "rev": "746ffbb17975ebd6c40142362eee1b0249969c5c",
       "src": "https://github.com/nvim-tree/nvim-web-devicons"
@@ -153,6 +157,10 @@
     "onenord.nvim": {
       "rev": "b68f1e66736840e837c2a77ebff59c932fcb70c7",
       "src": "https://github.com/rmehri01/onenord.nvim"
+    },
+    "outline.nvim": {
+      "rev": "ead1820d49c8e79ce89cab1c2c318981b695c9d2",
+      "src": "https://github.com/hedyhli/outline.nvim"
     },
     "paradox.nvim": {
       "rev": "1a49628bcbafc25fdc2d600b3fde155cc0e05aac",
@@ -229,6 +237,10 @@
     "yanky.nvim": {
       "rev": "04775cc6e10ef038c397c407bc17f00a2f52b378",
       "src": "https://github.com/gbprod/yanky.nvim"
+    },
+    "zen-mode.nvim": {
+      "rev": "8564ce6d29ec7554eb9df578efa882d33b3c23a7",
+      "src": "https://github.com/folke/zen-mode.nvim"
     }
   }
 }

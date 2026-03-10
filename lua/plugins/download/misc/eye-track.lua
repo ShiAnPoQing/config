@@ -314,15 +314,18 @@ return {
       },
       {
         function()
+          local jump
           require("eye-track.plugins.line")({
             matched = function(ctx)
-              local row = ctx.data.row
-              local col = ctx.data.col
-              vim.api.nvim_win_set_cursor(0, { row, col })
+              local offset = ctx.data.offset
+              jump = offset < 0 and "k" or "j"
+              jump = math.abs(offset) .. jump
             end,
           })
+          return jump
         end,
         { "n", "x" },
+        expr = true,
       },
     },
     ["0O"] = {
@@ -389,20 +392,20 @@ return {
       end,
       { "n", "x", "o" },
     },
-    ["0sn"] = {
-      function()
-        local cursor = vim.api.nvim_win_get_cursor(0)
-        require("eye-track.plugins.line")({
-          matched = function(ctx)
-            local row = ctx.data.topline - ctx.data.offset
-            row = row <= 0 and 1 or row
-            vim.cmd("keepjumps normal! " .. row .. "zt")
-          end,
-        })
-        vim.api.nvim_win_set_cursor(0, { cursor[1], cursor[2] })
-      end,
-      { "n", "x" },
-    },
+    -- ["0sn"] = {
+    --   function()
+    --     local cursor = vim.api.nvim_win_get_cursor(0)
+    --     require("eye-track.plugins.line")({
+    --       matched = function(ctx)
+    --         local row = ctx.data.topline - ctx.data.offset
+    --         row = row <= 0 and 1 or row
+    --         vim.cmd("keepjumps normal! " .. row .. "zt")
+    --       end,
+    --     })
+    --     vim.api.nvim_win_set_cursor(0, { cursor[1], cursor[2] })
+    --   end,
+    --   { "n", "x" },
+    -- },
   },
   config = function()
     require("eye-track").setup({})

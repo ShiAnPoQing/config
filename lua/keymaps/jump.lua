@@ -54,7 +54,7 @@ return {
   ["<C-S-i>"] = {
     function()
       local function callback()
-        require("builtin.jump-list").jump_buffer(-1)
+        require("builtin.jump-list")._jump_buffer(-1)
         require("repeat").set_operation(callback)
       end
       callback()
@@ -65,7 +65,7 @@ return {
   ["<C-S-o>"] = {
     function()
       local function callback()
-        require("builtin.jump-list").jump_buffer(1)
+        require("builtin.jump-list")._jump_buffer(1)
         require("repeat").set_operation(callback)
       end
       callback()

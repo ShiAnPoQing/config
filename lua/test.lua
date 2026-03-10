@@ -84,10 +84,6 @@
 -- })
 
 return {
-  ["<leader>1"] = {
-    function() end,
-    "n",
-  },
   ["<leader>2"] = {
     function() end,
     "n",
@@ -439,9 +435,10 @@ return {
 --   local escaped_file = vim.fn.shellescape(file)
 --   if is_executable then
 --     vim.cmd("silent !chmod -x " .. escaped_file)
---     vim.notify("Removed executable permission", vim.log.levels.INFO)
+-- vim.notify("Removed executable permission", vim.log.levels.INFO)
 --   else
 --     vim.cmd("silent !chmod +x " .. escaped_file)
 --     vim.notify("Added executable permission", vim.log.levels.INFO)
 --   end
 -- end, { desc = "Toggle executable permission" })
+--

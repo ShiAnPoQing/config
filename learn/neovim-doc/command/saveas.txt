@@ -1,3 +1,5 @@
+
+用于克隆文件
 							*:sav* *:saveas*
 :sav[eas][!] [++opt] {file}
 			以名称 {file} 保存当前缓冲区，并将当前缓冲区的文件名设置为 {file}。

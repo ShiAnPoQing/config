@@ -37,16 +37,21 @@ local paths = {
   "keymaps/tabpage",
   "keymaps/tagstack",
   "keymaps/terminal",
-  "keymaps/text",
   "keymaps/textobject",
   "keymaps/tmux-fixed",
   "keymaps/undo",
   "keymaps/window",
   "keymaps/word-move",
+  "keymaps/test",
 }
 
 for _, path in ipairs(paths) do
-  Key.add(require(path))
+  local ok, keymaps = pcall(require, path)
+  if ok then
+    Key.add(keymaps)
+  else
+    print(path .. " not found")
+  end
 end
 Key.del({
   ["in"] = { "x" },

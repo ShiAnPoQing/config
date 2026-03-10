@@ -99,6 +99,7 @@ function M.macro_repeat(register_name)
   local keys = split_keys(normalize_reg)
   local new_keys = get_real_keys(keys)
   local new_keys_copy = vim.tbl_deep_extend("force", {}, new_keys)
+
   local function run()
     if #new_keys_copy == 0 then
       require("repeat").set_operation(function()

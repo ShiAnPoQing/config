@@ -1,0 +1,72 @@
+Defaut range -> (1, $)
+
+*:[range]w[rite][!]* *[++opt]* *[>>]* *[file](不管缓冲区是否修改都写入)*
+
+:[range]w[rite]   	     将 指定范围行 写入当前文件(写入 = 覆盖)
+			       1. 当文件为只读或缓冲区没有名称时，写入失败
+:[range]w[rite]!   	     将 指定范围行 强制 写入当前文件
+			       1. 即使 'readonly' 已置位或者有其他原因写入被拒绝，还是强制写入
+			       2. 缓冲区没有名称时，写入失败
+
+:[range]w[rite] {file}	     将 指定范围行 写入 {file} 文件
+			       1. 当前 {file} 不存在才会写入
+			       2. 当前 {file} 存在且置位 'writeany' 强制覆盖(若存在 {file} 文件的 buffer 则失败 E139) 
+			       3. # = {file}  
+:[range]w[rite]! {file}      将 指定范围行 强制写入 {file} 文件  
+			       1. 当前 {file} 不存在(创建 {file} 文件并写入)
+			       2. 当前 {file} 存在(强制覆盖)(若存在 {file} 文件的 buffer 则失败 E139)
+			       3. # = {file} 
+
+:[range]w[rite] `>>`           将指定范围行附加到当前文件后    
+			       1. 当文件为只读或缓冲区没有名称时，写入失败
+:[range]w[rite]! `>>`          将指定范围行强制附加到当前文件后    
+			       1. 即使 'readonly' 已置位或者有其他原因写入被拒绝，还是强制写入
+			       2. 缓冲区没有名称时，写入失败
+
+:[range]w[rite] `>>` {file}    将指定范围行附加到 {file} 文件后
+			       1. 当 {file} 文件存在时才会附加(若存在 {file} 文件的 buffer 则失败 E139)
+			       3. # = {file} 
+:[range]w[rite]! `>>` {file}   将指定范围行强制附加到 {file} 文件后
+			       1. 当 {file} 文件存在(若存在 {file} 文件的 buffer 则失败 E139)
+			       2. 当 {file} 文件不存在(创建 {file} 文件并附加)
+			       3. # = {file} 
+
+:[range]w[rite] !{cmd}       执行命令 {cmd}，以 [range] 指定的行作为它的标准输入。
+
+
+:wa[ll]	[++opt]		写入所有已更改的缓冲区。
+:wa[ll]! [++opt]	写入所有已更改的缓冲区，即使是只读的缓冲区。
+			  1. 没有文件名的缓冲区不会被写入并导致错误消息。
+
+:[range]wq[!] [++opt] [file] same as :wirte, but..
+			  1. 如果这是最后一个 |edit-window|，Vim 退出。
+			  2. 当参数列表中的最后一个文件尚未编辑时，退出失败。
+
+
+*:[range]up[date]* *[++opt]* *[>>]* *[file](只有在缓冲区已修改的时候才写入)*
+			     和":write" 类似，但更合理
+
+:sav[eas] [++opt] {file}
+			以名称 {file} 保存当前缓冲区，并将当前缓冲区的文件名设置为 {file}。
+			1. 仅当 当前 {file} 不存在
+			2. # = old file, % = {file}
+
+			当 'filetype' 为空时，使用新名称进行文件类型检测，在文件写入之前。
+			当写入成功时，'readonly' 被重置。
+:sav[eas][!] [++opt] {file}
+			以名称 {file} 保存当前缓冲区，并将当前缓冲区的文件名设置为 {file}。
+			1. 当前 {file} 不存在(创建 {file} 文件并写入)
+			2. 当前 {file} 存在(强制覆盖)(若存在 {file} 文件的 buffer 则失败 E139)
+			3. # = old file, % = {file}
+
+			当 'filetype' 为空时，使用新名称进行文件类型检测，在文件写入之前。
+			当写入成功时，'readonly' 被重置。
+
+:saveas {file}  !== :file {name} + :w 如果 {name} 已存在，后者会导致 {name} 文件被覆盖(大坑) 
+:saveas! {file} !== :file {name} + :w
+    saveas 保证旧 buffer 存在且 old buffer = #
+    :file {name}只是改 buffer 的 name
+
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:
