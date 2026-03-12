@@ -82,7 +82,6 @@ return {
       require("builtin.buffer-swap").buffer_swap("left")
     end,
     "n",
-
     desc = "Swap with the window on the left",
   },
   ["<M-S-l>"] = {

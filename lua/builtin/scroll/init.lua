@@ -15,8 +15,8 @@ function M.toggle_cursor_follow(dir)
   end
 end
 
-function M.scroll_down()
-  local count = vim.v.count1
+function M.scroll_down(count)
+  count = count or vim.v.count1
   local key = count .. vim.api.nvim_replace_termcodes("<C-y>", true, false, true)
   if not cursor_follow then
     vim.api.nvim_feedkeys(key, "n", false)
@@ -29,8 +29,8 @@ function M.scroll_down()
   vim.api.nvim_feedkeys(key .. count .. "k", "n", false)
 end
 
-function M.scroll_up()
-  local count = vim.v.count1
+function M.scroll_up(count)
+  count = count or vim.v.count1
   local key = count .. vim.api.nvim_replace_termcodes("<C-e>", true, false, true)
   if not cursor_follow then
     vim.api.nvim_feedkeys(key, "n", false)

@@ -62,7 +62,14 @@ return {
   },
   ["<leader>2"] = {
     function()
-      require("builtin.jump-list")._jump_buffer(1)
+      local n_maps = vim.api.nvim_get_keymap("n")
+      local v_maps = vim.api.nvim_get_keymap("x")
+      local o_maps = vim.api.nvim_get_keymap("o")
+      local s_maps = vim.api.nvim_get_keymap("s")
+      print("Normal mode maps:", #n_maps)
+      print("Visual mode maps:", #v_maps)
+      print("Select mode maps:", #s_maps)
+      print("Operator pending mode maps:", #o_maps)
     end,
     "n",
   },

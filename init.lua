@@ -20,7 +20,7 @@ require("native-packer").setup({
   require("plugins.download.misc.zen"),
   require("plugins.download.snippet.luasnip"),
   require("plugins.download.cmp.blink-cmp"),
-  require("plugins.download.misc.eye-track"),
+  require("plugins.download.eye-track"),
   require("plugins.download.fzf"),
   require("plugins.download.format.conform"),
   require("plugins.download.treesitter"),
