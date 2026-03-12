@@ -1,7 +1,62 @@
 return {
   ["<leader>1"] = {
     function()
-      require("builtin.jump-list")._jump_buffer(-1)
+      local ns = vim.api.nvim_create_namespace("cmdline_ui")
+
+      local win
+      local buf
+
+      local function open_cmdline()
+        buf = vim.api.nvim_create_buf(false, true)
+
+        win = vim.api.nvim_open_win(buf, false, {
+          relative = "editor",
+          row = 10,
+          col = 20,
+          width = 40,
+          height = 1,
+          style = "minimal",
+          border = "rounded",
+          focusable = true,
+        })
+      end
+
+      local function close_cmdline()
+        if win and vim.api.nvim_win_is_valid(win) then
+          vim.api.nvim_win_close(win, true)
+          win = nil
+        end
+      end
+      vim.ui_attach(ns, { ext_cmdline = true }, function(event, ...)
+        if win and event == "cmdline_hide" then
+          close_cmdline()
+        end
+
+        if event == "cmdline_show" then
+          if not win then
+            vim.schedule(function()
+              open_cmdline()
+              vim.api.nvim_win_set_cursor(win, { 1, 0 })
+              vim.cmd.redraw()
+              vim.cmd.redraw()
+            end)
+          end
+          -- vim.print(event)
+          -- local content = select(1, ...)
+          -- local text = ""
+          --
+          -- for _, chunk in ipairs(content[1]) do
+          --   text = text .. chunk[1]
+          -- end
+          --
+        elseif event == "cmdline_pos" then
+          --   vim.schedule(function()
+          --     vim.api.nvim_win_set_cursor(win, { 1, 0 })
+          --   end)
+          -- elseif event == "cmdline_hide" then
+          --   close_cmdline()
+        end
+      end)
     end,
     "n",
   },

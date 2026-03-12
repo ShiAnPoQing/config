@@ -44,7 +44,7 @@ require("native-packer").setup({
   require("plugins.download.markdown"),
   require("plugins.download.misc.neotest"),
   -- require("plugins.download.misc.noice"),
-  -- require("plugins.local.buffer"),
   require("plugins.download.misc.outline"),
   require("plugins.local.bufferman"),
+  -- require("plugins.local.visual-move"),
 })

@@ -1,6 +1,6 @@
 return {
   name = "visual-move.nvim",
-  keys = {
+  key = {
     -- ["<M-l>"] = {
     --   function()
     --     require("visual-move").visual_move("right")
@@ -16,6 +16,18 @@ return {
     ["<C-h>"] = {
       function()
         require("visual-move").visual_move("left")
+      end,
+      "s",
+    },
+    ["<C-space><C-l>"] = {
+      function()
+        require("visual-move").visual_start_end_move("right")
+      end,
+      "s",
+    },
+    ["<C-space><C-h>"] = {
+      function()
+        require("visual-move").visual_start_end_move("left")
       end,
       "s",
     },

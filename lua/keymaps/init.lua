@@ -18,7 +18,7 @@ local paths = {
   "keymaps/lsp",
   "keymaps/macro",
   "keymaps/misc",
-  "keymaps/move-select",
+  -- "keymaps/move-select",
   "keymaps/move",
   "keymaps/nop",
   "keymaps/operator",

@@ -1,6 +1,7 @@
 local M = {}
 
 function M.move_word(direction)
+  local count = vim.v.count1
   local line = vim.api.nvim_get_current_line()
   local cursor = vim.api.nvim_win_get_cursor(0)
   local regex = vim.regex("\\k\\+")
@@ -43,15 +44,18 @@ function M.move_word(direction)
   end
 
   local remain_line = run(line)
-  if cursor_word and next_word then
-    local new_line = line:sub(1, cursor_word_start - 1) .. next_word .. word_middle .. cursor_word .. remain_line
-    local move = #next_word + #word_middle
-    if direction == -1 then
-      new_line = new_line:reverse()
-      move = -move
+
+  if cursor_word then
+    if next_word then
+      local new_line = line:sub(1, cursor_word_start - 1) .. next_word .. word_middle .. cursor_word .. remain_line
+      local move = #next_word + #word_middle
+      if direction == -1 then
+        new_line = new_line:reverse()
+        move = -move
+      end
+      vim.api.nvim_set_current_line(new_line)
+      vim.api.nvim_win_set_cursor(0, { cursor[1], cursor[2] + move })
     end
-    vim.api.nvim_set_current_line(new_line)
-    vim.api.nvim_win_set_cursor(0, { cursor[1], cursor[2] + move })
   end
 end
 

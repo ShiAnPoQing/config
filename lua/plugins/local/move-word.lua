@@ -1,7 +1,7 @@
 return {
   name = "move-word.nvim",
   key = {
-    ["<C-left>"] = {
+    ["<C-M-h>"] = {
       function()
         local function callback()
           require("move-word").move_word(-1)
@@ -12,7 +12,7 @@ return {
       { "i", "n" },
       desc = "Move word left",
     },
-    ["<C-right>"] = {
+    ["<C-M-l>"] = {
       function()
         local function callback()
           require("move-word").move_word(1)
