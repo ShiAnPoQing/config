@@ -10,11 +10,13 @@ local M = {
 }
 
 function M:open(opt)
-  local current_win = vim.api.nvim_get_current_win()
+  self.Shared.OpenPre()
+
   self.Shared.state = false
   Buffer:create(opt)
   Window:create(Buffer.buf)
-  self.Shared.OpenPost({ win = current_win })
+
+  self.Shared.OpenPost()
 end
 
 function M:close()
@@ -41,6 +43,7 @@ end
 
 function M:register(register)
   self.Shared.OpenPost = register.OpenPost
+  self.Shared.OpenPre = register.OpenPre
   self.Shared.ClosePre = register.ClosePre
   self.Shared.ClosePost = register.ClosePost
   self.Shared.get_cursor_pos = register.get_cursor_pos
@@ -49,10 +52,10 @@ function M:register(register)
   Buffer.Shared = self.Shared
 
   local BufWinEnter = register.Buffer.events.BufWinEnter
-  local WinEnter = register.Buffer.events.WinEnter
   local BufWriteCmd = register.Buffer.events.BufWriteCmd
   local WinClosed = register.Buffer.events.WinClosed
   local VimResized = register.Buffer.events.VimResized
+  local DirChanged = register.Buffer.events.DirChanged
   local OnEnter = register.Buffer.events.OnEnter
 
   local ctx = {
@@ -68,20 +71,20 @@ function M:register(register)
       BufWinEnter = function(ev)
         return BufWinEnter(ev, ctx)
       end,
-      WinEnter = function(ev)
-        return WinEnter(ev, ctx)
-      end,
       WinClosed = function(ev)
         return WinClosed(ev, ctx)
       end,
       VimResized = function(ev)
         return VimResized(ev, ctx)
       end,
+      DirChanged = function(ev)
+        return DirChanged(ev, ctx)
+      end,
       OnEnter = function()
         return OnEnter(ctx)
       end,
     },
-    get_lines = register.Buffer.get_lines,
+    get_files = register.Buffer.get_files,
   }
 
   self.Shared.Window = {}
@@ -91,11 +94,8 @@ function M:state()
   return self.Shared.state
 end
 
-function M:get_info()
-  return {
-    buf = Buffer.buf,
-    win = Window.win,
-  }
+function M:get_lines()
+  return vim.api.nvim_buf_get_lines(Buffer.buf, 0, -1, false)
 end
 
 return M

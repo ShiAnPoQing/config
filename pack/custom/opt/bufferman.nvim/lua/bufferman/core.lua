@@ -12,24 +12,30 @@ function M.toggle()
 end
 
 UI:register({
-  OpenPost = function(ctx)
-    MG:init({ win = ctx.win })
+  get_cursor_pos = function()
+    local index = MG:get_current_index()
+    if not index then
+      return
+    end
+    return { index, 0 }
+  end,
+  OpenPre = function()
+    MG:init()
+  end,
+  OpenPost = function()
+    MG:update()
   end,
   ClosePre = function() end,
   ClosePost = function()
     MG:clean()
   end,
-  get_cursor_pos = function()
-    return { MG.current_buf_index, 0 }
-  end,
   Buffer = {
-    get_lines = function()
-      return MG:get_buffer_names()
+    get_files = function()
+      return MG:get_buffer_data()
     end,
     events = {
       BufWriteCmd = function()
-        MG:update()
-        return true
+        MG:update("diff")
       end,
       WinClosed = function()
         if not UI:state() then
@@ -40,12 +46,20 @@ UI:register({
       VimResized = function()
         UI.Window:resize()
       end,
-      WinEnter = function() end,
       BufWinEnter = function(ev)
-        if ev.buf == UI:get_info().buf then
+        if ev.file == "" then
           return
         end
-        MG:init({ win = nil })
+        if vim.fn.fnamemodify(ev.file, ":t") == "Bufferman" then
+          return
+        end
+
+        -- vim.print("BufWinEnter")
+        MG:init()
+        MG:update()
+      end,
+      DirChanged = function()
+        MG:update()
       end,
       OnEnter = function()
         MG:switch()
@@ -56,8 +70,8 @@ UI:register({
 })
 
 MG:register({
-  get_ui_info = function()
-    return UI:get_info()
+  get_lines = function()
+    return UI:get_lines()
   end,
   OnUpdate = function()
     UI:update()

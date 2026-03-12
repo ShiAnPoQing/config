@@ -17,14 +17,16 @@
 return {
   ["<Tab>j"] = {
     function()
-      vim.cmd({ cmd = "bn", count = vim.v.count1 })
+      ---@diagnostic disable-next-line: param-type-mismatch
+      pcall(vim.cmd, { cmd = "bn", count = vim.v.count1 })
     end,
     "n",
     desc = "Goto the next[count] buffer",
   },
   ["<Tab>sj"] = {
     function()
-      vim.cmd({ cmd = "sbn", count = vim.v.count1 })
+      ---@diagnostic disable-next-line: param-type-mismatch
+      pcall(vim.cmd, { cmd = "sbn", count = vim.v.count1 })
     end,
     "n",
     desc = "Split and goto the next[count] buffer",
@@ -54,7 +56,8 @@ return {
   },
   ["<Tab>k"] = {
     function()
-      vim.cmd({ cmd = "bp", count = vim.v.count1 })
+      ---@diagnostic disable-next-line: param-type-mismatch
+      pcall(vim.cmd, { cmd = "bp", count = vim.v.count1 })
     end,
     "n",
     desc = "Goto the previous[count] buffer",

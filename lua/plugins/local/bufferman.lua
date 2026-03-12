@@ -1,12 +1,12 @@
 return {
   name = "bufferman.nvim",
   key = {
-    ["<leader>8"] = {
+    ["<leader>b"] = {
       function()
         require("bufferman").bufferman()
       end,
       "n",
-      desc = "Buffer",
+      desc = "Bufferman",
     },
   },
 }

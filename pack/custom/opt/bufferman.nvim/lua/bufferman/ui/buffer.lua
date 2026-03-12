@@ -15,10 +15,38 @@ function M:create(opt)
     })
   end
   self:create_autocmd()
+  self:create_keymap()
+end
 
-  vim.keymap.set("n", "<cr>", function()
-    self.Shared.Buffer.events.OnEnter()
-  end, { buffer = self.buf })
+function M:update(opt)
+  local lines = {}
+  local icons = {}
+  for _, data in ipairs(self.Shared.Buffer.get_files()) do
+    table.insert(lines, data.line)
+    table.insert(icons, data.icon)
+  end
+
+  vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, lines)
+
+  local ns_id = vim.api.nvim_create_namespace("buffer-manage")
+  for i, icon in pairs(icons) do
+    vim.api.nvim_buf_set_extmark(self.buf, ns_id, i - 1, 0, {
+      sign_text = icon.icon,
+      sign_hl_group = icon.hl_group,
+      invalidate = true,
+    })
+  end
+
+  local cursor_pos = self.Shared.get_cursor_pos()
+  if not cursor_pos then
+    return
+  end
+  local line = cursor_pos[1]
+  vim.api.nvim_buf_set_extmark(self.buf, ns_id, line - 1, 0, {
+    end_row = line,
+    hl_group = "CursorLine",
+    hl_eol = true,
+  })
 end
 
 function M:destory()
@@ -28,21 +56,10 @@ function M:destory()
   self.autocmds = {}
 end
 
-function M:update(opt)
-  vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, self.Shared.Buffer.get_lines())
-  local line = self.Shared.get_cursor_pos()[1]
-  local ns_id = vim.api.nvim_create_namespace("buffer-manage")
-  vim.api.nvim_buf_set_extmark(self.buf, ns_id, line - 1, 0, {
-    end_row = line,
-    hl_group = "Visual",
-    hl_eol = true,
-  })
-  -- file_icon = require("nvim-web-devicons").get_icon(filename, file_type, { default = true })
-  vim.api.nvim_buf_set_extmark(self.buf, ns_id, line - 1, 0, {
-    sign_text = "",
-    sign_hl_group = "Type",
-    invalidate = true,
-  })
+function M:create_keymap()
+  vim.keymap.set("n", "<cr>", function()
+    self.Shared.Buffer.events.OnEnter()
+  end, { buffer = self.buf })
 end
 
 function M:create_autocmd()
@@ -68,16 +85,18 @@ function M:create_autocmd()
       return self.Shared.Buffer.events.BufWinEnter(ev)
     end,
   })
-  local WinEnter = vim.api.nvim_create_autocmd("WinEnter", {
+  local DirChanged = vim.api.nvim_create_autocmd("DirChanged", {
     callback = function(ev)
-      return self.Shared.Buffer.events.WinEnter(ev)
+      if ev.match == "global" then
+        return self.Shared.Buffer.events.DirChanged(ev)
+      end
     end,
   })
   table.insert(self.autocmds, BufWriteCmd)
   table.insert(self.autocmds, WinClosed)
   table.insert(self.autocmds, VimResized)
   table.insert(self.autocmds, BufWinEnter)
-  table.insert(self.autocmds, WinEnter)
+  table.insert(self.autocmds, DirChanged)
 end
 
 function M:delete_autocmd()

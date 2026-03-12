@@ -21,7 +21,9 @@ local function get_config(config)
 end
 
 local function set_win_option(win)
-  local win_option = {}
+  local win_option = {
+    winfixbuf = true,
+  }
   for key, value in pairs(win_option) do
     vim.api.nvim_set_option_value(key, value, {
       win = win,
@@ -35,16 +37,16 @@ function M:create(buf)
   set_win_option(self.win)
 end
 
+function M:update()
+  local cursor_pos = self.Shared.get_cursor_pos()
+  if cursor_pos and (type(cursor_pos[1]) == "number") then
+    vim.api.nvim_win_set_cursor(self.win, cursor_pos)
+  end
+end
+
 function M:destory()
   pcall(vim.api.nvim_win_close, self.win, true)
   self.win = nil
-end
-
-function M:update()
-  local cursor_pos = self.Shared.get_cursor_pos()
-  if type(cursor_pos[1]) == "number" then
-    vim.api.nvim_win_set_cursor(self.win, cursor_pos)
-  end
 end
 
 function M:resize()
