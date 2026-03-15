@@ -12,7 +12,6 @@ function M.setup()
     end,
   })
 end
-
 function M._repeat()
   ---@diagnostic disable-next-line: param-type-mismatch
   local char = vim.fn.nr2char(vim.fn.getchar())

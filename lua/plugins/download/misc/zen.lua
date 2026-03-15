@@ -7,6 +7,7 @@ return {
         require("zen-mode").toggle()
       end,
       "n",
+      desc = "Zen mode",
     },
   },
   config = function()

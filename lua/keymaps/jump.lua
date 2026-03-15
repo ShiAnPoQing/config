@@ -17,14 +17,22 @@
 return {
   ["<C-i>"] = {
     function()
-      require("builtin.jump-list").jump(-1)
+      local function callback()
+        require("builtin.jump-list").jump(-1)
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Go to [count] older cursor position in jump list",
   },
   ["<C-o>"] = {
     function()
-      require("builtin.jump-list").jump(1)
+      local function callback()
+        require("builtin.jump-list").jump(1)
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Go to [count] newer cursor position in jump list",
@@ -55,7 +63,7 @@ return {
     function()
       local function callback()
         require("builtin.jump-list")._jump_buffer(-1)
-        require("repeat").set_operation(callback)
+        require("repeat").set_motion(callback)
       end
       callback()
     end,
@@ -66,7 +74,7 @@ return {
     function()
       local function callback()
         require("builtin.jump-list")._jump_buffer(1)
-        require("repeat").set_operation(callback)
+        require("repeat").set_motion(callback)
       end
       callback()
     end,

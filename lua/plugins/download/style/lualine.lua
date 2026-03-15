@@ -51,18 +51,27 @@ return {
         lualine_a = { "mode" },
         lualine_b = { "branch", "diff", "diagnostics" },
         lualine_c = {
-          "filename",
           {
-            function()
-              local n = navic.get_location() or ""
-              return n:gsub("(%*%%#(NavicIcons%w+)#)(.-)(%%*%%#)NavicText#", function(full, icon, middle, prefix)
-                return full .. middle .. prefix .. icon .. "#"
-              end)
-            end,
-            cond = function()
-              return navic.is_available()
-            end,
+            "filename",
+            path = 1,
+            symbols = {
+              modified = "[]", -- Text to show when the file is modified.
+              readonly = "[]", -- Text to show when the file is non-modifiable or readonly.
+              unnamed = "[No Name]", -- Text to show for unnamed buffers.
+              newfile = "[New]", -- Text to show for newly created file before first write
+            },
           },
+          -- {
+          --   function()
+          --     local n = navic.get_location() or ""
+          --     return n:gsub("(%*%%#(NavicIcons%w+)#)(.-)(%%*%%#)NavicText#", function(full, icon, middle, prefix)
+          --       return full .. middle .. prefix .. icon .. "#"
+          --     end)
+          --   end,
+          --   cond = function()
+          --     return navic.is_available()
+          --   end,
+          -- },
         },
         lualine_x = { "filetype" },
         lualine_y = { "progress" },

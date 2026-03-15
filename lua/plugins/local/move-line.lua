@@ -9,6 +9,7 @@ return {
         end
         callback()
       end,
+      desc = "Move line down",
       { "n", "i", "x" },
     },
     ["<C-M-k>"] = {
@@ -19,6 +20,7 @@ return {
         end
         callback()
       end,
+      desc = "Move line up",
       { "n", "i", "x" },
     },
     ["<C-down>"] = {
@@ -29,6 +31,7 @@ return {
         end
         callback()
       end,
+      desc = "Move line down",
       { "n", "i", "x" },
     },
     ["<C-up>"] = {
@@ -39,6 +42,7 @@ return {
         end
         callback()
       end,
+      desc = "Move line up",
       { "n", "i", "x" },
     },
   },

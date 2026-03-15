@@ -12,7 +12,11 @@ function M:_repeat(register_name)
   end
   local history = Record.history[register_name]
   if history == nil then
-    vim.api.nvim_feedkeys("@" .. register_name, "nx", true)
+    local function callback()
+      vim.api.nvim_feedkeys("@" .. register_name, "nx", true)
+      require("repeat").set_operation(callback)
+    end
+    callback()
     return
   end
 
@@ -26,6 +30,11 @@ function M:_repeat(register_name)
       vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(value.key, true, true, true), "m", true)
     end)
   end
+  vim.schedule(function()
+    require("repeat").set_operation(function()
+      self:_repeat(register_name)
+    end)
+  end)
 end
 
 return M

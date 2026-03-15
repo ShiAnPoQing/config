@@ -8,6 +8,7 @@ return {
       end,
       { "n", "x" },
       expr = true,
+      desc = "Join lines",
     },
     ["--"] = {
       {
@@ -19,6 +20,7 @@ return {
         expr = true,
         exclude_ft = "oil",
       },
+      desc = "Join One Line",
     },
     ["g-"] = {
       function()
@@ -27,6 +29,7 @@ return {
       end,
       { "n", "x" },
       expr = true,
+      desc = "Join lines[not trim blank]",
     },
     ["g--"] = {
       function()
@@ -35,6 +38,7 @@ return {
       end,
       "n",
       expr = true,
+      desc = "Join One Line[not trim blank]",
     },
   },
   config = function()

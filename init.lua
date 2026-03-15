@@ -5,9 +5,9 @@ require("autocmds")
 require("keymaps")
 require("native-packer").setup({
   require("plugins.download.style"),
-  require("plugins.local.native-macro"),
   require("plugins.download.style.statuscol"),
   require("plugins.download.style.lualine"),
+  require("plugins.local.native-macro"),
   require("plugins.download.misc.repeat"),
   require("plugins.local.undotree"),
   require("plugins.local.neo-option"),
@@ -43,6 +43,7 @@ require("native-packer").setup({
   require("plugins.download.misc.flash"),
   require("plugins.download.misc.snacks"),
   -- require("plugins.download.misc.trouble"),
+  require("plugins.local.neo-winbar"),
   require("plugins.download.tex"),
   require("plugins.download.markdown"),
   require("plugins.download.misc.neotest"),

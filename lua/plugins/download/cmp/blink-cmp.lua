@@ -76,6 +76,7 @@ return {
           show_with_menu = true,
           show_without_menu = true,
         },
+        accept = { auto_brackets = { enabled = true } },
       },
       cmdline = {
         keymap = {
@@ -172,7 +173,7 @@ return {
       snippets = { preset = "luasnip" },
       signature = { enabled = true },
       keymap = {
-        preset = "none",
+        -- preset = "none",
         ["<C-c>"] = {
           function(cmp)
             if cmp.is_menu_visible() then
@@ -223,7 +224,15 @@ return {
             end
           end,
         },
-        ["<CR>"] = { "accept", "fallback" },
+        ["<CR>"] = {
+          "accept",
+          function()
+            local key = require("nvim-autopairs").completion_confirm()
+            vim.api.nvim_feedkeys(key, "n", false)
+            return true
+          end,
+          "fallback",
+        },
         -- 我选择 Snippet 优先级最高
         -- 即使 Snippet 没在 menu 中，
         -- 也会优先触发 Snippet，而不是选中 menu 第一项

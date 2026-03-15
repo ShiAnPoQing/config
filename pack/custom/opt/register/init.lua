@@ -49,6 +49,7 @@ local registers = {
 }
 
 function M.paste(operator)
+  ---@diagnostic disable-next-line: param-type-mismatch
   local char = vim.fn.nr2char(vim.fn.getchar())
   if not vim.tbl_contains(registers, char) then
     return
@@ -61,6 +62,7 @@ function M.paste(operator)
 end
 
 function M.copy(operator)
+  ---@diagnostic disable-next-line: param-type-mismatch
   local char = vim.fn.nr2char(vim.fn.getchar())
   if not vim.tbl_contains(registers, char) then
     return
@@ -72,6 +74,7 @@ function M.copy(operator)
 end
 
 function M.delete(operator)
+  ---@diagnostic disable-next-line: param-type-mismatch
   local char = vim.fn.nr2char(vim.fn.getchar())
   if not vim.tbl_contains(registers, char) then
     return
@@ -83,6 +86,7 @@ function M.delete(operator)
 end
 
 function M.delete_x(operator)
+  ---@diagnostic disable-next-line: param-type-mismatch
   local char = vim.fn.nr2char(vim.fn.getchar())
   if not vim.tbl_contains(registers, char) then
     return
@@ -94,6 +98,7 @@ function M.delete_x(operator)
 end
 
 function M.change(operator)
+  ---@diagnostic disable-next-line: param-type-mismatch
   local char = vim.fn.nr2char(vim.fn.getchar())
   if not vim.tbl_contains(registers, char) then
     return
