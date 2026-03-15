@@ -98,6 +98,10 @@ local function update_node(node)
   node.current = current_jump_index
 end
 
+local function collect_node(node)
+  table.insert(history[node.bufnr], node)
+end
+
 local function find_node(nodes, node)
   local delete_node_indexs = {}
   local find
@@ -124,6 +128,10 @@ local function find_node(nodes, node)
   return find
 end
 
+local function get_jump_count(jump_index, current_jump_index, offset)
+  return math.abs(jump_index - current_jump_index) + offset
+end
+
 local function get_next_count_node(count, start, range, jumplist)
   local prev_node
   local prev_start = start
@@ -147,25 +155,24 @@ end
 
 function M.jump(direction)
   local count = vim.v.count1
+  local jump_key
   if direction < 0 then
     vim.api.nvim_feedkeys(JUMP_OLD_KEY .. JUMP_NEW_KEY, "nx", false)
+    jump_key = JUMP_OLD_KEY
+  else
+    jump_key = JUMP_NEW_KEY
   end
+
   local jumplist, current_jump_index = unpack(vim.fn.getjumplist())
+  if #jumplist == 0 then
+    return
+  end
   current_jump_index = current_jump_index + 1
+
   if direction > 0 and current_jump_index > #jumplist then
     return
   end
 
-  if #jumplist == 0 then
-    return
-  end
-
-  local jump_key
-  if direction > 0 then
-    jump_key = JUMP_NEW_KEY
-  else
-    jump_key = JUMP_OLD_KEY
-  end
   local range = get_range(direction, jumplist, current_jump_index)
   local current_node, next_start = get_next_node(1, range, jumplist)
   local next_node = get_next_count_node(count, next_start, range, jumplist)
@@ -177,36 +184,30 @@ function M.jump(direction)
   if not history[current_node.bufnr] then
     history[current_node.bufnr] = { current_node }
     update_node(current_node)
-    -- vim.print("没有 current node 历史", #current_node.jumps)
   else
     local find = find_node(history[current_node.bufnr], current_node)
     if find then
       update_node(find)
-      -- vim.print("find有 current node 历史")
     else
-      table.insert(history[current_node.bufnr], current_node)
+      collect_node(current_node)
       update_node(current_node)
-      -- vim.print("find没有 current node 历史", #current_node.jumps)
     end
   end
 
   local jump_count
   if not history[next_node.bufnr] then
     history[next_node.bufnr] = { next_node }
-    jump_count = math.abs(next_node.index - current_jump_index)
-    -- vim.print("没有 next node 历史", count)
+    jump_count = get_jump_count(next_node.index, current_jump_index, 0)
   else
     local find = find_node(history[next_node.bufnr], next_node)
     if find then
-      local index = next_node.index
-      jump_count = math.abs(index - current_jump_index) + (#next_node.jumps - next_node.current)
-      -- vim.print("find 有 next node 历史", count)
+      jump_count = get_jump_count(next_node.index, current_jump_index, #next_node.jumps - next_node.current)
     else
-      table.insert(history[current_node.bufnr], current_node)
-      jump_count = math.abs(next_node.index - current_jump_index)
-      -- vim.print("find 没有 next node 历史", count)
+      collect_node(next_node)
+      jump_count = get_jump_count(next_node.index, current_jump_index, 0)
     end
   end
+
   if jump_count and jump_count > 0 then
     vim.api.nvim_feedkeys(jump_count .. jump_key, "nx", false)
   end
