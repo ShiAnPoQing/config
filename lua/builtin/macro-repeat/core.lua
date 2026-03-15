@@ -102,9 +102,11 @@ function M.macro_repeat(register_name)
 
   local function run()
     if #new_keys_copy == 0 then
-      require("repeat").set_operation(function()
-        M.macro_repeat(register_name)
-      end)
+      vim.defer_fn(function()
+        require("repeat").set_operation(function()
+          M.macro_repeat(register_name)
+        end)
+      end, 0)
       return
     end
     local key = table.remove(new_keys_copy, 1)

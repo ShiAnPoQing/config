@@ -4,14 +4,18 @@ require("command")
 require("autocmds")
 require("keymaps")
 require("native-packer").setup({
+  require("plugins.download.style"),
+  require("plugins.local.native-macro"),
+  require("plugins.download.style.statuscol"),
+  require("plugins.download.style.lualine"),
   require("plugins.download.misc.repeat"),
   require("plugins.local.undotree"),
   require("plugins.local.neo-option"),
   require("plugins.download.misc.linefuse"),
   require("plugins.local.move-line"),
   require("plugins.local.move-word"),
+  require("plugins.local.file-details"),
   require("plugins.local.neo-lsp"),
-  require("plugins.download.style"),
   require("plugins.local.code-action"),
   require("plugins.local.op-register"),
   require("plugins.local.simple-translate"),
@@ -36,7 +40,6 @@ require("native-packer").setup({
   require("plugins.download.git.gitsigns"),
   require("plugins.download.tmux.vim-tmux-navigator"),
   require("plugins.download.window.winshift"),
-  require("plugins.download.style.lualine"),
   require("plugins.download.misc.flash"),
   require("plugins.download.misc.snacks"),
   -- require("plugins.download.misc.trouble"),

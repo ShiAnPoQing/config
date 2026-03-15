@@ -60,26 +60,26 @@ lightuserdata
 
 ?在类型（例如boolean?或）后添加问号 ( )number?相当于说boolean|nil或number|nil。
 
-| 类型名称   | 语法格式                                 | 描述                               |
+| 类型名称 | 语法格式 | 描述 |
 | ---------- | ---------------------------------------- | ---------------------------------- |
-| 联合类型   | `TYPE_1 \| TYPE_2`                       | 表示可以是多种类型之一             |
-| 数组       | `VALUE_TYPE[]`                           | 表示由特定类型元素组成的数组       |
-| 元组       | `[VALUE_TYPE, VALUE_TYPE]`               | 表示固定长度和类型的数组           |
-| 字典       | `{ [string]: VALUE_TYPE }`               | 表示字符串键到值的映射             |
-| 键值表     | `table<KEY_TYPE, VALUE_TYPE>`            | 表示键值对集合                     |
-| 对象字面量 | `{ key1: VALUE_TYPE, key2: VALUE_TYPE }` | 表示具有特定键的对象结构           |
-| 函数       | `fun(PARAM: TYPE): RETURN_TYPE`          | 表示函数类型，包含参数和返回值类型 |
+| 联合类型 | `TYPE_1 \| TYPE_2` | 表示可以是多种类型之一 |
+| 数组 | `VALUE_TYPE[]` | 表示由特定类型元素组成的数组 |
+| 元组 | `[VALUE_TYPE, VALUE_TYPE]` | 表示固定长度和类型的数组 |
+| 字典 | `{ [string]: VALUE_TYPE }` | 表示字符串键到值的映射 |
+| 键值表 | `table<KEY_TYPE, VALUE_TYPE>` | 表示键值对集合 |
+| 对象字面量 | `{ key1: VALUE_TYPE, key2: VALUE_TYPE }` | 表示具有特定键的对象结构 |
+| 函数 | `fun(PARAM: TYPE): RETURN_TYPE` | 表示函数类型，包含参数和返回值类型 |
 
 ```lua
 ---@type (string | integer)[]
 local myArray = {}
 ```
 
-| 符号                       | 含义     | 说明                         |
+| 符号 | 含义 | 说明 |
 | -------------------------- | -------- | ---------------------------- |
-| `<value_name>`             | 必需值   | 表示必须提供的值             |
-| `[value_name]`             | 可选值   | 表示方括号内的内容是可选的   |
-| `[value_name...]`          | 可重复值 | 表示该值可以重复出现多次     |
+| `<value_name>` | 必需值 | 表示必须提供的值 |
+| `[value_name]` | 可选值 | 表示方括号内的内容是可选的 |
+| `[value_name...]` | 可重复值 | 表示该值可以重复出现多次 |
 | `value_name \| value_name` | 选择关系 | 表示左侧值或右侧值都是有效的 |
 
 ## `@alias`

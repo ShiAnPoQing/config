@@ -69,20 +69,15 @@ return {
   ["<leader>mF"] = {
     function()
       local cwd = get_current_win_cwd()
-      -- vim.cmd.echohl("Operator")
       vim.ui.input({
         prompt = "Delete File: " .. cwd .. "/",
         completion = "file_in_path",
-        -- highlight = function(input)
-        -- return { { 0, 1, "ErrorMsg" } }
-        -- end,
       }, function(input)
         if not input then
           return
         end
         vim.fn.delete(cwd .. "/" .. input)
         vim.notify("Success Deleted File: " .. cwd .. "/" .. input)
-        -- vim.cmd.echohl("WarningMsg")
       end)
     end,
     "n",

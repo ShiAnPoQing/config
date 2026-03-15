@@ -1,5 +1,15 @@
 return {
   "stevearc/conform.nvim",
+  event = "BufWritePre",
+  key = {
+    ["<leader>="] = {
+      function()
+        require("conform").format({ async = true, lsp_fallback = true })
+      end,
+      { "n", "x" },
+      desc = "Format the current buffer",
+    },
+  },
   config = function()
     local conform = require("conform")
     conform.setup({
@@ -33,14 +43,5 @@ return {
     conform.formatters.latexindent = {
       prepend_args = { "-l", vim.fn.expand("~/.config/latexindent/indentconfig.yaml"), "-m" },
     }
-    require("native-packer.key").add({
-      ["<leader>="] = {
-        function()
-          conform.format({ async = true, lsp_fallback = true })
-        end,
-        { "n", "x" },
-        desc = "Format the current buffer",
-      },
-    })
   end,
 }

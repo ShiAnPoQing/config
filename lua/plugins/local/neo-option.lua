@@ -47,14 +47,18 @@ return {
       winaltkeys = "no",
       -- statusline = "%<%f %{luaeval('vim.api.nvim_get_mode().mode')}",
 
-      number = true,
-      numberwidth = 1,
-      relativenumber = true,
+      -- 禁止 number column 和 relative number column
+      -- 使用 statuscolumn 替代
+      number = false,
+      -- numberwidth = 0,
+      relativenumber = false,
+
       hlsearch = true,
       incsearch = true,
       ignorecase = true,
       smartcase = true,
       concealcursor = {},
+      cursorline = false,
       --
       -- updatetime = 100,
       -- 0: never
@@ -78,8 +82,8 @@ return {
       -- -- 是否自动切换工作目录
       -- -- autochdir = true,
       autoread = true,
-      signcolumn = "no",
-      -- signcolumn = "yes:2",
+      -- signcolumn = "no",
+      signcolumn = "yes:2",
       laststatus = 3,
 
       tabstop = 2,
@@ -106,6 +110,10 @@ return {
       fillchars = {
         vert = "│",
         horiz = "─",
+        -- fold = " ",
+        foldopen = "",
+        foldsep = " ",
+        foldclose = "",
       },
       formatoptions = {
         j = true,
@@ -116,7 +124,10 @@ return {
         l = true,
         ["/"] = true,
       },
-      foldcolumn = "0",
+
+      -- statuscolumn = "%s %{v:lnum} %{v:relnum}",
+
+      foldcolumn = "auto",
       foldmethod = "expr",
       foldexpr = "v:lua.vim.treesitter.foldexpr()",
       -- 打开文件时启用折叠

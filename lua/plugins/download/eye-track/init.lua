@@ -1,6 +1,55 @@
 return {
   "BrokenSunny/eye-track.nvim",
   key = {
+    ["0<space><space>w"] = {
+      function()
+        require("eye-track.plugins.line-start-end")({
+          position = -2,
+          matched = function(ctx)
+            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.col })
+            vim.api.nvim_feedkeys("i", "n", false)
+          end,
+        })
+      end,
+      "n",
+    },
+    ["0<space><space>e"] = {
+      function()
+        require("eye-track.plugins.line-start-end")({
+          position = 2,
+          matched = function(ctx)
+            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.col })
+            vim.api.nvim_feedkeys("a", "n", false)
+          end,
+        })
+      end,
+      "n",
+    },
+
+    ["0<space>w"] = {
+      function()
+        require("eye-track.plugins.line-start-end")({
+          position = -1,
+          matched = function(ctx)
+            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.col })
+            vim.api.nvim_feedkeys("i", "n", false)
+          end,
+        })
+      end,
+      "n",
+    },
+    ["0<space>e"] = {
+      function()
+        require("eye-track.plugins.line-start-end")({
+          position = 1,
+          matched = function(ctx)
+            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.col })
+            vim.api.nvim_feedkeys("a", "n", false)
+          end,
+        })
+      end,
+      "n",
+    },
     ["0<C-k>"] = {
       function()
         local row = vim.fn.line(".")

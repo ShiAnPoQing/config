@@ -62,15 +62,13 @@ return {
   },
   ["<leader>2"] = {
     function()
-      local n_maps = vim.api.nvim_get_keymap("n")
-      local v_maps = vim.api.nvim_get_keymap("x")
-      local o_maps = vim.api.nvim_get_keymap("o")
-      local s_maps = vim.api.nvim_get_keymap("s")
-      print("Normal mode maps:", #n_maps)
-      print("Visual mode maps:", #v_maps)
-      print("Select mode maps:", #s_maps)
-      print("Operator pending mode maps:", #o_maps)
+      local key = vim.api.nvim_replace_termcodes(":s/a/b<cr>", true, false, true)
+      vim.api.nvim_feedkeys(key, "m", true)
     end,
+    "n",
+  },
+  ["<leader>3"] = {
+    function() end,
     "n",
   },
   ["<leader>`"] = {

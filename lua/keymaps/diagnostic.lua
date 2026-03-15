@@ -16,6 +16,12 @@
 -- see /usr/share/nvim/runtime/lua/vim/_defaults.lua
 
 return {
+  ["<leader>de"] = {
+    function()
+      vim.diagnostic.enable(not vim.diagnostic.is_enabled({ bufnr = 0 }), { bufnr = 0 })
+    end,
+    "n",
+  },
   ["<leader>da"] = {
     function()
       vim.diagnostic.setloclist()
@@ -38,8 +44,12 @@ return {
   },
   ["[w"] = {
     function()
-      vim.diagnostic.jump({ severity = vim.diagnostic.severity.WARN, count = -1 })
-      vim.api.nvim_feedkeys("zz", "n", false)
+      local function callback()
+        vim.diagnostic.jump({ severity = vim.diagnostic.severity.WARN, count = -1 })
+        vim.api.nvim_feedkeys("zz", "n", false)
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Goto prev WARN diagnostic",
@@ -47,8 +57,12 @@ return {
   -- Goto next WARN diagnostic
   ["]w"] = {
     function()
-      vim.diagnostic.jump({ severity = vim.diagnostic.severity.WARN, count = 1 })
-      vim.api.nvim_feedkeys("zz", "n", false)
+      local function callback()
+        vim.diagnostic.jump({ severity = vim.diagnostic.severity.WARN, count = 1 })
+        vim.api.nvim_feedkeys("zz", "n", false)
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Goto next WARN diagnostic",
@@ -56,8 +70,12 @@ return {
   -- Goto next error diagnostic
   ["]e"] = {
     function()
-      vim.diagnostic.jump({ severity = vim.diagnostic.severity.ERROR, count = 1 })
-      vim.api.nvim_feedkeys("zz", "n", false)
+      local function callback()
+        vim.diagnostic.jump({ severity = vim.diagnostic.severity.ERROR, count = 1 })
+        vim.api.nvim_feedkeys("zz", "n", false)
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Goto next error diagnostic",
@@ -65,36 +83,56 @@ return {
   -- Goto previous error diagnostic
   ["[e"] = {
     function()
-      vim.diagnostic.jump({ severity = vim.diagnostic.severity.ERROR, count = -1 })
-      vim.api.nvim_feedkeys("zz", "n", false)
+      local function callback()
+        vim.diagnostic.jump({ severity = vim.diagnostic.severity.ERROR, count = -1 })
+        vim.api.nvim_feedkeys("zz", "n", false)
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Goto prev ERROR diagnostic",
   },
   ["[d"] = {
     function()
-      vim.diagnostic.jump({ count = -vim.v.count1 })
+      local function callback()
+        vim.diagnostic.jump({ count = -vim.v.count1 })
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Goto prev diagnostic",
   },
   ["]d"] = {
     function()
-      vim.diagnostic.jump({ count = vim.v.count1 })
+      local function callback()
+        vim.diagnostic.jump({ count = vim.v.count1 })
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Goto next diagnostic",
   },
   ["]D"] = {
     function()
-      vim.diagnostic.jump({ count = vim._maxint, wrap = false })
+      local function callback()
+        vim.diagnostic.jump({ count = vim._maxint, wrap = false })
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Goto last diagnostic",
   },
   ["[D"] = {
     function()
-      vim.diagnostic.jump({ count = -vim._maxint, wrap = false })
+      local function callback()
+        vim.diagnostic.jump({ count = -vim._maxint, wrap = false })
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Goto first diagnostic",

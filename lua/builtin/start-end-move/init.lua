@@ -22,13 +22,25 @@ end
 
 local function set_extmark(up_col, down_col, up_line, down_line)
   local ns_id = vim.api.nvim_create_namespace("test")
-  vim.api.nvim_buf_set_extmark(0, ns_id, up_line, 0, {
-    virt_text = { { "k", "Operator" } },
-    virt_text_win_col = up_col,
+  pcall(vim.api.nvim_buf_set_extmark, 0, ns_id, up_line, 0, {
+    hl_group = "EyeTrackLayer",
+    end_row = up_line + 1,
+    hl_eol = true,
   })
-  vim.api.nvim_buf_set_extmark(0, ns_id, down_line, 0, {
-    virt_text = { { "j", "Operator" } },
+  pcall(vim.api.nvim_buf_set_extmark, 0, ns_id, down_line, 0, {
+    hl_group = "EyeTrackLayer",
+    end_row = down_line + 1,
+    hl_eol = true,
+  })
+  pcall(vim.api.nvim_buf_set_extmark, 0, ns_id, up_line, 0, {
+    virt_text = { { "k", "EyeTrackKey" } },
+    virt_text_win_col = up_col,
+    hl_mode = "combine",
+  })
+  pcall(vim.api.nvim_buf_set_extmark, 0, ns_id, down_line, 0, {
+    virt_text = { { "j", "EyeTrackKey" } },
     virt_text_win_col = down_col,
+    hl_mode = "combine",
   })
   vim.cmd.redraw()
 
@@ -41,21 +53,27 @@ local function get_screen_col(LR, up_line_start, down_line_start)
   local wininfo = get_win_info()
   ---@diagnostic disable-next-line: undefined-field
   local leftcol = wininfo.leftcol
-  local up_line = vim.api.nvim_buf_get_lines(0, up_line_start, up_line_start + 1, false)[1]
-  local down_line = vim.api.nvim_buf_get_lines(0, down_line_start, down_line_start + 1, false)[1]
+  local up_line = vim.api.nvim_buf_get_lines(0, up_line_start, up_line_start + 1, false)[1] or ""
+  local down_line = vim.api.nvim_buf_get_lines(0, down_line_start, down_line_start + 1, false)[1] or ""
 
   if LR == "left" then
     local pattern = vim.regex("^\\s*\\S")
-    local _, up_end = pattern:match_str(up_line and up_line or "")
-    local _, down_end = pattern:match_str(down_line and down_line or "")
+    local _, up_end = pattern:match_str(up_line)
+    local _, down_end = pattern:match_str(down_line)
     up_end = up_end and up_end - leftcol - 1 or 0 - leftcol - 1
     down_end = down_end and down_end - leftcol - 1 or 0 - leftcol - 1
     return math.max(up_end, 0), math.max(down_end, 0)
   else
     local width = wininfo.width - wininfo.textoff
     local pattern = vim.regex("\\S\\s*$")
-    local up_start, _ = pattern:match_str(up_line and up_line or "")
-    local down_start, _ = pattern:match_str(down_line and down_line or "")
+    local up_start, _ = pattern:match_str(up_line)
+    local down_start, _ = pattern:match_str(down_line)
+    if not up_start then
+      up_start = 0
+    end
+    if not down_start then
+      down_start = 0
+    end
     local up_text = up_line:sub(0, up_start + 1)
     local down_text = down_line:sub(0, down_start + 1)
     local up_display = vim.fn.strdisplaywidth(up_text) - 1
@@ -152,8 +170,8 @@ function M.last_character()
   ---@diagnostic disable-next-line: undefined-field
   local leftcol = wininfo.leftcol
   local width = wininfo.width - wininfo.textoff
-  local up_col = vim.fn.strdisplaywidth(up_line) - leftcol
-  local down_col = vim.fn.strdisplaywidth(down_line) - leftcol
+  local up_col = vim.fn.strdisplaywidth(up_line) - leftcol - 1
+  local down_col = vim.fn.strdisplaywidth(down_line) - leftcol - 1
 
   if up_col >= width then
     up_col = width - 1

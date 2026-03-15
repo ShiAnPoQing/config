@@ -1,5 +1,6 @@
 return {
   "folke/snacks.nvim",
+  lazy = false,
   priority = 1000,
   key = {
     ["<leader>e"] = {
@@ -29,14 +30,14 @@ return {
       bigfile = { enabled = true },
       dashboard = { enabled = false },
       explorer = { enabled = true },
-      indent = { enabled = false },
+      indent = { enabled = true, char = "│", animate = { enabled = false } },
       input = { enabled = true },
       picker = { enabled = true },
       notifier = { enabled = false },
       quickfile = { enabled = true },
       scope = { enabled = false },
       scroll = { enabled = false },
-      statuscolumn = { enabled = true },
+      -- statuscolumn = { enabled = true },
       words = { enabled = true },
     })
   end,
