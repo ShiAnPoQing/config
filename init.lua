@@ -55,4 +55,7 @@ require("native-packer").setup({
   require("plugins.local.test.eye-track"),
   require("plugins.local.test.eye-track-treesitter"),
   require("plugins.local.doc"),
+  require("plugins.download.misc.ts-comments"),
+  require("plugins.download.misc.persistence"),
+  -- require("plugins.download.ai.copilot"),
 })

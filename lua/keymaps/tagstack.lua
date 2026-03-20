@@ -9,12 +9,13 @@ return {
     "n",
     desc = "Jump to [count] older entry in tag stack (default 1)",
   },
-  ["<space>]"] = {
+  ["a]"] = {
     "<C-]>",
     "n",
+    desc = "Jump to the definition of the keyword under the cursor",
   },
   ["g]"] = {
-    "<C-]>",
+    "g<C-]>",
     "n",
   },
   -- ["<space>]"] = {
