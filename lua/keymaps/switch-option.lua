@@ -24,6 +24,19 @@ return {
     "n",
     desc = "Switch the cursor line will always be in the middle of the window or not",
   },
+  ["<leader>vso"] = {
+    function()
+      ---@diagnostic disable-next-line: undefined-field
+      local scrolloff = vim.opt_local.scrolloff:get()
+      if scrolloff ~= 999 then
+        vim.opt_local.sidescrolloff = 999
+      else
+        vim.opt_local.sidescrolloff = 0
+      end
+    end,
+    "n",
+    desc = "Switch the cursor line will always be in the middle of the window or not"
+  },
   ["<leader>st"] = {
     function()
       ---@diagnostic disable-next-line: undefined-field
@@ -50,14 +63,12 @@ return {
     "n",
     desc = "Switch virtualedit",
   },
-  -- Toggle cursorline
-  -- Only in cursor window
   ["<leader>csl"] = {
     function()
-      require("builtin.toggle-cursorline").toggle_cursorline()
+      require("builtin.cursorline"):toggle()
     end,
     "n",
-    desc = "Switch cursor line",
+    desc = "Switch cursorline[only one cursorline]",
   },
   ["<space><space>-"] = {
     function()

@@ -64,28 +64,28 @@ return {
   },
   -- "[L"
   -- "]L"
-  ["[fl"] = {
-    function()
-      local count = vim.v.count1
-      --- @diagnostic disable-next-line
-      local ok = pcall(vim.cmd, count .. "lpfile")
-      if not ok then
-        vim.cmd("llast")
-      end
-    end,
-    "n",
-    desc = "Display the last location in the [count] previous file in the list that includes a file name.",
-  },
-  ["]fl"] = {
-    function()
-      local count = vim.v.count1
-      --- @diagnostic disable-next-line
-      local ok = pcall(vim.cmd, count .. "lnfile")
-      if not ok then
-        vim.cmd("lfirst")
-      end
-    end,
-    "n",
-    desc = "Display the first location in the [count] next file in the list that includes a file name.",
-  },
+  -- ["[fl"] = {
+  --   function()
+  --     local count = vim.v.count1
+  --     --- @diagnostic disable-next-line
+  --     local ok = pcall(vim.cmd, count .. "lpfile")
+  --     if not ok then
+  --       vim.cmd("llast")
+  --     end
+  --   end,
+  --   "n",
+  --   desc = "Display the last location in the [count] previous file in the list that includes a file name.",
+  -- },
+  -- ["]fl"] = {
+  --   function()
+  --     local count = vim.v.count1
+  --     --- @diagnostic disable-next-line
+  --     local ok = pcall(vim.cmd, count .. "lnfile")
+  --     if not ok then
+  --       vim.cmd("lfirst")
+  --     end
+  --   end,
+  --   "n",
+  --   desc = "Display the first location in the [count] next file in the list that includes a file name.",
+  -- },
 }

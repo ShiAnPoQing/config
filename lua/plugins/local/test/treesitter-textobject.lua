@@ -1,10 +1,10 @@
 return {
-  name = "treesitter-textobject.nvim",
+  name = "treesitter-textobject",
   key = {
     ["<leader>ims"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "javascript",
             query = "import.source",
             scm = "textobjects",
@@ -16,7 +16,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "import.source",
             scm = "textobjects",
@@ -28,7 +28,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "import.source",
             scm = "textobjects",
@@ -42,7 +42,7 @@ return {
     ["<leader>imn"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "import.clause",
             scm = "textobjects",
@@ -54,7 +54,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "import.clause",
             scm = "textobjects",
@@ -66,7 +66,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "javascript",
             query = "import.clause",
             scm = "textobjects",
@@ -79,7 +79,7 @@ return {
     },
     ["<leader>jo"] = {
       function()
-        require("treesitter-textobject").textobject({
+        require("treesitter-textobject.select").select({
           language = "tsx",
           query = "jsx_element.outer",
           scm = "textobjects",
@@ -92,7 +92,7 @@ return {
     ["<leader>tn"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "type.name",
             scm = "textobjects",
@@ -104,7 +104,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "type.name",
             scm = "textobjects",
@@ -118,7 +118,7 @@ return {
     ["<leader>tv"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "type.value",
             scm = "textobjects",
@@ -130,7 +130,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "type.value",
             scm = "textobjects",
@@ -144,7 +144,7 @@ return {
     ["<leader>tin"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "interface.name",
             scm = "textobjects",
@@ -156,7 +156,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "interface.name",
             scm = "textobjects",
@@ -170,7 +170,7 @@ return {
     ["<leader>tiv"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "interface.body",
             scm = "textobjects",
@@ -182,7 +182,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "interface.body",
             scm = "textobjects",
@@ -196,7 +196,7 @@ return {
     ["<leader>fn"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "function.name",
             scm = "textobjects",
@@ -208,7 +208,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "function.name",
             scm = "textobjects",
@@ -220,7 +220,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "javascript",
             query = "function.name",
             scm = "textobjects",
@@ -232,7 +232,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "lua",
             query = "function.name",
             scm = "textobjects",
@@ -244,7 +244,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "c",
             query = "function.name",
             scm = "textobjects",
@@ -257,7 +257,7 @@ return {
     },
     ["<leader>fc"] = {
       function()
-        require("treesitter-textobject").textobject({
+        require("treesitter-textobject.select").select({
           language = "lua",
           query = "function.call",
           scm = "textobjects",
@@ -269,7 +269,7 @@ return {
     },
     ["<leader>fp"] = {
       function()
-        require("treesitter-textobject").textobject({
+        require("treesitter-textobject.select").select({
           language = "lua",
           query = "parameter",
           scm = "textobjects",
@@ -282,7 +282,7 @@ return {
     ["<leader>fo"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "lua",
             query = "function.outer",
             scm = "textobjects",
@@ -294,7 +294,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "function.outer",
             scm = "textobjects",
@@ -306,7 +306,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "function.outer",
             scm = "textobjects",
@@ -318,7 +318,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "javascript",
             query = "function.outer",
             scm = "textobjects",
@@ -330,7 +330,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "c",
             query = "function.outer",
             scm = "textobjects",
@@ -344,7 +344,7 @@ return {
     ["<leader>fi"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "lua",
             query = "function.inner",
             scm = "textobjects",
@@ -356,7 +356,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "function.inner",
             scm = "textobjects",
@@ -368,7 +368,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "function.inner",
             scm = "textobjects",
@@ -380,7 +380,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "javascript",
             query = "function.inner",
             scm = "textobjects",
@@ -392,7 +392,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "c",
             query = "function.inner",
             scm = "textobjects",
@@ -406,7 +406,7 @@ return {
     ["<leader>fr"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "lua",
             query = "function.return",
             scm = "textobjects",
@@ -418,7 +418,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "function.return",
             scm = "textobjects",
@@ -430,7 +430,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "function.return",
             scm = "textobjects",
@@ -442,7 +442,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "javascript",
             query = "function.return",
             scm = "textobjects",
@@ -454,7 +454,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "c",
             query = "function.return",
             scm = "textobjects",
@@ -468,7 +468,7 @@ return {
     ["<leader>so"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "lua",
             query = "statement.outer",
             scm = "textobjects",
@@ -480,7 +480,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "statement.outer",
             scm = "textobjects",
@@ -492,7 +492,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "statement.outer",
             scm = "textobjects",
@@ -504,7 +504,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "javascript",
             query = "statement.outer",
             scm = "textobjects",
@@ -516,7 +516,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "c",
             query = "statement.outer",
             scm = "textobjects",
@@ -530,7 +530,7 @@ return {
     ["<leader>si"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "lua",
             query = "statement.inner",
             scm = "textobjects",
@@ -542,7 +542,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "statement.inner",
             scm = "textobjects",
@@ -554,7 +554,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "statement.inner",
             scm = "textobjects",
@@ -566,7 +566,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "javascript",
             query = "statement.inner",
             scm = "textobjects",
@@ -580,7 +580,7 @@ return {
     ["<leader>cd"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "lua",
             query = "condition",
             scm = "textobjects",
@@ -592,7 +592,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "condition",
             scm = "textobjects",
@@ -604,7 +604,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "condition",
             scm = "textobjects",
@@ -616,7 +616,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "javascript",
             query = "condition",
             scm = "textobjects",
@@ -628,7 +628,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "c",
             query = "condition",
             scm = "textobjects",
@@ -640,7 +640,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "latex",
             query = "command",
             scm = "textobjects",
@@ -654,7 +654,7 @@ return {
     ["<leader>el"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "lua",
             query = "expression_list",
             scm = "textobjects",
@@ -666,7 +666,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "expression_list",
             scm = "textobjects",
@@ -678,7 +678,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "expression_list",
             scm = "textobjects",
@@ -690,7 +690,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "javascript",
             query = "expression_list",
             scm = "textobjects",
@@ -704,7 +704,7 @@ return {
     ["<leader>=l"] = {
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "lua",
             query = "equal.right",
             scm = "textobjects",
@@ -716,7 +716,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "typescript",
             query = "equal.right",
             scm = "textobjects",
@@ -728,7 +728,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "tsx",
             query = "equal.right",
             scm = "textobjects",
@@ -740,7 +740,7 @@ return {
       },
       {
         function()
-          require("treesitter-textobject").textobject({
+          require("treesitter-textobject.select").select({
             language = "javascript",
             query = "equal.right",
             scm = "textobjects",
@@ -753,7 +753,7 @@ return {
     },
     ["<leader>icd"] = {
       function()
-        require("treesitter-textobject").textobject({
+        require("treesitter-textobject.select").select({
           language = "c",
           query = "include",
           scm = "textobjects",
@@ -765,7 +765,7 @@ return {
     },
     ["<leader>icp"] = {
       function()
-        require("treesitter-textobject").textobject({
+        require("treesitter-textobject.select").select({
           language = "c",
           query = "include.path",
           scm = "textobjects",
@@ -779,7 +779,7 @@ return {
       {
         function()
           local function callback()
-            require("treesitter-textobject").textobject({
+            require("treesitter-textobject.select").select({
               language = "lua",
               query = "comment.outer",
               scm = "textobjects",
@@ -795,7 +795,7 @@ return {
       {
         function()
           local function callback()
-            require("treesitter-textobject").textobject({
+            require("treesitter-textobject.select").select({
               language = "latex",
               query = "comment.outer",
               scm = "textobjects",
@@ -811,7 +811,7 @@ return {
     },
     ["<leader>ci"] = {
       function()
-        require("treesitter-textobject").textobject({
+        require("treesitter-textobject.select").select({
           language = "lua",
           query = "comment.inner",
           scm = "textobjects",
@@ -823,7 +823,7 @@ return {
     },
     ["ev"] = {
       function()
-        require("treesitter-textobject").textobject({
+        require("treesitter-textobject.select").select({
           language = "latex",
           query = "environment",
           scm = "textobjects",
@@ -835,7 +835,7 @@ return {
     },
     ["eq"] = {
       function()
-        require("treesitter-textobject").textobject({
+        require("treesitter-textobject.select").select({
           language = "latex",
           query = "equation",
           scm = "textobjects",
@@ -847,7 +847,7 @@ return {
     },
     ["<leader>pi"] = {
       function()
-        require("treesitter-textobject").textobject({
+        require("treesitter-textobject.select").select({
           language = "latex",
           query = "package.include",
           scm = "textobjects",
@@ -859,7 +859,7 @@ return {
     },
     ["<leader>cn"] = {
       function()
-        require("treesitter-textobject").textobject({
+        require("treesitter-textobject.select").select({
           language = "latex",
           query = "command.name",
           scm = "textobjects",
@@ -871,7 +871,7 @@ return {
     },
     ["<leader>ca"] = {
       function()
-        require("treesitter-textobject").textobject({
+        require("treesitter-textobject.select").select({
           language = "latex",
           query = "command.arg",
           scm = "textobjects",

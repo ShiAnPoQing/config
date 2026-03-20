@@ -1,6 +1,7 @@
 return {
   {
     "bluz71/vim-moonfly-colors",
+    lazy = true,
     priority = 1000,
     colorscheme = "moonfly",
     config = function()
@@ -31,7 +32,8 @@ return {
   {
     "BrokenSunny/paradox.nvim",
     priority = 1000,
-    -- colorscheme = "paradox",
+    lazy = false,
+    colorscheme = "paradox",
     config = function()
       require("paradox").setup()
       local time = tonumber(os.date("%H"))
@@ -48,6 +50,7 @@ return {
     colorscheme = { "kanagawa-wave", "kanagawa-dragon", "kanagawa-lotus" },
     config = function()
       require("kanagawa").setup()
+      vim.cmd([[colorscheme kanagawa-wave]])
     end,
   },
   {

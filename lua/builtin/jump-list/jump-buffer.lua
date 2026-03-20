@@ -1,8 +1,11 @@
 local M = {}
+local Shared = require("builtin.jump-list.shared")
 
 local history = {}
-local JUMP_NEW_KEY = vim.api.nvim_replace_termcodes("<C-i>", true, false, true)
-local JUMP_OLD_KEY = vim.api.nvim_replace_termcodes("<C-o>", true, false, true)
+
+local function collect_node(node)
+  table.insert(history[node.bufnr], node)
+end
 
 local function get_range(direction, jumplist, current_jump_index)
   local current_jump
@@ -98,10 +101,6 @@ local function update_node(node)
   node.current = current_jump_index
 end
 
-local function collect_node(node)
-  table.insert(history[node.bufnr], node)
-end
-
 local function find_node(nodes, node)
   local delete_node_indexs = {}
   local find
@@ -157,10 +156,10 @@ function M.jump(direction)
   local count = vim.v.count1
   local jump_key
   if direction < 0 then
-    vim.api.nvim_feedkeys(JUMP_OLD_KEY .. JUMP_NEW_KEY, "nx", false)
-    jump_key = JUMP_OLD_KEY
+    vim.api.nvim_feedkeys(Shared.JUMP_OLD_KEY .. Shared.JUMP_NEW_KEY, "nx", false)
+    jump_key = Shared.JUMP_OLD_KEY
   else
-    jump_key = JUMP_NEW_KEY
+    jump_key = Shared.JUMP_NEW_KEY
   end
 
   local jumplist, current_jump_index = unpack(vim.fn.getjumplist())

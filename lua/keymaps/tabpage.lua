@@ -47,10 +47,7 @@ local function tabpage_goto(dir)
 end
 
 return {
-  ["<tab>c"] = {
-    "<cmd>tabclose<cr>",
-    "n",
-  },
+  ["<tab>c"] = { "<cmd>tabclose<cr>", "n" },
   ["<tab><tab>c"] = { "<cmd>tabclose!<cr>", "n" },
   ["<tab>o"] = { "<cmd>on<cr>", "n" },
   ["<tab>O"] = { "<cmd>tabonly<cr>", "n" },

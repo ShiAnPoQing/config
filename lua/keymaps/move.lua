@@ -278,28 +278,44 @@ return {
   },
   ["ah"] = {
     function()
-      require("builtin.screen-move").first_non_blank_character()
+      local function callback()
+        require("builtin.screen-move").first_non_blank_character()
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     { "n", "x", "o" },
     desc = "Screen First Character",
   },
   ["al"] = {
     function()
-      require("builtin.screen-move").last_non_blank_character()
+      local function callback()
+        require("builtin.screen-move").last_non_blank_character()
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     { "n", "x", "o" },
     desc = "Screen Last Character",
   },
   ["ak"] = {
     function()
-      require("builtin.screen-move").top()
+      local function callback()
+        require("builtin.screen-move").top()
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     { "n", "x", "o" },
     desc = "Screen Top",
   },
   ["aj"] = {
     function()
-      require("builtin.screen-move").bottom()
+      local function callback()
+        require("builtin.screen-move").bottom()
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     { "n", "x", "o" },
     desc = "Screen Bottom",

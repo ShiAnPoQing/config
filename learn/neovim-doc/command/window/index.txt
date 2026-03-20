@@ -7,8 +7,6 @@
 |:enew|		:ene[w]		edit a new, unnamed buffer
 |:split|	:sp[lit]	split current window
 |:vsplit|	:vs[plit]	split current window vertically
-|:all|		:al[l]		open a window for each file in the argument
-				list
 |:sball|	:sba[ll]	open a window for each file in the buffer list
 |:fclose|	:fc[lose]	close floating window
 |:quit|		:q[uit]		quit current window (when one window quit Vim)

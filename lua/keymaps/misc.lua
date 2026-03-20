@@ -65,6 +65,6 @@ return {
     { "d", "v" },
   },
   ["<space>r"] = { "gR", "n" },
-  ["<C-f>"] = { ";", { "n" }, desc = "Repeat latest f, t, F or T [count] times" },
-  ["<C-S-f>"] = { ",", { "n" }, desc = "Repeat latest f, t, F or T in opposite direction [count] times" },
+  ["<M-f>"] = { ";", { "n" }, desc = "Repeat latest f, t, F or T [count] times" },
+  ["<C-f>"] = { ",", { "n" }, desc = "Repeat latest f, t, F or T in opposite direction [count] times" },
 }

@@ -1,11 +1,12 @@
 return {
   name = "simple-translate.nvim",
+  depend = "MunifTanjim/nui.nvim",
   key = {
     ["<leader>1"] = {
       function()
         require("simple-translate").visual_translate()
       end,
-      "x",
+      "v",
       desc = "Translate visual selection",
     },
   },

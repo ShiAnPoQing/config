@@ -37,7 +37,7 @@ return {
       history = 500,
       showcmd = true,
       title = true,
-      titlestring = "MuHuiXueLuoAnPoQing -neovim",
+      titlestring = "MuHuiXueLuoAnPoQing",
       showmode = false,
       cmdheight = 1,
       autoindent = true,
@@ -144,7 +144,7 @@ return {
         v.append({ "【:】", "<:>", "《:》", "（:）", "`:`" })
       end,
       rtp = function(v)
-        v.append({ "~/vimcdoc-2.5.0" })
+        -- v.append({ "~/vimcdoc-2.5.0" })
       end,
       helplang = function(v)
         v.prepend({ "cn" })

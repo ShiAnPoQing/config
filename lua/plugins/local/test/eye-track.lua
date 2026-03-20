@@ -1,12 +1,12 @@
 return {
-  "BrokenSunny/eye-track.nvim",
+  name = "eye-track.nvim",
   key = {
     ["0<space><space>w"] = {
       function()
         require("eye-track.plugins.line-start-end")({
           position = -2,
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.col })
             vim.api.nvim_feedkeys("i", "n", false)
           end,
         })
@@ -18,7 +18,7 @@ return {
         require("eye-track.plugins.line-start-end")({
           position = 2,
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.col })
             vim.api.nvim_feedkeys("a", "n", false)
           end,
         })
@@ -31,7 +31,7 @@ return {
         require("eye-track.plugins.line-start-end")({
           position = -1,
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.col })
             vim.api.nvim_feedkeys("i", "n", false)
           end,
         })
@@ -43,7 +43,7 @@ return {
         require("eye-track.plugins.line-start-end")({
           position = 1,
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.col })
             vim.api.nvim_feedkeys("a", "n", false)
           end,
         })
@@ -58,7 +58,7 @@ return {
             return { range.topline, row }
           end,
           matched = function(ctx)
-            require("builtin.scroll").scroll_up(math.abs(ctx.data.offset))
+            require("builtin.scroll").scroll_up(math.abs(ctx.offset))
           end,
         })
       end,
@@ -72,7 +72,7 @@ return {
             return { row, range.botline }
           end,
           matched = function(ctx)
-            require("builtin.scroll").scroll_down(math.abs(ctx.data.offset))
+            require("builtin.scroll").scroll_down(math.abs(ctx.offset))
           end,
         })
       end,
@@ -90,7 +90,7 @@ return {
             position = 0,
           },
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.start_col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.start_col })
           end,
           keyword = last_search,
           hl_group = "Visual",
@@ -110,7 +110,7 @@ return {
             position = 0,
           },
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.start_col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.start_col })
           end,
           keyword = last_search,
           hl_group = "Visual",
@@ -118,10 +118,10 @@ return {
       end,
       "n",
     },
-    ["0#"] = require("plugins.download.eye-track.cword").create_search_cword_keymap(true),
-    ["0g#"] = require("plugins.download.eye-track.cword").create_search_cword_keymap(false),
-    ["0*"] = require("plugins.download.eye-track.cword").create_search_cword_keymap(true),
-    ["0g*"] = require("plugins.download.eye-track.cword").create_search_cword_keymap(false),
+    -- ["0#"] = require("plugins.download.eye-track.cword").create_search_cword_keymap(true),
+    -- ["0g#"] = require("plugins.download.eye-track.cword").create_search_cword_keymap(false),
+    -- ["0*"] = require("plugins.download.eye-track.cword").create_search_cword_keymap(true),
+    -- ["0g*"] = require("plugins.download.eye-track.cword").create_search_cword_keymap(false),
     ["0<C-M-l>"] = {
       function()
         local cursor = vim.api.nvim_win_get_cursor(0)
@@ -161,7 +161,7 @@ return {
             return { range.topline, row }
           end,
           matched = function(ctx)
-            require("move-line").move_line(ctx.data.offset)
+            require("move-line").move_line(ctx.offset)
           end,
         })
       end,
@@ -176,7 +176,7 @@ return {
             return { row, range.botline }
           end,
           matched = function(ctx)
-            require("move-line").move_line(ctx.data.offset)
+            require("move-line").move_line(ctx.offset)
           end,
         })
       end,
@@ -187,7 +187,7 @@ return {
       function()
         require("eye-track.plugins.line")({
           matched = function(ctx)
-            require("move-line").move_line(ctx.data.offset)
+            require("move-line").move_line(ctx.offset)
           end,
         })
       end,
@@ -198,7 +198,7 @@ return {
       function()
         require("eye-track.plugins.line")({
           matched = function(ctx)
-            require("move-line").move_line(ctx.data.offset)
+            require("move-line").move_line(ctx.offset)
           end,
         })
       end,
@@ -210,12 +210,12 @@ return {
         local cursor = vim.api.nvim_win_get_cursor(0)
         require("eye-track.plugins.line")({
           matched = function(ctx)
-            local line = vim.api.nvim_buf_get_lines(0, ctx.data.row - 1, ctx.data.row, false)[1]
+            local line = vim.api.nvim_buf_get_lines(0, ctx.row - 1, ctx.row, false)[1]
             local col = cursor[2]
             if cursor[2] > #line then
               col = #line
             end
-            vim.api.nvim_win_set_cursor(0, { ctx.data.row, col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, col })
             vim.api.nvim_feedkeys("V", "n", false)
           end,
         })
@@ -226,7 +226,7 @@ return {
       function()
         require("eye-track.plugins.line")({
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.data.row, 1 })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, 1 })
             vim.api.nvim_feedkeys("O", "n", false)
           end,
         })
@@ -237,7 +237,7 @@ return {
       function()
         require("eye-track.plugins.line")({
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.data.row, 1 })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, 1 })
             vim.api.nvim_feedkeys("o", "n", false)
           end,
         })
@@ -248,8 +248,8 @@ return {
       function()
         require("eye-track.plugins.search")({
           matched = function(ctx)
-            vim.api.nvim_buf_set_mark(0, "<", ctx.line + 1, ctx.data.start_col, {})
-            vim.api.nvim_buf_set_mark(0, ">", ctx.line + 1, ctx.data.end_col, {})
+            vim.api.nvim_buf_set_mark(0, "<", ctx.row, ctx.start_col, {})
+            vim.api.nvim_buf_set_mark(0, ">", ctx.row, ctx.end_col, {})
             vim.api.nvim_feedkeys("gv", "nx", false)
           end,
           unmatched = function()
@@ -263,7 +263,7 @@ return {
       function()
         require("eye-track.plugins.search")({
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.start_col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.start_col })
           end,
           unmatched = function()
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Ignore>", true, false, true), "nx", false)
@@ -277,7 +277,7 @@ return {
         require("eye-track.plugins.line-start-end")({
           position = 2,
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.col })
           end,
         })
       end,
@@ -288,7 +288,7 @@ return {
         require("eye-track.plugins.line-start-end")({
           position = 1,
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.col })
           end,
         })
       end,
@@ -299,7 +299,7 @@ return {
         require("eye-track.plugins.line-start-end")({
           position = -2,
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.col })
           end,
         })
       end,
@@ -310,7 +310,7 @@ return {
         require("eye-track.plugins.line-start-end")({
           position = -1,
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.col })
           end,
         })
       end,
@@ -328,9 +328,9 @@ return {
           hl_group = "Visual",
           matched = function(ctx)
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.start_col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.start_col })
             vim.api.nvim_feedkeys("v", "nx", false)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.end_col - 1 })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.end_col - 1 })
           end,
           unmatched = function()
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Ignore>", true, false, true), "nx", false)
@@ -349,9 +349,9 @@ return {
           hl_group = "Visual",
           matched = function(ctx)
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.start_col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.start_col })
             vim.api.nvim_feedkeys("v", "nx", false)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.end_col - 1 })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.end_col - 1 })
           end,
           unmatched = function()
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Ignore>", true, false, true), "nx", false)
@@ -370,9 +370,9 @@ return {
           hl_group = "Visual",
           matched = function(ctx)
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.start_col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.start_col })
             vim.api.nvim_feedkeys("v", "nx", false)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.end_col - 1 })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.end_col - 1 })
           end,
           unmatched = function()
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Ignore>", true, false, true), "nx", false)
@@ -391,9 +391,9 @@ return {
           hl_group = "Visual",
           matched = function(ctx)
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.start_col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.start_col })
             vim.api.nvim_feedkeys("v", "nx", false)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.end_col - 1 })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.end_col - 1 })
           end,
           unmatched = function()
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Ignore>", true, false, true), "nx", false)
@@ -412,9 +412,9 @@ return {
           hl_group = "Visual",
           matched = function(ctx)
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.start_col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.start_col })
             vim.api.nvim_feedkeys("v", "nx", false)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.end_col - 1 })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.end_col - 1 })
           end,
           unmatched = function()
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Ignore>", true, false, true), "nx", false)
@@ -433,9 +433,9 @@ return {
           hl_group = "Visual",
           matched = function(ctx)
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.start_col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.start_col })
             vim.api.nvim_feedkeys("v", "nx", false)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.end_col - 1 })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.end_col - 1 })
           end,
           unmatched = function()
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Ignore>", true, false, true), "nx", false)
@@ -448,7 +448,7 @@ return {
       function()
         require("eye-track.plugins.line")({
           matched = function(ctx)
-            vim.api.nvim_buf_set_lines(0, ctx.data.row - 1, ctx.data.row, false, {})
+            vim.api.nvim_buf_set_lines(0, ctx.row - 1, ctx.row, false, {})
           end,
         })
       end,
@@ -459,7 +459,7 @@ return {
         require("eye-track.plugins.line")({
           matched = function(ctx)
             local cursor = vim.api.nvim_win_get_cursor(0)
-            vim.api.nvim_win_set_cursor(0, { ctx.data.row, cursor[2] })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, cursor[2] })
             vim.api.nvim_feedkeys("yy", "nx", false)
             vim.api.nvim_win_set_cursor(0, cursor)
           end,
@@ -472,7 +472,7 @@ return {
         require("eye-track.plugins.line")({
           matched = function(ctx)
             local cursor = vim.api.nvim_win_get_cursor(0)
-            vim.api.nvim_win_set_cursor(0, { ctx.data.row, cursor[2] })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, cursor[2] })
             vim.api.nvim_feedkeys("cc", "n", false)
           end,
         })
@@ -484,7 +484,7 @@ return {
         require("eye-track.plugins.line")({
           matched = function(ctx)
             local cursor = vim.api.nvim_win_get_cursor(0)
-            vim.api.nvim_win_set_cursor(0, { ctx.data.row, cursor[2] })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, cursor[2] })
             vim.api.nvim_feedkeys("C", "n", false)
           end,
         })
@@ -496,7 +496,7 @@ return {
         local cursor = vim.api.nvim_win_get_cursor(0)
         require("eye-track.plugins.line")({
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.data.row, 1 })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, 1 })
             vim.api.nvim_feedkeys("Y", "nx", false)
             vim.api.nvim_win_set_cursor(0, cursor)
           end,
@@ -514,7 +514,7 @@ return {
               return { ctx.topline, row }
             end,
             matched = function(ctx)
-              local offset = ctx.data.offset
+              local offset = ctx.offset
               jump = math.abs(offset) .. "k"
             end,
           })
@@ -532,7 +532,7 @@ return {
               return { ctx.topline, row }
             end,
             matched = function(ctx)
-              local offset = ctx.data.offset
+              local offset = ctx.offset
               jump = math.abs(offset) .. "k"
             end,
           })
@@ -552,7 +552,7 @@ return {
               return { row, ctx.botline }
             end,
             matched = function(ctx)
-              local offset = ctx.data.offset
+              local offset = ctx.offset
               jump = math.abs(offset) .. "j"
             end,
           })
@@ -570,7 +570,7 @@ return {
               return { row, ctx.botline }
             end,
             matched = function(ctx)
-              local offset = ctx.data.offset
+              local offset = ctx.offset
               jump = math.abs(offset) .. "j"
             end,
           })
@@ -586,7 +586,7 @@ return {
           local jump
           require("eye-track.plugins.line")({
             matched = function(ctx)
-              local offset = ctx.data.offset
+              local offset = ctx.offset
               jump = offset < 0 and "k" or "j"
               jump = math.abs(offset) .. jump
             end,
@@ -601,7 +601,7 @@ return {
           local jump
           require("eye-track.plugins.line")({
             matched = function(ctx)
-              local offset = ctx.data.offset
+              local offset = ctx.offset
               jump = offset < 0 and "k" or "j"
               jump = math.abs(offset) .. jump
             end,
@@ -620,7 +620,7 @@ return {
           end,
           label = { position = 1 },
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.end_col - 1 })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.end_col - 1 })
           end,
         })
       end,
@@ -635,13 +635,13 @@ return {
           label = { position = 1 },
           matched = function(ctx)
             local mode = vim.api.nvim_get_mode().mode
-            local row = ctx.line + 1
-            local col = ctx.data.end_col - 1
+            local row = ctx.row
+            local col = ctx.end_col - 1
             if mode == "no" then
               col = col + 1
             end
-            vim.api.nvim_set_current_win(ctx.data.win)
-            vim.api.nvim_win_set_cursor(ctx.data.win, { row, col })
+            vim.api.nvim_set_current_win(ctx.win)
+            vim.api.nvim_win_set_cursor(ctx.win, { row, col })
           end,
         })
       end,
@@ -655,8 +655,8 @@ return {
           end,
           label = { position = -1 },
           matched = function(ctx)
-            vim.api.nvim_set_current_win(ctx.data.win)
-            vim.api.nvim_win_set_cursor(ctx.data.win, { ctx.line + 1, ctx.data.start_col })
+            vim.api.nvim_set_current_win(ctx.win)
+            vim.api.nvim_win_set_cursor(ctx.win, { ctx.row, ctx.start_col })
           end,
         })
       end,
@@ -670,7 +670,7 @@ return {
           end,
           label = { position = -1 },
           matched = function(ctx)
-            vim.api.nvim_win_set_cursor(0, { ctx.line + 1, ctx.data.start_col })
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.start_col })
           end,
         })
       end,
@@ -681,7 +681,7 @@ return {
         local cursor = vim.api.nvim_win_get_cursor(0)
         require("eye-track.plugins.line")({
           matched = function(ctx)
-            local row = ctx.data.topline - ctx.data.offset
+            local row = ctx.topline - ctx.offset
             row = row <= 0 and 1 or row
             vim.cmd("keepjumps normal! " .. row .. "zt")
           end,

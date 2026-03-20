@@ -50,3 +50,9 @@
 
 (comment content: (_) @comment.inner)
 (comment) @comment.outer
+
+(table_constructor) @table.outer
+
+
+(parameters name: (identifier) @parameter.inner) 
+                      

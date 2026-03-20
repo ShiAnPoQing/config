@@ -1,14 +1,14 @@
 return {
   "folke/flash.nvim",
   key = {
-    ["0f"] = {
-      function()
-        require("flash").jump()
-      end,
-      { "n", "x", "o" },
-      desc = "Flash",
-    },
-    ["0F"] = {
+    -- ["0f"] = {
+    --   function()
+    --     require("flash").jump()
+    --   end,
+    --   { "n", "x", "o" },
+    --   desc = "Flash",
+    -- },
+    ["0R"] = {
       function()
         require("flash").treesitter()
       end,
@@ -22,13 +22,13 @@ return {
       "o",
       desc = "Remote Flash",
     },
-    ["0R"] = {
-      function()
-        require("flash").treesitter_search()
-      end,
-      { "o", "x" },
-      desc = "Treesitter Search",
-    },
+    -- ["0R"] = {
+    --   function()
+    --     require("flash").treesitter_search()
+    --   end,
+    --   { "o", "x" },
+    --   desc = "Treesitter Search",
+    -- },
     ["<c-s>"] = {
       function()
         require("flash").toggle()

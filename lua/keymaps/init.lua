@@ -16,7 +16,7 @@ local paths = {
   "keymaps/jump",
   "keymaps/location-list",
   "keymaps/lsp",
-  "keymaps/macro",
+  -- "keymaps/macro",
   "keymaps/misc",
   -- "keymaps/move-select",
   "keymaps/move",

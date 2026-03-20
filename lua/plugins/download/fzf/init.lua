@@ -20,7 +20,7 @@ return {
         require("fzf-lua").buffers()
       end,
       "n",
-      desc = "{F,{B,rs",
+      desc = "Find Buffers",
     },
     ["<leader>fll"] = {
       function()

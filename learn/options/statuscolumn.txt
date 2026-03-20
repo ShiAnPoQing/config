@@ -1,0 +1,48 @@
+*'statuscolumn'* *'stc'*
+'statuscolumn' 'stc'	字符串	(默认 "")
+			窗口局部
+	当非空时，此选项决定窗口侧边区域的内容，该区域通常包含折叠列、符号列和数字列。
+	此选项的格式类似于 'statusline' 的格式。
+
+	'statusline' 格式中的一些项目对于 'statuscolumn' 有所不同：
+
+	%l	当前绘制行的行号列
+	%s	当前绘制行的符号列
+	%C	当前绘制行的折叠列
+
+	'statuscolumn' 的宽度遵循默认列的宽度，并适应 'numberwidth'、'signcolumn' 和
+	'foldcolumn' 选项的值（无论符号和折叠项目是否存在）。此外，'statuscolumn' 会随着
+	计算的格式字符串的大小而增长，直到某个点（遵循默认折叠列、符号列和数字列的最大大小）。
+	仅当缓冲区中的行数发生变化或设置了 'statuscolumn' 选项时，宽度才会缩小。
+
+	|v:lnum|    变量保存要绘制的行号。
+	|v:relnum|  变量保存要绘制的相对行号。
+	|v:virtnum| 变量在绘制虚拟行时为负数，在绘制实际缓冲区行时为零，
+		     在绘制缓冲区行的换行部分时为正数。
+
+	使用 |v:relnum| 时，请记住，除非设置了 'relativenumber'，否则光标移动本身不会导致
+	'statuscolumn' 更新。
+
+	注意：同样支持 %@ 点击执行函数项，但指定的函数对于同一列中的每一行都是相同的。
+	无法通过动态的 'statuscolumn' 格式来切换，编写处理程序时应考虑到这一点。
+
+	示例： >vim
+		" 带竖线分隔符和点击处理程序的行号：
+		set statuscolumn=%@SignCb@%s%=%T%@NumCb@%l│%T
+
+		" 行的非换行部分的十六进制行号：
+		let &stc='%=%{v:virtnum>0?"":printf("%x",v:lnum)} '
+
+		" 带千位分隔符的人类可读行号：
+		let &stc='%{substitute(v:lnum,"\\d\\zs\\ze\\'
+			   . '%(\\d\\d\\d\\)\\+$",",","g")}'
+
+		" 同时显示相对和绝对行号，奇数和偶数相对行号使用不同的高亮：
+		let &stc='%#NonText#%{&nu?v:lnum:""}' .
+		 '%=%{&rnu&&(v:lnum%2)?"\ ".v:relnum:""}' .
+		 '%#LineNr#%{&rnu&&!(v:lnum%2)?"\ ".v:relnum:""}'
+
+<	警告：此表达式针对每个屏幕行进行计算，因此定义昂贵的表达式可能会对渲染性能产生
+	负面影响。
+
+vim:tw=78:ts=8:noet:ft=help:norl:

@@ -173,7 +173,7 @@ return {
       snippets = { preset = "luasnip" },
       signature = { enabled = true },
       keymap = {
-        -- preset = "none",
+        preset = "none",
         ["<C-c>"] = {
           function(cmp)
             if cmp.is_menu_visible() then
@@ -237,7 +237,7 @@ return {
         -- 即使 Snippet 没在 menu 中，
         -- 也会优先触发 Snippet，而不是选中 menu 第一项
         ["<Tab>"] = {
-          function(cmp)
+          function()
             local luasnip = require("luasnip")
             local expandable = luasnip.expandable()
 

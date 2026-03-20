@@ -21,7 +21,7 @@
       "src": "https://github.com/sainnhe/everforest"
     },
     "eye-track.nvim": {
-      "rev": "20482f7484197cf9ad474853e6fe18374c62396a",
+      "rev": "86ec0da5b04ebcb1956f42fa4f49d771d4e3641a",
       "src": "https://github.com/BrokenSunny/eye-track.nvim"
     },
     "flash.nvim": {
@@ -33,11 +33,11 @@
       "src": "https://github.com/rafamadriz/friendly-snippets"
     },
     "fzf-lua": {
-      "rev": "36d60dd59cd9bc0442352119fc0e45e1c9011e03",
+      "rev": "6e41ba7505f35a6f054ca682b043aa0cea36c2ef",
       "src": "https://github.com/ibhagwan/fzf-lua"
     },
     "gitsigns.nvim": {
-      "rev": "1ce96a464fdbc24208e24c117e2021794259005d",
+      "rev": "7c4faa3540d0781a28588cafbd4dd187a28ac6e3",
       "src": "https://github.com/lewis6991/gitsigns.nvim"
     },
     "grug-far.nvim": {
@@ -77,7 +77,7 @@
       "src": "https://github.com/echasnovski/mini.nvim"
     },
     "native-packer": {
-      "rev": "5315b620f26b0f3ba4b79226881aa98236441c41",
+      "rev": "7dd72465673b7347905a0c48511838c5ba0ceabe",
       "src": "https://github.com/BrokenSunny/native-packer"
     },
     "neo-packer": {
@@ -134,8 +134,13 @@
       "src": "https://github.com/rcarriga/nvim-notify"
     },
     "nvim-treesitter": {
-      "rev": "4967fa48b0fe7a7f92cee546c76bb4bb61bb14d5",
+      "rev": "ebc3201290b8372df2b3a1c23b71b9f007d972ff",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter",
+      "version": "'main'"
+    },
+    "nvim-treesitter-textobjects": {
+      "rev": "4e91b5d0394329a229725b021a8ea217099826ef",
+      "src": "https://github.com/nvim-treesitter/nvim-treesitter-textobjects",
       "version": "'main'"
     },
     "nvim-ts-autotag": {
@@ -147,7 +152,7 @@
       "src": "https://github.com/nvim-tree/nvim-web-devicons"
     },
     "oil.nvim": {
-      "rev": "f55b25e493a7df76371cfadd0ded5004cb9cd48a",
+      "rev": "0fcc83805ad11cf714a949c98c605ed717e0b83e",
       "src": "https://github.com/stevearc/oil.nvim"
     },
     "onedarkpro.nvim": {
@@ -233,6 +238,10 @@
     "vimtex": {
       "rev": "f707368022cdb851716be0d2970b90599c84a6a6",
       "src": "https://github.com/lervag/vimtex"
+    },
+    "which-key.nvim": {
+      "rev": "3aab2147e74890957785941f0c1ad87d0a44c15a",
+      "src": "https://github.com/folke/which-key.nvim"
     },
     "winshift.nvim": {
       "rev": "37468ed6f385dfb50402368669766504c0e15583",

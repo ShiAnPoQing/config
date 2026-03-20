@@ -57,6 +57,7 @@ return {
           ---A function used to filter the list of selectable windows.
           -----@param winids integer[] # The list of selectable window IDs.
           ----@return integer[] filtered # The filtered list of window IDs.
+          ---@diagnostic disable-next-line: assign-type-mismatch
           filter_func = nil,
         })
       end,

@@ -18,7 +18,7 @@ return {
   ["<C-i>"] = {
     function()
       local function callback()
-        require("builtin.jump-list").jump(-1)
+        require("builtin.jump-list").jump(-1, "global")
         require("repeat").set_motion(callback)
       end
       callback()
@@ -29,7 +29,7 @@ return {
   ["<C-o>"] = {
     function()
       local function callback()
-        require("builtin.jump-list").jump(1)
+        require("builtin.jump-list").jump(1, "global")
         require("repeat").set_motion(callback)
       end
       callback()
@@ -37,32 +37,32 @@ return {
     "n",
     desc = "Go to [count] newer cursor position in jump list",
   },
-  ["g<C-i>"] = {
+  ["<C-M-i>"] = {
     function()
       local function callback()
-        require("builtin.jump-list").switch_lock(-1)
-        require("repeat").set_operation(callback)
+        require("builtin.jump-list").jump(-1, "buffer")
+        require("repeat").set_motion(callback)
       end
       callback()
     end,
     "n",
-    desc = "Go to [count] older cursor position in jump list[switch buffer lock]",
+    desc = "Go to [count] older cursor position in jump list",
   },
-  ["g<C-o>"] = {
+  ["<C-M-o>"] = {
     function()
       local function callback()
-        require("builtin.jump-list").switch_lock(1)
-        require("repeat").set_operation(callback)
+        require("builtin.jump-list").jump(1, "buffer")
+        require("repeat").set_motion(callback)
       end
       callback()
     end,
     "n",
-    desc = "Go to [count] newer cursor position in jump list[switch buffer lock]",
+    desc = "Go to [count] newer cursor position in jump list",
   },
   ["<C-S-i>"] = {
     function()
       local function callback()
-        require("builtin.jump-list")._jump_buffer(-1)
+        require("builtin.jump-list").jump_buffer(-1)
         require("repeat").set_motion(callback)
       end
       callback()
@@ -73,7 +73,7 @@ return {
   ["<C-S-o>"] = {
     function()
       local function callback()
-        require("builtin.jump-list")._jump_buffer(1)
+        require("builtin.jump-list").jump_buffer(1)
         require("repeat").set_motion(callback)
       end
       callback()
@@ -81,4 +81,26 @@ return {
     "n",
     desc = "Go to [count] newer cursor position in jump list[buffer]",
   },
+  -- ["g<C-i>"] = {
+  --   function()
+  --     local function callback()
+  --       require("builtin.jump-list").switch_scope_and_jump(-1)
+  --       require("repeat").set_operation(callback)
+  --     end
+  --     callback()
+  --   end,
+  --   "n",
+  --   desc = "Go to [count] older cursor position in jump list[switch buffer lock]",
+  -- },
+  -- ["g<C-o>"] = {
+  --   function()
+  --     local function callback()
+  --       require("builtin.jump-list").switch_scope_and_jump(1)
+  --       require("repeat").set_operation(callback)
+  --     end
+  --     callback()
+  --   end,
+  --   "n",
+  --   desc = "Go to [count] newer cursor position in jump list[switch buffer lock]",
+  -- },
 }

@@ -17,18 +17,56 @@ return {
       "n",
       desc = "Buffers",
     },
-    -- ["<leader>z"] = {
-    --   function()
-    --     Snacks.zen()
-    --   end,
-    --   "n",
-    --   desc = "Toggle Zen Mode",
-    -- },
+    ["<leader>sf"] = {
+      function()
+        Snacks.picker.pick("files")
+      end,
+      "n",
+      desc = "Snacks pick files",
+    },
+    ["<leader>sh"] = {
+      function()
+        Snacks.picker.pick("help")
+      end,
+      "n",
+      desc = "Snacks pick help",
+    },
+    ["<leader>sk"] = {
+      function()
+        Snacks.picker.pick("keymaps")
+      end,
+      "n",
+      desc = "Snacks pick keymaps",
+    },
+    ["<leader>sj"] = {
+      function()
+        Snacks.picker.pick("jumps")
+      end,
+      "n",
+      desc = "Snacks pick jumps",
+    },
   },
   config = function()
     require("snacks").setup({
       bigfile = { enabled = true },
-      dashboard = { enabled = false },
+      dashboard = {
+        enabled = true,
+        preset = {
+          header = [[
+██████╗ ██████╗  ██████╗ ██╗  ██╗███████╗███╗   ██╗███████╗██╗   ██╗███╗   ██╗███╗   ██╗██╗   ██╗
+██╔══██╗██╔══██╗██╔═══██╗██║ ██╔╝██╔════╝████╗  ██║██╔════╝██║   ██║████╗  ██║████╗  ██║╚██╗ ██╔╝
+██████╔╝██████╔╝██║   ██║█████╔╝ █████╗  ██╔██╗ ██║███████╗██║   ██║██╔██╗ ██║██╔██╗ ██║ ╚████╔╝ 
+██╔══██╗██╔══██╗██║   ██║██╔═██╗ ██╔══╝  ██║╚██╗██║╚════██║██║   ██║██║╚██╗██║██║╚██╗██║  ╚██╔╝  
+██████╔╝██║  ██║╚██████╔╝██║  ██╗███████╗██║ ╚████║███████║╚██████╔╝██║ ╚████║██║ ╚████║   ██║   
+╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝   ╚═╝   
+    ]],
+        },
+        sections = {
+          { section = "header" },
+          { section = "keys", gap = 1, padding = 1 },
+          -- { section = "startup" },
+        },
+      },
       explorer = { enabled = true },
       indent = { enabled = true, char = "│", animate = { enabled = false } },
       input = { enabled = true },

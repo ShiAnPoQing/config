@@ -1,0 +1,3774 @@
+*api.txt*               Nvim
+
+
+                 NVIM REFERENCE MANUAL    by Thiago de Arruda
+
+
+
+Nvim API                                                           *API* *api*
+
+Nvim 暴露了一套强大的 API，供插件和外部进程通过 |RPC|、|Lua| 和 Vimscript (|eval-api|) 使用。
+
+应用程序也可以嵌入 libnvim 以直接使用 C API。
+
+输入 |gO| 查看目录。
+
+==============================================================================
+API 使用                                                 *api-rpc* *RPC* *rpc*
+
+                                                        *msgpack-rpc*
+RPC 是以编程方式控制 Nvim 的主要手段。Nvim 实现了 MessagePack-RPC 协议，并附加了以下（超出规范的）约束：
+
+1. 必须按请求的相反顺序给出响应（如同"展开栈"）。
+2. Nvim 按接收顺序处理所有消息（请求和通知）。
+
+MessagePack-RPC 规范：
+  https://github.com/msgpack-rpc/msgpack-rpc/blob/master/spec.md
+  https://github.com/msgpack/msgpack/blob/0b8f5ac/spec.md
+
+许多客户端使用此 API：用户界面（GUI）、远程插件、像 "nvr" (https://github.com/mhinz/neovim-remote) 这样的脚本。甚至 Nvim 自身也能控制其他 Nvim 实例。API 客户端能够：
+
+  - 调用任意 API 函数
+  - 监听事件
+  - 接收来自 Nvim 的远程调用
+
+RPC API 相当于一个功能更强大的 Vim "clientserver" 特性。
+
+连接                                              *rpc-connecting*
+
+查看 |channel-intro| 了解打开通道的各种方法。打开通道的函数在选项字典中接受一个 `rpc` 键。RPC 通道也可以通过其他进程连接到 Nvim 监听的 TCP/IP 套接字或命名管道来打开。
+
+Nvim 在 |启动| 时会创建一个默认的 RPC 套接字，由 |v:servername| 给出。要改为使用 TCP/IP 套接字启动，请使用带 TCP 风格地址的 |--listen|：>
+    nvim --listen 127.0.0.1:6666
+可以使用 |serverstart()| 启动更多端点。
+
+请注意，本地主机 TCP 套接字通常不如命名管道安全，可能导致远程代码执行等漏洞。
+
+连接到套接字是程序员测试 API 的最简单方式，可以通过任何 msgpack-rpc 客户端库或功能完备的 |api-client| 完成。这是一个 Ruby 脚本，它在当前 Nvim 实例中打印 "hello world!"：
+>ruby
+    #!/usr/bin/env ruby
+    # 需要 msgpack-rpc: gem install msgpack-rpc
+    #
+    # 要运行此脚本，请使用 Nvim 的内置终端模拟器：
+    #
+    #   :term ./hello.rb
+    #
+    # 或者通过设置 NVIM 从另一个 shell 运行：
+    # $ NVIM=[地址] ./hello.rb
+
+    require 'msgpack/rpc'
+    require 'msgpack/rpc/transport/unix'
+
+    nvim = MessagePack::RPC::Client.new(MessagePack::RPC::UNIXTransport.new, ENV['NVIM'])
+    result = nvim.call(:nvim_command, 'echo "hello world!"')
+<
+更好的方法是使用带有 "pynvim" 包的 Python REPL，可以在其中交互式调用 API 函数：
+>
+    >>> from pynvim import attach
+    >>> nvim = attach('socket', path='[地址]')
+    >>> nvim.command('echo "hello world!"')
+<
+您还可以通过 |jobstart()| 嵌入 Nvim，并使用 |rpcrequest()| 和 |rpcnotify()| 进行通信：
+>vim
+    let nvim = jobstart(['nvim', '--embed'], {'rpc': v:true})
+    echo rpcrequest(nvim, 'nvim_eval', '"Hello " . "world!"')
+    call jobstop(nvim)
+<
+
+==============================================================================
+API 定义                                         *api-definitions*
+
+                                                        *api-types*
+Nvim C API 为所有函数参数定义了自定义类型。有些只是围绕 C99 标准类型的 typedef，其他则是 Nvim 定义的数据结构。
+
+基本类型 ~
+>
+  API 类型                              C 类型
+  ------------------------------------------------------------------------
+  Nil
+  Boolean                               bool
+  Integer（有符号 64 位整数）          int64_t
+  Float（IEEE 754 双精度浮点数）        double
+  String                                {char* data, size_t size} 结构体
+  Array                                 kvec
+  Dict（msgpack：映射）                 kvec
+  Object                                以上任意类型
+<
+  注意：
+    - 空数组可以作为有效的字典参数接受。
+    - 函数不能跨越 RPC 边界传递。但 API 函数（例如 |nvim_create_autocmd()|）可能支持 Lua 函数参数用于非 RPC 调用。
+
+特殊类型（msgpack EXT） ~
+
+  这些是作为独立 Object 子类型区分的整数 typedef。它们可以当作不透明的整数处理，但彼此不兼容：Buffer 可以作为整数传递，但不能作为 Window 或 Tabpage 传递。
+
+  EXT 对象数据是（整数）对象句柄。|api-metadata| 的 `types` 键中给出的 EXT 类型代码是稳定的：它们不会改变，因此是向前兼容的。
+>
+  EXT 类型      C 类型                                  数据
+  ------------------------------------------------------------------------
+  Buffer        enum 值 kObjectTypeBuffer            |bufnr()|
+  Window        enum 值 kObjectTypeWindow            |窗口-ID|
+  Tabpage       enum 值 kObjectTypeTabpage           内部句柄
+<
+
+                                                        *api-indexing*
+大多数 API 使用从 0 开始的索引，范围是结束位置不包含在内。对于范围的结束位置，-1 表示最后一行/列。
+
+例外：以下 API 函数使用"标记式"索引（行从 1 开始，列从 0 开始）：
+
+- |nvim_get_mark()|
+- |nvim_buf_get_mark()|
+- |nvim_buf_set_mark()|
+- |nvim_win_get_cursor()|
+- |nvim_win_set_cursor()|
+
+例外：以下 API 函数使用 |extmarks| 索引（基于 0 的索引，结束位置包含在内）：
+
+- |nvim_buf_del_extmark()|
+- |nvim_buf_get_extmark_by_id()|
+- |nvim_buf_get_extmarks()|
+- |nvim_buf_set_extmark()|
+
+                                                        *api-fast*
+大多数 API 函数是"延迟"的：它们被排队到主循环中，并与正常输入一起按顺序处理。因此，如果编辑器正在以"模态"方式等待用户输入（例如在 |input()| 提示符下），请求将被阻塞。非延迟（快速）函数，如 |nvim_get_mode()| 和 |nvim_input()|，会立即得到服务（即，无需在输入队列中等待）。Lua 代码可以使用 |vim.in_fast_event()| 来检测快速上下文。
+
+==============================================================================
+API 元数据                                            *api-metadata*
+
+Nvim C API 由构建系统自动暴露给 RPC，该系统解析 src/nvim/api/* 中的头文件，并生成将 RPC API 方法名称映射到公共 C API 函数的调度函数，同时转换/验证参数和返回值。
+
+Nvim 将其 API 元数据作为一个包含以下项目的字典暴露：
+
+- version                 Nvim 版本，API 级别/兼容性
+- version.api_level       API 版本整数 *api-level*
+- version.api_compatible  API 向后兼容至此级别
+- version.api_prerelease  将 API 声明为不稳定/未发布
+                          `(version.api_prerelease && fn.since == version.api_level)`
+- functions                API 函数签名，包含描述返回值和参数的 |api-types| 信息。
+- ui_events                |UI| 事件签名
+- ui_options               支持的 |ui-option|
+- {fn}.since               引入函数 {fn} 的 API 级别
+- {fn}.deprecated_since    弃用函数 {fn} 的 API 级别
+- types                    Nvim 定义的自定义句柄类型
+- error_types              API 函数可能返回的错误类型
+
+关于 `functions` 映射：
+
+  - 容器类型可能带有类型/大小约束的修饰，例如 ArrayOf(Buffer) 或 ArrayOf(Integer, 2)。
+  - 被认为是操作 Nvim 特殊类型（msgpack EXT）实例的函数具有 "method=true" 标志。接收者类型是第一个参数的类型。方法名称以 `nvim_` 加上类型名称为前缀，例如 `nvim_buf_get_lines` 是 Buffer 实例的 `get_lines` 方法。|dev-api|
+  - 全局函数的标志为 "method=false"，并且仅以 `nvim_` 为前缀，例如 `nvim_list_bufs`。
+
+                                                        *api-mapping*
+外部程序（客户端）可以使用元数据来发现 API，通过以下任一方法：
+
+1. 连接到正在运行的 Nvim 实例，并通过 msgpack-RPC 调用 |nvim_get_api_info()|。这对于可以在运行时定义函数的动态语言编写的客户端来说是最好的。
+2. 使用启动参数 |--api-info|。适用于静态编译的客户端。示例（需要 Python 的 "pyyaml" 和 "msgpack-python" 模块）：>
+     nvim --api-info | python -c 'import msgpack, sys, yaml; yaml.dump(msgpack.unpackb(sys.stdin.buffer.read()), sys.stdout)'
+3. 使用 |api_info()| 函数。>vim
+     :lua vim.print(vim.fn.api_info())
+     " 使用 filter() 排除非弃用 API 函数的示例：
+     :new|put =map(filter(api_info().functions, '!has_key(v:val,''deprecated_since'')'), 'v:val.name')
+<
+
+==============================================================================
+API 契约                                                     *api-contract*
+
+Nvim API 由函数和事件组成。
+
+- 客户端调用像 |api-global| 中描述的那些函数。
+- 客户端可以订阅 |ui-events|、|api-buffer-updates| 等。
+- API 函数名称以 "nvim_" 为前缀。
+- API 事件名称以 "nvim_" 为前缀，并以 "_event" 为后缀。
+
+随着 Nvim 的发展，API 可能会发生变化，但需遵守本契约：
+
+- 可以添加新的函数和事件。
+  - 任何此类扩展都是可选的：旧客户端可以忽略它们。
+- 新函数在发布前可能会发生变化。客户端可以动态检查 `api_prerelease`、|api-metadata|。
+- 发布后，函数签名将不会更改，但以下情况除外：
+  - 映射/列表参数/结果可以扩展（可以添加新字段）。
+    - 此类新字段是可选的：旧客户端可以忽略它们。
+    - 现有字段不会被移除。
+  - 返回类型可能从 void 更改为非 void。旧客户端可以忽略新的返回值。
+  - 可能会添加一个可选的 `opts` 参数。
+  - 可能会在 `opts` 参数之后添加可选参数。
+- 事件参数不会被移除或重新排序（发布后）。
+- 事件可以扩展：可以添加新参数。
+- 已弃用的函数在 Nvim 2.0 之前不会被移除。
+
+"私有"接口不受本契约保护：
+
+- 任何类型的未记录（不在 :help 中）函数或事件
+- nvim__x（"双下划线"）函数
+
+其理念是 Rich Hickey 所说的"无版本演进"：
+- 放宽要求应该是兼容的更改。
+- 加强承诺应该是兼容的更改。
+
+==============================================================================
+缓冲区更新事件                                    *api-buffer-updates*
+
+API 客户端可以"附加"到 Nvim 缓冲区，以订阅缓冲区更新事件。这类似于 |TextChanged|，但更强大、更精细。
+
+调用 |nvim_buf_attach()| 可在通道上接收这些事件：
+
+                                                        *nvim_buf_lines_event*
+nvim_buf_lines_event[{buf}, {changedtick}, {firstline}, {lastline}, {linedata}, {more}]
+    当缓冲区中 {firstline} 和 {lastline} 之间的文本（结束位置不包含，从零开始索引）被更改为 {linedata} 列表中的新文本时触发。粒度是行级别，即如果编辑器中更改了单个字符，则会发送整行。
+
+    当 {changedtick} 为 |v:null| 时，这表示屏幕行（显示）发生了变化，但缓冲区内容未变。{linedata} 包含更改后的屏幕行。当 'inccommand' 显示缓冲区预览时会发生这种情况。
+
+    参数： ~
+      • {buf}         (`integer`) 缓冲区 id
+      • {changedtick} (`integer`) |b:changedtick| 的值。如果您向 Nvim 发送 API 命令，可以在请求中检查 |b:changedtick|，以确保没有发生其他更改。
+      • {firstline}   (`integer`) 被替换的第一行。
+                      从零开始索引：如果第 1 行被替换，那么 {firstline} 将是 0，而不是 1。始终小于或等于替换前缓冲区中的行数。
+      • {lastline}    (`integer`) 未被替换的第一行（即范围 {firstline} 到 {lastline} 是结束位置不包含的）。
+                      从零开始索引：如果第 2 行到第 5 行被替换，则此值将为 5 而不是 6。始终小于或等于替换前缓冲区中的行数。如果事件是附加后初始更新的一部分，则此值为 -1。
+      • {linedata}    (`string[]`) 新缓冲区行的内容。换行符被省略；空行作为空字符串发送。
+      • {more}        (`boolean`) 对于"多部分"更改通知为 true：当前更改被分块成多个 |nvim_buf_lines_event| 通知（例如，因为更改太大）。
+
+nvim_buf_changedtick_event[{buf}, {changedtick}]  *nvim_buf_changedtick_event*
+    当 |b:changedtick| 增加但文本未更改时触发。与撤销/重做相关。
+
+    参数： ~
+      • {buf}         (`integer`) 缓冲区 id
+      • {changedtick} (`integer`) |b:changedtick| 的新值。
+
+nvim_buf_detach_event[{buf}]                           *nvim_buf_detach_event*
+    当缓冲区被分离（即更新被禁用）时触发。由 |nvim_buf_detach()| 显式触发，或在以下情况下隐式触发：
+    - 缓冲区被 |abandon| 且 'hidden' 未设置。
+    - 缓冲区被重新加载，例如通过 |:edit| 或外部更改触发了 |:checktime| 或 'autoread'。
+    - 通常：每当缓冲区内容从内存中卸载时。
+
+    参数： ~
+      • {buf}         (`integer`) 缓冲区 id
+
+
+示例 ~
+
+在空缓冲区上调用 send_buffer=true 的 |nvim_buf_attach()|，会触发： >
+    nvim_buf_lines_event[{buf}, {changedtick}, 0, -1, [""], v:false]
+
+用户向缓冲区添加两行，触发： >
+    nvim_buf_lines_event[{buf}, {changedtick}, 0, 0, ["line1", "line2"], v:false]
+
+用户移动到包含文本 "Hello world" 的行并插入 "!"，触发： >
+    nvim_buf_lines_event[{buf}, {changedtick}, {linenr}, {linenr} + 1,
+                         ["Hello world!"], v:false]
+
+用户移动到第 3 行并使用 "20dd" 删除 20 行，触发： >
+    nvim_buf_lines_event[{buf}, {changedtick}, 2, 22, [], v:false]
+
+用户使用 |linewise-visual| 模式选择第 3-5 行，然后输入 "p" 粘贴一个包含 6 行的块，触发： >
+    nvim_buf_lines_event[{buf}, {changedtick}, 2, 5,
+      ['pasted line 1', 'pasted line 2', 'pasted line 3', 'pasted line 4',
+       'pasted line 5', 'pasted line 6'],
+      v:false
+    ]
+
+用户使用 ":edit" 重新加载缓冲区，触发： >
+    nvim_buf_detach_event[{buf}]
+<
+
+LUA ~
+                                                        *api-buffer-updates-lua*
+进程内 Lua 插件可以以 Lua 回调的形式接收缓冲区更新。这些回调在各种上下文中被频繁调用；|textlock| 阻止更改缓冲区内容和窗口布局（请使用 |vim.schedule()| 将这些操作推迟到主循环）。允许移动光标，但之后会恢复。
+
+|nvim_buf_attach()| 将接受回调的关键字参数。"on_lines" 将接收参数 ("lines", {buf}, {changedtick}, {firstline}, {lastline}, {new_lastline}, {old_byte_size} [, {old_utf32_size}, {old_utf16_size}])。与远程通道事件不同，文本内容不会被传递。可以在回调内部通过以下方式访问新文本 >lua
+
+    vim.api.nvim_buf_get_lines(buf, firstline, new_lastline, true)
+<
+{old_byte_size} 是被替换区域 {firstline} 到 {lastline} 的总大小（以字节为单位），包括 {lastline} 之后的最终换行符。如果在 |nvim_buf_attach()| 关键字参数中将 `utf_sizes` 设置为 true，那么删除区域的 UTF-32 和 UTF-16 大小也将作为附加参数 {old_utf32_size} 和 {old_utf16_size} 传递。
+
+"on_changedtick" 在 |b:changedtick| 增加但文本未更改时被调用。接收到的参数是 ("changedtick", {buf}, {changedtick})。
+
+                                                        *api-lua-detach*
+进程内 Lua 回调可以通过返回 `true` 来分离。这将分离通过同一次 |nvim_buf_attach()| 调用附加的所有回调。
+
+
+==============================================================================
+缓冲区高亮                                            *api-highlights*
+
+Nvim 允许插件向缓冲区添加基于位置的高亮。这类似于 |matchaddpos()|，但有一些关键区别。添加的高亮与缓冲区关联，并能适应行的插入和删除，类似于符号。也可以将一组高亮作为一个组来管理，并一次性删除或替换。
+
+预期的用例是 linter 或语义高亮插件，它们监视缓冲区变化，并在后台计算要应用于缓冲区的高亮。另一个用例是插件在仅追加的缓冲区中显示输出，并希望为输出添加高亮。高亮数据在将缓冲区写入文件或从文件加载时，以及在撤销/重做周期中，无法保留。
+
+高亮是使用 |nvim_buf_set_extmark()| 函数注册的，该函数将高亮添加为 |extmarks|。如果在添加高亮后需要跟踪或操作它们，可以使用返回的 |extmark| id。 >lua
+  -- 通过 extmark 创建高亮
+  extid = vim.api.nvim_buf_set_extmark(buf, ns_id, line, col_start, {end_col = col_end, hl_group = hl_group})
+
+  -- 示例：修改 extmark 的高亮组
+  vim.api.nvim_buf_set_extmark(buf, ns_id, line, col_start, {end_col = col_end, hl_group = NEW_HL_GROUP, id = extid})
+
+  -- 示例：更改高亮的位置
+  vim.api.nvim_buf_set_extmark(buf, ns_id, NEW_LINE, col_start, {end_col = col_end, hl_group = NEW_HL_GROUP, id = extid})
+<
+
+另请参阅 |vim.hl.range()|。
+
+==============================================================================
+浮动窗口                                *api-floatwin* *floating-windows*
+
+浮动窗口（"floats"）显示在普通窗口之上。这对于实现简单的部件很有用，例如显示在光标旁边的工具提示。浮动窗口是功能完备的窗口，支持用户编辑、常见的 |api-window| 调用以及大多数窗口选项（'statusline' 除外）。
+
+创建浮动窗口的两种方式：
+- |nvim_open_win()| 创建一个新窗口（需要一个缓冲区，参见 |nvim_create_buf()|）
+- |nvim_win_set_config()| 将普通窗口重新配置为浮动窗口
+
+要关闭它，请使用 |nvim_win_close()| 或诸如 |:close| 的命令。
+
+要检查窗口是否为浮动窗口，请检查其配置中的 `relative` 选项是否非空： >lua
+
+    if vim.api.nvim_win_get_config(window_id).relative ~= '' then
+      -- 具有此 window_id 的窗口是浮动的
+    end
+<
+
+缓冲区文本可以通过典型机制（语法高亮、|api-highlights|）进行高亮。|hl-NormalFloat| 组高亮普通文本；'winhighlight' 可以像往常一样用于本地覆盖组。浮动窗口继承当前窗口的选项；在 |nvim_open_win()| 中指定 `style=minimal` 可以禁用各种视觉特性，例如 'number' 列。
+
+特定于浮动窗口的其他高亮组：
+- |hl-FloatBorder| 用于窗口边框
+- |hl-FloatTitle| 用于窗口标题
+- |hl-FloatFooter| 用于窗口页脚
+
+目前，浮动窗口不支持某些部件，如滚动条。
+
+|:mksession| 的输出不包括用于恢复浮动窗口的命令。
+
+示例：使用临时缓冲区创建浮动窗口： >vim
+
+    let buf = nvim_create_buf(v:false, v:true)
+    call nvim_buf_set_lines(buf, 0, -1, v:true, ["test", "text"])
+    let opts = {'relative': 'cursor', 'width': 10, 'height': 2, 'col': 0,
+        \ 'row': 1, 'anchor': 'NW', 'style': 'minimal'}
+    let win = nvim_open_win(buf, 0, opts)
+    " 可选：更改高亮，否则使用 Pmenu
+    call nvim_set_option_value('winhl', 'Normal:MyHighlight', {'win': win})
+<
+
+==============================================================================
+扩展标记                       *api-extended-marks* *extmarks* *extmark*
+
+扩展标记（extmarks）表示跟踪缓冲区文本变化的缓冲区注解。它们可以表示光标、折叠、拼写错误的单词，以及任何需要跟踪缓冲区中随时间变化的逻辑位置的内容。|api-indexing|
+
+Extmark 位置像"竖线"光标一样工作：它存在于字符之间。因此，一行上的最大 extmark 索引比字符索引大 1：>
+
+     f o o b a r      行内容
+     0 1 2 3 4 5      字符位置（基于 0）
+    0 1 2 3 4 5 6     extmark 位置（基于 0）
+
+Extmarks 具有"向前重力"：如果您将光标直接放在 extmark 位置上并输入一些文本，extmark 会向前移动。>
+
+     f o o|b a r      行（| = 光标）
+          3           extmark
+
+     f o o z|b a r    行（| = 光标）
+            4         extmark（输入 "z" 后）
+
+如果一个 extmark 位于一行的最后一个索引处，并且您在该点输入换行符，该 extmark 将相应地移动到下一行：>
+
+     f o o z b a r|   行（| = 光标）
+                  7   extmark
+
+     f o o z b a r    第一行
+                      extmarks（不存在）
+     |                第二行（| = 光标）
+     0                extmark（输入 <CR> 后）
+
+
+示例：
+
+让我们在第一行（row=0）和第三列（column=2）设置一个 extmark。|api-indexing| 传递 id=0 会创建一个新标记并返回 id：>
+
+      01 2345678
+    0 ex|ample..
+        ^ extmark 位置
+<
+>vim
+    let g:mark_ns = nvim_create_namespace('myplugin')
+    let g:mark_id = nvim_buf_set_extmark(0, g:mark_ns, 0, 2, {})
+<
+我们可以通过其 id 获取标记：>vim
+
+    echo nvim_buf_get_extmark_by_id(0, g:mark_ns, g:mark_id, {})
+    " => [0, 2]
+
+我们可以通过 |namespace|（或通过范围）获取缓冲区中的所有标记：>vim
+
+    echo nvim_buf_get_extmarks(0, g:mark_ns, 0, -1, {})
+    " => [[1, 0, 2]]
+
+删除所有周围文本**不会**移除 extmark！要移除 extmarks，请使用 |nvim_buf_del_extmark()|。在我们的示例中删除 "x"：>
+
+      0 12345678
+    0 e|ample..
+       ^ extmark 位置
+<
+>vim
+    echo nvim_buf_get_extmark_by_id(0, g:mark_ns, g:mark_id, {})
+    " => [0, 1]
+<
+    注意：Extmark "重力"决定了它在文本编辑后如何移动。
+          参见 |nvim_buf_set_extmark()|
+
+命名空间允许任何插件只管理自己的 extmarks，而忽略其他插件创建的 extmarks。
+
+由编辑更改的 Extmark 位置将在撤销/重做时恢复。创建和删除 extmarks 不是缓冲区更改，因此不会为 extmark 更改创建新的撤销状态。
+
+==============================================================================
+全局事件                                                          *api-events*
+
+nvim_error_event({type}, {msg})                             *nvim_error_event*
+    在客户端通道上，如果异步 API 请求响应时出错，则会发出此事件。
+
+    属性: ~
+        |RPC| 专用
+
+    参数: ~
+      • {type}  (`整数`) 错误类型 ID，由 `api_info().error_types` 定义。
+      • {msg}   (`字符串`) 错误消息。
+
+nvim_ui_term_event({event}, {value})                      *nvim_ui_term_event*
+    由 TUI 客户端发出，用于指示主机终端事件的发生。
+
+    支持以下事件：
+    • "termresponse"：主机终端向 Nvim 发送了 DA1、OSC、DCS 或 APC 响应
+      序列。负载是接收到的响应。此操作会设置 |v:termresponse| 并触发 |TermResponse|。
+
+    属性: ~
+        |RPC| 专用
+        始于: 0.10.0
+
+    参数: ~
+      • {event}  (`字符串`) 事件名称
+      • {value}  (`任意`) 事件负载
+
+
+==============================================================================
+全局函数                                                          *api-global*
+
+nvim_chan_send({chan}, {data})                              *nvim_chan_send()*
+    向通道 `chan` 发送原始数据。|channel-bytes|
+    • 对于作业，它将数据写入进程的标准输入。
+    • 对于 stdio 通道 |channel-stdio|，它将数据写入 Nvim 的标准输出。
+    • 对于内部终端实例 (|nvim_open_term()|)，它将数据直接写入终端输出。
+
+    此函数写入原始数据，而不是 RPC 消息。如果通道期望 RPC 消息（即，它是
+    使用 `rpc=true` 创建的），请使用 |vim.rpcrequest()| 和 |vim.rpcnotify()|。
+
+    要向 |TUI| 主机终端写入数据，请参阅 |nvim_ui_send()|。
+
+    属性: ~
+        |RPC| 专用
+        Lua |vim.api| 专用
+        始于: 0.5.0
+
+    参数: ~
+      • {chan}  (`整数`) 通道 ID
+      • {data}  (`字符串`) 要写入的数据。8 位清洁：可能包含 NUL 字节。
+
+nvim_create_buf({listed}, {scratch})                       *nvim_create_buf()*
+    创建一个新的、空的、未命名的缓冲区。
+
+    属性: ~
+        始于: 0.4.0
+
+    参数: ~
+      • {listed}   (`布尔值`) 设置 'buflisted'
+      • {scratch}  (`布尔值`) 创建一个用于临时工作的“一次性”|scratch-buffer|
+                   （始终为 'nomodified'）。还会在此缓冲区上设置 'nomodeline'。
+
+    返回值: ~
+        (`整数`) 缓冲区 ID，出错时为 0
+
+    另请参阅: ~
+      • buf_open_scratch
+
+nvim_del_current_line()                              *nvim_del_current_line()*
+    删除当前行。
+
+    属性: ~
+        当 |textlock| 激活时不允许
+        始于: 0.1.0
+
+nvim_del_keymap({mode}, {lhs})                             *nvim_del_keymap()*
+    取消给定模式下全局 |mapping| 的映射。
+
+    要取消缓冲区局部的映射，请使用 |nvim_buf_del_keymap()|。
+
+    属性: ~
+        始于: 0.4.0
+
+    参数: ~
+      • {mode}  (`字符串`)
+      • {lhs}   (`字符串`)
+
+    另请参阅: ~
+      • |nvim_set_keymap()|
+
+nvim_del_mark({name})                                        *nvim_del_mark()*
+    删除一个大写/文件命名标记。参见 |mark-motions|。
+
+    注意: ~
+      • 小写名称（或其他缓冲区局部标记）会导致错误。
+
+    属性: ~
+        始于: 0.6.0
+
+    参数: ~
+      • {name}  (`字符串`) 标记名称
+
+    返回值: ~
+        (`布尔值`) 如果标记被删除则返回 true，否则返回 false。
+
+    另请参阅: ~
+      • |nvim_buf_del_mark()|
+      • |nvim_get_mark()|
+
+nvim_del_var({name})                                          *nvim_del_var()*
+    删除一个全局 (g:) 变量。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {name}  (`字符串`) 变量名称
+
+nvim_echo({chunks}, {history}, {opts})                           *nvim_echo()*
+    打印由 `[text, hl_group]` “片段”列表构成的消息。如果 `kind='progress'`，
+    则会发出一个 |Progress| 事件。
+
+    返回一个消息 ID，可以在后续调用中用于更新现有消息。该消息 ID 是一个自动生成的整数，
+    或用户定义的字符串。此 ID 的“地址空间”是全局的，因此指定字符串 ID 的插件应使用
+    限定名称，例如 "my.msg.id"，以避免意外冲突。
+
+    示例: >lua
+        vim.api.nvim_echo({ { 'chunk1-line1\nchunk1-line2\n' }, { 'chunk2-line1' } }, true, {})
+<
+
+    属性: ~
+        始于: 0.5.0
+
+    参数: ~
+      • {chunks}   (`[string, integer|string?][]`) `[text, hl_group]` 对的列表，
+                   其中每个 `text` 字符串由（可选的）名称或 ID `hl_group` 高亮。
+      • {history}  (`布尔值`) 如果为 true，则添加到 |message-history|。
+      • {opts}     (`vim.api.keyset.echo_opts`) 可选参数。
+                   • data (`表?`) 任意数据的字典，在 |Progress| |event-data| 中可用。
+                   • err (`布尔值?`) 将消息视为 `:echoerr`。默认设置
+                     `hl_group` 为 |hl-ErrorMsg|。
+                   • id (`整数|字符串?`) 先前 `nvim_echo` 调用返回的消息 ID，
+                     或用户定义的 ID（字符串）。如果存在具有此 ID 的消息，
+                     则更新该消息，而不是创建新消息。
+                   • kind (`字符串?`) 决定发出消息中的 |ui-messages| 类型。
+                     设置 "progress" 以发出 |progress-message|。
+                   • percent (`整数?`) |progress-message| 百分比。
+                   • status (`字符串?`) |progress-message| 状态：
+                     • "success": 进程成功完成。
+                     • "running": 进程正在进行中。
+                     • "failed": 进程失败。
+                     • "cancel": 进程应被取消。进度所有者必须处理
+                       |Progress| 事件以执行取消操作。
+                   • title (`字符串?`) 消息标题。目前仅用于
+                     |progress-message|。
+                   • verbose (`布尔值?`) 消息受 'verbose' 选项控制。
+                     `nvim -V3log` 会将消息写入“日志”文件，而不是标准输出。
+
+    返回值: ~
+        (`整数|字符串`) 消息 ID，如果消息未显示则为 -1。
+
+nvim_eval_statusline({str}, {opts})                   *nvim_eval_statusline()*
+    计算状态行字符串。
+
+    属性: ~
+        |api-fast|
+        始于: 0.6.0
+
+    参数: ~
+      • {str}   (`字符串`) 状态行字符串（参见 'statusline'）。
+      • {opts}  (`vim.api.keyset.eval_statusline`) 可选参数。
+                • winid: (数字) 用作状态行上下文的窗口的 |window-ID|。
+                • maxwidth: (数字) 状态行的最大宽度。
+                • fillchar: (字符串) 用于填充状态行空白位置的字符
+                  （参见 'fillchars'）。即使不是单宽字符，也视为单宽处理。
+                • highlights: (布尔值) 返回高亮信息。
+                • use_winbar: (布尔值) 计算窗口栏（winbar）而不是状态行。
+                • use_tabline: (布尔值) 计算标签栏（tabline）而不是状态行。
+                  当为 true 时，{winid} 被忽略。与 {use_winbar} 互斥。
+                • use_statuscol_lnum: (数字) 为此行号计算状态列（statuscolumn）
+                  而不是状态行。
+
+    返回值: ~
+        (`vim.api.keyset.eval_statusline_ret`) 包含状态行信息的字典，
+        包含以下键：
+        • str: (字符串) 将在状态行上显示的字符。
+        • width: (数字) 状态行的显示宽度。
+        • highlights: 包含状态行高亮信息的数组。仅在 {opts} 中的
+          "highlights" 键为 true 时包含。数组的每个元素是一个 |Dict|，
+          包含以下键：
+          • start: (数字) 使用该高亮的第一个字符的字节索引（从 0 开始）。
+          • group: (字符串) 已弃用。请改用 `groups`。
+          • groups: (数组) 堆叠的高亮组名称（优先级最高的最后）。
+
+nvim_exec_lua({code}, {args})                                *nvim_exec_lua()*
+    执行 Lua 代码。在代码块内，参数可作为 `...` 使用。代码块可以返回一个值。
+
+    只执行语句。要计算表达式，请在其前面加上 "return": `return my_function(...)`
+
+    示例: >lua
+        local peer = vim.fn.jobstart({ vim.v.progpath, '--clean', '--embed' }, { rpc=true })
+        vim.print(vim.rpcrequest(peer, 'nvim_exec_lua', [[
+              local a, b = ...
+              return ('result: %s'):format(a + b)
+            ]],
+            { 1, 3 }
+          )
+        )
+<
+
+    属性: ~
+        |RPC| 专用
+        始于: 0.5.0
+
+    参数: ~
+      • {code}  (`字符串`) 要执行的 Lua 代码。
+      • {args}  (`任意[]`) 传递给 Lua 代码的参数。
+
+    返回值: ~
+        (`任意`) Lua 代码返回的值（如果有），否则为 NIL。
+
+nvim_feedkeys({keys}, {mode}, {escape_ks})                   *nvim_feedkeys()*
+    向 Nvim 发送输入按键，受 `mode` 标志控制的各种特殊情况影响。与
+    |nvim_input()| 不同，这是一个阻塞调用。
+
+    执行出错时：不会失败，但会更新 v:errmsg。
+
+    要输入像 <C-o> 这样的序列，请使用 |nvim_replace_termcodes()|（通常使用
+    escape_ks=false）替换 |keycodes|，然后将结果传递给 nvim_feedkeys()。
+
+    示例: >vim
+        :let key = nvim_replace_termcodes("<C-o>", v:true, v:false, v:true)
+        :call nvim_feedkeys(key, 'n', v:false)
+<
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {keys}       (`字符串`) 要键入的按键
+      • {mode}       (`字符串`) 行为标志，参见 |feedkeys()|
+      • {escape_ks}  (`布尔值`) 如果为 true，则对 `keys` 中的 K_SPECIAL 字节进行转义。
+                     如果您已经使用了 |nvim_replace_termcodes()|，则应设为 false，
+                     否则设为 true。
+
+    另请参阅: ~
+      • feedkeys()
+      • vim_strsave_escape_ks
+
+nvim_get_api_info()                                      *nvim_get_api_info()*
+    返回一个 2 元组（数组），其中第 0 项是当前通道 ID，第 1 项是
+    |api-metadata| 映射（字典）。
+
+    属性: ~
+        |api-fast|
+        |RPC| 专用
+        始于: 0.1.0
+
+    返回值: ~
+        (`[任意, 任意]`) 2 元组 `[{channel-id}, {api-metadata}]`
+
+nvim_get_chan_info({chan})                              *nvim_get_chan_info()*
+    获取关于通道的信息。
+
+    有关如何获取通道信息的示例，请参见 |nvim_list_uis()|。
+
+    属性: ~
+        始于: 0.3.0
+
+    参数: ~
+      • {chan}  (`整数`) 通道 ID，或为当前通道指定 0
+
+    返回值: ~
+        (`表<string,任意>`) 通道信息字典，包含以下键：
+        • "id" 通道 ID。
+        • "argv" （可选）作业参数列表。
+        • "stream" 通道底层的流。
+          • "stdio" 此 Nvim 实例的标准输入和标准输出
+          • "stderr" 此 Nvim 实例的标准错误
+          • "socket" TCP/IP 套接字或命名管道
+          • "job" 通过其 stdio 进行通信的作业。
+        • "mode" 如何解释通道上接收的数据。
+          • "bytes" 发送和接收原始字节。
+          • "terminal" |terminal| 实例解释 ASCII 序列。
+          • "rpc" 通道上的 |RPC| 通信已激活。
+        • "pty" （可选）伪终端名称。在 POSIX 系统上，这是一个设备路径，
+          如 "/dev/pts/1"。如果未知，但如果使用了 pty（例如在 Windows 上使用
+          conpty），该键仍会存在。
+        • "buffer" （可选）连接到 |terminal| 实例的缓冲区。
+        • "client" （可选）关于对端（通道另一端的客户端）的信息，
+          由 |nvim_set_client_info()| 设置。
+        • "exitcode" （可选）|terminal| 进程的退出代码。
+
+nvim_get_color_by_name({name})                      *nvim_get_color_by_name()*
+    返回 |nvim_get_color_map()| 颜色名称或 "#rrggbb" 十六进制字符串的
+    24 位 RGB 值。
+
+    示例: >vim
+        :echo nvim_get_color_by_name("Pink")
+        :echo nvim_get_color_by_name("#cbcbcb")
+<
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {name}  (`字符串`) 颜色名称或 "#rrggbb" 字符串
+
+    返回值: ~
+        (`整数`) 24 位 RGB 值，参数无效时为 -1。
+
+nvim_get_color_map()                                    *nvim_get_color_map()*
+    返回颜色名称和 RGB 值的映射。
+
+    键是颜色名称（例如 "Aqua"），值是 24 位 RGB 颜色值（例如 65535）。
+
+    属性: ~
+        始于: 0.1.0
+
+    返回值: ~
+        (`表<string,整数>`) 颜色名称和 RGB 值的映射。
+
+nvim_get_context({opts})                                  *nvim_get_context()*
+    获取当前编辑器状态的映射。
+
+    属性: ~
+        始于: 0.4.0
+
+    参数: ~
+      • {opts}  (`vim.api.keyset.context`) 可选参数。
+                • types: 要收集的 |context-types| 列表 ("regs", "jumps",
+                  "bufs", "gvars", …)，空列表表示收集“所有”。
+
+    返回值: ~
+        (`表<string,任意>`) 全局 |context| 的映射。
+
+nvim_get_current_buf()                                *nvim_get_current_buf()*
+    获取当前缓冲区。
+
+    属性: ~
+        始于: 0.1.0
+
+    返回值: ~
+        (`整数`) 缓冲区 ID
+
+nvim_get_current_line()                              *nvim_get_current_line()*
+    获取当前行。
+
+    属性: ~
+        始于: 0.1.0
+
+    返回值: ~
+        (`字符串`) 当前行字符串
+
+nvim_get_current_tabpage()                        *nvim_get_current_tabpage()*
+    获取当前标签页。
+
+    属性: ~
+        始于: 0.1.0
+
+    返回值: ~
+        (`整数`) |tab-ID|
+
+nvim_get_current_win()                                *nvim_get_current_win()*
+    获取当前窗口。
+
+    属性: ~
+        始于: 0.1.0
+
+    返回值: ~
+        (`整数`) |window-ID|
+
+nvim_get_hl({ns_id}, {opts})                                   *nvim_get_hl()*
+    获取命名空间中的所有或特定高亮组。
+
+    注意: ~
+      • 当高亮定义映射中定义了 `link` 属性时，其他属性将不会生效
+        （参见 |:hi-link|）。
+
+    属性: ~
+        始于: 0.9.0
+
+    参数: ~
+      • {ns_id}  (`整数`) 为命名空间 ns_id 获取高亮组
+                 |nvim_get_namespaces()|。使用 0 获取全局高亮组
+                 |:highlight|。
+      • {opts}   (`vim.api.keyset.get_highlight`) 选项字典：
+                 • name: (字符串) 按名称获取高亮定义。
+                 • id: (整数) 按 ID 获取高亮定义。
+                 • link: (布尔值，默认 true) 显示链接的组名
+                   而不是有效定义 |:hi-link|。
+                 • create: (布尔值，默认 true) 如果高亮组不存在则创建它。
+
+    返回值: ~
+        (`vim.api.keyset.get_hl_info`) 高亮组，作为一个从组名到高亮定义映射的映射，
+        如 |nvim_set_hl()| 中所示；或者如果通过名称或 ID 请求，则仅返回单个高亮定义映射。
+
+nvim_get_hl_id_by_name({name})                      *nvim_get_hl_id_by_name()*
+    通过名称获取高亮组。
+
+    类似于 |hlID()|，但如果不存在则分配一个新 ID。
+
+    属性: ~
+        始于: 0.5.0
+
+    参数: ~
+      • {name}  (`字符串`)
+
+    返回值: ~
+        (`整数`)
+
+nvim_get_hl_ns({opts})                                      *nvim_get_hl_ns()*
+    获取活动的高亮命名空间。
+
+    属性: ~
+        始于: 0.10.0
+
+    参数: ~
+      • {opts}  (`vim.api.keyset.get_ns`) 可选参数
+                • winid: (数字) 用于检索窗口高亮命名空间的 |window-ID|。
+                  当 |nvim_win_set_hl_ns()| 尚未对该窗口调用时
+                  （或使用 -1 的命名空间调用时），返回值为 -1。
+
+    返回值: ~
+        (`整数`) 命名空间 ID，或 -1
+
+nvim_get_keymap({mode})                                    *nvim_get_keymap()*
+    获取全局（非缓冲区局部）|mapping| 定义的列表。
+
+    属性: ~
+        始于: 0.2.1
+
+    参数: ~
+      • {mode}  (`字符串`) 模式短名称 ("n", "i", "v", ...)
+
+    返回值: ~
+        (`vim.api.keyset.get_keymap[]`) 描述映射的类似于 |maparg()| 的字典数组。
+        其中 "buffer" 键始终为零。
+
+nvim_get_mark({name}, {opts})                                *nvim_get_mark()*
+    返回一个 `(row, col, buffer, buffername)` 元组，表示大写/文件命名标记的位置。
+    “行尾”列位置作为 |v:maxcol|（大数）返回。参见 |mark-motions|。
+
+    标记是 (1,0) 索引的。|api-indexing|
+
+    注意: ~
+      • 小写名称（或其他缓冲区局部标记）会导致错误。
+
+    属性: ~
+        始于: 0.6.0
+
+    参数: ~
+      • {name}  (`字符串`) 标记名称
+      • {opts}  (`vim.api.keyset.empty`) 可选参数。保留供将来使用。
+
+    返回值: ~
+        (`[整数, 整数, 整数, 字符串]`) 4 元组 (row, col, buffer,
+        buffername)，如果标记未设置则返回 (0, 0, 0, '')。
+
+    另请参阅: ~
+      • |nvim_buf_set_mark()|
+      • |nvim_del_mark()|
+
+nvim_get_mode()                                              *nvim_get_mode()*
+    获取当前模式。|mode()| 如果 Nvim 正在等待输入，则 "blocking" 为 true。
+
+    属性: ~
+        |api-fast|
+        始于: 0.2.0
+
+    返回值: ~
+        (`vim.api.keyset.get_mode`) 字典 { "mode": 字符串, "blocking": 布尔值
+        }
+
+nvim_get_proc({pid})                                         *nvim_get_proc()*
+    获取描述进程 `pid` 的信息。
+
+    属性: ~
+        始于: 0.3.0
+
+    参数: ~
+      • {pid}  (`整数`)
+
+    返回值: ~
+        (`任意`) 进程属性的映射，如果未找到进程则返回 NIL。
+
+nvim_get_proc_children({pid})                       *nvim_get_proc_children()*
+    获取进程 `pid` 的直接子进程。
+
+    属性: ~
+        始于: 0.3.0
+
+    参数: ~
+      • {pid}  (`整数`)
+
+    返回值: ~
+        (`任意[]`) 子进程 ID 的数组，如果未找到进程则为空。
+
+nvim_get_runtime_file({name}, {all})                 *nvim_get_runtime_file()*
+    在运行时目录中查找文件，按 'runtimepath' 顺序。
+
+    "name" 可以包含通配符。例如
+    `nvim_get_runtime_file("colors/*.{vim,lua}", true)` 将返回所有配色
+    方案文件。在子目录的搜索模式中，无论平台如何，始终使用正斜杠 (/)。
+
+    找不到任何文件不算错误。此时返回一个空数组。
+
+    属性: ~
+        |api-fast|
+        始于: 0.5.0
+
+    参数: ~
+      • {name}  (`字符串`) 要搜索的文件模式
+      • {all}   (`布尔值`) 是否返回所有匹配项或仅返回第一个
+
+    返回值: ~
+        (`字符串[]`) 找到文件的绝对路径列表
+
+nvim_get_var({name})                                          *nvim_get_var()*
+    获取一个全局 (g:) 变量。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {name}  (`字符串`) 变量名称
+
+    返回值: ~
+        (`任意`) 变量值
+
+nvim_get_vvar({name})                                        *nvim_get_vvar()*
+    获取一个 v: 变量。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {name}  (`字符串`) 变量名称
+
+    返回值: ~
+        (`任意`) 变量值
+
+nvim_input({keys})                                              *nvim_input()*
+    将原始用户输入加入队列。与 |nvim_feedkeys()| 不同，此函数使用低级输入缓冲区，
+    且调用是非阻塞的（输入由事件循环异步处理）。
+
+    要输入文本块，|nvim_paste()| 速度快得多，应优先使用。
+
+    执行出错时：不会失败，但会更新 v:errmsg。
+
+    注意: ~
+      • |keycodes| 如 <CR> 会被转换，因此 "<" 是特殊字符。要输入字面意义的 "<"，
+        请发送 <LT>。
+      • 对于鼠标事件，请使用 |nvim_input_mouse()|。伪键形式
+        `<LeftMouse><col,row>` 自 |api-level| 6 起已弃用。
+
+    属性: ~
+        |api-fast|
+        始于: 0.1.0
+
+    参数: ~
+      • {keys}  (`字符串`) 要键入的按键
+
+    返回值: ~
+        (`整数`) 实际写入的字节数（如果缓冲区变满，可能少于请求的数量）。
+
+                                                          *nvim_input_mouse()*
+nvim_input_mouse({button}, {action}, {modifier}, {grid}, {row}, {col})
+    从 GUI 发送鼠标事件。
+
+    非阻塞：不等待任何结果，而是将事件加入队列，由事件循环尽快处理。
+
+    注意: ~
+      • 目前，不支持通过在循环中多次调用来“脚本化”多个鼠标事件：中间的鼠标位置
+        将被忽略。它应该用于在 GUI 中实现实时鼠标输入。|nvim_input()| 中已弃用的
+        伪键形式 (`<LeftMouse><col,row>`) 具有相同的限制。
+
+    属性: ~
+        |api-fast|
+        始于: 0.4.0
+
+    参数: ~
+      • {button}    (`字符串`) 鼠标按钮： "left", "right", "middle", "wheel",
+                    "move", "x1", "x2" 之一。
+      • {action}    (`字符串`) 对于普通按钮，为 "press", "drag", "release" 之一。
+                    对于滚轮，为 "up", "down", "left", "right" 之一。
+                    对于 "move" 忽略。
+      • {modifier}  (`字符串`) 修饰符字符串，每个修饰符由一个字符表示。
+                    使用与按键相同的说明符，但 "-" 分隔符是可选的，
+                    因此 "C-A-", "c-a" 和 "CA" 均可用于指定 Ctrl+Alt+点击。
+      • {grid}      (`整数`) 网格编号（供 |ui-multigrid| 客户端使用），
+                    或为 0 让 Nvim 决定窗口位置。更多信息，请参阅 |dev-ui-multigrid|
+      • {row}       (`整数`) 鼠标行位置（从零开始，与重绘事件相同）
+      • {col}       (`整数`) 鼠标列位置（从零开始，与重绘事件相同）
+
+nvim_list_bufs()                                            *nvim_list_bufs()*
+    获取当前的缓冲区列表。
+
+    包括未列出的（卸载/删除的）缓冲区，如 `:ls!`。使用 |nvim_buf_is_loaded()|
+    检查缓冲区是否已加载。
+
+    属性: ~
+        始于: 0.1.0
+
+    返回值: ~
+        (`整数[]`) 缓冲区 ID 列表
+
+nvim_list_chans()                                          *nvim_list_chans()*
+    获取关于所有打开的通道的信息。
+
+    属性: ~
+        始于: 0.3.0
+
+    返回值: ~
+        (`表<string,任意>[]`) 字典数组，每个字典描述一个通道，格式在
+        |nvim_get_chan_info()| 中指定。
+
+nvim_list_runtime_paths()                          *nvim_list_runtime_paths()*
+    获取 |runtime-search-path| 中包含的路径。
+
+    属性: ~
+        始于: 0.1.0
+
+    返回值: ~
+        (`字符串[]`) 路径列表
+
+nvim_list_tabpages()                                    *nvim_list_tabpages()*
+    获取当前的 |tab-ID| 列表。
+
+    属性: ~
+        始于: 0.1.0
+
+    返回值: ~
+        (`整数[]`) |tab-ID| 列表
+
+nvim_list_uis()                                              *nvim_list_uis()*
+    获取表示已附加 UI 的字典列表。
+
+    示例：Nvim 内置的 |TUI| 会按照 |startup-tui| 中的描述设置其通道信息。
+    特别是，它将 `client.name` 设置为 "nvim-tui"。因此，您可以通过检查每个 UI
+    的客户端名称来检查 TUI 是否正在运行： >lua
+        vim.print(vim.api.nvim_get_chan_info(vim.api.nvim_list_uis()[1].chan).client.name)
+<
+
+    属性: ~
+        始于: 0.3.0
+
+    返回值: ~
+        (`表<string,任意>[]`) UI 字典数组，每个字典包含以下键：
+        • "height" UI 的请求高度
+        • "width" UI 的请求宽度
+        • "rgb" 如果 UI 使用 RGB 颜色则为 true（false 表示 |cterm-colors|）
+        • "ext_..." 请求的 UI 扩展，参见 |ui-option|
+        • "chan" 远程 UI 的 |channel-id|
+
+nvim_list_wins()                                            *nvim_list_wins()*
+    获取当前所有标签页中所有 |window-ID| 的列表。
+
+    属性: ~
+        始于: 0.1.0
+
+    返回值: ~
+        (`整数[]`) |window-ID| 列表
+
+nvim_load_context({dict})                                *nvim_load_context()*
+    根据给定的 |context| 映射设置当前编辑器状态。
+
+    属性: ~
+        始于: 0.4.0
+
+    参数: ~
+      • {dict}  (`表<string,任意>`) |Context| 映射。
+
+    返回值: ~
+        (`任意`)
+
+nvim_open_term({buffer}, {opts})                            *nvim_open_term()*
+    在缓冲区中打开一个终端实例
+
+    默认情况下（并且目前是唯一选项），终端不会连接到外部进程。相反，在通道上发送的输入
+    将由终端直接回显。这对于显示作为 RPC 消息一部分返回的 ANSI 终端序列或类似内容很有用。
+
+    注意：要使用正确的大小直接启动终端，请在调用此函数之前，在配置好的窗口中显示该缓冲区。
+    例如，对于浮动显示，首先使用 |nvim_create_buf()| 创建一个空缓冲区，
+    然后使用 |nvim_open_win()| 显示它，最后调用此函数。之后可以立即调用
+    |nvim_chan_send()| 在具有预期大小的虚拟终端中处理序列。
+
+    示例：此 `TermHl` 命令可用于显示和高亮原始 ANSI 终端代码，因此您可以将 Nvim
+    用作“回滚分页器”（适用于像 kitty 这样的终端）：                     *ansi-colorize* *terminal-scrollback-pager* >lua
+        vim.api.nvim_create_user_command('TermHl', function()
+          vim.api.nvim_open_term(0, {})
+        end, { desc = 'Highlights ANSI termcodes in curbuf' })
+<
+
+    属性: ~
+        当 |textlock| 激活时不允许
+        始于: 0.5.0
+
+    参数: ~
+      • {buffer}  (`整数`) 要使用的缓冲区。缓冲区内容（如果有）将被写入 PTY。
+      • {opts}    (`vim.api.keyset.open_term`) 可选参数。
+                  • on_input: 用于发送输入的 Lua 回调，即终端模式下的按键。
+                    注意：按键是原始发送的，就像发送给 pty 主端一样。例如，
+                    回车符作为 "\r" 发送，而不是 "\n"。|textlock| 适用。
+                    但是可以在回调中直接调用 |nvim_chan_send()|。
+                    `["input", term, bufnr, data]`
+                  • force_crlf: (布尔值，默认 true) 将 "\n" 转换为 "\r\n"。
+
+    返回值: ~
+        (`整数`) 通道 ID，出错时为 0
+
+nvim_paste({data}, {crlf}, {phase})                             *nvim_paste()*
+    在光标处粘贴（任何模式下），并设置“重做”以便点命令（|.|）将重复输入。
+    UI 调用此函数来实现“粘贴”，但也供脚本用于输入大的、可点重复的文本块
+    （与受制于映射/事件因而慢得多的 |nvim_input()| 相对）。
+
+    调用 |vim.paste()| 处理程序，该程序会适当地处理每种模式。
+
+    错误（'nomodifiable'、`vim.paste()` 失败等）会在 `err` 中反映，
+    但不影响返回值（返回值完全由 `vim.paste()` 决定）。在错误或取消时，
+    后续调用将被忽略（“排空”），直到下一次粘贴开始（阶段 1 或 -1）。
+
+    在映射和脚本中用于插入多行文本很有用。示例： >lua
+        vim.keymap.set('n', 'x', function()
+          vim.api.nvim_paste([[
+            line1
+            line2
+            line3
+          ]], false, -1)
+        end, { buffer = true })
+<
+
+    属性: ~
+        当 |textlock| 激活时不允许
+        始于: 0.4.0
+
+    参数: ~
+      • {data}   (`字符串`) 多行输入。行在 LF ("\n") 处断开。可以是二进制数据
+                 （包含 NUL 字节）。
+      • {crlf}   (`布尔值`) 也允许在 CR 和 CRLF 处断开行。
+      • {phase}  (`整数`) -1：单次调用粘贴（即不流式传输）。要“流式”粘贴，
+                 请按顺序使用以下 `phase` 值调用 `nvim_paste`：
+                 • 1：开始粘贴（恰好一次）
+                 • 2：继续粘贴（零次或多次）
+                 • 3：结束粘贴（恰好一次）
+
+    返回值: ~
+        (`布尔值`)
+        • true：客户端可以继续粘贴。
+        • false：客户端应取消粘贴。
+
+nvim_put({lines}, {type}, {after}, {follow})                      *nvim_put()*
+    在任何模式下，将文本放在光标处。对于可点重复的输入，请使用 |nvim_paste()|。
+
+    比较始终是行方式的 |:put| 和 |p|。
+
+    属性: ~
+        当 |textlock| 激活时不允许
+        始于: 0.4.0
+
+    参数: ~
+      • {lines}   (`字符串[]`) |readfile()| 风格的行列表。|channel-lines|
+      • {type}    (`字符串`) 编辑行为：任何 |getregtype()| 结果，或：
+                  • "b" |blockwise-visual| 模式（可能包含宽度，例如 "b3"）
+                  • "c" |charwise| 模式
+                  • "l" |linewise| 模式
+                  • "" 根据内容猜测，参见 |setreg()|
+      • {after}   (`布尔值`) 如果为 true，则在光标后插入（如 |p|），否则在光标前插入（如 |P|）。
+      • {follow}  (`布尔值`) 如果为 true，则将光标置于插入文本的末尾。
+
+                                                    *nvim_replace_termcodes()*
+nvim_replace_termcodes({str}, {from_part}, {do_lt}, {special})
+    用内部表示替换字符串中的终端代码和 |keycodes|（<CR>, <Esc>, ...）。
+
+    注意: ~
+      • Lua 可以改用 |vim.keycode()|。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {str}        (`字符串`) 要转换的字符串。
+      • {from_part}  (`布尔值`) 遗留的 Vim 参数。通常为 true。
+      • {do_lt}      (`布尔值`) 也转换 <lt>。如果 `special` 为 false，则忽略。
+      • {special}    (`布尔值`) 替换 |keycodes|，例如 <CR> 变成 "\r" 字符。
+
+    返回值: ~
+        (`字符串`)
+
+    另请参阅: ~
+      • replace_termcodes
+      • cpoptions
+
+                                                *nvim_select_popupmenu_item()*
+nvim_select_popupmenu_item({item}, {insert}, {finish}, {opts})
+    在补全弹出菜单中选择一个项目。
+
+    如果 |ins-completion| 或 |cmdline-completion| 弹出菜单均未激活，
+    则此 API 调用将被静默忽略。对于使用 |ui-popupmenu| 的外部 UI 通过鼠标控制
+    弹出菜单很有用。也可用于映射中；使用 <Cmd> |:map-cmd| 或 Lua 映射以确保映射
+    不会结束补全模式。
+
+    属性: ~
+        始于: 0.4.0
+
+    参数: ~
+      • {item}    (`整数`) 要选择的项目的索引（从零开始）。值为 -1 表示不选择任何项
+                  并恢复原始文本。
+      • {insert}  (`布尔值`) 对于 |ins-completion|，指示是否应将选择插入缓冲区。
+                  对于 |cmdline-completion| 忽略。
+      • {finish}  (`布尔值`) 完成补全并关闭弹出菜单。隐含 {insert}。
+      • {opts}    (`vim.api.keyset.empty`) 可选参数。保留供将来使用。
+
+                                                      *nvim_set_client_info()*
+nvim_set_client_info({name}, {version}, {type}, {methods}, {attributes})
+    自我标识客户端，并在通道上设置可选标志。定义由 |nvim_get_chan_info()| 返回的
+    `client` 对象。
+
+    客户端应在连接后立即调用此函数，为调试和编排提供提示。（注意：有信息总比没有好！
+    字段是可选的，但至少要设置 `name`。）
+
+    可以多次调用；如有需要，调用者应合并旧信息。
+    示例：一个库首先标识通道，然后使用该库的插件稍后标识自己。
+
+    属性: ~
+        |RPC| 专用
+        始于: 0.3.0
+
+    参数: ~
+      • {name}        (`字符串`) 客户端短名称。设置 |nvim_get_chan_info()|
+                      的 `client.name` 字段。
+      • {version}     (`表<string,任意>`) 描述版本的字典，包含以下（可选）键：
+                      • "major" 主版本号（如果未设置，默认 0，表示尚未发布）
+                      • "minor" 次版本号
+                      • "patch" 补丁号
+                      • "prerelease" 描述预发布版本的字符串，如 "dev" 或 "beta1"
+                      • "commit" 提交的哈希值或类似标识符
+      • {type}        (`字符串`) 必须是以下值之一。除非被用户覆盖，客户端库应默认
+                      使用 "remote"。
+                      • "remote" 连接的远程客户端，“Nvim 风格”的 MessagePack-RPC
+                        （响应的顺序必须与请求相反）。|msgpack-rpc|
+                      • "msgpack-rpc" 通过完全符合 MessagePack-RPC 协议的协议
+                        连接到 Nvim 的远程客户端。
+                      • "ui" 图形用户界面前端
+                      • "embedder" 将 Nvim 作为组件使用的应用程序（例如，
+                        实现 vim 模式的 IDE/编辑器）。
+                      • "host" 插件主机，通常由 nvim 启动
+                      • "plugin" 单个插件，由 nvim 启动
+      • {methods}     (`表<string,任意>`) 客户端中的内置方法。对于主机，这不包括
+                      稍后才会发现的插件方法。键应为方法名称，值是包含以下（可选）
+                      键的字典（Nvim 的未来版本可能会添加更多键，因此未知键会被忽略。
+                      客户端只能使用此版本或更高版本 Nvim 中定义的键）：
+                      • "async" 如果为 true，则作为通知发送。如果为 false 或未指定，
+                        则使用阻塞请求。
+                      • "nargs" 参数数量。可以是单个整数，也可以是包含最小和最大
+                        值（包括）的两个整数的数组。
+      • {attributes}  (`表<string,任意>`) 非正式的客户端属性的任意字符串:字符串映射。
+                      建议的键：
+                      • "pid": 进程 ID。
+                      • "website": 客户端主页 URL（例如 GitHub 仓库）
+                      • "license": 许可证描述（"Apache 2", "GPLv3", "MIT", …）
+                      • "logo": 图像的 URI 或路径，最好是小的徽标或图标。首选
+                        .png 或 .svg 格式。
+
+nvim_set_current_buf({buffer})                        *nvim_set_current_buf()*
+    将当前窗口的缓冲区设置为 `buffer`。
+
+    属性: ~
+        当 |textlock| 激活或在 |cmdwin| 中时不允许
+        始于: 0.1.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID
+
+nvim_set_current_dir({dir})                           *nvim_set_current_dir()*
+    更改全局工作目录。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {dir}  (`字符串`) 目录路径
+
+nvim_set_current_line({line})                        *nvim_set_current_line()*
+    设置当前行的文本。
+
+    属性: ~
+        当 |textlock| 激活时不允许
+        始于: 0.1.0
+
+    参数: ~
+      • {line}  (`字符串`) 行内容
+
+nvim_set_current_tabpage({tabpage})               *nvim_set_current_tabpage()*
+    设置当前标签页。
+
+    属性: ~
+        当 |textlock| 激活或在 |cmdwin| 中时不允许
+        始于: 0.1.0
+
+    参数: ~
+      • {tabpage}  (`整数`) 要聚焦的 |tab-ID|
+
+nvim_set_current_win({window})                        *nvim_set_current_win()*
+    导航到给定的窗口（并隐含地导航到其标签页）。
+
+    属性: ~
+        当 |textlock| 激活或在 |cmdwin| 中时不允许
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) 要聚焦的 |window-ID|
+
+nvim_set_hl({ns_id}, {name}, {val})                            *nvim_set_hl()*
+    设置一个高亮组。
+
+    注意: ~
+      • 与可以更新高亮组的 `:highlight` 命令不同，此函数完全替换定义。
+        例如：`nvim_set_hl(0, 'Visual', {})` 将清除高亮组 'Visual'。
+      • fg 和 bg 键也接受字符串值 `"fg"` 或 `"bg"`，它们作为 Normal 组相应
+        前景色和背景色的别名。如果 Normal 组尚未定义，使用这些值将导致错误。
+      • 如果 `link` 与其他属性组合使用；只有 `link` 会生效（参见 |:hi-link|）。
+
+    属性: ~
+        始于: 0.5.0
+
+    参数: ~
+      • {ns_id}  (`整数`) 此高亮的命名空间 ID
+                 |nvim_create_namespace()|。使用 0 设置全局高亮组
+                 |:highlight|。来自非全局命名空间的高亮默认不激活，
+                 使用 |nvim_set_hl_ns()| 或 |nvim_win_set_hl_ns()| 来激活它们。
+      • {name}   (`字符串`) 高亮组名称，例如 "ErrorMsg"
+      • {val}    (`vim.api.keyset.highlight`) 高亮定义映射，
+                 接受以下键：
+                 • bg: 颜色名称或 "#RRGGBB"，参见注意。
+                 • bg_indexed: 布尔值（默认 false）如果为 true，则 bg 是
+                   终端调色板索引（0-255）。
+                 • blend: 介于 0 和 100 之间的整数
+                 • cterm: cterm 属性映射，类似 |highlight-args|。如果未设置，
+                   cterm 属性将匹配上面记录的属性映射中的属性。
+                 • ctermbg: 设置 cterm 颜色的背景 |ctermbg|
+                 • ctermfg: 设置 cterm 颜色的前景 |ctermfg|
+                 • default: 布尔值 不覆盖现有定义 |:hi-default|
+                 • fg: 颜色名称或 "#RRGGBB"，参见注意。
+                 • fg_indexed: 布尔值（默认 false）如果为 true，则 fg 是
+                   终端调色板索引（0-255）。
+                 • force: 如果为 true，则在高亮组存在时强制更新。
+                 • link: 要链接到的高亮组名称。|:hi-link|
+                 • sp: 颜色名称或 "#RRGGBB"
+                 • altfont: 布尔值
+                 • blink: 布尔值
+                 • bold: 布尔值
+                 • conceal: 布尔值 UI 级别的隐藏（终端 SGR），
+                   与 |:syn-conceal| 无关。
+                 • dim: 布尔值
+                 • italic: 布尔值
+                 • nocombine: 布尔值
+                 • overline: 布尔值
+                 • reverse: 布尔值
+                 • standout: 布尔值
+                 • strikethrough: 布尔值
+                 • undercurl: 布尔值
+                 • underdashed: 布尔值
+                 • underdotted: 布尔值
+                 • underdouble: 布尔值
+                 • underline: 布尔值
+
+nvim_set_hl_ns({ns_id})                                     *nvim_set_hl_ns()*
+    为使用 |nvim_set_hl()| 定义的高亮设置活动命名空间。可以为单个窗口设置，
+    参见 |nvim_win_set_hl_ns()|。
+
+    属性: ~
+        始于: 0.8.0
+
+    参数: ~
+      • {ns_id}  (`整数`) 要使用的命名空间
+
+nvim_set_hl_ns_fast({ns_id})                           *nvim_set_hl_ns_fast()*
+    在重绘期间为使用 |nvim_set_hl()| 定义的高亮设置活动命名空间。
+
+    此函数旨在重绘期间调用，主要来自 |nvim_set_decoration_provider()|
+    的 on_win 和 on_line 回调，这些回调允许在重绘周期内更改命名空间。
+
+    属性: ~
+        |api-fast|
+        始于: 0.8.0
+
+    参数: ~
+      • {ns_id}  (`整数`) 要激活的命名空间
+
+nvim_set_keymap({mode}, {lhs}, {rhs}, {opts})              *nvim_set_keymap()*
+    为给定模式设置一个全局 |mapping|。
+
+    要设置缓冲区局部的映射，请使用 |nvim_buf_set_keymap()|。
+
+    与 |:map| 不同，前导/尾随空白作为 {lhs} 或 {rhs} 的一部分被接受。
+    空的 {rhs} 表示 <Nop>。|keycodes| 照常替换。
+
+    示例: >vim
+        call nvim_set_keymap('n', ' <NL>', '', {'nowait': v:true})
+<
+
+    等同于: >vim
+        nmap <nowait> <Space><NL> <Nop>
+<
+
+    属性: ~
+        始于: 0.4.0
+
+    参数: ~
+      • {mode}  (`字符串`) 模式短名称（映射命令前缀："n", "i", "v", "x", …）
+                或 "!" 用于 |:map!|，或空字符串用于 |:map|。
+                "ia", "ca" 或 "!a" 分别用于插入模式、命令行模式或两者的缩写。
+      • {lhs}   (`字符串`) 映射的左侧 |{lhs}|。
+      • {rhs}   (`字符串`) 映射的右侧 |{rhs}|。
+      • {opts}  (`vim.api.keyset.keymap`) 可选参数映射：接受除 <buffer> 以外的
+                所有 |:map-arguments| 作为键，值为布尔值（默认 false）。还有：
+                • "noremap" 禁用 |recursive_mapping|，类似 |:noremap|
+                • "desc" 人类可读的描述。
+                • "callback" 代替 {rhs} 调用的 Lua 函数。
+                • "replace_keycodes" （布尔值）当 "expr" 为 true 时，替换结果
+                  字符串中的键码（参见 |nvim_replace_termcodes()|）。从 Lua
+                  "callback" 返回 nil 等同于返回空字符串。
+
+nvim_set_var({name}, {value})                                 *nvim_set_var()*
+    设置一个全局 (g:) 变量。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {name}   (`字符串`) 变量名称
+      • {value}  (`任意`) 变量值
+
+nvim_set_vvar({name}, {value})                               *nvim_set_vvar()*
+    设置一个 v: 变量，如果它不是只读的。
+
+    属性: ~
+        始于: 0.4.0
+
+    参数: ~
+      • {name}   (`字符串`) 变量名称
+      • {value}  (`任意`) 变量值
+
+
+nvim_strwidth({text})                                        *nvim_strwidth()*
+    计算 `text` 占用的显示单元格数量。包括 <Tab> 在内的控制字符计为一个单元格。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {text}  (`字符串`) 一些文本
+
+    返回值: ~
+        (`整数`) 单元格数量
+
+nvim__complete_set({index}, {opts})                     *nvim__complete_set()*
+    实验性：此 API 未来可能会更改。
+
+    为给定索引处的补全项设置信息。如果信息文本显示在窗口中，则返回窗口和缓冲区的 ID，
+    如果未显示则返回空字典。
+
+    参数: ~
+      • {index}  (`整数`) 补全候选项索引
+      • {opts}   (`vim.api.keyset.complete_set`) 可选参数。
+                 • info: (字符串) 信息文本。
+
+    返回值: ~
+        (`表<string,数字>`) 包含以下键的字典：
+        • winid: (数字) 浮动窗口 ID
+        • bufnr: (数字) 浮动窗口中的缓冲区 ID
+
+nvim__exec_lua_fast({code}, {args})                    *nvim__exec_lua_fast()*
+    实验性：此 API 未来可能会更改或删除。
+
+    类似于 |nvim_exec_lua()|，但可以在 |api-fast| 上下文中调用。
+
+    执行 Lua 代码。参数（如果有）在代码块内可作为 `...` 使用。代码块可以返回一个值。
+
+    只执行语句。要计算表达式，请在其前面加上 `return`：return my_function(...)
+
+    属性: ~
+        |api-fast|
+        |RPC| 专用
+        始于: 0.12.0
+
+    参数: ~
+      • {code}  (`字符串`) 要执行的 Lua 代码
+      • {args}  (`任意[]`) 传递给代码的参数
+
+    返回值: ~
+        (`任意`) Lua 代码的返回值（如果存在），否则为 NIL。
+
+nvim__get_runtime({pat}, {all}, {opts})                  *nvim__get_runtime()*
+    在运行时目录中查找文件
+
+    属性: ~
+        |api-fast|
+        始于: 0.6.0
+
+    参数: ~
+      • {pat}   (`字符串[]`) 要搜索的文件模式
+      • {all}   (`布尔值`) 是否返回所有匹配项或仅返回第一个
+      • {opts}  (`vim.api.keyset.runtime`) is_lua: 仅搜索 Lua 子目录
+
+    返回值: ~
+        (`字符串[]`) 找到文件的绝对路径列表
+
+nvim__id({obj})                                                   *nvim__id()*
+    返回作为参数给定的对象。
+
+    此 API 函数用于测试。插件不应依赖其存在。
+
+    参数: ~
+      • {obj}  (`任意`) 要返回的对象。
+
+    返回值: ~
+        (`任意`) 其参数。
+
+nvim__id_array({arr})                                       *nvim__id_array()*
+    返回作为参数给定的数组。
+
+    此 API 函数用于测试。插件不应依赖其存在。
+
+    参数: ~
+      • {arr}  (`任意[]`) 要返回的数组。
+
+    返回值: ~
+        (`任意[]`) 其参数。
+
+nvim__id_dict({dct})                                         *nvim__id_dict()*
+    返回作为参数给定的字典。
+
+    此 API 函数用于测试。插件不应依赖其存在。
+
+    参数: ~
+      • {dct}  (`表<string,任意>`) 要返回的字典。
+
+    返回值: ~
+        (`表<string,任意>`) 其参数。
+
+nvim__id_float({flt})                                       *nvim__id_float()*
+    返回作为参数给定的浮点值。
+
+    此 API 函数用于测试。插件不应依赖其存在。
+
+    参数: ~
+      • {flt}  (`数字`) 要返回的值。
+
+    返回值: ~
+        (`数字`) 其参数。
+
+nvim__inspect_cell({grid}, {row}, {col})                *nvim__inspect_cell()*
+    注意：如果您的 UI 不使用 hlstate，则第一次不会返回 hlstate。
+
+    参数: ~
+      • {grid}  (`整数`)
+      • {row}   (`整数`)
+      • {col}   (`整数`)
+
+    返回值: ~
+        (`任意[]`)
+
+nvim__invalidate_glyph_cache()                *nvim__invalidate_glyph_cache()*
+    用于测试。schar_cache_clear_if_full 中的条件很难达到，因此此函数可用于在测试中强制清除缓存。
+
+nvim__redraw({opts})                                          *nvim__redraw()*
+    实验性：此 API 未来可能会更改。
+
+    指示 Nvim 重绘各种组件。
+
+    属性: ~
+        始于: 0.10.0
+
+    参数: ~
+      • {opts}  (`vim.api.keyset.redraw`) 可选参数。
+                • win: 针对特定的 |window-ID|，如下所述。
+                • buf: 针对特定的缓冲区编号，如下所述。
+                • flush: 用挂起的更新更新屏幕。
+                • valid: 当存在时，标记 `win`、`buf` 或所有窗口进行重绘。
+                  当为 `true` 时，仅重绘更改的行（对装饰提供者有用）。
+                  当为 `false` 时，强制重绘。
+                • range: 重绘 `buf`、`win` 中的缓冲区或当前缓冲区中的一个范围
+                  （对装饰提供者有用）。期望一个元组 `[first, last]`，包含范围的
+                  首行和末行行号，0 基、结束位置不包含 |api-indexing|。
+                • cursor: 立即更新屏幕上 `win` 或当前窗口中的光标位置。
+                • statuscolumn: 重绘 `buf`、`win` 或所有窗口中的 'statuscolumn'。
+                • statusline: 重绘 `buf`、`win` 或所有窗口中的 'statusline'。
+                • winbar: 重绘 `buf`、`win` 或所有窗口中的 'winbar'。
+                • tabline: 重绘 'tabline'。
+
+    另请参阅: ~
+      • |:redraw|
+
+nvim__stats()                                                  *nvim__stats()*
+    获取内部统计信息。
+
+    返回值: ~
+        (`表<string,任意>`) 各种内部统计信息的映射。
+
+
+==============================================================================
+Vimscript 函数                                                  *api-vimscript*
+
+                                                   *nvim_call_dict_function()*
+nvim_call_dict_function({dict}, {fn}, {args})
+    使用给定的参数调用 Vimscript |Dictionary-function|。
+
+    执行出错时：因 Vimscript 错误而失败，更新 v:errmsg。
+
+    属性: ~
+        始于: 0.3.0
+
+    参数: ~
+      • {dict}  (`任意`) 字典，或求值为 Vimscript |self| 字典的字符串
+      • {fn}    (`字符串`) 在 Vimscript 字典上定义的函数名称
+      • {args}  (`任意[]`) 打包在数组中的函数参数
+
+    返回值: ~
+        (`任意`) 函数调用的结果
+
+nvim_call_function({fn}, {args})                        *nvim_call_function()*
+    使用给定的参数调用 Vimscript 函数。
+
+    执行出错时：因 Vimscript 错误而失败，更新 v:errmsg。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {fn}    (`字符串`) 要调用的函数
+      • {args}  (`任意[]`) 打包在数组中的函数参数
+
+    返回值: ~
+        (`任意`) 函数调用的结果
+
+nvim_command({command})                                       *nvim_command()*
+    执行一条 Ex 命令。
+
+    执行出错时：因 Vimscript 错误而失败，更新 v:errmsg。
+
+    优先使用 |nvim_cmd()| 或 |nvim_exec2()|。要在执行前以结构化方式修改 Ex 命令，
+    请修改 |nvim_parse_cmd()| 的结果，然后将其传递给 |nvim_cmd()|。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {command}  (`字符串`) Ex 命令字符串
+
+nvim_eval({expr})                                                *nvim_eval()*
+    计算 Vimscript |expression|。字典和列表会被递归展开。
+
+    执行出错时：因 Vimscript 错误而失败，更新 v:errmsg。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {expr}  (`字符串`) Vimscript 表达式字符串
+
+    返回值: ~
+        (`任意`) 计算结果或展开的对象
+
+nvim_exec2({src}, {opts})                                       *nvim_exec2()*
+    执行 Vimscript（多行 Ex 命令块），类似于匿名的 |:source|。
+
+    与 |nvim_command()| 不同，此函数支持 here 文档、脚本作用域 (s:) 等。
+
+    执行出错时：因 Vimscript 错误而失败，更新 v:errmsg。
+
+    属性: ~
+        始于: 0.9.0
+
+    参数: ~
+      • {src}   (`字符串`) Vimscript 代码
+      • {opts}  (`vim.api.keyset.exec_opts`) 可选参数。
+                • output: (布尔值，默认 false) 是否捕获并返回所有（非错误、非 shell |:!|）输出。
+
+    返回值: ~
+        (`表<string,任意>`) 包含执行信息的字典，包含以下键：
+        • output: (字符串|nil) 如果 `opts.output` 为 true，则返回输出。
+
+    另请参阅: ~
+      • |execute()|
+      • |nvim_command()|
+      • |nvim_cmd()|
+
+                                                     *nvim_parse_expression()*
+nvim_parse_expression({expr}, {flags}, {highlight})
+    解析 Vimscript 表达式。
+
+    属性: ~
+        |api-fast|
+        始于: 0.3.0
+
+    参数: ~
+      • {expr}       (`字符串`) 要解析的表达式。始终视为单行。
+      • {flags}      (`字符串`) 标志：
+                     • "m" 如果允许连续多个表达式（只会解析第一个），
+                     • "E" 如果不允许 EOC 令牌（决定它们是会停止解析过程，
+                       还是被识别为操作符/空格，但也会产生错误）。
+                     • "l" 当需要以 lvalues 开始解析用于 ":let" 或 ":for" 时。
+                       常用标志集：
+                     • "m" 用于像 `":echo"` 那样解析。
+                     • "E" 用于像 `"<C-r>="` 那样解析。
+                     • 空字符串用于 ":call"。
+                     • "lm" 用于解析 ":let"。
+      • {highlight}  (`布尔值`) 如果为 true，返回值还将包含 "highlight" 键，
+                     其中包含 4 元组（数组）的数组 (整数, 整数, 整数, 字符串)，
+                     前三个数字定义了高亮区域，代表行、起始列和结束列
+                     （后者不包含：应高亮区域 [start_col, end_col)）。
+
+    返回值: ~
+        (`表<string,任意>`)
+        • AST: 顶层字典，包含以下键：
+          • "error": 包含错误的字典，仅当解析器遇到错误时出现。
+            包含以下键：
+            • "message": 字符串，翻译后的 printf 格式的错误消息。
+              必须恰好包含一个 `%.*s`。
+            • "arg": 字符串，错误消息参数。
+          • "len": 成功解析的字节数。当 flags 等于 "" 时，这应该等于 expr 字符串的长度。
+            （这里的“成功解析”意味着“参与了 AST 创建”，而不是“直到第一个错误”。）
+          • "ast": AST，要么为 nil，要么是一个包含以下键的字典：
+            • "type": 节点类型，来自 ExprASTNodeType 的值名称之一，
+              不带 "kExprNode" 前缀的字符串形式。
+            • "start": 一对 `[line, column]`，描述节点的“起始”位置，
+              其中 "line" 始终为 0（如果您在例如 ":let" 上使用此 API，则不会为 0，
+              但这尚未实现）。两个元素都是整数。
+            • "len": 节点的“长度”。此 "start" 和 "len" 主要用于调试目的
+              （调试解析器和提供调试信息）。
+            • "children": 在顶层/"ast" 中描述的节点列表。总是有零个、一个或两个子节点，
+              如果节点没有子节点，则不会出现此键。子节点的最大数量可在 node_maxchildren 数组中找到。
+        • 局部值（仅对某些节点存在）：
+          • "scope": 单个整数，为 "Option" 和 "PlainIdentifier" 节点指定作用域。
+            对于 "Option"，它是 ExprOptScope 值之一；
+            对于 "PlainIdentifier"，它是 ExprVarScope 值之一。
+          • "ident": 标识符（不含作用域，如果有），存在于 "Option"、"PlainIdentifier"、
+            "PlainKey" 和 "Environment" 节点。
+          • "name": 整数，寄存器名称（一个字符）或 -1。仅存在于 "Register" 节点。
+          • "cmp_type": 字符串，比较类型，来自 ExprComparisonType 的值名称之一，
+            不带 "kExprCmp" 前缀的字符串形式。仅存在于 "Comparison" 节点。
+          • "ccs_strategy": 字符串，大小写比较策略，来自 ExprCaseCompareStrategy
+            的值名称之一，不带 "kCCStrategy" 前缀的字符串形式。
+            仅存在于 "Comparison" 节点。
+          • "augmentation": 字符串，用于 "Assignment" 节点的增强类型。
+            对于 "="、"+="、"-=" 或 ".="，分别为空字符串、"Add"、"Subtract" 或 "Concat"。
+          • "invert": 布尔值，如果比较结果需要取反则为 true。仅存在于 "Comparison" 节点。
+          • "ivalue": 整数，用于 "Integer" 节点的整数值。
+          • "fvalue": 浮点数，用于 "Float" 节点的浮点值。
+          • "svalue": 字符串，用于 "SingleQuotedString" 和 "DoubleQuotedString" 节点的值。
+
+
+==============================================================================
+自动命令函数                                                    *api-autocmd*
+
+nvim_clear_autocmds({opts})                            *nvim_clear_autocmds()*
+    清除与 {opts} 查询匹配的所有自动命令。要删除自动命令，请参见 |nvim_del_autocmd()|。
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {opts}  (`vim.api.keyset.clear_autocmds`) 可选参数：
+                • event: (`vim.api.keyset.events|vim.api.keyset.events[]?`)
+                  示例：
+                  • event: "pat1"
+                  • event: { "pat1" }
+                  • event: { "pat1", "pat2", "pat3" }
+                • pattern: (`字符串|表?`) 按模式筛选（精确匹配）。
+                  不允许与 {buffer} 同时使用。
+                  • 示例：如果您为自动命令设置了 `*.py` 作为模式，则必须精确传递
+                    `*.py` 才能清除它。`test.py` 将不匹配该模式。
+                • buffer: (`整数?`) 选择 |autocmd-buflocal| 自动命令。
+                  不允许与 {pattern} 同时使用。
+                • group: (`字符串|整数?`) 组名称或 ID。
+                  • 注意：如果未提供，则匹配不在任何组中的自动命令。
+
+nvim_create_augroup({name}, {opts})                    *nvim_create_augroup()*
+    创建或获取一个自动命令组 |autocmd-groups|。
+
+    要获取现有组的 ID，请执行： >lua
+        local id = vim.api.nvim_create_augroup('my.lsp.config', {
+          clear = false
+        })
+<
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {name}  (`字符串`) 组名称
+      • {opts}  (`vim.api.keyset.create_augroup`) 可选参数：
+                • clear (`布尔值?`，默认: true) 清除组中的现有命令 |autocmd-groups|。
+
+    返回值: ~
+        (`整数`) 组 ID。
+
+    另请参阅: ~
+      • |autocmd-groups|
+
+nvim_create_autocmd({event}, {opts})                   *nvim_create_autocmd()*
+    创建一个 |autocommand| 事件处理器，由 `callback`（Lua 函数或 Vimscript 函数名称字符串）
+    或 `command`（Ex 命令字符串）定义。
+
+    使用 Lua 回调的示例： >lua
+        vim.api.nvim_create_autocmd({'BufEnter', 'BufWinEnter'}, {
+          pattern = {'*.c', '*.h'},
+          callback = function(ev)
+            print(string.format('event fired: %s', vim.inspect(ev)))
+          end
+        })
+<
+
+    使用 Ex 命令作为处理器的示例： >lua
+        vim.api.nvim_create_autocmd({'BufEnter', 'BufWinEnter'}, {
+          pattern = {'*.c', '*.h'},
+          command = "echo 'Entering a C or C++ file'",
+        })
+<
+
+    注意：`pattern` 不会自动展开（与 |:autocmd| 不同），因此像 "$HOME" 和 "~" 这样的名称
+    必须显式展开： >lua
+        pattern = vim.fn.expand('~') .. '/some/path/*.py'
+<
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {event}  (`vim.api.keyset.events|vim.api.keyset.events[]`) 将触发处理器
+                 （`callback` 或 `command`）的事件。
+      • {opts}   (`vim.api.keyset.create_autocmd`) 选项字典：
+                 • buffer (`整数?`) 用于缓冲区局部自动命令的缓冲区 ID
+                   |autocmd-buflocal|。不允许与 {pattern} 同时使用。
+                 • callback (`函数|字符串?`) 当事件被触发时调用的 Lua 函数
+                   （如果是字符串，则为 Vimscript 函数名称）。Lua 回调可以返回
+                   |lua-truthy| 以删除自动命令。回调接收一个参数，一个包含以下键的表：
+                                                              *event-args*
+                   • id: (`数字`) 自动命令 ID
+                   • event: (`vim.api.keyset.events`) 被触发事件的名称
+                     |autocmd-events|
+                   • group: (`数字?`) 组 ID（如果有）
+                   • file: (`字符串`) <afile>（未展开为完整路径）
+                   • match: (`字符串`) <amatch>（展开为完整路径）
+                   • buf: (`数字`) <abuf>
+                   • data: (`任意`) 从 |nvim_exec_autocmds()| 传递的任意数据
+                                                              *event-data*
+                 • command (字符串?) 事件发生时执行的 Vim 命令。
+                   不允许与 {callback} 同时使用。
+                 • desc (`字符串?`) 描述（用于文档和故障排除）。
+                 • group (`字符串|整数?`) 要匹配的组名称或 ID。
+                 • nested (`布尔值?`，默认: false) 运行嵌套的自动命令 |autocmd-nested|。
+                 • once (`布尔值?`，默认: false) 仅处理事件一次 |autocmd-once|。
+                 • pattern (`字符串|数组?`) 要精确匹配的模式 |autocmd-pattern|。
+
+    返回值: ~
+        (`整数`) 自动命令 ID（数字）
+
+    另请参阅: ~
+      • |autocommand|
+      • |nvim_del_autocmd()|
+
+nvim_del_augroup_by_id({id})                        *nvim_del_augroup_by_id()*
+    通过 ID 删除一个自动命令组。
+
+    要获取组 ID，可以使用 |nvim_get_autocmds()|。
+
+    注意：行为与 |:augroup-delete| 不同。删除组时，此组中包含的自动命令也将被删除和清除。
+    此组将不再存在。
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {id}  (`整数`) 组 ID。
+
+    另请参阅: ~
+      • |nvim_del_augroup_by_name()|
+      • |nvim_create_augroup()|
+
+nvim_del_augroup_by_name({name})                  *nvim_del_augroup_by_name()*
+    通过名称删除一个自动命令组。
+
+    注意：行为与 |:augroup-delete| 不同。删除组时，此组中包含的自动命令也将被删除和清除。
+    此组将不再存在。
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {name}  (`字符串`) 组名称。
+
+    另请参阅: ~
+      • |autocmd-groups|
+
+nvim_del_autocmd({id})                                    *nvim_del_autocmd()*
+    通过 ID 删除一个自动命令。
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {id}  (`整数`) 由 |nvim_create_autocmd()| 返回的自动命令 ID
+
+nvim_exec_autocmds({event}, {opts})                     *nvim_exec_autocmds()*
+    为 {event} 执行与相应 {opts} 查询匹配的处理器。|autocmd-execute|
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {event}  (`vim.api.keyset.events|vim.api.keyset.events[]`) 要执行的事件。
+      • {opts}   (`vim.api.keyset.exec_autocmds`) 可选筛选器：
+                 • group (`字符串|整数?`) 要匹配的组名称或 ID。|autocmd-groups|。
+                 • pattern (`字符串|数组?`，默认: "*") |autocmd-pattern|。
+                   不允许与 {buffer} 同时使用。
+                 • buffer (`整数?`) 缓冲区 ID |autocmd-buflocal|。不允许与 {pattern} 同时使用。
+                 • modeline (`布尔值?`，默认: true) 在自动命令之后处理模型线 <nomodeline>。
+                 • data (`任意`): 传递给回调的任意数据。参见 |nvim_create_autocmd()|。
+
+    另请参阅: ~
+      • |:doautocmd|
+
+nvim_get_autocmds({opts})                                *nvim_get_autocmds()*
+    获取与 {opts} 查询中 ALL 条件匹配的所有自动命令。
+
+    注意：当提供多个模式或事件时，它们具有“或”语义（匹配任意组合）。
+
+    示例: >lua
+        -- 匹配所有条件
+        autocommands = vim.api.nvim_get_autocmds({
+          group = 'MyGroup',
+          event = {'BufEnter', 'BufWinEnter'},
+          pattern = {'*.c', '*.h'}
+        })
+
+        -- 来自一个组的所有命令
+        autocommands = vim.api.nvim_get_autocmds({
+          group = 'MyGroup',
+        })
+<
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {opts}  (`vim.api.keyset.get_autocmds`) 字典，至少包含以下键之一：
+                • buffer: (`整数[]|整数?`) 缓冲区 ID 或缓冲区 ID 列表，用于缓冲区局部自动命令 |autocmd-buflocal|。
+                  不允许与 {pattern} 同时使用。
+                • event: (`vim.api.keyset.events|vim.api.keyset.events[]?`)
+                  要匹配的事件 |autocmd-events|。
+                • group: (`字符串|表?`) 要匹配的组名称或 ID。
+                • id: (`整数?`) 要匹配的自动命令 ID。
+                • pattern: (`字符串|表?`) 要匹配的模式 |autocmd-pattern|。不允许与 {buffer} 同时使用。
+
+    返回值: ~
+        (`vim.api.keyset.get_autocmds.ret[]`) 匹配的自动命令数组，每个项包含：
+        • buffer (`整数?`): 缓冲区 ID（仅用于 |autocmd-buffer-local|）。
+        • buflocal (`布尔值?`): 如果自动命令是缓冲区局部的，则为 true |autocmd-buffer-local|。
+        • callback: (`函数|字符串?`): 事件处理器：一个 Lua 函数或 Vimscript 函数名称。
+        • command: (`字符串`) 事件处理器：一条 Ex 命令。如果设置了 `callback`，则为空。
+        • desc: (`字符串`) 描述。
+        • event: (`vim.api.keyset.events`) 事件名称。
+        • group: (`整数`) 组 ID。
+        • group_name: (`字符串`) 组名称。
+        • id: (`整数`) 自动命令 ID（仅当使用 API 定义时）。
+        • once: (`布尔值`) 如果设置了 |autocmd-once|，则为 true。
+        • pattern: (`字符串`) 自动命令模式。
+
+
+==============================================================================
+缓冲区函数                                                     *api-buffer*
+
+
+有关缓冲区的更多信息，请参阅 |buffers|。
+
+未加载的缓冲区： ~
+
+缓冲区可能因 |:bunload| 命令或缓冲区的 'bufhidden' 选项而被卸载。当缓冲区被卸载时，
+其文件内容将从内存中释放，vim 无法操作该缓冲区的行，直到它被重新加载（通常通过在新窗口中
+再次打开该缓冲区）。诸如 |nvim_buf_get_lines()| 和 |nvim_buf_line_count()| 等
+API 方法将受到影响。
+
+您可以使用 |nvim_buf_is_loaded()| 或 |nvim_buf_line_count()| 来检查缓冲区是否已加载。
+
+
+nvim_buf_attach({buffer}, {send_buffer}, {opts})           *nvim_buf_attach()*
+    在通道上激活 |api-buffer-updates| 事件，或作为 Lua 回调激活。
+
+    示例（Lua）：将缓冲区更新捕获到全局 `events` 变量中（使用 "vim.print(events)" 查看其内容）： >lua
+        events = {}
+        vim.api.nvim_buf_attach(0, false, {
+          on_lines = function(...)
+            table.insert(events, {...})
+          end,
+        })
+<
+
+    属性: ~
+        始于: 0.3.0
+
+    参数: ~
+      • {buffer}       (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {send_buffer}  (`布尔值`) 如果为 true，则初始通知应包含整个缓冲区：
+                       第一个通知将是 `nvim_buf_lines_event`。否则，第一个通知将是
+                       `nvim_buf_changedtick_event`。不用于 Lua 回调。
+      • {opts}         (`vim.api.keyset.buf_attach`) 可选参数。
+                       • on_lines: 在行级更改时调用。在缓冲区重新加载时
+                         （`:checktime`、`:edit` 等）不调用，请参见 `on_reload:`。
+                         返回一个 |lua-truthy| 值以分离。
+                         参数：
+                         • 字符串 "lines"
+                         • 缓冲区 ID
+                         • b:changedtick
+                         • 更改的第一行（从零开始索引）
+                         • 更改的最后一行
+                         • 更新范围内的最后一行
+                         • 先前内容的字节数
+                         • deleted_codepoints（如果 `utf_sizes` 为 true）
+                         • deleted_codeunits（如果 `utf_sizes` 为 true）
+                       • on_bytes: 在细粒度更改时调用（与 on_lines 相比）。
+                         在缓冲区重新加载时（`:checktime`、`:edit` 等）不调用，
+                         请参见 `on_reload:`。返回一个 |lua-truthy| 值以分离。
+                         参数：
+                         • 字符串 "bytes"
+                         • 缓冲区 ID
+                         • b:changedtick
+                         • 更改文本的起始行（从零开始索引）
+                         • 更改文本的起始列
+                         • 更改文本的字节偏移量（从缓冲区开头算起）
+                         • 更改文本的旧结束行（相对于起始行的偏移）
+                         • 更改文本的旧结束列（如果旧结束行 = 0，则为相对于起始列的偏移）
+                         • 更改文本的旧结束字节长度
+                         • 更改文本的新结束行（相对于起始行的偏移）
+                         • 更改文本的新结束列（如果新结束行 = 0，则为相对于起始列的偏移）
+                         • 更改文本的新结束字节长度
+                       • on_changedtick: 在 |changetick| 增加但文本未更改时调用。
+                         参数：
+                         • 字符串 "changedtick"
+                         • 缓冲区 ID
+                         • b:changedtick
+                       • on_detach: 在分离时调用。参数：
+                         • 字符串 "detach"
+                         • 缓冲区 ID
+                       • on_reload: 在加载整个缓冲区时（`:checktime`、`:edit` 等）调用。
+                         客户端通常应重新获取整个缓冲区内容。参数：
+                         • 字符串 "reload"
+                         • 缓冲区 ID
+                       • utf_sizes: 包含被替换区域的 UTF-32 和 UTF-16 大小，
+                         作为 `on_lines` 的参数。
+                       • preview: 也附加到命令预览（即 'inccommand'）事件。
+
+    返回值: ~
+        (`布尔值`) 如果附加失败（参数无效，或缓冲区未加载）则为 False；否则为 True。
+
+    另请参阅: ~
+      • |nvim_buf_detach()|
+      • |api-buffer-updates-lua|
+
+nvim_buf_call({buffer}, {fun})                               *nvim_buf_call()*
+    以缓冲区作为临时当前缓冲区调用一个函数。
+
+    这会临时将当前缓冲区切换到“buffer”。如果当前窗口已显示“buffer”，则不会切换窗口。
+    如果当前标签页内的某个窗口（包括浮动窗口）已显示该缓冲区，则该窗口之一将被临时设置为
+    当前窗口。否则，将使用一个临时的临时窗口（由于历史原因称为“自动命令窗口”）。
+
+    这在例如调用当前仅适用于当前缓冲区/窗口的 Vimscript 函数时很有用，比如
+    `jobstart(…, {'term': v:true})`。
+
+    属性: ~
+        Lua |vim.api| 专用
+        始于: 0.5.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {fun}     (`函数`) 要在缓冲区内部调用的函数（目前仅 Lua 可调用）
+
+    返回值: ~
+        (`任意`) 函数的返回值。
+
+nvim_buf_del_keymap({buffer}, {mode}, {lhs})           *nvim_buf_del_keymap()*
+    取消给定模式下缓冲区局部 |mapping| 的映射。
+
+    属性: ~
+        始于: 0.4.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {mode}    (`字符串`)
+      • {lhs}     (`字符串`)
+
+    另请参阅: ~
+      • |nvim_del_keymap()|
+
+nvim_buf_del_mark({buffer}, {name})                      *nvim_buf_del_mark()*
+    删除缓冲区中的命名标记。参见 |mark-motions|。
+
+    注意: ~
+      • 仅删除在缓冲区中设置的标记，如果标记未在该缓冲区中设置，则返回 false。
+
+    属性: ~
+        始于: 0.6.0
+
+    参数: ~
+      • {buffer}  (`整数`) 要设置标记的缓冲区
+      • {name}    (`字符串`) 标记名称
+
+    返回值: ~
+        (`布尔值`) 如果标记被删除则返回 true，否则返回 false。
+
+    另请参阅: ~
+      • |nvim_buf_set_mark()|
+      • |nvim_del_mark()|
+
+nvim_buf_del_var({buffer}, {name})                        *nvim_buf_del_var()*
+    删除一个缓冲区作用域 (b:) 变量
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {name}    (`字符串`) 变量名称
+
+nvim_buf_delete({buffer}, {opts})                          *nvim_buf_delete()*
+    删除一个缓冲区及其元数据（类似于 |:bwipeout|）。
+
+    要获得 |:bdelete| 的行为，请重置 'buflisted' 并传递 `unload=true`： >lua
+        vim.bo.buflisted = false
+        vim.api.nvim_buf_delete(0, { unload = true })
+<
+
+    属性: ~
+        当 |textlock| 激活或在 |cmdwin| 中时不允许
+        始于: 0.5.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {opts}    (`vim.api.keyset.buf_delete`) 可选参数。键：
+                  • force: 强制删除，忽略未保存的更改。
+                  • unload: 仅卸载（|:bunload|），不删除。
+
+nvim_buf_detach({buffer})                                  *nvim_buf_detach()*
+    停用通道上的缓冲区更新事件。
+
+    属性: ~
+        |RPC| 专用
+        始于: 0.3.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+
+    返回值: ~
+        (`布尔值`) 如果分离失败（因为缓冲区未加载）则为 False；否则为 True。
+
+    另请参阅: ~
+      • |nvim_buf_attach()|
+      • |api-lua-detach| 用于分离 Lua 回调
+
+nvim_buf_get_changedtick({buffer})                *nvim_buf_get_changedtick()*
+    获取缓冲区的更改滴答数
+
+    属性: ~
+        始于: 0.2.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+
+    返回值: ~
+        (`整数`) `b:changedtick` 值。
+
+nvim_buf_get_keymap({buffer}, {mode})                  *nvim_buf_get_keymap()*
+    获取缓冲区局部 |mapping| 定义的列表。
+
+    属性: ~
+        始于: 0.2.1
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {mode}    (`字符串`) 模式短名称 ("n", "i", "v", ...)
+
+    返回值: ~
+        (`vim.api.keyset.get_keymap[]`) 描述映射的类似于 |maparg()| 的字典数组。
+        其中 "buffer" 键保存关联的缓冲区 ID。
+
+                                                        *nvim_buf_get_lines()*
+nvim_buf_get_lines({buffer}, {start}, {end}, {strict_indexing})
+    从缓冲区获取一个行范围。
+
+    索引是从零开始的，结束位置不包含。负索引解释为 length+1+index：-1 指向末尾之后的索引。
+    因此要获取最后一个元素，请使用 start=-2 和 end=-1。
+
+    除非设置了 `strict_indexing`，否则超出范围的索引会被限制到最近的合法值。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {buffer}           (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {start}            (`整数`) 起始行索引
+      • {end}              (`整数`) 结束行索引，不包含
+      • {strict_indexing}  (`布尔值`) 超出范围是否应视为错误。
+
+    返回值: ~
+        (`字符串[]`) 行的数组，如果缓冲区未加载则返回空数组。
+
+    另请参阅: ~
+      • |nvim_buf_get_text()|
+
+nvim_buf_get_mark({buffer}, {name})                      *nvim_buf_get_mark()*
+    返回一个 `(row,col)` 元组，表示命名标记的位置。
+    “行尾”列位置作为 |v:maxcol|（大数）返回。参见 |mark-motions|。
+
+    标记是 (1,0) 索引的。|api-indexing|
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {name}    (`字符串`) 标记名称
+
+    返回值: ~
+        (`[整数, 整数]`) (row, col) 元组，如果标记未设置，或者是设置在另一个缓冲区中的
+        大写/文件标记，则返回 (0, 0)。
+
+    另请参阅: ~
+      • |nvim_buf_set_mark()|
+      • |nvim_buf_del_mark()|
+
+nvim_buf_get_name({buffer})                              *nvim_buf_get_name()*
+    获取缓冲区的完整文件名
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+
+    返回值: ~
+        (`字符串`) 缓冲区名称
+
+nvim_buf_get_offset({buffer}, {index})                 *nvim_buf_get_offset()*
+    返回一行（从零开始索引）的字节偏移量。|api-indexing|
+
+    第 1 行（索引=0）的偏移量为 0。计数 UTF-8 字节。EOL 计为一个字节。
+    忽略 'fileformat' 和 'fileencoding'。最后一行之后的下一行索引给出缓冲区的总字节数。
+    如果会被写入，则计算最后的 EOL 字节，参见 'eol'。
+
+    与 |line2byte()| 不同，对于超出范围的索引会抛出错误。对于未加载的缓冲区返回 -1。
+
+    属性: ~
+        始于: 0.3.2
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {index}   (`整数`) 行索引
+
+    返回值: ~
+        (`整数`) 整数字节偏移量，对于未加载的缓冲区返回 -1。
+
+                                                         *nvim_buf_get_text()*
+nvim_buf_get_text({buffer}, {start_row}, {start_col}, {end_row}, {end_col},
+                  {opts})
+    从缓冲区获取一个范围（可能是部分行，与 |nvim_buf_get_lines()| 不同）。
+
+    索引是从零开始的。行索引是结束包含的，列索引是结束不包含的。
+
+    在检索整行时，优先使用 |nvim_buf_get_lines()|。
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {buffer}     (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {start_row}  (`整数`) 起始行索引
+      • {start_col}  (`整数`) 在起始行上的起始列（字节偏移量）
+      • {end_row}    (`整数`) 结束行索引，包含
+      • {end_col}    (`整数`) 在结束行上的结束列（字节偏移量），不包含
+      • {opts}       (`vim.api.keyset.empty`) 可选参数。当前未使用。
+
+    返回值: ~
+        (`字符串[]`) 行的数组，如果缓冲区未加载则返回空数组。
+
+nvim_buf_get_var({buffer}, {name})                        *nvim_buf_get_var()*
+    获取一个缓冲区作用域 (b:) 变量。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {name}    (`字符串`) 变量名称
+
+    返回值: ~
+        (`任意`) 变量值
+
+nvim_buf_is_loaded({buffer})                            *nvim_buf_is_loaded()*
+    检查缓冲区是否有效且已加载。有关未加载缓冲区的更多信息，请参见 |api-buffer|。
+
+    属性: ~
+        始于: 0.3.2
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+
+    返回值: ~
+        (`布尔值`) 如果缓冲区有效且已加载则为 true，否则为 false。
+
+nvim_buf_is_valid({buffer})                              *nvim_buf_is_valid()*
+    检查缓冲区是否有效。
+
+    注意: ~
+      • 即使缓冲区有效，它也可能已被卸载。有关未加载缓冲区的更多信息，
+        请参见 |api-buffer|。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+
+    返回值: ~
+        (`布尔值`) 如果缓冲区有效则为 true，否则为 false。
+
+nvim_buf_line_count({buffer})                          *nvim_buf_line_count()*
+    返回给定缓冲区中的行数。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+
+    返回值: ~
+        (`整数`) 行数，对于未加载的缓冲区返回 0。|api-buffer|
+
+                                                       *nvim_buf_set_keymap()*
+nvim_buf_set_keymap({buffer}, {mode}, {lhs}, {rhs}, {opts})
+    为给定模式设置一个缓冲区局部 |mapping|。
+
+    属性: ~
+        始于: 0.4.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {mode}    (`字符串`)
+      • {lhs}     (`字符串`)
+      • {rhs}     (`字符串`)
+      • {opts}    (`vim.api.keyset.keymap`)
+
+    另请参阅: ~
+      • |nvim_set_keymap()|
+
+                                                        *nvim_buf_set_lines()*
+nvim_buf_set_lines({buffer}, {start}, {end}, {strict_indexing}, {replacement})
+    设置（替换）缓冲区中的一个行范围。
+
+    索引是从零开始的，结束位置不包含。负索引解释为 length+1+index：-1 指向末尾之后的索引。
+    因此要更改或删除最后一行，请使用 start=-2 和 end=-1。
+
+    要在给定索引处插入行，请将 `start` 和 `end` 设置为相同的索引。
+    要删除一个行范围，请将 `replacement` 设置为一个空数组。
+
+    除非设置了 `strict_indexing`，否则超出范围的索引会被限制到最近的合法值。
+
+    属性: ~
+        当 |textlock| 激活时不允许
+        始于: 0.1.0
+
+    参数: ~
+      • {buffer}           (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {start}            (`整数`) 起始行索引
+      • {end}              (`整数`) 结束行索引，不包含
+      • {strict_indexing}  (`布尔值`) 超出范围是否应视为错误。
+      • {replacement}      (`字符串[]`) 用作替换的行数组
+
+    另请参阅: ~
+      • |nvim_buf_set_text()|
+
+                                                         *nvim_buf_set_mark()*
+nvim_buf_set_mark({buffer}, {name}, {line}, {col}, {opts})
+    在给定的缓冲区中设置一个命名标记，允许所有标记：文件/大写、可视、最后更改等。
+    参见 |mark-motions|。
+
+    标记是 (1,0) 索引的。|api-indexing|
+
+    注意: ~
+      • 传递 0 作为行号会删除该标记
+
+    属性: ~
+        始于: 0.6.0
+
+    参数: ~
+      • {buffer}  (`整数`) 要设置标记的缓冲区
+      • {name}    (`字符串`) 标记名称
+      • {line}    (`整数`) 行号
+      • {col}     (`整数`) 列/行号
+      • {opts}    (`vim.api.keyset.empty`) 可选参数。保留供将来使用。
+
+    返回值: ~
+        (`布尔值`) 如果标记被设置则返回 true，否则返回 false。
+
+    另请参阅: ~
+      • |nvim_buf_del_mark()|
+      • |nvim_buf_get_mark()|
+
+nvim_buf_set_name({buffer}, {name})                      *nvim_buf_set_name()*
+    设置缓冲区的完整文件名，类似于 |:file_f|
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {name}    (`字符串`) 缓冲区名称
+
+                                                         *nvim_buf_set_text()*
+nvim_buf_set_text({buffer}, {start_row}, {start_col}, {end_row}, {end_col},
+                  {replacement})
+    设置（替换）缓冲区中的一个范围
+
+    当只修改行的一部分时，这比 |nvim_buf_set_lines()| 更推荐，因为标记扩展
+    （extmarks）将在受影响行的未修改部分上得以保留。
+
+    索引是从零开始的。行索引是结束包含的，列索引是结束不包含的。
+
+    要在给定的 `(row, column)` 位置插入文本，请使用
+    `start_row = end_row = row` 和 `start_col = end_col = col`。要删除一个范围
+    内的文本，请使用 `replacement = {}`。
+
+    注意: ~
+      • 优先使用 |nvim_buf_set_lines()|（出于性能考虑）来添加或删除整行。
+      • 优先使用 |nvim_paste()| 或 |nvim_put()| 在光标处插入（而不是替换）文本。
+
+    属性: ~
+        当 |textlock| 激活时不允许
+        始于: 0.5.0
+
+    参数: ~
+      • {buffer}       (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {start_row}    (`整数`) 起始行索引
+      • {start_col}    (`整数`) 在起始行上的起始列（字节偏移量）
+      • {end_row}      (`整数`) 结束行索引，包含
+      • {end_col}      (`整数`) 在结束行上的结束列（字节偏移量），不包含
+      • {replacement}  (`字符串[]`) 用作替换的行数组
+
+nvim_buf_set_var({buffer}, {name}, {value})               *nvim_buf_set_var()*
+    设置一个缓冲区作用域 (b:) 变量
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {name}    (`字符串`) 变量名称
+      • {value}   (`任意`) 变量值
+
+
+==============================================================================
+命令函数                                                        *api-command*
+
+                                              *nvim_buf_create_user_command()*
+nvim_buf_create_user_command({buffer}, {name}, {command}, {opts})
+    创建一个缓冲区局部的命令 |user-commands|。
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {buffer}   (`整数`) 缓冲区 ID，或为当前缓冲区指定 0。
+      • {name}     (`字符串`)
+      • {command}  (`任意`)
+      • {opts}     (`vim.api.keyset.user_command`)
+
+    另请参阅: ~
+      • nvim_create_user_command
+
+                                                 *nvim_buf_del_user_command()*
+nvim_buf_del_user_command({buffer}, {name})
+    删除一个缓冲区局部的用户定义命令。
+
+    只能使用此函数删除通过 |:command-buffer| 或 |nvim_buf_create_user_command()|
+    创建的命令。
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0。
+      • {name}    (`字符串`) 要删除的命令名称。
+
+nvim_buf_get_commands({buffer}, {opts})              *nvim_buf_get_commands()*
+    获取缓冲区局部 |user-commands| 的映射。
+
+    属性: ~
+        始于: 0.3.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {opts}    (`vim.api.keyset.get_commands`) 可选参数。当前未使用。
+
+    返回值: ~
+        (`vim.api.keyset.command_info`) 描述命令的映射的映射。
+
+nvim_cmd({cmd}, {opts})                                           *nvim_cmd()*
+    执行一条 Ex 命令 `cmd`，指定为具有与 |nvim_parse_cmd()| 返回相同结构的字典。
+
+    使用 `magic={…=false}` 来禁用特殊字符： >lua
+        vim.api.nvim_cmd({
+            cmd = 'edit',
+            args = { '%foo"|bar#baz"' },
+            magic = { file = false, bar = false }
+          },
+          {}
+        )
+<
+    • 参见 |nvim_parse_cmd()| 解析命令行字符串（然后可以将其传递给 `nvim_cmd`）。
+    • 参见 |nvim_command()| 执行命令行字符串。
+
+    执行出错时：因 Vimscript 错误而失败，更新 v:errmsg。
+
+    属性: ~
+        始于: 0.8.0
+
+    参数: ~
+      • {cmd}   (`vim.api.keyset.cmd`) 要执行的命令，一个字典，结构与
+                |nvim_parse_cmd()| 的返回值相同（但忽略 "addr"、"nargs" 和
+                "nextcmd"）。除 "cmd" 外的所有键都是可选的。
+      • {opts}  (`vim.api.keyset.cmd_opts`) 可选参数。
+                • output: (布尔值，默认 false) 是否返回命令输出。
+
+    返回值: ~
+        (`字符串`) 如果 `output` 为 true，则返回命令输出（非错误、非 shell |:!|），
+        否则返回空字符串。
+
+    另请参阅: ~
+      • |nvim_command()|
+      • |nvim_exec2()|
+      • |nvim_parse_cmd()|
+
+                                                  *nvim_create_user_command()*
+nvim_create_user_command({name}, {command}, {opts})
+    创建一个全局 |user-commands| 命令。
+
+    对于 Lua 用法，请参见 |lua-guide-commands-create|。
+
+    示例: >vim
+        :call nvim_create_user_command('SayHello', 'echo "Hello world!"', {'bang': v:true})
+        :SayHello
+        Hello world!
+<
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {name}     (`字符串`) 新用户命令的名称。必须以大写字母开头。
+      • {command}  (`字符串|fun(args: vim.api.keyset.create_user_command.command_args)`)
+                   执行此用户命令时要执行的替换命令。当从 Lua 调用时，命令也可以是一个
+                   Lua 函数。该函数被调用时带有一个表参数，包含以下键：
+                   • name: (字符串) 命令名称
+                   • args: (字符串) 传递给命令的参数，如果有的话 <args>
+                   • fargs: (表) 由未转义的空白符分割的参数
+                     （当允许多于一个参数时），如果有的话 <f-args>
+                   • nargs: (字符串) 参数数量 |:command-nargs|
+                   • bang: (布尔值) 如果命令是用 ! 修饰符执行的，则为 "true" <bang>
+                   • line1: (数字) 命令范围的起始行 <line1>
+                   • line2: (数字) 命令范围的结束行 <line2>
+                   • range: (数字) 命令范围中的项目数：0、1 或 2 <range>
+                   • count: (数字) 提供的任何计数 <count>
+                   • reg: (字符串) 如果指定了可选的寄存器 <reg>
+                   • mods: (字符串) 命令修饰符，如果有的话 <mods>
+                   • smods: (表) 结构化格式的命令修饰符。
+                     具有与 |nvim_parse_cmd()| 的 "mods" 键相同的结构。
+      • {opts}     (`vim.api.keyset.user_command`) 可选标志
+                   • `desc` (字符串) 命令描述。
+                   • `force` (布尔值，默认 true) 覆盖任何先前的定义。
+                   • `complete` |:command-complete| 命令或函数，类似
+                     |:command-completion-customlist|。
+                   • `preview` (函数) 用于 'inccommand' 的预览处理器 |:command-preview|
+                   • 将布尔值 |command-attributes| 如 |:command-bang|
+                     或 |:command-bar| 设置为 true（但不包括 |:command-buffer|，
+                     请改用 |nvim_buf_create_user_command()|）。
+
+nvim_del_user_command({name})                        *nvim_del_user_command()*
+    删除一个用户定义命令。
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {name}  (`字符串`) 要删除的命令名称。
+
+nvim_get_commands({opts})                                *nvim_get_commands()*
+    获取全局（非缓冲区局部）Ex 命令的映射。
+
+    目前仅支持 |user-commands|，不支持内置 Ex 命令。
+
+    属性: ~
+        始于: 0.3.0
+
+    参数: ~
+      • {opts}  (`vim.api.keyset.get_commands`) 可选参数。当前仅支持 {"builtin":false}
+
+    返回值: ~
+        (`表<string,vim.api.keyset.command_info>`) 描述命令的映射的映射。
+
+    另请参阅: ~
+      • |nvim_get_all_options_info()|
+
+nvim_parse_cmd({str}, {opts})                               *nvim_parse_cmd()*
+    解析命令行。
+
+    不检查命令参数的有效性。
+
+    属性: ~
+        |api-fast|
+        始于: 0.8.0
+
+    参数: ~
+      • {str}   (`字符串`) 要解析的命令行字符串。不能包含 "\n"。
+      • {opts}  (`vim.api.keyset.empty`) 可选参数。保留供将来使用。
+
+    返回值: ~
+        (`vim.api.keyset.cmd`) 包含命令信息的字典，包含以下键：
+        • cmd: (字符串) 命令名称。
+        • range: (数组)（可选）命令范围 (<line1> <line2>)。如果命令不接受范围，则省略。
+          否则，如果未指定范围，则没有元素；如果只指定了单个范围项，则有一个元素；
+          如果指定了两个范围项，则有两个元素。
+        • count: (数字)（可选）命令 <count>。如果命令不能接受计数，则省略。
+        • reg: (字符串)（可选）命令 <register>。如果命令不能接受寄存器，则省略。
+        • bang: (布尔值) 命令是否包含 <bang> (!) 修饰符。
+        • args: (数组) 命令参数。
+        • addr: (字符串) |:command-addr| 的值。对于 -addr=lines 使用短名称或 "line"。
+        • nargs: (字符串) |:command-nargs| 的值。
+        • nextcmd: (字符串) 如果有多个命令由 |:bar| 分隔，则为下一个命令。
+          如果没有下一个命令，则为空。
+        • magic: (字典) 哪些字符在命令参数中具有特殊含义。
+          • file: (布尔值) 该命令会展开文件名。这意味着像 "%"、"#" 和通配符等字符会被展开。
+          • bar: (布尔值) "|" 字符被视为命令分隔符，双引号字符 (") 被视为注释的开始。
+        • mods: (字典) |:command-modifiers|。
+          • filter: (字典) |:filter|。
+            • pattern: (字符串) 过滤模式。如果没有过滤器，则为空字符串。
+            • force: (布尔值) 过滤器是否被反转。
+          • silent: (布尔值) |:silent|。
+          • emsg_silent: (布尔值) |:silent!|。
+          • unsilent: (布尔值) |:unsilent|。
+          • sandbox: (布尔值) |:sandbox|。
+          • noautocmd: (布尔值) |:noautocmd|。
+          • browse: (布尔值) |:browse|。
+          • confirm: (布尔值) |:confirm|。
+          • hide: (布尔值) |:hide|。
+          • horizontal: (布尔值) |:horizontal|。
+          • keepalt: (布尔值) |:keepalt|。
+          • keepjumps: (布尔值) |:keepjumps|。
+          • keepmarks: (布尔值) |:keepmarks|。
+          • keeppatterns: (布尔值) |:keeppatterns|。
+          • lockmarks: (布尔值) |:lockmarks|。
+          • noswapfile: (布尔值) |:noswapfile|。
+          • tab: (整数) |:tab|。省略时为 -1。
+          • verbose: (整数) |:verbose|。省略时为 -1。
+          • vertical: (布尔值) |:vertical|。
+          • split: (字符串) 分割修饰符字符串，如果没有分割修饰符则为空字符串。
+            如果有分割修饰符，它可以是以下之一：
+            • "aboveleft": |:aboveleft|。
+            • "belowright": |:belowright|。
+            • "topleft": |:topleft|。
+            • "botright": |:botright|。
+
+
+==============================================================================
+扩展标记函数                                                    *api-extmark*
+
+                                                  *nvim_buf_clear_namespace()*
+nvim_buf_clear_namespace({buffer}, {ns_id}, {line_start}, {line_end})
+    清除一个区域内的 |namespace| 对象（高亮、|extmarks|、虚拟文本）。
+
+    行是从零开始索引的。|api-indexing| 要清除整个缓冲区中的命名空间，
+    请指定 line_start=0 和 line_end=-1。
+
+    属性: ~
+        始于: 0.3.2
+
+    参数: ~
+      • {buffer}      (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {ns_id}       (`整数`) 要清除的命名空间，或 -1 清除所有命名空间。
+      • {line_start}  (`整数`) 要清除的行范围的起始行
+      • {line_end}    (`整数`) 要清除的行范围的结束行（不包含），或 -1 清除到缓冲区末尾。
+
+nvim_buf_del_extmark({buffer}, {ns_id}, {id})         *nvim_buf_del_extmark()*
+    移除一个 |extmark|。
+
+    属性: ~
+        始于: 0.5.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {ns_id}   (`整数`) 来自 |nvim_create_namespace()| 的命名空间 ID
+      • {id}      (`整数`) 扩展标记 ID
+
+    返回值: ~
+        (`布尔值`) 如果找到并删除了扩展标记则为 true，否则为 false
+
+                                                *nvim_buf_get_extmark_by_id()*
+nvim_buf_get_extmark_by_id({buffer}, {ns_id}, {id}, {opts})
+    获取一个 |extmark| 的位置（从零开始索引）。
+
+    属性: ~
+        始于: 0.5.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {ns_id}   (`整数`) 来自 |nvim_create_namespace()| 的命名空间 ID
+      • {id}      (`整数`) 扩展标记 ID
+      • {opts}    (`vim.api.keyset.get_extmark`) 可选参数。键：
+                  • details: 是否包含详细信息字典
+                  • hl_name: 是否包含高亮组名称而不是 ID，如果省略则为 true
+
+    返回值: ~
+        (`[整数, 整数, vim.api.keyset.extmark_details?]`) 从零开始索引的
+        (row, col, details?) 元组，如果扩展标记 ID 不存在，则返回空列表 ()。
+        可选的 `details` 字典包含与 |nvim_buf_set_extmark()| 中 `opts` 相同的键，
+        但 `id`、`conceal_lines` 和 `ephemeral` 除外。它还包含以下键：
+        • ns_id: |namespace| ID
+        • invalid: 布尔值，指示标记是否因为其文本跨度范围的 entirety 被删除而隐藏。
+          另请参见 |nvim_buf_set_extmark()| 中的键 `invalidate`。
+
+                                                     *nvim_buf_get_extmarks()*
+nvim_buf_get_extmarks({buffer}, {ns_id}, {start}, {end}, {opts})
+    以“遍历顺序”从由缓冲区位置定义的 |charwise| 区域（包含，从零开始索引 |api-indexing|）
+    获取 |extmarks|。
+
+    区域可以指定为 (row,col) 元组，或有效的扩展标记 ID（其位置定义边界）。
+    0 和 -1 分别被理解为 (0,0) 和 (-1,-1)，因此以下写法是等价的： >lua
+        vim.api.nvim_buf_get_extmarks(0, my_ns, 0, -1, {})
+        vim.api.nvim_buf_get_extmarks(0, my_ns, {0,0}, {-1,-1}, {})
+<
+
+    如果 `end` 小于 `start`，则标记以相反顺序返回。
+    （与 `limit` 一起使用，以获取给定位置之前的第一个标记。）
+
+    注意：对于反向范围，`limit` 实际上不影响遍历的范围，只影响返回的标记数量。
+
+    注意：当使用扩展标记范围（具有 end_row/end_col 位置的标记）时，`overlap` 选项可能很有用。
+    否则，将仅考虑扩展标记的起始位置。
+
+    注意：通过 |:sign| 命令放置的传统符号是作为扩展标记实现的，并会在此处显示。
+    它们的 details 数组将包含一个 `sign_name` 字段。
+
+    示例: >lua
+        local api = vim.api
+        local pos = api.nvim_win_get_cursor(0)
+        local ns  = api.nvim_create_namespace('my-plugin')
+        -- 在第 1 行，第 1 列创建新的扩展标记。
+        local m1  = api.nvim_buf_set_extmark(0, ns, 0, 0, {})
+        -- 在第 3 行，第 1 列创建新的扩展标记。
+        local m2  = api.nvim_buf_set_extmark(0, ns, 2, 0, {})
+        -- 仅从第 3 行获取扩展标记。
+        local ms  = api.nvim_buf_get_extmarks(0, ns, {2,0}, {2,0}, {})
+        -- 获取此缓冲区 + 命名空间中的所有标记。
+        local all = api.nvim_buf_get_extmarks(0, ns, 0, -1, {})
+        vim.print(ms)
+<
+
+    属性: ~
+        始于: 0.5.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {ns_id}   (`整数`) 来自 |nvim_create_namespace()| 的命名空间 ID，或 -1 用于所有命名空间
+      • {start}   (`任意`) 范围的起始：一个从零开始索引的 (row, col) 或有效的
+                  扩展标记 ID（其位置定义边界）。|api-indexing|
+      • {end}     (`任意`) 范围的结束（包含）：一个从零开始索引的 (row, col) 或
+                  有效的扩展标记 ID（其位置定义边界）。|api-indexing|
+      • {opts}    (`vim.api.keyset.get_extmarks`) 可选参数。键：
+                  • limit: 要返回的最大标记数
+                  • details: 是否包含详细信息字典
+                  • hl_name: 是否包含高亮组名称而不是 ID，如果省略则为 true
+                  • overlap: 同时包括与范围重叠的标记，即使它们的起始位置小于 `start`
+                  • type: 按类型筛选标记："highlight"、"sign"、"virt_text" 和 "virt_lines"
+
+    返回值: ~
+        (`vim.api.keyset.get_extmark_item[]`) 以“遍历顺序”排列的
+        `[extmark_id, row, col, details?]` 元组列表。
+        关于 `details` 字典，请参见 |nvim_buf_get_extmark_by_id()|。
+
+                                                      *nvim_buf_set_extmark()*
+nvim_buf_set_extmark({buffer}, {ns_id}, {line}, {col}, {opts})
+    创建或更新一个 |extmark|。
+
+    默认情况下，当未传入 ID 时会创建一个新的扩展标记，但也可以传入一个先前未使用的 ID 来创建
+    新标记，或传入其 ID 来移动现有标记。调用者必须自行跟踪现有和未使用的 ID。
+    （在 RPC 上很有用，可以避免等待返回值。）
+
+    使用可选参数，可以借此高亮一个文本范围，也可以将虚拟文本关联到该标记。
+
+    如果存在，由 `end_col` 和 `end_row` 定义的位置应在起始位置之后，以便扩展标记覆盖一个范围。
+    更早的结束位置不是错误，但会导致其行为类似于空范围（无高亮）。
+
+    属性: ~
+        始于: 0.5.0
+
+    参数: ~
+      • {buffer}  (`整数`) 缓冲区 ID，或为当前缓冲区指定 0
+      • {ns_id}   (`整数`) 来自 |nvim_create_namespace()| 的命名空间 ID
+      • {line}    (`整数`) 放置标记的行，从零开始。|api-indexing|
+      • {col}     (`整数`) 放置标记的列，从零开始。|api-indexing|
+      • {opts}    (`vim.api.keyset.set_extmark`) 可选参数。
+                  • id : 要编辑的扩展标记的 ID。
+                  • end_row : 标记的结束行，从零开始包含。
+                  • end_col : 标记的结束列，从零开始不包含，或 -1 将范围扩展到行尾。
+                  • hl_group : 用于文本范围的高亮组。此高亮组及以下高亮组可以作为
+                    字符串或整数提供，整数可以使用 |nvim_get_hl_id_by_name()| 获得。
+                    可以通过传递一个数组来堆叠多个高亮组（优先级最高的最后）。
+                  • hl_eol : 当为 true 时，对于覆盖行尾 EOL 的多行高亮，将高亮延续到
+                    屏幕行的其余部分（就像 diff 和 cursorline 高亮一样）。
+                  • virt_text : 链接到此标记的 *virtual-text*。一个 `[text, highlight]`
+                    元组列表，每个元组代表一个具有指定高亮的文本块。`highlight` 元素可以
+                    是单个高亮组，也可以是多个高亮组的数组，这些组将被堆叠（优先级最高的最后）。
+                  • virt_text_pos : 虚拟文本的位置。可能的值：
+                    • "eol": 紧跟在 eol 字符之后（默认）。
+                    • "eol_right_align": 在窗口中右对齐显示，除非虚拟文本长于可用空间。
+                      如果虚拟文本太长，它将被截断以适应 EOL 字符后的窗口。如果行被换行，
+                      虚拟文本显示在行尾之后，而不是前一个屏幕行之后。
+                    • "overlay": 在指定列上方显示，不移动底层文本。
+                    • "right_align": 在窗口中右对齐显示。
+                    • "inline": 在指定列显示，并根据需要将缓冲区文本向右移动。
+                  • virt_text_win_col : 将虚拟文本放置在固定的窗口列（从屏幕行的第一文本列开始）
+                    而不是使用 "virt_text_pos"。
+                  • virt_text_hide : 当背景文本被选中或因使用 'nowrap' 或 'smoothscroll'
+                    滚动而隐藏时，隐藏虚拟文本。目前仅影响 "overlay" virt_text。
+                  • virt_text_repeat_linebreak : 在换行的行上重复虚拟文本。
+                  • hl_mode : 控制高亮如何与文本的高亮结合。目前仅影响 virt_text 高亮，
+                    但在后续版本中可能影响 `hl_group`。
+                    • "replace": 仅显示 virt_text 颜色。这是默认值。
+                    • "combine": 与背景文本颜色结合。
+                    • "blend": 与背景文本颜色混合。不支持 "inline" virt_text。
+                  • virt_lines : 在此标记旁边添加的虚拟行。这应该是一个行数组，其中每一行
+                    又是由 `[text, highlight]` 元组组成的数组。通常，缓冲区和窗口选项
+                    不影响文本的显示。特别是 'wrap' 和 'linebreak' 选项不起作用，
+                    因此额外屏幕行的数量将始终与数组的大小匹配。但是，'tabstop' 缓冲区
+                    选项仍然用于硬制表符。默认情况下，行放置在包含该标记的缓冲区行下方。
+                  • virt_lines_above: 将虚拟行放置在上方。
+                  • virt_lines_leftcol: 将虚拟行放置在窗口的最左列，绕过符号列和数字列。
+                  • virt_lines_overflow: 控制如何处理比窗口宽的虚拟行。当前接受以下值之一：
+                    • "trunc": 在右侧截断虚拟行（默认）。
+                    • "scroll": 虚拟行可以使用 'nowrap' 水平滚动，否则与 "trunc" 相同。
+                  • ephemeral : 用于 |nvim_set_decoration_provider()| 回调。
+                    该标记仅用于当前重绘周期，不会永久存储在缓冲区中。
+                  • right_gravity : 布尔值，指示在插入新文本时扩展标记将移动的方向
+                    （true 向右，false 向左）。默认为 true。
+                  • end_right_gravity : 布尔值，指示在插入新文本时扩展标记结束位置
+                    （如果存在）将移动的方向（true 向右，false 向左）。默认为 false。
+                  • undo_restore : 如果标记周围的文本被删除然后通过撤销恢复，则恢复标记的
+                    确切位置。默认为 true。
+                  • invalidate : 布尔值，指示如果标记的整个范围被删除，是否隐藏该扩展标记。
+                    对于隐藏的标记，一个 "invalid" 键会被添加到 |nvim_buf_get_extmarks()|
+                    及相关函数的 "details" 数组中。如果 "undo_restore" 为 false，
+                    则扩展标记将被删除而不是隐藏。
+                  • priority: 高亮组、符号属性或虚拟文本的优先级值。对于虚拟文本，
+                    优先级最高的项最后绘制。例如，tree-sitter 高亮使用值 100。
+                  • strict: 布尔值，指示如果行或列值分别超出缓冲区末尾或行尾，是否不应放置
+                    扩展标记。默认为 true。
+                  • sign_text: 长度为 1-2 的字符串，用于在符号列中显示。
+                  • sign_hl_group: 用于符号列文本的高亮组。
+                  • number_hl_group: 用于数字列的高亮组。
+                  • line_hl_group: 用于整行的高亮组。
+                  • cursorline_hl_group: 当光标位于标记所在行且 'cursorline' 启用时，
+                    用于符号列文本的高亮组。
+                  • conceal: 字符串，应为空或单个字符。启用类似 |:syn-conceal| 的隐藏。
+                    如果提供了一个字符，它被用作 |:syn-cchar|。
+                    如果提供了 "hl_group"，则用作 cchar 的高亮，否则默认为 |hl-Conceal|。
+                  • conceal_lines: 应为空的字符串。当提供时，范围内的行根本不绘制
+                    （根据 'conceallevel'）；而是绘制下一个未隐藏的行。
+                  • spell: 布尔值，指示是否应在此扩展标记内执行拼写检查。
+                  • ui_watched: 布尔值，指示标记应由 UI 绘制。设置后，UI 将接收
+                    win_extmark 事件。注意：标记由 virt_text 属性定位。可以与 virt_text
+                    一起使用。
+                  • url: 与此扩展标记关联的 URL。在 TUI 中，OSC 8 控制序列用于生成指向
+                    此 URL 的可点击超链接。
+
+    返回值: ~
+        (`整数`) 创建/更新的扩展标记的 ID
+
+nvim_create_namespace({name})                        *nvim_create_namespace()*
+    创建一个新的命名空间或获取一个现有的。                               *namespace*
+
+    命名空间用于缓冲区高亮和虚拟文本，参见 |nvim_buf_set_extmark()|。
+
+    命名空间可以是命名的或匿名的。如果 `name` 匹配一个现有的命名空间，则返回关联的 ID。
+    如果 `name` 是空字符串，则创建一个新的匿名命名空间。
+
+    属性: ~
+        始于: 0.3.2
+
+    参数: ~
+      • {name}  (`字符串`) 命名空间名称或空字符串
+
+    返回值: ~
+        (`整数`) 命名空间 ID
+
+nvim_get_namespaces()                                  *nvim_get_namespaces()*
+    获取现有的、非匿名的 |namespace|。
+
+    属性: ~
+        始于: 0.3.2
+
+    返回值: ~
+        (`表<string,整数>`) 将名称映射到命名空间 ID 的字典。
+
+                                              *nvim_set_decoration_provider()*
+nvim_set_decoration_provider({ns_id}, {opts})
+    为 |namespace| 设置或更改装饰提供者
+
+    这是一个非常通用的接口，用于在重绘代码期间触发 Lua 回调。
+
+    预期的用法是为当前重绘的缓冲区设置 |extmarks|。可以调用 |nvim_buf_set_extmark()|
+    以按窗口或按行的方式添加标记。使用 `ephemeral` 键使标记仅用于当前屏幕重绘
+    （回调将在下一次重绘时再次被调用）。
+
+    注意：此函数不应被频繁调用。相反，回调本身可用于限制不必要的回调。`on_start`
+    回调可以返回 `false` 以禁用提供者，直到下一次重绘。类似地，在 `on_win` 中返回
+    `false` 将跳过该窗口的 `on_line` 和 `on_range` 调用（但在 `on_win` 中设置的任何
+    扩展标记仍将被使用）。一个管理多个装饰来源的插件理想情况下应该只设置一个提供者，
+    并在内部合并这些来源。无论如何，您可以在回调内部为设置的/修改的扩展标记使用多个
+    `ns_id`。
+
+    注意：除了设置扩展标记之外的任何操作都被认为是实验性的。像更改选项这样的事情
+    并未明确禁止，但很可能会导致意外的后果（例如 100% 的 CPU 消耗）。执行 `vim.rpcnotify`
+    应该没问题，但目前 `vim.rpcrequest` 相当可疑。
+
+    注意：不允许在 `on_line` 或 `on_range` 回调中移除或更新扩展标记。
+
+    属性: ~
+        Lua |vim.api| 专用
+        始于: 0.5.0
+
+    参数: ~
+      • {ns_id}  (`整数`) 来自 |nvim_create_namespace()| 的命名空间 ID
+      • {opts}   (`vim.api.keyset.set_decoration_provider`) 回调表：
+                 • on_start: 每次屏幕重绘时首先调用 >
+                    ["start", tick]
+<
+                 • on_buf: 为每个正在重绘的缓冲区调用（每个编辑一次，在窗口回调之前） >
+                    ["buf", bufnr, tick]
+<
+                 • on_win: 当开始重绘特定窗口时调用。 >
+                    ["win", winid, bufnr, toprow, botrow]
+<
+                 • on_line: （已弃用，请改用 on_range） >
+                    ["line", winid, bufnr, row]
+<
+                 • on_range: 为每个正在重绘的缓冲区范围调用。范围是结束不包含的，
+                   可能跨越多个行。范围边界指向一个字符的第一个字节。形式为 (lnum, 0)
+                   的结束位置，包括（行数，0），是有效的，表示包含前一行的 EOL。 >
+                    ["range", winid, bufnr, begin_row, begin_col, end_row, end_col]
+<
+                   除了返回一个布尔值，还允许返回一个 `skip_row, skip_col` 整数对。
+                   这意味着在直到超过跳过位置的连续范围之前，不需要调用此函数。
+                   单个整数的返回值 `skip_row` 是 `skip_row, 0` 的简写。
+                 • on_end: 在重绘周期结束时调用 >
+                    ["end", tick]
+<
+
+nvim__ns_get({ns_id})                                         *nvim__ns_get()*
+    实验性：此 API 未来将会更改。
+
+    获取命名空间的属性
+
+    参数: ~
+      • {ns_id}  (`整数`) 命名空间
+
+    返回值: ~
+        (`vim.api.keyset.ns_opts`) 定义命名空间属性的映射，参见 |nvim__ns_set()|
+
+nvim__ns_set({ns_id}, {opts})                                 *nvim__ns_set()*
+    实验性：此 API 未来将会更改。
+
+    为命名空间设置一些属性
+
+    参数: ~
+      • {ns_id}  (`整数`) 命名空间
+      • {opts}   (`vim.api.keyset.ns_opts`) 要设置的可选参数：
+                 • wins: 要限定作用域的窗口列表
+
+
+==============================================================================
+选项函数                                                        *api-options*
+
+nvim_get_all_options_info()                      *nvim_get_all_options_info()*
+    获取所有选项的选项信息。
+
+    字典以完整选项名作为键，选项元数据字典作为值，详细内容参见 |nvim_get_option_info2()|。
+
+    属性: ~
+        始于: 0.5.0
+
+    返回值: ~
+        (`表<string,任意>`) 所有选项的字典
+
+    另请参阅: ~
+      • |nvim_get_commands()|
+
+nvim_get_option_info2({name}, {opts})                *nvim_get_option_info2()*
+    从任意缓冲区或窗口获取一个选项的选项信息
+
+    结果字典包含以下键：
+    • name: 选项名称（如 'filetype'）
+    • shortname: 选项的短名称（如 'ft'）
+    • type: 选项类型（"string"、"number" 或 "boolean"）
+    • default: 选项的默认值
+    • was_set: 选项是否被设置过。
+    • last_set_sid: 最后设置的脚本 ID（如果有）
+    • last_set_linenr: 设置选项的行号
+    • last_set_chan: 设置选项的通道（0 表示本地）
+    • scope: 为 "global"、"win" 或 "buf" 之一
+    • global_local: 窗口或缓冲区选项是否具有全局值
+    • commalist: 逗号分隔值的列表
+    • flaglist: 单字符标志的列表
+
+    当未提供 {scope} 时，最后设置的信息适用于当前缓冲区或窗口中的本地值（如果可用），
+    否则返回全局值信息。可以通过在 {opts} 表中显式指定 {scope} 来禁用此行为。
+
+    属性: ~
+        始于: 0.9.0
+
+    参数: ~
+      • {name}  (`字符串`) 选项名称
+      • {opts}  (`vim.api.keyset.option`) 可选参数
+                • scope: "global" 或 "local" 之一。分别类似于 |:setglobal| 和 |:setlocal|。
+                • win: |window-ID|。用于获取窗口局部选项。
+                • buf: 缓冲区编号。用于获取缓冲区局部选项。隐含 {scope} 为 "local"。
+
+    返回值: ~
+        (`vim.api.keyset.get_option_info`) 选项信息
+
+nvim_get_option_value({name}, {opts})                *nvim_get_option_value()*
+    获取选项的值。此函数的行为与 |:set| 一致：如果选项的局部值存在，则返回该值；
+    否则返回全局值。局部值始终对应于当前缓冲区或窗口，除非在 {opts} 中设置了 "buf" 或 "win"。
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {name}  (`字符串`) 选项名称
+      • {opts}  (`vim.api.keyset.option`) 可选参数
+                • scope: "global" 或 "local" 之一。分别类似于 |:setglobal| 和 |:setlocal|。
+                • win: |window-ID|。用于获取窗口局部选项。
+                • buf: 缓冲区编号。用于获取缓冲区局部选项。隐含 {scope} 为 "local"。
+                • filetype: |filetype|。用于获取特定文件类型的默认选项。
+                  不能与任何其他选项一起使用。注意：这将触发相应文件类型的 |ftplugin|
+                  和所有 |FileType| 自动命令。
+
+    返回值: ~
+        (`任意`) 选项值
+
+                                                     *nvim_set_option_value()*
+nvim_set_option_value({name}, {value}, {opts})
+    设置选项的值。此函数的行为与 |:set| 一致：对于全局-局部选项，除非使用 {scope}
+    另有指定，否则全局值和局部值都会被设置。
+
+    注意选项 {win} 和 {buf} 不能同时使用。
+
+    属性: ~
+        始于: 0.7.0
+
+    参数: ~
+      • {name}   (`字符串`) 选项名称
+      • {value}  (`任意`) 新的选项值
+      • {opts}   (`vim.api.keyset.option`) 可选参数
+                 • scope: "global" 或 "local" 之一。分别类似于 |:setglobal|
+                   和 |:setlocal|。
+                 • win: |window-ID|。用于设置窗口局部选项。
+                 • buf: 缓冲区编号。用于设置缓冲区局部选项。
+
+
+==============================================================================
+标签页函数                                                      *api-tabpage*
+
+nvim_open_tabpage({buffer}, {enter}, {config})           *nvim_open_tabpage()*
+    打开一个新的标签页。
+
+    属性: ~
+        当 |textlock| 激活时不允许
+        始于: 0.12.0
+
+    参数: ~
+      • {buffer}  (`整数`) 要在新标签页的第一个窗口中打开的缓冲区。使用 0 表示当前缓冲区。
+      • {enter}   (`布尔值`) 进入该标签页（使其成为当前标签页）。
+      • {config}  (`vim.api.keyset.tabpage_config`) 新标签页的配置。键：
+                  • after: 插入标签页的位置（默认：-1；在当前之后）。0 = 第一个，N = 在第 N 个之后。
+
+    返回值: ~
+        (`整数`) 新标签页的 |tab-ID|
+
+nvim_tabpage_del_var({tabpage}, {name})               *nvim_tabpage_del_var()*
+    删除一个标签作用域 (t:) 变量
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {tabpage}  (`整数`) |tab-ID|，或为当前标签页指定 0
+      • {name}     (`字符串`) 变量名称
+
+nvim_tabpage_get_number({tabpage})                 *nvim_tabpage_get_number()*
+    获取标签页编号
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {tabpage}  (`整数`) |tab-ID|，或为当前标签页指定 0
+
+    返回值: ~
+        (`整数`) 标签页编号
+
+nvim_tabpage_get_var({tabpage}, {name})               *nvim_tabpage_get_var()*
+    获取一个标签作用域 (t:) 变量
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {tabpage}  (`整数`) |tab-ID|，或为当前标签页指定 0
+      • {name}     (`字符串`) 变量名称
+
+    返回值: ~
+        (`任意`) 变量值
+
+nvim_tabpage_get_win({tabpage})                       *nvim_tabpage_get_win()*
+    获取标签页中的当前窗口
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {tabpage}  (`整数`) |tab-ID|，或为当前标签页指定 0
+
+    返回值: ~
+        (`整数`) |window-ID|
+
+nvim_tabpage_is_valid({tabpage})                     *nvim_tabpage_is_valid()*
+    检查标签页是否有效
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {tabpage}  (`整数`) |tab-ID|，或为当前标签页指定 0
+
+    返回值: ~
+        (`布尔值`) 如果标签页有效则为 true，否则为 false
+
+nvim_tabpage_list_wins({tabpage})                   *nvim_tabpage_list_wins()*
+    获取标签页中的窗口
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {tabpage}  (`整数`) |tab-ID|，或为当前标签页指定 0
+
+    返回值: ~
+        (`整数[]`) `tabpage` 中的窗口列表
+
+                                                      *nvim_tabpage_set_var()*
+nvim_tabpage_set_var({tabpage}, {name}, {value})
+    设置一个标签作用域 (t:) 变量
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {tabpage}  (`整数`) |tab-ID|，或为当前标签页指定 0
+      • {name}     (`字符串`) 变量名称
+      • {value}    (`任意`) 变量值
+
+nvim_tabpage_set_win({tabpage}, {win})                *nvim_tabpage_set_win()*
+    设置标签页中的当前窗口
+
+    属性: ~
+        始于: 0.10.0
+
+    参数: ~
+      • {tabpage}  (`整数`) |tab-ID|，或为当前标签页指定 0
+      • {win}      (`整数`) |window-ID|，必须已属于 {tabpage}
+
+
+==============================================================================
+UI 函数                                                            *api-ui*
+
+nvim_ui_attach({width}, {height}, {options})                *nvim_ui_attach()*
+    在通道上激活 UI 事件。
+
+    所有 UI 客户端的入口点。允许 |--embed| 继续启动。暗示客户端已准备好显示 UI。
+    将客户端添加到 UI 列表中。|nvim_list_uis()|
+
+    注意: ~
+      • 如果附加了多个 UI 客户端，全局屏幕尺寸会降级到最小的客户端。例如，
+        如果客户端 A 请求 80x40，但客户端 B 请求 200x100，则全局屏幕大小为 80x40。
+
+    属性: ~
+        |RPC| 专用
+        始于: 0.1.0
+
+    参数: ~
+      • {width}    (`整数`) 请求的屏幕列数
+      • {height}   (`整数`) 请求的屏幕行数
+      • {options}  (`表<string,任意>`) |ui-option| 映射
+
+nvim_ui_detach()                                            *nvim_ui_detach()*
+    停用通道上的 UI 事件。
+
+    将客户端从 UI 列表中移除。|nvim_list_uis()|
+
+    属性: ~
+        |RPC| 专用
+        始于: 0.1.0
+
+                                                    *nvim_ui_pum_set_bounds()*
+nvim_ui_pum_set_bounds({width}, {height}, {row}, {col})
+    告诉 Nvim 弹出菜单的几何尺寸，以便将浮动窗口与外部弹出菜单对齐。
+
+    注意不要将此方法与 |nvim_ui_pum_set_height()| 混淆，后者设置弹出菜单中可见项的数量，
+    而此函数设置弹出菜单的边界框，包括边框和滑块等视觉元素。浮动窗口不必使用相同的字体大小，
+    也不必锚定在精确的网格角上，因此可以为弹出菜单几何尺寸设置浮点数。
+
+    属性: ~
+        |RPC| 专用
+        始于: 0.5.0
+
+    参数: ~
+      • {width}   (`数字`) 弹出菜单宽度。
+      • {height}  (`数字`) 弹出菜单高度。
+      • {row}     (`数字`) 弹出菜单行。
+      • {col}     (`数字`) 弹出菜单高度。
+
+nvim_ui_pum_set_height({height})                    *nvim_ui_pum_set_height()*
+    告诉 Nvim 弹出菜单中显示的元素数量，以决定 <PageUp> 和 <PageDown> 的移动。
+
+    属性: ~
+        |RPC| 专用
+        始于: 0.4.0
+
+    参数: ~
+      • {height}  (`整数`) 弹出菜单高度，必须大于零。
+
+nvim_ui_send({content})                                       *nvim_ui_send()*
+    向 UI 发送任意数据。如果您确实想写入 |TUI| 主机终端，请使用此函数代替
+    |nvim_chan_send()| 或 `io.stdout:write()`。
+
+    向所有设置了 "stdout_tty" |ui-option| 的 UI 发送 "ui_send" 事件。
+    UI 被期望将接收到的数据写入连接的 TTY（如果存在）。
+
+    属性: ~
+        始于: 0.12.0
+
+    参数: ~
+      • {content}  (`字符串`) 要写入 TTY 的内容
+
+nvim_ui_set_focus({gained})                              *nvim_ui_set_focus()*
+    告诉 nvim 服务器 GUI 是获得了焦点还是失去了焦点
+
+    属性: ~
+        |RPC| 专用
+        始于: 0.9.0
+
+    参数: ~
+      • {gained}  (`布尔值`)
+
+nvim_ui_set_option({name}, {value})                     *nvim_ui_set_option()*
+
+    属性: ~
+        |RPC| 专用
+        始于: 0.1.0
+
+    参数: ~
+      • {name}   (`字符串`)
+      • {value}  (`任意`)
+
+nvim_ui_try_resize({width}, {height})                   *nvim_ui_try_resize()*
+
+    属性: ~
+        |RPC| 专用
+        始于: 0.1.0
+
+    参数: ~
+      • {width}   (`整数`)
+      • {height}  (`整数`)
+
+                                                   *nvim_ui_try_resize_grid()*
+nvim_ui_try_resize_grid({grid}, {width}, {height})
+    告诉 Nvim 调整网格大小。触发一个 grid_resize 事件，其中包含请求的网格大小，
+    或者如果超出大小限制，则为最大大小。
+
+    如果网格句柄无效，则失败并报错。
+
+    属性: ~
+        |RPC| 专用
+        始于: 0.4.0
+
+    参数: ~
+      • {grid}    (`整数`) 要更改的网格句柄。
+      • {width}   (`整数`) 新的请求宽度。
+      • {height}  (`整数`) 新的请求高度。
+
+
+==============================================================================
+窗口配置函数                                                  *api-win_config*
+
+nvim_open_win({buffer}, {enter}, {config})                   *nvim_open_win()*
+    打开一个新的分割窗口、浮动窗口或外部窗口。
+    • 指定 `relative` 以创建一个浮动窗口。浮动窗口绘制在分割布局之上，相对于某个
+      其他窗口中的位置。参见 |api-floatwin|。
+      • 浮动窗口必须指定 `width` 和 `height`。
+    • 指定 `external` 以创建一个外部窗口。外部窗口显示为由 |ui-multigrid| UI
+      （而非 Nvim）管理的独立顶级窗口。
+    • 如果省略 `relative` 和 `external`，则创建一个普通的“分割”窗口。
+      • `win` 键决定要分割哪个窗口。如果为 nil 或 0，则分割将相邻于当前窗口。
+        如果为 -1，则将创建一个顶级分割。
+      • 使用 `vertical` 和 `split` 来控制分割方向。对于 `vertical`，确切方向由
+        'splitright' 和 'splitbelow' 决定。
+      • 分割窗口不能有 `bufpos`、`row`、`col`、`border`、`title`、`footer`。
+
+    当 relative=editor 时，(row=0,col=0) 指屏幕网格的左上角，(row=Lines-1,col=Columns-1)
+    指右下角。允许使用小数值，但内置实现（由非多网格 UI 使用）总是向下取整到最接近的整数。
+
+    允许使用超出范围的值以及使浮动窗口无法完全容纳在主编辑器内的配置。内置实现会截断值，
+    使浮动窗口完全位于主屏幕网格内。外部 GUI 可以让浮动窗口像工具提示一样悬停在主窗口外部，
+    但这不应用于指定任意的 WM 屏幕位置。
+
+    示例: >lua
+        -- 窗口相对浮动，启用 'statusline'：
+        local w1 = vim.api.nvim_open_win(0, false,
+          {relative='win', row=3, col=3, width=40, height=4})
+        vim.wo[w1].statusline = vim.o.statusline
+
+        -- 缓冲区相对浮动（随缓冲区滚动而移动）：
+        vim.api.nvim_open_win(0, false,
+          {relative='win', width=40, height=4, bufpos={100,10}})
+
+        -- 在当前窗口左侧垂直分割：
+        vim.api.nvim_open_win(0, false, { split = 'left', win = 0, })
+<
+
+    属性: ~
+        当 |textlock| 激活时不允许
+        始于: 0.4.0
+
+    参数: ~
+      • {buffer}  (`整数`) 要显示的缓冲区，或 0 表示当前缓冲区
+      • {enter}   (`布尔值`) 进入该窗口（使其成为当前窗口）
+      • {config}  (`vim.api.keyset.win_config`) 定义窗口配置的映射。键：
+                  • anchor: 决定将浮动的哪个角放置在 (row,col)：
+                    • "NW" 西北（默认）
+                    • "NE" 东北
+                    • "SW" 西南
+                    • "SE" 东南
+                  • border: (`字符串|字符串[]`)（默认为 'winborder' 选项）窗口边框。
+                    字符串形式接受与 'winborder' 选项相同的值。数组形式的长度必须为八
+                    或八的约数，指定从左上角开始顺时针方向形成边框的字符。例如，
+                    双框样式可以指定为： >
+                    [ "╔", "═" ,"╗", "║", "╝", "═", "╚", "║" ]。
+<
+                    如果给定的字符少于八个，它们将被重复。一个 ASCII 边框可以指定为： >
+                    [ "/", "-", "\\", "|" ]，
+<
+                    或者一个字符用于所有边： >
+                    [ "x" ]。
+<
+                    可以使用空字符串来隐藏特定的边框。此示例将只显示垂直边框，不显示水平边框： >
+                    [ "", "", "", ">", "", "", "", "<" ]
+<
+                    默认情况下，使用 |hl-FloatBorder| 高亮，当未定义时链接到
+                    |hl-WinSeparator|。每个边框侧可以指定一个可选的高亮： >
+                    [ ["+", "MyCorner"], ["x", "MyBorder"] ]。
+<
+                  • bufpos: 将浮动放置在相对于缓冲区文本的位置（仅当 relative="win" 时）。
+                    接受一个从零开始索引的 `[line, column]` 元组。如果给出了 `row` 和 `col`，
+                    则它们相对于此位置应用，否则默认为：
+                    • 如果 `anchor` 是 "NW" 或 "NE"，则 `row=1` 且 `col=0`
+                    • 如果 `anchor` 是 "SW" 或 "SE"，则 `row=0` 且 `col=0`
+                      （因此类似于靠近缓冲区文本的工具提示）。
+                  • col: 列位置，以屏幕单元格宽度为单位，可以是小数。
+                  • external: GUI 应将窗口显示为外部顶级窗口。目前不接受与此同时的任何其他
+                    定位配置。
+                  • fixed: 如果为 true 且锚点为 NW 或 SW，则浮动窗口将保持固定，即使窗口会被截断。
+                  • focusable: 允许通过用户操作（窗口命令、鼠标事件）获得焦点。默认为 true。
+                    不可聚焦的窗口可以通过 |nvim_set_current_win()| 进入，或者当 `mouse` 字段
+                    设置为 true 时，通过鼠标事件进入。参见 |focusable|。
+                  • footer: （可选）窗口边框中的页脚，字符串或列表。列表应由 `[text, highlight]`
+                    元组组成。如果是字符串，或者元组缺少高亮，则默认高亮组是 `FloatFooter`。
+                  • footer_pos: 页脚位置。必须与 `footer` 选项一起设置。值可以是 "left"、
+                    "center" 或 "right" 之一。默认为 `"left"`。
+                  • height: 窗口高度（以字符单元格为单位）。最小为 1。
+                  • hide: 如果为 true，则浮动窗口将被隐藏，并且当光标聚焦于其上时光标将不可见。
+                  • mouse: 指定此窗口如何与鼠标事件交互。默认为 `focusable` 值。
+                    • 如果为 false，鼠标事件将穿透此窗口。
+                    • 如果为 true，鼠标事件将正常与此窗口交互。
+                  • noautocmd: 在调用期间阻止所有自动命令。不能通过 |nvim_win_set_config()| 更改。
+                  • relative: 将窗口布局设置为“浮动”，放置在相对于以下位置的 (row,col) 坐标处：
+                    • "cursor" 当前窗口中的光标位置。
+                    • "editor" 全局编辑器网格。
+                    • "laststatus" 如果存在 'laststatus'，则为最后一行。
+                    • "mouse" 鼠标位置。
+                    • "tabline" 如果存在标签栏，则为第一行。
+                    • "win" 由 `win` 字段给定的窗口，或当前窗口。
+                  • row: 行位置，以“屏幕单元格高度”为单位，可以是小数。
+                  • split: 分割方向："left"、"right"、"above"、"below"。
+                  • style: （可选）配置窗口外观：
+                    • "" 无特殊样式。
+                    • "minimal" Nvim 将显示禁用了许多 UI 选项的窗口。这在显示不应编辑文本的
+                      临时浮动时很有用。禁用 'number'、'relativenumber'、'cursorline'、
+                      'cursorcolumn'、'foldcolumn'、'spell' 和 'list' 选项。'signcolumn'
+                      更改为 `auto`，并清除 'colorcolumn'。'statuscolumn' 更改为空。
+                      通过将 'fillchars' 的 `eob` 标志设置为空格字符，并清除 'winhighlight'
+                      中的 |hl-EndOfBuffer| 区域来隐藏缓冲区末尾区域。
+                  • title: （可选）窗口边框中的标题，字符串或列表。列表应由 `[text, highlight]`
+                    元组组成。如果是字符串，或者元组缺少高亮，则默认高亮组是 `FloatTitle`。
+                  • title_pos: 标题位置。必须与 `title` 选项一起设置。值可以是 "left"、
+                    "center" 或 "right" 之一。默认为 `"left"`。
+                  • vertical: 垂直分割 |:vertical|。
+                  • width: 窗口宽度（以字符单元格为单位）。最小为 1。
+                  • win: |window-ID| 目标窗口。可以在不同的标签页中。确定要分割的窗口
+                    （负值类似于 |:topleft|、|:botright|）、`relative="win"` 浮动窗口的
+                    相对窗口，或者对于其他情况，仅确定目标标签页（从窗口推断）。
+                  • zindex: 堆叠顺序。具有较高 `zindex` 的浮动窗口位于具有较低索引的浮动窗口之上。
+                    必须大于零。以下屏幕元素具有硬编码的 z-index：
+                    • 100：插入补全弹出菜单
+                    • 200：消息回滚
+                    • 250：命令行补全弹出菜单（当 wildoptions+=pum 时）浮动的默认值为 50。
+                      通常建议使用低于 100 的值，除非有充分的理由要遮盖内置元素。
+                  • _cmdline_offset: （实验性）当提供时，将 |cmdline-completion| 弹出菜单
+                    锚定到此窗口，并带有屏幕单元格宽度的偏移量。
+
+    返回值: ~
+        (`整数`) |window-ID|，出错时为 0
+
+nvim_win_get_config({window})                          *nvim_win_get_config()*
+    以字典形式获取窗口配置，该字典可作为 |nvim_open_win()| 的 `config` 参数传递。
+
+    对于非浮动窗口，`relative` 为空。
+
+    属性: ~
+        始于: 0.4.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+
+    返回值: ~
+        (`vim.api.keyset.win_config`) 定义窗口配置的映射，参见 |nvim_open_win()|
+
+nvim_win_set_config({window}, {config})                *nvim_win_set_config()*
+    重新配置窗口的布局和属性。
+    • 仅更新给定的键；未指定（`nil`）的键将不会被更改。
+    • 可以将窗口移动到另一个标签页。
+    • 可以将窗口转换为浮动窗口，或从浮动窗口转换回来。
+    • 键 `row` / `col` / `relative` 必须一起指定。
+    • 不能将标签页中的最后一个窗口移动到另一个标签页。
+
+    示例：要将一个浮动窗口转换为“普通”分割窗口，请指定 `win` 字段： >lua
+        vim.api.nvim_win_set_config(0, { split = 'above', win = vim.fn.win_getid(1), })
+<
+
+    属性: ~
+        始于: 0.4.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+      • {config}  (`vim.api.keyset.win_config`) 定义窗口配置的映射，参见 |nvim_open_win()|
+
+    另请参阅: ~
+      • |nvim_open_win()|
+
+
+==============================================================================
+窗口函数                                                        *api-window*
+
+nvim_win_call({window}, {fun})                               *nvim_win_call()*
+    以窗口作为临时当前窗口调用一个函数。
+
+    属性: ~
+        Lua |vim.api| 专用
+        始于: 0.5.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+      • {fun}     (`函数`) 要在窗口内部调用的函数（目前仅 Lua 可调用）
+
+    返回值: ~
+        (`任意`) 函数的返回值。
+
+    另请参阅: ~
+      • |win_execute()|
+      • |nvim_buf_call()|
+
+nvim_win_close({window}, {force})                           *nvim_win_close()*
+    关闭窗口（类似于带有 |window-ID| 的 |:close|）。
+
+    属性: ~
+        当 |textlock| 激活时不允许
+        始于: 0.4.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+      • {force}   (`布尔值`) 行为类似于 `:close!`。可以关闭包含未保存更改的缓冲区的最后一个窗口。
+                   即使未设置 'hidden'，该缓冲区也会变为隐藏状态。
+
+nvim_win_del_var({window}, {name})                        *nvim_win_del_var()*
+    删除一个窗口作用域 (w:) 变量
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+      • {name}    (`字符串`) 变量名称
+
+nvim_win_get_buf({window})                                *nvim_win_get_buf()*
+    获取窗口中的当前缓冲区
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+
+    返回值: ~
+        (`整数`) 缓冲区 ID
+
+nvim_win_get_cursor({window})                          *nvim_win_get_cursor()*
+    获取给定窗口的、相对于缓冲区的 (1,0) 索引光标位置
+    （显示相同缓冲区的不同窗口具有独立的光标位置）。|api-indexing|
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+
+    返回值: ~
+        (`[整数, 整数]`) (row, col) 元组
+
+    另请参阅: ~
+      • |getcurpos()|
+
+nvim_win_get_height({window})                          *nvim_win_get_height()*
+    获取窗口高度
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+
+    返回值: ~
+        (`整数`) 以行数计数的高度
+
+nvim_win_get_number({window})                          *nvim_win_get_number()*
+    获取窗口编号
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+
+    返回值: ~
+        (`整数`) 窗口编号
+
+nvim_win_get_position({window})                      *nvim_win_get_position()*
+    获取窗口在显示单元格中的位置。第一个位置为零。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+
+    返回值: ~
+        (`[整数, 整数]`) 包含窗口位置的 (row, col) 元组
+
+nvim_win_get_tabpage({window})                        *nvim_win_get_tabpage()*
+    获取窗口所在的标签页
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+
+    返回值: ~
+        (`整数`) 包含该窗口的标签页
+
+nvim_win_get_var({window}, {name})                        *nvim_win_get_var()*
+    获取一个窗口作用域 (w:) 变量
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+      • {name}    (`字符串`) 变量名称
+
+    返回值: ~
+        (`任意`) 变量值
+
+nvim_win_get_width({window})                            *nvim_win_get_width()*
+    获取窗口宽度
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+
+    返回值: ~
+        (`整数`) 以列数计数的宽度
+
+nvim_win_hide({window})                                      *nvim_win_hide()*
+    关闭窗口并隐藏其中包含的缓冲区（类似于带有 |window-ID| 的 |:hide|）。
+
+    与 |:hide| 类似，除非另一个窗口正在编辑该缓冲区，或者 'bufhidden' 是 `unload`、
+    `delete` 或 `wipe`（与 |:close| 或 |nvim_win_close()| 相对，后者会关闭缓冲区），
+    否则该缓冲区将变为隐藏状态。
+
+    属性: ~
+        当 |textlock| 激活时不允许
+        始于: 0.5.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+
+nvim_win_is_valid({window})                              *nvim_win_is_valid()*
+    检查窗口是否有效
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+
+    返回值: ~
+        (`布尔值`) 如果窗口有效则为 true，否则为 false
+
+nvim_win_set_buf({window}, {buffer})                      *nvim_win_set_buf()*
+    设置窗口中的当前缓冲区。
+
+    注意：作为副作用，这会执行 |BufEnter| 和 |BufLeave| 自动命令。
+
+    属性: ~
+        当 |textlock| 激活时不允许
+        始于: 0.3.2
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+      • {buffer}  (`整数`) 缓冲区 ID
+
+nvim_win_set_cursor({window}, {pos})                   *nvim_win_set_cursor()*
+    设置窗口中的 (1,0) 索引光标位置（字节偏移量）。|api-indexing|
+    即使该窗口不是当前窗口，这也会滚动它。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+      • {pos}     (`[整数, 整数]`) 表示新位置的 (row, col) 元组
+
+nvim_win_set_height({window}, {height})                *nvim_win_set_height()*
+    设置窗口高度。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+      • {height}  (`整数`) 以行数计数的高度
+
+nvim_win_set_hl_ns({window}, {ns_id})                   *nvim_win_set_hl_ns()*
+    为窗口设置高亮命名空间。这将使用为此命名空间通过 |nvim_set_hl()| 定义的高亮，
+    但在缺失时会回退到全局高亮（ns=0）。
+
+    这优先于 'winhighlight' 选项。
+
+    属性: ~
+        始于: 0.8.0
+
+    参数: ~
+      • {window}  (`整数`)
+      • {ns_id}   (`整数`) 要使用的命名空间
+
+nvim_win_set_var({window}, {name}, {value})               *nvim_win_set_var()*
+    设置一个窗口作用域 (w:) 变量
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+      • {name}    (`字符串`) 变量名称
+      • {value}   (`任意`) 变量值
+
+nvim_win_set_width({window}, {width})                   *nvim_win_set_width()*
+    设置窗口宽度。仅当屏幕垂直分割时才会成功。
+
+    属性: ~
+        始于: 0.1.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0
+      • {width}   (`整数`) 以列数计数的宽度
+
+nvim_win_text_height({window}, {opts})                *nvim_win_text_height()*
+    计算给定窗口中一段文本范围所占用的屏幕行数。适用于屏幕外的文本，并考虑折叠。
+
+    差异填充行或一行上方的虚拟行被计为该行的一部分，除非该行位于 "start_row" 且指定了
+    "start_vcol"。
+
+    当省略 "end_row" 时，最后一个缓冲区行下方的差异填充行或虚拟行会计入结果中。
+
+    行索引类似于 |nvim_buf_get_text()|。
+
+    属性: ~
+        始于: 0.10.0
+
+    参数: ~
+      • {window}  (`整数`) |window-ID|，或为当前窗口指定 0。
+      • {opts}    (`vim.api.keyset.win_text_height`) 可选参数：
+                  • start_row: 起始行索引，从零开始包含。如果省略，则从最顶部开始。
+                  • end_row: 结束行索引，从零开始包含。如果省略，则到最底部结束。
+                  • start_vcol: "start_row" 上的起始虚拟列索引，从零开始包含，
+                    向下取整到完整的屏幕行。如果省略，则包含整行。
+                  • end_vcol: "end_row" 上的结束虚拟列索引，从零开始不包含，
+                    向上取整到完整的屏幕行。如果为 0，则仅包含 "end_row" 上方的差异填充行
+                    和虚拟行。如果省略，则包含整行。
+                  • max_height: 不要添加达到此高度所在行下方的行的高度。用于例如将高度限制为
+                    窗口高度，避免不必要的工作。或者，找出超出 "start_row" 的多少缓冲区行
+                    占用一定数量的逻辑行（在 "end_row" 和 "end_vcol" 中返回）。
+
+    返回值: ~
+        (`vim.api.keyset.win_text_height_ret`) 包含文本高度信息的字典，包含以下键：
+        • all: 该范围占用的总屏幕行数。
+        • fill: 其中差异填充行或虚拟行的数量。
+        • end_row: 达到返回高度的行（闭合折叠的第一行）。
+        • end_vcol: 在 "end_row" 中达到 "max_height" 或返回高度时的结束虚拟列。
+          如果 "end_row" 是闭合折叠，则为 0。
+
+    另请参阅: ~
+      • |virtcol()| 了解文本宽度。
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

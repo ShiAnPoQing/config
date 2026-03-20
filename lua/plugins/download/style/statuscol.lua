@@ -1,17 +1,8 @@
 return {
   "luukvbaal/statuscol.nvim",
   lazy = false,
-  key = {
-    ["<space><F3>"] = {
-      function()
-        vim.print(require("statuscol").get_statuscol_string())
-      end,
-      "n",
-    },
-  },
   config = function()
     local builtin = require("statuscol.builtin")
-    -- Custom function to show both absolute and relative line numbers
     local function lnum_both()
       local lnum = vim.v.lnum
       local relnum = vim.v.lnum == vim.fn.line(".") and 0 or math.abs(vim.v.lnum - vim.fn.line("."))

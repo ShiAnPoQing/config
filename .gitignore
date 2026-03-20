@@ -1,2 +1,5 @@
 *.json 
 TODO.txt
+pack/custom/opt/treesitter-textobject
+pack/custom/opt/native-packer
+pack/custom/opt/eye-track.nvim

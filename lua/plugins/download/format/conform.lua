@@ -1,6 +1,6 @@
 return {
   "stevearc/conform.nvim",
-  event = "BufWritePre",
+  event = "BufFilePost",
   key = {
     ["<leader>="] = {
       function()
