@@ -5,19 +5,36 @@ if vim.env.TERM ~= "tmux-256color" and vim.env.TERM ~= "xterm-ghostty" then
 end
 
 return {
-  -- Tmux <S-BS> is not working
-  ["<F32>"] = {
-    { "<Del>", { "i", "c", "t" } },
-    { "lxh", "n" },
+  -- <M-left>
+  ["<F13>"] = {
+    function()
+      require("builtin.window-resize").resize("decrease", "horizontal")
+    end,
+    "n",
   },
-  -- ["<F6>"] = {
-  --   function()
-  --     require("custom.plugins.move-col-center").move_col_center("left")
-  --   end,
-  --   "n",
-  -- },
-  -- tmux <C-BS> is not working
-  ["<F31>"] = {
+  -- <M-right>
+  ["<F14>"] = {
+    function()
+      require("builtin.window-resize").resize("increase", "horizontal")
+    end,
+    "n",
+  },
+  --- <M-up>
+  ["<F15>"] = {
+    function()
+      require("builtin.window-resize").resize("decrease", "vertical")
+    end,
+    "n",
+  },
+  --- <M-down>
+  ["<F16>"] = {
+    function()
+      require("builtin.window-resize").resize("increase", "vertical")
+    end,
+    "n",
+  },
+  -- <C-BS>
+  ["<F17>"] = {
     { "<Left><C-o>diw", "i" },
     {
       function()
@@ -27,8 +44,13 @@ return {
       desc = "Delete current word(before)",
     },
   },
-  -- tmux <C-/> is not working
-  ["<F33>"] = {
+  -- <S-BS>
+  ["<F18>"] = {
+    { "<Del>", { "i", "c", "t" } },
+    { "lxh", "n" },
+  },
+  -- <C-/>
+  ["<F19>"] = {
     {
       function()
         return require("vim._comment").operator() .. "_"
@@ -61,4 +83,10 @@ return {
       expr = true,
     },
   },
+  -- ["<F6>"] = {
+  --   function()
+  --     require("custom.plugins.move-col-center").move_col_center("left")
+  --   end,
+  --   "n",
+  -- },
 }

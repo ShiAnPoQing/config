@@ -54,5 +54,5 @@ for _, path in ipairs(paths) do
   end
 end
 Key.del({
-  ["in"] = { "x" },
+  ["in"] = { "x", "o" },
 })

@@ -122,8 +122,8 @@ return {
           },
         })
       end,
-      [Methods.textDocument_documentColor] = function(args)
-        vim.lsp.document_color.enable(true, args.buf, { style = "virtual" })
+      [Methods.textDocument_documentColor] = function()
+        vim.lsp.document_color.enable(true, nil, { style = "virtual" })
       end,
       [Methods.textDocument_linkedEditingRange] = function(args, client)
         vim.lsp.linked_editing_range.enable(true, { client_id = client.id })

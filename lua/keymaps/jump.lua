@@ -81,26 +81,4 @@ return {
     "n",
     desc = "Go to [count] newer cursor position in jump list[buffer]",
   },
-  -- ["g<C-i>"] = {
-  --   function()
-  --     local function callback()
-  --       require("builtin.jump-list").switch_scope_and_jump(-1)
-  --       require("repeat").set_operation(callback)
-  --     end
-  --     callback()
-  --   end,
-  --   "n",
-  --   desc = "Go to [count] older cursor position in jump list[switch buffer lock]",
-  -- },
-  -- ["g<C-o>"] = {
-  --   function()
-  --     local function callback()
-  --       require("builtin.jump-list").switch_scope_and_jump(1)
-  --       require("repeat").set_operation(callback)
-  --     end
-  --     callback()
-  --   end,
-  --   "n",
-  --   desc = "Go to [count] newer cursor position in jump list[switch buffer lock]",
-  -- },
 }

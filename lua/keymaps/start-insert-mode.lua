@@ -38,7 +38,7 @@ local last_non_blank_character = {
         end
       end)
     end,
-    { "x", "s" },
+    { "x" },
     after = true,
     desc = "Start insert mode to the right of the last non-blank character in the visual area",
   },

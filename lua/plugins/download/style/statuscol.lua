@@ -3,11 +3,6 @@ return {
   lazy = false,
   config = function()
     local builtin = require("statuscol.builtin")
-    local function lnum_both()
-      local lnum = vim.v.lnum
-      local relnum = vim.v.lnum == vim.fn.line(".") and 0 or math.abs(vim.v.lnum - vim.fn.line("."))
-      return string.format("%3d %2d", lnum, relnum)
-    end
     require("statuscol").setup({
       setopt = true,
       segments = {
@@ -19,8 +14,13 @@ return {
           },
         },
         {
-          text = { lnum_both },
-          condition = { true },
+          text = {
+            function(args)
+              return ("%3d %2d "):format(args.lnum, args.relnum)
+            end,
+            " ",
+          },
+          condition = { true, builtin.not_empty },
           click = "v:lua.ScLa",
         },
         {

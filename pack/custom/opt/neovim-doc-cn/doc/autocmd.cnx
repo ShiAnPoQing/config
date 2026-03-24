@@ -1,0 +1,1160 @@
+*autocmd.txt*   Nvim
+
+
+		  VIM 参考手册	  by Bram Moolenaar
+
+
+自动命令					*autocmd* *autocommand*
+
+有关基本说明，请参阅用户手册中的 |40.3| 节。
+
+				      键入 |gO| 查看目录。
+
+==============================================================================
+1. 简介						*autocmd-intro*
+
+您可以指定在读取或写入文件、进入或离开缓冲区或窗口以及退出 Vim 时自动执行的命令。
+例如，您可以创建一个自动命令，为匹配 `*.c` 的文件设置 'cindent' 选项。您也可以使用自动命令来实现高级功能，例如编辑压缩文件（参见 |gzip-example|）。通常将自动命令放在您的 vimrc 文件中。
+
+				*E203* *E204* *E143* *E855* *E937* *E952*
+警告：使用自动命令功能非常强大，但可能导致意外的副作用。注意不要破坏您的文本。
+- 最好先在文件的备份副本上进行一些测试。
+  例如：如果您使用自动命令在开始编辑文件时解压缩该文件，请确保在写入时进行压缩的自动命令能正常工作。
+- 为中途发生的错误（例如，磁盘已满）做好准备。Vim 大多能够撤消对缓冲区的更改，但您可能需要手动清理对其他文件的更改（例如，压缩已解压的文件）。
+- 如果 BufRead* 事件允许您编辑压缩文件，那么 FileRead* 事件也应执行相同的操作（这在某些罕见情况下使恢复成为可能）。
+- 如果可能，最好为 File* 和 Buf* 事件使用相同的自动命令。
+
+==============================================================================
+2. 定义自动命令				*autocmd-define*
+
+使用 |nvim_create_autocmd()| 从 Lua 定义事件处理程序。
+
+Vimscript 命令在下面描述。
+
+							*:au* *:autocmd*
+:au[tocmd] [group] {event} {aupat} [++once] [++nested] {cmd}
+			将 {cmd} 添加到 Vim 将针对匹配 {aupat} |autocmd-pattern| 的文件在 {event} 上自动执行的命令列表中。
+			注意：引号字符被视为 :autocmd 的参数，不会开始注释。
+			Nvim 始终将 {cmd} 添加到现有自动命令之后，以便它们按定义的顺序执行。
+			有关 [++nested] 的信息，请参阅 |autocmd-nested|。
+							*autocmd-once*
+			如果提供了 [++once]，则该命令执行一次，然后被移除（“一次性”）。
+
+特殊模式 <buffer> 或 <buffer=N> 定义缓冲区本地自动命令。
+请参阅 |autocmd-buflocal|。
+
+注意：只有当 "|" 出现在预期模式的位置时，":autocmd" 命令后面才能跟另一个命令。这样可以： >
+	:augroup mine | au! BufRead | augroup END
+但这样会将 "augroup" 视为已定义命令的一部分： >
+	:augroup mine | au! BufRead * | augroup END
+	:augroup mine | au BufRead * set tw=70 | augroup END
+相反，您可以将组名放入命令中： >
+	:au! mine BufRead *
+	:au mine BufRead * set tw=70
+或者使用 `:execute`： >
+	:augroup mine | exe "au! BufRead *" | augroup END
+	:augroup mine | exe "au BufRead * set tw=70" | augroup END
+
+<							*autocmd-expand*
+注意，在定义自动命令时，":autocmd" 参数中的特殊字符（例如 "%"、"<cword>"）不会被扩展。这些字符将在事件被识别并执行 {cmd} 时进行扩展。唯一的例外是 "<sfile>"（与 "<script>" 不同），它会在定义自动命令时被扩展。示例：
+>
+	:au BufNewFile,BufRead *.html so <sfile>:h/html.vim
+
+这里 Vim 将 <sfile> 扩展为包含此行的文件名。
+但是，<sfile> 在函数中的工作方式不同，在这种情况下，最好使用带有 <script> 的 `:execute` 来实现相同的目标：
+>
+	:exe $'au BufNewFile,BufRead *.html so {expand("<script>:h")}/html.vim'
+
+`:autocmd` 会将自动命令添加到列表中，无论它们是否已经存在。当您的 .vimrc 文件被加载两次时，自动命令会出现两次。为了避免这种情况，请在一个组中定义您的自动命令，以便您可以轻松清除它们： >
+
+	augroup vimrc
+	  " 移除所有 vimrc 自动命令
+	  autocmd!
+	  au BufNewFile,BufRead *.html so <sfile>:h/html.vim
+	augroup END
+
+如果您不想移除所有自动命令，可以使用一个变量来确保 Vim 只包含这些自动命令一次： >
+
+	:if !exists("autocommands_loaded")
+	:  let autocommands_loaded = 1
+	:  au ...
+	:endif
+
+如果没有给出 [group] 参数，Vim 使用当前组（由 ":augroup" 定义）；否则，Vim 使用 [group] 定义的组。注意，[group] 必须事先已定义。您不能使用 ":au group ..." 来定义新组；请使用 ":augroup" 来定义。
+
+在测试自动命令时，您可能会发现 'verbose' 选项很有用： >
+	:set verbose=9
+此设置使 Vim 在执行自动命令时回显它们。
+
+在脚本中定义自动命令时，它将能够调用脚本本地的函数并使用脚本本地的映射。当事件触发且命令执行时，它将在定义它的脚本上下文中运行。如果在命令中使用了 |<SID>|，这一点很重要。
+
+执行命令时，一条命令的消息会覆盖前一条消息。这与手动执行命令时不同。大多数情况下，屏幕不会滚动，因此不会出现 hit-enter 提示。当一条命令输出两条消息时，这种情况仍可能发生。
+
+==============================================================================
+3. 移除自动命令			*autocmd!* *autocmd-remove*
+
+使用 Lua，这些函数可以移除自动命令和自动命令组：
+
+- |nvim_del_autocmd()|
+- |nvim_del_augroup_by_id()|
+- |nvim_del_augroup_by_name()|
+
+Vimscript 命令在下面描述。
+
+:au[tocmd]! [group] {event} {aupat} [++once] [++nested] {cmd}
+			移除与 {event} 和 {aupat} 关联的所有自动命令，并添加命令 {cmd}。
+			有关 [++once] 的信息，请参阅 |autocmd-once|。
+			有关 [++nested] 的信息，请参阅 |autocmd-nested|。
+
+:au[tocmd]! [group] {event} {aupat}
+			移除与 {event} 和 {aupat} 关联的所有自动命令。
+
+:au[tocmd]! [group] * {aupat}
+			移除与 {aupat} 关联的所有事件的所有自动命令。
+
+:au[tocmd]! [group] {event}
+			移除 {event} 的 所有 自动命令。
+			警告：对于 |BufRead| 和其他常见事件，您不应在没有组的情况下执行此操作，它可能会破坏插件、语法高亮等。
+
+:au[tocmd]! [group]	移除 所有 自动命令。
+			注意：引号将被视为 :autocmd 的参数，不会开始注释。
+			警告：通常您不应在没有组的情况下执行此操作，它会破坏插件、语法高亮等。
+
+如果没有给出 [group] 参数，Vim 使用当前组（由 ":augroup" 定义）；否则，Vim 使用 [group] 定义的组。
+
+==============================================================================
+4. 列出自动命令					*autocmd-list*
+
+:au[tocmd] [group] {event} {aupat}
+			显示与 {event} 和 {aupat} 关联的自动命令。
+
+:au[tocmd] [group] * {aupat}
+			显示所有事件中与 {aupat} 关联的自动命令。
+
+:au[tocmd] [group] {event}
+			显示 {event} 的所有自动命令。
+
+:au[tocmd] [group]	显示所有自动命令。
+
+如果您提供了 [group] 参数，Vim 仅列出该 [group] 的自动命令；否则，Vim 列出 所有 组的自动命令。请注意，此参数行为与定义和移除自动命令的行为不同。
+
+为了列出缓冲区本地自动命令，请使用 <buffer> 或 <buffer=N> 形式的模式。请参阅 |autocmd-buflocal|。
+
+							*:autocmd-verbose*
+当 'verbose' 非零时，列出自动命令还将显示其上次定义的位置。示例： >
+
+    :verbose autocmd BufEnter
+    FileExplorer  BufEnter
+	*	  call s:LocalBrowse(expand("<amatch>"))
+	    Last set from /usr/share/vim/vim-7.0/plugin/NetrwPlugin.vim
+<
+有关更多信息，请参阅 |:verbose-cmd|。
+
+==============================================================================
+5. 事件					*autocmd-events* *E215* *E216*
+
+您可以指定一个由逗号分隔的事件名称列表。此列表中不能使用空格。该命令适用于列表中的所有事件。
+
+对于 读取文件，有四种可能的事件类型：
+	BufNewFile			开始编辑一个不存在的文件
+	BufReadPre	BufReadPost	开始编辑一个已存在的文件
+	FilterReadPre	FilterReadPost	读取包含过滤器输出的临时文件
+	FileReadPre	FileReadPost	任何其他文件读取
+当读取文件时，Vim 只使用这四种类型之一。在读取文件之前和之后，"Pre" 和 "Post" 事件都会被触发。
+
+注意，用于 "*ReadPre" 事件和所有 Filter 事件的自动命令不允许更改当前缓冲区（如果发生这种情况，您将收到错误消息）。这是为了防止将文件读入错误的缓冲区。
+
+注意，'modified' 标志在 BufReadPost 和 BufNewFile 自动命令执行 之后 被重置。但是，如果 'modified' 选项是由自动命令设置的，则不会发生这种情况。
+
+您可以使用 'eventignore' 选项来忽略多个事件或所有事件。
+
+							*events* *{event}*
+Nvim 识别以下事件。名称不区分大小写。
+
+							*BufAdd*
+BufAdd				将新缓冲区或现有的未列出缓冲区添加到缓冲区列表后（启动期间除外，请参阅 |VimEnter|），或重命名已列出的缓冲区后。
+				在 |BufEnter| 之前。
+				注意：当前缓冲区 "%" 不是目标缓冲区 "<afile>"、"<abuf>"。 |<buffer=abuf>|
+							*BufDelete*
+BufDelete			从缓冲区列表中删除缓冲区之前。
+				可能会先调用 BufUnload（如果缓冲区已加载）。
+				也用于缓冲区列表中的缓冲区被重命名之前。
+				注意：当前缓冲区 "%" 不是目标缓冲区 "<afile>"、"<abuf>"。 |<buffer=abuf>|
+				不要切换到另一个缓冲区。
+							*BufEnter*
+BufEnter			进入（访问、切换到）新缓冲区或现有缓冲区之后。用于设置文件类型选项很有用。比较 |BufNew|，后者不会为现有缓冲区触发。
+				在 |BufAdd| 之后。
+				在 |BufReadPost| 之后。
+							*BufFilePost*
+BufFilePost			使用 ":file" 或 ":saveas" 命令更改当前缓冲区的名称之后。
+							*BufFilePre*
+BufFilePre			使用 ":file" 或 ":saveas" 命令更改当前缓冲区的名称之前。
+							*BufHidden*
+BufHidden			在缓冲区变为隐藏之前：当没有窗口再显示该缓冲区，但缓冲区未被卸载或删除时。
+
+				不用于退出 Vim 时的 ":qa" 或 ":q"。
+				注意：当前缓冲区 "%" 不是目标缓冲区 "<afile>"、"<abuf>"。 |<buffer=abuf>|
+							*BufLeave*
+BufLeave			在离开到另一个缓冲区之前。也用于离开或关闭当前窗口，且新的当前窗口不属于同一缓冲区时。
+
+				不用于退出 Vim 时的 ":qa" 或 ":q"。
+							*BufModifiedSet*
+BufModifiedSet			在缓冲区的 `'modified'` 值被更改之后。|OptionSet| 的特例。
+							*BufNew*
+BufNew				创建新缓冲区后（启动期间除外，请参阅 |VimEnter|），或重命名现有缓冲区后。与 |BufEnter| 不同，访问（切换到）现有缓冲区不会再次触发此事件。
+				注意：当前缓冲区 "%" 不是目标缓冲区 "<afile>"、"<abuf>"。 |<buffer=abuf>|
+				另请参阅 |BufAdd|、|BufNewFile|。
+							*BufNewFile*
+BufNewFile			开始编辑一个不存在的文件时。可用于读入骨架文件。
+						*BufRead* *BufReadPost*
+BufRead 或 BufReadPost		开始编辑新缓冲区时，在将文件读入缓冲区之后，处理 modeline 之前。请参阅 |BufWinEnter| 以在处理 modeline 后执行某些操作。
+				也会触发：
+				- 当以某种方式写入未命名缓冲区导致缓冲区获得名称时
+				- 成功恢复文件后
+				- 执行 ":filetype detect" 时，针对 "filetypedetect" 组
+				不触发：
+				- 对于 `:read file` 命令
+				- 当文件不存在时
+							*BufReadCmd*
+BufReadCmd			在开始编辑新缓冲区之前。应负责将文件读入缓冲区。|Cmd-event|
+						*BufReadPre* *E200* *E201*
+BufReadPre			开始编辑新缓冲区时，在将文件读入缓冲区之前。如果文件不存在，则不使用。
+							*BufUnload*
+BufUnload			在卸载缓冲区之前，当缓冲区中的文本将被释放时。
+				在 BufWritePost 之后。
+				在 BufDelete 之前。
+				当 Vim 将要退出时，为所有已加载的缓冲区触发。
+				注意：当前缓冲区 "%" 不是目标缓冲区 "<afile>"、"<abuf>"。 |<buffer=abuf>|
+								*E1546*
+				不要切换缓冲区或窗口！
+				当退出且 v:dying 为 2 或更大时不触发。
+							*BufWinEnter*
+BufWinEnter			在缓冲区显示在窗口中之后。这可能发生在缓冲区被加载时（在处理 modeline 之后），或者当隐藏的缓冲区被显示时（并且不再是隐藏状态）。
+
+				对于不带参数的 |:split| 不会触发，因为缓冲区没有改变，对于已经在一个窗口中打开的文件使用 :split 也不会触发。
+				对于使用当前缓冲区名称的 ":split" 会触发，因为它会重新加载该缓冲区。
+							*BufWinLeave*
+BufWinLeave			在缓冲区从窗口中移除之前。当它仍在另一个窗口中可见时不会触发。
+				退出时也会触发。
+				在 BufUnload、BufHidden 之前。
+				注意：当前缓冲区 "%" 不是目标缓冲区 "<afile>"、"<abuf>"。 |<buffer=abuf>|
+				当退出且 v:dying 为 2 或更大时不触发。
+							*BufWipeout*
+BufWipeout			在完全删除缓冲区之前。可能会先调用 BufUnload 和 BufDelete 事件（如果缓冲区已加载并在缓冲区列表中）。也用于缓冲区被重命名之前（即使它不在缓冲区列表中）。
+				注意：当前缓冲区 "%" 不是目标缓冲区 "<afile>"、"<abuf>"。 |<buffer=abuf>|
+				不要切换到另一个缓冲区。
+						*BufWrite* *BufWritePre*
+BufWrite 或 BufWritePre		将整个缓冲区写入文件之前。
+							*BufWriteCmd*
+BufWriteCmd			将整个缓冲区写入文件之前。应负责写入文件，如果成功，则重置 'modified'，除非 'cpo' 中有 '+' 且写入到另一个文件 |cpo-+|。
+				不应更改缓冲区内容。当命令重置 'modified' 时，撤消信息会被调整，以将较旧的撤消状态标记为 'modified'，就像 |:write| 所做的那样。使用 |'[| 和 |']| 标记表示行范围。|Cmd-event|
+							*BufWritePost*
+BufWritePost			将整个缓冲区写入文件之后（应撤消 BufWritePre 的命令）。
+							*ChanInfo*
+ChanInfo			通道状态改变时，例如 RPC 通道的客户端描述了自身。
+				即使在由未使用 |autocmd-nested| 定义的自动命令内部，此事件也会被触发。
+				设置以下 |v:event| 键：
+				    info	与 |nvim_get_chan_info()| 的结果相同
+							*ChanOpen*
+ChanOpen			通道刚打开之后。
+				即使在由未使用 |autocmd-nested| 定义的自动命令内部，此事件也会被触发。
+				设置以下 |v:event| 键：
+				    info	与 |nvim_get_chan_info()| 的结果相同
+							*CmdUndefined*
+CmdUndefined			当使用用户命令但未定义该命令时。对于仅在命令使用时才定义它很有用。模式与命令名称匹配。<amatch> 和 <afile> 都扩展为命令名称。
+				即使在由未使用 |autocmd-nested| 定义的自动命令内部，此事件也会被触发。
+				注意：在命令定义之前，自动补全将无法工作。另一种方法是始终定义用户命令，并让其调用一个自动加载的函数。请参阅 |autoload|。
+							*CmdlineChanged*
+CmdlineChanged			在命令行内部每次更改之后。在映射期间也会触发！在映射中使用 |<Cmd>| 代替 ":" 以避免这种情况。
+
+				<afile> 扩展为 |cmdline-char|。
+							*CmdlineEnter*
+CmdlineEnter			进入命令行之后（包括在映射中非交互式使用 ":"：改用 |<Cmd>| 以避免此事件）。
+				模式与 |cmdline-char| 匹配。
+				<afile> 扩展为 |cmdline-char|。
+				设置以下 |v:event| 键：
+				    cmdlevel
+				    cmdtype
+							*CmdlineLeave*
+CmdlineLeave			离开命令行之前（包括在映射中非交互式使用 ":"：改用 |<Cmd>| 以避免此事件）。
+				<afile> 扩展为 |cmdline-char|。
+				将 |v:char| 设置为退出命令行的键（例如 <CR>、<CTRL-C>、<Esc>）。
+				设置以下 |v:event| 键：
+				    abort (可变)
+				    cmdlevel
+				    cmdtype
+				注意：`abort` 只能从 false 更改为 true：无法通过将其更改为 false 来执行已中止的命令行。
+							*CmdlineLeavePre*
+CmdlineLeavePre			刚离开命令行之前，且在 |CmdlineLeave| 之前。对于使用 |cmdcomplete_info()| 捕获补全信息很有用，因为此信息在触发 |CmdlineLeave| 之前会被清除。对于映射中非交互式使用 ":" 会触发，但使用 |<Cmd>| 时不会触发。当通过键入 CTRL-C 或 <Esc> 放弃命令行时也会触发。<afile> 设置为 |cmdline-char|。
+				设置 |v:char|，与 |CmdlineLeave| 相同。
+							*CmdwinEnter*
+CmdwinEnter			进入命令行窗口之后。对于专门为此特殊类型窗口设置选项很有用。
+				<afile> 扩展为单个字符，指示命令行的类型。
+				|cmdwin-char|
+							*CmdwinLeave*
+CmdwinLeave			离开命令行窗口之前。对于清理使用 CmdwinEnter 设置的任何全局设置很有用。
+				<afile> 扩展为单个字符，指示命令行的类型。
+				|cmdwin-char|
+							*ColorScheme*
+ColorScheme			加载颜色方案之后。|:colorscheme|
+				如果未找到颜色方案，则不触发。
+				模式与颜色方案名称匹配。<afile> 可用于设置此选项的实际文件的名称，<amatch> 用于新的颜色方案名称。
+
+							*ColorSchemePre*
+ColorSchemePre			加载颜色方案之前。|:colorscheme|
+				在加载另一个颜色方案之前，对于设置移除颜色方案添加的内容很有用。
+
+CompleteChanged						*CompleteChanged*
+				每次插入模式补全菜单更改后。在弹出菜单隐藏时不触发，为此请使用 |CompleteDonePre| 或 |CompleteDone|。
+
+				设置以下 |v:event| 键：
+				    completed_item	参见 |complete-items|。
+				    height		可见项目数
+				    width		屏幕单元格数
+				    row		顶部屏幕行
+				    col		最左侧屏幕列
+				    size		项目总数
+				    scrollbar		是否可见（TRUE 表示可见）
+
+				非递归（事件不能触发自身）。
+				不能更改文本。|textlock|
+
+				弹出菜单的大小和位置也可以通过调用 |pum_getpos()| 获得。
+
+							*CompleteDonePre*
+CompleteDonePre			插入模式补全完成后。无论是成功补全了某些内容还是被丢弃。|ins-completion|
+				在此事件期间，|complete_info()| 有效。
+				|v:completed_item| 给出已补全的项目。
+
+							*CompleteDone*
+CompleteDone			插入模式补全完成后。无论是成功补全了某些内容还是被丢弃。|ins-completion|
+				在此之前，|complete_info()| 已被清除；如果需要，请使用 CompleteDonePre。
+				|v:completed_item| 给出已补全的项目，如果补全被丢弃，则为空字典。
+
+设置以下 |v:event| 键：
+				    complete_word	被选中的单词，如果补全被放弃（丢弃）则为空。
+				    complete_type	|complete_info_mode|
+				    reason		完成补全的原因。可以是以下之一：
+						- "accept"：补全被 |complete_CTRL-Y| 接受。
+						- "cancel"：补全被 |complete_CTRL-E| 停止。
+						- "discard"：补全因其他原因被放弃。
+
+							*CursorHold*
+CursorHold			在普通模式下，当在 'updatetime' 时长内没有用户输入时触发。在等待命令参数或操作符后的移动期间，以及在 |recording| 宏时不会触发。参见 |CursorHold-example|。
+
+				注意：此事件不能使用交互式命令。没有 hit-enter 提示，屏幕会直接更新（如果需要）。
+				注意：将来可能会有另一个选项来设置时间。
+				提示：要强制更新状态行，请使用： >
+					:let &ro = &ro
+<
+							*CursorHoldI*
+CursorHoldI			类似于 CursorHold，但在插入模式下。在等待另一个按键时（例如在 CTRL-V 之后）以及在 CTRL-X 模式 |insert_expand| 下不会触发。
+
+							*CursorMoved*
+CursorMoved			在普通模式或可视模式下移动光标后，或移动到另一个窗口后。当光标行的文本发生更改时（例如使用 "x"、"rx" 或 "p"）也会触发。
+				当存在预输入、在脚本文件中执行命令或操作符挂起时，并不总是触发。
+				有关示例，请参见 |match-parens|。
+				注意：无法使用 |:noautocmd| 跳过。
+				注意：此事件触发非常频繁，不要做任何用户不期望或速度慢的事情。
+							*CursorMovedC*
+CursorMovedC			光标在命令行中移动后。注意不要弄乱命令行，否则可能导致 Vim 锁定。
+				<afile> 扩展为 |cmdline-char|。
+							*CursorMovedI*
+CursorMovedI			在插入模式下光标移动后。当弹出菜单可见时不触发。
+				其他方面与 CursorMoved 相同。
+							*DiffUpdated*
+DiffUpdated			在差异更新之后。根据所使用的差异类型（内部或外部），可能在每次更改时或执行 |:diffupdate| 时触发。
+							*DirChanged*
+DirChanged			在 |current-directory| 更改之后。
+				模式可以是：
+					"window"  在 `:lcd` 时触发
+					"tabpage" 在 `:tcd` 时触发
+					"global"  在 `:cd` 时触发
+					"auto"    在 'autochdir' 时触发。
+				设置以下 |v:event| 键：
+				    cwd:            当前工作目录
+				    scope:          "global"、"tabpage"、"window"
+				    changed_window: 如果我们在切换窗口（或标签页）时触发了事件，则为 v:true
+				<afile> 设置为新目录名称。
+				非递归（事件不能触发自身）。
+							*DirChangedPre*
+DirChangedPre			当 |current-directory| 将要更改时，与 |DirChanged| 类似。
+				模式与 |DirChanged| 类似。
+				设置以下 |v:event| 键：
+				    directory:      新的工作目录
+				    scope:          "global"、"tabpage"、"window"
+				    changed_window: 如果我们在切换窗口（或标签页）时触发了事件，则为 v:true
+				<afile> 设置为新目录名称。
+				非递归（事件不能触发自身）。
+							*ExitPre*
+ExitPre				当使用 `:quit`、`:wq` 导致 Vim 退出时，或使用 `:qall` 时，在 |QuitPre| 之后立即触发。可用于关闭任何非必要的窗口。如果存在未自动保存的已修改缓冲区，退出仍可能被取消，请使用 |VimLeavePre| 处理真正退出的情况。
+				另请参阅 |QuitPre|、|WinClosed|。
+							*FileAppendCmd*
+FileAppendCmd			在追加到文件之前。应执行对文件的追加操作。使用 '[ 和 '] 标记表示行范围。|Cmd-event|
+							*FileAppendPost*
+FileAppendPost			在追加到文件之后。
+							*FileAppendPre*
+FileAppendPre			在追加到文件之前。使用 '[ 和 '] 标记表示行范围。
+							*FileChangedRO*
+FileChangedRO			在对只读文件进行第一次更改之前。可用于从源代码控制系统检出文件。当更改是由自动命令引起时不触发。
+				当对缓冲区进行第一次更改或在设置 'readonly' 后第一次更改时触发，就在更改应用到文本之前。
+				警告：如果自动命令移动光标，则更改的效果是未定义的。
+							*E788*
+				不能切换缓冲区。您可以重新加载缓冲区，但不能编辑另一个缓冲区。
+							*E881*
+				如果行数发生变化，保存撤消信息可能会失败，更改将被中止。
+							*FileChangedShell*
+FileChangedShell		当 Vim 注意到文件修改时间自开始编辑以来已发生更改时。当文件的文件属性发生更改或文件大小发生更改时也会触发。|timestamp|
+				为每个更改的文件触发，在以下情况之后：
+				- 执行 shell 命令后
+				- |:checktime|
+				- |FocusGained|
+
+				当设置了 'autoread' 且缓冲区未更改时，不使用此事件。如果存在 FileChangedShell 自动命令，则不会给出警告消息和提示。
+				|v:fcs_reason| 指示发生了什么。设置 |v:fcs_choice| 以控制接下来发生的事情。
+				注意：当前缓冲区 "%" 不是目标缓冲区 "<afile>" 和 "<abuf>"。|<buffer=abuf>|
+							*E246* *E811*
+				不能切换、跳转到或删除缓冲区。
+				非递归（事件不能触发自身）。
+							*FileChangedShellPost*
+FileChangedShellPost		在处理了 Vim 外部发生更改的文件之后。可用于更新状态行。
+							*FileReadCmd*
+FileReadCmd			在使用 ":read" 命令读取文件之前。应执行对文件的读取操作。|Cmd-event|
+							*FileReadPost*
+FileReadPost			在使用 ":read" 命令读取文件之后。注意 Vim 将 '[ 和 '] 标记设置为读取的第一行和最后一行。这可用于对刚读取的行进行操作。
+							*FileReadPre*
+FileReadPre			在使用 ":read" 命令读取文件之前。
+							*FileType*
+FileType			当 'filetype' 选项被设置时。模式与文件类型匹配。
+				<afile> 是设置此选项的文件名称。<amatch> 是 'filetype' 的新值。
+				不能切换窗口或缓冲区。
+				参见 |filetypes|。
+							*FileWriteCmd*
+FileWriteCmd			在写入文件之前，当不是写入整个缓冲区时。应执行对文件的写入操作。不应更改缓冲区。使用 |'[| 和 |']| 标记表示行范围。|Cmd-event|
+							*FileWritePost*
+FileWritePost			在写入文件之后，当不是写入整个缓冲区时。
+							*FileWritePre*
+FileWritePre			在写入文件之前，当不是写入整个缓冲区时。使用 |'[| 和 |']| 标记表示行范围。
+							*FilterReadPost*
+FilterReadPost			从过滤器命令读取文件之后。Vim 将模式与当前缓冲区的名称进行匹配，就像 FilterReadPre 一样。
+				当 'shelltemp' 关闭时不触发。
+							*FilterReadPre* *E135*
+FilterReadPre			从过滤器命令读取文件之前。Vim 将模式与当前缓冲区的名称进行匹配，而不是与作为过滤器命令输出的临时文件的名称进行匹配。
+				当 'shelltemp' 关闭时不触发。
+							*FilterWritePost*
+FilterWritePost			为过滤器命令写入文件或使用外部差异进行差异比较之后（内部差异请参见 |DiffUpdated|）。
+				Vim 将模式与当前缓冲区的名称进行匹配，就像 FilterWritePre 一样。
+				当 'shelltemp' 关闭时不触发。
+							*FilterWritePre*
+FilterWritePre			为过滤器命令写入文件或使用外部差异进行差异比较之前。
+				Vim 将模式与当前缓冲区的名称进行匹配，而不是与作为过滤器命令输出的临时文件的名称进行匹配。
+				当 'shelltemp' 关闭时不触发。
+							*FocusGained*
+FocusGained			Nvim 获得焦点。
+							*FocusLost*
+FocusLost			Nvim 失去焦点。也可能在 GUI 对话框弹出时触发。
+							*FuncUndefined*
+FuncUndefined			当使用用户函数但未定义时。对于仅在函数使用时才定义它很有用。模式与函数名称匹配。<amatch> 和 <afile> 都设置为函数的名称。
+				即使在由未使用 |autocmd-nested| 定义的自动命令内部，此事件也会被触发。
+				注意：在编写 Vim 脚本时，更好的替代方法是使用自动加载函数。参见 |autoload-functions|。
+							*UIEnter*
+UIEnter				在 UI 通过 |nvim_ui_attach()| 连接之后，或在内置 TUI 启动之后，在 |VimEnter| 之后。
+				设置以下 |v:event| 键：
+				    chan: UI 的 |channel-id|
+							*UILeave*
+UILeave				在 UI 与 Nvim 断开连接之后，或在内置 TUI 停止之后，在 |VimLeave| 之后。
+				设置以下 |v:event| 键：
+				    chan: UI 的 |channel-id|
+							*InsertChange*
+InsertChange			在插入模式或替换模式下键入 <Insert> 时。|v:insertmode| 变量指示新模式。
+				注意不要移动光标或做任何用户不期望的事情。
+							*InsertCharPre*
+InsertCharPre			在插入模式下键入一个字符时，在插入该字符之前。
+				|v:char| 变量指示键入的字符，并且可以在事件期间更改以插入不同的字符。当 |v:char| 被设置为多个字符时，此文本将按字面插入。
+
+				不能更改文本。|textlock|
+							*InsertEnter*
+InsertEnter			在开始插入模式之前。也适用于替换模式和虚拟替换模式。|v:insertmode| 变量指示模式。
+				注意不要做任何用户不期望的事情。
+				光标随后会被恢复。如果您不希望这样，请将 |v:char| 设置为非空字符串。
+							*InsertLeavePre*
+InsertLeavePre			在离开插入模式之前。也适用于使用 CTRL-O |i_CTRL-O| 时。注意不要更改模式或使用 `:normal`，这很可能会导致问题。
+							*InsertLeave*
+InsertLeave			在离开插入模式之后。也适用于使用 CTRL-O |i_CTRL-O| 时。但不适用于 |i_CTRL-C|。
+LspAttach			参见 |LspAttach|
+LspDetach			参见 |LspDetach|
+LspNotify			参见 |LspNotify|
+LspProgress			参见 |LspProgress|
+LspRequest			参见 |LspRequest|
+LspTokenUpdate			参见 |LspTokenUpdate|
+							*MarkSet*
+MarkSet				在通过 |m|、|:mark| 和 |nvim_buf_set_mark()| 设置 |mark| 之后。支持 `[a-zA-Z]` 标记（将来可能支持更多）。
+				|autocmd-pattern| 与标记名称匹配（例如 `[ab]` 匹配 `a` 或 `b`，`*` 匹配所有标记）。
+
+				|event-data| 包含以下键：
+				- name: 标记名称（例如 "a"）
+				- line: 标记行。
+				- col: 标记列。
+
+							*MenuPopup*
+MenuPopup			在显示弹出菜单（在鼠标右键下）之前。对于根据光标或鼠标指针下的内容调整菜单很有用。
+				模式与一个或两个表示模式的字符匹配：
+					n	普通
+					v	可视
+					o	操作符待决
+					i	插入
+					c	命令行
+					tl	终端
+							*ModeChanged*
+ModeChanged			在更改模式之后。模式与 `'old_mode:new_mode'` 匹配，例如匹配 `*:c*` 以模拟 |CmdlineEnter|。
+				设置以下 |v:event| 值：
+				   old_mode	更改前的模式。
+				   new_mode	新模式，与使用非零参数调用 |mode()| 返回的结果相同。
+				当 ModeChanged 触发时，old_mode 将是上次触发事件时 new_mode 的值。
+				这将在每次次要模式更改时触发。
+				进入可视模式时使用相对行号的用法示例： >
+		:au ModeChanged [vV\x16]*:* let &l:rnu = mode() =~# '^[vV\x16]'
+		:au ModeChanged *:[vV\x16]* let &l:rnu = mode() =~# '^[vV\x16]'
+		:au WinEnter,WinLeave * let &l:rnu = mode() =~# '^[vV\x16]'
+Progress						*Progress*
+				在通过 `nvim_echo` 创建或更新 |progress-message| 之后。模式与消息的标题匹配。|event-data| 包含：
+					id: 消息的 id
+					text: 消息的文本
+					title: 进度消息的标题
+					status: 进度消息的状态
+					percent: 此进度项已完成多少进度
+				用法示例：
+>lua
+		vim.api.nvim_create_autocmd('Progress', {
+		  pattern={'term'},
+		  callback = function(ev)
+		    print(string.format('event fired: %s', vim.inspect(ev)))
+		  end
+		})
+		local id = vim.api.nvim_echo({{'searching...'}}, true, {kind='progress', status='running', percent=10, title='term'})
+		vim.api.nvim_echo({{'searching'}}, true, {id = id, kind='progress', status='running', percent=50, title='term'})
+		vim.api.nvim_echo({{'done'}}, true, {id = id, kind='progress', status='success', percent=100, title='term'})
+
+<							*OptionSet*
+OptionSet			在设置选项之后（|startup| 期间除外）。|autocmd-pattern| 与长选项名称匹配。|<amatch>| 指示设置了哪个选项。
+
+				|v:option_type| 指示它是全局作用域还是本地作用域。
+				|v:option_command| 指示使用了什么类型的 set/let 命令（跟随标签查看表格）。
+				|v:option_new| 指示新设置的值。
+				|v:option_oldlocal| 包含旧的本地值。
+				|v:option_oldglobal| 包含旧的全局值。
+				|v:option_old| 指示旧的选项值。
+
+				|v:option_oldlocal| 仅在使用 |:set| 或 |:setlocal| 或 |modeline| 设置选项时设置。类似地，|v:option_oldglobal| 仅在使用了 |:set| 或 |:setglobal| 时设置。
+
+				这不会设置 |<abuf>|，您可以使用 |bufnr()|。
+
+				注意，当使用 |:set| 设置 |global-local| 选项时，|v:option_old| 是旧的全局值。但是，对于所有非全局本地的选项，它是旧的本地值。
+
+				用法示例：检查 'backupdir' 和 'undodir' 选项中的目录是否存在，如果目录尚不存在则创建它。
+
+				注意：在此自动命令期间不要重置相同的选项，这可能会破坏插件。您始终可以使用 |:noautocmd| 来防止触发 OptionSet。
+
+				注意：'modified' 选项不会触发此事件；可以使用 |BufModifiedSet| 事件来处理该情况。
+
+				非递归：自动命令中的 |:set| 不会再次触发 OptionSet。
+
+				在启动时不会触发。
+
+							*QuickFixCmdPre*
+QuickFixCmdPre			在运行 quickfix 命令之前（|:make|、|:lmake|、|:grep|、|:lgrep|、|:grepadd|、|:lgrepadd|、|:vimgrep|、|:lvimgrep|、|:vimgrepadd|、|:lvimgrepadd|、|:cfile|、|:cgetfile|、|:caddfile|、|:lfile|、|:lgetfile|、|:laddfile|、|:helpgrep|、|:lhelpgrep|、|:cexpr|、|:cgetexpr|、|:caddexpr|、|:cbuffer|、|:cgetbuffer|、|:caddbuffer|）。
+				模式与正在运行的命令匹配。当使用 |:grep| 但 'grepprg' 设置为 "internal" 时，它仍然匹配 "grep"。
+				此命令不能用于设置 'makeprg' 和 'grepprg' 变量。
+				如果此命令导致错误，则不会执行 quickfix 命令。
+							*QuickFixCmdPost*
+QuickFixCmdPost			类似于 QuickFixCmdPre，但在 quickfix 命令运行之后、跳转到第一个位置之前。对于 |:cfile| 和 |:lfile| 命令，它在读取错误文件之后、移动到第一个错误之前运行。
+				参见 |QuickFixCmdPost-example|。
+							*QuitPre*
+QuitPre				当使用 `:quit`、`:wq` 或 `:qall` 时，在决定是关闭当前窗口还是退出 Vim 之前。对于 `:wq`，缓冲区在 QuitPre 触发之前写入。如果当前窗口是最后一个普通窗口，可用于关闭任何非必要的窗口。
+				另请参阅 |ExitPre|、|WinClosed|。
+							*RemoteReply*
+RemoteReply			当收到来自充当服务器的 Vim 的回复 server2client() 时。模式与 {serverid} 匹配。
+				<amatch> 等于发送回复的 {serverid}，<afile> 是实际的回复字符串。
+				注意，即使定义了自动命令，也应使用 remote_read() 读取回复以消耗它。
+							*SearchWrapped*
+SearchWrapped			在使用 |n| 或 |N| 进行搜索后，如果搜索分别绕回到文档的开头或结尾。
+							*RecordingEnter*
+RecordingEnter			当宏开始录制时。
+				模式是当前文件名，|reg_recording()| 是当前使用的寄存器。
+							*RecordingLeave*
+RecordingLeave			当宏停止录制时。
+				模式是当前文件名，|reg_recording()| 是已录制的寄存器。
+				|reg_recorded()| 仅在此事件之后更新。
+				设置以下 |v:event| 键：
+				    regcontents
+				    regname
+							*SafeState*
+SafeState			当没有待处理事项，即将等待用户键入字符时。
+				在以下情况下不会触发：
+				- 操作符挂起
+				- 使用 "r 输入寄存器
+				- 命令执行到一半
+				- 执行映射
+				- 存在预输入
+				- 插入模式补全处于活动状态
+				- 命令行补全处于活动状态
+				您可以使用 `mode()` 来了解 Vim 处于什么状态。可能是：
+				- 可视模式
+				- 普通模式
+				- 插入模式
+				- 命令行模式
+				根据您想做的事情，您也可以使用 `state()` 进行更多检查，例如屏幕是否因消息而滚动。
+
+							*SessionLoadPre*
+SessionLoadPre			在加载使用 |:mksession| 命令创建的会话文件之前。
+							*SessionLoadPost*
+SessionLoadPost			在加载使用 |:mksession| 命令创建的会话文件之后。
+							*SessionWritePost*
+SessionWritePost		在通过调用 |:mksession| 命令写入会话文件之后。
+							*ShellCmdPost*
+ShellCmdPost			在执行 shell 命令 |:!cmd|、|:make| 和 |:grep| 之后。可用于检查任何更改的文件。
+				对于非阻塞 shell 命令，请参阅 |job-control|。
+							*Signal*
+Signal				Nvim 收到信号后。模式与信号名称匹配。仅支持 "SIGUSR1" 和 "SIGWINCH"。
+				即使在由未使用 |autocmd-nested| 定义的自动命令内部，此事件也会被触发。
+				示例： >vim
+				    autocmd Signal SIGUSR1 call some#func()
+<							*ShellFilterPost*
+ShellFilterPost			在执行 shell 命令 ":{range}!cmd"、":w !cmd" 或 ":r !cmd" 之后。可用于检查任何更改的文件。
+							*SourcePre*
+SourcePre			在加载 Vimscript/Lua 文件之前。|:source|
+				<afile> 是被加载的文件的名称。
+							*SourcePost*
+SourcePost			在加载 Vimscript/Lua 文件之后。|:source|
+				<afile> 是被加载的文件的名称。
+				当加载被中断时不触发。
+				在 SourceCmd 自动命令被触发之后也会触发。
+							*SourceCmd*
+SourceCmd			当加载 Vimscript/Lua 文件时。|:source|
+				<afile> 是被加载的文件的名称。
+				自动命令必须加载该文件。|Cmd-event|
+							*SpellFileMissing*
+SpellFileMissing		当尝试加载拼写检查文件但找不到时。模式与语言匹配。<amatch> 是语言，'encoding' 也很重要。参见 |spell-SpellFileMissing|。
+							*StdinReadPost*
+StdinReadPost			在启动期间，从 stdin 读取到缓冲区之后，执行 modeline 之前。|--|
+							*StdinReadPre*
+StdinReadPre			在启动期间，从 stdin 读取到缓冲区之前。|--|
+							*SwapExists*
+SwapExists			在开始编辑文件时检测到已存在的交换文件。仅当可以选择处理该情况的方式时，即 Vim 会询问用户该怎么做时。
+				|v:swapname| 变量保存找到的交换文件的名称，<afile> 是被编辑的文件。|v:swapcommand| 可能包含要在打开的文件中执行的命令。
+				命令应将 |v:swapchoice| 变量设置为包含一个字符的字符串，以告诉 Vim 接下来应该做什么：
+					'o'	以只读方式打开
+					'e'	仍然编辑该文件
+					'r'	恢复
+					'd'	删除交换文件
+					'q'	退出，不编辑文件
+					'a'	中止，类似于按 CTRL-C
+				当设置为空字符串时，将询问用户，就像没有 SwapExists 自动命令一样。
+							*E812*
+				不能更改为另一个缓冲区、更改缓冲区名称或更改目录。
+							*Syntax*
+Syntax				当 'syntax' 选项被设置时。模式与语法名称匹配。
+				<afile> 扩展为设置此选项的文件的名称。<amatch> 扩展为 'syntax' 的新值。
+				参见 |:syn-on|。
+							*TabClosed*
+TabClosed			关闭标签页之后。<afile> 扩展为标签页编号。
+							*TabClosedPre*
+TabClosedPre			关闭标签页之前。窗口布局被锁定，因此禁止打开和关闭窗口。
+							*TabEnter*
+TabEnter			刚进入标签页之后。|tab-page|
+				在 WinEnter 之后。
+				在 BufEnter 之前。
+							*TabLeave*
+TabLeave			刚离开标签页之前。|tab-page|
+				在 WinLeave 之后。
+							*TabNew*
+TabNew				在创建新标签页时。|tab-page|
+				在 WinEnter 之后。
+				在 TabEnter 之前。
+							*TabNewEntered*
+TabNewEntered			在进入新标签页之后。|tab-page|
+				在 BufEnter 之后。
+							*TermOpen*
+TermOpen			当 |terminal| 作业正在启动时。可用于配置终端缓冲区。要获取终端进程详细信息： >lua
+				    vim.print(vim.api.nvim_get_chan_info(vim.bo.channel))
+<
+							*TermEnter*
+TermEnter			在进入 |Terminal-mode| 之后。
+				在 TermOpen 之后。
+							*TermLeave*
+TermLeave			在离开 |Terminal-mode| 之后。
+				在 TermClose 之后。
+							*TermClose*
+TermClose			当 |terminal| 作业结束时。
+				设置以下 |v:event| 键：
+				    status	作业退出状态，如果终端缓冲区被删除则为 -1
+							*TermRequest*
+TermRequest			当 |:terminal| 子进程发出 OSC、DCS 或 APC 序列时。设置 |v:termrequest|。|event-data| 是一个包含以下字段的表：
+
+				- sequence: 接收到的序列
+				- terminator: 接收到的序列终止符（即 BEL 或 ST）
+				- cursor: 接收序列时光标的 (1,0)-索引、缓冲区相对位置（如果该位置不再存在于缓冲区中，行号可能 <= 0）
+
+				即使在由未使用 |autocmd-nested| 定义的自动命令内部，此事件也会被触发。
+
+							*TermResponse*
+TermResponse			当 Nvim 从主机终端收到 DA1、OSC、DCS 或 APC 响应时。设置 |v:termresponse|。|event-data| 是一个包含以下字段的表：
+
+				- sequence: 接收到的序列
+
+				即使在由未使用 |autocmd-nested| 定义的自动命令内部，此事件也会被触发。
+
+				可能在另一个事件（文件 I/O、shell 命令或任何其他耗时操作）期间触发。
+
+				示例： >lua
+
+				-- 使用 OSC 4 查询终端调色板中颜色 1（红色）的 RGB 值 >
+				vim.api.nvim_create_autocmd('TermResponse', {
+				  once = true,
+				  callback = function(ev)
+				    local resp = ev.data.sequence
+				    local r, g, b = resp:match("\027%]4;1;rgb:(%w+)/(%w+)/(%w+)")
+				  end,
+				})
+				vim.api.nvim_ui_send("\027]4;1;?\027\\")
+<
+							*TextChanged*
+TextChanged			在普通模式下，对当前缓冲区中的文本进行更改之后。即在 |b:changedtick| 更改之后（即使这种情况发生在定义 TextChanged 自动命令之前也会触发）。
+				当存在预输入或操作符挂起时不触发。
+				注意：无法使用 `:noautocmd` 跳过。
+				注意：此事件触发非常频繁，不要做任何用户不期望或速度慢的事情。
+							*TextChangedI*
+TextChangedI			在插入模式下，对当前缓冲区中的文本进行更改之后。
+				当弹出菜单可见时不触发。
+				其他方面与 TextChanged 相同。
+							*TextChangedP*
+TextChangedP			在插入模式下，对当前缓冲区中的文本进行更改之后，仅在弹出菜单可见时触发。其他方面与 TextChanged 相同。
+							*TextChangedT*
+TextChangedT			在 |Terminal-mode| 下，对当前缓冲区中的文本进行更改之后。其他方面与 TextChanged 相同。
+							*TextYankPost*
+TextYankPost			在 |yank| 或 |deleting| 命令之后立即触发，但如果使用黑洞寄存器 |quote_| 或用于 |setreg()| 则不触发。模式必须为 "*"。
+				设置以下 |v:event| 键：
+				    inclusive
+				    operator
+				    regcontents
+				    regname
+				    regtype
+				    visual
+				`inclusive` 标志与 |'[| 和 |']| 标记结合使用，可以计算操作的精确区域。
+
+				非递归（事件不能触发自身）。
+				不能更改文本。|textlock|
+							*User*
+User				不自动执行。使用 |:doautocmd| 来触发此事件，通常用于插件中的“自定义事件”。示例： >
+				    :autocmd User MyPlugin echom 'got MyPlugin event'
+				    :doautocmd User MyPlugin
+<							*UserGettingBored*
+UserGettingBored		当用户连续按同一个键 42 次时触发。
+				开个玩笑！:-)
+							*VimEnter*
+VimEnter			在完成所有启动工作之后，包括加载 vimrc 文件、执行 "-c cmd" 参数、创建所有窗口并加载其中的缓冲区。
+				在此事件触发之前，|v:vim_did_enter| 变量被设置，因此您可以执行： >
+				    if v:vim_did_enter
+				      call s:init()
+				    else
+				      au VimEnter * call s:init()
+				    endif
+<							*VimLeave*
+VimLeave			在退出 Vim 之前，在写入 .shada 文件之后立即执行。仅执行一次，类似于 VimLeavePre。
+				使用 |v:dying| 检测异常退出。
+				使用 |v:exiting| 获取退出代码。
+				如果 |v:dying| 为 2 或更大，则不触发。
+							*VimLeavePre*
+VimLeavePre			在退出 Vim 之前，在写入 |shada| 文件之前立即执行。仅执行一次，如果模式与退出时的当前缓冲区匹配。
+				通常与 "*" 模式一起使用。>
+				   :autocmd VimLeavePre * call CleanupStuff()
+<				使用 |v:dying| 检测异常退出。
+				使用 |v:exiting| 获取退出代码。
+				如果 |v:dying| 为 2 或更大，则不触发。
+							*VimResized*
+VimResized			在 Vim 窗口大小调整之后，即 'lines' 和/或 'columns' 改变时。但在启动时不会触发。
+							*VimResume*
+VimResume			在 Nvim 从 |suspend| 状态恢复之后。
+							*VimSuspend*
+VimSuspend			在 Nvim 进入 |suspend| 状态之前。
+							*WinClosed*
+WinClosed			关闭窗口时，在将其从窗口布局中移除之前立即触发。模式与 |window-ID| 匹配。<amatch> 和 <afile> 都设置为 |window-ID|。
+				在 WinLeave 之后。
+				非递归（事件不能触发自身）。
+				另请参阅 |ExitPre|、|QuitPre|。
+							*WinEnter*
+WinEnter			进入另一个窗口之后。在 Vim 刚启动时，不会为第一个窗口触发。
+				对于设置窗口高度很有用。
+				如果该窗口用于另一个缓冲区，Vim 会在 WinEnter 自动命令之后执行 BufEnter 自动命令。
+				注意：对于 split 和 tabpage 命令，WinEnter 事件在 split 或 tab 命令之后、但在加载文件之前触发。
+
+							*WinLeave*
+WinLeave			离开窗口之前。如果要进入的下一个窗口用于不同的缓冲区，Vim 会在 WinLeave 自动命令之前执行 BufLeave 自动命令（但 ":new" 除外）。
+				退出 Vim 时，不用于 ":qa" 或 ":q"。
+				在 WinClosed 之前。
+							*WinNewPre*
+WinNewPre			在创建新窗口之前。在通过创建分割来修改窗口布局的命令之前触发。
+				在创建标签页时以及对于第一个窗口不会触发，因为窗口结构尚未初始化，因此通常不安全。
+				在为 WinNewPre 事件执行命令时，不允许修改窗口布局。
+				最有用的是存储当前窗口布局，并在窗口创建后将其与新布局进行比较。
+
+							*WinNew*
+WinNew				当创建了一个新窗口时。在 Vim 刚启动时，不会为第一个窗口触发。
+				在 WinEnter 之前。
+
+							*WinScrolled*
+WinScrolled			在当前标签页中的任何窗口滚动文本（水平或垂直）或更改宽度或高度之后。参见 |win-scrolled-resized|。
+
+				注意：无法使用 `:noautocmd` 跳过此事件，因为它是在处理普通命令后 Vim 返回到主循环时触发的。如果您想禁用它，可以考虑改用 'eventignore' 选项。
+
+				模式与第一个滚动或调整大小的窗口的 |window-ID| 匹配。<amatch> 和 <afile> 都设置为 |window-ID|。
+
+				|v:event| 设置为有关大小和滚动变化的信息。|WinScrolled-event|
+
+				仅在启动完成并且第一次屏幕重绘完成后开始触发。
+				在定义第一个 WinScrolled 或 WinResized 事件时不触发，但在添加更多事件时可能会触发。
+
+				非递归：在为 WinScrolled 事件执行命令时，该事件不会触发。但是，如果该命令导致窗口滚动或更改大小，则稍后会触发另一个 WinScrolled 事件。
+
+
+							*WinResized*
+WinResized			在当前标签页中的窗口更改宽度或高度之后。
+				参见 |win-scrolled-resized|。
+
+				|v:event| 设置为有关大小变化的信息。|WinResized-event|
+
+				对于模式、触发和递归行为，与 |WinScrolled| 相同。
+
+==============================================================================
+6. 模式					*autocmd-pattern* *{aupat}*
+
+`:autocmd` 的 {aupat} 参数可以是一个逗号分隔的列表。其效果等同于分别使用每个模式单独给出命令。因此，此命令： >
+	:autocmd BufRead *.txt,*.info set et
+等效于： >
+	:autocmd BufRead *.txt set et
+	:autocmd BufRead *.info set et
+
+文件模式 {aupat} 通过以下两种方式之一与文件名进行匹配测试：
+1. 当模式中没有 '/' 时，Vim 仅检查与文件名的尾部部分（不包含其前导目录路径）的匹配。
+2. 当模式中有 '/' 时，Vim 检查与短文件名（您键入的）和完整文件名（将其扩展为完整路径并解析符号链接后）的匹配。
+
+特殊模式 <buffer> 或 <buffer=N> 用于缓冲区本地自动命令 |autocmd-buflocal|。此模式不与缓冲区的名称进行匹配。
+
+示例： >
+	:autocmd BufRead *.txt		set et
+为所有文本文件设置 'et' 选项。>
+
+	:autocmd BufRead /vim/src/*.c	set cindent
+为 /vim/src 目录中的 C 文件设置 'cindent' 选项。>
+
+	:autocmd BufRead /tmp/*.c	set ts=5
+如果您有一个从 "/tmp/test.c" 到 "/home/nobody/vim/src/test.c" 的链接，并且您开始编辑 "/tmp/test.c"，则此自动命令将匹配。
+
+注意：要匹配路径的一部分，但不从根目录开始，请使用 "*" 作为第一个字符。示例： >
+	:autocmd BufRead */doc/*.txt	set tw=78
+例如，此自动命令将针对 "/tmp/doc/xx.txt" 和 "/usr/home/piet/doc/yy.txt" 执行。目录的数量在此无关紧要。
+
+用于匹配模式的文件名是在扩展通配符之后。因此，如果您发出此命令： >
+	:e $ROOTDIR/main.$EXT
+参数首先被扩展为： >
+	/usr/root/main.py
+然后才与自动命令的模式进行匹配。当使用诸如 FileReadCmd 等事件时，请小心这一点，<amatch> 的值可能不是您所期望的。
+
+可以在模式中使用环境变量： >
+	:autocmd BufRead $VIMRUNTIME/doc/*.txt  set expandtab
+并且 ~ 可用于 home 目录（如果定义了 $HOME）： >
+	:autocmd BufWritePost ~/.config/nvim/init.vim   so <afile>
+	:autocmd BufRead ~archive/*      set readonly
+环境变量在定义自动命令时扩展，而不是在执行自动命令时扩展。这与命令不同！
+
+							*file-pattern*
+模式的解释方式与文件名中的用法大致相同：
+	*	匹配任意字符序列；特别之处：包括路径分隔符
+	?	匹配任意单个字符
+	\?	匹配一个 '?'
+	.	匹配一个 '.'
+	~	匹配一个 '~'
+	,	分隔模式
+	\,	匹配一个 ','
+	{ }	类似于 |pattern| 中的 \( \)
+	,	在 {} 内部：类似于 |pattern| 中的 \|
+	\}	字面意义的 }
+	\{	字面意义的 {
+	\\\{n,m\}  类似于 |pattern| 中的 \{n,m}
+	\	特殊含义，类似于 |pattern| 中的
+	[ch]	匹配 'c' 或 'h'
+	[^ch]   匹配除 'c' 和 'h' 之外的任何字符
+
+请注意，对于所有系统，都使用 '/' 字符作为路径分隔符（即使对于 MS-Windows）。这是因为反斜杠在模式中难以使用，并且为了使自动命令在不同系统之间可移植。要在所有平台上仅匹配一个 '/'（例如在非文件模式中），请使用 "\/"。
+
+可以使用 |pattern| 项，但由于对上述内容进行了转换，它们可能无法按预期工作。
+
+							*autocmd-changes*
+模式的匹配在事件触发时进行。在自动命令中更改缓冲区名称，甚至删除缓冲区，都不会改变将执行哪些自动命令。示例： >
+
+	au BufEnter *.foo  bdel
+	au BufEnter *.foo  set modified
+
+这将删除当前缓冲区，然后在已成为当前缓冲区的缓冲区中设置 'modified'。Vim 不考虑 "*.foo" 是否与该缓冲区名称匹配。它在事件触发时根据缓冲区的名称匹配 "*.foo"。
+
+但是，对于已使用 |:bwipe| 清除的缓冲区，不会执行缓冲区本地自动命令。使用 |:bdel| 删除缓冲区后，该缓冲区实际上仍然存在（变为未列出），因此自动命令仍然会执行。
+
+==============================================================================
+7. 缓冲区本地自动命令	*autocmd-buflocal* *autocmd-buffer-local*
+				*<buffer>* *<buffer=N>* *<buffer=abuf>* *E680*
+
+缓冲区本地自动命令附加到特定缓冲区。如果缓冲区没有名称，或者名称与特定模式不匹配，它们非常有用。但这也意味着必须将它们显式添加到每个缓冲区。
+
+缓冲区本地自动命令使用以下形式之一代替模式：
+	<buffer>	当前缓冲区
+	<buffer=99>	缓冲区编号 99
+	<buffer=abuf>	使用 <abuf>（仅在执行自动命令时）|<abuf>|
+
+示例： >
+    :au CursorHold <buffer>  echo 'hold'
+    :au CursorHold <buffer=33>  echo 'hold'
+    :au BufNewFile * au CursorHold <buffer=abuf>  echo 'hold'
+
+所有用于自动命令的命令也适用于缓冲区本地自动命令，只需使用特殊字符串代替模式即可。示例： >
+    :au! * <buffer>		     " 移除当前缓冲区的缓冲区本地自动命令
+    :au! * <buffer=33>		     " 移除缓冲区 #33 的缓冲区本地自动命令
+    :bufdo :au! CursorHold <buffer>  " 为所有缓冲区移除给定事件的自动命令
+    :au * <buffer>		     " 列出当前缓冲区的缓冲区本地自动命令
+
+请注意，当为当前缓冲区定义自动命令时，它会与缓冲区编号一起存储。因此，它使用 "<buffer=12>" 的形式，其中 12 是当前缓冲区的编号。例如，您在列出自动命令时会看到这一点。
+
+要测试是否存在缓冲区本地自动命令，请使用 |exists()| 函数，如下所示： >
+    :if exists("#CursorHold#<buffer=12>") | ... | endif
+    :if exists("#CursorHold#<buffer>") | ... | endif    " 对于当前缓冲区
+
+当缓冲区被清除时，其缓冲区本地自动命令当然也会消失。请注意，当删除缓冲区时（例如使用 ":bdel"），它只是变为未列出，自动命令仍然存在。要查看缓冲区本地自动命令的移除情况： >
+    :set verbose=6
+
+无法为不存在的缓冲区定义缓冲区本地自动命令。
+
+==============================================================================
+8. 组						*autocmd-groups*
+
+自动命令可以组合在一个组中。这对于移除或执行一组自动命令非常有用。例如，所有用于语法高亮的自动命令都放在 "highlight" 组中，以便在 GUI 启动时能够执行 ":doautoall highlight BufRead"。
+
+当没有选择特定组时，Vim 使用默认组。默认组没有名称。您不能单独执行默认组中的自动命令；您只能通过执行所有组的自动命令来执行它们。
+
+通常，当自动执行自动命令时，Vim 使用所有组的自动命令。组仅在使用 ":doautocmd" 或 ":doautoall" 执行自动命令时，或者在定义或删除自动命令时才重要。
+
+组名可以包含除空格之外的任何字符。组名 "end" 是保留的（大写形式也保留）。
+
+组名区分大小写。请注意，这与事件名称不同！
+
+							*:aug* *:augroup*
+:aug[roup] {name}		为后续的 ":autocmd" 命令定义自动命令组名称。名称 "end" 或 "END" 选择默认组。
+				为避免混淆，名称应与现有的 {event} 名称不同，因为这很可能不会达到您的预期。
+
+					*:augroup-delete* *E367* *W19* *E936*
+:aug[roup]! {name}		删除自动命令组 {name}。如果仍有自动命令使用此组，请不要使用此命令！如果执意使用，您将收到警告。当该组是当前组时，您将收到错误 E936。
+
+要为特定组输入自动命令，请使用以下方法：
+1. 使用 ":augroup {name}" 选择组。
+2. 使用 ":au!" 删除任何旧的自动命令。
+3. 定义自动命令。
+4. 使用 "augroup END" 返回到默认组。
+
+示例： >
+	:augroup uncompress
+	:  au!
+	:  au BufEnter *.gz	%!gunzip
+	:augroup END
+
+这样可以防止自动命令被定义两次（例如，在再次加载 vimrc 文件后）。
+
+						*FileExplorer*
+Vim 识别一个组：FileExplorer。如果此组存在，Vim 假定可以编辑目录，并将触发一个列出该目录中文件的插件。这被目录浏览器插件使用。这允许您执行： >
+	browse edit
+
+==============================================================================
+9. 执行自动命令				*autocmd-execute*
+
+Vim 也可以非自动地执行自动命令。如果您更改了自动命令，或者当 Vim 执行了错误的自动命令时（例如，文件模式匹配错误），这会很有用。
+
+请注意，'eventignore' 选项也适用于此处。此选项中列出的事件不会导致执行任何命令。
+
+				*:do* *:doau* *:doaut* *:doautocmd* *E217*
+:do[autocmd] [<nomodeline>] [group] {event} [fname]
+			将匹配 [fname]（默认：当前文件名）的自动命令应用于 {event} 的当前缓冲区。
+			您可以在当前文件名与正确模式不匹配时、更改设置后，或为某个特定事件执行自动命令时使用此命令。
+			也可以在自动命令内部使用它，因此您可以基于另一种扩展的自动命令为一种扩展提供自动命令。示例： >
+				:au BufEnter *.cpp so ~/.config/nvim/init_cpp.vim
+				:au BufEnter *.cpp doau BufEnter x.c
+<			注意避免无限循环。|autocmd-nested|
+
+			如果没有给出 [group] 参数，Vim 将执行所有组的自动命令。如果包含了 [group] 参数，Vim 仅执行该组的匹配自动命令。未定义的组将导致错误。
+							*<nomodeline>*
+			在应用自动命令之后，会处理 modeline，以便它们在编辑文件时覆盖自动命令的设置。如果指定了 <nomodeline>，则跳过此步骤。对于加载缓冲区时不使用的事件（如 |User|），您可能希望使用 <nomodeline>。
+			当没有执行匹配的自动命令时，也会跳过 modeline。
+
+						*:doautoa* *:doautoall*
+:doautoa[ll] [<nomodeline>] [group] {event} [fname]
+			类似于 ":doautocmd"，但将自动命令应用于每个已加载的缓冲区。当前缓冲区最后执行。
+
+			注意，[fname] 用于选择自动命令，而不是它们所应用的缓冲区。示例： >
+				augroup mine
+				  autocmd!
+				  autocmd FileType * echo expand('<amatch>')
+				augroup END
+				doautoall mine FileType Loaded-Buffer
+<			加载此脚本后，您将看到与已加载缓冲区数量一样多的 "Loaded-Buffer" 回显。
+
+			注意：不要将此用于删除缓冲区、更改为另一个缓冲区或更改缓冲区内容的自动命令；结果不可预测。
+			此命令旨在用于设置选项、更改高亮等类似的自动命令。
+
+==============================================================================
+10. 使用自动命令					*autocmd-use*
+
+对于 写入文件，有四种可能的事件集。Vim 对于写入命令仅使用这些集之一：
+
+BufWriteCmd	BufWritePre	BufWritePost	写入整个缓冲区
+		FilterWritePre	FilterWritePost	写入过滤器临时文件
+FileAppendCmd	FileAppendPre	FileAppendPost	追加到文件
+FileWriteCmd	FileWritePre	FileWritePost	任何其他文件写入
+
+当存在匹配的 "*Cmd" 自动命令时，假定它将执行写入操作。不会执行进一步的写入操作，也不会触发其他事件。|Cmd-event|
+
+请注意，"*WritePost" 命令应撤消由 "*WritePre" 命令引起的对缓冲区的任何更改；否则，写入文件将产生更改缓冲区的副作用。
+
+在执行自动命令之前，要写入其行的缓冲区暂时成为当前缓冲区。除非自动命令更改当前缓冲区或删除先前的当前缓冲区，否则先前的当前缓冲区将再次成为当前缓冲区。
+
+"*WritePre" 和 "*AppendPre" 自动命令不得删除要写入其行的缓冲区。
+
+'[ 和 '] 标记具有特殊位置：
+- 在 "*ReadPre" 事件之前，'[ 标记设置为将要插入新行的行上方一行。
+- 在 "*ReadPost" 事件之前，'[ 标记设置为刚读取的第一行，'] 标记设置为最后一行。
+- 在执行 "*WriteCmd"、"*WritePre" 和 "*AppendPre" 自动命令之前，'[ 标记设置为将要写入的第一行，'] 标记设置为最后一行。
+注意：使用更改缓冲区的命令时，'[ 和 '] 会改变。
+
+在需要文件名的命令中，您可以使用 "<afile>" 表示正在读取的文件名 |:<afile>|（您也可以使用 "%" 表示当前文件名）。"<abuf>" 可用于当前有效缓冲区的缓冲区编号。这也适用于没有名称的缓冲区。但它不适用于没有缓冲区的文件（例如，使用 ":r file"）。
+
+							*gzip-example*
+读取和写入压缩文件的示例： >
+  :augroup gzip
+  :  autocmd!
+  :  autocmd BufReadPre,FileReadPre	*.gz set bin
+  :  autocmd BufReadPost,FileReadPost	*.gz '[,']!gunzip
+  :  autocmd BufReadPost,FileReadPost	*.gz set nobin
+  :  autocmd BufReadPost,FileReadPost	*.gz execute ":doautocmd BufReadPost " .. expand("%:r")
+  :  autocmd BufWritePost,FileWritePost	*.gz !mv <afile> <afile>:r
+  :  autocmd BufWritePost,FileWritePost	*.gz !gzip <afile>:r
+
+  :  autocmd FileAppendPre		*.gz !gunzip <afile>
+  :  autocmd FileAppendPre		*.gz !mv <afile>:r <afile>
+  :  autocmd FileAppendPost		*.gz !mv <afile> <afile>:r
+  :  autocmd FileAppendPost		*.gz !gzip <afile>:r
+  :augroup END
+
+使用 "gzip" 组是为了能够在文件被加载两次时，使用 ":autocmd!" 删除任何现有的自动命令。
+
+("<afile>:r" 是不带扩展名的文件名，参见 |:_%:|)
+
+为 BufNewFile、BufRead/BufReadPost、BufWritePost、FileAppendPost 和 VimLeave 事件执行的命令不会设置或重置缓冲区的更改标志。当您使用 BufReadPost 自动命令解压缩缓冲区时，您仍然可以使用 ":q" 退出。当您在 BufWritePost 中使用 ":undo" 来撤消 BufWritePre 命令所做的更改时，您仍然可以执行 ":q"（这也使 "ZZ" 有效）。如果您确实希望将缓冲区标记为已修改，请设置 'modified' 选项。
+
+要从自动命令执行普通模式命令，请使用 ":normal" 命令。请小心使用！如果普通模式命令未完成，用户需要键入字符（例如，在 ":normal m" 之后，您需要键入一个标记名称）。
+
+如果您希望在更改缓冲区后缓冲区处于未修改状态，请重置 'modified' 选项。这样就可以使用 ":q" 而不是 ":q!" 退出缓冲区。
+
+							*autocmd-nested* *E218*
+默认情况下，自动命令不嵌套。例如，如果您在自动命令中使用 ":e" 或 ":w"，Vim 不会为这些命令执行 BufRead 和 BufWrite 自动命令。如果您确实希望这样做，请在希望嵌套的命令中使用 "++nested" 标志。例如： >
+  :autocmd FileChangedShell *.c ++nested e!
+嵌套限制为 10 层，以避免递归循环。
+
+可以在自动命令中使用 ":au" 命令。这可以是一个自修改命令！这对于应仅执行一次的自动命令很有用。
+
+如果您想为单个命令跳过自动命令，请使用 |:noautocmd| 命令修饰符或 'eventignore' 选项。
+
+注意：当读取文件（使用 ":read file" 或通过过滤器命令）且文件中的最后一行没有 <EOL> 时，Vim 会记住这一点。下次写入（使用 ":write file" 或通过过滤器命令）时，如果同一行再次作为最后一行写入，并且 'binary' 被设置，Vim 不会提供 <EOL>。这使得对刚读取的行执行过滤器命令能够写入与读取相同的文件，并且使得对刚过滤的行执行写入命令能够写入与从过滤器读取相同的文件。例如，另一种写入压缩文件的方法： >
+
+  :autocmd FileWritePre *.gz   set bin|'[,']!gzip
+  :autocmd FileWritePost *.gz  undo|set nobin
+<
+							*autocommand-pattern*
+您可以指定多个模式，用逗号分隔。以下是一些示例： >
+
+  :autocmd BufRead   *		set tw=79 nocin ic infercase fo=2croq
+  :autocmd BufRead   .letter	set tw=72 fo=2tcrq
+  :autocmd BufEnter  .letter	set dict=/usr/lib/dict/words
+  :autocmd BufLeave  .letter	set dict=
+  :autocmd BufRead,BufNewFile   *.c,*.h	set tw=0 cin noic
+  :autocmd BufEnter  *.c,*.h	abbr FOR for (i = 0; i < 3; ++i)<CR>{<CR>}<Esc>O
+  :autocmd BufLeave  *.c,*.h	unabbr FOR
+
+对于 makefile（makefile、Makefile、imakefile、makefile.unix 等）： >
+
+  :autocmd BufEnter  ?akefile*	set include=^s\=include
+  :autocmd BufLeave  ?akefile*	set include&
+
+为了总是在第一个函数处开始编辑 C 文件： >
+
+  :autocmd BufRead   *.c,*.h	1;/^{
+
+如果没有上面的 "1;"，搜索将从进入文件的任何位置开始，而不是从文件开头开始。
+
+						*skeleton* *template*
+要在打开新文件时读取骨架（模板）文件： >
+
+  :autocmd BufNewFile  *.c	0r ~/vim/skeleton.c
+  :autocmd BufNewFile  *.h	0r ~/vim/skeleton.h
+  :autocmd BufNewFile  *.java	0r ~/vim/skeleton.java
+
+要在写入 "*.html" 文件时插入当前日期和时间： >
+
+  :autocmd BufWritePre,FileWritePre *.html   ks|call LastMod()|'s
+  :fun LastMod()
+  :  if line("$") > 20
+  :    let l = 20
+  :  else
+  :    let l = line("$")
+  :  endif
+  :  exe "1," .. l .. "g/Last modified: /s/Last modified: .*/Last modified: " ..
+  :  \ strftime("%Y %b %d")
+  :endfun
+
+您需要在文件的前 20 行中有一行 "Last modified: <date time>" 才能使其工作。Vim 将 <date time>（以及同一行中它后面的任何内容）替换为当前日期和时间。解释：
+	ks		用标记 's' 标记当前位置
+	call LastMod()  调用 LastMod() 函数来执行工作
+	's		将光标返回到原来的位置
+LastMod() 函数检查文件是否少于 20 行，然后使用 ":g" 命令查找包含 "Last modified: " 的行。对于这些行，执行 ":s" 命令以将现有日期替换为当前日期。使用 ":execute" 命令是为了能够在 ":g" 和 ":s" 命令中使用表达式。日期通过 strftime() 函数获取。您可以更改其参数以获取不同的日期字符串。
+
+在命令行上输入 :autocmd 时，可以在适当的位置完成事件和命令名称的补全（使用 <Tab>、CTRL-D 等）。
+
+Vim 按照您指定的顺序执行所有匹配的自动命令。建议您使用 "*" 作为文件模式，将您的第一个自动命令用于所有文件。这意味着您可以在此处为您喜欢的任何设置定义默认值，如果有另一个匹配的自动命令，它将覆盖这些设置。但是，如果没有其他匹配的自动命令，那么至少您的默认设置会被恢复（如果从另一个确实匹配了自动命令的文件进入此文件）。请注意，与 Unix shell 不同，"*" 也会匹配以 "." 开头的文件。
+
+						    *autocmd-searchpat*
+自动命令不会更改当前的搜索模式。Vim 在执行自动命令之前保存当前的搜索模式，然后在自动命令完成后恢复它们。这意味着自动命令不会影响使用 'hlsearch' 选项高亮显示的字符串。在自动命令内部，您仍然可以正常使用搜索模式，例如使用 "n" 命令。
+如果您希望自动命令设置搜索模式，以便在自动命令完成后使用它，请使用 ":let @/ = " 命令。
+在自动命令中无法使用 ":nohlsearch" 关闭搜索高亮。请使用 'shada' 选项中的 'h' 标志来在启动 Vim 时禁用搜索高亮。
+
+							*Cmd-event*
+当使用 "*Cmd" 事件之一时，匹配的自动命令应执行文件读取、写入或来源。这在处理特殊类型的文件时很有用，例如在远程系统上。
+小心：如果您以错误的方式使用这些事件，可能会导致无法读取或写入匹配的文件！请确保正确测试您的自动命令。最好使用一个永远不会匹配普通文件名的模式，例如 "ftp://*"。
+
+当定义 BufReadCmd 时，Vim 将很难恢复崩溃的编辑会话。从原始文件恢复时，Vim 仅读取那些在交换文件中未找到的文件部分。由于使用 BufReadCmd 无法做到这一点，请使用 |:preserve| 命令以确保原始文件不需要用于恢复。您可能只希望在预期文件会被修改时执行此操作。
+
+对于文件读取和写入命令，|v:cmdarg| 变量保存有效的 "++enc=" 和 "++ff=" 参数。这些参数应应用于读取/写入文件的命令。|v:cmdbang| 变量在使用 "!" 时为 1，否则为 0。
+
+有关示例，请参见 $VIMRUNTIME/pack/dist/opt/netrw/plugin/netrwPlugin.vim。
+
+==============================================================================
+11. 禁用自动命令				*autocmd-disable*
+
+要在一段时间内禁用自动命令，请使用 'eventignore' 选项。请注意，这可能导致意外行为，请确保之后使用带有 |:finally| 的 |:try| 块恢复 'eventignore'。
+
+要在特定窗口中无限期禁用自动命令，请使用 'eventignorewin' 选项。这仅可用于忽略与窗口和缓冲区相关的事件。
+
+							*:noautocmd* *:noa*
+要为单个命令禁用自动命令，请使用 ":noautocmd" 命令修饰符。这将在后续命令期间将 'eventignore' 设置为 "all"。示例： >
+
+	:noautocmd w fname.gz
+
+这将写入文件而不会触发 gzip 插件定义的自动命令。
+
+请注意，某些自动命令不会立即触发，而是稍后触发。这尤其适用于 |CursorMoved| 和 |TextChanged|。
+
+
+ vim:tw=78:ts=8:noet:ft=help:norl:

@@ -10,6 +10,9 @@ return {
     -- },
     ["0R"] = {
       function()
+        --- test
+        --- test
+        --- test
         require("flash").treesitter()
       end,
       { "n", "x", "o" },
@@ -19,7 +22,7 @@ return {
       function()
         require("flash").remote()
       end,
-      "o",
+      "n",
       desc = "Remote Flash",
     },
     -- ["0R"] = {

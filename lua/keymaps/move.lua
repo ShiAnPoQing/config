@@ -81,6 +81,10 @@ return {
   ["gk"] = { gk, { "n", "x", "o" }, expr = true },
   ["gl"] = { gl, { "n", "x", "o" }, expr = true },
   ["gh"] = { gl, { "n", "x", "o" }, expr = true },
+  ["[k"] = { "-", { "n", "x", "o" }, desc = "[count] lines upward, on the first non-blank character [linewise]" },
+  ["]k"] = { "kg_", { "n", "x", "o" }, desc = "[count] lines upward, on the last non-blank character [linewise]" },
+  ["[j"] = { "+", { "n", "x", "o" }, desc = "[count] lines downward, on the first non-blank character [linewise]" },
+  ["]j"] = { "jg_", { "n", "x", "o" }, desc = "[count] lines downward, on the last non-blank character [linewise]" },
   ["H"] = { H, { "n", "x", "o" } },
   ["J"] = { J, { "n", "x", "o" } },
   ["K"] = { K, { "n", "x", "o" } },
@@ -298,6 +302,8 @@ return {
     { "n", "x", "o" },
     desc = "Screen Last Character",
   },
+  ["<M-a><M-h>"] = { "<C-o>g^", "i", desc = "Screen First Character" },
+  ["<M-a><M-l>"] = { "<esc>g<end>a", "i", desc = "Screen Last Character" },
   ["ak"] = {
     function()
       local function callback()
@@ -322,14 +328,6 @@ return {
   },
   ["am"] = {
     "gm",
-    -- function()
-    --   ---@diagnostic disable-next-line: undefined-field
-    --   local virtualedit = vim.opt_local.virtualedit:get()
-    --   if virtualedit[1] ~= "all" then
-    --     return "gM"
-    --   end
-    --   return "gm"
-    -- end,
     { "n", "x", "o" },
   },
   ["an"] = {
@@ -361,6 +359,8 @@ return {
     { "g$", "o" },
     desc = "Screen Last Character",
   },
+  ["<M-a><M-a><M-h>"] = { "<C-o>g0", "i", desc = "Screen First Character" },
+  ["<M-a><M-a><M-l>"] = { "<esc>g$a", "i", desc = "Screen Last Character" },
   ["aak"] = {
     function()
       require("builtin.screen-move").top()

@@ -62,7 +62,7 @@ Nvim 提供了一个 LSP 客户端，但服务器由第三方提供。按照以�
 
 当 LSP 激活时，默认情况下，如果 (1) 语言服务器支持该功能，并且 (2) 选项为空或由内置运行时（ftplugin）文件设置，它会启用下面列出的各种 LSP 功能并设置选项和键映射。当 LSP 客户端停止或分离时，这些选项不会恢复。
 
-全局默认值                       *gra* *gri* *grn* *grr* *grt* *i_CTRL-S*
+全局默认值                       *gra* *gri* *grn* *grr* *grt* *grx* *i_CTRL-S*
 
 当 Nvim 启动时，无条件创建以下全局键映射：
 
@@ -71,6 +71,7 @@ Nvim 提供了一个 LSP 客户端，但服务器由第三方提供。按照以�
 - "grn" 映射到 |vim.lsp.buf.rename()|
 - "grr" 映射到 |vim.lsp.buf.references()|
 - "grt" 映射到 |vim.lsp.buf.type_definition()|
+- "grx" is mapped to |vim.lsp.codelens.run()|
 - "gO" 映射到 |vim.lsp.buf.document_symbol()|
 - CTRL-S（插入模式）映射到 |vim.lsp.buf.signature_help()|
 - 如果 treesitter 未激活，|v_an| 和 |v_in| 会回退到 LSP |vim.lsp.buf.selection_range()|。
@@ -101,7 +102,7 @@ Nvim 提供了一个 LSP 客户端，但服务器由第三方提供。按照以�
   - 要选择退出，请使用 |gw| 代替 gq，或在 |LspAttach| 上清除 'formatexpr'。
 - |K| 映射到 |vim.lsp.buf.hover()|，除非 'keywordprg' 被自定义或存在自定义的 `K` 键映射。
 - 文档颜色已启用，用于高亮文档中的颜色引用。
-  - 要选择退出，请在 |LspAttach| 上调用 `vim.lsp.document_color.enable(false, ev.buf)`。
+  - 要选择退出，请在 |LspAttach| 上调用 `vim.lsp.document_color.enable(false, { bufnr = ev.buf })`。
 
 禁用默认值                                          *lsp-defaults-disable*
 
@@ -116,9 +117,9 @@ Nvim 提供了一个 LSP 客户端，但服务器由第三方提供。按照以�
         -- 取消设置 'omnifunc'
         vim.bo[ev.buf].omnifunc = nil
         -- 取消映射 K
-        vim.keymap.del('n', 'K', { buffer = ev.buf })
+        vim.keymap.del('n', 'K', { buf = ev.buf })
         -- 禁用文档颜色
-        vim.lsp.document_color.enable(false, ev.buf)
+        vim.lsp.document_color.enable(false, { bufnr = ev.buf })
       end,
     })
 <
@@ -898,7 +899,7 @@ enable({name}, {enable})                                    *vim.lsp.enable()*
     激活时才调用 `on_dir()`： >lua
         vim.lsp.config('lua_ls', {
           root_dir = function(bufnr, on_dir)
-            if not vim.fn.bufname(bufnr):match('%.txt$') then
+            if vim.fs.ext(vim.fn.bufname(bufnr)) ~= 'txt' then
               on_dir(vim.fn.getcwd())
             end
           end
@@ -1002,6 +1003,24 @@ get_clients({filter})                                  *vim.lsp.get_clients()*
     返回值: ~
         (`vim.lsp.Client[]`) |vim.lsp.Client| 对象列表
 
+get_configs({filter})                                  *vim.lsp.get_configs()*
+    获取 LSP 配置。
+
+    警告：
+    • 可能会急切地（过早地！）评估 'runtimepath' 中的配置文件。
+    • 如果配置具有异步属性（如 `on_dir()`），它们可能处于部分状态。
+
+    属性： ~
+        自版本：0.12.0
+
+    参数： ~
+      • {filter}  (`table?`) 用于过滤返回配置的键值对。
+                  • {enabled}? (`boolean`) 如果为 true，仅返回启用的配置。如果为 false，仅返回未启用的配置。
+                  • {filetype}? (`string`) 仅返回附加到给定文件类型的配置。
+
+    返回值： ~
+        (`vim.lsp.Config[]`) |vim.lsp.Config| 对象的列表
+
 is_enabled({name})                                      *vim.lsp.is_enabled()*
     检查给定的 LSP 配置是否已启用（全局范围，而非每个缓冲区）。
 
@@ -1022,8 +1041,8 @@ omnifunc({findstart}, {base})                             *vim.lsp.omnifunc()*
 
     返回值: ~
         (`整数|表`) 由 {findstart} 决定：
-        • findstart=0：补全开始的列，或 -2 或 -3
-        • findstart=1：匹配项列表（实际上只是调用 |complete()|）
+        • findstart=1：补全开始的列，或 -2 或 -3
+        • findstart=0：匹配项列表（实际上只是调用 |complete()|）
 
     另请参阅: ~
       • |complete-functions|
@@ -1814,8 +1833,8 @@ Lua 模块: vim.lsp.document_color                        *lsp-document_color*
 color_presentation()             *vim.lsp.document_color.color_presentation()*
     从光标下颜色的表示列表中选择一个。
 
-enable({enable}, {bufnr}, {opts})            *vim.lsp.document_color.enable()*
-    在给定缓冲区中启用来自给定语言客户端的文档高亮。
+enable({enable}, {filter}, {opts})           *vim.lsp.document_color.enable()*
+    为 {filter}ed 范围启用或禁用文档颜色高亮。
 
     要“切换”，请传递 `is_enabled()` 的反值： >lua
         vim.lsp.document_color.enable(not vim.lsp.document_color.is_enabled())
@@ -1823,19 +1842,23 @@ enable({enable}, {bufnr}, {opts})            *vim.lsp.document_color.enable()*
 
     参数: ~
       • {enable}  (`布尔值?`) True 启用，false 禁用。（默认：`true`）
-      • {bufnr}   (`整数?`) 缓冲区句柄，0 表示当前。（默认：0）
+      • {filter}  (`表?`) 可选过滤器 |kwargs|，
+                  • {bufnr}? (`整数`, 默认: all) 缓冲区编号，0 表示当前缓冲区，nil 表示所有。
+                  • {client_id}? (`整数`, 默认: all) 客户端 ID，nil 表示所有。
       • {opts}    (`表?`) 包含以下字段的表：
                   • {style}?
-                    (`'background'|'foreground'|'virtual'|字符串|fun(bufnr: 整数, range: Range4, hex_code: 字符串)`)
+                    (`'background'|'foreground'|'virtual'|字符串|fun(bufnr: 整数, range: vim.Range, hex_code: 字符串)`)
                     高亮样式。可以是预定义样式之一、用作虚拟文本的字符串，或者一个接收
                     缓冲区句柄、范围（起始行、起始列、结束行、结束列）和已解析十六进制颜色的函数。
                     （默认：`'background'`）
 
-is_enabled({bufnr})                      *vim.lsp.document_color.is_enabled()*
-    查询在给定缓冲区中是否启用了文档颜色。
+is_enabled({filter})                     *vim.lsp.document_color.is_enabled()*
+    查询在 {filter}ed 范围内是否启用了文档颜色。
 
     参数: ~
-      • {bufnr}  (`整数?`) 缓冲区句柄，0 表示当前。（默认：0）
+      • {filter}  (`表?`) 可选过滤器 |kwargs|，
+                  • {bufnr}? (`整数`, 默认: all) 缓冲区编号，0 表示当前缓冲区，nil 表示所有。
+                  • {client_id}? (`整数`, 默认: all) 客户端 ID，nil 表示所有。
 
     返回值: ~
         (`布尔值`)

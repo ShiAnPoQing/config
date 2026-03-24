@@ -1,0 +1,135 @@
+*health.txt*               Nvim
+
+
+                 NVIM 参考手册
+
+
+                                       键入 |gO| 查看目录。
+
+==============================================================================
+检查健康状态                                              *vim.health* *health*
+
+vim.health 是一个最小化的框架，旨在帮助用户排查配置以及插件可能关心的任何其他环境条件。Nvim 自带了对配置、性能、Python 支持、Ruby 支持、剪贴板支持等方面的健康检查。
+
+要运行所有健康检查，请使用：>vim
+    :checkhealth
+<
+
+鼓励插件作者编写新的健康检查。|health-dev|
+
+
+命令                                                     *health-commands*
+
+                                                           *:che* *:checkhealth*
+:che[ckhealth] 运行所有健康检查。
+                                                                       *E5009*
+               Nvim 依赖 |$VIMRUNTIME|、'runtimepath' 和 'packpath' 来查找用于语法高亮、文件类型特定行为以及标准插件（包括 :checkhealth）的标准“运行时文件”。如果找不到运行时文件，则这些功能将无法工作。
+
+:che[ckhealth] {plugins}
+                运行一个或多个插件的健康检查。例如，仅运行标准 Nvim 健康检查：>vim
+                        :checkhealth vim.health
+<
+                运行 "foo" 和 "bar" 插件的健康检查（假设它们在 'runtimepath' 上并且已实现 Lua `require("foo.health").check()` 接口）：>vim
+                        :checkhealth foo bar
+<
+                要运行 Lua 子模块的健康检查，请使用点号表示法或使用 "*" 表示所有子模块。例如 Nvim 提供 `vim.lsp` 和 `vim.treesitter`：>vim
+                        :checkhealth vim.lsp vim.treesitter
+                        :checkhealth vim*
+<
+
+用法                                                           *health-usage*
+
+健康检查缓冲区中的本地映射：
+
+q               关闭窗口。
+
+全局配置：
+                                                                    *g:health*
+g:health  包含以下可选键的字典：
+          - `style` (`'float'|nil`) 设置为 "float" 以在浮动窗口中显示 :checkhealth，而不是默认行为。
+
+          示例：>lua
+            vim.g.health = { style = 'float' }
+
+
+本地配置：
+
+Checkhealth 将其缓冲区的文件类型设置为 "checkhealth"。您可以通过处理 |FileType| 事件来自定义缓冲区。例如，如果您不希望在健康报告中显示表情符号：>vim
+    autocmd FileType checkhealth :set modifiable | silent! %s/\v( ?[^\x00-\x7F])//g
+<
+
+
+--------------------------------------------------------------------------------
+创建健康检查                                              *health-dev*
+
+健康检查是检查用户环境、配置或插件可能关心的任何其他先决条件的函数。Nvim 自带的健康检查位于：
+• $VIMRUNTIME/autoload/health/
+• $VIMRUNTIME/lua/vim/lsp/health.lua
+• $VIMRUNTIME/lua/vim/treesitter/health.lua
+• 等等...
+
+要为您的插件添加新的健康检查，只需在 'runtimepath' 上创建一个 "health.lua" 模块，该模块返回一个带有 "check()" 函数的表。然后 |:checkhealth| 会自动找到并调用该函数。
+
+例如，如果您的插件名为 "foo"，请在以下位置之一（位于 'runtimepath' 上）定义您的健康检查模块：
+• lua/foo/health/init.lua
+• lua/foo/health.lua
+
+如果您的插件还提供了一个名为 "bar" 的子模块，并且您希望为其单独进行健康检查，请在以下位置之一定义健康检查：
+• lua/foo/bar/health/init.lua
+• lua/foo/bar/health.lua
+
+所有这些健康模块必须返回一个包含 `check()` 函数的 Lua 表。
+
+将此示例代码复制到 `lua/foo/health.lua` 中，并将路径中的 "foo" 替换为您的插件名称：>lua
+    local M = {}
+
+    M.check = function()
+      vim.health.start("foo report")
+      -- 确保 setup 函数参数正确
+      if check_setup() then
+        vim.health.ok("Setup is correct")
+      else
+        vim.health.error("Setup is incorrect")
+      end
+      -- 进行更多检查
+      -- ...
+    end
+
+    return M
+<
+
+
+error({msg}, {...})                                       *vim.health.error()*
+    报告一个错误。
+
+    参数： ~
+      • {msg}  (`string`)
+      • {...}  (`string|string[]`) 可选的建议
+
+info({msg})                                                *vim.health.info()*
+    报告一条信息性消息。
+
+    参数： ~
+      • {msg}  (`string`)
+
+ok({msg})                                                    *vim.health.ok()*
+    报告一条“成功”消息。
+
+    参数： ~
+      • {msg}  (`string`)
+
+start({name})                                             *vim.health.start()*
+    开始一个新的报告。大多数插件应仅调用此函数一次，但如果您希望报告中出现不同的部分，请为每个部分调用一次此函数。
+
+    参数： ~
+      • {name}  (`string`)
+
+warn({msg}, {...})                                         *vim.health.warn()*
+    报告一个警告。
+
+    参数： ~
+      • {msg}  (`string`)
+      • {...}  (`string|string[]`) 可选的建议
+
+
+ vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:

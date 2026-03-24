@@ -49,9 +49,9 @@ return {
 
       -- 禁止 number column 和 relative number column
       -- 使用 statuscolumn 替代
-      number = false,
+      number = true,
       -- numberwidth = 0,
-      relativenumber = false,
+      relativenumber = true,
 
       hlsearch = true,
       incsearch = true,

@@ -1,9 +1,157 @@
 *help.txt*	Nvim
 
 ==============================================================================
-Nvim documentation
+Nvim 文档
 
-If you are new to Nvim, see |nvim-intro|. (To go to a help link, move the
-cursor to it and hit CTRL-], or ctrl-click with mouse. Try it here: |bars|.)
+如果您是 Nvim 新手，请参阅 |nvim-intro|。（要跳转到帮助链接，请将光标移动到链接上并按 CTRL-]，或使用鼠标 ctrl-click。在此处尝试：|bars|。）
 
-vim:tw=78:ts=8:noet:ft=help:norl:
+------------------------------------------------------------------------------
+关于 Nvim						*reference_toc* *Q_ct*
+
+- |news|		自上一版本以来的新闻
+- |nvim|		Nvim 入门
+- |tutor|		为初学者提供的 30 分钟交互式课程
+- |vim-differences|	Nvim 与 Vim 的比较
+- |faq|		常见问题解答
+- |tips|		各种技巧
+- |bugs|		报告 Bug 的地址
+- |support|		支持的平台
+- |copying|		关于版权
+
+------------------------------------------------------------------------------
+使用
+
+- |helphelp|		使用 `:help` 文件
+- |intro|		Vim 简介
+- |quickref|		常用命令概览
+- |index|		所有命令的索引
+- |user-manual|		用户手册：如何完成编辑任务。
+- |message.txt|		（错误）消息及其解释
+- |Kuwasha|		帮助乌干达的贫困儿童
+
+------------------------------------------------------------------------------
+基本编辑
+
+- |starting|		启动 Vim、Vim 命令参数、初始化
+- |edit-files|		编辑和写入文件
+- |motion.txt|		移动命令
+- |scrolling|		滚动窗口中的文本
+- |insert.txt|		插入和替换模式
+- |change.txt|		删除和替换文本
+- |undo-redo|		撤销和重做
+- |repeat.txt|		重复命令、Vim 脚本和调试
+- |visual-mode|		使用可视模式（选择文本）
+- |various|		各种其他命令
+- |crash-recovery|		从崩溃中恢复
+
+------------------------------------------------------------------------------
+高级编辑
+
+- |cmdline|		命令行编辑
+- |options|		所有选项的描述
+- |pattern-searches|	Vim 正则表达式模式和搜索命令
+- |key-mapping|		键映射（快捷键）、缩写
+- |tags|		标签和特殊搜索
+- |windows|		使用窗口和缓冲区的命令
+- |tabpage|		使用标签页的命令
+- |spell|		拼写检查
+- |diff|		比较文件
+- |folding|		隐藏（折叠）行范围
+- |terminal|		嵌入式终端模拟器
+
+------------------------------------------------------------------------------
+API（扩展性/脚本编写/插件）
+
+- |api|		通过 RPC、Lua 和 Vimscript 的 Nvim API
+- |ui|		Nvim UI 协议
+- |lua-guide|		Nvim Lua 指南
+- |lua|			Lua API
+- |luaref|		Lua 参考手册
+- |luvref|		Luv (|vim.uv|) 参考手册
+- |autocmd|		事件处理程序
+- |job-control|		生成和控制多个进程
+- |channel|		Nvim 异步 IO
+- |vimscript|		Vimscript 参考
+- |vimscript-functions|	Vimscript 函数
+- |remote-plugin|	Nvim 远程插件
+- |health|		健康检查
+
+------------------------------------------------------------------------------
+编程语言支持
+
+- |lsp|		语言服务器协议 (LSP)
+- |diagnostic-api|	诊断框架
+- |treesitter|		增量语法解析
+- |indent.txt|		C 语言和其他语言的自动缩进
+- |syntax|		语法高亮
+- |filetype|		特定类型文件的设置
+- |quickfix|		用于快速编辑-编译-修复循环的命令
+- |ft_ada.txt|		Ada 文件类型插件
+- |ft_hare.txt|		Hare 文件类型插件
+- |ft_ps1.txt|		PowerShell 文件类型插件
+- |ft_raku.txt|		Raku 文件类型插件
+- |ft_rust.txt|		Rust 文件类型插件
+- |ft_sql.txt|		SQL 文件类型插件
+
+------------------------------------------------------------------------------
+用户界面 (UI)
+
+- |tui|		内置 UI
+- |gui|		外部（图形化）UI
+- |signs|		显示为窗口装饰的标记（“边栏”）
+
+------------------------------------------------------------------------------
+多语言支持
+
+- |digraph|		可用双字符组合列表
+- |mbyte.txt|		多字节文本支持
+- |mlang.txt|		非英语语言支持
+- |rileft.txt|		从右到左编辑模式
+- |l10n-arabic.txt|	阿拉伯语支持和编辑
+- |l10n-hebrew.txt|	希伯来语支持和编辑
+- |l10n-russian.txt|	俄语支持和编辑
+- |l10n-vietnamese.txt|	越南语支持和编辑
+
+------------------------------------------------------------------------------
+互操作性
+
+- |provider|		内置远程插件宿主
+- |if_perl|		Perl 接口
+- |if_pyth|		Python 接口
+- |if_ruby|		Ruby 接口
+
+------------------------------------------------------------------------------
+版本
+
+- |deprecated|		将被移除的已弃用功能
+- |vi-differences|	Vim 与 Vi 的差异
+
+------------------------------------------------------------------------------
+开发 nvim
+
+- |dev|			Nvim 开发
+- |dev-arch|		内部架构、模块、数据结构
+- |dev-style|		开发风格指南
+- |dev-test|		编写和运行测试
+- |dev-theme|		设计指南（颜色方案等）
+- |dev-tools|		开发 Nvim 的工具和技术
+- |dev-vimpatch|		合并来自 Vim 的补丁
+
+标准插件 ~
+
+参见 |standard-plugin-list|。
+
+本地添加 ~
+							     *local-additions*
+
+------------------------------------------------------------------------------
+条形示例								*bars*
+
+现在您已使用 CTRL-] 或鼠标双击跳转至此，您可以使用 CTRL-T、CTRL-O、g<RightMouse> 或 <C-RightMouse> 返回之前所在位置。
+
+请注意，标签位于 | 字符内，但启用高亮时，这些字符会被隐藏（出于美观考虑）。
+
+您可以在任何单词上使用 CTRL-]（即使它不在 "|" 内），Nvim 会尝试为其查找帮助。特别是对于单引号中的选项，例如 'hlsearch'。
+
+
+ vim:tw=78:isk=!-~,^*,^\|,^\":ts=8:noet:ft=help:norl:

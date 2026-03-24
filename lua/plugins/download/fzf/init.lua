@@ -526,9 +526,9 @@ return {
       fzf.filetypes()
     end, {})
     require("fzf-lua").setup({
-      winopts = {
-        split = "belowright new",
-      },
+      -- winopts = {
+      --   split = "belowright new",
+      -- },
     })
     vim.api.nvim_create_user_command("FzFDirectories", function()
       local fzf_lua = require("fzf-lua")

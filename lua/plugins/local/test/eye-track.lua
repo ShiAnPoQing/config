@@ -1,6 +1,20 @@
 return {
   name = "eye-track.nvim",
   key = {
+    ["<leader><leader>t"] = {
+      function ()
+        require("eye-track.plugins.word")({
+          keyword = function()
+            return "\\k"
+          end,
+          label = { position = 1 },
+          matched = function(ctx)
+            vim.api.nvim_win_set_cursor(0, { ctx.row, ctx.end_col - 1 })
+          end,
+        })
+      end,
+      "n",
+    },
     ["0<space><space>w"] = {
       function()
         require("eye-track.plugins.line-start-end")({
