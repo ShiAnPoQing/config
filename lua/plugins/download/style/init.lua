@@ -17,6 +17,7 @@ return {
   {
     "folke/tokyonight.nvim",
     priority = 1000,
+    lazy = false,
     colorscheme = {
       "tokyonight",
       "tokyonight-day",
@@ -25,14 +26,16 @@ return {
       "tokyonight-moon",
     },
     config = function()
-      require("tokyonight").setup()
+      require("tokyonight").setup({
+        transparent = true,
+      })
       vim.cmd.colorscheme("tokyonight-night")
     end,
   },
   {
     "BrokenSunny/paradox.nvim",
     priority = 1000,
-    lazy = false,
+    lazy = true,
     colorscheme = "paradox",
     config = function()
       require("paradox").setup()

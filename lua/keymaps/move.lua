@@ -375,46 +375,6 @@ return {
     { "n", "x", "o" },
     desc = "Screen Bottom",
   },
-  ["sh"] = {
-    function()
-      return require("builtin.scroll-cursor").scroll_left()
-    end,
-    { "n", "x" },
-    expr = true,
-    desc = "Scroll the text horizontally to position the cursor at the start (left side) of the screen.",
-  },
-  ["sl"] = {
-    function()
-      return require("builtin.scroll-cursor").scroll_right()
-    end,
-    { "n", "x" },
-    expr = true,
-    desc = "Scroll the text horizontally to position the cursor at the end (right side) of the screen.",
-  },
-  ["sk"] = {
-    "zt",
-    { "n", "x" },
-    desc = "line [count] at top of window (default cursor line)(leave the cursor in the same column).",
-  },
-  ["sj"] = {
-    "zb",
-    { "n", "x" },
-    desc = "line [count] at bottom of window (default cursor line)(leave the cursor in the same column).",
-  },
-  ["sn"] = {
-    "zz",
-    { "n", "x" },
-    desc = "line [count] at center of window (default cursor line)(leave the cursor in the same column).",
-  },
-  -- TODO: Fix virtualedit=none
-  ["sm"] = {
-    function()
-      return require("builtin.scroll-cursor").scroll_row_center()
-    end,
-    { "n" },
-    expr = true,
-    desc = "col at center of window",
-  },
   ["<M-2><M-l>"] = {
     "<C-o>ze",
     "i",
@@ -470,6 +430,7 @@ return {
 -- },
 -- ["L"] = {
 --   {
+
 --     function()
 --       require("builtin.screen-move").last_character()
 --     end,
@@ -490,7 +451,7 @@ return {
 -- ["J"] = {
 --   {
 --     function()
---       require("builtin.screen-move").bottom()
+---       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()--       require("builtin.screen-move").bottom()-       require("builtin.screen-move").bottom()
 --     end,
 --     { "n", "x", "o" },
 --   },

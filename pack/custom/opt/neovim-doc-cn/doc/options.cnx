@@ -838,350 +838,287 @@ se[t]			字符串 "set " 或 "se "（注意空格）；当使用 "Vim"
 	将来版本使用其他默认值时出现的问题。
 	出于安全原因，此选项不能从 |modeline| 或 |sandbox| 中设置。
 
-					*'backupext'* *'bex'* *E589*
-'backupext' 'bex'	string	(default "~")
-			global
-	String which is appended to a file name to make the name of the
-	backup file.  The default is quite unusual, because this avoids
-	accidentally overwriting existing files with a backup file.  You might
-	prefer using ".bak", but make sure that you don't have files with
-	".bak" that you want to keep.
-	Only normal file name characters can be used; `/\*?[|<>` are illegal.
+						*'backupext'* *'bex'* *E589*
+'backupext' 'bex'	字符串	(默认 "~")
+			全局
+	附加到文件名后以生成备份文件名称的字符串。默认值相当不常见，因为这样
+	可以避免意外地用备份文件覆盖现有文件。你可能更喜欢使用 ".bak"，但请
+	确保你没有想要保留的 ".bak" 文件。
+	只能使用普通的文件名字符；`/\*?[|<>` 是非法的。
 
-	If you like to keep a lot of backups, you could use a BufWritePre
-	autocommand to change 'backupext' just before writing the file to
-	include a timestamp. >vim
+	如果你喜欢保留大量备份，可以使用 BufWritePre 自动命令在写入文件前
+	更改 'backupext' 以包含时间戳。 >vim
 		au BufWritePre * let &bex = '-' .. strftime("%Y%b%d%X") .. '~'
-<	Use 'backupdir' to put the backup in a different directory.
+<	使用 'backupdir' 将备份放在不同的目录中。
 
 						*'backupskip'* *'bsk'*
-'backupskip' 'bsk'	string	(default "$TMPDIR/*,$TMP/*,$TEMP/*"
+'backupskip' 'bsk'	字符串	(默认 "$TMPDIR/*,$TMP/*,$TEMP/*"
                                  Unix: "/tmp/*,$TMPDIR/*,$TMP/*,$TEMP/*"
                                  Mac: "/private/tmp/*,$TMPDIR/*,$TMP/*,$TEMP/*")
-			global
-	A list of file patterns.  When one of the patterns matches with the
-	name of the file which is written, no backup file is created.  Both
-	the specified file name and the full path name of the file are used.
-	The pattern is used like with |:autocmd|, see |autocmd-pattern|.
-	Watch out for special characters, see |option-backslash|.
-	When $TMPDIR, $TMP or $TEMP is not defined, it is not used for the
-	default value.  "/tmp/*" is only used for Unix.
+			全局
+	文件模式列表。当写入的文件名与其中一个模式匹配时，不会创建备份文件。
+	会使用指定的文件名和文件的完整路径名进行匹配。模式的使用方式与
+	|:autocmd| 相同，参见 |autocmd-pattern|。
+	注意特殊字符，参见 |option-backslash|。
+	如果未定义 $TMPDIR、$TMP 或 $TEMP，则默认值中不会使用它们。"/tmp/*"
+	仅在 Unix 上使用。
 
-	WARNING: Not having a backup file means that when Vim fails to write
-	your buffer correctly and then, for whatever reason, Vim exits, you
-	lose both the original file and what you were writing.  Only disable
-	backups if you don't care about losing the file.
+	警告：没有备份文件意味着，如果 Vim 未能正确写入缓冲区，然后无论出于
+	何种原因 Vim 退出，你将同时丢失原始文件和正在写入的内容。只有在你
+	不介意丢失文件时才禁用备份。
 
-	Note that environment variables are not expanded.  If you want to use
-	$HOME you must expand it explicitly, e.g.: >vim
+	请注意，环境变量不会被展开。如果你想使用 $HOME，你必须显式展开它，
+	例如： >vim
 		let &backupskip = escape(expand('$HOME'), '\') .. '/tmp/*'
 
-<	Note that the default also makes sure that "crontab -e" works (when a
-	backup would be made by renaming the original file crontab won't see
-	the newly created file).  Also see 'backupcopy' and |crontab|.
+<	注意，默认值也确保了 "crontab -e" 的工作（如果通过重命名原始文件
+	创建备份，crontab 将看不到新创建的文件）。另请参阅 'backupcopy' 和
+	|crontab|。
 
 						*'belloff'* *'bo'*
-'belloff' 'bo'		string	(default "all")
-			global
-	Specifies for which events the bell will not be rung.  It is a comma-
-	separated list of items.  For each item that is present, the bell will
-	be silenced.  This is most useful to specify specific events in insert
-	mode to be silenced.
-	You can also make it flash by using 'visualbell'.
+'belloff' 'bo'		字符串	(默认 "all")
+			全局
+	指定哪些事件不会响铃。它是一个逗号分隔的项目列表。对于每个存在的项目，
+	铃声将被静音。这对于指定插入模式下要静音的特定事件最有用。
+	你也可以通过使用 'visualbell' 使其闪烁。
 
-	item	    meaning when present	~
-	all	    All events.
-	backspace   When hitting <BS> or <Del> and deleting results in an
-		    error.
-	cursor	    Fail to move around using the cursor keys or
-		    <PageUp>/<PageDown> in |Insert-mode|.
-	complete    Error occurred when using |i_CTRL-X_CTRL-K| or
-		    |i_CTRL-X_CTRL-T|.
-	copy	    Cannot copy char from insert mode using |i_CTRL-Y| or
-		    |i_CTRL-E|.
-	ctrlg	    Unknown Char after <C-G> in Insert mode.
-	error	    Other Error occurred (e.g. try to join last line)
-		    (mostly used in |Normal-mode| or |Cmdline-mode|).
-	esc	    hitting <Esc> in |Normal-mode|.
-	hangul	    Ignored.
-	lang	    Calling the beep module for Lua/Mzscheme/TCL.
-	mess	    No output available for |g<|.
-	showmatch   Error occurred for 'showmatch' function.
-	operator    Empty region error |cpo-E|.
-	register    Unknown register after <C-R> in |Insert-mode|.
-	shell	    Bell from shell output |:!|.
-	spell	    Error happened on spell suggest.
-	term	    Bell from |:terminal| output.
-	wildmode    More matches in |cmdline-completion| available
-		    (depends on the 'wildmode' setting).
+	项目	    含义（存在时）	~
+	all	    所有事件。
+	backspace    按下 <BS> 或 <Del> 且删除导致错误时。
+	cursor	    在 |插入模式| 中使用光标键或 <PageUp>/<PageDown> 移动失败时。
+	complete	    使用 |i_CTRL-X_CTRL-K| 或 |i_CTRL-X_CTRL-T| 时发生错误。
+	copy	    无法使用 |i_CTRL-Y| 或 |i_CTRL-E| 从插入模式复制字符。
+	ctrlg	    在插入模式下，<C-G> 后出现未知字符。
+	error	    发生其他错误（例如，尝试合并最后一行）
+		    （主要用于 |普通模式| 或 |命令行模式|）。
+	esc	        在 |普通模式| 下按 <Esc>。
+	hangul	    已忽略。
+	lang	    为 Lua/Mzscheme/TCL 调用响铃模块。
+	mess	    没有可用于 |g<| 的输出。
+	showmatch    'showmatch' 功能发生错误。
+	operator	    空区域错误 |cpo-E|。
+	register	    在 |插入模式| 中，<C-R> 后出现未知寄存器。
+	shell	    来自 shell 输出的铃声 |:!|。
+	spell	    拼写建议时发生错误。
+	term	    来自 |:terminal| 输出的铃声。
+	wildmode	    有更多 |命令行补全| 匹配项可用
+		    （取决于 'wildmode' 设置）。
 
-	This is most useful to fine tune when in Insert mode the bell should
-	be rung.  For Normal mode and Ex commands, the bell is often rung to
-	indicate that an error occurred.  It can be silenced by adding the
-	"error" keyword.
+	这对于微调在插入模式下何时应该响铃最有用。对于普通模式和 Ex 命令，
+	响铃通常用于指示发生错误。可以通过添加 "error" 关键字来静音。
 
 				*'binary'* *'bin'* *'nobinary'* *'nobin'*
-'binary' 'bin'		boolean	(default off)
-			local to buffer
-	This option should be set before editing a binary file.  You can also
-	use the |-b| Vim argument.  When this option is switched on a few
-	options will be changed (also when it already was on):
-		'textwidth'  will be set to 0
-		'wrapmargin' will be set to 0
-		'modeline'   will be off
-		'expandtab'  will be off
-	Also, 'fileformat' and 'fileformats' options will not be used, the
-	file is read and written like 'fileformat' was "unix" (a single <NL>
-	separates lines).
-	The 'fileencoding' and 'fileencodings' options will not be used, the
-	file is read without conversion.
-	NOTE: When you start editing a(nother) file while the 'bin' option is
-	on, settings from autocommands may change the settings again (e.g.,
-	'textwidth'), causing trouble when editing.  You might want to set
-	'bin' again when the file has been loaded.
-	The previous values of these options are remembered and restored when
-	'bin' is switched from on to off.  Each buffer has its own set of
-	saved option values.
-	To edit a file with 'binary' set you can use the |++bin| argument.
-	This avoids you have to do ":set bin", which would have effect for all
-	files you edit.
-	When writing a file the <EOL> for the last line is only written if
-	there was one in the original file (normally Vim appends an <EOL> to
-	the last line if there is none; this would make the file longer).  See
-	the 'endofline' option.
+'binary' 'bin'		布尔	(默认关闭)
+			本地到缓冲区
+	在编辑二进制文件之前应设置此选项。你也可以使用 |-b| Vim 参数。
+	当此选项打开时，一些选项会被更改（即使它已经打开）：
+		'textwidth'  将被设置为 0
+		'wrapmargin' 将被设置为 0
+		'modeline'   将被关闭
+		'expandtab'  将被关闭
+	此外，'fileformat' 和 'fileformats' 选项将不会被使用，文件的读取和
+	写入就像 'fileformat' 是 "unix" 一样（用单个 <NL> 分隔行）。
+	'fileencoding' 和 'fileencodings' 选项将不会被使用，文件读取时不进行
+	转换。
+	注意：当 'bin' 选项打开时开始编辑（另一个）文件，自动命令的设置可能
+	会再次更改设置（例如 'textwidth'），导致编辑时出现问题。你可能想在
+	文件加载后再次设置 'bin'。
+	这些选项的先前值会被记住，并在 'bin' 从打开切换到关闭时恢复。每个
+	缓冲区都有自己的已保存选项值集。
+	要编辑设置了 'binary' 的文件，可以使用 |++bin| 参数。这样可以避免你
+	必须执行 ":set bin"，后者会影响你编辑的所有文件。
+	写入文件时，仅当原始文件中存在最后一行的 <EOL> 时才会写入（通常如果
+	最后一行没有 <EOL>，Vim 会附加一个 <EOL>；这会使文件变长）。参见
+	'endofline' 选项。
 
 						*'bomb'* *'nobomb'*
-'bomb'			boolean	(default off)
-			local to buffer
-	When writing a file and the following conditions are met, a BOM (Byte
-	Order Mark) is prepended to the file:
-	- this option is on
-	- the 'binary' option is off
-	- 'fileencoding' is "utf-8", "ucs-2", "ucs-4" or one of the little/big
-	  endian variants.
-	Some applications use the BOM to recognize the encoding of the file.
-	Often used for UCS-2 files on MS-Windows.  For other applications it
-	causes trouble, for example: "cat file1 file2" makes the BOM of file2
-	appear halfway through the resulting file.  Gcc doesn't accept a BOM.
-	When Vim reads a file and 'fileencodings' starts with "ucs-bom", a
-	check for the presence of the BOM is done and 'bomb' set accordingly.
-	Unless 'binary' is set, it is removed from the first line, so that you
-	don't see it when editing.  When you don't change the options, the BOM
-	will be restored when writing the file.
+'bomb'			布尔	(默认关闭)
+			本地到缓冲区
+	写入文件且满足以下条件时，会在文件前加上 BOM（字节顺序标记）：
+	- 此选项打开
+	- 'binary' 选项关闭
+	- 'fileencoding' 是 "utf-8"、"ucs-2"、"ucs-4" 或小端/大端变体之一。
+	某些应用程序使用 BOM 来识别文件的编码。常用于 MS-Windows 上的 UCS-2
+	文件。对于其他应用程序，这会引起问题，例如："cat file1 file2" 会使
+	file2 的 BOM 出现在结果文件的中间。Gcc 不接受 BOM。
+	当 Vim 读取文件且 'fileencodings' 以 "ucs-bom" 开头时，会检查 BOM
+	的存在并相应设置 'bomb'。除非设置了 'binary'，否则它会被从第一行
+	移除，这样你在编辑时就不会看到它。如果你不更改选项，写入文件时将
+	恢复 BOM。
 
 						*'breakat'* *'brk'*
-'breakat' 'brk'		string	(default " ^I!@*-+;:,./?")
-			global
-	This option lets you choose which characters might cause a line
-	break if 'linebreak' is on.  Only works for ASCII characters.
+'breakat' 'brk'		字符串	(默认 " ^I!@*-+;:,./?")
+			全局
+	此选项允许你选择哪些字符可能导致换行（如果 'linebreak' 打开）。
+	仅对 ASCII 字符有效。
 
 			*'breakindent'* *'bri'* *'nobreakindent'* *'nobri'*
-'breakindent' 'bri'	boolean	(default off)
-			local to window
-	Every wrapped line will continue visually indented (same amount of
-	space as the beginning of that line), thus preserving horizontal
-	blocks of text.
+'breakindent' 'bri'	布尔	(默认关闭)
+			本地到窗口
+	每个换行的行在视觉上将继续缩进（与该行开头相同的空格量），从而保留
+	文本的水平块。
 
 					*'breakindentopt'* *'briopt'*
-'breakindentopt' 'briopt'	string	(default "")
-			local to window
-	Settings for 'breakindent'.  It can consist of the following optional
-	items and must be separated by a comma:
-		min:{n}	    Minimum text width that will be kept after
-			    applying 'breakindent', even if the resulting
-			    text should normally be narrower.  This prevents
-			    text indented almost to the right window border
-			    occupying lots of vertical space when broken.
-			    (default: 20)
-		shift:{n}   After applying 'breakindent', the wrapped line's
-			    beginning will be shifted by the given number of
-			    characters.  It permits dynamic French paragraph
-			    indentation (negative) or emphasizing the line
-			    continuation (positive).
-			    (default: 0)
-		sbr	    Display the 'showbreak' value before applying the
-			    additional indent.
-			    (default: off)
-		list:{n}    Adds an additional indent for lines that match a
-			    numbered or bulleted list (using the
-			    'formatlistpat' setting).
-			    (default: 0)
-		list:-1	    Uses the width of a match with 'formatlistpat' for
-			    indentation.
-		column:{n}  Indent at column {n}.  Will overrule the other
-			    sub-options.  Note: an additional indent may be
-			    added for the 'showbreak' setting.
-			    (default: off)
+'breakindentopt' 'briopt'	字符串	(默认 "")
+			本地到窗口
+	'breakindent' 的设置。它可以包含以下可选项目，并且必须用逗号分隔：
+		min:{n}	    应用 'breakindent' 后保持的最小文本宽度，即使结果
+			    文本通常应该更窄。这可以防止缩进几乎到窗口右边框的
+			    文本在换行时占用大量垂直空间。
+			    (默认: 20)
+		shift:{n}   应用 'breakindent' 后，换行行的开头将移动给定的
+			    字符数。它允许动态的法语段落缩进（负值）或强调
+			    行继续（正值）。
+			    (默认: 0)
+		sbr	        在应用额外缩进之前显示 'showbreak' 值。
+			    (默认: 关闭)
+		list:{n}    为匹配编号或项目符号列表的行添加额外的缩进
+			    （使用 'formatlistpat' 设置）。
+			    (默认: 0)
+		list:-1	    使用与 'formatlistpat' 匹配的宽度作为缩进。
+		column:{n}  在列 {n} 缩进。将覆盖其他子选项。
+			    注意：可能会为 'showbreak' 设置添加额外的缩进。
+			    (默认: 关闭)
 
 						*'bufhidden'* *'bh'*
-'bufhidden' 'bh'	string	(default "")
-			local to buffer  |local-noglobal|
-	This option specifies what happens when a buffer is no longer
-	displayed in a window:
-	  <empty>	follow the global 'hidden' option
-	  hide		hide the buffer (don't unload it), even if 'hidden' is
-			not set
-	  unload	unload the buffer, even if 'hidden' is set; the
-			|:hide| command will also unload the buffer
-	  delete	delete the buffer from the buffer list, even if
-			'hidden' is set; the |:hide| command will also delete
-			the buffer, making it behave like |:bdelete|
-	  wipe		wipe the buffer from the buffer list, even if
-			'hidden' is set; the |:hide| command will also wipe
-			out the buffer, making it behave like |:bwipeout|
+'bufhidden' 'bh'	字符串	(默认 "")
+			本地到缓冲区  |local-noglobal|
+	此选项指定当缓冲区不再显示在窗口中时会发生什么：
+	  <empty>	遵循全局的 'hidden' 选项
+	  hide		隐藏缓冲区（不要卸载它），即使未设置 'hidden'
+	  unload	卸载缓冲区，即使设置了 'hidden'；|:hide| 命令也会
+			卸载缓冲区
+	  delete	从缓冲区列表中删除缓冲区，即使设置了 'hidden'；
+			|:hide| 命令也会删除缓冲区，使其行为类似于 |:bdelete|
+	  wipe		从缓冲区列表中擦除缓冲区，即使设置了 'hidden'；
+			|:hide| 命令也会擦除缓冲区，使其行为类似于 |:bwipeout|
 
-	CAREFUL: when "unload", "delete" or "wipe" is used changes in a buffer
-	are lost without a warning.  Also, these values may break autocommands
-	that switch between buffers temporarily.
-	This option is used together with 'buftype' and 'swapfile' to specify
-	special kinds of buffers.   See |special-buffers|.
+	小心：当使用 "unload"、"delete" 或 "wipe" 时，缓冲区中的更改会丢失
+	且不会发出警告。此外，这些值可能会破坏临时切换缓冲区的自动命令。
+	此选项与 'buftype' 和 'swapfile' 一起用于指定特殊类型的缓冲区。
+	参见 |special-buffers|。
 
 			*'buflisted'* *'bl'* *'nobuflisted'* *'nobl'* *E85*
-'buflisted' 'bl'	boolean	(default on)
-			local to buffer
-	When this option is set, the buffer shows up in the buffer list.  If
-	it is reset it is not used for ":bnext", "ls", the Buffers menu, etc.
-	This option is reset by Vim for buffers that are only used to remember
-	a file name or marks.  Vim sets it when starting to edit a buffer.
-	But not when moving to a buffer with ":buffer".
+'buflisted' 'bl'	布尔	(默认开启)
+			本地到缓冲区
+	当设置此选项时，缓冲区会显示在缓冲区列表中。如果重置它，它不会用于
+	":bnext"、"ls"、"Buffers" 菜单等。
+	对于仅用于记住文件名或标记的缓冲区，Vim 会重置此选项。当开始编辑
+	缓冲区时，Vim 会设置它。但使用 ":buffer" 移动到缓冲区时不会设置。
 
 						*'buftype'* *'bt'* *E382*
-'buftype' 'bt'		string	(default "")
-			local to buffer  |local-noglobal|
-	The value of this option specifies the type of a buffer:
-	  <empty>	normal buffer
-	  acwrite	buffer will always be written with |BufWriteCmd|s
-	  help		help buffer (do not set this manually)
-	  nofile	buffer is not related to a file, will not be written
-	  nowrite	buffer will not be written
-	  prompt	buffer where only the last section can be edited, for
-			use by plugins. |prompt-buffer|
-	  quickfix	list of errors |:cwindow| or locations |:lwindow|
-	  terminal	|terminal-emulator| buffer
+'buftype' 'bt'		字符串	(默认 "")
+			本地到缓冲区  |local-noglobal|
+	此选项的值指定缓冲区的类型：
+	  <empty>	普通缓冲区
+	  acwrite	缓冲区将始终使用 |BufWriteCmd| 写入
+	  help		帮助缓冲区（不要手动设置此项）
+	  nofile	缓冲区与文件无关，不会被写入
+	  nowrite	缓冲区不会被写入
+	  prompt	缓冲区只有最后一部分可以编辑，供插件使用 |prompt-buffer|
+	  quickfix	错误列表 |:cwindow| 或位置列表 |:lwindow|
+	  terminal	|terminal-emulator| 缓冲区
 
-	This option is used together with 'bufhidden' and 'swapfile' to
-	specify special kinds of buffers.   See |special-buffers|.
-	Also see |win_gettype()|, which returns the type of the window.
+	此选项与 'bufhidden' 和 'swapfile' 一起用于指定特殊类型的缓冲区。
+	参见 |special-buffers|。
+	另请参阅 |win_gettype()|，它返回窗口的类型。
 
-	Be careful with changing this option, it can have many side effects!
-	One such effect is that Vim will not check the timestamp of the file,
-	if the file is changed by another program this will not be noticed.
+	更改此选项时要小心，它可能产生许多副作用！一个这样的副作用是 Vim
+	不会检查文件的时间戳，如果文件被另一个程序更改，将不会被注意到。
 
-	A "quickfix" buffer is only used for the error list and the location
-	list.  This value is set by the |:cwindow| and |:lwindow| commands and
-	you are not supposed to change it.
+	"quickfix" 缓冲区仅用于错误列表和位置列表。此值由 |:cwindow| 和
+	|:lwindow| 命令设置，你不应更改它。
 
-	"nofile" and "nowrite" buffers are similar:
-	both:		The buffer is not to be written to disk, ":w" doesn't
-			work (":w filename" does work though).
-	both:		The buffer is never considered to be 'modified'.
-			There is no warning when the changes will be lost, for
-			example when you quit Vim.
-	both:		A swap file is only created when using too much memory
-			(when 'swapfile' has been reset there is never a swap
-			file).
-	nofile only:	The buffer name is fixed, it is not handled like a
-			file name.  It is not modified in response to a |:cd|
-			command.
-	both:		When using ":e bufname" and already editing "bufname"
-			the buffer is made empty and autocommands are
-			triggered as usual for |:edit|.
+	"nofile" 和 "nowrite" 缓冲区类似：
+	两者：		缓冲区不会写入磁盘，":w" 不起作用（但 ":w filename"
+			有效）。
+	两者：		缓冲区永远不会被视为 'modified'。当更改将丢失时，
+			例如退出 Vim 时，不会有警告。
+	两者：		仅在内存使用过多时创建交换文件（当 'swapfile' 已重置时，
+			绝不会创建交换文件）。
+	nofile 仅：	缓冲区名称是固定的，不会像文件名一样处理。它不会响应
+			|:cd| 命令而修改。
+	两者：		当使用 ":e bufname" 且已经在编辑 "bufname" 时，缓冲区
+			会被清空，并像 |:edit| 一样照常触发自动命令。
 							*E676*
-	"acwrite" implies that the buffer name is not related to a file, like
-	"nofile", but it will be written.  Thus, in contrast to "nofile" and
-	"nowrite", ":w" does work and a modified buffer can't be abandoned
-	without saving.  For writing there must be matching |BufWriteCmd|,
-	|FileWriteCmd| or |FileAppendCmd| autocommands.
+	"acwrite" 意味着缓冲区名称与文件无关，如 "nofile"，但它会被写入。
+	因此，与 "nofile" 和 "nowrite" 相比，":w" 确实有效，并且不能在
+	不保存的情况下放弃已修改的缓冲区。写入必须要有匹配的 |BufWriteCmd|、
+	|FileWriteCmd| 或 |FileAppendCmd| 自动命令。
 
 							*'busy'*
-'busy'			number	(default 0)
-			local to buffer
-	Sets a buffer "busy" status. Indicated in the default statusline.
-	When busy status is larger then 0 busy flag is shown in statusline.
-	The semantics of "busy" are arbitrary, typically decided by the plugin that owns the buffer.
+'busy'			数字	(默认 0)
+			本地到缓冲区
+	设置缓冲区的 "busy" 状态。在默认状态行中指示。当 busy 状态大于 0 时，
+	状态行中会显示 busy 标志。"busy" 的语义是任意的，通常由拥有该缓冲区的
+	插件决定。
 
 						*'casemap'* *'cmp'*
-'casemap' 'cmp'		string	(default "internal,keepascii")
-			global
-	Specifies details about changing the case of letters.  It may contain
-	these words, separated by a comma:
-	internal	Use internal case mapping functions, the current
-			locale does not change the case mapping. When
-			"internal" is omitted, the towupper() and towlower()
-			system library functions are used when available.
-	keepascii	For the ASCII characters (0x00 to 0x7f) use the US
-			case mapping, the current locale is not effective.
-			This probably only matters for Turkish.
+'casemap' 'cmp'		字符串	(默认 "internal,keepascii")
+			全局
+	指定更改字母大小写的详细信息。它可以包含以下单词，以逗号分隔：
+	internal	使用内部大小写映射函数，当前语言环境不会更改大小写
+			映射。省略 "internal" 时，如果可用，则使用系统库函数
+			towupper() 和 towlower()。
+	keepascii	对于 ASCII 字符（0x00 到 0x7f），使用美国大小写映射，
+			当前语言环境无效。这可能只对土耳其语有影响。
 
 				*'cdhome'* *'cdh'* *'nocdhome'* *'nocdh'*
-'cdhome' 'cdh'		boolean	(default on on Unix, off on Windows)
-			global
-	When on, |:cd|, |:tcd| and |:lcd| without an argument changes the
-	current working directory to the |$HOME| directory like in Unix.
-	When off, those commands just print the current directory name.
-	This option cannot be set from a |modeline| or in the |sandbox|, for
-	security reasons.
+'cdhome' 'cdh'		布尔	(默认 Unix 上开启，Windows 上关闭)
+			全局
+	开启时，不带参数的 |:cd|、|:tcd| 和 |:lcd| 会将当前工作目录更改为
+	|$HOME| 目录，就像在 Unix 中一样。关闭时，这些命令仅打印当前目录名。
+	出于安全原因，此选项不能从 |modeline| 或 |sandbox| 中设置。
 
 					*'cdpath'* *'cd'* *E344* *E346*
-'cdpath' 'cd'		string	(default equivalent to $CDPATH or ",,")
-			global
-	This is a list of directories which will be searched when using the
-	|:cd|, |:tcd| and |:lcd| commands, provided that the directory being
-	searched for has a relative path, not an absolute part starting with
-	"/", "./" or "../", the 'cdpath' option is not used then.
-	The 'cdpath' option's value has the same form and semantics as
-	'path'.  Also see |file-searching|.
-	The default value is taken from $CDPATH, with a "," prepended to look
-	in the current directory first.
-	If the default value taken from $CDPATH is not what you want, include
-	a modified version of the following command in your vimrc file to
-	override it: >vim
+'cdpath' 'cd'		字符串	(默认等同于 $CDPATH 或 ",,")
+			全局
+	这是一个目录列表，当使用 |:cd|、|:tcd| 和 |:lcd| 命令时，如果正在
+	搜索的目录是相对路径，而不是以 "/"、"./" 或 "../" 开头的绝对路径，
+	则会搜索此列表，否则不使用 'cdpath' 选项。
+	'cdpath' 选项的值具有与 'path' 相同的形式和语义。另请参阅
+	|file-searching|。
+	默认值取自 $CDPATH，并在前面加上一个 "," 以便在当前目录中首先查找。
+	如果取自 $CDPATH 的默认值不是您想要的，请在您的 vimrc 文件中包含以下
+	命令的修改版本以覆盖它： >vim
 	  let &cdpath = ',' .. substitute(substitute($CDPATH, '[, ]', '\\\0', 'g'), ':', ',', 'g')
-<	Environment variables are expanded |:set_env|.
-	This option cannot be set from a |modeline| or in the |sandbox|, for
-	security reasons.
-	(parts of 'cdpath' can be passed to the shell to expand file names).
+<	环境变量会被展开 |:set_env|。
+	出于安全原因，此选项不能从 |modeline| 或 |sandbox| 中设置。
+	（'cdpath' 的部分可以传递给 shell 以展开文件名）。
 
 							*'cedit'*
-'cedit'			string	(default CTRL-F)
-			global
-	The key used in Command-line Mode to open the command-line window.
-	Only non-printable keys are allowed.
-	The key can be specified as a single character, but it is difficult to
-	type.  The preferred way is to use |key-notation| (e.g. <Up>, <C-F>) or
-	a letter preceded with a caret (e.g. `^F` is CTRL-F).  Examples: >vim
+'cedit'			字符串	(默认 CTRL-F)
+			全局
+	在命令行模式下用于打开命令行窗口的键。只允许使用非可打印键。
+	该键可以指定为单个字符，但很难键入。首选方法是使用 |key-notation|
+	（例如 <Up>、<C-F>）或前面带有脱字符的字母（例如 `^F` 是 CTRL-F）。
+	示例： >vim
 		set cedit=^Y
 		set cedit=<Esc>
-<	|Nvi| also has this option, but it only uses the first character.
-	See |cmdwin|.
+<	|Nvi| 也有此选项，但它只使用第一个字符。参见 |cmdwin|。
 
 							*'channel'*
-'channel'		number	(default 0)
-			local to buffer
-	|channel| connected to the buffer, or 0 if no channel is connected.
-	In a |:terminal| buffer this is the terminal channel.
-	Read-only.
+'channel'		数字	(默认 0)
+			本地到缓冲区
+	连接到缓冲区的 |channel|，如果没有连接通道则为 0。在 |:terminal|
+	缓冲区中，这是终端通道。只读。
 
 				*'charconvert'* *'ccv'* *E202* *E214* *E513*
-'charconvert' 'ccv'	string	(default "")
-			global
-	An expression that is used for character encoding conversion.  It is
-	evaluated when a file that is to be read or has been written has a
-	different encoding from what is desired.
-	'charconvert' is not used when the internal iconv() function is
-	supported and is able to do the conversion.  Using iconv() is
-	preferred, because it is much faster.
-	'charconvert' is not used when reading stdin |--|, because there is no
-	file to convert from.  You will have to save the text in a file first.
-	The expression must return zero, false or an empty string for success,
-	non-zero or true for failure.
-	See |encoding-names| for possible encoding names.
-	Additionally, names given in 'fileencodings' and 'fileencoding' are
-	used.
-	Conversion between "latin1", "unicode", "ucs-2", "ucs-4" and "utf-8"
-	is done internally by Vim, 'charconvert' is not used for this.
-	Also used for Unicode conversion.
-	Example: >vim
+'charconvert' 'ccv'	字符串	(默认 "")
+			全局
+	用于字符编码转换的表达式。当要读取或已写入的文件具有与期望不同的
+	编码时，将评估此表达式。
+	如果支持内部 iconv() 函数并且能够进行转换，则不使用 'charconvert'。
+	首选使用 iconv()，因为它快得多。
+	读取 stdin |--| 时不使用 'charconvert'，因为没有要转换的文件。你
+	必须先将文本保存在文件中。
+	表达式必须返回零、false 或空字符串表示成功，返回非零或 true 表示
+	失败。
+	有关可能的编码名称，请参见 |encoding-names|。
+	此外，还会使用 'fileencodings' 和 'fileencoding' 中给出的名称。
+	Vim 内部处理 "latin1"、"unicode"、"ucs-2"、"ucs-4" 和 "utf-8" 之间的
+	转换，为此不使用 'charconvert'。也用于 Unicode 转换。
+	示例： >vim
 		set charconvert=CharConvert()
 		fun CharConvert()
 		  system("recode "
@@ -1189,674 +1126,523 @@ se[t]			字符串 "set " 或 "se "（注意空格）；当使用 "Vim"
 			\ .. " <" .. v:fname_in .. " >" .. v:fname_out)
 		  return v:shell_error
 		endfun
-<	The related Vim variables are:
-		v:charconvert_from	name of the current encoding
-		v:charconvert_to	name of the desired encoding
-		v:fname_in		name of the input file
-		v:fname_out		name of the output file
-	Note that v:fname_in and v:fname_out will never be the same.
+<	相关的 Vim 变量是：
+		v:charconvert_from	当前编码的名称
+		v:charconvert_to	所需编码的名称
+		v:fname_in		输入文件的名称
+		v:fname_out		输出文件的名称
+	注意 v:fname_in 和 v:fname_out 永远不会相同。
 
-	The advantage of using a function call without arguments is that it is
-	faster, see |expr-option-function|.
+	使用无参数的函数调用的优点是速度更快，参见 |expr-option-function|。
 
-	If the 'charconvert' expression starts with s: or |<SID>|, then it is
-	replaced with the script ID (|local-function|).  Example: >vim
+	如果 'charconvert' 表达式以 s: 或 |<SID>| 开头，则会被替换为脚本 ID
+	（|local-function|）。示例： >vim
 		set charconvert=s:MyConvert()
 		set charconvert=<SID>SomeConvert()
-<	Otherwise the expression is evaluated in the context of the script
-	where the option was set, thus script-local items are available.
+<	否则，表达式将在设置选项的脚本上下文中评估，因此脚本本地项目可用。
 
-	This option cannot be set from a |modeline| or in the |sandbox|, for
-	security reasons.
+	出于安全原因，此选项不能从 |modeline| 或 |sandbox| 中设置。
 
 					*'chistory'* *'chi'* *E1542* *E1543*
-'chistory' 'chi'	number	(default 10)
-			global
-	Number of quickfix lists that should be remembered for the quickfix
-	stack.  Must be between 1 and 100.  If the option is set to a value
-	that is lower than the amount of entries in the quickfix list stack,
-	entries will be removed starting from the oldest one.  If the current
-	quickfix list was removed, then the quickfix list at top of the stack
-	(the most recently created) will be used in its place.  For additional
-	info, see |quickfix-stack|.
+'chistory' 'chi'	数字	(默认 10)
+			全局
+	快速修复堆栈应记住的快速修复列表数量。必须在 1 到 100 之间。
+	如果该选项设置为低于快速修复列表堆栈中条目数的值，将从最旧的条目开始
+	移除条目。如果当前快速修复列表被移除，则将使用堆栈顶部的快速修复列表
+	（最近创建的）代替。有关其他信息，请参见 |quickfix-stack|。
 
 				*'cindent'* *'cin'* *'nocindent'* *'nocin'*
-'cindent' 'cin'		boolean	(default off)
-			local to buffer
-	Enables automatic C program indenting.  See 'cinkeys' to set the keys
-	that trigger reindenting in insert mode and 'cinoptions' to set your
-	preferred indent style.
-	If 'indentexpr' is not empty, it overrules 'cindent'.
-	If 'lisp' is not on and both 'indentexpr' and 'equalprg' are empty,
-	the "=" operator indents using this algorithm rather than calling an
-	external program.
-	See |C-indenting|.
-	When you don't like the way 'cindent' works, try the 'smartindent'
-	option or 'indentexpr'.
+'cindent' 'cin'		布尔	(默认关闭)
+			本地到缓冲区
+	启用自动 C 程序缩进。请参阅 'cinkeys' 以设置在插入模式下触发重新缩进
+	的键，并参阅 'cinoptions' 以设置你喜欢的缩进样式。
+	如果 'indentexpr' 不为空，它将覆盖 'cindent'。
+	如果 'lisp' 未打开，且 'indentexpr' 和 'equalprg' 都为空，则 "="
+	运算符使用此算法进行缩进，而不是调用外部程序。
+	参见 |C-indenting|。
+	如果你不喜欢 'cindent' 的工作方式，可以尝试 'smartindent' 选项或
+	'indentexpr'。
 
 						*'cinkeys'* *'cink'*
-'cinkeys' 'cink'	string	(default "0{,0},0),0],:,0#,!^F,o,O,e")
-			local to buffer
-	A list of keys that, when typed in Insert mode, cause reindenting of
-	the current line.  Only used if 'cindent' is on and 'indentexpr' is
-	empty.
-	For the format of this option see |cinkeys-format|.
-	See |C-indenting|.
+'cinkeys' 'cink'	字符串	(默认 "0{,0},0),0],:,0#,!^F,o,O,e")
+			本地到缓冲区
+	在插入模式下键入时会导致当前行重新缩进的键列表。仅当 'cindent' 打开
+	且 'indentexpr' 为空时使用。
+	有关此选项的格式，请参见 |cinkeys-format|。
+	参见 |C-indenting|。
 
 						*'cinoptions'* *'cino'*
-'cinoptions' 'cino'	string	(default "")
-			local to buffer
-	The 'cinoptions' affect the way 'cindent' reindents lines in a C
-	program.  See |cinoptions-values| for the values of this option, and
-	|C-indenting| for info on C indenting in general.
+'cinoptions' 'cino'	字符串	(默认 "")
+			本地到缓冲区
+	'cinoptions' 影响 'cindent' 在 C 程序中重新缩进行的方式。有关此选项
+	的值，请参见 |cinoptions-values|；有关 C 缩进的一般信息，请参见
+	|C-indenting|。
 
 					*'cinscopedecls'* *'cinsd'*
-'cinscopedecls' 'cinsd'	string	(default "public,protected,private")
-			local to buffer
-	Keywords that are interpreted as a C++ scope declaration by |cino-g|.
-	Useful e.g. for working with the Qt framework that defines additional
-	scope declarations "signals", "public slots" and "private slots": >vim
+'cinscopedecls' 'cinsd'	字符串	(默认 "public,protected,private")
+			本地到缓冲区
+	被 |cino-g| 解释为 C++ 作用域声明的关键字。例如，对于使用 Qt 框架
+	（该框架定义了额外的作用域声明 "signals"、"public slots" 和
+	"private slots"）的情况很有用： >vim
 		set cinscopedecls+=signals,public\ slots,private\ slots
 <
 
 						*'cinwords'* *'cinw'*
-'cinwords' 'cinw'	string	(default "if,else,while,do,for,switch")
-			local to buffer
-	These keywords start an extra indent in the next line when
-	'smartindent' or 'cindent' is set.  For 'cindent' this is only done at
-	an appropriate place (inside {}).
-	Note that 'ignorecase' isn't used for 'cinwords'.  If case doesn't
-	matter, include the keyword both the uppercase and lowercase:
-	"if,If,IF".
+'cinwords' 'cinw'	字符串	(默认 "if,else,while,do,for,switch")
+			本地到缓冲区
+	当设置了 'smartindent' 或 'cindent' 时，这些关键字会在下一行开始
+	额外的缩进。对于 'cindent'，这仅在适当的位置（在 {} 内）进行。
+	注意，'ignorecase' 不用于 'cinwords'。如果大小写无关紧要，请同时包含
+	关键字的大写和小写形式："if,If,IF"。
 
 						*'clipboard'* *'cb'*
-'clipboard' 'cb'	string	(default "")
-			global
-	This option is a list of comma-separated names.
-	These names are recognized:
+'clipboard' 'cb'	字符串	(默认 "")
+			全局
+	此选项是逗号分隔的名称列表。识别以下名称：
 
 						*clipboard-unnamed*
-	unnamed		When included, Vim will use the clipboard register "*"
-			for all yank, delete, change and put operations which
-			would normally go to the unnamed register.  When a
-			register is explicitly specified, it will always be
-			used regardless of whether "unnamed" is in 'clipboard'
-			or not.  The clipboard register can always be
-			explicitly accessed using the "* notation.  Also see
-			|clipboard|.
+	unnamed		当包含此项时，Vim 会将剪贴板寄存器 "*" 用于通常进入
+			无名寄存器的所有拉取、删除、更改和放置操作。当显式
+			指定寄存器时，无论 'clipboard' 中是否包含 "unnamed"，
+			都将始终使用该寄存器。剪贴板寄存器始终可以使用 "*"
+			符号显式访问。另请参阅 |clipboard|。
 
 						*clipboard-unnamedplus*
-	unnamedplus	A variant of the "unnamed" flag which uses the
-			clipboard register "+" (|quoteplus|) instead of
-			register "*" for all yank, delete, change and put
-			operations which would normally go to the unnamed
-			register.  When "unnamed" is also included to the
-			option, yank and delete operations (but not put)
-			will additionally copy the text into register
-			"*". See |clipboard|.
+	unnamedplus	"unnamed" 标志的一个变体，它对通常进入无名寄存器的
+			所有拉取、删除、更改和放置操作使用剪贴板寄存器 "+"
+			（|quoteplus|）而不是寄存器 "*"。当选项中也包含
+			"unnamed" 时，拉取和删除操作（但不包括放置）将额外
+			将文本复制到寄存器 "*"。请参阅 |clipboard|。
 
 						*'cmdheight'* *'ch'*
-'cmdheight' 'ch'	number	(default 1)
-			global or local to tab page
-	Number of screen lines to use for the command-line.  Helps avoiding
-	|hit-enter| prompts.
-	The value of this option is stored with the tab page, so that each tab
-	page can have a different value.
+'cmdheight' 'ch'	数字	(默认 1)
+			全局或本地到标签页
+	用于命令行的屏幕行数。有助于避免 |hit-enter| 提示。
+	此选项的值与标签页一起存储，因此每个标签页可以有不同的值。
 
-	When 'cmdheight' is zero, there is no command-line unless it is being
-	used.  The command-line will cover the last line of the screen when
-	shown.
+	当 'cmdheight' 为零时，除非正在使用，否则没有命令行。命令行显示时
+	将覆盖屏幕的最后一行。
 
-	WARNING: `cmdheight=0` is EXPERIMENTAL. Expect some unwanted behaviour.
-	Some 'shortmess' flags and similar mechanism might fail to take effect,
-	causing unwanted hit-enter prompts.  Some informative messages, both
-	from Nvim itself and plugins, will not be displayed.
+	警告：`cmdheight=0` 是实验性的。可能会出现一些不良行为。某些
+	'shortmess' 标志和类似机制可能无法生效，导致不必要的 hit-enter 提示。
+	来自 Nvim 本身和插件的一些信息性消息将不会显示。
 
 						*'cmdwinheight'* *'cwh'*
-'cmdwinheight' 'cwh'	number	(default 7)
-			global
-	Number of screen lines to use for the command-line window. |cmdwin|
+'cmdwinheight' 'cwh'	数字	(默认 7)
+			全局
+	用于命令行窗口的屏幕行数。|cmdwin|
 
 						*'colorcolumn'* *'cc'*
-'colorcolumn' 'cc'	string	(default "")
-			local to window
-	'colorcolumn' is a comma-separated list of screen columns that are
-	highlighted with ColorColumn |hl-ColorColumn|.  Useful to align
-	text.  Will make screen redrawing slower.
-	The screen column can be an absolute number, or a number preceded with
-	'+' or '-', which is added to or subtracted from 'textwidth'. >vim
+'colorcolumn' 'cc'	字符串	(默认 "")
+			本地到窗口
+	'colorcolumn' 是一个逗号分隔的屏幕列列表，这些列会用 ColorColumn
+	|hl-ColorColumn| 高亮显示。有助于对齐文本。会使屏幕重绘变慢。
+	屏幕列可以是绝对数字，也可以是前面带有 '+' 或 '-' 的数字，表示与
+	'textwidth' 相加或相减。 >vim
 
-		set cc=+1	  " highlight column after 'textwidth'
-		set cc=+1,+2,+3  " highlight three columns after 'textwidth'
+		set cc=+1	  " 高亮显示 'textwidth' 之后的一列
+		set cc=+1,+2,+3  " 高亮显示 'textwidth' 之后的三列
 		hi ColorColumn ctermbg=lightgrey guibg=lightgrey
 <
-	When 'textwidth' is zero then the items with '-' and '+' are not used.
-	A maximum of 256 columns are highlighted.
+	当 'textwidth' 为零时，带有 '-' 和 '+' 的项目不被使用。最多高亮显示
+	256 列。
 
 						*'columns'* *'co'* *E594*
-'columns' 'co'		number	(default 80 or terminal width)
-			global
-	Number of columns of the screen.  Normally this is set by the terminal
-	initialization and does not have to be set by hand.
-	When Vim is running in the GUI or in a resizable window, setting this
-	option will cause the window size to be changed.  When you only want
-	to use the size for the GUI, put the command in your |ginit.vim| file.
-	When you set this option and Vim is unable to change the physical
-	number of columns of the display, the display may be messed up.  For
-	the GUI it is always possible and Vim limits the number of columns to
-	what fits on the screen.  You can use this command to get the widest
-	window possible: >vim
+'columns' 'co'		数字	(默认 80 或终端宽度)
+			全局
+	屏幕的列数。通常由终端初始化设置，无需手动设置。
+	当 Vim 在 GUI 中或在可调整大小的窗口中运行时，设置此选项将导致窗口
+	大小更改。如果你只想为 GUI 使用该大小，请将命令放在你的 |ginit.vim|
+	文件中。
+	当你设置此选项且 Vim 无法更改显示器的物理列数时，显示可能会混乱。
+	对于 GUI，总是可以更改，并且 Vim 会将列数限制为适合屏幕的数量。
+	你可以使用此命令获得尽可能宽的窗口： >vim
 		set columns=9999
-<	Minimum value is 12, maximum value is 10000.
+<	最小值为 12，最大值为 10000。
 
-					*'comments'* *'com'* *E524* *E525*
-'comments' 'com'	string	(default "s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-,fb:•")
-			local to buffer
-	A comma-separated list of strings that can start a comment line.  See
-	|format-comments|.  See |option-backslash| about using backslashes to
-	insert a space.
+						*'comments'* *'com'* *E524* *E525*
+'comments' 'com'	字符串	(默认 "s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-,fb:•")
+			本地到缓冲区
+	一个逗号分隔的字符串列表，这些字符串可以开始一个注释行。参见
+	|format-comments|。关于使用反斜杠插入空格，请参见 |option-backslash|。
 
 					*'commentstring'* *'cms'* *E537*
-'commentstring' 'cms'	string	(default "")
-			local to buffer
-	A template for a comment.  The "%s" in the value is replaced with the
-	comment text, and should be padded with a space when possible.
-	Used for |commenting| and to add markers for folding, see |fold-marker|.
+'commentstring' 'cms'	字符串	(默认 "")
+			本地到缓冲区
+	注释的模板。值中的 "%s" 会被替换为注释文本，并且可能的话应填充一个空格。
+	用于 |commenting| 和添加折叠标记，参见 |fold-marker|。
 
 						*'complete'* *'cpt'* *E535*
-'complete' 'cpt'	string	(default ".,w,b,u,t")
-			local to buffer
-	This option controls how completion |ins-completion| behaves when
-	using CTRL-P, CTRL-N, or |ins-autocompletion|.  It is also used for
-	whole-line completion |i_CTRL-X_CTRL-L|.  It indicates the type of
-	completion and the places to scan.  It is a comma-separated list of
-	flags:
-	.	scan the current buffer ('wrapscan' is ignored)
-	w	scan buffers from other windows
-	b	scan other loaded buffers that are in the buffer list
-	u	scan the unloaded buffers that are in the buffer list
-	U	scan the buffers that are not in the buffer list
-	k	scan the files given with the 'dictionary' option
-	kspell  use the currently active spell checking |spell|
-	k{dict}	scan the file {dict}.  Several "k" flags can be given,
-		patterns are valid too.  For example: >vim
+'complete' 'cpt'	字符串	(默认 ".,w,b,u,t")
+			本地到缓冲区
+	此选项控制使用 CTRL-P、CTRL-N 或 |ins-autocompletion| 时补全
+	|ins-completion| 的行为。它也用于整行补全 |i_CTRL-X_CTRL-L|。
+	它指示补全的类型和要扫描的位置。它是一个逗号分隔的标志列表：
+	.	扫描当前缓冲区（忽略 'wrapscan'）
+	w	扫描其他窗口中的缓冲区
+	b	扫描缓冲区列表中已加载的其他缓冲区
+	u	扫描缓冲区列表中未加载的缓冲区
+	U	扫描不在缓冲区列表中的缓冲区
+	k	扫描 'dictionary' 选项给出的文件
+	kspell	使用当前激活的拼写检查 |spell|
+	k{dict}	扫描文件 {dict}。可以给出多个 "k" 标志，模式也有效。例如： >vim
 			set cpt=k/usr/dict/*,k~/spanish
-<	s	scan the files given with the 'thesaurus' option
-	s{tsr}	scan the file {tsr}.  Several "s" flags can be given, patterns
-		are valid too.
-	i	scan current and included files
-	d	scan current and included files for defined name or macro
+<	s	扫描 'thesaurus' 选项给出的文件
+	s{tsr}	扫描文件 {tsr}。可以给出多个 "s" 标志，模式也有效。
+	i	扫描当前文件和包含的文件
+	d	扫描当前文件和包含的文件以获取定义名称或宏
 		|i_CTRL-X_CTRL-D|
-	]	tag completion
-	t	same as "]"
-	f	scan the buffer names (as opposed to buffer contents)
-	F{func}	call the function {func}.  Multiple "F" flags may be
-		specified.  Refer to |complete-functions| for details on how
-		the function is invoked and what it should return.  The value
-		can be the name of a function or a |Funcref|.  For |Funcref|
-		values, spaces must be escaped with a backslash ('\'), and
-		commas with double backslashes ('\\') (see |option-backslash|).
-		Unlike other sources, functions can provide completions
-		starting from a non-keyword character before the cursor, and
-		their start position for replacing text may differ from other
-		sources.  If the Dict returned by the {func} includes
-		`{"refresh": "always"}`, the function will be invoked again
-		whenever the leading text changes.
-		If generating matches is potentially slow, call
-		|complete_check()| periodically to keep Vim responsive.  This
-		is especially important for |ins-autocompletion|.
-	F	equivalent to using "F{func}", where the function is taken
-		from the 'completefunc' option.
-	o	equivalent to using "F{func}", where the function is taken
-		from the 'omnifunc' option.
+	]	标签补全
+	t	同 "]"
+	f	扫描缓冲区名称（与缓冲区内容相对）
+	F{func}	调用函数 {func}。可以指定多个 "F" 标志。有关如何调用函数以及
+		它应返回什么的详细信息，请参阅 |complete-functions|。该值可以
+		是函数名或 |Funcref|。对于 |Funcref| 值，空格必须用反斜杠
+		（'\'）转义，逗号用双反斜杠（'\\'）转义（参见 |option-backslash|）。
+		与其他源不同，函数可以提供从光标前非关键字字符开始的补全，
+		并且它们用于替换文本的起始位置可能与其他源不同。如果 {func}
+		返回的字典包含 `{"refresh": "always"}`，则每当引导文本更改时，
+		将再次调用该函数。
+		如果生成匹配项可能很慢，请定期调用 |complete_check()| 以保持
+		Vim 的响应性。这对于 |ins-autocompletion| 尤其重要。
+	F	相当于使用 "F{func}"，其中函数取自 'completefunc' 选项。
+	o	相当于使用 "F{func}"，其中函数取自 'omnifunc' 选项。
 
-	Unloaded buffers are not loaded, thus their autocmds |:autocmd| are
-	not executed, this may lead to unexpected completions from some files
-	(gzipped files for example).  Unloaded buffers are not scanned for
-	whole-line completion.
+	未加载的缓冲区不会被加载，因此它们的自动命令 |:autocmd| 不会被执行，
+	这可能导致从某些文件（例如 gzip 压缩的文件）中获得意外的补全。未加载的
+	缓冲区不会为整行补全进行扫描。
 
-	CTRL-N, CTRL-P, and |ins-autocompletion| can be used for any
-	'iskeyword'-based completion (dictionary |i_CTRL-X_CTRL-K|, included
-	patterns |i_CTRL-X_CTRL-I|, tags |i_CTRL-X_CTRL-]|, and normal
-	expansions).  With the "F" and "o" flags in 'complete', non-keywords
-	can also be completed.
+	CTRL-N、CTRL-P 和 |ins-autocompletion| 可用于任何基于 'iskeyword' 的补全
+	（字典 |i_CTRL-X_CTRL-K|、包含模式 |i_CTRL-X_CTRL-I|、标签
+	|i_CTRL-X_CTRL-]| 和普通展开）。通过 'complete' 中的 "F" 和 "o" 标志，
+	也可以补全非关键字。
 
-	An optional match limit can be specified for a completion source by
-	appending a caret ("^") followed by a {count} to the source flag.
-	For example: ".^9,w,u,t^5" limits matches from the current buffer to 9
-	and from tags to 5.  Other sources remain unlimited.
-	Note: The match limit takes effect only during forward completion
-	(CTRL-N) and is ignored during backward completion (CTRL-P).
+	可以通过在源标志后附加脱字符（"^"）后跟 {count} 来为补全源指定可选的
+	匹配限制。例如：".^9,w,u,t^5" 将当前缓冲区的匹配限制为 9 个，标签的
+	匹配限制为 5 个。其他源保持无限制。
+	注意：匹配限制仅在前向补全（CTRL-N）期间生效，在后向补全（CTRL-P）期间
+	被忽略。
 
 						*'completefunc'* *'cfu'*
-'completefunc' 'cfu'	string	(default "")
-			local to buffer
-	This option specifies a function to be used for Insert mode completion
-	with CTRL-X CTRL-U. |i_CTRL-X_CTRL-U|
-	See |complete-functions| for an explanation of how the function is
-	invoked and what it should return.  The value can be the name of a
-	function, a |lambda| or a |Funcref|.  See |option-value-function| for
-	more information.
-	This option cannot be set from a |modeline| or in the |sandbox|, for
-	security reasons.
+'completefunc' 'cfu'	字符串	(默认 "")
+			本地到缓冲区
+	此选项指定一个函数，用于使用 CTRL-X CTRL-U 进行插入模式补全。
+	|i_CTRL-X_CTRL-U|
+	有关如何调用函数以及它应返回什么的说明，请参阅 |complete-functions|。
+	该值可以是函数名、|lambda| 或 |Funcref|。更多信息请参见
+	|option-value-function|。
+	出于安全原因，此选项不能从 |modeline| 或 |sandbox| 中设置。
 
 					*'completeitemalign'* *'cia'*
-'completeitemalign' 'cia'	string	(default "abbr,kind,menu")
-			global
-	A comma-separated list of strings that controls the alignment and
-	display order of items in the popup menu during Insert mode
-	completion.  The supported values are "abbr", "kind", and "menu".
-	These values allow customizing how |complete-items| are shown in the
-	popup menu.  Note: must always contain those three values in any
-	order.
+'completeitemalign' 'cia'	字符串	(默认 "abbr,kind,menu")
+			全局
+	一个逗号分隔的字符串列表，控制插入模式补全期间弹出菜单中项目的对齐方式
+	和显示顺序。支持的值有 "abbr"、"kind" 和 "menu"。这些值允许自定义
+	|complete-items| 在弹出菜单中的显示方式。注意：必须始终包含这三个值，
+	顺序不限。
 
 						*'completeopt'* *'cot'*
-'completeopt' 'cot'	string	(default "menu,popup")
-			global or local to buffer |global-local|
-	A comma-separated list of options for Insert mode completion
-	|ins-completion|.  The supported values are:
+'completeopt' 'cot'	字符串	(默认 "menu,popup")
+			全局或本地到缓冲区 |global-local|
+	插入模式补全 |ins-completion| 的选项列表，以逗号分隔。支持的值有：
 
-	   fuzzy    Enable |fuzzy-matching| for completion candidates.  This
-		    allows for more flexible and intuitive matching, where
-		    characters can be skipped and matches can be found even
-		    if the exact sequence is not typed (disabled for thesaurus
-		    completion |compl-thesaurus|).
+	   fuzzy    为补全候选项启用 |fuzzy-matching|。这允许更灵活、更直观的匹配，
+		    可以跳过字符，即使没有键入精确序列也能找到匹配项
+		    （对同义词库补全 |compl-thesaurus| 禁用）。
 
-	   longest
-		    When 'autocomplete' is not active, only the longest common
-		    prefix of the matches is inserted (disabled for thesaurus
-		    completion |compl-thesaurus|).  If the popup menu is
-		    displayed, you can use CTRL-L to add more characters.
-		    Whether case is ignored depends on the type of completion.
-		    For buffer text the 'ignorecase' option applies.
+	   longest  当 'autocomplete' 未激活时，仅插入匹配项的最长公共前缀
+		    （对同义词库补全 |compl-thesaurus| 禁用）。如果显示弹出菜单，
+		    可以使用 CTRL-L 添加更多字符。是否忽略大小写取决于补全类型。
+		    对于缓冲区文本，适用 'ignorecase' 选项。
 
-		    When 'autocomplete' is active and no completion item is
-		    selected, the longest common prefix of the matches is
-		    inserted after the cursor.  The prefix is taken either
-		    from all displayed items or only from items in the current
-		    buffer.  The inserted text is highlighted with
-		    |hl-PreInsert|, and the cursor position does not change
-		    (similar to `"preinsert"`).  Press CTRL-Y to accept.
-		    See also |preinserted()|.
+		    当 'autocomplete' 激活且未选择补全项时，光标后插入匹配项的最长
+		    公共前缀。前缀取自所有显示的项目或仅取自当前缓冲区中的项目。
+		    插入的文本使用 |hl-PreInsert| 高亮显示，光标位置不变
+		    （类似于 `"preinsert"`）。按 CTRL-Y 接受。
+		    另请参见 |preinserted()|。
 
-	   menu	    Use a popup menu to show the possible completions.  The
-		    menu is only shown when there is more than one match and
-		    sufficient colors are available.  |ins-completion-menu|
+	   menu	  使用弹出菜单显示可能的补全项。只有当有多个匹配项且可用颜色足够时，
+		    才会显示菜单。|ins-completion-menu|
 
-	   menuone  Use the popup menu also when there is only one match.
-		    Useful when there is additional information about the
-		    match, e.g., what file it comes from.
+	   menuone 即使只有一个匹配项，也显示弹出菜单。当有关于匹配项的额外信息时
+		    （例如它来自哪个文件），这很有用。
 
-	   nearest  Matches are listed based on their proximity to the cursor
-		    position, unlike the default behavior, which only
-		    considers proximity for matches appearing below the
-		    cursor.  This applies only to matches from the current
-		    buffer.  No effect if "fuzzy" is present.
+	   nearest  匹配项根据它们与光标位置的接近程度列出，而默认行为只考虑光标
+		    下方匹配项的接近程度。这仅适用于当前缓冲区的匹配项。
+		    如果存在 "fuzzy"，则无效。
 
-	   noinsert Do not insert any text for a match until the user selects
-		    a match from the menu.  Only works in combination with
-		    "menu" or "menuone". No effect if "longest" is present.
+	   noinsert 在用户从菜单中选择匹配项之前，不插入任何匹配文本。仅与 "menu"
+		    或 "menuone" 结合使用。如果存在 "longest"，则无效。
 
-	   noselect Same as "noinsert", except that no menu item is
-		    pre-selected.  If both "noinsert" and "noselect" are
-		    present, "noselect" takes precedence.  This is enabled
-		    automatically when 'autocomplete' is on, unless
-		    "preinsert" is also enabled.
+	   noselect 与 "noinsert" 相同，只是没有预先选择菜单项。如果同时存在
+		    "noinsert" 和 "noselect"，"noselect" 优先。当 'autocomplete'
+		    开启时，除非也启用了 "preinsert"，否则会自动启用此选项。
 
-	   nosort   Disable sorting of completion candidates based on fuzzy
-		    scores when "fuzzy" is enabled.  Candidates will appear
-		    in their original order.
+	   nosort   启用 "fuzzy" 时，禁用基于模糊分数对补全候选项的排序。候选项将
+		    以其原始顺序显示。
 
-	   popup    Show extra information about the currently selected
-		    completion in a popup window.  Only works in combination
-		    with "menu" or "menuone".  Overrides "preview".
+	   popup    在弹出窗口中显示有关当前所选补全项的额外信息。仅与 "menu" 或
+		    "menuone" 结合使用。覆盖 "preview"。
 
 	   preinsert
-		    Inserts the text of the first completion candidate beyond
-		    the current leader, highlighted with |hl-PreInsert|.
-		    The cursor does not move.
-		    Requires "fuzzy" to be unset, and either "menuone" in
-		    'completeopt' or 'autocomplete' enabled.  When
-		    'autocomplete' is enabled, this does not work if
-		    'ignorecase' is set without 'infercase'.
-		    See also |preinserted()|.
+		    插入第一个补全候选项超出当前前导符的文本，使用 |hl-PreInsert|
+		    高亮显示。光标不移动。
+		    要求 "fuzzy" 未设置，并且 'completeopt' 中设置了 "menuone"
+		    或启用了 'autocomplete'。当启用 'autocomplete' 时，如果设置了
+		    'ignorecase' 而未设置 'infercase'，则此功能无效。
+		    另请参见 |preinserted()|。
 
-	   preview  Show extra information about the currently selected
-		    completion in the preview window.  Only works in
-		    combination with "menu" or "menuone".
+	   preview  在预览窗口中显示有关当前所选补全项的额外信息。仅与 "menu" 或
+		    "menuone" 结合使用。
 
-	Only "fuzzy", "longest", "popup", "preinsert" and "preview" have an
-	effect when 'autocomplete' is enabled.
+	当启用 'autocomplete' 时，只有 "fuzzy"、"longest"、"popup"、"preinsert"
+	和 "preview" 有效。
 
-	This option does not apply to |cmdline-completion|.  See 'wildoptions'
-	for that.
+	此选项不适用于 |cmdline-completion|。有关命令行补全，请参阅 'wildoptions'。
 
 						*'completeslash'* *'csl'*
-'completeslash' 'csl'	string	(default "")
-			local to buffer
-			only modifiable in MS-Windows
-	When this option is set it overrules 'shellslash' for completion:
-	- When this option is set to "slash", a forward slash is used for path
-	  completion in insert mode.  This is useful when editing HTML tag, or
-	  Makefile with 'noshellslash' on MS-Windows.
-	- When this option is set to "backslash", backslash is used.  This is
-	  useful when editing a batch file with 'shellslash' set on
-	  MS-Windows.
-	- When this option is empty, same character is used as for
-	  'shellslash'.
-	For Insert mode completion the buffer-local value is used.  For
-	command line completion the global value is used.
+'completeslash' 'csl'	字符串	(默认 "")
+			本地到缓冲区
+			仅在 MS-Windows 上可修改
+	设置此选项时，它将覆盖补全时的 'shellslash'：
+	- 当此选项设置为 "slash" 时，插入模式下的路径补全使用正斜杠。
+	  这在 MS-Windows 上编辑 HTML 标签或使用 'noshellslash' 的 Makefile
+	  时很有用。
+	- 当此选项设置为 "backslash" 时，使用反斜杠。这在 MS-Windows 上编辑
+	  批处理文件且设置了 'shellslash' 时很有用。
+	- 当此选项为空时，使用与 'shellslash' 相同的字符。
+	对于插入模式补全，使用缓冲区本地值。对于命令行补全，使用全局值。
 
 					*'completetimeout'* *'cto'*
-'completetimeout' 'cto'	number	(default 0)
-			global
-	Like 'autocompletetimeout', but applies to |i_CTRL-N| and |i_CTRL-P|
-	completion.  Value of 0 disables the timeout; positive values allowed.
+'completetimeout' 'cto'	数字	(默认 0)
+			全局
+	类似于 'autocompletetimeout'，但适用于 |i_CTRL-N| 和 |i_CTRL-P| 补全。
+	值为 0 禁用超时；允许正数值。
 
 					*'concealcursor'* *'cocu'*
-'concealcursor' 'cocu'	string	(default "")
-			local to window
-	Sets the modes in which text in the cursor line can also be concealed.
-	When the current mode is listed then concealing happens just like in
-	other lines.
-	  n		Normal mode
-	  v		Visual mode
-	  i		Insert mode
-	  c		Command line editing, for 'incsearch'
+'concealcursor' 'cocu'	字符串	(默认 "")
+			本地到窗口
+	设置在哪些模式下光标行中的文本也可以被隐藏。当当前模式被列出时，
+	隐藏行为与其他行相同。
+	  n		普通模式
+	  v		可视模式
+	  i		插入模式
+	  c		命令行编辑，用于 'incsearch'
 
-	'v' applies to all lines in the Visual area, not only the cursor.
-	A useful value is "nc".  This is used in help files.  So long as you
-	are moving around text is concealed, but when starting to insert text
-	or selecting a Visual area the concealed text is displayed, so that
-	you can see what you are doing.
-	Keep in mind that the cursor position is not always where it's
-	displayed.  E.g., when moving vertically it may change column.
+	'v' 适用于可视区域中的所有行，而不仅仅是光标行。
+	一个有用的值是 "nc"。这在帮助文件中使用。只要你在移动，文本就会被隐藏，
+	但当开始插入文本或选择可视区域时，隐藏的文本会显示出来，这样你可以看到
+	你在做什么。
+	请记住，光标位置并不总是它显示的位置。例如，垂直移动时，它可能会改变列。
 
 						*'conceallevel'* *'cole'*
-'conceallevel' 'cole'	number	(default 0)
-			local to window
-	Determine how text with the "conceal" syntax attribute |:syn-conceal|
-	is shown:
+'conceallevel' 'cole'	数字	(默认 0)
+			本地到窗口
+	确定带有 "conceal" 语法属性的文本 |:syn-conceal| 的显示方式：
 
-	Value		Effect ~
-	0		Text is shown normally
-	1		Each block of concealed text is replaced with one
-			character.  If the syntax item does not have a custom
-			replacement character defined (see |:syn-cchar|) the
-			character defined in 'listchars' is used.
-			It is highlighted with the "Conceal" highlight group.
-	2		Concealed text is completely hidden unless it has a
-			custom replacement character defined (see
-			|:syn-cchar|).
-	3		Concealed text is completely hidden.
+	值		效果 ~
+	0		文本正常显示
+	1		每个隐藏文本块被替换为一个字符。如果语法项没有定义
+			自定义替换字符（参见 |:syn-cchar|），则使用 'listchars'
+			中定义的字符。它使用 "Conceal" 高亮组高亮显示。
+	2		隐藏文本完全隐藏，除非定义了自定义替换字符
+			（参见 |:syn-cchar|）。
+	3		隐藏文本完全隐藏。
 
-	Note: in the cursor line concealed text is not hidden, so that you can
-	edit and copy the text.  This can be changed with the 'concealcursor'
-	option.
+	注意：在光标行中，隐藏文本不会被隐藏，以便你可以编辑和复制文本。这可以
+	通过 'concealcursor' 选项更改。
 
 				*'confirm'* *'cf'* *'noconfirm'* *'nocf'*
-'confirm' 'cf'		boolean	(default off)
-			global
-	When 'confirm' is on, certain operations that would normally
-	fail because of unsaved changes to a buffer, e.g. ":q" and ":e",
-	instead raise a dialog asking if you wish to save the current
-	file(s).  You can still use a ! to unconditionally |abandon| a buffer.
-	If 'confirm' is off you can still activate confirmation for one
-	command only (this is most useful in mappings) with the |:confirm|
-	command.
-	Also see the |confirm()| function and the 'v' flag in 'guioptions'.
+'confirm' 'cf'		布尔	(默认关闭)
+			全局
+	当 'confirm' 开启时，某些通常因缓冲区未保存更改而失败的操作，例如
+	":q" 和 ":e"，会弹出一个对话框询问你是否希望保存当前文件。你仍然可以
+	使用 ! 无条件地 |abandon| 缓冲区。
+	如果 'confirm' 关闭，你仍然可以使用 |:confirm| 命令仅为一个命令激活
+	确认（这在映射中最有用）。
+	另请参阅 |confirm()| 函数和 'guioptions' 中的 'v' 标志。
 
 			*'copyindent'* *'ci'* *'nocopyindent'* *'noci'*
-'copyindent' 'ci'	boolean	(default off)
-			local to buffer
-	Copy the structure of the existing lines indent when autoindenting a
-	new line.  Normally the new indent is reconstructed by a series of
-	tabs followed by spaces as required (unless 'expandtab' is enabled,
-	in which case only spaces are used).  Enabling this option makes the
-	new line copy whatever characters were used for indenting on the
-	existing line.  'expandtab' has no effect on these characters, a Tab
-	remains a Tab.  If the new indent is greater than on the existing
-	line, the remaining space is filled in the normal manner.
-	See 'preserveindent'.
+'copyindent' 'ci'	布尔	(默认关闭)
+			本地到缓冲区
+	在自动缩进新行时，复制现有行的缩进结构。通常，新的缩进是通过一系列
+	制表符后跟所需的空格重建的（除非启用了 'expandtab'，在这种情况下只使用
+	空格）。启用此选项使新行复制现有行上用于缩进的任何字符。'expandtab'
+	对这些字符没有影响，制表符仍然是制表符。如果新缩进大于现有行的缩进，
+	剩余空间将以正常方式填充。参见 'preserveindent'。
 
 						*'cpoptions'* *'cpo'* *cpo*
-'cpoptions' 'cpo'	string	(default "aABceFs_")
-			global
-	A sequence of single character flags.  When a character is present
-	this indicates Vi-compatible behavior.  This is used for things where
-	not being Vi-compatible is mostly or sometimes preferred.
-	'cpoptions' stands for "compatible-options".
-	Commas can be added for readability.
-	To avoid problems with flags that are added in the future, use the
-	"+=" and "-=" feature of ":set" |add-option-flags|.
+'cpoptions' 'cpo'	字符串	(默认 "aABceFs_")
+			全局
+	单字符标志序列。当存在某个字符时，表示 Vi 兼容的行为。这用于那些
+	不兼容 Vi 的行为大部分或有时更受偏好的情况。
+	'cpoptions' 代表 "compatible-options"。
+	可以添加逗号以提高可读性。
+	为了避免将来添加标志时出现问题，请使用 ":set" 的 "+=" 和 "-=" 功能
+	|add-option-flags|。
 
-	    contains	behavior	~
+	    包含项	行为	~
 								*cpo-a*
-		a	When included, a ":read" command with a file name
-			argument will set the alternate file name for the
-			current window.
+		a	当包含时，带文件名的 ":read" 命令将为当前窗口设置
+			备用文件名。
 								*cpo-A*
-		A	When included, a ":write" command with a file name
-			argument will set the alternate file name for the
-			current window.
+		A	当包含时，带文件名的 ":write" 命令将为当前窗口设置
+			备用文件名。
 								*cpo-b*
-		b	"\|" in a ":map" command is recognized as the end of
-			the map command.  The '\' is included in the mapping,
-			the text after the '|' is interpreted as the next
-			command.  Use a CTRL-V instead of a backslash to
-			include the '|' in the mapping.  Applies to all
-			mapping, abbreviation, menu and autocmd commands.
-			See also |map_bar|.
+		b	":map" 命令中的 "\|" 被识别为映射命令的结束。'\' 被
+			包含在映射中，'|' 之后的文本被解释为下一个命令。
+			使用 CTRL-V 而不是反斜杠来在映射中包含 '|'。适用于所有
+			映射、缩写、菜单和自动命令命令。另请参阅 |map_bar|。
 								*cpo-B*
-		B	A backslash has no special meaning in mappings,
-			abbreviations, user commands and the "to" part of the
-			menu commands.  Remove this flag to be able to use a
-			backslash like a CTRL-V.  For example, the command
-			":map X \<Esc>" results in X being mapped to:
-				'B' included:	"\^["	 (^[ is a real <Esc>)
-				'B' excluded:	"<Esc>"  (5 characters)
+		B	反斜杠在映射、缩写、用户命令和菜单命令的 "to" 部分中
+			没有特殊含义。移除此标志以便能够像使用 CTRL-V 一样使用
+			反斜杠。例如，命令 ":map X \<Esc>" 导致 X 被映射为：
+				'B' 包含：	"\^["   (^[ 是一个真正的 <Esc>)
+				'B' 排除：	"<Esc>"  (5 个字符)
 								*cpo-c*
-		c	Searching continues at the end of any match at the
-			cursor position, but not further than the start of the
-			next line.  When not present searching continues
-			one character from the cursor position.  With 'c'
-			"abababababab" only gets three matches when repeating
-			"/abab", without 'c' there are five matches.
+		c	搜索在光标位置的任何匹配项的末尾继续，但不超过下一行的
+			开头。当不存在时，搜索从光标位置起一个字符处继续。
+			使用 'c' 时，"abababababab" 在重复 "/abab" 时只得到三个
+			匹配项，没有 'c' 时有五个匹配项。
 								*cpo-C*
-		C	Do not concatenate sourced lines that start with a
-			backslash.  See |line-continuation|.
+		C	不要连接以反斜杠开头的引用行。参见 |line-continuation|。
 								*cpo-d*
-		d	Using "./" in the 'tags' option doesn't mean to use
-			the tags file relative to the current file, but the
-			tags file in the current directory.
+		d	在 'tags' 选项中使用 "./" 并不意味着使用相对于当前
+			文件的 tags 文件，而是使用当前目录中的 tags 文件。
 								*cpo-D*
-		D	Can't use CTRL-K to enter a digraph after Normal mode
-			commands with a character argument, like |r|, |f| and
-			|t|.
+		D	在普通模式命令（如 |r|、|f| 和 |t|）中使用带字符参数的
+			命令后，不能使用 CTRL-K 输入二合字母。
 								*cpo-e*
-		e	When executing a register with ":@r", always add a
-			<CR> to the last line, also when the register is not
-			linewise.  If this flag is not present, the register
-			is not linewise and the last line does not end in a
-			<CR>, then the last line is put on the command-line
-			and can be edited before hitting <CR>.
+		e	当使用 ":@r" 执行寄存器时，总是在最后一行添加一个 <CR>，
+			即使寄存器不是行方式的。如果不存在此标志，寄存器不是
+			行方式的，且最后一行不以 <CR> 结尾，则最后一行将放在
+			命令行上，可以在按 <CR> 之前进行编辑。
 								*cpo-E*
-		E	It is an error when using "y", "d", "c", "g~", "gu" or
-			"gU" on an Empty region.  The operators only work when
-			at least one character is to be operated on.  Example:
-			This makes "y0" fail in the first column.
+		E	在空区域上使用 "y"、"d"、"c"、"g~"、"gu" 或 "gU" 是一个
+			错误。这些操作符仅当至少有一个字符要操作时才工作。示例：
+			这使得 "y0" 在第一列失败。
 								*cpo-f*
-		f	When included, a ":read" command with a file name
-			argument will set the file name for the current
-			buffer, if the current buffer doesn't have a file name
-			yet.
+		f	当包含时，如果当前缓冲区还没有文件名，带文件名的
+			":read" 命令将为当前缓冲区设置文件名。
 								*cpo-F*
-		F	When included, a ":write" command with a file name
-			argument will set the file name for the current
-			buffer, if the current buffer doesn't have a file name
-			yet.  Also see |cpo-P|.
+		F	当包含时，如果当前缓冲区还没有文件名，带文件名的
+			":write" 命令将为当前缓冲区设置文件名。另请参见 |cpo-P|。
 								*cpo-i*
-		i	When included, interrupting the reading of a file will
-			leave it modified.
+		i	当包含时，中断读取文件将使其保持已修改状态。
 								*cpo-I*
-		I	When moving the cursor up or down just after inserting
-			indent for 'autoindent', do not delete the indent.
+		I	在为 'autoindent' 插入缩进后向上或向下移动光标时，
+			不要删除缩进。
 								*cpo-J*
-		J	A |sentence| has to be followed by two spaces after
-			the '.', '!' or '?'.  A <Tab> is not recognized as
-			white space.
+		J	|sentence| 必须在 '.'、'!' 或 '?' 后跟两个空格。
+			<Tab> 不被识别为空白字符。
 								*cpo-K*
-		K	Don't wait for a key code to complete when it is
-			halfway through a mapping.  This breaks mapping
-			<F1><F1> when only part of the second <F1> has been
-			read.  It enables cancelling the mapping by typing
-			<F1><Esc>.
+		K	当按键代码在映射中只读取了部分时，不要等待其完成。
+			这会在只读取了第二个 <F1> 的一部分时中断映射 <F1><F1>。
+			它允许通过键入 <F1><Esc> 取消映射。
 								*cpo-l*
-		l	Backslash in a [] range in a search pattern is taken
-			literally, only "\]", "\^", "\-" and "\\" are special.
-			See |/[]|
-			   'l' included: "/[ \t]"  finds <Space>, '\' and 't'
-			   'l' excluded: "/[ \t]"  finds <Space> and <Tab>
+		l	搜索模式中 [] 范围内的反斜杠被视为字面量，只有 "\]"、
+			"\^"、"\-" 和 "\\" 是特殊的。参见 |/[]|
+			   'l' 包含： "/[ \t]"  找到 <Space>、'\' 和 't'
+			   'l' 排除： "/[ \t]"  找到 <Space> 和 <Tab>
 								*cpo-L*
-		L	When the 'list' option is set, 'wrapmargin',
-			'textwidth', 'softtabstop' and Virtual Replace mode
-			(see |gR|) count a <Tab> as two characters, instead of
-			the normal behavior of a <Tab>.
+		L	当设置 'list' 选项时，'wrapmargin'、'textwidth'、
+			'softtabstop' 和虚拟替换模式（参见 |gR|）将 <Tab> 计为
+			两个字符，而不是 <Tab> 的正常行为。
 								*cpo-m*
-		m	When included, a showmatch will always wait half a
-			second.  When not included, a showmatch will wait half
-			a second or until a character is typed.  'showmatch'
+		m	当包含时，showmatch 将始终等待半秒钟。当不包含时，
+			showmatch 将等待半秒钟或直到键入一个字符。'showmatch'
 								*cpo-M*
-		M	When excluded, "%" matching will take backslashes into
-			account.  Thus in "( \( )" and "\( ( \)" the outer
-			parenthesis match.  When included "%" ignores
-			backslashes, which is Vi compatible.
+		M	当排除时，"%" 匹配将考虑反斜杠。因此，在 "( \( )" 和
+			"\( ( \)" 中，外部的括号匹配。当包含时，"%" 忽略反斜杠，
+			这是 Vi 兼容的。
 								*cpo-n*
-		n	When included, the column used for 'number' and
-			'relativenumber' will also be used for text of wrapped
-			lines.
+		n	当包含时，用于 'number' 和 'relativenumber' 的列也将用于
+			换行行的文本。
 								*cpo-o*
-		o	Line offset to search command is not remembered for
-			next search.
+		o	搜索命令的行偏移不会为下一次搜索记住。
 								*cpo-O*
-		O	Don't complain if a file is being overwritten, even
-			when it didn't exist when editing it.  This is a
-			protection against a file unexpectedly created by
-			someone else.  Vi didn't complain about this.
+		O	即使文件在编辑时不存在，也不要抱怨文件被覆盖。这是一种
+			防止他人意外创建文件的保护措施。Vi 对此不抱怨。
 								*cpo-P*
-		P	When included, a ":write" command that appends to a
-			file will set the file name for the current buffer, if
-			the current buffer doesn't have a file name yet and
-			the 'F' flag is also included |cpo-F|.
+		P	当包含时，如果当前缓冲区还没有文件名，并且 'F' 标志也被
+			包含（|cpo-F|），则追加到文件的 ":write" 命令将为当前
+			缓冲区设置文件名。
 								*cpo-q*
-		q	When joining multiple lines leave the cursor at the
-			position where it would be when joining two lines.
+		q	当连接多行时，将光标留在连接两行时光标会处于的位置。
 								*cpo-r*
-		r	Redo ("." command) uses "/" to repeat a search
-			command, instead of the actually used search string.
+		r	重做（"." 命令）使用 "/" 来重复搜索命令，而不是实际使用
+			的搜索字符串。
 								*cpo-R*
-		R	Remove marks from filtered lines.  Without this flag
-			marks are kept like |:keepmarks| was used.
+		R	从过滤的行中移除标记。没有此标志时，标记会被保留，就像
+			使用了 |:keepmarks| 一样。
 								*cpo-s*
-		s	Set buffer options when entering the buffer for the
-			first time.  This is like it is in Vim version 3.0.
-			And it is the default.  If not present the options are
-			set when the buffer is created.
+		s	首次进入缓冲区时设置缓冲区选项。这就像 Vim 3.0 版本中的
+			那样。这是默认值。如果不存在，则在创建缓冲区时设置选项。
 								*cpo-S*
-		S	Set buffer options always when entering a buffer
-			(except 'readonly', 'fileformat', 'filetype' and
-			'syntax').  This is the (most) Vi compatible setting.
-			The options are set to the values in the current
-			buffer.  When you change an option and go to another
-			buffer, the value is copied.  Effectively makes the
-			buffer options global to all buffers.
+		S	始终在进入缓冲区时设置缓冲区选项（除了 'readonly'、
+			'fileformat'、'filetype' 和 'syntax'）。这是（最）Vi 兼容
+			的设置。选项被设置为当前缓冲区中的值。当你更改一个选项并
+			转到另一个缓冲区时，该值会被复制。实际上使缓冲区选项对所有
+			缓冲区都是全局的。
 
-			's'    'S'     copy buffer options
-			no     no      when buffer created
-			yes    no      when buffer first entered (default)
-			 X     yes     each time when buffer entered (vi comp.)
+			's'    'S'     复制缓冲区选项
+			否     否      创建缓冲区时
+			是     否      首次进入缓冲区时（默认）
+			 X     是      每次进入缓冲区时（vi 兼容）
 								*cpo-t*
-		t	Search pattern for the tag command is remembered for
-			"n" command.  Otherwise Vim only puts the pattern in
-			the history for search pattern, but doesn't change the
-			last used search pattern.
+		t	tag 命令的搜索模式被记住用于 "n" 命令。否则，Vim 仅将
+			模式放入搜索模式的历史记录中，但不更改上次使用的搜索模式。
 								*cpo-u*
-		u	Undo is Vi compatible.  See |undo-two-ways|.
+		u	撤销是 Vi 兼容的。参见 |undo-two-ways|。
 								*cpo-v*
-		v	Backspaced characters remain visible on the screen in
-			Insert mode.  Without this flag the characters are
-			erased from the screen right away.  With this flag the
-			screen newly typed text overwrites backspaced
-			characters.
+		v	在插入模式下，退格的字符在屏幕上仍然可见。如果没有此标志，
+			字符会立即从屏幕上擦除。有此标志时，屏幕上新键入的文本会
+			覆盖退格的字符。
 								*cpo-W*
-		W	Don't overwrite a readonly file.  When omitted, ":w!"
-			overwrites a readonly file, if possible.
+		W	不要覆盖只读文件。当省略时，":w!" 会覆盖只读文件（如果可能）。
 								*cpo-x*
-		x	<Esc> on the command-line executes the command-line.
-			The default in Vim is to abandon the command-line,
-			because <Esc> normally aborts a command.  |c_<Esc>|
+		x	命令行上的 <Esc> 执行命令行。Vim 中的默认设置是放弃
+			命令行，因为 <Esc> 通常会中止命令。|c_<Esc>|
 								*cpo-X*
-		X	When using a count with "R" the replaced text is
-			deleted only once.  Also when repeating "R" with "."
-			and a count.
+		X	当与 "R" 一起使用计数时，替换的文本只被删除一次。当使用
+			计数重复 "R" 和 "." 时也是如此。
 								*cpo-y*
-		y	A yank command can be redone with ".".  Think twice if
-			you really want to use this, it may break some
-			plugins, since most people expect "." to only repeat a
-			change.
+		y	拉取命令可以用 "." 重做。请三思是否真的想使用此功能，
+			因为它可能会破坏某些插件，因为大多数人期望 "." 只重复更改。
 								*cpo-Z*
-		Z	When using "w!" while the 'readonly' option is set,
-			don't reset 'readonly'.
+		Z	当设置了 'readonly' 选项时使用 "w!"，不要重置 'readonly'。
 								*cpo-!*
-		!	When redoing a filter command, use the last used
-			external command, whatever it was.  Otherwise the last
-			used -filter- command is used.
+		!	当重做过滤器命令时，使用上次使用的外部命令，无论它是什么。
+			否则，使用上次使用的 -filter- 命令。
 								*cpo-$*
-		$	When making a change to one line, don't redisplay the
-			line, but put a '$' at the end of the changed text.
-			The changed text will be overwritten when you type the
-			new text.  The line is redisplayed if you type any
-			command that moves the cursor from the insertion
-			point.
+		$	当对一行进行更改时，不重新显示该行，而是在更改文本的末尾
+			放置一个 '$'。当你键入新文本时，更改的文本将被覆盖。
+			如果你键入任何将光标从插入点移开的命令，该行将重新显示。
 								*cpo-%*
-		%	Vi-compatible matching is done for the "%" command.
-			Does not recognize "#if", "#endif", etc.
-			Does not recognize "/*" and "*/".
-			Parens inside single and double quotes are also
-			counted, causing a string that contains a paren to
-			disturb the matching.  For example, in a line like
-			"if (strcmp("foo(", s))" the first paren does not
-			match the last one.  When this flag is not included,
-			parens inside single and double quotes are treated
-			specially.  When matching a paren outside of quotes,
-			everything inside quotes is ignored.  When matching a
-			paren inside quotes, it will find the matching one (if
-			there is one).  This works very well for C programs.
-			This flag is also used for other features, such as
-			C-indenting.
+		%	为 "%" 命令执行 Vi 兼容的匹配。不识别 "#if"、"#endif" 等。
+			不识别 "/*" 和 "*/"。
+			单引号和双引号内的括号也会被计数，导致包含括号的字符串
+			干扰匹配。例如，在 "if (strcmp("foo(", s))" 这样的行中，
+			第一个括号与最后一个不匹配。当不包含此标志时，单引号和
+			双引号内的括号会被特殊处理。当匹配引号外的括号时，引号内的
+			所有内容都被忽略。当匹配引号内的括号时，它会找到匹配的括号
+			（如果存在）。这对于 C 程序非常有效。
+			此标志也用于其他功能，如 C 缩进。
 								*cpo-+*
-		+	When included, a ":write file" command will reset the
-			'modified' flag of the buffer, even though the buffer
-			itself may still be different from its file.
+		+	当包含时，":write file" 命令将重置缓冲区的 'modified' 标志，
+			即使缓冲区本身可能仍与其文件不同。
 								*cpo->*
-		>	When appending to a register, put a line break before
-			the appended text.
+		>	当追加到寄存器时，在追加的文本前放置一个换行符。
 								*cpo-;*
-		;	When using |,| or |;| to repeat the last |t| search
-			and the cursor is right in front of the searched
-			character, the cursor won't move.  When not included,
-			the cursor would skip over it and jump to the
-			following occurrence.
+		;	当使用 |,| 或 |;| 重复上次的 |t| 搜索，并且光标正好在
+			被搜索字符的前面时，光标不会移动。当不包含时，光标会跳过它
+			并跳转到下一个出现的位置。
 								*cpo-~*
-		~	When included, don't resolve symbolic links when
-			changing directory with |:cd|, |:lcd|, or |:tcd|.
-			This preserves the symbolic link path in buffer names
-			and when displaying the current directory.  When
-			excluded (default), symbolic links are resolved to
-			their target paths.
+		~	当包含时，使用 |:cd|、|:lcd| 或 |:tcd| 更改目录时不解析
+			符号链接。这会在缓冲区名称和显示当前目录时保留符号链接路径。
+			当排除时（默认），符号链接会被解析为其目标路径。
 								*cpo-_*
-		_	When using |cw| on a word, do not include the
-			whitespace following the word in the motion.
+		_	当在单词上使用 |cw| 时，不要将单词后面的空白包含在动作中。
 
 			*'cursorbind'* *'crb'* *'nocursorbind'* *'nocrb'*
 'cursorbind' 'crb'	boolean	(default off)

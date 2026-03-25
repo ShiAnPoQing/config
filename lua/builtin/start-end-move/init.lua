@@ -118,7 +118,7 @@ function M.last_non_blank_character()
 
   if count == 0 then
     local cursor1 = vim.api.nvim_win_get_cursor(0)
-    vim.api.nvim_feedkeys(count .. "g_", "nx", false)
+    vim.api.nvim_feedkeys("g_", "nx", false)
     local cursor2 = vim.api.nvim_win_get_cursor(0)
     if cursor1[2] == cursor2[2] then
       vim.api.nvim_feedkeys("$", "nx", false)
