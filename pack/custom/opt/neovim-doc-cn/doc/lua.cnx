@@ -359,21 +359,22 @@ VIM.UV                                                   *lua-loop* *vim.uv*
 `vim.uv` 公开了“luv”Lua 绑定，用于 Nvim 用于网络、文件系统和进程管理的 libUV 库，参见 |luvref.txt|。
 特别是，它允许与主 Nvim |luv-event-loop| 交互。
 
-                                                    *E5560* *lua-loop-callbacks*
-在 `vim.uv` 回调中直接调用 `vim.api` 函数（|api-fast| 除外）是错误的。例如，以下写法是错误的： >lua
+                                                         *E5560* *lua-loop-callbacks*
+在 `vim.uv` 回调中直接调用 `vim.api` 函数（|api-fast| 除外）是错误的。例如，这是错误的： >lua
 
     local timer = vim.uv.new_timer()
     timer:start(1000, 0, function()
       vim.api.nvim_command('echomsg "test"')
     end)
 <
-要避免此错误，请使用 |vim.schedule_wrap()| 来延迟回调： >lua
+要避免此错误，请使用 |schedule| 调度回调：>lua
 
     local timer = vim.uv.new_timer()
     timer:start(1000, 0, vim.schedule_wrap(function()
       vim.api.nvim_command('echomsg "test"')
     end))
 <
+同上
 （对于一次性定时器，参见 |vim.defer_fn()|，它会自动添加包装。）
 
 示例：重复定时器
@@ -1052,8 +1053,7 @@ vim.cmd({command})                                                 *vim.cmd()*
 vim.defer_fn({fn}, {timeout})                                 *vim.defer_fn()*
     延迟调用 {fn} 直到 {timeout} 毫秒后。
 
-    用于创建一个一次性定时器，该定时器调用 {fn}。注意：{fn} 会自动通过 |vim.schedule()| 调度，
-    因此可以安全地调用 API 函数。
+    用于创建一个一次性定时器来调用 {fn}。注意：{fn} 会被自动 |schedule|，因此可以安全地调用 API 函数。
 
     参数: ~
       • {fn}       (`函数`) 超时后调用的回调
@@ -3137,8 +3137,9 @@ vim.keymap.del({modes}, {lhs}, {opts})                      *vim.keymap.del()*
     参数: ~
       • {modes}  (`字符串|字符串[]`)
       • {lhs}    (`字符串`)
-      • {opts}   (`表?`) 包含以下字段的表：
-                 • {buf}? (`整数|布尔值`) 从给定缓冲区移除映射。当为 `0` 或 `true` 时，使用当前缓冲区。
+      • {opts}   (`table?`) 包含以下字段的表：
+                 • {buf}? (`integer`) 从给定的缓冲区中移除映射。
+                   `0` 表示当前缓冲区。
 
     另请参阅: ~
       • |vim.keymap.set()|
@@ -3150,7 +3151,7 @@ vim.keymap.set({modes}, {lhs}, {rhs}, {opts})               *vim.keymap.set()*
         -- 将 "x" 映射到 Lua 函数：
         vim.keymap.set('n', 'x', function() print('real lua function') end)
         -- 将 "<leader>x" 映射到当前缓冲区的多个模式：
-        vim.keymap.set({'n', 'v'}, '<leader>x', vim.lsp.buf.references, { buf = true })
+        vim.keymap.set({'n', 'v'}, '<leader>x', vim.lsp.buf.references, { buf = 0 })
         -- 将 <Tab> 映射到一个表达式 (|:map-<expr>|)：
         vim.keymap.set('i', '<Tab>', function()
           return vim.fn.pumvisible() == 1 and '<C-n>' or '<Tab>'
@@ -3180,7 +3181,7 @@ vim.keymap.set({modes}, {lhs}, {rhs}, {opts})               *vim.keymap.set()*
                  • 不支持 {noremap}；请改用 {remap}（见下文）。
 
                  同时接受：
-                 • {buf}? (`整数|布尔值`) 创建缓冲区局部映射，`0` 或 `true` 表示当前缓冲区。
+                 • {buf}? (`integer`) 创建缓冲区本地的映射，`0` 表示当前缓冲区。
                  • {remap}? (`布尔值`, 默认: `false`) 使映射可递归。{noremap} 的反义。
 
     另请参阅: ~
@@ -3601,22 +3602,51 @@ vim.mpack.encode({obj})                                   *vim.mpack.encode()*
 ==============================================================================
 Lua 模块: vim.net                                                  *vim.net*
 
-vim.net.request({url}, {opts}, {on_response})              *vim.net.request()*
-    向给定 URL 发出 HTTP GET 请求（异步）。
+*vim.net.request.Response*
 
-    此函数以以下模式运行：
-    • 异步（非阻塞）：立即返回，并在完成时将响应对象传递给提供的 `on_response` 处理器。
+    字段：~
+      • {body}  (`string`) 请求的 HTTP 正文
+
+vim.net.request({url}, {opts}, {on_response})              *vim.net.request()*
+    向给定的 URL 发起 HTTP GET 请求，异步地将结果传递给指定的 `on_response`、`outpath` 或 `outbuf`。
+
+    示例： >lua
+        -- 将响应正文写入文件
+        vim.net.request('https://neovim.io/charter/', {
+          outpath = 'vision.html',
+        })
+
+        -- 处理响应
+        vim.net.request(
+          'https://api.github.com/repos/neovim/neovim',
+          {},
+          function (err, res)
+            if err then return end
+            local stars = vim.json.decode(res.body).stargazers_count
+            vim.print(('Neovim 目前拥有 %d 颗星'):format(stars))
+          end
+        )
+
+        -- 同时写入文件和当前缓冲区，但取消它
+        local job = vim.net.request('https://neovim.io/charter/', {
+          outpath = 'vision.html',
+          outbuf = 0,
+        })
+        job:close()
+<
 
     参数: ~
       • {url}          (`字符串`) 请求的 URL。
-      • {opts}         (`表?`) 可选参数：
-                       • `verbose` (布尔值|nil): 启用详细输出。
-                       • `retry` (整数|nil): 临时失败时的重试次数（默认：3）。
-                       • `outpath` (字符串|nil): 保存响应主体的文件路径。如果设置，
-                         响应对象中的 `body` 值将为 `true` 而不是响应主体。
-      • {on_response}  (`fun(err?: 字符串, response?: { body: 字符串|布尔值 })`)
-                       请求完成时调用的回调。响应对象中的 `body` 字段包含原始响应数据
-                       （文本或二进制）。失败时调用 (err, nil)，成功时调用 (nil, { body = 字符串|布尔值 })。
+      • {opts}         (`table?`) 包含以下字段的表：
+                       • {verbose}? (`boolean`) 启用详细输出。
+                       • {retry}? (`integer`) 在瞬时故障时的重试次数（默认值：3）。
+                       • {outpath}? (`string`) 将响应正文保存到的文件路径。
+                       • {outbuf}? (`integer`) 将响应正文保存到的缓冲区。
+      • {on_response}  (`fun(err: string?, response: vim.net.request.Response?)?`)
+                       请求完成时调用的回调函数。响应参数中的 `body` 字段包含原始响应数据（文本或二进制）。
+
+    返回值：~
+        (`{ close: fun() }`) 包含取消方法的表，类似于 |vim.SystemObj|。
 
 
 ==============================================================================
@@ -4756,7 +4786,7 @@ UI2                                                                      *ui2*
 
 有四个特殊的窗口/缓冲区用于呈现消息和命令行：
 • "cmd": 命令行。默认情况下也用于 'showcmd'、'showmode'、'ruler' 和消息。
-• "msg": 消息窗口，显示短暂的消息，当 'cmdheight' == 0 时很有用。
+• "msg": 消息窗口，显示对 'cmdheight' == 0 有用的短暂消息。
 • "pager": 分页器窗口，显示 |:messages| 和某些永远不会被“折叠”的消息。
 • "dialog": 对话框窗口，显示期望用户输入的模态提示。
 

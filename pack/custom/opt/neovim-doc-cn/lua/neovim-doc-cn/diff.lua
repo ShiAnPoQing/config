@@ -41,7 +41,7 @@ function M.diff(input)
     return
   end
 
-  for i, neovim_cn_doc in ipairs(neovim_cn_docs) do
+  for _, neovim_cn_doc in ipairs(neovim_cn_docs) do
     local neovim_cn_doc_name = get_file_name(neovim_cn_doc)
     if input == neovim_cn_doc_name then
       local neovim_doc

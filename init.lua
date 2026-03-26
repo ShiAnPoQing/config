@@ -12,6 +12,8 @@ require("native-packer").setup({
   require("plugins.download.misc.repeat"),
   require("plugins.local.undotree"),
   require("plugins.local.reasonable-scroll"),
+  require("plugins.local.window-swap"),
+  require("plugins.local.buffer-swap"),
   require("plugins.download.misc.linefuse"),
   require("plugins.local.move-line"),
   require("plugins.local.move-word"),

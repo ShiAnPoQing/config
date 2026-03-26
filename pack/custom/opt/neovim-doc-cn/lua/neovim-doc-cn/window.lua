@@ -19,6 +19,7 @@ function M.init(lines)
       },
     },
     position = "50%",
+    relative = "editor",
     size = {
       width = "80%",
       height = "60%",

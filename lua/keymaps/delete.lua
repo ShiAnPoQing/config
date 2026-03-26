@@ -42,8 +42,8 @@ local function ctrl_space_ctrl_i()
 end
 
 return {
-  ["<S-BS>"] = { { "<Del>", { "i", "c", "t" } }, { "x", "n" }, desc = "Delete char after cursor" },
-  ["<C-BS>"] = { "<Left><C-o>diw", "i", desc = "Delete the word where the cursor is(before)" },
+  ["<S-BS>"] = { { "<Del>", { "i", "c", "t" } }, { "x", "n" }, desc = "Delete the character after the cursor" },
+  ["<C-BS>"] = { "<Left><C-o>diw", "i", desc = "Delete the cword(before)" },
   ["<M-BS>"] = {
     { "<C-o>diw", "i" },
     {
@@ -52,7 +52,7 @@ return {
       end,
       "c",
     },
-    desc = "Delete the word where the cursor is(after)",
+    desc = "Delete the cword(after)",
   },
   ["<C-i>"] = {
     {
@@ -81,7 +81,7 @@ return {
       "i",
     },
     { "<C-w>", "c" },
-    desc = "Delete to the beginning of the word",
+    desc = "Delete the part of the word before the cursor",
   },
   ["<C-o>"] = {
     {
@@ -97,7 +97,7 @@ return {
       end,
       "c",
     },
-    desc = "Delete to the end of the word",
+    desc = "Delete the part of the word after the cursor",
   },
   ["<C-S-i>"] = {
     function()
@@ -122,7 +122,7 @@ return {
       delete()
     end,
     "i",
-    desc = "Delete to the beginning of the WORD",
+    desc = "Delete the part of the WORD before the cursor",
   },
   ["<C-S-o>"] = {
     function()
@@ -130,7 +130,7 @@ return {
       vim.api.nvim_feedkeys(esc .. "vEolc", "n", false)
     end,
     "i",
-    desc = "Delete to the end of the WORD",
+    desc = "Delete the part of the WORD after the cursor",
   },
   ["<C-space><C-i>"] = {
     {
@@ -143,7 +143,7 @@ return {
       end,
       "c",
     },
-    desc = "Delete to the end of the previous word",
+    desc = "Delete up to the end of the previous word",
   },
   ["<C-space><C-o>"] = {
     { "<C-o>dw", "i" },
@@ -153,12 +153,13 @@ return {
       end,
       "c",
     },
-    desc = "Delete to the beginning of the next word",
+    desc = "Delete up to the start of the next word",
   },
-  ["<C-space><C-S-i>"] = { "<C-o>dgE", "i", desc = "Delete to the end of the previous WORD" },
-  ["<C-space><C-S-O>"] = { "<C-o>dW", "i", desc = "Delete to the beginning of the next WORD" },
-  ["<C-u>"] = { "<C-G>u<C-u>", "i", desc = "Delete to the first non-blank character of the current line" },
-  ["<M-u>"] = { "<C-o>dg_", "i", desc = "Delete to the last non-blank character of the current line" },
+  ["<C-space><C-S-i>"] = { "<C-o>dgE", "i", desc = "Delete up to the end of the previous WORD" },
+  ["<C-space><C-S-O>"] = { "<C-o>dW", "i", desc = "Delete up to the start of the next WORD" },
+  ["<C-u>"] = { "<C-G>u<C-u>", "i", desc = "Delete up to the first non-blank character of the current line" },
+  ["<M-u>"] = { "<C-o>dg_", "i", desc = "Delete up to the last non-blank character of the current line" },
+  ["<C-M-u>"] = { "<Esc>cc", "i", desc = "Delete the current line" },
   ["<C-space><C-u>"] = {
     function()
       local line = vim.api.nvim_get_current_line()
@@ -171,9 +172,9 @@ return {
     end,
     "i",
     expr = true,
-    desc = "Delete to the first character of the current line",
+    desc = "Delete up to the first character of the current line",
   },
-  ["<M-space><M-u>"] = { "<C-o>d$", "i", desc = "Delete to the last character of the current line" },
+  ["<M-space><M-u>"] = { "<C-o>d$", "i", desc = "Delete up to the last character of the current line" },
   ["<C-space><C-h>"] = {
     function()
       local line = vim.api.nvim_get_current_line()
@@ -186,9 +187,9 @@ return {
     end,
     "i",
     expr = true,
-    desc = "Delete to the first non-blank character of the current line",
+    desc = "Delete up to the first non-blank character of the current line",
   },
-  ["<C-space><C-l>"] = { "<C-o>dg_", "i", desc = "Delete to the end non-blank character of the current  line" },
+  ["<C-space><C-l>"] = { "<C-o>dg_", "i", desc = "Delete up to the last non-blank character of the current line" },
   ["<C-space><C-space><C-h>"] = {
     function()
       local line = vim.api.nvim_get_current_line()
@@ -201,9 +202,9 @@ return {
     end,
     "i",
     expr = true,
-    desc = "Delete to the first character of the current line",
+    desc = "Delete up to the first character of the current line",
   },
-  ["<C-space><C-space><C-l>"] = { "<C-o>d$", "i", desc = "Delete to the end character of the current line" },
+  ["<C-space><C-space><C-l>"] = { "<C-o>d$", "i", desc = "Delete up to the last character of the current line" },
   ["<C-a><C-h>"] = {
     function()
       local line = vim.api.nvim_get_current_line()
@@ -216,12 +217,12 @@ return {
     end,
     "i",
     expr = true,
-    desc = "Delete to the first non-blank character of the screen line",
+    desc = "Delete up to the first non-blank character of the screen line",
   },
   ["<C-a><C-l>"] = {
     "<C-o>dg<End>",
     "i",
-    desc = "Delete to the end non-blank character of the screen line",
+    desc = "Delete up to the last non-blank character of the screen line",
   },
   ["<C-a><C-a><C-h>"] = {
     function()
@@ -235,8 +236,7 @@ return {
     end,
     "i",
     expr = true,
-    desc = "Delete to the first character of the screen line",
+    desc = "Delete up to the first character of the screen line",
   },
-  ["<C-a><C-a><C-l>"] = { "<C-o>dg$", "i", desc = "Delete to the end character of the screen line" },
-  ["<C-M-u>"] = { "<Esc>cc", "i", desc = "Delete the current line" },
+  ["<C-a><C-a><C-l>"] = { "<C-o>dg$", "i", desc = "Delete up to the end character of the screen line" },
 }

@@ -21,7 +21,7 @@ return {
       pcall(vim.cmd, { cmd = "bn", count = vim.v.count1 })
     end,
     "n",
-    desc = "Goto the next[count] buffer",
+    desc = "Goto the next [count] buffer",
   },
   ["<Tab>sj"] = {
     function()
@@ -29,7 +29,7 @@ return {
       pcall(vim.cmd, { cmd = "sbn", count = vim.v.count1 })
     end,
     "n",
-    desc = "Split and goto the next[count] buffer",
+    desc = "Split and goto the next [count] buffer",
   },
   ["<Tab>vj"] = {
     function()
@@ -37,7 +37,7 @@ return {
       vim.cmd("vertical " .. count .. "sbn")
     end,
     "n",
-    desc = "Vertical split and goto the next[count] buffer",
+    desc = "Vertical split and goto the next [count] buffer",
   },
   ["<Tab><Tab>j"] = {
     "<cmd>bl<cr>",
@@ -52,7 +52,7 @@ return {
   ["<Tab><Tab>vj"] = {
     "<cmd>vertical sbl<cr>",
     "n",
-    desc = "Vertical Split and Goto the last buffer",
+    desc = "Vertical Split and goto the last buffer",
   },
   ["<Tab>k"] = {
     function()
@@ -60,14 +60,14 @@ return {
       pcall(vim.cmd, { cmd = "bp", count = vim.v.count1 })
     end,
     "n",
-    desc = "Goto the previous[count] buffer",
+    desc = "Goto the previous [count] buffer",
   },
   ["<Tab>sk"] = {
     function()
       vim.cmd({ cmd = "sbp", count = vim.v.count1 })
     end,
     "n",
-    desc = "Split and goto the previous[count] buffer",
+    desc = "Split and goto the previous [count] buffer",
   },
   ["<Tab>vk"] = {
     function()
@@ -75,7 +75,7 @@ return {
       vim.cmd("vertical " .. count .. "sbp")
     end,
     "n",
-    desc = "Vertical split and goto the previous[count] buffer",
+    desc = "Vertical split and goto the previous [count] buffer",
   },
   ["<Tab><Tab>k"] = {
     "<cmd>bf<cr>",
@@ -104,7 +104,7 @@ return {
       vim.cmd({ cmd = "sba", count = vim.v.count1 })
     end,
     "n",
-    desc = "Split and open all buffer[limit count windows]",
+    desc = "Split and open all buffer [limit count windows]",
   },
   ["<Tab>va"] = {
     function()
@@ -112,7 +112,7 @@ return {
       vim.cmd("vertical " .. count .. "sba")
     end,
     "n",
-    desc = "Vertical split and open all buffer[limit count windows]",
+    desc = "Vertical split and open all buffer [limit count windows]",
   },
   ["<tab>b"] = {
     "<cmd>buffer#<cr>",

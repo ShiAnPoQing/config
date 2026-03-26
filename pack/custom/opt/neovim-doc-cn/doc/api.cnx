@@ -130,7 +130,14 @@ Nvim C API 为所有函数参数定义了自定义类型。有些只是围绕 C9
 - |nvim_buf_set_extmark()|
 
                                                         *api-fast*
-大多数 API 函数是"延迟"的：它们被排队到主循环中，并与正常输入一起按顺序处理。因此，如果编辑器正在以"模态"方式等待用户输入（例如在 |input()| 提示符下），请求将被阻塞。非延迟（快速）函数，如 |nvim_get_mode()| 和 |nvim_input()|，会立即得到服务（即，无需在输入队列中等待）。Lua 代码可以使用 |vim.in_fast_event()| 来检测快速上下文。
+大多数 API 函数是延迟执行的：它们被排队（“调度”）到主循环上，并与正常输入按顺序处理。
+如果编辑器以“模态”方式等待用户输入（例如 |input()| 提示），则延迟请求会阻塞。
+- 非延迟（快速）函数，如 |nvim_get_mode()|、|nvim_input()| 或任何 Lua 回调，会立即执行
+  （不会在输入队列中排序）。
+- Lua 代码可以使用 |vim.in_fast_event()| 来检测快速上下文，在此上下文中它可以与 Lua
+  状态交互，但不能与“编辑器”状态（|textlock|、选项、窗口布局等）交互。
+- 要执行编辑器操作，Lua 代码必须通过 |vim.defer_fn()| 或 |vim.schedule()| 进行调度，
+  或者等待 `vim.in_fast_event()` 返回 `false`。
 
 ==============================================================================
 API 元数据                                            *api-metadata*
@@ -273,7 +280,9 @@ nvim_buf_detach_event[{buf}]                           *nvim_buf_detach_event*
 
 LUA ~
                                                         *api-buffer-updates-lua*
-进程内 Lua 插件可以以 Lua 回调的形式接收缓冲区更新。这些回调在各种上下文中被频繁调用；|textlock| 阻止更改缓冲区内容和窗口布局（请使用 |vim.schedule()| 将这些操作推迟到主循环）。允许移动光标，但之后会恢复。
+进程内插件可以通过 Lua 回调接收缓冲区更新。这些回调在各种上下文中被频繁调用；
+|textlock| 阻止更改缓冲区内容和窗口布局（此类操作必须被 |schedule| 调度）。
+允许移动光标，但之后会被恢复。
 
 |nvim_buf_attach()| 将接受回调的关键字参数。"on_lines" 将接收参数 ("lines", {buf}, {changedtick}, {firstline}, {lastline}, {new_lastline}, {old_byte_size} [, {old_utf32_size}, {old_utf16_size}])。与远程通道事件不同，文本内容不会被传递。可以在回调内部通过以下方式访问新文本 >lua
 
@@ -1146,7 +1155,7 @@ nvim_paste({data}, {crlf}, {phase})                             *nvim_paste()*
             line2
             line3
           ]], false, -1)
-        end, { buf = true })
+        end, { buf = 0 })
 <
 
     属性: ~
@@ -1475,7 +1484,7 @@ nvim_strwidth({text})                                        *nvim_strwidth()*
         (`整数`) 单元格数量
 
 nvim__complete_set({index}, {opts})                     *nvim__complete_set()*
-    实验性：此 API 未来可能会更改。
+    警告：此功能是实验性/不稳定的。
 
     为给定索引处的补全项设置信息。如果信息文本显示在窗口中，则返回窗口和缓冲区的 ID，
     如果未显示则返回空字典。
@@ -1491,7 +1500,7 @@ nvim__complete_set({index}, {opts})                     *nvim__complete_set()*
         • bufnr: (数字) 浮动窗口中的缓冲区 ID
 
 nvim__exec_lua_fast({code}, {args})                    *nvim__exec_lua_fast()*
-    实验性：此 API 未来可能会更改或删除。
+    警告：此功能是实验性/不稳定的。
 
     类似于 |nvim_exec_lua()|，但可以在 |api-fast| 上下文中调用。
 
@@ -1512,6 +1521,8 @@ nvim__exec_lua_fast({code}, {args})                    *nvim__exec_lua_fast()*
         (`任意`) Lua 代码的返回值（如果存在），否则为 NIL。
 
 nvim__get_runtime({pat}, {all}, {opts})                  *nvim__get_runtime()*
+    警告：此功能是实验性/不稳定的。
+
     在运行时目录中查找文件
 
     属性: ~
@@ -1527,6 +1538,8 @@ nvim__get_runtime({pat}, {all}, {opts})                  *nvim__get_runtime()*
         (`字符串[]`) 找到文件的绝对路径列表
 
 nvim__id({obj})                                                   *nvim__id()*
+    警告：此功能是实验性/不稳定的。
+
     返回作为参数给定的对象。
 
     此 API 函数用于测试。插件不应依赖其存在。
@@ -1538,6 +1551,8 @@ nvim__id({obj})                                                   *nvim__id()*
         (`任意`) 其参数。
 
 nvim__id_array({arr})                                       *nvim__id_array()*
+    警告：此功能是实验性/不稳定的。
+
     返回作为参数给定的数组。
 
     此 API 函数用于测试。插件不应依赖其存在。
@@ -1549,6 +1564,8 @@ nvim__id_array({arr})                                       *nvim__id_array()*
         (`任意[]`) 其参数。
 
 nvim__id_dict({dct})                                         *nvim__id_dict()*
+    警告：此功能是实验性/不稳定的。
+
     返回作为参数给定的字典。
 
     此 API 函数用于测试。插件不应依赖其存在。
@@ -1560,6 +1577,8 @@ nvim__id_dict({dct})                                         *nvim__id_dict()*
         (`表<string,任意>`) 其参数。
 
 nvim__id_float({flt})                                       *nvim__id_float()*
+    警告：此功能是实验性/不稳定的。
+
     返回作为参数给定的浮点值。
 
     此 API 函数用于测试。插件不应依赖其存在。
@@ -1571,6 +1590,8 @@ nvim__id_float({flt})                                       *nvim__id_float()*
         (`数字`) 其参数。
 
 nvim__inspect_cell({grid}, {row}, {col})                *nvim__inspect_cell()*
+    警告：此功能是实验性/不稳定的。
+
     注意：如果您的 UI 不使用 hlstate，则第一次不会返回 hlstate。
 
     参数: ~
@@ -1582,10 +1603,12 @@ nvim__inspect_cell({grid}, {row}, {col})                *nvim__inspect_cell()*
         (`任意[]`)
 
 nvim__invalidate_glyph_cache()                *nvim__invalidate_glyph_cache()*
+    警告：此功能是实验性/不稳定的。
+
     用于测试。schar_cache_clear_if_full 中的条件很难达到，因此此函数可用于在测试中强制清除缓存。
 
 nvim__redraw({opts})                                          *nvim__redraw()*
-    实验性：此 API 未来可能会更改。
+    警告：此功能是实验性/不稳定的。
 
     指示 Nvim 重绘各种组件。
 
@@ -1613,6 +1636,8 @@ nvim__redraw({opts})                                          *nvim__redraw()*
       • |:redraw|
 
 nvim__stats()                                                  *nvim__stats()*
+    警告：此功能是实验性/不稳定的。
+
     获取内部统计信息。
 
     返回值: ~
@@ -2985,7 +3010,7 @@ nvim_set_decoration_provider({ns_id}, {opts})
 <
 
 nvim__ns_get({ns_id})                                         *nvim__ns_get()*
-    实验性：此 API 未来将会更改。
+    警告：此功能是实验性/不稳定的。
 
     获取命名空间的属性
 
@@ -2996,7 +3021,7 @@ nvim__ns_get({ns_id})                                         *nvim__ns_get()*
         (`vim.api.keyset.ns_opts`) 定义命名空间属性的映射，参见 |nvim__ns_set()|
 
 nvim__ns_set({ns_id}, {opts})                                 *nvim__ns_set()*
-    实验性：此 API 未来将会更改。
+    警告：此功能是实验性/不稳定的。
 
     为命名空间设置一些属性
 

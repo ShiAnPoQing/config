@@ -3,20 +3,6 @@ return {
     "<cmd>vsplit<cr>",
     "n",
   },
-  ["<M-]>"] = {
-    function()
-      require("builtin.window-swap").window_swap(1)
-    end,
-    "n",
-    desc = "Swap adjacent windows",
-  },
-  ["<M-[>"] = {
-    function()
-      require("builtin.window-swap").window_swap(-1)
-    end,
-    "n",
-    desc = "Swap adjacent windows",
-  },
   ["<M-S-V>"] = {
     "<cmd>split<cr>",
     "n",
@@ -76,34 +62,6 @@ return {
       require("builtin.window-resize").resize("increase", "vertical")
     end,
     "n",
-  },
-  ["<M-S-h>"] = {
-    function()
-      require("builtin.buffer-swap").buffer_swap("left")
-    end,
-    "n",
-    desc = "Swap with the window on the left",
-  },
-  ["<M-S-l>"] = {
-    function()
-      require("builtin.buffer-swap").buffer_swap("right")
-    end,
-    "n",
-    desc = "Swap with the window on the right",
-  },
-  ["<M-S-j>"] = {
-    function()
-      require("builtin.buffer-swap").buffer_swap("down")
-    end,
-    "n",
-    desc = "Swap with the window below",
-  },
-  ["<M-S-k>"] = {
-    function()
-      require("builtin.buffer-swap").buffer_swap("up")
-    end,
-    "n",
-    desc = "Swap with the window above",
   },
   ["<M-space><M-k>"] = {
     "<C-W>K",

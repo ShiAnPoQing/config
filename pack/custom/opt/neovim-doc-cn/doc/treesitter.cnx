@@ -592,8 +592,8 @@ TSTree:root()                                                  *TSTree:root()*
 ==============================================================================
 TREESITTER 节点                                    *treesitter-node* *TSNode*
 
-“treesitter 节点”表示缓冲区解析内容的一个特定元素，可以被 |Query| 捕获用于例如高亮。
-它是 treesitter 库持有的对象的 |userdata| 引用。
+一个 "treesitter 节点" 代表缓冲区解析内容的特定元素，可以通过 |treesitter-query| 捕获，例如用于高亮显示。它是 treesitter 库持有的一个对象的 |userdata| 引用。
+
 
 treesitter 节点的实例 `TSNode` 支持以下方法。
 
@@ -1400,8 +1400,6 @@ add_directive({name}, {handler}, {opts})
                      `{ "#set!", "conceal", "-" }`
       • {opts}     (`表`) 包含以下字段的表：
                    • {force}? (`布尔值`) 覆盖同名的现有谓词
-                   • {all}? (`布尔值`) 使用匹配表的正确实现，其中捕获 ID 映射到
-                     节点列表而不是单个节点。默认为 true。此选项将在未来版本中移除。
 
                                         *vim.treesitter.query.add_predicate()*
 add_predicate({name}, {handler}, {opts})
@@ -1413,8 +1411,6 @@ add_predicate({name}, {handler}, {opts})
                    • 参数含义参见 |vim.treesitter.query.add_directive()|
       • {opts}     (`表?`) 包含以下字段的表：
                    • {force}? (`布尔值`) 覆盖同名的现有谓词
-                   • {all}? (`布尔值`) 使用匹配表的正确实现，其中捕获 ID 映射到
-                     节点列表而不是单个节点。默认为 true。此选项将在未来版本中移除。
 
 edit({lang})                                     *vim.treesitter.query.edit()*
     打开一个实时编辑器，用于查询您启动时的缓冲区。
@@ -1601,9 +1597,6 @@ Query:iter_matches({node}, {source}, {start}, {stop}, {opts})
                   • max_start_depth (整数) 如果非零，设置每个匹配的最大起始深度。
                     这用于防止在树中遍历过深。
                   • match_limit (整数) 设置进行中的匹配的最大数量（默认：256）。
-                  • all (布尔值) 当为 `false` 时（默认 `true`），返回的表将捕获 ID
-                    映射到单个（最后一个）节点，而不是完整的匹配节点列表。此选项仅
-                    用于向后兼容，将在未来版本中移除。
 
     返回值: ~
         (`fun(): 整数, 表<整数, TSNode[]>, vim.treesitter.query.TSMetadata, TSTree`)

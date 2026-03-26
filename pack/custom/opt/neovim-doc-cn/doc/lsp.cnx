@@ -309,6 +309,17 @@ LSP 规范定义的请求和通知被称为“LSP 方法”。这些由 Lua |lsp
                                                                  *lsp-handler*
 LSP 处理器是处理 Nvim 向服务器发出的请求的 |lsp-response| 的函数。（通知与请求不同，是一发即忘的：没有响应，因此它们无法被处理。|lsp-notification|）
 
+每个处理程序具有以下签名： >
+
+    vim.lsp.ResponseHandler:
+        fun(err, result, ctx)
+
+    vim.lsp.NotificationHandler:
+        fun(err, params, ctx)
+
+    vim.lsp.RequestHandler:
+        fun(err, params, ctx): Result?, lsp.ResponseError?
+
 每个响应处理器具有以下签名： >
 
     function(err, result, ctx)
@@ -326,10 +337,14 @@ LSP 处理器是处理 Nvim 向服务器发出的请求的 |lsp-response| 的函
                                 文档版本进行比较，以检查响应是否“过时”。另请参见
                                 |b:changedtick|。
 
-    返回值: ~
-        两个值 `result, err`，其中 `err` 的形状类似于 RPC 错误： >
+    返回值（多个）： ~
+        • (`Result?`) 成功时返回 `result`，错误时返回 `nil`。
+        • (`lsp.ResponseError?`) 失败时返回 `error`，成功时返回 `nil`。
+          RPC 错误结构： >
             { code, message, data? }
-<        您可以使用 |vim.lsp.rpc.rpc_response_error()| 创建此对象。
+<          你可以使用 |vim.lsp.rpc.rpc_response_error()| 来创建此对象。
+
+        |lsp-response| 和 |lsp-notification| 处理程序没有返回值。
 
                                                       *lsp-handler-resolution*
 可以通过以下方式设置处理器（优先级递增）：
@@ -376,13 +391,23 @@ https://github.com/microsoft/language-server-protocol/raw/gh-pages/_specificatio
     vim.lsp.protocol.TextDocumentSyncKind.Full == 1
     vim.lsp.protocol.TextDocumentSyncKind[1] == "Full"
 <
+                                                                *lsp-request*
+LSP 请求结构： >
+    { id: integer|string, method: string, params?: Params }
+<
+https://microsoft.github.io/language-server-protocol/specifications/specification-current/#requestMessage
 
                                                                 *lsp-response*
-LSP 响应结构：
+LSP 响应结构： >
+    { id: integer|string|nil, result: Result, error: nil }       （成功时）
+    { id: integer|string|nil, result: nil, error: ResponseError }  （错误时）
+<
 https://microsoft.github.io/language-server-protocol/specifications/specification-current/#responseMessage
 
                                                                 *lsp-notification*
-LSP 通知结构：
+LSP 通知结构： >
+    { method: string, params?: Params }
+<
 https://microsoft.github.io/language-server-protocol/specifications/specification-current/#notificationMessage
 
 ================================================================================
@@ -1006,9 +1031,9 @@ get_clients({filter})                                  *vim.lsp.get_clients()*
 get_configs({filter})                                  *vim.lsp.get_configs()*
     获取 LSP 配置。
 
-    警告：
-    • 可能会急切地（过早地！）评估 'runtimepath' 中的配置文件。
-    • 如果配置具有异步属性（如 `on_dir()`），它们可能处于部分状态。
+    另见 |vim.lsp.get_clients()| 以获取如 `root_dir` 等动态字段的运行时值，这些值取决于当前缓冲区/工作区等。
+
+    警告：可能会急切地（过早地！）评估 'runtimepath' 中的配置文件。
 
     属性： ~
         自版本：0.12.0
