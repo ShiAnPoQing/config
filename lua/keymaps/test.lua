@@ -170,7 +170,29 @@ return {
     "n",
   },
   ["<leader>5"] = {
-    function() end,
+    function()
+      -- 1️⃣ 创建 namespace（你的插件必须有自己的）
+      local ns = vim.api.nvim_create_namespace("my_diag")
+
+      -- 2️⃣ 获取当前 buffer（也可以换成指定 bufnr）
+      local bufnr = vim.api.nvim_get_current_buf()
+
+      -- 3️⃣ 构造一个 diagnostic
+      ---@type vim.Diagnostic.Set[]
+      local diags = {
+        {
+          lnum = 2, -- 行号（0-based！第3行）
+          col = 4, -- 列号（0-based）
+          end_lnum = 2, -- 可选
+          end_col = 10, -- 可选
+          severity = vim.diagnostic.severity.ERROR,
+          source = "my-plugin",
+          message = "Something went wrong",
+        },
+      }
+      -- 4️⃣ 设置 diagnostic
+      vim.diagnostic.set(ns, bufnr, diags)
+    end,
     "n",
   },
 }

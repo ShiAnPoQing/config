@@ -34,15 +34,16 @@ return {
     "n",
   },
   -- <C-BS>
+  --- @see keymaps/delete.lua <C-BS>
   ["<F17>"] = {
     { "<Left><C-o>diw", "i" },
     {
       function()
-        require("builtin.cmdline").delete_current_word_before()
+        require("builtin.cmdline").delete_cword_before()
       end,
       "c",
-      desc = "Delete current word(before)",
     },
+    desc = "Delete the cword(before)",
   },
   -- <S-BS>
   ["<F18>"] = {
@@ -82,6 +83,31 @@ return {
       desc = "Toggle Comment",
       expr = true,
     },
+  },
+  -- <C-S-BS>
+  --- @see keymaps/delete.lua <C-BS>
+  ["<F20>"] = {
+    { "<Left><C-o>diW", "i" },
+    {
+      function()
+        vim.print("hao")
+        require("builtin.cmdline").delete_CWORD_before()
+      end,
+      "c",
+    },
+    desc = "Delete the cword(before)",
+  },
+  -- <M-S-BS>
+  ["<F21>"] = {
+    { "<C-o>diW", "i" },
+    {
+      function()
+        vim.print("hao")
+        require("builtin.cmdline").delete_CWORD_after()
+      end,
+      "c",
+    },
+    desc = "Delete the CWORD(after)",
   },
   -- ["<F6>"] = {
   --   function()

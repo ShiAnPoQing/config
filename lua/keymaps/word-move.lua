@@ -22,22 +22,6 @@ local o_mode_space_I = function()
   vim.api.nvim_feedkeys("vgEloh", "nx", false)
 end
 
-local c_mode_space_i = function()
-  require("builtin.cmdline").word_end_backward()
-end
-
-local c_mode_space_o = function()
-  require("builtin.cmdline").word_start_forward()
-end
-
-local c_mode_i = function()
-  require("builtin.cmdline").word_start_backward()
-end
-
-local c_mode_o = function()
-  require("builtin.cmdline").word_end_forward()
-end
-
 return {
   ["i"] = {
     {
@@ -140,6 +124,21 @@ return {
     { "lwh", "x", desc = "Forword to the start of the word[count](right exclusion)" },
     desc = "Forword to the start of the word[count]",
   },
+  ["<S-space>I"] = {
+    {
+      function()
+        local function callback()
+          vim.api.nvim_feedkeys(vim.v.count1 .. "gE", "n", false)
+          require("repeat").set_motion(callback)
+        end
+        callback()
+      end,
+      "n",
+    },
+    { "hgEl", "x", desc = "Backward to the end of WORD[count](left exclusion)" },
+    { o_mode_space_I, "o", desc = "Backward to the end of WORD[count](left exclusion)" },
+    desc = "Backward to the end of WORD[count]",
+  },
   ["<space>I"] = {
     {
       function()
@@ -154,6 +153,25 @@ return {
     { "hgEl", "x", desc = "Backward to the end of WORD[count](left exclusion)" },
     { o_mode_space_I, "o", desc = "Backward to the end of WORD[count](left exclusion)" },
     desc = "Backward to the end of WORD[count]",
+  },
+  ["<S-space>O"] = {
+    {
+      function()
+        local function callback()
+          vim.api.nvim_feedkeys(vim.v.count1 .. "W", "n", false)
+          require("repeat").set_motion(callback)
+        end
+        callback()
+      end,
+      "n",
+    },
+    {
+      "W",
+      "o",
+      desc = "Forword to the start of the WORD[count](right exclusion)",
+    },
+    { "lWh", "x", desc = "Forword to the start of the WORD[count](right exclusion)" },
+    desc = "Forword to the start of the WORD[count]",
   },
   ["<space>O"] = {
     {
@@ -185,7 +203,12 @@ return {
       desc = "Expand word[left]",
     },
     { "<C-left>", "t" },
-    { c_mode_i, "c" },
+    {
+      function()
+        require("builtin.cmdline").prev_word_start()
+      end,
+      "c",
+    },
     desc = "Backward to the start of word",
   },
   ["<M-o>"] = {
@@ -199,12 +222,22 @@ return {
       "s",
       desc = "Expand word[right]",
     },
-    { c_mode_o, "c" },
+    {
+      function()
+        require("builtin.cmdline").next_word_end()
+      end,
+      "c",
+    },
     desc = "Forword to the end of the word",
   },
   ["<M-space><M-i>"] = {
     { "<Esc>gea", "i" },
-    { c_mode_space_i, "c" },
+    {
+      function()
+        require("builtin.cmdline").prev_word_end()
+      end,
+      "c",
+    },
     {
       function()
         require("builtin.expand-select").expand_select_left_word_with_blank()
@@ -215,7 +248,12 @@ return {
   },
   ["<M-space><M-o>"] = {
     { "<S-right>", "i" },
-    { c_mode_space_o, "c" },
+    {
+      function()
+        require("builtin.cmdline").next_word_start()
+      end,
+      "c",
+    },
     {
       function()
         require("builtin.expand-select").expand_select_right_word_with_blank()
@@ -227,11 +265,75 @@ return {
   ["<M-S-i>"] = {
     { "<Esc>Bi", "i", desc = "Backward to the start of WORD" },
     { "Bi", "n", desc = "Backward to the start of WORD and start insert mode" },
+    {
+      function()
+        require("builtin.cmdline").prev_WORD_start()
+      end,
+      "c",
+      desc = "Backward to the start of WORD",
+    },
   },
   ["<M-S-o>"] = {
     { "<Esc>Ea", "i", desc = "Forword to the end of the WORD" },
     { "Ea", "n", desc = "Forword to the end of the WORD and start insert mode" },
+    {
+      function()
+        require("builtin.cmdline").next_WORD_end()
+      end,
+      "c",
+      desc = "Forword to the end of the WORD",
+    },
   },
-  ["<M-space><M-S-i>"] = { "<Esc>gEa", "i", desc = "Backward to the end of WORD[count]" },
-  ["<M-space><M-S-o>"] = { "<C-o>W", "i", desc = "Forword to the start of the word[count]" },
+  ["<M-space><M-S-i>"] = {
+    {
+      "<Esc>gEa",
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").prev_WORD_end()
+      end,
+      "c",
+    },
+    desc = "Backward to the end of WORD[count]",
+  },
+  ["<M-space><M-S-o>"] = {
+    {
+      "<C-o>W",
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").next_WORD_start()
+      end,
+      "c",
+    },
+    desc = "Forword to the start of the word[count]",
+  },
+  ["<M-S-space><M-S-i>"] = {
+    {
+      "<Esc>gEa",
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").prev_WORD_end()
+      end,
+      "c",
+    },
+    desc = "Backward to the end of WORD[count]",
+  },
+  ["<M-S-space><M-S-o>"] = {
+    {
+      "<C-o>W",
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").next_WORD_start()
+      end,
+      "c",
+    },
+    desc = "Forword to the start of the word[count]",
+  },
 }

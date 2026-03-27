@@ -105,6 +105,10 @@
       "rev": "ab63c170ced00d36ffe8dab9b9001640b2a3ac84",
       "src": "https://github.com/MisanthropicBit/neotest-busted"
     },
+    "neovim": {
+      "rev": "cf2a288696b03d0934da713d66c6d71557b5c997",
+      "src": "https://github.com/rose-pine/neovim"
+    },
     "noice.nvim": {
       "rev": "7bfd942445fb63089b59f97ca487d605e715f155",
       "src": "https://github.com/folke/noice.nvim"

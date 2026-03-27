@@ -43,16 +43,51 @@ end
 
 return {
   ["<S-BS>"] = { { "<Del>", { "i", "c", "t" } }, { "x", "n" }, desc = "Delete the character after the cursor" },
-  ["<C-BS>"] = { "<Left><C-o>diw", "i", desc = "Delete the cword(before)" },
+  ["<C-BS>"] = {
+    {
+      "<Left><C-o>diw",
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_cword_before()
+      end,
+      "c",
+    },
+    desc = "Delete the cword(before)",
+  },
   ["<M-BS>"] = {
     { "<C-o>diw", "i" },
     {
       function()
-        require("builtin.cmdline").delete_current_word_after()
+        require("builtin.cmdline").delete_cword_after()
       end,
       "c",
     },
     desc = "Delete the cword(after)",
+  },
+  ["<C-S-BS>"] = {
+    {
+      "<Left><C-o>diW",
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_CWORD_before()
+      end,
+      "c",
+    },
+    desc = "Delete the CWORD(before)",
+  },
+  ["<M-S-BS>"] = {
+    { "<C-o>diW", "i" },
+    {
+      function()
+        require("builtin.cmdline").delete_CWORD_after()
+      end,
+      "c",
+    },
+    desc = "Delete the CWORD(after)",
   },
   ["<C-i>"] = {
     {
@@ -93,43 +128,59 @@ return {
     },
     {
       function()
-        require("builtin.cmdline").delete_to_word_end_forward()
+        require("builtin.cmdline").delete_to_next_word_end()
       end,
       "c",
     },
     desc = "Delete the part of the word after the cursor",
   },
   ["<C-S-i>"] = {
-    function()
-      local function delete()
-        local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
-        vim.api.nvim_feedkeys(esc .. "ldBi", "n", false)
-      end
-      local cursor = vim.api.nvim_win_get_cursor(0)
-      local line = vim.api.nvim_get_current_line()
-      if cursor[2] == #line then
-        ---@diagnostic disable-next-line: undefined-field
-        local virtualedit = vim.opt_local.virtualedit:get()[1]
-        if virtualedit ~= "all" then
-          vim.opt_local.virtualedit = "all"
-          delete()
-          vim.schedule(function()
-            vim.opt_local.virtualedit = virtualedit
-          end)
-          return
+    {
+      function()
+        local function delete()
+          local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+          vim.api.nvim_feedkeys(esc .. "ldBi", "n", false)
         end
-      end
-      delete()
-    end,
-    "i",
+        local cursor = vim.api.nvim_win_get_cursor(0)
+        local line = vim.api.nvim_get_current_line()
+        if cursor[2] == #line then
+          ---@diagnostic disable-next-line: undefined-field
+          local virtualedit = vim.opt_local.virtualedit:get()[1]
+          if virtualedit ~= "all" then
+            vim.opt_local.virtualedit = "all"
+            delete()
+            vim.schedule(function()
+              vim.opt_local.virtualedit = virtualedit
+            end)
+            return
+          end
+        end
+        delete()
+      end,
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_to_prev_WORD_start()
+      end,
+      "c",
+    },
     desc = "Delete the part of the WORD before the cursor",
   },
   ["<C-S-o>"] = {
-    function()
-      local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
-      vim.api.nvim_feedkeys(esc .. "vEolc", "n", false)
-    end,
-    "i",
+    {
+      function()
+        local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+        vim.api.nvim_feedkeys(esc .. "vEolc", "n", false)
+      end,
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_to_next_WORD_end()
+      end,
+      "c",
+    },
     desc = "Delete the part of the WORD after the cursor",
   },
   ["<C-space><C-i>"] = {
@@ -139,7 +190,7 @@ return {
     },
     {
       function()
-        require("builtin.cmdline").delete_to_word_end_backward()
+        require("builtin.cmdline").delete_to_prev_word_end()
       end,
       "c",
     },
@@ -149,32 +200,126 @@ return {
     { "<C-o>dw", "i" },
     {
       function()
-        require("builtin.cmdline").delete_to_word_start_forward()
+        require("builtin.cmdline").delete_to_next_word_start()
       end,
       "c",
     },
     desc = "Delete up to the start of the next word",
   },
-  ["<C-space><C-S-i>"] = { "<C-o>dgE", "i", desc = "Delete up to the end of the previous WORD" },
-  ["<C-space><C-S-O>"] = { "<C-o>dW", "i", desc = "Delete up to the start of the next WORD" },
-  ["<C-u>"] = { "<C-G>u<C-u>", "i", desc = "Delete up to the first non-blank character of the current line" },
-  ["<M-u>"] = { "<C-o>dg_", "i", desc = "Delete up to the last non-blank character of the current line" },
+  ["<C-space><C-S-i>"] = {
+    {
+      "<C-o>dgE",
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_to_prev_WORD_end()
+      end,
+      "c",
+    },
+    desc = "Delete up to the end of the previous WORD",
+  },
+  ["<C-S-space><C-S-i>"] = {
+    {
+      "<C-o>dgE",
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_to_prev_WORD_end()
+      end,
+      "c",
+    },
+    desc = "Delete up to the end of the previous WORD",
+  },
+  ["<C-space><C-S-O>"] = {
+    {
+      "<C-o>dW",
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_to_next_WORD_start()
+      end,
+      "c",
+    },
+    desc = "Delete up to the start of the next WORD",
+  },
+  ["<C-S-space><C-S-O>"] = {
+    {
+      "<C-o>dW",
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_to_next_WORD_start()
+      end,
+      "c",
+    },
+    desc = "Delete up to the start of the next WORD",
+  },
+  ["<C-u>"] = {
+    {
+      "<C-G>u<C-u>",
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_to_first_non_blank_character()
+      end,
+      "c",
+    },
+    desc = "Delete up to the first non-blank character of the current line",
+  },
+  ["<M-u>"] = {
+    {
+      "<C-o>dg_",
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_to_last_non_blank_character()
+      end,
+      "c",
+    },
+    desc = "Delete up to the last non-blank character of the current line",
+  },
   ["<C-M-u>"] = { "<Esc>cc", "i", desc = "Delete the current line" },
   ["<C-space><C-u>"] = {
-    function()
-      local line = vim.api.nvim_get_current_line()
-      local cursor = vim.api.nvim_win_get_cursor(0)
-      local delete = "<C-o>d0"
-      if cursor[2] == #line then
-        return delete .. "<del>"
-      end
-      return delete
-    end,
-    "i",
-    expr = true,
+    {
+      function()
+        local line = vim.api.nvim_get_current_line()
+        local cursor = vim.api.nvim_win_get_cursor(0)
+        local delete = "<C-o>d0"
+        if cursor[2] == #line then
+          return delete .. "<del>"
+        end
+        return delete
+      end,
+      "i",
+      expr = true,
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_to_first_character()
+      end,
+      "c",
+    },
     desc = "Delete up to the first character of the current line",
   },
-  ["<M-space><M-u>"] = { "<C-o>d$", "i", desc = "Delete up to the last character of the current line" },
+  ["<M-space><M-u>"] = {
+    {
+      "<C-o>d$",
+      "i",
+    },
+    {
+      function()
+        require("builtin.cmdline").delete_to_last_character()
+      end,
+      "c",
+    },
+    desc = "Delete up to the last character of the current line",
+  },
   ["<C-space><C-h>"] = {
     function()
       local line = vim.api.nvim_get_current_line()

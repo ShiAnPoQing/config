@@ -1,7 +1,23 @@
 return {
   {
+    "rose-pine/neovim",
+    -- lazy = false,
+    colorscheme = {
+      "rose-pine",
+      "rose-pine-moon",
+      "rose-pine-main",
+      "rose-pine-dawn",
+    },
+    config = function()
+      vim.cmd("colorscheme rose-pine-dawn")
+      -- vim.cmd("colorscheme rose-pine-main")
+      -- vim.cmd("colorscheme rose-pine-moon")
+      -- vim.cmd("colorscheme rose-pine-dawn")
+    end,
+  },
+  {
     "bluz71/vim-moonfly-colors",
-    lazy = true,
+    lazy = false,
     priority = 1000,
     colorscheme = "moonfly",
     config = function()
@@ -27,7 +43,7 @@ return {
     },
     config = function()
       require("tokyonight").setup({
-        transparent = true,
+        -- transparent = true,
       })
       vim.cmd.colorscheme("tokyonight-night")
     end,
@@ -35,7 +51,7 @@ return {
   {
     "BrokenSunny/paradox.nvim",
     priority = 1000,
-    lazy = false,
+    -- lazy = false,
     colorscheme = "paradox",
     config = function()
       require("paradox").setup()

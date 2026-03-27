@@ -23,7 +23,7 @@ return {
       end
       callback()
     end,
-    "n",
+    { "n", "x" },
     desc = "Go to [count] older cursor position in jump list",
   },
   ["<C-o>"] = {
@@ -34,7 +34,7 @@ return {
       end
       callback()
     end,
-    "n",
+    { "n", "x" },
     desc = "Go to [count] newer cursor position in jump list",
   },
   ["<C-M-i>"] = {

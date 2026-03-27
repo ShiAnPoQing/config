@@ -136,7 +136,7 @@ return {
             end,
             "n",
             desc = "Goto Lsp definition",
-            buffer = args.buf,
+            buf = args.buf,
           },
         })
       end,
@@ -148,7 +148,7 @@ return {
             end,
             "n",
             desc = "Got Lsp type definition",
-            buffer = args.buf,
+            buf = args.buf,
           },
         })
       end,
@@ -159,7 +159,7 @@ return {
               vim.lsp.buf.hover()
             end,
             "n",
-            buffer = args.buf,
+            buf = args.buf,
             desc = "LSP Hover",
           },
         })
@@ -171,7 +171,7 @@ return {
               vim.lsp.buf.signature_help()
             end,
             "n",
-            buffer = args.buf,
+            buf = args.buf,
             desc = "LSP Signature Help",
           },
         })
