@@ -10,7 +10,6 @@ return {
           sign = {
             namespace = { ".*" },
             name = { ".*" },
-            -- auto = true,
           },
         },
         {
@@ -27,6 +26,7 @@ return {
           sign = {
             namespace = { "gitsigns.*" },
             name = { "gitsigns.*" },
+            auto = true,
           },
         },
         { text = { builtin.foldfunc }, click = "v:lua.ScFa" },

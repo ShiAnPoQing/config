@@ -111,6 +111,8 @@ return {
   ["<M-space><M-space><M-j>"] = { "<down><home>", { "i" } },
   ["<space>m"] = { "gM", { "n", "x", "o" } },
   ["<space>n"] = { "M", { "n", "x", "o" } },
+  ["<space>k"] = { "{", { "n", "x", "o" } },
+  ["<space>j"] = { "}", { "n", "x", "o" } },
   ["<space>h"] = {
     {
       function()

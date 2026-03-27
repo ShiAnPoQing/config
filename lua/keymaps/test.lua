@@ -61,10 +61,7 @@ return {
     "n",
   },
   ["<leader>2"] = {
-    function()
-      local key = vim.api.nvim_replace_termcodes(":s/a/b<cr>", true, false, true)
-      vim.api.nvim_feedkeys(key, "m", true)
-    end,
+    function() end,
     "n",
   },
   ["<leader>3"] = {
@@ -170,6 +167,10 @@ return {
       end
       M.setup()
     end,
+    "n",
+  },
+  ["<leader>5"] = {
+    function() end,
     "n",
   },
 }

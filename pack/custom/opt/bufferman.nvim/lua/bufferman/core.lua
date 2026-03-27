@@ -54,7 +54,6 @@ UI:register({
           return
         end
 
-        -- vim.print("BufWinEnter")
         MG:init()
         MG:update()
       end,

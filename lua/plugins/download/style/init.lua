@@ -17,7 +17,7 @@ return {
   {
     "folke/tokyonight.nvim",
     priority = 1000,
-    lazy = false,
+    lazy = true,
     colorscheme = {
       "tokyonight",
       "tokyonight-day",
@@ -35,7 +35,7 @@ return {
   {
     "BrokenSunny/paradox.nvim",
     priority = 1000,
-    lazy = true,
+    lazy = false,
     colorscheme = "paradox",
     config = function()
       require("paradox").setup()
@@ -91,6 +91,7 @@ return {
   },
   {
     "Iron-E/nvim-highlite",
+    lazy = true,
     colorscheme = {
       "highlite",
       "highlite-ayu",
@@ -103,6 +104,7 @@ return {
     },
     config = function()
       require("highlite").setup({ generator = { plugins = { vim = false }, syntax = false } })
+      vim.cmd("colorscheme highlite-iceberg")
     end,
     -- version = "^4.0.0",
   },
@@ -131,6 +133,7 @@ return {
   {
     "rmehri01/onenord.nvim",
     priority = 1000,
+    lazy = true,
     colorscheme = "onenord",
     config = function()
       require("onenord").setup()
