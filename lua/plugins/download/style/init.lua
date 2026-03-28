@@ -17,7 +17,7 @@ return {
   },
   {
     "bluz71/vim-moonfly-colors",
-    lazy = false,
+    -- lazy = false,
     priority = 1000,
     colorscheme = "moonfly",
     config = function()
@@ -51,17 +51,17 @@ return {
   {
     "BrokenSunny/paradox.nvim",
     priority = 1000,
-    -- lazy = false,
+    lazy = false,
     colorscheme = "paradox",
     config = function()
       require("paradox").setup()
-      -- local time = tonumber(os.date("%H"))
-      -- if time >= 17 or time < 7 then
-      --   vim.o.background = "dark"
-      -- else
-      --   vim.o.background = "light"
-      -- end
-      vim.o.background = "light"
+      local time = tonumber(os.date("%H"))
+      if time >= 17 or time < 7 then
+        vim.o.background = "dark"
+      else
+        vim.o.background = "light"
+      end
+      -- vim.o.background = "light"
       vim.cmd([[colorscheme paradox]])
     end,
   },

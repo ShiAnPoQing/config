@@ -110,7 +110,7 @@ function M.file_details()
   })
 end
 
-function M.setup(opt)
+function M.setup()
   vim.api.nvim_create_user_command("FileDetails", function()
     M.file_details()
   end, {})

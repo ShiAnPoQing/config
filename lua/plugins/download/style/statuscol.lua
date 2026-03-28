@@ -7,12 +7,6 @@ return {
       setopt = true,
       segments = {
         {
-          sign = {
-            namespace = { ".*" },
-            name = { ".*" },
-          },
-        },
-        {
           text = {
             function(args)
               return ("%3d %2d "):format(args.lnum, args.relnum)
@@ -21,6 +15,12 @@ return {
           },
           condition = { true, builtin.not_empty },
           click = "v:lua.ScLa",
+        },
+        {
+          sign = {
+            namespace = { ".*" },
+            name = { ".*" },
+          },
         },
         {
           sign = {

@@ -143,9 +143,6 @@ return {
       matchpairs = function(v)
         v.append({ "【:】", "<:>", "《:》", "（:）", "`:`" })
       end,
-      rtp = function(v)
-        -- v.append({ "~/vimcdoc-2.5.0" })
-      end,
       helplang = function(v)
         v.prepend({ "cn" })
       end,

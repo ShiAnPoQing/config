@@ -79,69 +79,69 @@ return {
       ["cem"] = {
         "<Plug>(vimtex-delim-delete)",
         "n",
-        buffer = true,
+        buf = 0,
       },
       ["wc"] = {
         "<Plug>(vimtex-ac)",
         { "x", "o" },
-        buffer = true,
+        buf = 0,
       },
       ["ec"] = {
         "<Plug>(vimtex-ic)",
         { "x", "o" },
-        buffer = true,
+        buf = 0,
       },
       ["wd"] = {
         "<Plug>(vimtex-ad)",
         { "x", "o" },
-        buffer = true,
+        buf = 0,
       },
       ["ed"] = {
         "<Plug>(vimtex-id)",
         { "x", "o" },
-        buffer = true,
+        buf = 0,
       },
       ["we"] = {
         "<Plug>(vimtex-ae)",
         { "x", "o" },
-        buffer = true,
+        buf = 0,
       },
       ["ee"] = {
         "<Plug>(vimtex-ie)",
         { "x", "o" },
-        buffer = true,
+        buf = 0,
       },
       ["w$"] = {
         "<Plug>(vimtex-a$)",
         { "x", "o" },
-        buffer = true,
+        buf = 0,
       },
       ["e$"] = {
         "<Plug>(vimtex-i$)",
         { "x", "o" },
-        buffer = true,
+        buf = 0,
       },
       ["wP"] = {
         "<Plug>(vimtex-aP)",
         { "x", "o" },
-        buffer = true,
+        buf = 0,
       },
       ["eP"] = {
         "<Plug>(vimtex-iP)",
         { "x", "o" },
-        buffer = true,
+        buf = 0,
       },
       ["<localleader>lt"] = {
         function()
           return require("vimtex.fzf-lua").run()
         end,
         "n",
-        buffer = true,
+        buf = 0,
       },
       ["<localleader>k"] = {
         "<Plug>(vimtex-doc-package)",
         "n",
-        buffer = true,
+        buf = 0,
       },
     })
     vim.keymap.set("n", "<localleader>cse", function()

@@ -3,6 +3,7 @@ require("global")
 require("command")
 require("autocmds")
 require("keymaps")
+-- require("test")
 require("native-packer").setup({
   require("plugins.download.style"),
   require("plugins.download.style.statuscol"),
@@ -14,6 +15,7 @@ require("native-packer").setup({
   require("plugins.local.neo-lsp"),
   require("plugins.local.native-diagnostic"),
   require("plugins.local.reasonable-scroll"),
+  require("plugins.local.reasonable-screen-move"),
   require("plugins.local.window-swap"),
   require("plugins.local.buffer-swap"),
   require("plugins.download.misc.linefuse"),
@@ -61,5 +63,6 @@ require("native-packer").setup({
   require("plugins.local.doc"),
   require("plugins.download.misc.ts-comments"),
   require("plugins.download.misc.persistence"),
+  require("plugins.download.misc.showkey"),
   -- require("plugins.download.ai.copilot"),
 })

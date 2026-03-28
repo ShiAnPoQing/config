@@ -18,14 +18,14 @@ return {
         require("toggleterm").toggle(vim.v.count, 0, vim.uv.cwd(), "float")
       end,
       "n",
-      desc = "Toggle Terminal",
+      desc = "Toggle Terminal[float]",
     },
     ["<leader>tF"] = {
       function()
         require("toggleterm").toggle(vim.v.count, 0, vim.fn.expand("%:p:h"), "float")
       end,
       "n",
-      desc = "Toggle Terminal",
+      desc = "Toggle Terminal[float][cursor file path]",
     },
     ["<leader>th"] = {
       function()
@@ -39,7 +39,7 @@ return {
         require("toggleterm").toggle(vim.v.count, 15, vim.fn.expand("%:p:h"), "horizontal")
       end,
       "n",
-      desc = "Toggle Terminal Horizontal",
+      desc = "Toggle Terminal Horizontal[cursor file path]",
     },
     ["<leader>tv"] = {
       function()
@@ -53,7 +53,7 @@ return {
         require("toggleterm").toggle(vim.v.count, vim.o.columns * 0.4, vim.fn.expand("%:p:h"), "vertical")
       end,
       "n",
-      desc = "Toggle Terminal Vertical",
+      desc = "Toggle Terminal Vertical[cursor file path]",
     },
     ["<leader>tt"] = {
       function()
@@ -67,7 +67,7 @@ return {
         require("toggleterm").toggle(vim.v.count, 0, vim.fn.expand("%:p:h"), "tab")
       end,
       "n",
-      desc = "Toggle Terminal Tabpage",
+      desc = "Toggle Terminal Tabpage[cursor file path]",
     },
     ["<leader>tn"] = {
       "<cmd>ToggleTermSetName<cr>",

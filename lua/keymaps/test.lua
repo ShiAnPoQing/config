@@ -9,7 +9,7 @@ return {
       local function open_cmdline()
         buf = vim.api.nvim_create_buf(false, true)
 
-        win = vim.api.nvim_open_win(buf, false, {
+        win = vim.api.nvim_open_win(buf, true, {
           relative = "editor",
           row = 10,
           col = 20,
@@ -17,8 +17,12 @@ return {
           height = 1,
           style = "minimal",
           border = "rounded",
-          focusable = true,
+          -- focusable = true,
+          noautocmd = true,
         })
+        -- vim.api.nvim_buf_call(buf, function()
+        --   vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "test" })
+        -- end)
       end
 
       local function close_cmdline()
@@ -27,6 +31,7 @@ return {
           win = nil
         end
       end
+      local timer = vim.loop.new_timer()
       vim.ui_attach(ns, { ext_cmdline = true }, function(event, ...)
         if win and event == "cmdline_hide" then
           close_cmdline()
@@ -34,12 +39,22 @@ return {
 
         if event == "cmdline_show" then
           if not win then
-            vim.schedule(function()
-              open_cmdline()
-              vim.api.nvim_win_set_cursor(win, { 1, 0 })
-              vim.cmd.redraw()
-              vim.cmd.redraw()
-            end)
+            timer:start(
+              0,
+              0,
+              vim.schedule_wrap(function()
+                timer:stop()
+                open_cmdline()
+                -- vim.cmd.redraw()
+                -- vim.schedule(function()
+                vim.api.nvim_win_set_cursor(win, { 1, 0 })
+                vim.cmd.startinsert()
+                vim.api.nvim__redraw({ cursor = true, win = win, flush = true })
+                -- vim.cmd.redraw()
+                -- end)
+              end)
+            )
+            return true
           end
           -- vim.print(event)
           -- local content = select(1, ...)
@@ -50,12 +65,28 @@ return {
           -- end
           --
         elseif event == "cmdline_pos" then
+          timer:start(
+            0,
+            0,
+            vim.schedule_wrap(function()
+              timer:stop()
+              vim.print("test")
+              vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "test" })
+              -- vim.cmd.redraw()
+              -- vim.schedule(function()
+              -- vim.cmd.startinsert()
+              vim.api.nvim__redraw({ buf = buf, win = win, flush = true })
+              -- vim.cmd.redraw()
+              -- end)
+            end)
+          )
           --   vim.schedule(function()
           --     vim.api.nvim_win_set_cursor(win, { 1, 0 })
           --   end)
           -- elseif event == "cmdline_hide" then
           --   close_cmdline()
         end
+        return true
       end)
     end,
     "n",
@@ -192,6 +223,25 @@ return {
       }
       -- 4️⃣ 设置 diagnostic
       vim.diagnostic.set(ns, bufnr, diags)
+    end,
+    "n",
+  },
+  ["<leader>6"] = {
+    function()
+      local win = vim.api.nvim_get_current_win()
+      local view = vim.fn.winsaveview()
+      vim.cmd("split")
+      vim.api.nvim_win_call(win, function()
+        vim.fn.winrestview(view)
+      end)
+
+      -- local a = vim.api.nvim_get_keymap("n")
+      -- local b = vim.api.nvim_get_keymap("x")
+      -- local c = vim.api.nvim_get_keymap("i")
+      -- local d = vim.api.nvim_get_keymap("c")
+      -- local e = vim.api.nvim_get_keymap("s")
+      -- vim.print(#a, #b, #c, #d, #e)
+      -- vim.print("Total: " .. #a + #b + #c + #d + #e)
     end,
     "n",
   },

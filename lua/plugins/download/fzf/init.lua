@@ -526,9 +526,14 @@ return {
       fzf.filetypes()
     end, {})
     require("fzf-lua").setup({
-      -- winopts = {
-      --   split = "belowright new",
-      -- },
+      winopts = {
+        -- split = "belowright new",
+        row = 1, -- window row position (0=top, 1=bottom)
+        col = 0.50,
+        width = 1,
+        height = 0.5,
+        backdrop = 100,
+      },
     })
     vim.api.nvim_create_user_command("FzFDirectories", function()
       local fzf_lua = require("fzf-lua")

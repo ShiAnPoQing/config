@@ -175,9 +175,9 @@ function M.scroll_viewport_left()
   local count = vim.v.count
   -- 判断是否处在虚拟编辑区域
   if is_cursor_in_virtualedit() then
-    return scroll_viewport_left_none_virtualedit(count)
+    return scroll_viewport_left_virtualedit(count, vim.fn.virtcol("."))
   end
-  return scroll_viewport_left_virtualedit(count, vim.fn.virtcol("."))
+  return scroll_viewport_left_none_virtualedit(count)
 end
 
 -- ze 默认行为如下:

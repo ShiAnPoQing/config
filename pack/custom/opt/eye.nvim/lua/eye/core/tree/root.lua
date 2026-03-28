@@ -72,7 +72,6 @@ function M:_register(source)
   for _, r in ipairs(source) do
     ---@diagnostic disable-next-line: param-type-mismatch
     local config = Config:proxy(Config:normalize(r), self.config)
-    --- TODO: Add buffer control
     self.buffers[tostring(r.buf)] = config
     for _, label in ipairs(r.source) do
       label.buf = r.buf
