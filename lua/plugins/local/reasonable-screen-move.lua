@@ -1,6 +1,9 @@
 return {
   name = "reasonable-screen-move.nvim",
-  depend = "reasonable-scroll.nvim",
+  depend = {
+    "reasonable-scroll.nvim",
+    "BrokenSunny/repeat.nvim",
+  },
   key = {
     ["ah"] = {
       function()

@@ -8,8 +8,8 @@ local M = {}
 --- @field WORD.outer string
 
 --- @class Eye.Word.Config
---- @field matched fun(ctx: Eye.Config.Hook.Context)
 --- @field regex string|fun(ctx: Eye.Word.RegexContext): string
+--- @field matched fun(ctx: Eye.Config.Hook.Context)
 --- @field position -1 | 1
 
 local function iter(win, matches, topline, botline, callback)
@@ -77,6 +77,7 @@ function M.gaze(config)
       label = {
         highlight = {
           show_next_key = false,
+          HighlightPre = function(ns_id) end,
         },
       },
       matched = config.matched,

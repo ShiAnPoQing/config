@@ -4,7 +4,7 @@
 --- @field layer Eye._Config._Layer
 
 --- @class Eye._Config._Label
---- @field base Eye.Config.Label.Base
+--- @field misc Eye.Config.Label.Misc
 --- @field hook Eye.Config.Label.Hook
 --- @field extmark? Eye.Config.Label.Extmark
 --- @field highlight? Eye.Config.Label.Highlight
@@ -17,7 +17,7 @@
 --- @field config Eye._Config._Label
 local label = {
   config = {
-    base = {
+    misc = {
       -- stylua: ignore
       include = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", },
       exclude = {},
@@ -68,33 +68,33 @@ function label:proxy(config, parent)
   config = config or {}
 
   if not parent then
-    if config.base.exclude then
+    if config.misc and config.misc.exclude then
       local include = {}
-      for _, char in ipairs(self.config.base.include) do
-        if not vim.list_contains(config.base.exclude, char) then
+      for _, char in ipairs(self.config.misc.include) do
+        if not vim.list_contains(config.misc.exclude, char) then
           table.insert(include, char)
         end
       end
-      config.base.include = include
+      config.misc.include = include
     end
     parent = self.config
   end
 
   return {
-    base = setmetatable(config.base or {}, { __index = parent.base }),
+    misc = setmetatable(config.misc or {}, { __index = parent.misc }),
     extmark = setmetatable(config.extmark or {}, { __index = parent.extmark }),
     highlight = setmetatable(config.highlight or {}, { __index = parent.highlight }),
     hook = setmetatable(config.hook or {}, { __index = parent.hook }),
   }
 end
 
---- @param config Eye.Config.Label
+--- @param config Eye.Config.Label|Eye.Config.LabelBase
 --- @return Eye._Config._Label
 function label:normalize(config)
   config = config or {}
 
   return {
-    base = {
+    misc = {
       exclude = config.exclude,
       include = config.include,
     },
@@ -107,7 +107,7 @@ function label:normalize(config)
   }
 end
 
---- @param config Eye.Config
+--- @param config Eye.ConfigBase
 --- @return Eye._Config._Hook
 function hook:normalize(config)
   config = config or {}
@@ -154,7 +154,7 @@ function M:proxy(config, parent)
   }
 end
 
---- @param config Eye.Config
+--- @param config Eye.ConfigBase
 --- @return Eye._Config
 function M:normalize(config)
   return {

@@ -79,6 +79,15 @@ function M.gaze(config)
 
   require("eye.core")
     .gaze({
+      layer = {
+        highlight = {
+          {
+            range = function()
+              return { range[1], range[2] }
+            end,
+          },
+        },
+      },
       source = {
         {
           buf = vim.api.nvim_get_current_buf(),

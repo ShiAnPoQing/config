@@ -1,4 +1,5 @@
 local U = require("eye.core.util")
+local HL = require("eye.highlight")
 local State = require("eye.plugin.search.state")
 --- @class Eye.Plugin.Search
 local M = {}
@@ -182,6 +183,18 @@ function M.gaze(config)
   end
 
   step("")
+end
+
+function M.setup()
+  HL.register_highlights({
+    {
+      name = "EyeSearchIcon",
+      value = {
+        fg = "#ff007c",
+        bold = true,
+      },
+    },
+  })
 end
 
 return M

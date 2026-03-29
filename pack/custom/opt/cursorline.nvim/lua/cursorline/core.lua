@@ -9,7 +9,7 @@
 :setglobal option?         display           -
 --]]
 
---- @class NeovimBuiltin.Cursorline
+--- @class Cursorline
 local M = {}
 
 local function reset_cursorline()
@@ -40,7 +40,10 @@ function M:active()
   })
   self.winenter = vim.api.nvim_create_autocmd("WinEnter", {
     callback = function()
-      vim.opt_local.cursorline = true
+      local win = vim.api.nvim_get_current_win()
+      vim.schedule(function()
+        vim.api.nvim_set_option_value("cursorline", true, { win = win, scope = "local" })
+      end)
     end,
   })
 end

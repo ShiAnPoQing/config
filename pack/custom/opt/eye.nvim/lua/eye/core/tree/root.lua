@@ -25,17 +25,23 @@ local function get_random_label(include, node)
 end
 
 --- @param node Eye.Node
---- @param label Eye.LabelSpec
---- @param config Eye._Config
-function M:_build(node, label, config)
-  local include = self.config.label.base.include
+--- @param spec Eye._LabelSpec
+--- @param label_base Eye.Config.LabelBase
+--- @param parent_config Eye._Config
+function M:_build(node, spec, label_base, parent_config)
+  local include = self.config.label.misc.include
   if not node then
     return
   end
+
+  local function build(n)
+    self:_build(n, spec, label_base, parent_config)
+  end
+
   local function transfer()
     if node.parent then
       node.parent.current = nil
-      self:_build(node.parent, label, config)
+      build(node.parent)
     end
   end
   if node.level == 1 then
@@ -43,10 +49,10 @@ function M:_build(node, label, config)
       transfer()
       return
     end
-    Leaf:new(node, get_random_label(include, node), label, #include, config)
+    Leaf:new(node, get_random_label(include, node), spec, label_base, #include, parent_config)
   else
     if node.current then
-      self:_build(node.current, label, config)
+      build(node.current)
       return
     end
     if node.remain == 0 then
@@ -54,11 +60,11 @@ function M:_build(node, label, config)
       return
     end
     node.current = Node:new(node, get_random_label(include, node), #include)
-    self:_build(node.current, label, config)
+    build(node.current)
   end
 end
 
---- @param register Eye.BufferLabelSpec[]
+--- @param register Eye.BufferConfig[]
 local function compute_label_count(register)
   local total = 0
   for _, r in ipairs(register) do
@@ -67,15 +73,18 @@ local function compute_label_count(register)
   return total
 end
 
---- @param source Eye.BufferLabelSpec[]
-function M:_register(source)
-  for _, r in ipairs(source) do
-    ---@diagnostic disable-next-line: param-type-mismatch
-    local config = Config:proxy(Config:normalize(r), self.config)
-    self.buffers[tostring(r.buf)] = config
-    for _, label in ipairs(r.source) do
-      label.buf = r.buf
-      self:_build(self.current, label, config)
+--- @param buffer_configs Eye.BufferConfig[]
+function M:_register(buffer_configs)
+  for _, config in ipairs(buffer_configs) do
+    local buffer_config = Config:proxy(Config:normalize(config), self.config)
+    self.buffers[tostring(config.buf)] = buffer_config
+    for _, label in ipairs(config.source) do
+      local spec = {
+        buf = config.buf,
+        items = label.items,
+        data = label.data,
+      }
+      self:_build(self.current, spec, label --[[@as Eye.Config.LabelBase]], buffer_config)
     end
   end
 end
@@ -85,14 +94,14 @@ end
 function M:new(config)
   local root = Node.new(self) --[[@as Eye.Root]]
   root.config = Config:proxy(Config:normalize(config or {}))
-  local level, remain1, remain2 = U.compute(#root.config.label.base.include, compute_label_count(config.source))
+  local level, remain1, remain2 = U.compute(#root.config.label.misc.include, compute_label_count(config.source))
   root.buffers = {}
   root.id = "0"
   root.level = level + 1
   root.remain = remain2 + 1
   root.current = Node:new(root, "[[empty]]", remain1)
   setmetatable(root.children, { __index = root.current.children })
-  root:_register(config.source)
+  root:_register(vim.tbl_deep_extend("force", {}, config.source))
   return root
 end
 

@@ -21,6 +21,7 @@ require("native-packer").setup({
   require("plugins.download.misc.linefuse"),
   require("plugins.local.move-line"),
   require("plugins.local.move-word"),
+  require("plugins.local.cursorline"),
   require("plugins.local.file-details"),
   require("plugins.local.code-action"),
   require("plugins.local.op-register"),

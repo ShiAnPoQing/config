@@ -1,0 +1,1 @@
+require("eye.highlight").setup()

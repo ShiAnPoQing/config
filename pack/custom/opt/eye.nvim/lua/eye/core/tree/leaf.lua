@@ -3,8 +3,13 @@ local Node = require("eye.core.tree.node")
 local Extmark = require("eye.core.extmark")
 local Config = require("eye.core.config")
 
+--- @class Eye._LabelSpec
+--- @field buf integer
+--- @field items Eye.Config.Label.Item[]
+--- @field data? table<any>
+
 --- @class Eye.Leaf: Eye.Node
---- @field spec Eye.LabelSpec
+--- @field spec Eye._LabelSpec
 --- @field config Eye._Config._Label
 local M = setmetatable({}, { __index = Node })
 M.__index = M
@@ -17,21 +22,20 @@ function M:highlight(targets)
   --- @param node Eye.Node|Eye.Leaf
   local function hl(i, node)
     for _, item in ipairs(self.spec.items) do
-      ---@diagnostic disable-next-line: param-type-mismatch
-      local config = Config.label:proxy(Config.label:normalize(item), self.config)
-      if not config.highlight.show_next_key and i ~= 1 then
+      local label_config = Config.label:proxy(Config.label:normalize(item --[[@as Eye.Config.LabelBase]]), self.config)
+      if not label_config.highlight.show_next_key and i ~= 1 then
         return
       end
       Extmark.set({
         line = item.row,
         col = item.col + i - 1,
         text = node.label,
-        hl_group = config.highlight.group[i] or config.highlight.group[#config.highlight.group],
+        hl_group = label_config.highlight.group[i] or label_config.highlight.group[#label_config.highlight.group],
         buf = self.spec.buf,
         ns_id = require("eye.core").ns_id,
-        virt_text_pos = config.extmark.virt_text_pos,
-        virt = config.extmark.virt,
-        right_gravity = config.extmark.right_gravity,
+        virt_text_pos = label_config.extmark.virt_text_pos,
+        virt = label_config.extmark.virt,
+        right_gravity = label_config.extmark.right_gravity,
       })
     end
   end
@@ -43,19 +47,15 @@ end
 
 --- @param parent Eye.Node|nil
 --- @param label string|nil
---- @param source Eye.LabelSpec
+--- @param spec Eye._LabelSpec
+--- @param label_base Eye.Config.LabelBase
 --- @param remain integer|nil
---- @param config Eye._Config
-function M:new(parent, label, source, remain, config)
+--- @param parent_config Eye._Config
+function M:new(parent, label, spec, label_base, remain, parent_config)
   local o = Node.new(self, parent, label, remain) --[[@as Eye.Leaf]]
   o.level = 0
-  ---@diagnostic disable-next-line: param-type-mismatch, missing-fields
-  o.config = Config.label:proxy(Config.label:normalize(source), config.label)
-  o.spec = {
-    data = source.data,
-    items = source.items,
-    buf = source.buf,
-  }
+  o.config = Config.label:proxy(Config.label:normalize(label_base), parent_config.label)
+  o.spec = spec
   return o
 end
 

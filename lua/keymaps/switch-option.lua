@@ -35,7 +35,7 @@ return {
       end
     end,
     "n",
-    desc = "Switch the cursor line will always be in the middle of the window or not"
+    desc = "Switch the cursor line will always be in the middle of the window or not",
   },
   ["<leader>st"] = {
     function()
@@ -62,13 +62,6 @@ return {
     end,
     "n",
     desc = "Switch virtualedit",
-  },
-  ["<leader>csl"] = {
-    function()
-      require("builtin.cursorline"):toggle()
-    end,
-    "n",
-    desc = "Switch cursorline[only one cursorline]",
   },
   ["<space><space>-"] = {
     function()

@@ -1,7 +1,18 @@
 local M = {}
 
-local Comment = vim.api.nvim_get_hl(0, { name = "Comment" })
-vim.api.nvim_set_hl(0, "EyeLayer", { fg = Comment.fg })
+--- @class Eye.Config.Layer.Highlight.RangeContext
+--- @field topline integer
+--- @field botline integer
+
+--- @alias Eye.Config.Layer.Highlight.Range [integer, integer]|fun(ctx: Eye.Config.Layer.Highlight.RangeContext): [integer, integer]
+
+--- @class Eye.Config.Layer.Highlight
+--- @field range Eye.Config.Layer.Highlight.Range
+--- @field group? string
+
+--- @class Eye.Config.Layer
+--- @field enable? boolean
+--- @field highlight? Eye.Config.Layer.Highlight[]
 
 local function hl(data)
   vim.api.nvim_buf_set_extmark(0, data.ns_id, data.start_row, 0, {
@@ -23,6 +34,19 @@ local function get_win(buf)
   return win
 end
 
+--- @param range Eye.Config.Layer.Highlight.Range
+local function get_range(range, wininfo)
+  if type(range) == "function" then
+    return range({
+      topline = wininfo.topline,
+      botline = wininfo.botline,
+    })
+  elseif type(range) == "table" then
+    return range
+  end
+  return { wininfo.topline, wininfo.botline }
+end
+
 --- @param buf integer
 --- @param config Eye._Config._Layer
 function M.draw(buf, config)
@@ -34,10 +58,7 @@ function M.draw(buf, config)
 
   for _, value in ipairs(config.highlight) do
     local group = value.group
-    local range = value.range({
-      topline = wininfo.topline,
-      botline = wininfo.botline,
-    })
+    local range = get_range(value.range, wininfo)
     hl({
       start_row = range[1],
       end_row = range[2],
