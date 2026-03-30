@@ -23,22 +23,22 @@ end
 local function set_extmark(up_col, down_col, up_line, down_line)
   local ns_id = vim.api.nvim_create_namespace("test")
   pcall(vim.api.nvim_buf_set_extmark, 0, ns_id, up_line, 0, {
-    hl_group = "EyeTrackLayer",
+    hl_group = "EyeLayer",
     end_row = up_line + 1,
     hl_eol = true,
   })
   pcall(vim.api.nvim_buf_set_extmark, 0, ns_id, down_line, 0, {
-    hl_group = "EyeTrackLayer",
+    hl_group = "EyeLayer",
     end_row = down_line + 1,
     hl_eol = true,
   })
   pcall(vim.api.nvim_buf_set_extmark, 0, ns_id, up_line, 0, {
-    virt_text = { { "k", "EyeTrackKey" } },
+    virt_text = { { "k", "EyeLabel" } },
     virt_text_win_col = up_col,
     hl_mode = "combine",
   })
   pcall(vim.api.nvim_buf_set_extmark, 0, ns_id, down_line, 0, {
-    virt_text = { { "j", "EyeTrackKey" } },
+    virt_text = { { "j", "EyeLabel" } },
     virt_text_win_col = down_col,
     hl_mode = "combine",
   })

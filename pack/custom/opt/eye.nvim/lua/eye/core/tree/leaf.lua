@@ -3,6 +3,10 @@ local Node = require("eye.core.tree.node")
 local Extmark = require("eye.core.extmark")
 local Config = require("eye.core.config")
 
+--- @class Eye.Leaf.Pending
+--- @field spec Eye._LabelSpec
+--- @field config Eye.Config.Label
+
 --- @class Eye._LabelSpec
 --- @field buf integer
 --- @field items Eye.Config.Label.Item[]
@@ -10,7 +14,7 @@ local Config = require("eye.core.config")
 
 --- @class Eye.Leaf: Eye.Node
 --- @field spec Eye._LabelSpec
---- @field config Eye._Config._Label
+--- @field config Eye.Config.Label
 local M = setmetatable({}, { __index = Node })
 M.__index = M
 
@@ -22,7 +26,7 @@ function M:highlight(targets)
   --- @param node Eye.Node|Eye.Leaf
   local function hl(i, node)
     for _, item in ipairs(self.spec.items) do
-      local label_config = Config.label:proxy(Config.label:normalize(item --[[@as Eye.Config.LabelBase]]), self.config)
+      local label_config = Config.label:proxy(item --[[@as Eye.Config.BaseLabel]], self.config)
       if not label_config.highlight.show_next_key and i ~= 1 then
         return
       end
@@ -47,15 +51,13 @@ end
 
 --- @param parent Eye.Node|nil
 --- @param label string|nil
---- @param spec Eye._LabelSpec
---- @param label_base Eye.Config.LabelBase
 --- @param remain integer|nil
---- @param parent_config Eye._Config
-function M:new(parent, label, spec, label_base, remain, parent_config)
+--- @param leaf_spec Eye.Leaf.Pending
+function M:new(parent, label, remain, leaf_spec)
   local o = Node.new(self, parent, label, remain) --[[@as Eye.Leaf]]
   o.level = 0
-  o.config = Config.label:proxy(Config.label:normalize(label_base), parent_config.label)
-  o.spec = spec
+  o.config = leaf_spec.config
+  o.spec = leaf_spec.spec
   return o
 end
 
@@ -67,8 +69,8 @@ function M:start()
     data = vim.tbl_deep_extend("force", {}, self.spec.data or {}),
     matched = true,
   }
-  U.try(self.config.hook.matched or self:find_root().config.hook.matched, ctx)
-  self:stop(ctx)
+  U.try(self.config.matched, ctx)
+  self:finish(ctx)
 end
 
 return M

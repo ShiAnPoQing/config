@@ -4,7 +4,7 @@ return {
   key = {
     ["<leader>csl"] = {
       function()
-        require("builtin.cursorline"):toggle()
+        require("cursorline").toggle()
       end,
       "n",
       desc = "Switch cursorline[only one cursorline]",

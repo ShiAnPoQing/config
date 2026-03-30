@@ -228,20 +228,20 @@ return {
   },
   ["<leader>6"] = {
     function()
-      local win = vim.api.nvim_get_current_win()
-      local view = vim.fn.winsaveview()
-      vim.cmd("split")
-      vim.api.nvim_win_call(win, function()
-        vim.fn.winrestview(view)
-      end)
+      -- local win = vim.api.nvim_get_current_win()
+      -- local view = vim.fn.winsaveview()
+      -- vim.cmd("split")
+      -- vim.api.nvim_win_call(win, function()
+      --   vim.fn.winrestview(view)
+      -- end)
 
-      -- local a = vim.api.nvim_get_keymap("n")
-      -- local b = vim.api.nvim_get_keymap("x")
-      -- local c = vim.api.nvim_get_keymap("i")
-      -- local d = vim.api.nvim_get_keymap("c")
-      -- local e = vim.api.nvim_get_keymap("s")
-      -- vim.print(#a, #b, #c, #d, #e)
-      -- vim.print("Total: " .. #a + #b + #c + #d + #e)
+      local a = vim.api.nvim_get_keymap("n")
+      local b = vim.api.nvim_get_keymap("x")
+      local c = vim.api.nvim_get_keymap("i")
+      local d = vim.api.nvim_get_keymap("c")
+      local e = vim.api.nvim_get_keymap("s")
+      vim.print(#a, #b, #c, #d, #e)
+      vim.print("Total: " .. #a + #b + #c + #d + #e)
     end,
     "n",
   },

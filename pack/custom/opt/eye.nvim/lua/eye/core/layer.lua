@@ -1,21 +1,29 @@
 local M = {}
 
+--- @class Eye.Layer.Pending
+--- @field buf integer
+--- @field config Eye.Config.Layer.Config
+--- @field specs Eye.Config.LayerSpec[]
+
 --- @class Eye.Config.Layer.Highlight.RangeContext
 --- @field topline integer
 --- @field botline integer
 
 --- @alias Eye.Config.Layer.Highlight.Range [integer, integer]|fun(ctx: Eye.Config.Layer.Highlight.RangeContext): [integer, integer]
 
---- @class Eye.Config.Layer.Highlight
+--- @class Eye.Config.LayerSpec
 --- @field range Eye.Config.Layer.Highlight.Range
 --- @field group? string
 
---- @class Eye.Config.Layer
+--- @class Eye.Config.Layer.Config
 --- @field enable? boolean
---- @field highlight? Eye.Config.Layer.Highlight[]
+--- @field group? string
+
+--- @class Eye.Config.Layer: Eye.Config.Layer.Config
+--- @field [integer] Eye.Config.LayerSpec
 
 local function hl(data)
-  vim.api.nvim_buf_set_extmark(0, data.ns_id, data.start_row, 0, {
+  vim.api.nvim_buf_set_extmark(data.buf, data.ns_id, data.start_row, 0, {
     end_row = data.end_row,
     hl_group = data.group,
     hl_eol = true,
@@ -44,25 +52,32 @@ local function get_range(range, wininfo)
   elseif type(range) == "table" then
     return range
   end
+
   return { wininfo.topline, wininfo.botline }
 end
 
 --- @param buf integer
---- @param config Eye._Config._Layer
-function M.draw(buf, config)
+--- @param specs Eye.Config.LayerSpec[]
+--- @param config Eye.Config.Layer.Config
+function M.draw(buf, specs, config)
   local win = get_win(buf)
   if not win then
     return
   end
-  local wininfo = vim.fn.getwininfo(win)[1]
-
-  for _, value in ipairs(config.highlight) do
-    local group = value.group
-    local range = get_range(value.range, wininfo)
+  local wininfo
+  for _, value in ipairs(specs) do
+    local range = value.range
+    if type(value.range) == "function" then
+      if not wininfo then
+        wininfo = vim.fn.getwininfo(win)[1]
+      end
+      range = get_range(value.range, wininfo)
+    end
+    local group = value.group or config.group
     hl({
       start_row = range[1],
       end_row = range[2],
-      group = group or "EyeLayer",
+      group = group,
       ns_id = require("eye.core").ns_id,
       buf = buf,
     })

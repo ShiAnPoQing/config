@@ -6,7 +6,6 @@ local M = {}
 
 --- @class Eye.Plugin.Search.Config
 --- @field matched? fun(ctx: any)
---- @field unmatched? fun(ctx: any)
 
 local function get_next_pattern(key, pattern)
   local next_pattern
@@ -111,11 +110,14 @@ local function create_label(buf, match, pattern)
 end
 
 --- @param pattern string
---- @return Eye.LabelSpec[], string[], integer
+--- @return Eye.LabelSpec[], string[]
 local function create_labels(pattern)
   local buf = vim.api.nvim_get_current_buf()
+  local labels = {
+    buf = buf,
+  }
   if pattern == "" then
-    return {}, {}, buf
+    return labels, {}
   end
   local win = vim.api.nvim_get_current_win()
   local wininfo = vim.fn.getwininfo(win)[1]
@@ -133,7 +135,6 @@ local function create_labels(pattern)
     regex = pattern:gsub("([\\^$.~[*?+])", "\\%1") .. ".\\?",
   })
 
-  local labels = {}
   local exclude = {}
   iter_match(0, Regex.matches, topline, botline, function(match)
     local label, exclude_char = create_label(buf, match, pattern)
@@ -141,7 +142,7 @@ local function create_labels(pattern)
     table.insert(exclude, exclude_char)
   end)
 
-  return labels, exclude, buf
+  return labels, exclude
 end
 
 --- @param config Eye.Plugin.Search.Config
@@ -155,24 +156,18 @@ function M.gaze(config)
       return
     end
 
-    local labels, exclude, buf = create_labels(pattern)
+    local labels, exclude = create_labels(pattern)
     local Eye = require("eye.core").gaze({
+      labels,
       label = {
         exclude = exclude,
       },
-      source = {
-        {
-          buf = buf,
-          source = labels,
-        },
-      },
-      stop = function(ctx)
+      finish = function(ctx)
         if ctx.matched then
           U.try(config.matched, ctx)
           return
         end
         if ctx.label:lower() == "<esc>" then
-          U.try(config.unmatched, ctx)
           return
         end
         step(get_next_pattern(ctx.label:lower(), pattern))

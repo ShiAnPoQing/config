@@ -23,7 +23,7 @@ local function reset_cursorline()
 end
 
 function M:is_active()
-  return self.winenter and self.winleave
+  return self.win_enter and self.win_leave
 end
 
 function M:active()
@@ -33,17 +33,19 @@ function M:active()
     return
   end
 
-  self.winleave = vim.api.nvim_create_autocmd("WinLeave", {
+  self.win_leave = vim.api.nvim_create_autocmd("WinLeave", {
     callback = function()
       vim.opt_local.cursorline = false
     end,
   })
-  self.winenter = vim.api.nvim_create_autocmd("WinEnter", {
+  self.win_enter = vim.api.nvim_create_autocmd("WinEnter", {
     callback = function()
-      local win = vim.api.nvim_get_current_win()
-      vim.schedule(function()
-        vim.api.nvim_set_option_value("cursorline", true, { win = win, scope = "local" })
-      end)
+      vim.opt_local.cursorline = true
+    end,
+  })
+  self.buf_win_enter = vim.api.nvim_create_autocmd("BufWinEnter", {
+    callback = function()
+      vim.opt_local.cursorline = true
     end,
   })
 end
@@ -54,10 +56,12 @@ function M:deactive()
   if not self:is_active() then
     return
   end
-  pcall(vim.api.nvim_del_autocmd, self.winleave)
-  pcall(vim.api.nvim_del_autocmd, self.winenter)
-  self.winleave = nil
-  self.winenter = nil
+  pcall(vim.api.nvim_del_autocmd, self.win_leave)
+  pcall(vim.api.nvim_del_autocmd, self.win_enter)
+  pcall(vim.api.nvim_del_autocmd, self.buf_win_enter)
+  self.win_leave = nil
+  self.win_enter = nil
+  self.buf_win_enter = nil
 end
 
 -- 'cursorline' local to window

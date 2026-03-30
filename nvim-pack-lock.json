@@ -271,6 +271,10 @@
       "rev": "04775cc6e10ef038c397c407bc17f00a2f52b378",
       "src": "https://github.com/gbprod/yanky.nvim"
     },
+    "yazi.nvim": {
+      "rev": "cb669a55963b390878880a044aacd6f9f136dde6",
+      "src": "https://github.com/mikavilpas/yazi.nvim"
+    },
     "zen-mode.nvim": {
       "rev": "8564ce6d29ec7554eb9df578efa882d33b3c23a7",
       "src": "https://github.com/folke/zen-mode.nvim"

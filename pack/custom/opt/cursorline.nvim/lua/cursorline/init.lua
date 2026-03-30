@@ -17,4 +17,8 @@ function M.setup(config)
   end
 end
 
+function M.toggle()
+  require("cursorline.core"):toggle()
+end
+
 return M

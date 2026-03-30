@@ -65,5 +65,6 @@ require("native-packer").setup({
   require("plugins.download.misc.ts-comments"),
   require("plugins.download.misc.persistence"),
   require("plugins.download.misc.showkey"),
+  require("plugins.download.filemanager.yazi"),
   -- require("plugins.download.ai.copilot"),
 })

@@ -69,7 +69,9 @@ return {
       },
       explorer = { enabled = true },
       indent = { enabled = true, char = "│", animate = { enabled = false } },
-      input = { enabled = true },
+      input = {
+        enabled = true,
+      },
       picker = { enabled = true },
       notifier = { enabled = false },
       quickfile = { enabled = true },
@@ -77,6 +79,13 @@ return {
       scroll = { enabled = false },
       -- statuscolumn = { enabled = true },
       words = { enabled = true },
+      styles = {
+        input = {
+          b = {
+            completion = true, -- disable blink completions in input
+          },
+        },
+      },
     })
   end,
 }

@@ -1,4 +1,3 @@
-local Layer = require("eye.core.layer")
 --- @class Eye.Node
 --- @field id string
 --- @field level integer
@@ -12,27 +11,21 @@ M.__index = M
 
 function M:start()
   local root = self:find_root()
-  for str_buf, config in pairs(root.buffers) do
-    local buf = tonumber(str_buf) --[[@as integer]]
-    Layer.draw(buf, config.layer)
-  end
+  root:layer()
   self:highlight({})
   vim.cmd.redraw()
-
   local char = vim.fn.getcharstr()
-
   local next = self.children[char]
+  root:refresh()
   if next then
-    root:refresh()
     next:start()
   else
-    root:refresh()
-    self:stop({ matched = false, label = vim.fn.keytrans(char) })
+    self:finish({ matched = false, label = vim.fn.keytrans(char) })
   end
 end
 
-function M:stop(ctx)
-  self:find_root():stop(ctx)
+function M:finish(ctx)
+  self:find_root():finish(ctx)
 end
 
 --- @param parent Eye.Node|nil

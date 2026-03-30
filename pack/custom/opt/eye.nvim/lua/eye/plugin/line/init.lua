@@ -6,7 +6,7 @@ local M = {}
 --- @field botline integer
 
 --- @class Eye.Plugin.Line.Config
---- @field matched fun(ctx: Eye.Config.Hook.Context)
+--- @field matched fun(ctx: Eye.RootGroup.Config.Hook.Context)
 --- @field range? fun(range: Eye.Plugin.Line.RangeContext): [integer, integer]
 
 --- @type Eye.Plugin.Line.Config
@@ -56,14 +56,16 @@ function M.gaze(config)
   })
 
   --- @type Eye.LabelSpec[]
-  local source = {}
+  local labels = {
+    buf = vim.api.nvim_get_current_buf(),
+  }
   iter(cursor[1], range[1], range[2], function(row)
     local line = vim.api.nvim_buf_get_lines(0, row - 1, row, false)[1]
     ---@diagnostic disable-next-line: param-type-mismatch
-    -- local _col = vim.fn.virtcol2col(win, row, virt_col) - 1
-    -- if _col < 0 then
-    --   _col = 0
-    -- end
+    local _col = vim.fn.virtcol2col(win, row, virt_col) - 1
+    if _col < 0 then
+      _col = 0
+    end
     local col = virt_col - 1
     if vim.fn.strdisplaywidth(line) < virt_col then
       col = vim.fn.strdisplaywidth(line) - 1
@@ -72,29 +74,30 @@ function M.gaze(config)
     if col < 0 then
       col = -1
     end
-    table.insert(source, {
+    labels[#labels + 1] = {
       items = { { row = row - 1, col = col } },
-    })
+      data = {
+        row = row,
+        col = _col,
+      },
+    }
   end)
-
-  require("eye.core")
+  require("eye")
     .gaze({
+      labels,
+      label = {
+        extmark = {
+          virt = true,
+        },
+        matched = config.matched,
+      },
       layer = {
-        highlight = {
-          {
-            range = function()
-              return { range[1], range[2] }
-            end,
-          },
-        },
-      },
-      source = {
         {
-          buf = vim.api.nvim_get_current_buf(),
-          source = source,
+          range = function()
+            return { range[1] - 1, range[2] }
+          end,
         },
       },
-      matched = config.matched,
     })
     :start()
 end

@@ -154,6 +154,9 @@ return {
             "lazydev",
             -- "annotation"
           },
+          -- snacks_input = {
+          --   "path",
+          -- },
           -- vim = { inherit_defaults = true, 'cmdline' },
         },
         providers = {
@@ -266,7 +269,6 @@ return {
         ["<Down>"] = { "select_next", "fallback" },
       },
       -- opts_extend = { "sources.default" },
-      -- init = function() end,
     })
     vim.api.nvim_set_hl(0, "BlinkCmpLabelMatch", {
       link = "PmenuKind",

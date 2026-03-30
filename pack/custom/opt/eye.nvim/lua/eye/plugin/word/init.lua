@@ -9,7 +9,7 @@ local M = {}
 
 --- @class Eye.Word.Config
 --- @field regex string|fun(ctx: Eye.Word.RegexContext): string
---- @field matched fun(ctx: Eye.Config.Hook.Context)
+--- @field matched fun(ctx: Eye.RootGroup.Config.Hook.Context)
 --- @field position -1 | 1
 
 local function iter(win, matches, topline, botline, callback)
@@ -47,17 +47,20 @@ end
 --- @param config Eye.Word.Config
 function M.gaze(config)
   local win = vim.api.nvim_get_current_win()
+  local buf = vim.api.nvim_get_current_buf()
   local wininfo = vim.fn.getwininfo(win)[1]
   local regex = require("eye.regex"):new({
     regex = config.regex,
-    buf = vim.api.nvim_get_current_buf(),
+    buf = buf,
     topline = wininfo.topline,
     botline = wininfo.botline,
     leftcol = wininfo.leftcol,
     rightcol = wininfo.leftcol + wininfo.width - wininfo.textoff,
   })
-  local labels = {}
-
+  ---@type Eye.BufferGroup
+  local labels = {
+    buf = buf,
+  }
   iter(win, regex.matches, wininfo.topline, wininfo.botline, function(match)
     local col
     if config.position == -1 then
@@ -74,18 +77,13 @@ function M.gaze(config)
 
   require("eye.core")
     .gaze({
+      labels,
       label = {
         highlight = {
           show_next_key = false,
-          HighlightPre = function(ns_id) end,
+          HighlightPre = function() end,
         },
-      },
-      matched = config.matched,
-      source = {
-        {
-          buf = vim.api.nvim_get_current_buf(),
-          source = labels,
-        },
+        matched = config.matched,
       },
     })
     :start()
