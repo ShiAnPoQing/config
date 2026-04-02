@@ -28,7 +28,12 @@ return {
     depend = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" }, -- if you use the mini.nvim suite
     ft = { "markdown" },
     key = {
-      ["<leader>rd"] = { "<cmd>RenderMarkdown toggle<cr>", desc = "Toggle Markdown Render", "n", ft = "markdown" },
+      ["<leader>rd"] = {
+        "<cmd>RenderMarkdown toggle<cr>",
+        "n",
+        ft = "markdown",
+        desc = "Toggle Markdown Render",
+      },
     },
     config = function()
       require("render-markdown").setup({

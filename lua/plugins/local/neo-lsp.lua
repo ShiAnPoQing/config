@@ -29,7 +29,7 @@ return {
               vim.lsp.buf.document_symbol()
             end,
             "n",
-            buffer = args.buf,
+            buf = args.buf,
             desc = "LSP Document Symbol",
           },
         })
@@ -41,7 +41,7 @@ return {
               vim.lsp.codelens.enable(not vim.lsp.codelens.is_enabled())
             end,
             "n",
-            buffer = args.buf,
+            buf = args.buf,
             desc = "Toggle codelens",
           },
         })
@@ -81,7 +81,7 @@ return {
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({}))
             end,
             "n",
-            buffer = args.buf,
+            buf = args.buf,
             desc = "Toggle inlay hint",
           },
         })
@@ -93,7 +93,7 @@ return {
               vim.lsp.buf.incoming_calls()
             end,
             "n",
-            buffer = args.buf,
+            buf = args.buf,
             desc = "Lists all the call sites of the symbol under the cursor in the |quickfix| window.",
           },
         })
@@ -105,7 +105,7 @@ return {
               vim.lsp.buf.selection_range(vim.v.count1)
             end,
             "x",
-            buffer = args.buf,
+            buf = args.buf,
             desc = "Perform an incremental selection at the cursor position based on ranges given by the LSP.",
           },
         })
@@ -117,7 +117,7 @@ return {
               vim.lsp.buf.incoming_calls()
             end,
             "n",
-            buffer = args.buf,
+            buf = args.buf,
             desc = "Lists all the items that are called by the symbol under the cursor in the |quickfix| window.",
           },
         })

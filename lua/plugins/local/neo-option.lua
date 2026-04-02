@@ -1,12 +1,95 @@
+local function specificity(name)
+  return #vim.split(name, ".", { plain = true })
+end
+
+local function fold_virt_text(result, start_text, lnum)
+  local text = ""
+  local hl
+  for i = 1, #start_text do
+    local char = start_text:sub(i, i)
+    local new_hl = "@text"
+
+    -- local sem_tokens = vim.lsp.semantic_tokens.get_at_pos(0, lnum, i)
+    -- if sem_tokens and #sem_tokens > 0 then
+    --   new_hl = "@" .. sem_tokens[1].type
+    -- else
+    local captures = vim.treesitter.get_captures_at_pos(0, lnum, i - 1)
+    if #captures > 0 then
+      local top = captures[1]
+      local top_priority = (top.metadata and tonumber(top.metadata.priority)) or 0
+      local top_spec = specificity(top.capture)
+      for _, cap in ipairs(captures) do
+        local raw_prio = cap.metadata and cap.metadata.priority
+        local prio = tonumber(raw_prio) or 0
+        if prio > top_priority then
+          top = cap
+          top_priority = prio
+        elseif prio == top_priority and top_spec < specificity(cap.capture) then
+          top = cap
+          top_priority = prio
+        end
+      end
+      new_hl = "@" .. top.capture
+    end
+    -- end
+
+    if new_hl then
+      if new_hl ~= hl then
+        table.insert(result, { text, hl })
+        text = ""
+        hl = nil
+      end
+      text = text .. char
+      hl = new_hl
+    else
+      text = text .. char
+    end
+  end
+  table.insert(result, { text, hl })
+end
+
+function _G.custom_foldtext()
+  local start_text = vim.fn.getline(vim.v.foldstart):gsub("\t", string.rep(" ", vim.o.tabstop))
+  local nline = vim.v.foldend - vim.v.foldstart
+  local result = {}
+  fold_virt_text(result, start_text, vim.v.foldstart - 1)
+  table.insert(result, { "  ", nil })
+  table.insert(result, { "󰛁  " .. nline .. " lines folded", "@comment" })
+  return result
+end
+
 function MyTabLabel(n)
+  local hl = vim.api.nvim_get_hl(0, { name = "TabLineSel" })
+  vim.api.nvim_set_hl(0, "TabLineError", {
+    fg = "#ff5555",
+    bg = hl.bg,
+  })
   local buflist = vim.fn.tabpagebuflist(n)
   local winnr = vim.fn.tabpagewinnr(n)
+  local buf = buflist[winnr]
   local full_path = vim.fn.bufname(buflist[winnr])
   local filename = vim.fn.fnamemodify(full_path, ":t")
-  if filename == "" then
+  local modified = vim.api.nvim_get_option_value("modified", { buf = buf })
+  local error_count = vim.diagnostic.count(buf, {
+    severity = vim.diagnostic.severity.ERROR,
+  })[vim.diagnostic.severity.ERROR]
+  local label = filename
+  if label == "" then
+    label = "[No Name]"
+    return label
+  end
+  if error_count and error_count > 0 then
+    label = label .. " %#TabLineError#" .. " " .. "%#TabLine#"
+  end
+  if modified then
+    label = label .. " ●"
+  end
+  if label == "" then
     return "[No Name]"
   else
-    return filename
+    -- vim.print(label)
+    -- return ""
+    return label
   end
 end
 
@@ -96,16 +179,17 @@ return {
       conceallevel = 0,
       -- colorcolumn = "72",
       -- textwidth = 80,
-      list = false,
+
+      list = true,
       -- inccommand = "split",
       listchars = {
         -- eol = "",
-        space = " ",
+        -- space = " ",
         extends = "⭆",
         -- trail = "»",
         trail = "·",
         -- tab = "│",
-        multispace = "   │",
+        -- multispace = "   │",
       },
       fillchars = {
         vert = "│",
@@ -124,7 +208,6 @@ return {
         l = true,
         ["/"] = true,
       },
-
       -- statuscolumn = "%s %{v:lnum} %{v:relnum}",
 
       foldcolumn = "auto",
@@ -139,6 +222,7 @@ return {
       -- 最大嵌套折叠层数
       foldnestmax = 3,
       -- foldenable = false,
+      foldtext = "v:lua.custom_foldtext()",
       pumheight = 8,
       matchpairs = function(v)
         v.append({ "【:】", "<:>", "《:》", "（:）", "`:`" })

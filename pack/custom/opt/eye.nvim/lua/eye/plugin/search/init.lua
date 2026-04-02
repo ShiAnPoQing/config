@@ -5,7 +5,8 @@ local State = require("eye.plugin.search.state")
 local M = {}
 
 --- @class Eye.Plugin.Search.Config
---- @field matched? fun(ctx: any)
+--- @field matched? fun(ctx: Eye.Hook.Context)
+--- @field unmatched? fun(ctx: Eye.Hook.Context)
 
 local function get_next_pattern(key, pattern)
   local next_pattern
@@ -85,14 +86,17 @@ end
 --- @param buf integer
 --- @param match Eye.Regex.Match
 --- @param pattern string
---- @return Eye.LabelSpec, string
+--- @return Eye.Label.Spec, string
 local function create_label(buf, match, pattern)
   local exclude_char = get_exclude_char(buf, match, pattern)
   local offset = exclude_char and #exclude_char or 0
-  ---@type Eye.LabelSpec
+  ---@type Eye.Label.Spec
   local label = {
+    buf = buf,
     items = {
-      { row = match.row - 1, col = match.end_col - offset },
+      {
+        pos = { match.row - 1, match.end_col - offset },
+      },
     },
     highlight = {
       HighlightPre = function(ns_id)
@@ -110,14 +114,12 @@ local function create_label(buf, match, pattern)
 end
 
 --- @param pattern string
---- @return Eye.LabelSpec[], string[]
+--- @return Eye.Label.Spec[], string[], integer
 local function create_labels(pattern)
   local buf = vim.api.nvim_get_current_buf()
-  local labels = {
-    buf = buf,
-  }
+  local labels = {}
   if pattern == "" then
-    return labels, {}
+    return labels, {}, buf
   end
   local win = vim.api.nvim_get_current_win()
   local wininfo = vim.fn.getwininfo(win)[1]
@@ -126,23 +128,24 @@ local function create_labels(pattern)
   ---@diagnostic disable-next-line: undefined-field
   local leftcol = wininfo.leftcol
   local rightcol = leftcol + wininfo.width - wininfo.textoff
-  local Regex = require("eye.regex"):new({
-    buf = buf,
-    topline = topline,
-    botline = botline,
-    leftcol = leftcol,
-    rightcol = rightcol,
-    regex = pattern:gsub("([\\^$.~[*?+])", "\\%1") .. ".\\?",
+  local regex = require("eye.regex"):new(pattern:gsub("([\\^$.~[*?+])", "\\%1") .. ".\\?")
+  regex:match({
+    {
+      buf = buf,
+      topline = topline,
+      botline = botline,
+      leftcol = leftcol,
+      rightcol = rightcol,
+    },
   })
-
   local exclude = {}
-  iter_match(0, Regex.matches, topline, botline, function(match)
+  iter_match(0, regex.matches, topline, botline, function(match)
     local label, exclude_char = create_label(buf, match, pattern)
     table.insert(labels, label)
     table.insert(exclude, exclude_char)
   end)
 
-  return labels, exclude
+  return labels, exclude, buf
 end
 
 --- @param config Eye.Plugin.Search.Config
@@ -150,27 +153,33 @@ function M.gaze(config)
   config = config or {}
   State:init()
   local function step(pattern)
-    notify(pattern)
-
     if rollback_state(pattern) then
       return
     end
-
-    local labels, exclude = create_labels(pattern)
+    local labels, exclude, buf = create_labels(pattern)
     local Eye = require("eye.core").gaze({
-      labels,
+      labels = labels,
       label = {
         exclude = exclude,
       },
+      layers = {
+        {
+          buf = buf,
+          range = function(ctx)
+            return { ctx.topline - 1, ctx.botline }
+          end,
+        },
+      },
       finish = function(ctx)
-        if ctx.matched then
+        if ctx.completed then
           U.try(config.matched, ctx)
           return
         end
-        if ctx.label:lower() == "<esc>" then
+        if ctx.char:lower() == "<esc>" then
+          U.try(config.unmatched, ctx)
           return
         end
-        step(get_next_pattern(ctx.label:lower(), pattern))
+        step(get_next_pattern(ctx.char:lower(), pattern))
       end,
     })
     State:register(pattern, Eye)

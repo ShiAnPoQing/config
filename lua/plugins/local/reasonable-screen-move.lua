@@ -14,7 +14,7 @@ return {
         callback()
       end,
       { "n", "x", "o" },
-      desc = "Screen First Character",
+      desc = "Screen Line First Non Blank Character",
     },
     ["al"] = {
       function()
@@ -25,7 +25,7 @@ return {
         callback()
       end,
       { "n", "x", "o" },
-      desc = "Screen Last Character",
+      desc = "Screen Line Last Non Blank Character",
     },
     ["ak"] = {
       function()
@@ -52,15 +52,17 @@ return {
     ["am"] = {
       "gm",
       { "n", "x", "o" },
+      desc = "Screen Horizontally Center",
     },
     ["an"] = {
       "M",
       { "n", "x", "o" },
-      desc = "To Middle line of window, on the first non-blank character (linewise)",
+      desc = "Screen Vertical Center",
     },
     ["ac"] = {
       "gmM",
       "n",
+      desc = "Screen Center",
     },
     ["aak"] = {
       function()
@@ -84,7 +86,7 @@ return {
         { "n", "x" },
       },
       { "g0", "o" },
-      desc = "Screen First Character",
+      desc = "Screen Line First Character",
     },
     ["aal"] = {
       {
@@ -94,7 +96,7 @@ return {
         { "n", "x" },
       },
       { "g$", "o" },
-      desc = "Screen Last Character",
+      desc = "Screen Line Last Character",
     },
   },
 }

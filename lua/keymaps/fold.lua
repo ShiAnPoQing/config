@@ -16,9 +16,8 @@
 
 return {
   ["<CR>"] = {
-    "<CR>",
+    "zo",
     "n",
-    desc = "Stop same as <C-M>",
   },
   -- ["<S-CR>"] = {
   --   "zMzv",

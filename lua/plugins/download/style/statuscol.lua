@@ -5,6 +5,8 @@ return {
     local builtin = require("statuscol.builtin")
     require("statuscol").setup({
       setopt = true,
+      ft_ignore = { "neo-tree" },
+      bt_ignore = { "neo-tree" },
       segments = {
         {
           text = {

@@ -237,7 +237,6 @@ local snippets = {
     end),
     t({ "", "end" }),
   }),
-
   s("whi", {
     t("while "),
     i(1, "true"),
@@ -251,6 +250,19 @@ local snippets = {
       end
     end),
     t({ "", "end" }),
+  }),
+  s("mm", {
+    t({ "local M = {" }),
+    i(1),
+    t({ "}", "", "" }),
+    t("function M"),
+    i(2),
+    t("("),
+    i(3),
+    t({ ")", "" }),
+    i(4),
+    t({ "", "end", "", "" }),
+    t("return M"),
   }),
 
   -- s("dfun", {

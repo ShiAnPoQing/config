@@ -7,8 +7,8 @@ local function toggle_cursor_follow()
   cursor_follow = not cursor_follow
 end
 
-function M.scroll_up()
-  local count = vim.v.count1
+function M.scroll_up(count)
+  count = count or vim.v.count1
   local key = count .. "<C-y>"
   if cursor_follow then
     U.feedkeys(key)
@@ -20,8 +20,8 @@ function M.scroll_up()
   U.feedkeys(key .. count .. "k")
 end
 
-function M.scroll_down()
-  local count = vim.v.count1
+function M.scroll_down(count)
+  count = count or vim.v.count1
   local key = count .. "<C-e>"
   if cursor_follow then
     U.feedkeys(key)

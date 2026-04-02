@@ -228,20 +228,14 @@ return {
   },
   ["<leader>6"] = {
     function()
-      -- local win = vim.api.nvim_get_current_win()
-      -- local view = vim.fn.winsaveview()
-      -- vim.cmd("split")
-      -- vim.api.nvim_win_call(win, function()
-      --   vim.fn.winrestview(view)
-      -- end)
-
-      local a = vim.api.nvim_get_keymap("n")
-      local b = vim.api.nvim_get_keymap("x")
-      local c = vim.api.nvim_get_keymap("i")
-      local d = vim.api.nvim_get_keymap("c")
-      local e = vim.api.nvim_get_keymap("s")
-      vim.print(#a, #b, #c, #d, #e)
-      vim.print("Total: " .. #a + #b + #c + #d + #e)
+      ------@param r number 0-255
+      ------@param g number 0-255
+      ------@param b number 0-255
+      ------@return string
+      ---local function rgb_to_hex(r, g, b)
+      ---  return string.format("#%02x%02x%02x", r, g, b)
+      ---end
+      ----- rgb_to_hex(128, 128, 128)
     end,
     "n",
   },

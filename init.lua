@@ -3,11 +3,13 @@ require("global")
 require("command")
 require("autocmds")
 require("keymaps")
--- require("test")
+require("test")
 require("native-packer").setup({
   require("plugins.download.style"),
   require("plugins.download.style.statuscol"),
-  require("plugins.download.style.lualine"),
+  -- require("plugins.download.heirline"),
+  require("plugins.local.test.statusline"),
+  -- require("plugins.download.style.lualine"),
   require("plugins.local.neo-option"),
   require("plugins.local.native-macro"),
   require("plugins.download.misc.repeat"),
@@ -36,7 +38,7 @@ require("native-packer").setup({
   require("plugins.download.treesitter"),
   -- require("plugins.download.misc.which-key"),
   require("plugins.download.filemanager.oil"),
-  -- require("plugins.download.filemanager.neo-tree"),
+  require("plugins.download.filemanager.neo-tree"),
   require("plugins.download.misc.autopairs"),
   require("plugins.download.misc.nvim-ts-autotag"),
   require("plugins.download.misc.supermaven"),
@@ -46,7 +48,7 @@ require("native-packer").setup({
   require("plugins.download.git.gitsigns"),
   require("plugins.download.tmux.vim-tmux-navigator"),
   require("plugins.download.window.winshift"),
-  require("plugins.download.misc.flash"),
+  -- require("plugins.download.misc.flash"),
   require("plugins.download.misc.snacks"),
   -- require("plugins.download.misc.trouble"),
   require("plugins.local.neo-winbar"),
@@ -68,3 +70,36 @@ require("native-packer").setup({
   require("plugins.download.filemanager.yazi"),
   -- require("plugins.download.ai.copilot"),
 })
+
+-- vim.api.nvim_set_hl(0, "Normal", {
+--   bg = "#141414",
+--   fg = "#808080",
+-- })
+--
+-- vim.api.nvim_set_hl(0, "String", {
+--   fg = "#809e80",
+-- })
+--
+-- vim.api.nvim_set_hl(0, "@variable", {
+--   fg = "#808080",
+-- })
+--
+-- vim.api.nvim_set_hl(0, "Function", {
+--   fg = "#9999ad",
+-- })
+--
+-- vim.api.nvim_set_hl(0, "@keyword", {
+--   fg = "#806280",
+-- })
+--
+-- vim.api.nvim_set_hl(0, "@keyword.function", {
+--   fg = "#806280",
+-- })
+--
+-- vim.api.nvim_set_hl(0, "@property", {
+--   fg = "#816e8c",
+-- })
+--
+-- vim.api.nvim_set_hl(0, "@punctuation.bracket", {
+--   fg = "#808080",
+-- })

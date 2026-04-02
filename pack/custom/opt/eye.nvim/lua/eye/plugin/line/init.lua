@@ -6,7 +6,7 @@ local M = {}
 --- @field botline integer
 
 --- @class Eye.Plugin.Line.Config
---- @field matched fun(ctx: Eye.RootGroup.Config.Hook.Context)
+--- @field matched fun(ctx: Eye.Hook.Context)
 --- @field range? fun(range: Eye.Plugin.Line.RangeContext): [integer, integer]
 
 --- @type Eye.Plugin.Line.Config
@@ -46,53 +46,84 @@ end
 function M.gaze(config)
   config = vim.tbl_deep_extend("force", default_config, config)
   local win = vim.api.nvim_get_current_win()
+  local buf = vim.api.nvim_win_get_buf(win)
   local wininfo = vim.fn.getwininfo(win)[1]
   local cursor = vim.api.nvim_win_get_cursor(win)
   local virt_col = vim.fn.virtcol(".")
-
   local range = config.range({
     topline = wininfo.topline,
     botline = wininfo.botline,
   })
 
-  --- @type Eye.LabelSpec[]
-  local labels = {
-    buf = vim.api.nvim_get_current_buf(),
-  }
+  --- @type Eye.Label.Spec[]
+  local labels = {}
   iter(cursor[1], range[1], range[2], function(row)
-    local line = vim.api.nvim_buf_get_lines(0, row - 1, row, false)[1]
-    ---@diagnostic disable-next-line: param-type-mismatch
-    local _col = vim.fn.virtcol2col(win, row, virt_col) - 1
-    if _col < 0 then
-      _col = 0
+    ---@diagnostic disable-next-line: undefined-field
+    local virtualedit = vim.opt_local.virtualedit:get()
+    if vim.list_contains(virtualedit, "all") then
+      ---@diagnostic disable-next-line: param-type-mismatch
+      local _col = vim.fn.virtcol2col(vim.api.nvim_get_current_win(), row, virt_col) - 1
+      if _col < 0 then
+        _col = 0
+      end
+      local col = virt_col - wininfo.leftcol - 1
+      labels[#labels + 1] = {
+        buf = buf,
+        items = {
+          {
+            pos = { row - 1, col },
+          },
+        },
+        data = {
+          row = row,
+          col = _col,
+          offset = row - cursor[1],
+          topline = wininfo.topline,
+          botline = wininfo.botline,
+        },
+      }
+    else
+      local line = vim.api.nvim_buf_get_lines(0, row - 1, row, false)[1]
+      ---@diagnostic disable-next-line: param-type-mismatch
+      local _col = vim.fn.virtcol2col(win, row, virt_col) - 1
+      if _col < 0 then
+        _col = 0
+      end
+      local col = virt_col - 1
+      if vim.fn.strdisplaywidth(line) < virt_col then
+        col = vim.fn.strdisplaywidth(line) - 1
+      end
+      col = col - wininfo.leftcol
+      if col < 0 then
+        col = -1
+      end
+      labels[#labels + 1] = {
+        buf = buf,
+        items = {
+          { pos = { row - 1, col } },
+        },
+        data = {
+          row = row,
+          col = _col,
+          offset = row - cursor[1],
+          topline = wininfo.topline,
+          botline = wininfo.botline,
+        },
+      }
     end
-    local col = virt_col - 1
-    if vim.fn.strdisplaywidth(line) < virt_col then
-      col = vim.fn.strdisplaywidth(line) - 1
-    end
-    col = col - wininfo.leftcol
-    if col < 0 then
-      col = -1
-    end
-    labels[#labels + 1] = {
-      items = { { row = row - 1, col = col } },
-      data = {
-        row = row,
-        col = _col,
-      },
-    }
   end)
   require("eye")
     .gaze({
-      labels,
+      labels = labels,
       label = {
         extmark = {
           virt = true,
         },
         matched = config.matched,
       },
-      layer = {
+      layers = {
         {
+          buf = buf,
           range = function()
             return { range[1] - 1, range[2] }
           end,

@@ -1,17 +1,23 @@
 local U = require("eye.core.util")
-local Config = require("eye.core.config")
 local Node = require("eye.core.tree.node")
 local Leaf = require("eye.core.tree.leaf")
-local Layer = require("eye.core.layer")
+
+--- @class Eye.Root.Handle
+--- @field BeforeNodeStart fun()[]
+--- @field LeafCreatePost fun()[]
+--- @field BuildPost fun()[]
+
+--- @alias Eye.Root.Event "BeforeNodeStart"|"LeafCreatePost"
 
 --- @class Eye.Root: Eye.Node
---- @field config Eye.RootGroup.Config
---- @field leaf_pendings Eye.Leaf.Pending[]
---- @field layer_pendings Eye.Layer.Pending[]
---- @field bufs integer[]
---- @field layer_specs Eye.Config.LayerSpec[]
+--- @field config Eye.Config
+--- @field bufs table<string, boolean>
+--- @field ns_id integer
+--- @field handle Eye.Root.Handle
 local M = setmetatable({}, { __index = Node })
 M.__index = M
+
+local ns_id = vim.api.nvim_create_namespace("eye-namespace")
 
 --- @return string|nil
 local function get_random_label(include, node)
@@ -28,16 +34,44 @@ local function get_random_label(include, node)
   return get_random_label(include, node)
 end
 
+--- @param config Eye.Config
+--- @return Eye.Root
+function M:new(config)
+  local root = Node.new(self) --[[@as Eye.Root]]
+  local level, remain1, remain2 = U.compute(#config.label.include, #config.labels)
+  root.type = "root"
+  root.root = root
+  root.id = "0"
+  root.level = level + 1
+  root.remain = remain2 + 1
+  root.config = config
+  root.bufs = {}
+  root.handle.BeforeNodeStart = {}
+  root.handle.LeafCreatePost = {}
+  root.handle.BuildPost = {}
+  root.current = Node:new(root, "[[empty]]", remain1)
+  setmetatable(root.children, { __index = root.current.children })
+  return root
+end
+
+function M:build()
+  for _, label in ipairs(self.config.labels or {}) do
+    self.bufs[tostring(label.buf)] = true
+    self:_build(self.current, label)
+  end
+  self:emit("BuildPost")
+end
+
 --- @param node Eye.Node
---- @param leaf_pending Eye.Leaf.Pending
-function M:_build(node, leaf_pending)
+--- @param label Eye.Label.Spec
+function M:_build(node, label)
   local include = self.config.label.include
   if not node then
     return
   end
 
   local function build(n)
-    self:_build(n, leaf_pending)
+    self:_build(n, label)
   end
 
   local function transfer()
@@ -52,7 +86,8 @@ function M:_build(node, leaf_pending)
       transfer()
       return
     end
-    Leaf:new(node, get_random_label(include, node), #include, leaf_pending)
+    local leaf = Leaf:new(node, get_random_label(include, node), #include)
+    self:emit("LeafCreatePost", leaf, label, self.config.label)
     return
   end
 
@@ -70,143 +105,39 @@ function M:_build(node, leaf_pending)
   build(node.current)
 end
 
-function M:_register()
-  for _, v in ipairs(self.leaf_pendings) do
-    self:_build(self.current, v)
+--- @param target Eye.Node | Eye.Leaf | Eye.Root
+function M:before_node_start(target)
+  if target.type == "root" then
+    U.try(self.config.start)
+  end
+  self:emit("BeforeNodeStart")
+end
+
+function M:clear_namespace()
+  for buf, _ in pairs(self.bufs or {}) do
+    vim.api.nvim_buf_clear_namespace(tonumber(buf) --[[@as integer]], self:get_ns_id(), 0, -1)
   end
 end
 
---- @param mixed_table Eye.Config
-function M:_prepare(mixed_table)
-  mixed_table = vim.tbl_deep_extend("force", {
-    root = true,
-  }, mixed_table or {})
-
-  local function callback_buffer_level(mt, ctx)
-    local config = Config:proxy(mt, ctx.config)
-    ctx.config = config
-    ctx.buf = mt.buf
-    self.bufs[#self.bufs + 1] = mt.buf
-
-    if type(mt.layer) == "table" and #mt.layer > 0 then
-      self.layer_pendings[#self.layer_pendings + 1] = {
-        buf = mt.buf,
-        config = config.layer,
-        specs = ctx.config.layer,
-      }
-    end
-    return ctx
-  end
-
-  local function callback_root_level(mt, ctx)
-    local config = Config:proxy(mt)
-    self.config = config
-    if type(mt.layer) == "table" and #mt.layer > 0 then
-      self.layer_specs = mt.layer
-    end
-    ctx.config = config
-    return ctx
-  end
-
-  local function callback_leaf_level(mt, ctx)
-    local label = mt --[[@as Eye.LabelSpec]]
-    local config = Config.label:proxy(label, ctx.config.label)
-    self.leaf_pendings[#self.leaf_pendings + 1] = {
-      spec = {
-        items = label.items,
-        data = label.data,
-        buf = ctx.buf,
-      },
-      config = config,
-    }
-  end
-
-  local function callback(mt, ctx)
-    ctx.config = Config:proxy(mt, ctx.config)
-    return ctx
-  end
-
-  local function work(mt, ctx)
-    if type(mt) ~= "table" then
-      return
-    end
-    local function process(_mt, _ctx)
-      for _, v in ipairs(_mt) do
-        work(v, _ctx)
-      end
-    end
-    if mt.root then
-      process(mt, callback_root_level(mt, ctx))
-      return
-    end
-    if type(mt.buf) == "number" then
-      process(mt, callback_buffer_level(mt, ctx))
-      return
-    end
-    if type(mt.items) == "table" then
-      callback_leaf_level(mt, ctx)
-      return
-    end
-    process(mt, callback(mt, ctx))
-  end
-  work(mixed_table, {})
-end
-
---- @param config Eye.Config
---- @return Eye.Root
-function M:new(config)
-  local root = Node.new(self) --[[@as Eye.Root]]
-  root.bufs = {}
-  root.leaf_pendings = {}
-  root.layer_pendings = {}
-  root.layer_specs = {
-    {
-      range = function(c)
-        return { c.topline - 1, c.botline }
-      end,
-    },
-  }
-  root:_prepare(config)
-  local level, remain1, remain2 = U.compute(#root.config.label.include, #root.leaf_pendings)
-  root.id = "0"
-  root.level = level + 1
-  root.remain = remain2 + 1
-  root.current = Node:new(root, "[[empty]]", remain1)
-  setmetatable(root.children, { __index = root.current.children })
-  root:_register()
-  return root
-end
-
-function M:start()
-  U.try(self.config.start)
-  Node.start(self)
-end
-
-function M:finish(ctx)
-  if not ctx.matched then
-    U.try(self.config.cancelled, ctx)
-  else
-    U.try(self.config.completed, ctx)
-  end
-  U.try(self.config.finish, ctx)
-end
-
-function M:refresh()
-  for _, buf in ipairs(self.bufs) do
-    vim.api.nvim_buf_clear_namespace(buf, require("eye.core").ns_id, 0, -1)
-  end
-end
-
-function M:layer()
-  if #self.layer_pendings > 0 then
-    for _, pending in ipairs(self.layer_pendings) do
-      Layer.draw(pending.buf, pending.specs, pending.config)
+--- @param target Eye.Node | Eye.Leaf | Eye.Root
+--- @param state "interrupted"| "uninterrupted"
+function M:after_node_finish(target, state, ctx)
+  self:clear_namespace()
+  if state == "interrupted" then
+    if target.type == "leaf" then
+      U.try(self.config.completed, ctx)
+      U.try(self.config.finish, vim.tbl_deep_extend("force", ctx, { completed = true }))
+    else
+      U.try(self.config.cancelled, ctx)
+      U.try(self.config.finish, vim.tbl_deep_extend("force", ctx, { completed = false }))
     end
   else
-    for _, buf in ipairs(self.bufs) do
-      Layer.draw(buf, self.layer_specs, self.config.layer)
-    end
+    -- Node is uninterrupted do something
   end
+end
+
+function M.get_ns_id()
+  return ns_id
 end
 
 return M

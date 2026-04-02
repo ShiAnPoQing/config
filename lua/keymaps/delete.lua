@@ -42,22 +42,30 @@ local function ctrl_space_ctrl_i()
 end
 
 return {
-  ["<S-BS>"] = { { "<Del>", { "i", "c", "t" } }, { "x", "n" }, desc = "Delete the character after the cursor" },
+  ["<BS>"] = {
+    { "s", "n", desc = "same as 's'" },
+    { "d", "x", desc = "same as 'd'" },
+    { " <bs>", "s" },
+  },
+  ["<S-BS>"] = {
+    { "<Del>", { "i", "c", "t" } },
+    { "x", "n" },
+    desc = "Delete character after the cursor",
+  },
   ["<C-BS>"] = {
-    {
-      "<Left><C-o>diw",
-      "i",
-    },
+    { '<Left><C-o>"_diw', "i" },
+    { '"_diw', "n" },
     {
       function()
         require("builtin.cmdline").delete_cword_before()
       end,
       "c",
     },
-    desc = "Delete the cword(before)",
+    desc = "Delete cword(before)",
   },
   ["<M-BS>"] = {
-    { "<C-o>diw", "i" },
+    { '<C-o>"_diw', "i" },
+    { '"_diw', "n" },
     {
       function()
         require("builtin.cmdline").delete_cword_after()
@@ -68,7 +76,7 @@ return {
   },
   ["<C-S-BS>"] = {
     {
-      "<Left><C-o>diW",
+      '<Left><C-o>"_diW',
       "i",
     },
     {
@@ -80,7 +88,7 @@ return {
     desc = "Delete the CWORD(before)",
   },
   ["<M-S-BS>"] = {
-    { "<C-o>diW", "i" },
+    { '<C-o>"_diW', "i" },
     {
       function()
         require("builtin.cmdline").delete_CWORD_after()
@@ -91,28 +99,12 @@ return {
   },
   ["<C-i>"] = {
     {
+      --- TODO: Undo Block
       function()
-        local function delete()
-          local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
-          vim.api.nvim_feedkeys(esc .. "ldbi", "n", false)
-        end
-
-        local cursor = vim.api.nvim_win_get_cursor(0)
-        local line = vim.api.nvim_get_current_line()
-        if cursor[2] == #line then
-          ---@diagnostic disable-next-line: undefined-field
-          local virtualedit = vim.opt_local.virtualedit:get()[1]
-          if virtualedit ~= "all" then
-            vim.opt_local.virtualedit = "all"
-            delete()
-            vim.schedule(function()
-              vim.opt_local.virtualedit = virtualedit
-            end)
-            return
-          end
-        end
-        delete()
+        local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+        vim.api.nvim_feedkeys(esc .. 'vb"_c', "n", false)
       end,
+
       "i",
     },
     { "<C-w>", "c" },
@@ -122,7 +114,7 @@ return {
     {
       function()
         local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
-        vim.api.nvim_feedkeys(esc .. "veolc", "n", false)
+        vim.api.nvim_feedkeys(esc .. 'veol"_c', "n", false)
       end,
       "i",
     },
@@ -137,25 +129,8 @@ return {
   ["<C-S-i>"] = {
     {
       function()
-        local function delete()
-          local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
-          vim.api.nvim_feedkeys(esc .. "ldBi", "n", false)
-        end
-        local cursor = vim.api.nvim_win_get_cursor(0)
-        local line = vim.api.nvim_get_current_line()
-        if cursor[2] == #line then
-          ---@diagnostic disable-next-line: undefined-field
-          local virtualedit = vim.opt_local.virtualedit:get()[1]
-          if virtualedit ~= "all" then
-            vim.opt_local.virtualedit = "all"
-            delete()
-            vim.schedule(function()
-              vim.opt_local.virtualedit = virtualedit
-            end)
-            return
-          end
-        end
-        delete()
+        local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+        vim.api.nvim_feedkeys(esc .. 'vB"_c', "n", false)
       end,
       "i",
     },
@@ -171,7 +146,7 @@ return {
     {
       function()
         local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
-        vim.api.nvim_feedkeys(esc .. "vEolc", "n", false)
+        vim.api.nvim_feedkeys(esc .. 'vEol"_c', "n", false)
       end,
       "i",
     },
@@ -197,7 +172,7 @@ return {
     desc = "Delete up to the end of the previous word",
   },
   ["<C-space><C-o>"] = {
-    { "<C-o>dw", "i" },
+    { '<C-o>"_dw', "i" },
     {
       function()
         require("builtin.cmdline").delete_to_next_word_start()
@@ -208,7 +183,7 @@ return {
   },
   ["<C-space><C-S-i>"] = {
     {
-      "<C-o>dgE",
+      '<C-o>"_dgE',
       "i",
     },
     {
@@ -221,7 +196,7 @@ return {
   },
   ["<C-S-space><C-S-i>"] = {
     {
-      "<C-o>dgE",
+      '<C-o>"_dgE',
       "i",
     },
     {
@@ -234,7 +209,7 @@ return {
   },
   ["<C-space><C-S-O>"] = {
     {
-      "<C-o>dW",
+      '<C-o>"_dW',
       "i",
     },
     {
@@ -247,7 +222,7 @@ return {
   },
   ["<C-S-space><C-S-O>"] = {
     {
-      "<C-o>dW",
+      '<C-o>"_dW',
       "i",
     },
     {
@@ -273,7 +248,7 @@ return {
   },
   ["<M-u>"] = {
     {
-      "<C-o>dg_",
+      '<C-o>"_dg_',
       "i",
     },
     {
@@ -284,13 +259,13 @@ return {
     },
     desc = "Delete up to the last non-blank character of the current line",
   },
-  ["<C-M-u>"] = { "<Esc>cc", "i", desc = "Delete the current line" },
+  ["<C-M-u>"] = { '<Esc>"_cc', "i", desc = "Delete the current line" },
   ["<C-space><C-u>"] = {
     {
       function()
         local line = vim.api.nvim_get_current_line()
         local cursor = vim.api.nvim_win_get_cursor(0)
-        local delete = "<C-o>d0"
+        local delete = '<C-o>"_d0'
         if cursor[2] == #line then
           return delete .. "<del>"
         end
@@ -309,7 +284,7 @@ return {
   },
   ["<M-space><M-u>"] = {
     {
-      "<C-o>d$",
+      '<C-o>"_d$',
       "i",
     },
     {
@@ -324,7 +299,7 @@ return {
     function()
       local line = vim.api.nvim_get_current_line()
       local cursor = vim.api.nvim_win_get_cursor(0)
-      local delete = "<C-o>d^"
+      local delete = '<C-o>"_d^'
       if cursor[2] == #line then
         return delete .. "<del>"
       end
@@ -334,12 +309,12 @@ return {
     expr = true,
     desc = "Delete up to the first non-blank character of the current line",
   },
-  ["<C-space><C-l>"] = { "<C-o>dg_", "i", desc = "Delete up to the last non-blank character of the current line" },
+  ["<C-space><C-l>"] = { '<C-o>"_dg_', "i", desc = "Delete up to the last non-blank character of the current line" },
   ["<C-space><C-space><C-h>"] = {
     function()
       local line = vim.api.nvim_get_current_line()
       local cursor = vim.api.nvim_win_get_cursor(0)
-      local delete = "<C-o>d0"
+      local delete = '<C-o>"_d0'
       if cursor[2] == #line then
         return delete .. "<del>"
       end
@@ -349,12 +324,12 @@ return {
     expr = true,
     desc = "Delete up to the first character of the current line",
   },
-  ["<C-space><C-space><C-l>"] = { "<C-o>d$", "i", desc = "Delete up to the last character of the current line" },
+  ["<C-space><C-space><C-l>"] = { '<C-o>"_d$', "i", desc = "Delete up to the last character of the current line" },
   ["<C-a><C-h>"] = {
     function()
       local line = vim.api.nvim_get_current_line()
       local cursor = vim.api.nvim_win_get_cursor(0)
-      local delete = "<C-o>dg^"
+      local delete = '<C-o>"_dg^'
       if cursor[2] == #line then
         return delete .. "<bs>"
       end
@@ -365,7 +340,7 @@ return {
     desc = "Delete up to the first non-blank character of the screen line",
   },
   ["<C-a><C-l>"] = {
-    "<C-o>dg<End>",
+    '<C-o>"_dg<End>',
     "i",
     desc = "Delete up to the last non-blank character of the screen line",
   },
@@ -373,7 +348,7 @@ return {
     function()
       local line = vim.api.nvim_get_current_line()
       local cursor = vim.api.nvim_win_get_cursor(0)
-      local delete = "<C-o>dg0"
+      local delete = '<C-o>"_dg0'
       if cursor[2] == #line then
         return delete .. "<bs>"
       end
@@ -383,5 +358,5 @@ return {
     expr = true,
     desc = "Delete up to the first character of the screen line",
   },
-  ["<C-a><C-a><C-l>"] = { "<C-o>dg$", "i", desc = "Delete up to the end character of the screen line" },
+  ["<C-a><C-a><C-l>"] = { '<C-o>"_dg$', "i", desc = "Delete up to the end character of the screen line" },
 }

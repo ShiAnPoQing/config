@@ -1,6 +1,6 @@
 return {
   name = "eye-track-treesitter.nvim",
-  depend = "eye-track.nvim",
+  depend = "eye.nvim",
   key = {
     ["0{"] = {
       function()

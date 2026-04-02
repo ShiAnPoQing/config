@@ -36,7 +36,8 @@ return {
   -- <C-BS>
   --- @see keymaps/delete.lua <C-BS>
   ["<F17>"] = {
-    { "<Left><C-o>diw", "i" },
+    { '<Left><C-o>"_diw', "i" },
+    { '"_diw', "n" },
     {
       function()
         require("builtin.cmdline").delete_cword_before()
@@ -87,10 +88,9 @@ return {
   -- <C-S-BS>
   --- @see keymaps/delete.lua <C-BS>
   ["<F20>"] = {
-    { "<Left><C-o>diW", "i" },
+    { '<Left><C-o>"_diW', "i" },
     {
       function()
-        vim.print("hao")
         require("builtin.cmdline").delete_CWORD_before()
       end,
       "c",
@@ -99,7 +99,7 @@ return {
   },
   -- <M-S-BS>
   ["<F21>"] = {
-    { "<C-o>diW", "i" },
+    { '<C-o>"_diW', "i" },
     {
       function()
         vim.print("hao")

@@ -1,86 +1,93 @@
---- @class Eye.Gaze
-local M = {
-  ns_id = vim.api.nvim_create_namespace("eye-namespace"),
-}
-
---- @class Eye.RootGroup.Config.Hook.Context
---- @field matched boolean
---- @field label? string
---- @field items? Eye.Config.Label.Item[]
+--- @class Eye.Hook.Context
+--- @field completed? boolean
+--- @field cancelled? boolean
+--- @field char? string
+--- @field items? Eye.Label.Spec.Item[]
 --- @field buf? integer
 --- @field data? table<any>
 
---- @class Eye.RootGroup.Config.Hook
---- @field start? fun(ctx: Eye.RootGroup.Config.Hook.Context)
---- @field finish? fun(ctx: Eye.RootGroup.Config.Hook.Context)
---- @field completed? fun(ctx: Eye.RootGroup.Config.Hook.Context)
---- @field cancelled? fun(ctx: Eye.RootGroup.Config.Hook.Context)
+--- @class Eye.Hook
+--- @field start? fun(ctx: Eye.Hook.Context)
+--- @field finish? fun(ctx: Eye.Hook.Context)
+--- @field completed? fun(ctx: Eye.Hook.Context)
+--- @field cancelled? fun(ctx: Eye.Hook.Context)
 
---- @class Eye.Config.Label.Misc
---- @field include? string[]
---- @field exclude? string[]
+--- @class Eye.Config: Eye.Hook
+--- @field labels?  Eye.Label.Spec[]
+--- @field layers? Eye.Layer.Spec[]
+--- @field label? Eye.Label.Config
+--- @field layer? Eye.Layer.Config
 
---- @class Eye.Config.Label.Hook
---- @field matched? fun(ctx: Eye.Config.Label.Hook.Context)
+local C = require("eye.core.config")
+local Layer = require("eye.core.layer")
+local Label = require("eye.core.label")
+local Root = require("eye.core.tree.root")
 
---- @class Eye.Config.Label.Hook.Context
---- @field label string
---- @field buf integer
---- @field items Eye.Config.Label.Item[]
---- @field data table<any>
---- @field matched boolean
+--- @class Eye.Gaze
+local M = {}
 
---- @class Eye.Config.Label.Highlight
---- @field group? string[]|fun(ctx:any):string[]
---- @field show_next_key? boolean
---- @field HighlightPre? fun(ns_id: integer)
+--- @param leaf Eye.Leaf
+--- @param spec Eye.Label.Spec
+--- @param cfg Eye.Label.Config
+local function attach_label_to_leaf(leaf, spec, cfg)
+  spec.label = leaf.label --[[@as Eye.Label._Spec]]
+  local label = Label:new(
+    spec --[[@as Eye.Label._Spec]],
+    vim.tbl_deep_extend("force", cfg, {
+      extmark = spec.extmark,
+      highlight = spec.highlight,
+      matched = spec.matched,
+    })
+  )
+  leaf.Label = label
+  leaf:on(
+    "Highlight",
+    --- @param targets Eye.Node[]
+    function(targets)
+      local texts = {}
+      for _, node in ipairs(targets) do
+        table.insert(texts, node.label)
+      end
+      label:highlight(texts)
+    end
+  )
+end
 
---- @class Eye.Config.Label.Extmark
---- @field virt? boolean
---- @field virt_text_pos? "eol" | "eol_right_align" | "overlay" | "right_align" | "inline"
---- @field right_gravity? boolean
-
---- @class Eye.Config.BaseLabel: Eye.Config.Label.Hook
---- @field extmark? Eye.Config.Label.Extmark
---- @field highlight? Eye.Config.Label.Highlight
-
---- @class Eye.Config.Label.Item
---- @field row integer
---- @field col integer
---- @field extmark? Eye.Config.Label.Extmark
---- @field highlight? Eye.Config.Label.Highlight
-
---- @class Eye.LabelSpec: Eye.Config.BaseLabel
---- @field items Eye.Config.Label.Item[]
---- @field data? table<any>
-
---- @class Eye.Config.Label: Eye.Config.BaseLabel, Eye.Config.Label.Misc
-
---- @class Eye.Group.Config
---- @field label? Eye.Config.Label
-
---- @class Eye.RootGroup.Config: Eye.Group.Config, Eye.RootGroup.Config.Hook
---- @field layer? Eye.Config.Layer
-
---- @class Eye.BufferGroup.Config: Eye.Group.Config
---- @field buf integer
---- @field layer? Eye.Config.Layer
-
---- @class Eye.Group.Groups
---- @field [integer] Eye.LabelSpec|Eye.Group
-
---- @class Eye.RootGroup.Groups
---- @field [integer] Eye.BufferGroup
-
---- @class Eye.Group: Eye.Group.Config, Eye.Group.Groups
---- @class Eye.RootGroup: Eye.RootGroup.Config, Eye.RootGroup.Groups
---- @class Eye.BufferGroup: Eye.BufferGroup.Config, Eye.Group.Groups
-
---- @class Eye.Config: Eye.RootGroup
+--- @param layers Eye.Layer.Spec[]
+--- @param layer Eye.Layer
+--- @param root Eye.Root
+local function set_default_layers(layers, layer, root)
+  layers = layers or {}
+  if #layers == 0 then
+    for buf in pairs(root.bufs) do
+      layers[#layers + 1] = {
+        buf = tonumber(buf) --[[@as integer]],
+        range = function(ctx)
+          return { ctx.topline - 1, ctx.botline }
+        end,
+      }
+    end
+  end
+  for _, l in ipairs(layers) do
+    root.bufs[tostring(l.buf)] = true
+  end
+  layer.layers = layers
+end
 
 --- @param config Eye.Config
 function M.gaze(config)
-  return require("eye.core.tree.root"):new(config)
+  config = C:resolve(config or {})
+  local layer = Layer:new({}, config.layer)
+  local root = Root:new(config)
+  root:on("LeafCreatePost", attach_label_to_leaf)
+  root:on("BeforeNodeStart", function()
+    layer:draw()
+  end)
+  root:on("BuildPost", function()
+    set_default_layers(config.layers, layer, root)
+  end)
+  root:build()
+  return root
 end
 
 return M

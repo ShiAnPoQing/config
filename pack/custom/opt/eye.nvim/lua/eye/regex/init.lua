@@ -1,20 +1,20 @@
 --- @class Eye.Regex
---- @field topline integer
---- @field botline integer
---- @field leftcol integer
---- @field rightcol integer
+--- @field regex vim.regex
+--- @field config Eye.Regex.Config
 --- @field matches Eye.Regex.Match[][]
 local M = {}
 M.__index = M
 
 --- @class Eye.Regex.Config
---- @field regex string | fun(builtin: table): string
+--- @field should_capture? boolean
+
+--- @class Eye.Regex.Spec
+--- @field buf integer
 --- @field topline integer
 --- @field botline integer
 --- @field leftcol integer
 --- @field rightcol integer
 --- @field should_capture? boolean
---- @field buf integer
 
 --- @class Eye.Regex.Match
 --- @field row integer
@@ -25,6 +25,12 @@ M.__index = M
 --- @field start_virt_win_col integer
 --- @field end_virt_win_col integer
 --- @field capture? string
+
+--- @class Eye.Regex.BuiltinRegex
+--- @field word.inner string
+--- @field word.outer string
+--- @field WORD.inner string
+--- @field WORD.outer string
 
 local BUILTIN_REGEX_MAP = {
   ["word.inner"] = "\\k\\+",
@@ -54,10 +60,9 @@ local function get_display_width(buf, start_row, start_col, end_row, end_col)
   return display_width
 end
 
-local function collect(self, row, start_col, end_col, current_line)
-  local start_virt_col = get_display_width(self.buf, row - 1, 0, row - 1, start_col)
-  local end_virt_col = get_display_width(self.buf, row - 1, 0, row - 1, end_col) - 1
-
+function M:__collect(spec, row, start_col, end_col, current_line)
+  local start_virt_col = get_display_width(spec.buf, row - 1, 0, row - 1, start_col)
+  local end_virt_col = get_display_width(spec.buf, row - 1, 0, row - 1, end_col) - 1
   --- @type Eye.Regex.Match
   local match = {
     row = row,
@@ -65,55 +70,56 @@ local function collect(self, row, start_col, end_col, current_line)
     end_col = end_col,
     start_virt_col = start_virt_col,
     end_virt_col = end_virt_col,
-    start_virt_win_col = start_virt_col - self.leftcol,
-    end_virt_win_col = end_virt_col - self.leftcol,
+    start_virt_win_col = start_virt_col - spec.leftcol,
+    end_virt_win_col = end_virt_col - spec.leftcol,
   }
-  if self.should_capture then
+  if spec.should_capture then
     match.capture = current_line:sub(start_col + 1, end_col)
   end
   table.insert(self.matches[#self.matches], match)
 end
 
-local function match(self, i, leftcol, rightcol)
-  table.insert(self.matches, {})
-  local start_pos = 0
+--- @param spec Eye.Regex.Spec
+function M:match_spec(spec)
+  for i = spec.topline, spec.botline do
+    table.insert(self.matches, {})
+    local start_pos = 0
 
-  while true do
-    local start, end_ = self.regex:match_line(self.buf, i - 1, start_pos)
-    local current_line = self.should_capture and vim.api.nvim_buf_get_lines(self.buf, i - 1, i, false)[1]
+    while true do
+      local start, end_ = self.regex:match_line(spec.buf, i - 1, start_pos)
+      local current_line = spec.should_capture and vim.api.nvim_buf_get_lines(spec.buf, i - 1, i, false)[1]
 
-    if not start or not end_ or (start == 0 and end_ == 0) then
-      break
+      if not start or not end_ or (start == 0 and end_ == 0) then
+        break
+      end
+
+      local start_col = start + start_pos
+      local end_col = end_ + start_pos
+
+      if end_col > spec.leftcol and start_col < spec.rightcol then
+        self:__collect(spec, i, start_col, end_col, current_line)
+      end
+
+      start_pos = start_pos + end_
     end
-
-    local start_col = start + start_pos
-    local end_col = end_ + start_pos
-
-    if end_col > leftcol and start_col < rightcol then
-      collect(self, i, start_col, end_col, current_line)
-    end
-
-    start_pos = start_pos + end_
   end
 end
 
-function M:_match()
-  for i = self.topline, self.botline do
-    match(self, i, self.leftcol, self.rightcol)
+--- @param specs Eye.Regex.Spec[]
+function M:match(specs)
+  specs = vim.tbl_deep_extend("force", {}, specs or {})
+  for _, spec in ipairs(specs) do
+    self:match_spec(spec)
   end
 end
 
---- @param config Eye.Regex.Config
-function M:new(config)
+--- @param regex string | fun(builtin: Eye.Regex.BuiltinRegex): string
+--- @param config? Eye.Regex.Config
+function M:new(regex, config)
   local o = setmetatable({}, self)
-  o.buf = config.buf
-  o.topline = config.topline
-  o.botline = config.botline
-  o.leftcol = config.leftcol
-  o.rightcol = config.rightcol
+  o.regex = vim.regex(get_pattern(regex))
+  o.config = vim.tbl_deep_extend("force", {}, config or {})
   o.matches = {}
-  o.regex = vim.regex(get_pattern(config.regex))
-  o:_match()
   return o
 end
 

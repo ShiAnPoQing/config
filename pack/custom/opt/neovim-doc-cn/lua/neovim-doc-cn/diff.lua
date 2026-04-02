@@ -66,4 +66,30 @@ function M.diff(input)
   vim.api.nvim_echo({ { "未找到文档: " .. input, "ErrorMsg" } }, true, {})
 end
 
+function M._diff()
+  local neovim_cn_docs = get_neovim_cn_docs()
+  local neovim_docs = get_neovim_docs()
+  if not neovim_docs then
+    return
+  end
+
+  for _, neovim_cn_doc in ipairs(neovim_cn_docs) do
+    local neovim_cn_doc_name = get_file_name(neovim_cn_doc)
+    local neovim_doc
+    for _, doc in ipairs(neovim_docs) do
+      local neovim_doc_name = get_file_name(doc)
+      if neovim_cn_doc_name == neovim_doc_name then
+        neovim_doc = doc
+      end
+    end
+    if neovim_doc then
+      local new_text = io.open(neovim_doc):read("*a")
+      local old_text = io.open(neovim_cn_doc):read("*a")
+      local result = vim.text.diff(old_text, new_text)
+      vim.print(result)
+      vim.print("--------------------------------")
+    end
+  end
+end
+
 return M

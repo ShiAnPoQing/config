@@ -9,6 +9,12 @@ return {
       end,
       "n",
     },
+    ["<space><space>t"] = {
+      function()
+        require("neovim-doc-cn.diff")._diff()
+      end,
+      "n",
+    },
   },
   config = function()
     require("neovim-doc-cn").setup()
