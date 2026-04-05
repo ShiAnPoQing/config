@@ -1,118 +1,198 @@
 local ModeComponent = {
-  mode_hls = {
-    n = "DiagnosticInfo",
-    no = "DiagnosticInfo",
-    nov = "DiagnosticInfo",
-    noV = "DiagnosticInfo",
-    niI = "DiagnosticInfo",
-    niR = "DiagnosticInfo",
-    niV = "DiagnosticInfo",
-    nt = "DiagnosticInfo",
-    v = "DiagnosticWarn",
-    vs = "DiagnosticWarn",
-    V = "DiagnosticWarn",
-    Vs = "DiagnosticWarn",
-    s = "Select",
-    S = "Select",
-    ["\19"] = "Select",
-    i = "Insert",
-    ic = "Insert",
-    ix = "Insert",
-    R = "Replace",
-    Rc = "Replace",
-    Rx = "Replace",
-    Rv = "Replace",
-    Rvc = "Replace",
-    Rvx = "Replace",
-    c = "Command",
-    cv = "Command",
-    r = "Command",
-    rm = "Command",
-    ["r?"] = "Command",
-    ["!"] = "Command",
-    t = "Terminal",
-  },
-  mode_names = {
-    -- Normal
-    n = "Normal",
-    no = "Operator",
-    nov = "Operator",
-    noV = "Operator",
-    ["no\22"] = "Operator",
-
-    -- Normal (insert-like)
-    niI = "Normal(Insert)",
-    niR = "Normal(Replace)",
-    niV = "Normal(Virtual Replace)",
-    nt = "Normal(Terminal)",
-
-    -- Visual
-    v = "Visual",
-    vs = "Visual(Select)",
-    V = "Visual Line",
-    Vs = "Visual Line(Select)",
-    ["\22"] = "Visual Block",
-    ["\22s"] = "Visual Block(Select)",
-
-    -- Select mode
-    s = "Select",
-    S = "Select Line",
-    ["\19"] = "Select Block",
-
-    -- Insert
-    i = "Insert",
-    ic = "Insert(Completion)",
-    ix = "Insert(Completion)",
-
-    -- Replace
-    R = "Replace",
-    Rc = "Replace(Completion)",
-    Rx = "Replace(Completion)",
-    Rv = "Virtual Replace",
-    Rvc = "Virtual Replace(Completion)",
-    Rvx = "Virtual Replace(Completion)",
-
-    -- Command
-    c = "Command",
-    cv = "Ex",
-
-    -- Prompt / misc
-    r = "Prompt",
-    rm = "More",
-    ["r?"] = "Confirm",
-
-    ["!"] = "Shell",
-    t = "Terminal",
-  },
+  init = function(self)
+    self.mode_name = vim.fn.mode(1)
+    self.mode = self:compute()
+  end,
   provider = function(self)
-    self.mode = vim.fn.mode(1)
-    return self.mode_names[self.mode]
+    return self.mode
+  end,
+  update = function(self)
+    self.mode = self:compute()
   end,
   hl = function(self)
-    return self.mode_hls[self.mode]
+    return self.mode_hls[self.mode_name]
   end,
-  update = "ModeChanged",
+  event = {
+    "ModeChanged",
+    callback = function(self)
+      self.mode_name = vim.fn.mode(1)
+      self:redraw()
+    end,
+  },
+  compute = function(self)
+    local mode_status = self.mode_names[self.mode_name]
+    return " " .. mode_status .. " "
+  end,
+  mode_hls = {
+    n = "NORMAL",
+    no = "O-PENDING",
+    nov = "O-PENDING(VISUAL)",
+    noV = "O-PENDING(V-LINE)",
+    ["no\22"] = "O-PENDING(V-BLOCK)",
+    niI = "NORMAL(INSERT)",
+    niR = "NORMAL(REPLACE)",
+    niV = "NORMAL(V-REPLACE)",
+    nt = "NORMAL(TERMINAL)",
+    ntT = "NORMAL(TERMINAL)",
+
+    v = "VISUAL",
+    vs = "VISUAL(SELECT)",
+    V = "V-LINE",
+    Vs = "V-LINE(SELECT)",
+    ["\22"] = "V-BLOCK",
+    ["\22s"] = "V-BLOCK(SELECT)",
+
+    s = "SELECT",
+    S = "S-LINE",
+    ["\19"] = "S-BLOCK",
+
+    i = "INSERT",
+    ic = "INSERT(COMPLETION)",
+    ix = "INSERT(COMPLETION)",
+
+    R = "REPLACE",
+    Rc = "REPLACE(COMPLETION)",
+    Rx = "REPLACE(COMPLETION)",
+    Rv = "V-REPLACE",
+    Rvc = "V-REPLACE(COMPLETION)",
+    Rvx = "REPLACE(COMPLETION)",
+
+    c = "COMMAND",
+    cr = "COMMAND(REPLACE)",
+    cv = "Ex",
+    cvr = "Ex(INSERT)",
+
+    r = "PROMPT",
+    rm = "MORE",
+    ["r?"] = "CONFIRM",
+    ["!"] = "SHELL",
+    t = "TERMINAL",
+  },
+  mode_names = {
+    n = "NORMAL",
+    no = "O-PENDING",
+    nov = "O-PENDING(VISUAL)",
+    noV = "O-PENDING(V-LINE)",
+    ["no\22"] = "O-PENDING(V-BLOCK)",
+    niI = "NORMAL(INSERT)",
+    niR = "NORMAL(REPLACE)",
+    niV = "NORMAL(V-REPLACE)",
+    nt = "NORMAL(TERMINAL)",
+    ntT = "NORMAL(TERMINAL)",
+
+    v = "VISUAL",
+    vs = "VISUAL(SELECT)",
+    V = "V-LINE",
+    Vs = "V-LINE(SELECT)",
+    ["\22"] = "V-BLOCK",
+    ["\22s"] = "V-BLOCK(SELECT)",
+
+    s = "SELECT",
+    S = "S-LINE",
+    ["\19"] = "S-BLOCK",
+
+    i = "INSERT",
+    ic = "INSERT(COMPLETION)",
+    ix = "INSERT(COMPLETION)",
+
+    R = "REPLACE",
+    Rc = "REPLACE(COMPLETION)",
+    Rx = "REPLACE(COMPLETION)",
+    Rv = "V-REPLACE",
+    Rvc = "V-REPLACE(COMPLETION)",
+    Rvx = "REPLACE(COMPLETION)",
+
+    c = "COMMAND",
+    cr = "COMMAND(REPLACE)",
+    cv = "Ex",
+    cvr = "Ex(INSERT)",
+
+    r = "PROMPT",
+    rm = "MORE",
+    ["r?"] = "CONFIRM",
+    ["!"] = "SHELL",
+    t = "TERMINAL",
+  },
 }
 
 local File = {
   init = function(self)
-    self.file = vim.fn.expand("%:p")
+    self.filename = vim.api.nvim_buf_get_name(0)
   end,
   provider = function(self)
-    return self.file or "%f"
+    return self.file
   end,
-  update = {
-    "VimResized",
-    callback = function(self)
-      local width = vim.o.columns
-      local file = vim.fn.expand("%:p")
-      if #file > math.floor(width * 0.5) then
-        self.file = vim.fn.pathshorten(file)
-      else
-        self.file = file
-      end
-      self.ensure_update()
+  update = function(self)
+    local filename = vim.fn.fnamemodify(self.filename, ":.")
+    if filename == "" then
+      filename = "[No Name]"
+    end
+    if #filename > math.floor(vim.o.columns * 0.5) then
+      filename = vim.fn.pathshorten(filename)
+    end
+    self.file = filename
+  end,
+  event = {
+    {
+      "VimResized",
+      callback = function(self)
+        self.redraw()
+      end,
+    },
+    {
+      { "BufWinEnter", "DirChanged", "WinEnter" },
+      callback = function(self)
+        self.filename = vim.api.nvim_buf_get_name(0)
+        self.redraw()
+      end,
+    },
+  },
+}
+
+local Diagnostic = {
+  error_icon = " ",
+  warn_icon = " ",
+  info_icon = " ",
+  hint_icon = " ",
+  init = function(self)
+    self.errors = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })
+    self.warnings = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.WARN })
+    self.hints = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.HINT })
+    self.info = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.INFO })
+  end,
+  update = function(self)
+    self.errors = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })
+    self.warnings = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.WARN })
+    self.hints = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.HINT })
+    self.info = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.INFO })
+  end,
+  event = {
+    "DiagnosticChanged",
+    "BufEnter",
+  },
+  {
+    provider = function(self)
+      return self.errors > 0 and (self.error_icon .. self.errors .. " ")
     end,
+    hl = "DiagnosticError",
+  },
+  {
+    provider = function(self)
+      return self.warnings > 0 and (self.warn_icon .. self.warnings .. " ")
+    end,
+    hl = "DiagnosticWarn",
+  },
+  {
+    provider = function(self)
+      return self.info > 0 and (self.info_icon .. self.info .. " ")
+    end,
+    hl = "DiagnosticInfo",
+  },
+  {
+    provider = function(self)
+      return self.hints > 0 and (self.hint_icon .. self.hints)
+    end,
+    hl = "DiagnosticHint",
   },
 }
 
@@ -121,6 +201,7 @@ return {
   config = function()
     require("plain-statusline").setup({
       ModeComponent,
+      Diagnostic,
       File,
     })
   end,

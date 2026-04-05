@@ -7,9 +7,8 @@ require("test")
 require("native-packer").setup({
   require("plugins.download.style"),
   require("plugins.download.style.statuscol"),
-  -- require("plugins.download.heirline"),
-  require("plugins.local.test.statusline"),
-  -- require("plugins.download.style.lualine"),
+  -- require("plugins.local.test.statusline"),
+  require("plugins.download.style.lualine"),
   require("plugins.local.neo-option"),
   require("plugins.local.native-macro"),
   require("plugins.download.misc.repeat"),
@@ -70,36 +69,3 @@ require("native-packer").setup({
   require("plugins.download.filemanager.yazi"),
   -- require("plugins.download.ai.copilot"),
 })
-
--- vim.api.nvim_set_hl(0, "Normal", {
---   bg = "#141414",
---   fg = "#808080",
--- })
---
--- vim.api.nvim_set_hl(0, "String", {
---   fg = "#809e80",
--- })
---
--- vim.api.nvim_set_hl(0, "@variable", {
---   fg = "#808080",
--- })
---
--- vim.api.nvim_set_hl(0, "Function", {
---   fg = "#9999ad",
--- })
---
--- vim.api.nvim_set_hl(0, "@keyword", {
---   fg = "#806280",
--- })
---
--- vim.api.nvim_set_hl(0, "@keyword.function", {
---   fg = "#806280",
--- })
---
--- vim.api.nvim_set_hl(0, "@property", {
---   fg = "#816e8c",
--- })
---
--- vim.api.nvim_set_hl(0, "@punctuation.bracket", {
---   fg = "#808080",
--- })

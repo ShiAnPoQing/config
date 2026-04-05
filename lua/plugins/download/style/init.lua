@@ -61,7 +61,7 @@ return {
       else
         vim.o.background = "light"
       end
-      -- vim.o.background = "light"
+      vim.o.background = "light"
       vim.cmd([[colorscheme paradox]])
     end,
   },

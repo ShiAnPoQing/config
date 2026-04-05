@@ -92,7 +92,14 @@ return {
     "n",
   },
   ["<leader>2"] = {
-    function() end,
+    function()
+      vim.opt.statusline = "%!v:lua.require('test').statusline()"
+      vim.cmd("redrawstatus")
+      vim.cmd("redrawstatus")
+      vim.print("test")
+      vim.cmd("redrawstatus")
+      vim.cmd("redrawstatus")
+    end,
     "n",
   },
   ["<leader>3"] = {

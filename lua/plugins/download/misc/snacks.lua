@@ -1,6 +1,6 @@
 return {
   "folke/snacks.nvim",
-  lazy = false,
+  -- lazy = false,
   priority = 1000,
   key = {
     ["<leader>e"] = {

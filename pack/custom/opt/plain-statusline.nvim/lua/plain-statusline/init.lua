@@ -162,15 +162,20 @@ modeline 里设置 statusline 表达式且 modelineexpr=on 生效，但在 sandb
 
 local M = {}
 
---- @class PlainStatusline.Component.Autocmd
---- @field [1] string|string[]
+--- @class PlainStatusline.Component.EventConfig
 --- @field pattern? string|string[]
 --- @field callback? string|fun(self: PlainStatusline.Component, args: vim.api.keyset.create_autocmd.callback_args): boolean?
 
+--- @class PlainStatusline.Component.Events: PlainStatusline.Component.EventConfig
+--- @field [integer] PlainStatusline.Component.Event
+
+--- @alias PlainStatusline.Component.Event string|PlainStatusline.Component.Events
+
 --- @class PlainStatusline.Component
 --- @field condition? fun(self: PlainStatusline.Component): any
---- @field init? fun(self: PlainStatusline.Component): nil
---- @field update? string|(string|PlainStatusline.Component.Autocmd)[]
+--- @field init? fun(self: PlainStatusline.Component)
+--- @field update? fun(self: PlainStatusline.Component)
+--- @field event? PlainStatusline.Component.Event
 --- @field provider? string|number|fun(self: PlainStatusline.Component):string|number
 --- @field hl? string|vim.api.keyset.highlight|fun(self: PlainStatusline.Component):string|vim.api.keyset.highlight
 
@@ -179,13 +184,13 @@ local Root
 
 --- @param opts PlainStatusline.Component
 function M.setup(opts)
-  opts = opts or {}
-  vim.opt.statusline = "%{%v:lua.require'plain-statusline'.statusline()%}"
+  opts = vim.tbl_deep_extend("force", {}, opts or {})
   Root = require("plain-statusline.component"):new(opts)
+  vim.opt.statusline = "%{%v:lua.require'plain-statusline'.statusline()%}"
 end
 
 function M.statusline()
-  return Root:provider()
+  return Root:eval()
 end
 
 function M.get_mode()

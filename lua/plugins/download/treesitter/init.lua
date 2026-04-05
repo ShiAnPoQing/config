@@ -82,6 +82,7 @@ return {
     run = function()
       vim.cmd("TSUpdate")
     end,
+    event = { "BufReadPost", "BufNewFile" },
     config = function()
       local langs = {
         "c",
