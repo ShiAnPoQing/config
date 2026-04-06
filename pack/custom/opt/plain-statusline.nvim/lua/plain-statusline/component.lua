@@ -5,14 +5,18 @@
 --- @field parent PlainStatusline._Component?
 --- @field pending_event boolean|nil
 --- @field pending_init boolean|nil
---- @field tag "event"|"default"
-local M = {}
+--- @field StatusRedrawPre fun(self: PlainStatusline._Component)
+--- @field highlights table<string, boolean>
+local M = {
+  highlights = {},
+}
 M.__index = M
 
---- @param component PlainStatusline.Component
+local U = require("plain-statusline.utils")
+
 --- @param event string
---- @param opts PlainStatusline.Component.EventConfig
-local function create_autocmd(component, event, opts)
+--- @param opts vim.api.keyset.create_autocmd
+local function create_autocmd(event, opts)
   if type(event) ~= "string" then
     return
   end
@@ -24,31 +28,7 @@ local function create_autocmd(component, event, opts)
   end
   vim.api.nvim_create_autocmd(event, {
     pattern = opts.pattern,
-    callback = function(args)
-      opts.callback(component, args)
-    end,
-  })
-end
-
---- @param self PlainStatusline._Component
---- @param event? PlainStatusline.Component.Event
-local function register_event(self, event)
-  local function work(source, opts)
-    if type(source) == "string" then
-      create_autocmd(self._, source, opts)
-      return
-    end
-    if type(source) ~= "table" then
-      return
-    end
-    for _, value in ipairs(source) do
-      work(value, vim.tbl_extend("force", opts, source))
-    end
-  end
-  work(event, {
-    callback = function()
-      self:redraw()
-    end,
+    callback = opts.callback,
   })
 end
 
@@ -60,26 +40,41 @@ function M:new(component, parent)
   return o
 end
 
+function M:_register_event()
+  if type(self._.event) ~= "table" then
+    return
+  end
+  for event_name, value in pairs(self._.event) do
+    local update, pattern
+    if type(value) == "table" then
+      pattern = value.pattern
+      update = value.callback
+    elseif type(value) == "function" then
+      update = value
+    end
+    if event_name ~= "StatusRedrawPre" then
+      create_autocmd(event_name, {
+        pattern = pattern,
+        callback = function(args)
+          U.try(update, self._, args)
+          self:redraw()
+        end,
+      })
+    else
+      self.StatusRedrawPre = update --[[@as any]]
+    end
+  end
+end
+
 --- @param parent PlainStatusline._Component?
 function M:init(parent)
   self.parent = parent
   self.statusline = ""
   self.children = {}
-  self._.redraw = function()
-    self:redraw()
-  end
-
-  if self._.event == nil then
-    self.tag = "default"
-  else
-    self.tag = "event"
-    register_event(self, self._.event)
-  end
-
+  self:_register_event()
   if type(self._.init) == "function" then
     self.pending_init = true
   end
-
   for _, child in ipairs(self._) do
     if type(child) == "table" then
       self.children[#self.children + 1] = M:new(child, self)
@@ -91,7 +86,7 @@ function M:eval()
   if not self:condition() then
     return ""
   end
-  self:compute()
+  self:update()
   local provide = self:provider()
   for _, child in ipairs(self.children) do
     provide = provide .. child:eval()
@@ -100,33 +95,16 @@ function M:eval()
   return self.statusline
 end
 
-function M:compute()
-  local function update()
-    if type(self._.update) == "function" then
-      self._:update()
-    end
-  end
-
-  local function init()
-    if type(self._.init) == "function" then
-      self._:init()
-    end
-  end
-
+function M:update()
   if self.pending_init then
     self.pending_init = nil
-    init()
+    U.try(self._.init, self._)
     return
   end
-
-  if self.tag == "event" then
-    if self.pending_event then
-      self.pending_event = nil
-      update()
-    end
-  elseif self.tag == "default" then
-    update()
+  if self.pending_event then
+    self.pending_event = nil
   end
+  U.try(self.StatusRedrawPre, self._)
 end
 
 function M:provider()
@@ -151,9 +129,30 @@ function M:condition()
   return true
 end
 
+--- @param opts vim.api.keyset.highlight
+local function set_hl(opts)
+  local key_parts = {}
+  for k, v in pairs(opts) do
+    table.insert(key_parts, k .. "_" .. tostring(v))
+  end
+  table.sort(key_parts)
+  local key = "PlainStatusline_" .. table.concat(key_parts, "_")
+  key = key:gsub("#", "")
+
+  if not M.highlights[key] then
+    vim.api.nvim_set_hl(0, key, opts)
+    M.highlights[key] = true
+  end
+
+  return key
+end
+
 local function get_hl_item(hl, ...)
   if type(hl) == "function" then
     hl = hl(...)
+  end
+  if type(hl) == "table" then
+    hl = set_hl(hl)
   end
   if type(hl) == "string" then
     return "%#" .. hl .. "#"

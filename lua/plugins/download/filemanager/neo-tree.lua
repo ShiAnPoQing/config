@@ -7,7 +7,7 @@ return {
     "MunifTanjim/nui.nvim",
   },
   key = {
-    ["<leader><leader>e"] = {
+    ["<leader>e"] = {
       function()
         require("neo-tree.command").execute({ toggle = true, reveal_force_cwd = false })
       end,

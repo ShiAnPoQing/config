@@ -146,18 +146,28 @@ return {
     },
     desc = "all",
   },
+  --- /usr/share/nvim/runtime/lua/vim/_core/defaults.lua
+  --- an
   ["wn"] = {
     function()
-      vim.lsp.buf.selection_range(vim.v.count1)
+      if vim.treesitter.get_parser(nil, nil, { error = false }) then
+        require("vim.treesitter._select").select_parent(vim.v.count1)
+      else
+        vim.lsp.buf.selection_range(vim.v.count1)
+      end
     end,
-    "x",
-    desc = "vim.lsp.buf.selection_range(vim.v.count1)",
+    { "x", "o" },
+    desc = "Select parent (outer) node",
   },
   ["en"] = {
     function()
-      vim.lsp.buf.selection_range(-vim.v.count1)
+      if vim.treesitter.get_parser(nil, nil, { error = false }) then
+        require("vim.treesitter._select").select_child(vim.v.count1)
+      else
+        vim.lsp.buf.selection_range(-vim.v.count1)
+      end
     end,
-    "x",
-    desc = "vim.lsp.buf.selection_range(-vim.v.count1)",
+    { "x", "o" },
+    desc = "Select child (inner) node",
   },
 }

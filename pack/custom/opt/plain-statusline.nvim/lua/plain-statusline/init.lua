@@ -162,20 +162,16 @@ modeline 里设置 statusline 表达式且 modelineexpr=on 生效，但在 sandb
 
 local M = {}
 
---- @class PlainStatusline.Component.EventConfig
+--- @alias PlainStatusline.Component.Events vim.api.keyset.events|"StatusRedrawPre"
+
+--- @class PlainStatusline.Component.EventSpec
+--- @field callback? fun(self: PlainStatusline.Component, args: vim.api.keyset.create_autocmd.callback_args)
 --- @field pattern? string|string[]
---- @field callback? string|fun(self: PlainStatusline.Component, args: vim.api.keyset.create_autocmd.callback_args): boolean?
-
---- @class PlainStatusline.Component.Events: PlainStatusline.Component.EventConfig
---- @field [integer] PlainStatusline.Component.Event
-
---- @alias PlainStatusline.Component.Event string|PlainStatusline.Component.Events
 
 --- @class PlainStatusline.Component
 --- @field condition? fun(self: PlainStatusline.Component): any
 --- @field init? fun(self: PlainStatusline.Component)
---- @field update? fun(self: PlainStatusline.Component)
---- @field event? PlainStatusline.Component.Event
+--- @field event? table<PlainStatusline.Component.Events, PlainStatusline.Component.EventSpec|fun(self: PlainStatusline.Component, args: vim.api.keyset.create_autocmd)>
 --- @field provider? string|number|fun(self: PlainStatusline.Component):string|number
 --- @field hl? string|vim.api.keyset.highlight|fun(self: PlainStatusline.Component):string|vim.api.keyset.highlight
 
@@ -190,25 +186,9 @@ function M.setup(opts)
 end
 
 function M.statusline()
-  return Root:eval()
-end
-
-function M.get_mode()
-  local mode = vim.api.nvim_get_mode().mode
-  local m = {
-    n = "NORMAL",
-    i = "INSERT",
-    v = "VISUAL",
-    V = "V-LINE",
-    ["\22"] = "V-BLOCK", -- Ctrl+V
-    R = "REPLACE",
-    c = "COMMAND",
-    s = "SELECT",
-    S = "S-LINE",
-    ["\19"] = "S-BLOCK",
-    t = "TERMINAL",
-  }
-  return m[mode] or mode
+  local statusline = Root:eval()
+  -- print(statusline)
+  return statusline
 end
 
 return M

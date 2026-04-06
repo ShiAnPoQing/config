@@ -229,11 +229,11 @@ return {
         },
         ["<CR>"] = {
           "accept",
-          function()
-            local key = require("nvim-autopairs").completion_confirm()
-            vim.api.nvim_feedkeys(key, "n", false)
-            return true
-          end,
+          -- function()
+          --   local key = require("nvim-autopairs").completion_confirm()
+          --   vim.api.nvim_feedkeys(key, "n", false)
+          --   return true
+          -- end,
           "fallback",
         },
         -- 我选择 Snippet 优先级最高

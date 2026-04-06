@@ -4,7 +4,6 @@ return {
     "rafamadriz/friendly-snippets",
   },
   event = "InsertEnter",
-  -- version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
   run = function(plug)
     vim
       .system({ "make", "install_jsregexp" }, {

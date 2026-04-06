@@ -98,16 +98,16 @@ return {
     desc = "Delete the CWORD(after)",
   },
   ["<C-i>"] = {
-    {
-      --- TODO: Undo Block
-      function()
-        local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
-        vim.api.nvim_feedkeys(esc .. 'vb"_c', "n", false)
-      end,
-
-      "i",
-    },
-    { "<C-w>", "c" },
+    -- {
+    --   --- TODO: Undo Block
+    --   function()
+    --     local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+    --     vim.api.nvim_feedkeys(esc .. 'vb"_c', "n", false)
+    --   end,
+    --
+    --   "i",
+    -- },
+    { "<C-w>", { "c", "i" } },
     desc = "Delete the part of the word before the cursor",
   },
   ["<C-o>"] = {
