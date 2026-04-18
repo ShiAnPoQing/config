@@ -140,6 +140,28 @@ return {
       end,
       { "n", "x", "o" },
     },
+    ["0gd"] = {
+      function()
+        require("eye.plugin.word").gaze({
+          regex = function(ctx)
+            return ctx["word.inner"]
+          end,
+          position = 0,
+          hl_group = "Visual",
+          matched = function(ctx)
+            local mode = vim.api.nvim_get_mode().mode
+            local row = ctx.data.row
+            local col = ctx.data.end_col - 1
+            if mode == "no" then
+              col = col + 1
+            end
+            vim.api.nvim_win_set_cursor(0, { row, col })
+            vim.api.nvim_feedkeys("gd", "m", false)
+          end,
+        })
+      end,
+      "n",
+    },
     ["0o"] = {
       function()
         require("eye.plugin.word").gaze({

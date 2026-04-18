@@ -178,6 +178,10 @@
       "rev": "b68f1e66736840e837c2a77ebff59c932fcb70c7",
       "src": "https://github.com/rmehri01/onenord.nvim"
     },
+    "opencode.nvim": {
+      "rev": "b3cdd746a5ca321b6884badefa0ba22c86c3d45e",
+      "src": "https://github.com/nickjvandyke/opencode.nvim"
+    },
     "outline.nvim": {
       "rev": "ead1820d49c8e79ce89cab1c2c318981b695c9d2",
       "src": "https://github.com/hedyhli/outline.nvim"

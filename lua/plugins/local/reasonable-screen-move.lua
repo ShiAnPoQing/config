@@ -98,5 +98,39 @@ return {
       { "g$", "o" },
       desc = "Screen Line Last Character",
     },
+    ["AK"] = {
+      function()
+        require("reasonable-screen-move").top()
+      end,
+      { "n", "x", "o" },
+      desc = "Screen Top",
+    },
+    ["AJ"] = {
+      function()
+        require("reasonable-screen-move").bottom()
+      end,
+      { "n", "x", "o" },
+      desc = "Screen Bottom",
+    },
+    ["AH"] = {
+      {
+        function()
+          require("reasonable-screen-move").first_character()
+        end,
+        { "n", "x" },
+      },
+      { "g0", "o" },
+      desc = "Screen Line First Character",
+    },
+    ["AL"] = {
+      {
+        function()
+          require("reasonable-screen-move").last_character()
+        end,
+        { "n", "x" },
+      },
+      { "g$", "o" },
+      desc = "Screen Line Last Character",
+    },
   },
 }

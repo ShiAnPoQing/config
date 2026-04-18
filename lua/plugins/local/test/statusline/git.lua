@@ -2,14 +2,12 @@ local S = require("plugins.local.test.statusline.shared")
 local colors = S.colors
 
 return {
-  event = {
-    StatusRedrawPre = function(self)
-      self.status_dict = vim.b.gitsigns_status_dict
-      if self.status_dict then
-        self.has_changes = self.status_dict.added ~= 0 or self.status_dict.removed ~= 0 or self.status_dict.changed ~= 0
-      end
-    end,
-  },
+  update = function(self)
+    self.status_dict = vim.b.gitsigns_status_dict
+    if self.status_dict then
+      self.has_changes = self.status_dict.added ~= 0 or self.status_dict.removed ~= 0 or self.status_dict.changed ~= 0
+    end
+  end,
   hl = function(self)
     local current_mode_hl = self:get_current_mode_hl()
     return {

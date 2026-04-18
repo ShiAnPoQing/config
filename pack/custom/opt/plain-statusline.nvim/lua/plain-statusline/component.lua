@@ -1,11 +1,10 @@
 --- @class PlainStatusline._Component
 --- @field _ PlainStatusline.Component
---- @field statusline string
+--- @field status string
 --- @field children PlainStatusline._Component[]
 --- @field parent PlainStatusline._Component?
---- @field pending_event boolean|nil
+--- @field pending_event vim.api.keyset.create_autocmd.callback_args[]
 --- @field pending_init boolean|nil
---- @field StatusRedrawPre fun(self: PlainStatusline._Component)
 --- @field highlights table<string, boolean>
 local M = {
   highlights = {},
@@ -44,33 +43,31 @@ function M:_register_event()
   if type(self._.event) ~= "table" then
     return
   end
+
   for event_name, value in pairs(self._.event) do
-    local update, pattern
+    local callback, pattern
     if type(value) == "table" then
       pattern = value.pattern
-      update = value.callback
+      callback = value.callback
     elseif type(value) == "function" then
-      update = value
+      callback = value
     end
-    if event_name ~= "StatusRedrawPre" then
-      create_autocmd(event_name, {
-        pattern = pattern,
-        callback = function(args)
-          U.try(update, self._, args)
-          self:redraw()
-        end,
-      })
-    else
-      self.StatusRedrawPre = update --[[@as any]]
-    end
+    create_autocmd(event_name, {
+      pattern = pattern,
+      callback = function(args)
+        U.try(callback, self._, args)
+        self:redraw(args)
+      end,
+    })
   end
 end
 
 --- @param parent PlainStatusline._Component?
 function M:init(parent)
   self.parent = parent
-  self.statusline = ""
+  self.status = ""
   self.children = {}
+  self.pending_event = {}
   self:_register_event()
   if type(self._.init) == "function" then
     self.pending_init = true
@@ -84,27 +81,30 @@ end
 
 function M:eval()
   if not self:condition() then
-    return ""
+    self.status = ""
+    return self.status
   end
   self:update()
   local provide = self:provider()
   for _, child in ipairs(self.children) do
     provide = provide .. child:eval()
   end
-  self.statusline = provide
-  return self.statusline
+  ---@diagnostic disable-next-line: assign-type-mismatch
+  self.status = provide
+  return self.status
 end
 
 function M:update()
   if self.pending_init then
     self.pending_init = nil
     U.try(self._.init, self._)
-    return
   end
-  if self.pending_event then
-    self.pending_event = nil
+  if #self.pending_event > 0 then
+    U.try(self._.update, self._, self.pending_event)
+    self.pending_event = {}
+  else
+    U.try(self._.update, self._, {})
   end
-  U.try(self.StatusRedrawPre, self._)
 end
 
 function M:provider()
@@ -163,10 +163,11 @@ function M:get_hl_item()
   return get_hl_item(rawget(self._, "hl"), self._) or get_hl_item(self._.hl, self._)
 end
 
-function M:redraw()
-  self.pending_event = true
+--- @param args vim.api.keyset.create_autocmd.callback_args
+function M:redraw(args)
+  self.pending_event[#self.pending_event + 1] = args
   vim.schedule(function()
-    if self.pending_event then
+    if #self.pending_event > 0 then
       vim.cmd("redrawstatus")
     end
   end)

@@ -173,3 +173,80 @@ end, {})
 -- vim.api.nvim_create_user_command("SelectTag", function()
 --   test()
 -- end, {})
+--
+
+-- vim.api.nvim_create_user_command("Bufcall", function(args)
+--   local command = table.remove(args.fargs, #args.fargs)
+--   for _, farg in ipairs(args.fargs) do
+--     vim.api.nvim_buf_call(
+--       ---@diagnostic disable-next-line: param-type-mismatch
+--       tonumber(farg),
+--       function()
+--         vim.cmd(command)
+--       end
+--     )
+--   end
+-- end, {
+--   nargs = "*",
+--   complete = function()
+--     local completions = {}
+--     for _, cmd in ipairs(vim.fn.getcompletion("", "buffer")) do
+--       table.insert(completions, cmd)
+--     end
+--     for _, cmd in ipairs(vim.fn.getcompletion("", "command")) do
+--       table.insert(completions, cmd)
+--     end
+--     return completions
+--   end,
+-- })
+
+vim.api.nvim_create_user_command("Put", function(args)
+  local command = ""
+  for _, cmd in ipairs(args.fargs) do
+    command = command .. " " .. cmd
+  end
+  local output = vim.api.nvim_exec2(command, { output = true }).output
+  vim.api.nvim_put(vim.split(output, "\n"), "l", args.bang and true or false, false)
+end, {
+  nargs = "*",
+  bang = true,
+  complete = "command",
+})
+
+vim.api.nvim_create_user_command("Yank", function(args)
+  local command = ""
+  for _, cmd in ipairs(args.fargs) do
+    command = command .. " " .. cmd
+  end
+  local output = vim.api.nvim_exec2(command, { output = true }).output
+  vim.fn.setreg(vim.v.register, output)
+end, {
+  nargs = "*",
+  complete = "command",
+})
+
+vim.api.nvim_create_user_command("Show", function(args)
+  local command = ""
+  for _, cmd in ipairs(args.fargs) do
+    command = command .. " " .. cmd
+  end
+  local output = vim.api.nvim_exec2(command, { output = true }).output
+  local lines = vim.split(output, "\n")
+  local buffer = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_open_win(buffer, true, {
+    relative = "laststatus",
+    style = "minimal",
+    row = 0,
+    col = 10000,
+    width = 10000,
+    height = #lines,
+    border = { "", { " ", "MsgSeparator" }, "", "", "", "", "", "" },
+    zindex = 197,
+    anchor = "SE",
+    mouse = true,
+  })
+  vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
+end, {
+  nargs = "*",
+  complete = "command",
+})

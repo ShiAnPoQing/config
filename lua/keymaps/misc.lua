@@ -1,4 +1,36 @@
 return {
+  ["y:"] = {
+    function()
+      vim.ui.input({
+        prompt = "Yank:",
+        completion = "command",
+      }, function(input)
+        if input == "or" or input == nil then
+          return
+        end
+        local output = vim.api.nvim_exec2(input, { output = true }).output
+        vim.fn.setreg(vim.v.register, output)
+      end)
+    end,
+    "n",
+    desc = "Yank command output to register",
+  },
+  ["<leader>p:"] = {
+    function()
+      vim.ui.input({
+        prompt = "Put:",
+        completion = "command",
+      }, function(input)
+        if input == "or" or input == nil then
+          return
+        end
+        local output = vim.api.nvim_exec2(input, { output = true }).output
+        vim.api.nvim_put(vim.split(output, "\n"), "l", true, true)
+      end)
+    end,
+    "n",
+    desc = "Put command output",
+  },
   ["<space>D"] = { "xd^", "n" },
   ["<esc>"] = {
     function()

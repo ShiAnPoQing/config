@@ -9,6 +9,14 @@ return {
     local File = require("plugins.local.test.statusline.file")
     local Cursor = require("plugins.local.test.statusline.cursor")
 
+    local Space = {
+      provider = " ",
+    }
+
+    local Algins = {
+      provider = "%=",
+    }
+
     require("plain-statusline").setup({
       mode_hls = {
         n = {
@@ -238,14 +246,35 @@ return {
       shared = {},
       Mode,
       Git,
+      Space,
       {
-        provider = " ",
+        condition = function()
+          return not vim.tbl_isempty(vim.lsp.get_clients({ bufnr = 0 }))
+        end,
+        event = {
+          LspAttach = function() end,
+          LspDetach = function() end,
+        },
+        update = function(self, events)
+          for _, arg in ipairs(events) do
+            if arg.event == "LspAttach" or arg.event == "LspDetach" then
+              local names = {}
+              for _, server in pairs(vim.lsp.get_clients({ bufnr = 0 })) do
+                table.insert(names, server.name)
+              end
+              self.status = " [" .. table.concat(names, " ") .. "] "
+            end
+          end
+        end,
+        provider = function(self)
+          return self.status
+        end,
+        hl = { fg = colors.purple, bold = true },
       },
       Diagnostic,
       File,
-      {
-        provider = "%=",
-      },
+      Algins,
+      Space,
       Cursor,
     })
   end,

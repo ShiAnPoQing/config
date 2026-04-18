@@ -1,24 +1,28 @@
+local function update(self)
+  self.errors = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })
+  self.warnings = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.WARN })
+  self.hints = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.HINT })
+  self.info = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.INFO })
+end
+
 return {
   error_icon = " ",
   warn_icon = " ",
   info_icon = " ",
   hint_icon = " ",
   init = function(self)
-    self:update()
+    update(self)
   end,
-  update = function(self)
-    self.errors = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })
-    self.warnings = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.WARN })
-    self.hints = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.HINT })
-    self.info = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.INFO })
+  update = function(self, events)
+    for _, event in ipairs(events) do
+      if event.event == "DiagnosticChanged" or event.event == "BufEnter" then
+        update(self)
+      end
+    end
   end,
   event = {
-    DiagnosticChanged = function(self)
-      self:update()
-    end,
-    BufEnter = function(self)
-      self:update()
-    end,
+    DiagnosticChanged = function() end,
+    BufEnter = function() end,
   },
   {
     provider = function(self)

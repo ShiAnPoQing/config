@@ -53,7 +53,7 @@ return {
   ["e"] = {
     "a",
     "n",
-    desc = "Cursor right start in  sert mode",
+    desc = "Cursor right start insert mode",
   },
   ["W"] = first_non_blank_character,
   ["E"] = last_non_blank_character,

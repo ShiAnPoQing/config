@@ -185,31 +185,25 @@ return {
         vim.cmd.stopinsert()
         vim.schedule(function()
           local line_count = vim.api.nvim_buf_line_count(0)
-          local function run(line_count)
-            if line_count == 0 then
+          local function run(count)
+            if count == 0 then
               return
             end
-            local line = vim.api.nvim_buf_get_lines(0, line_count - 1, line_count, false)[1]
+            local line = vim.api.nvim_buf_get_lines(0, count - 1, count, false)[1]
             if #line > 0 then
-              return line_count, line
+              return line
             else
-              return run(line_count - 1)
+              return run(count - 1)
             end
           end
-          local count, line = run(line_count)
-          if count then
-            vim.cmd.startinsert()
-            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<end>", true, false, true), "n", false)
-            vim.schedule(function()
-              local offset = #line - #line:gsub("%s*$", "")
-              if offset == 0 then
-                return
-              end
-              local key = "<left>"
-              key = key:rep(offset)
-              vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, false, true), "n", false)
-            end)
+          local line = run(line_count) or ""
+          local key = "<end>"
+          local offset = #line - #line:gsub("%s*$", "")
+          if offset > 0 then
+            key = key .. ("<left>"):rep(offset)
           end
+          vim.cmd.startinsert()
+          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<end>" .. key, true, false, true), "n", false)
         end)
       end,
       "t",
@@ -246,6 +240,18 @@ return {
     { "v0", "o" },
     desc = "Move to the first character of the line",
   },
+  ["<S-Space>H"] = {
+    {
+      function()
+        require("builtin.start-end-move").first_character()
+      end,
+      "n",
+    },
+    { "0", "x" },
+    --- contains the character under the cursor
+    { "v0", "o" },
+    desc = "Move to the first character of the line",
+  },
   ["<space><space>l"] = {
     {
       function()
@@ -260,6 +266,17 @@ return {
   ["<M-space><M-space><M-l>"] = { "<End>", { "i", "c", "s", "t" } },
   ["<M-space><M-space><M-h>"] = { "<Home>", { "i", "c", "s", "t" } },
   ["<space>L"] = {
+    {
+      function()
+        require("builtin.start-end-move").last_character()
+      end,
+      "n",
+    },
+    { "$", "o" },
+    { "$h", "x" },
+    desc = "Move to the last character of the line",
+  },
+  ["<S-space>L"] = {
     {
       function()
         require("builtin.start-end-move").last_character()

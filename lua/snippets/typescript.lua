@@ -171,13 +171,13 @@ local snippets = {
     "csl",
     d(1, function(_, snip)
       if utils.has_TM_SELECTED_TEXT(snip) then
-        return sn(1, { t("console.log("), i(1), t(")") })
-      else
         return sn(1, {
           t("console.log("),
           i(1, snip.env.TM_SELECTED_TEXT),
           t(")"),
         })
+      else
+        return sn(1, { t("console.log("), i(1), t(")") })
       end
     end)
   ),

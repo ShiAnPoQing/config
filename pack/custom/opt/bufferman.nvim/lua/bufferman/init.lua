@@ -1,9 +1,10 @@
 local M = {}
 
-function M.setup(opt)
-  require("bufferman.config").extend(opt)
-end
+--- @param opts any
+function M.setup(opts) end
 
-M.bufferman = require("bufferman.core").toggle
+function M.bufferman()
+  require("bufferman.core").bufferman()
+end
 
 return M

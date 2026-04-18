@@ -15,18 +15,20 @@ local FileIcon = {
 
 local FileFlags = {
   {
-    condition = function()
-      return vim.bo.modified
+    condition = function(self)
+      local buf = self.shared.buf
+      return buf and vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].modified
     end,
-    provider = " [+]",
-    hl = { fg = "green" },
+    provider = " ",
+    hl = { fg = colors.yellow_green },
   },
   {
-    condition = function()
-      return not vim.bo.modifiable or vim.bo.readonly
+    condition = function(self)
+      local buf = self.shared.buf
+      return buf and vim.api.nvim_buf_is_valid(buf) and (not vim.bo[buf].modifiable or vim.bo[buf].readonly)
     end,
-    provider = " ",
-    hl = { fg = "orange" },
+    provider = " 󰈡 ",
+    hl = { fg = colors.red },
   },
 }
 
@@ -34,63 +36,53 @@ local FileName = {
   provider = function(self)
     return self.file
   end,
-  init = function(self)
-    self:update_filename()
-  end,
-  update_filename = function(self)
-    self.shared.filename = vim.api.nvim_buf_get_name(0)
-    self.buf = vim.api.nvim_get_current_buf()
-  end,
-  update = function(self)
-    local filename = vim.fn.fnamemodify(self.shared.filename, ":.")
-    if filename == "" then
-      filename = "[No Name]"
-    end
-    if #filename > math.floor(vim.o.columns * 0.4) then
-      filename = vim.fn.pathshorten(filename)
-    end
-    self.file = filename
-  end,
-  event = {
-    VimResized = function(self)
-      self:update()
-    end,
-    BufWinEnter = function(self)
-      local filetype = vim.bo.filetype
-      if
-        filetype == "blink-cmp-menu"
-        or filetype == "blink-cmp-documentation"
-        or (filetype == "" and not vim.bo.modifiable)
-      then
-        return
-      end
-      self:update_filename()
-      self:update()
-    end,
-    DirChanged = function(self)
-      self:update_filename()
-      self:update()
-    end,
-    WinEnter = function(self)
-      self:update_filename()
-      self:update()
-    end,
-  },
   hl = function(self)
-    if self.buf then
-      local modified = vim.api.nvim_get_option_value("modified", {
-        scope = "local",
-        buf = self.buf,
-      })
-      return modified and {
-        fg = colors.yellow_green,
-      }
+    local buf = self.shared.buf
+    if buf and vim.api.nvim_buf_is_valid(buf) then
+      return vim.bo[buf].modified and { fg = colors.yellow_green }
     end
   end,
 }
 
 return {
   shared = {},
+  init = function(self)
+    self:update_filename()
+  end,
+  update_filename = function(self)
+    local buf = vim.api.nvim_win_get_buf(vim.g.statusline_winid)
+    self.shared.buf = buf
+    local name = vim.api.nvim_buf_get_name(buf)
+    if vim.bo[buf].filetype == "help" then
+      name = vim.fn.fnamemodify(name, ":t")
+    end
+    self.shared.filename = name
+  end,
+  update = function(self, targets)
+    for _, target in ipairs(targets) do
+      if target.event == "BufWinEnter" then
+        self:update_filename()
+      elseif target.event == "DirChanged" then
+        self:update_filename()
+      elseif target.event == "WinEnter" then
+        self:update_filename()
+      end
+      local filename = self.shared.filename
+      if filename == "" then
+        filename = "[No Name]"
+      end
+      if #filename > math.floor(vim.o.columns * 0.4) then
+        filename = vim.fn.pathshorten(filename)
+      end
+      self.file = filename
+    end
+  end,
+  event = {
+    VimResized = function() end,
+    BufWinEnter = function() end,
+    DirChanged = function() end,
+    WinEnter = function() end,
+  },
   FileIcon,
   FileName,
   FileFlags,
