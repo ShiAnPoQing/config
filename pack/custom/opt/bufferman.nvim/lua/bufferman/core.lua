@@ -1,12 +1,7 @@
 local UI = require("bufferman.ui")
+local U = require("bufferman.utils")
 
 local M = {}
-
-local function is_buflisted(buf)
-  return vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_get_option_value("buflisted", {
-    buf = buf,
-  })
-end
 
 local function create_fit()
   local pre_view
@@ -51,7 +46,7 @@ local function create_items(current_buf)
   --- @type Bufferman.UI.Item[]
   local items = {}
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    if is_buflisted(buf) then
+    if U.is_buflisted(buf) then
       local buffer_name = vim.api.nvim_buf_get_name(buf)
       buffer_name = vim.fn.fnamemodify(buffer_name, ":.")
       --- @type Bufferman.UI.Item
@@ -74,10 +69,10 @@ local function create_items(current_buf)
 end
 
 function M:clean()
-  for _, id in ipairs(self.autocmds or {}) do
-    vim.api.nvim_del_autocmd(id)
-  end
-  self.autocmds = nil
+  local win = self.win
+  vim.schedule(function()
+    vim.api.nvim_set_current_win(win)
+  end)
   self.buf = nil
   self.win = nil
 end
@@ -85,13 +80,6 @@ end
 function M:init()
   self.win = vim.api.nvim_get_current_win()
   self.buf = vim.api.nvim_get_current_buf()
-  local bufadd = vim.api.nvim_create_autocmd("BufAdd", {
-    callback = function()
-      self.buf = vim.api.nvim_win_get_buf(self.win)
-      UI:update(create_items(self.buf))
-    end,
-  })
-  self.autocmds = { bufadd }
 end
 
 function M.bufferman()
@@ -105,11 +93,12 @@ function M.bufferman()
     select = {
       callback = function(ctx)
         local item = ctx.item
-        if not item.data.buf then
+        local buf = item.data.buf
+        if not buf then
           return
         end
-        vim.api.nvim_win_set_buf(M.win, item.data.buf)
-        M.buf = item.data.buf
+        vim.api.nvim_win_set_buf(M.win, buf)
+        M.buf = buf
         return true
       end,
       keymap = { "<cr>" },
@@ -148,7 +137,32 @@ function M.bufferman()
     UI:close()
   end)
   UI:on({ "TextChanged", "TextChangedI" }, create_fit())
-  UI:keymap("s", function() end)
+  UI:keymap("s", function()
+    local item = UI:get_cursor_item()
+    if not item then
+      return
+    end
+    local buf = item.data.buf
+    local win = vim.api.nvim_open_win(buf, false, { win = M.win, split = "right" })
+    M.win = win
+    M.buf = buf
+  end)
+  UI:keymap("S", function()
+    local item = UI:get_cursor_item()
+    if not item then
+      return
+    end
+    local buf = item.data.buf
+    local win = vim.api.nvim_open_win(buf, false, { win = M.win, split = "below" })
+    M.win = win
+    M.buf = buf
+  end)
+  UI:keymap("<C-n>", function()
+    UI:select_next()
+  end)
+  UI:keymap("<C-p>", function()
+    UI:select_prev()
+  end)
 end
 
 return M

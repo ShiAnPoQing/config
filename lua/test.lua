@@ -520,3 +520,37 @@ vim.api.nvim_create_autocmd("LspProgress", {
 -- --   fg = "#808080",
 -- -- })
 -- --
+
+-- vim.api.nvim_buf_attach(self.buf, false, {
+--   on_bytes = function(
+--     _,
+--     buf,
+--     _,
+--     start_row,
+--     start_col,
+--     start_byte,
+--     old_end_row,
+--     old_end_col,
+--     old_end_byte,
+--     new_end_row,
+--     new_end_col,
+--     new_end_byte
+--   )
+--     local removed_line = old_end_row - start_row
+--     local added_line = new_end_row - start_row
+--   end,
+--   on_lines = function(_, buf, _, first, last, new_last, _)
+--     local removed = last - first
+--     local added = new_last - first
+--
+--     if removed > 0 then
+--       return
+--     end
+--
+--     if added > 0 then
+--       return
+--     end
+--     print("range:", first, last, "->", new_last)
+--     print("removed:", removed)
+--   end,
+-- })

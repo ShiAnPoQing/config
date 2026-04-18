@@ -1,6 +1,8 @@
+local U = require("bufferman.utils")
+
 --- @class Bufferman.UI
---- @field items Bufferman.UI.Item[]
---- @field selected_item Bufferman.UI.Item
+--- @field __items Bufferman.UI.Item[]
+--- @field __selected_item Bufferman.UI.Item
 --- @field ns_id integer
 --- @field bufnr integer
 --- @field winid integer
@@ -42,15 +44,6 @@ local M = {}
 --- @field items Bufferman.UI.Item[]
 --- @field name string
 
---- @generic T
---- @param fn fun(...: T)
---- @param ... T
-local function try(fn, ...)
-  if type(fn) == "function" then
-    return fn(...)
-  end
-end
-
 local default_win_config = {
   relative = "editor",
   border = "rounded",
@@ -91,35 +84,13 @@ end
 
 ---@param options Bufferman.UI.Options
 function M:open(options)
-  local lines, selected_item_index, max_width = resolve_items(options.items)
   self.ns_id = vim.api.nvim_create_namespace("bufferman.ui")
-  self.hook = {
-    select = options.select,
-    close = options.close,
-    submit = options.submit,
-  }
-  self.items = options.items
+  self.hook = { select = options.select, close = options.close, submit = options.submit }
   self.bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(self.bufnr, "Bufferman")
-  self.win_config = vim.tbl_deep_extend(
-    "force",
-    default_win_config,
-    { height = #options.items, width = max_width, title = options.name }
-  )
-  resolve_win_config(self.win_config)
-  self.winid = vim.api.nvim_open_win(self.bufnr, true, self.win_config)
-  vim.api.nvim_buf_set_lines(self.bufnr, 0, -1, false, lines)
   set_options({ buftype = "acwrite", filetype = "bufferman", modified = false }, { buf = self.bufnr })
-  set_options({ winfixbuf = true }, { win = self.winid })
-
-  local Update = require("bufferman.ui.update"):new(self.bufnr)
-  Update:attach({
-    added = function() end,
-    removed = function() end,
-  })
-
-  self:select(selected_item_index)
-
+  self.win_config = vim.tbl_deep_extend("force", default_win_config, { title = options.name })
+  self:update(options.items)
   local select = self.hook.select
   local close = self.hook.close
   if select then
@@ -132,10 +103,14 @@ function M:open(options)
   if close then
     for _, key in ipairs(close.keymap) do
       self:keymap(key, function()
-        self:close()
+        vim.api.nvim_win_close(self.winid, true)
       end)
     end
   end
+  self:_listen()
+end
+
+function M:_listen()
   self:on("VimResized", function()
     resolve_win_config(self.win_config)
     vim.api.nvim_win_set_config(self.winid, self.win_config)
@@ -156,10 +131,7 @@ function M:open(options)
   end)
   self:on("BufReadCmd", function(args)
     if args.buf == self.bufnr then
-      set_options(
-        { buftype = "acwrite", filetype = "bufferman", modified = false, buflisted = false },
-        { buf = self.bufnr }
-      )
+      self:update(self.__items)
     end
   end)
 end
@@ -168,9 +140,9 @@ end
 function M:submit(bang)
   local submit = self.hook.submit
   if submit then
-    try(submit.callback, {
+    U.try(submit.callback, {
       lines = vim.api.nvim_buf_get_lines(self.bufnr, 0, -1, false),
-      items = self.items,
+      items = self.__items,
       bang = bang,
     })
   end
@@ -178,73 +150,107 @@ end
 
 --- @param items Bufferman.UI.Item
 function M:update(items)
-  self.items = items
-  local lines, selected_item_index, max_width = resolve_items(self.items)
-  self.win_config = vim.tbl_deep_extend("force", self.win_config, { height = #self.items, width = max_width })
+  self.__items = items
+  local lines, selected_item_index, max_width = resolve_items(self.__items)
+  self.win_config = vim.tbl_deep_extend("force", self.win_config, { height = #self.__items, width = max_width })
   resolve_win_config(self.win_config)
-  vim.api.nvim_win_set_config(self.winid, self.win_config)
+  if self.winid then
+    vim.api.nvim_win_set_config(self.winid, self.win_config)
+  else
+    self.winid = vim.api.nvim_open_win(self.bufnr, true, self.win_config)
+    set_options({ winfixbuf = true }, { win = self.winid })
+  end
+  set_options({ undolevels = -1 }, { buf = self.bufnr })
   vim.api.nvim_buf_set_lines(self.bufnr, 0, -1, false, lines)
+  set_options({ undolevels = 1000 }, { buf = self.bufnr })
   self:select(selected_item_index)
 end
 
-function M:select(index)
+function M:select(index, is_item_index)
   if type(index) ~= "number" then
     return
   end
-  if index < 1 or index > #self.items then
+  local item_index, item_row
+  if is_item_index then
+    item_index = index
+    if item_index < 0 or item_index > #self.__items then
+      return
+    end
+    local item = self.__items[item_index]
+    for i, line in ipairs(vim.api.nvim_buf_get_lines(self.bufnr, 0, -1, false)) do
+      line = vim.trim(line)
+      if item.text == line then
+        item_row = i
+        break
+      end
+    end
+  else
+    item_row = index
+    local lines = vim.api.nvim_buf_get_lines(self.bufnr, item_row - 1, item_row, false)
+    if #lines == 0 then
+      return
+    end
+    local line = vim.trim(lines[1])
+    for i, item in ipairs(self.__items) do
+      if item.text == line then
+        item_index = i
+        break
+      end
+    end
+  end
+
+  if not item_row or not item_index then
     return
   end
+
   local select = self.hook.select
   if select then
     --- @type Bufferman.UI.Hook.Select.Context
-    local ctx = { item = self.items[index] }
-    if not try(select.callback, ctx) then
+    local ctx = { item = self.__items[item_index] }
+    if not U.try(select.callback, ctx) then
       return
     end
   end
-  if self.selected_item then
-    self.selected_item.selected = nil
+  if self.__selected_item then
+    self.__selected_item.selected = nil
   end
-  self.selected_item = self.items[index]
-  self.selected_item.selected = true
+  self.__selected_item = self.__items[item_index]
+  self.__selected_item.selected = true
   vim.api.nvim_buf_clear_namespace(self.bufnr, self.ns_id, 0, -1)
-  vim.api.nvim_buf_set_extmark(self.bufnr, self.ns_id, index - 1, 0, {
+  vim.api.nvim_buf_set_extmark(self.bufnr, self.ns_id, item_row - 1, 0, {
     hl_eol = true,
     line_hl_group = "Visual",
     invalidate = true,
     undo_restore = false,
   })
   local cursor = vim.api.nvim_win_get_cursor(self.winid)
-  vim.schedule(function()
-    vim.api.nvim_win_set_cursor(self.winid, { index, cursor[2] })
-  end)
+  vim.api.nvim_win_set_cursor(self.winid, { item_row, cursor[2] })
+  return true
 end
 
 function M:close()
+  if not self:is_open() then
+    return
+  end
   if self.hook.close then
-    try(self.hook.close.callback)
+    U.try(self.hook.close.callback)
   end
-
-  if self.winid and vim.api.nvim_win_is_valid(self.winid) then
-    vim.api.nvim_win_close(self.winid, true)
-    pcall(vim.api.nvim_buf_delete, self.bufnr, { force = true })
-    self.winid = nil
-    self.bufnr = nil
-    self.ns_id = nil
-    self.hook = nil
-    self.items = nil
-  end
+  vim.api.nvim_win_close(self.winid, true)
+  vim.api.nvim_buf_delete(self.bufnr, { force = true })
+  self.winid = nil
+  self.bufnr = nil
+  self.ns_id = nil
+  self.hook = nil
+  self.__items = nil
 end
 
 function M:is_open()
-  if self.winid and vim.api.nvim_win_is_valid(self.winid) then
-    return true
-  end
+  return U.is_win_valid(self.winid)
 end
 
 --- @param event vim.api.keyset.events|vim.api.keyset.events[]
 --- @param callback fun(args: vim.api.keyset.create_autocmd.callback_args)
-function M:on(event, callback, opts)
+function M:on(event, callback)
   if type(event) ~= "string" and type(event) ~= "table" then
     vim.api.nvim_echo({ { "evenst must be a string or string[]", "ErrorMsg" } }, false, {})
     return
@@ -287,6 +293,84 @@ function M:fit_height(height)
   self.win_config.height = math.min(self.win_config.height, max_height)
   self.win_config.row = math.ceil((max_height - self.win_config.height) / 2)
   vim.api.nvim_win_set_config(self.winid, self.win_config)
+end
+
+function M:is_item(row)
+  if not self:is_open() then
+    return false
+  end
+
+  local line = vim.api.nvim_buf_get_lines(self.bufnr, row - 1, row, false)[1]
+  line = vim.trim(line)
+
+  for _, item in ipairs(self.__items or {}) do
+    if item.text == line then
+      return true
+    end
+  end
+
+  return false
+end
+
+function M:get_selected_item()
+  return self.__selected_item
+end
+
+function M:get_items()
+  return self.__items
+end
+
+function M:get_cursor_item()
+  if not self:is_open() then
+    return
+  end
+  local cursor = vim.api.nvim_win_get_cursor(self.winid)
+  local line = vim.api.nvim_buf_get_lines(self.bufnr, cursor[1] - 1, cursor[1], false)[1]
+  line = vim.trim(line)
+  for _, item in ipairs(self.__items) do
+    if item.text == line then
+      return item
+    end
+  end
+end
+
+function M:select_next()
+  if not self:is_open() then
+    return
+  end
+  local start
+  for i, line in ipairs(vim.api.nvim_buf_get_lines(self.bufnr, 0, -1, false)) do
+    line = vim.trim(line)
+    if start then
+      if self:select(i) then
+        return true
+      end
+    end
+    if line == self.__selected_item.text then
+      start = true
+    end
+  end
+  return self:select(1, true)
+end
+
+function M:select_prev()
+  if not self:is_open() then
+    return
+  end
+  local start
+  local lines = vim.iter(vim.api.nvim_buf_get_lines(self.bufnr, 0, -1, false)):rev():totable()
+  for i, line in ipairs(lines) do
+    line = vim.trim(line)
+    if start then
+      if self:select(#lines - i + 1) then
+        return true
+      end
+    end
+    if line == self.__selected_item.text then
+      start = true
+    end
+  end
+  return self:select(#self.__items, true)
 end
 
 return M
