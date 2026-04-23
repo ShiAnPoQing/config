@@ -1,4 +1,7 @@
 return {
+  [","] = { ",<C-g>u", "i" },
+  ["."] = { ".<C-g>u", "i" },
+  [";"] = { ";<C-g>u", "i" },
   ["y:"] = {
     function()
       vim.ui.input({

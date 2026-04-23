@@ -5,8 +5,20 @@ local function get_visual_texts()
   return vim.api.nvim_buf_get_text(0, start_mark[1] - 1, start_mark[2], end_mark[1] - 1, end_mark[2] + 1, {})
 end
 return {
-  ["*"] = { "*zz", "n" },
-  ["#"] = { "#zz", "n" },
+  ["n"] = {
+    { "'Nn'[v:searchforward].'zv'", "n" },
+    { "'Nn'[v:searchforward]", { "x", "o" } },
+    expr = true,
+    desc = "Next Search Result",
+  },
+  ["N"] = {
+    { "'nN'[v:searchforward].'zv'", "n" },
+    { "'nN'[v:searchforward]", { "x", "o" } },
+    expr = true,
+    desc = "Prev Search Result",
+  },
+  -- ["*"] = { "*zz", "n" },
+  -- ["#"] = { "#zz", "n" },
   --["%"] = { "%zz", "n" },
   ["<space>/"] = {
     function()

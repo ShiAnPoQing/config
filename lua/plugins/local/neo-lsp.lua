@@ -19,7 +19,6 @@ return {
         }
       end,
     })
-
     local Methods = vim.lsp.protocol.Methods
     local callbacks = {
       [Methods.textDocument_documentSymbol] = function(args)
@@ -132,10 +131,117 @@ return {
         require("native-packer.key").add({
           ["gd"] = {
             function()
+              vim.opt.switchbuf = "uselast"
               vim.lsp.buf.definition()
             end,
             "n",
             desc = "Goto Lsp definition",
+            buf = args.buf,
+          },
+          ["<tab>gd"] = {
+            function()
+              vim.opt.switchbuf = "newtab"
+              vim.lsp.buf.definition()
+            end,
+            "n",
+            desc = "Goto Lsp definition(New Tab)",
+            buf = args.buf,
+          },
+          ["ad"] = {
+            function()
+              vim.opt.switchbuf = "vsplit"
+              vim.lsp.buf.definition()
+            end,
+            "n",
+            desc = "Goto Lsp definition(vsplit)",
+            buf = args.buf,
+          },
+          ["sd"] = {
+            function()
+              vim.opt.switchbuf = "split"
+              vim.lsp.buf.definition()
+            end,
+            "n",
+            desc = "Goto Lsp definition(vsplit)",
+            buf = args.buf,
+          },
+          [";gd"] = {
+            function()
+              local method = vim.lsp.protocol.Methods.textDocument_definition
+              local bufnr = vim.api.nvim_get_current_buf()
+              local win = vim.api.nvim_get_current_win()
+
+              local clients = vim.lsp.get_clients({ method = method, bufnr = bufnr })
+              if not next(clients) then
+                vim.notify(vim.lsp._unsupported_method(method), vim.log.levels.WARN)
+                return
+              end
+
+              local from = vim.fn.getpos(".")
+              from[1] = bufnr
+              local tagname = vim.fn.expand("<cword>")
+
+              vim.lsp.buf_request_all(bufnr, method, function(client)
+                local params = vim.lsp.util.make_position_params(win, client.offset_encoding)
+                ---@diagnostic disable-next-line: inject-field
+                params.context = nil or { includeDeclaration = true }
+                return params
+              end, function(results)
+                ---@type vim.quickfix.entry[]
+                local all_items = {}
+
+                for client_id, res in pairs(results) do
+                  local client = assert(vim.lsp.get_client_by_id(client_id))
+                  local locations = {}
+                  if res then
+                    locations = vim.islist(res.result) and res.result or { res.result }
+                  end
+                  local items = vim.lsp.util.locations_to_items(locations, client.offset_encoding)
+                  vim.list_extend(all_items, items)
+                end
+
+                local name = string.gsub(method:match("textDocument/(.*)"), "(%u)", " %1"):lower()
+                if vim.tbl_isempty(all_items) then
+                  vim.notify(("No %s found"):format(name), vim.log.levels.INFO)
+                  return
+                end
+
+                ---@type vim.fn.setqflist.what
+                local list = {
+                  title = name:gsub("^%l", string.upper),
+                  items = all_items,
+                  context = { bufnr = bufnr, method = method },
+                }
+
+                local float_buf = vim.api.nvim_create_buf(false, true)
+                local float_win = vim.api.nvim_open_win(float_buf, true, {
+                  relative = "cursor",
+                  width = math.ceil(vim.o.columns * 0.5),
+                  height = math.ceil(vim.o.lines * 0.5),
+                  style = "minimal",
+                  row = 1,
+                  col = 0,
+                  title = "Tag: " .. tagname,
+                  title_pos = "center",
+                  border = "single",
+                })
+                vim.api.nvim_set_option_value("cursorline", true, {
+                  win = float_win,
+                })
+                vim.fn.setqflist({}, " ", list)
+                local tagstack = { { tagname = tagname, from = from } }
+                vim.fn.settagstack(vim.fn.win_getid(win), { items = tagstack }, "t")
+                vim.cmd("cfirst")
+                vim.api.nvim_set_current_win(win)
+                vim.api.nvim_create_autocmd("CursorMoved", {
+                  callback = function()
+                    vim.api.nvim_win_close(float_win, true)
+                    return true
+                  end,
+                })
+              end)
+            end,
+            "n",
             buf = args.buf,
           },
         })

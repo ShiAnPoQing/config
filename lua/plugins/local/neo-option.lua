@@ -114,6 +114,7 @@ return {
   name = "neo-option.nvim",
   config = function()
     require("neo-option").setup({
+      autowrite = false,
       clipboard = { "unnamedplus" },
       updatetime = 500,
       termguicolors = true,
@@ -174,7 +175,7 @@ return {
       shiftwidth = 2,
       expandtab = true,
       smarttab = true,
-      --
+
       display = { "truncate" },
       conceallevel = 0,
       -- colorcolumn = "72",
@@ -188,13 +189,13 @@ return {
         extends = "⭆",
         -- trail = "»",
         trail = "·",
-        -- tab = "│",
+        tab = ">-",
         -- multispace = "   │",
       },
       fillchars = {
         vert = "│",
         horiz = "─",
-        -- fold = " ",
+        fold = " ",
         foldopen = "",
         foldsep = " ",
         foldclose = "",
@@ -213,15 +214,10 @@ return {
       foldcolumn = "auto",
       foldmethod = "expr",
       foldexpr = "v:lua.vim.treesitter.foldexpr()",
-      -- 打开文件时启用折叠
-      foldenable = true,
-      -- 默认展开所有
-      foldlevel = 99,
-      -- 打开文件时不折叠
-      foldlevelstart = 99,
-      -- 最大嵌套折叠层数
-      foldnestmax = 3,
-      -- foldenable = false,
+      foldenable = true, -- 打开文件时启用折叠
+      foldlevel = 99, -- 默认展开所有
+      foldlevelstart = 99, -- 打开文件时不折叠
+      foldnestmax = 3, -- 最大嵌套折叠层数
       foldtext = "v:lua.custom_foldtext()",
       pumheight = 8,
       matchpairs = function(v)

@@ -1,0 +1,1839 @@
+*quickfix.txt*  Nvim
+
+
+		  VIM 参考手册	  Bram Moolenaar 著
+
+
+用户手册的 |30.1| 节介绍了这个主题。
+
+                                      键入 |gO| 查看目录。
+
+=============================================================================
+1. 使用 QuickFix 命令					*quickfix* *Quickfix* *E42*
+
+Vim 有一种特殊模式，可以加快编辑-编译-编辑的循环速度。这受到了 Amiga 上 Manx 的 Aztec C 编译器的 quickfix 选项的启发。其思路是将编译器的错误消息保存到一个文件中，并使用 Vim 逐个跳转到错误位置。你可以检查每个问题并修复它，而不必记住所有错误消息。
+
+在 Vim 中，quickfix 命令更广泛地用于查找文件中的位置列表。例如，|:vimgrep| 查找模式匹配项。你可以使用 |getqflist()| 函数在脚本中使用这些位置。因此，你可以做的远不止编辑/编译/修复循环！
+
+如果你将错误消息保存在一个文件中，你可以使用以下命令启动 Vim： >
+	vim -q filename
+
+在 Vim 内部，运行命令并处理输出的一种简单方法是使用 |:make| 命令（见下文）。
+
+'errorformat' 选项应设置为匹配你编译器的错误消息（参见下面的 |errorformat|）。
+
+					*quickfix-stack* *quickfix-ID*
+每个 quickfix 列表都有一个称为 quickfix ID 的唯一标识符，该编号在 Vim 会话期间不会改变。|getqflist()| 函数可用于获取分配给列表的标识符。还有一个 quickfix 列表编号，当向 quickfix 堆栈添加超过 'chistory' 个列表时，该编号可能会改变。
+
+						*location-list* *E776*
+位置列表是窗口局部的 quickfix 列表。在执行诸如 `:lvimgrep`、`:lgrep`、`:lhelpgrep`、`:lmake` 等命令后，你会得到一个位置列表，这些命令会创建一个位置列表，而不是像对应的 `:vimgrep`、`:grep`、`:helpgrep`、`:make` 那样创建 quickfix 列表。
+						*location-list-file-window*
+位置列表与窗口相关联，每个窗口可以有一个单独的位置列表。一个位置列表只能与一个窗口相关联。位置列表独立于 quickfix 列表。
+
+当带有位置列表的窗口被拆分时，新窗口会获得位置列表的一个副本。当不再有任何对位置列表的引用时，该位置列表将被销毁。
+
+						*quickfix-changedtick*
+每个 quickfix 和位置列表都有一个只读的 changedtick 变量，用于跟踪对列表所做的更改总数。每次修改 quickfix 列表时，此计数都会增加。这可以用于仅在列表更改时执行操作。|getqflist()| 和 |getloclist()| 函数可用于查询 changedtick 的当前值。你不能更改 changedtick 变量。
+
+可以使用以下 quickfix 命令。位置列表命令与 quickfix 命令类似，将 quickfix 命令中的 'c' 前缀替换为 'l'。
+
+							*E924*
+如果在处理位置列表命令时当前窗口被 |autocommand| 关闭，则该命令将被中止。
+
+							*E925* *E926*
+如果在处理 quickfix 或位置列表命令时当前的 quickfix 或位置列表被 |autocommand| 更改，则该命令将被中止。
+
+							*:cc*
+:cc[!] [nr]		显示错误 [nr]。如果省略 [nr]，则再次显示相同的
+:[nr]cc[!]		错误。不带 [!] 时，当跳转到另一个缓冲区时，如果
+			当前缓冲区已被更改，且该缓冲区只有一个窗口，同时
+			'hidden' 和 'autowrite' 都关闭，则此命令不起作用。
+			使用 [!] 跳转到另一个缓冲区时，除非设置了 'hidden'
+			或者该缓冲区还有另一个窗口，否则对当前缓冲区的任
+			何更改都将丢失。
+			跳转到缓冲区时，会遵循 'switchbuf' 设置。
+			在 quickfix 窗口中使用时，可以使用行号，包括用于当
+			前行的 "." 和用于最后一行的 "$"。
+
+							*:ll*
+:ll[!] [nr]		与 ":cc" 相同，不同的是使用当前窗口的位置列表而
+:[nr]ll[!]		非 quickfix 列表。
+
+						*:cn* *:cne* *:cnext* *E553*
+:[count]cn[ext][!]	显示列表中包含文件名的第 [count] 个下一个错误。
+			如果根本没有文件名，则转到第 [count] 个下一个错误。
+			关于 [!] 和 'switchbuf' 参见 |:cc|。
+
+								*]q*
+]q			映射到 |:cnext|。|default-mappings|
+
+							*:lne* *:lnext*
+:[count]lne[xt][!]	与 ":cnext" 相同，不同的是使用当前窗口的位置列表
+			而非 quickfix 列表。
+
+								*]l*
+]l			映射到 |:lnext|。|default-mappings|
+
+:[count]cN[ext][!]		*:cp* *:cprevious*  *:cprev* *:cN* *:cNext*
+:[count]cp[revious][!]	显示列表中包含文件名的第 [count] 个上一个错误。
+			如果根本没有文件名，则转到第 [count] 个上一个错误。
+			关于 [!] 和 'switchbuf' 参见 |:cc|。
+
+								*[q*
+[q			映射到 |:cprevious|。|default-mappings|
+
+
+:[count]lN[ext][!]		*:lp* *:lprevious* *:lprev* *:lN* *:lNext*
+:[count]lp[revious][!]	与 ":cNext" 和 ":cprevious" 相同，不同的是使用当前
+			窗口的位置列表而非 quickfix 列表。
+
+								*[l*
+[l			映射到 |:lprevious|。|default-mappings|
+
+							*:cabo* *:cabove*
+:[count]cabo[ve]	跳转到当前缓冲区中当前行上方的第 [count] 个错误。
+			如果省略 [count]，则使用 1。如果没有错误，则显示错
+			误消息。假定 quickfix 列表中的条目按其缓冲区编号和
+			行号排序。如果同一行有多个错误，则仅使用第一个条目。
+			如果 [count] 超过当前行上方的条目数，则选择文件中
+			的第一个错误。
+
+							*:lab* *:labove*
+:[count]lab[ove]	与 ":cabove" 相同，不同的是使用当前窗口的位置列表
+			而非 quickfix 列表。
+
+							*:cbel* *:cbelow*
+:[count]cbel[ow]	跳转到当前缓冲区中当前行下方的第 [count] 个错误。
+			如果省略 [count]，则使用 1。如果没有错误，则显示错
+			误消息。假定 quickfix 列表中的条目按其缓冲区编号和
+			行号排序。如果同一行有多个错误，则仅使用第一个条目。
+			如果 [count] 超过当前行下方的条目数，则选择文件中
+			的最后一个错误。
+
+							*:lbel* *:lbelow*
+:[count]lbel[ow]	与 ":cbelow" 相同，不同的是使用当前窗口的位置列表
+			而非 quickfix 列表。
+
+							*:cbe* *:cbefore*
+:[count]cbe[fore]	跳转到当前缓冲区中当前光标位置之前的第 [count] 个
+			错误。如果省略 [count]，则使用 1。如果没有错误，则
+			显示错误消息。假定 quickfix 列表中的条目按其缓冲区、
+			行号和列号排序。如果 [count] 超过当前位置之前的条目
+			数，则选择文件中的第一个错误。
+
+							*:lbe* *:lbefore*
+:[count]lbe[fore]	与 ":cbefore" 相同，不同的是使用当前窗口的位置列表
+			而非 quickfix 列表。
+
+							*:caf* *:cafter*
+:[count]caf[ter]	跳转到当前缓冲区中当前光标位置之后的第 [count] 个
+			错误。如果省略 [count]，则使用 1。如果没有错误，则
+			显示错误消息。假定 quickfix 列表中的条目按其缓冲区、
+			行号和列号排序。如果 [count] 超过当前位置之后的条目
+			数，则选择文件中的最后一个错误。
+
+							*:laf* *:lafter*
+:[count]laf[ter]	与 ":cafter" 相同，不同的是使用当前窗口的位置列表
+			而非 quickfix 列表。
+
+							*:cnf* *:cnfile*
+:[count]cnf[ile][!]	显示列表中包含文件名的第 [count] 个下一个文件中的
+			第一个错误。如果根本没有文件名或者没有下一个文件，
+			则转到第 [count] 个下一个错误。关于 [!] 和
+			'switchbuf' 参见 |:cc|。
+
+								*]_CTRL-Q*
+]_CTRL-Q		映射到 |:cnfile|。|default-mappings|
+
+							*:lnf* *:lnfile*
+:[count]lnf[ile][!]	与 ":cnfile" 相同，不同的是使用当前窗口的位置列表
+			而非 quickfix 列表。
+
+								*]_CTRL-L*
+]_CTRL-L		映射到 |:lnfile|。|default-mappings|
+
+:[count]cNf[ile][!]			*:cpf* *:cpfile* *:cNf* *:cNfile*
+:[count]cpf[ile][!]	显示列表中包含文件名的第 [count] 个上一个文件中的
+			最后一个错误。如果没有文件名或者没有下一个文件，则
+			转到第 [count] 个上一个错误。关于 [!] 和
+			'switchbuf' 参见 |:cc|。
+
+								*[_CTRL-Q*
+[_CTRL-Q		映射到 |:cpfile|。|default-mappings|
+
+
+:[count]lNf[ile][!]			*:lpf* *:lpfile* *:lNf* *:lNfile*
+:[count]lpf[ile][!]	与 ":cNfile" 和 ":cpfile" 相同，不同的是使用当前
+			窗口的位置列表而非 quickfix 列表。
+
+							*[_CTRL-L*
+[_CTRL-L		映射到 |:lpfile|。|default-mappings|
+
+							*:crewind* *:cr*
+:cr[ewind][!] [nr]	显示错误 [nr]。如果省略 [nr]，则显示第一个错误。
+			参见 |:cc|。
+
+							*[Q*
+[Q			映射到 |:crewind|。|default-mappings|
+
+							*:lrewind* *:lr*
+:lr[ewind][!] [nr]	与 ":crewind" 相同，不同的是使用当前窗口的位置列表
+			而非 quickfix 列表。
+
+							*[L*
+[L			映射到 |:lrewind|。|default-mappings|
+
+							*:cfirst* *:cfir*
+:cfir[st][!] [nr]	与 ":crewind" 相同。
+
+							*:lfirst* *:lfir*
+:lfir[st][!] [nr]	与 ":lrewind" 相同。
+
+							*:clast* *:cla*
+:cla[st][!] [nr]	显示错误 [nr]。如果省略 [nr]，则显示最后一个错误。
+			参见 |:cc|。
+
+							*]Q*
+]Q			映射到 |:clast|。
+
+							*:llast* *:lla*
+:lla[st][!] [nr]	与 ":clast" 相同，不同的是使用当前窗口的位置列表
+			而非 quickfix 列表。
+
+							*]L*
+]L			映射到 |:llast|。
+
+							*:cq* *:cquit*
+:cq[uit][!]
+:{N}cq[uit][!]
+:cq[uit][!] {N}		以错误代码 {N} 退出 Vim。{N} 默认为 1。
+			当 Vim 被另一个程序调用时很有用：
+			例如，编译器不会再次编译同一个文件，
+			`git commit` 将中止提交过程，`fc`（bash 和 zsh
+			等 shell 的内置命令）将不会执行该命令等。
+			{N} 也可以为零，此时 Vim 正常退出。
+			警告：文件中的所有更改都将丢失。它的工作方式类似于
+			":qall!" |:qall|，不同之处在于 Nvim 以非零值或
+			[count] 退出。
+
+							*:cf* *:cfi* *:cfile*
+:cf[ile][!] [errorfile]	读取错误文件并跳转到第一个错误。
+			当使用 -q 选项启动 Vim 时，会自动完成此操作。
+			你可以在编译时保持 Vim 运行的情况下使用此命令。
+			如果你指定了错误文件的名称，'errorfile' 选项将被
+			设置为 [errorfile]。关于 [!] 参见 |:cc|。
+			如果错误文件的编码与 'encoding' 选项不同，你可以
+			使用 'makeencoding' 选项指定编码。
+
+							*:lf* *:lfi* *:lfile*
+:lf[ile][!] [errorfile]	与 ":cfile" 相同，不同的是使用当前窗口的位置列表
+			而非 quickfix 列表。你不能使用 -q 命令行选项来
+			设置位置列表。
+
+
+:cg[etfile] [errorfile]					*:cg* *:cgetfile*
+			读取错误文件。就像 ":cfile" 一样，但不跳转到第一
+			个错误。
+			如果错误文件的编码与 'encoding' 选项不同，你可以
+			使用 'makeencoding' 选项指定编码。
+
+
+:lg[etfile] [errorfile]					*:lg* *:lge* *:lgetfile*
+			与 ":cgetfile" 相同，不同的是使用当前窗口的位置列
+			表而非 quickfix 列表。
+
+							*:caddf* *:caddfile*
+:caddf[ile] [errorfile]	读取错误文件，并将错误文件中的错误添加到当前
+			quickfix 列表。如果 quickfix 列表不存在，则创建一个
+			新列表。
+			如果错误文件的编码与 'encoding' 选项不同，你可以
+			使用 'makeencoding' 选项指定编码。
+
+							*:laddf* *:laddfile*
+:laddf[ile] [errorfile]	与 ":caddfile" 相同，不同的是使用当前窗口的位置列
+			表而非 quickfix 列表。
+
+						*:cb* *:cbuffer* *E681*
+:[range]cb[uffer][!] [bufnr]
+			从当前缓冲区读取错误列表。
+			如果指定了 [bufnr]，则它必须是一个已加载缓冲区的
+			编号。然后将使用该缓冲区而不是当前缓冲区。
+			可以指定一个范围来限定要使用的行。
+			否则将使用缓冲区中的所有行。
+			关于 [!] 参见 |:cc|。
+
+						*:lb* *:lbuffer*
+:[range]lb[uffer][!] [bufnr]
+			与 ":cbuffer" 相同，不同的是使用当前窗口的位置列表
+			而非 quickfix 列表。
+
+						*:cgetb* *:cgetbuffer*
+:[range]cgetb[uffer] [bufnr]
+			从当前缓冲区读取错误列表。就像 ":cbuffer" 一样，
+			但不跳转到第一个错误。
+
+						*:lgetb* *:lgetbuffer*
+:[range]lgetb[uffer] [bufnr]
+			与 ":cgetbuffer" 相同，不同的是使用当前窗口的位置
+			列表而非 quickfix 列表。
+
+						*:cad* *:cadd* *:caddbuffer*
+:[range]cad[dbuffer] [bufnr]
+			从当前缓冲区读取错误列表，并将错误添加到当前
+			quickfix 列表。如果 quickfix 列表不存在，则创建一个
+			新列表。否则，与 ":cbuffer" 相同。
+
+							*:laddb* *:laddbuffer*
+:[range]laddb[uffer] [bufnr]
+			与 ":caddbuffer" 相同，不同的是使用当前窗口的位置
+			列表而非 quickfix 列表。
+
+							*:cex* *:cexpr* *E777*
+:cex[pr][!] {expr}	使用 {expr} 的结果创建一个 quickfix 列表，并跳转
+			到第一个错误。
+			如果 {expr} 是一个字符串，则使用 'errorformat' 的
+			全局值处理字符串中以换行符终止的每一行，并将结果
+			添加到 quickfix 列表。
+			如果 {expr} 是一个列表，则处理列表中的每个字符串项
+			并将其添加到 quickfix 列表。列表中的非字符串项将被
+			忽略。
+			关于 [!] 参见 |:cc|。
+			示例： >
+				:cexpr system('grep -n xyz *')
+				:cexpr getline(1, '$')
+<
+							*:lex* *:lexpr*
+:lex[pr][!] {expr}	与 |:cexpr| 相同，不同的是使用当前窗口的位置列表
+			而非 quickfix 列表。
+
+							*:cgete* *:cgetexpr*
+:cgete[xpr] {expr}	使用 {expr} 的结果创建一个 quickfix 列表。
+			就像 |:cexpr| 一样，但不跳转到第一个错误。
+
+							*:lgete* *:lgetexpr*
+:lgete[xpr] {expr}	与 |:cgetexpr| 相同，不同的是使用当前窗口的位置
+			列表而非 quickfix 列表。
+
+							*:cadde* *:caddexpr*
+:cadde[xpr] {expr}	计算 {expr} 并将结果行添加到当前 quickfix 列表。
+			如果 quickfix 列表不存在，则创建一个新列表。当前光
+			标位置不会改变。更多信息请参见 |:cexpr|。
+			示例： >
+    :g/mypattern/caddexpr expand("%") .. ":" .. line(".") ..  ":" .. getline(".")
+<
+						*:lad* *:ladd* *:laddexpr*
+:lad[dexpr] {expr}	与 ":caddexpr" 相同，不同的是使用当前窗口的位置
+			列表而非 quickfix 列表。
+
+							*:cl* *:clist*
+:cl[ist] [from] [, [to]]
+			列出所有有效的错误 |quickfix-valid|。
+			如果指定了数字 [from] 和/或 [to]，则列出相应范围的
+			错误。负数从最后一个错误开始倒数，-1 表示最后一个
+			错误。
+			|:filter| 命令可用于仅显示与提供的模式匹配的
+			quickfix 条目。该模式会与条目的文件名、模块名、
+			模式和文本进行匹配。
+
+:cl[ist] +{count}	列出当前错误以及接下来的 {count} 个有效错误。
+			这类似于 ":clist from from+count"，其中 "from" 是
+			当前错误位置。
+
+:cl[ist]! [from] [, [to]]
+			列出所有错误。
+
+:cl[ist]! +{count}	列出当前错误以及接下来的 {count} 个错误行。
+			这对于查看当前行之后无法识别的行很有用。
+			例如，如果 ":clist" 显示：
+	8384 testje.java:252: error: cannot find symbol ~
+			然后使用 ":cl! +3" 显示原因：
+	8384 testje.java:252: error: cannot find symbol ~
+	8385:   ZexitCode = Fmainx(); ~
+	8386:               ^ ~
+	8387:   symbol:   method Fmainx() ~
+
+:lli[st] [from] [, [to]]				*:lli* *:llist*
+			与 ":clist" 相同，不同的是使用当前窗口的位置列表
+			而非 quickfix 列表。
+
+:lli[st]! [from] [, [to]]
+			列出当前窗口位置列表中的所有条目。
+
+如果你插入或删除行，由于使用了隐藏标记，大多数情况下仍然可以找到正确的错误位置。有时，当标记因某种原因被删除时，会显示 "line changed" 消息，警告你错误位置可能不正确。如果你退出 Vim 并重新启动，标记将丢失，错误位置可能不再正确。
+
+有两个自动命令可用于在 quickfix 命令（':make'、':grep' 等）执行前后运行命令。详细信息请参见 |QuickFixCmdPre| 和 |QuickFixCmdPost|。
+
+						*QuickFixCmdPost-example*
+当 'encoding' 与区域设置不同时，错误消息的编码可能与 Vim 使用的编码不同。要转换消息，你可以使用以下代码： >
+	function QfMakeConv()
+	   let qflist = getqflist()
+	   for i in qflist
+	      let i.text = iconv(i.text, "cp936", "utf-8")
+	   endfor
+	   call setqflist(qflist)
+	endfunction
+
+	au QuickfixCmdPost make call QfMakeConv()
+另一种选择是使用 'makeencoding'。
+
+							*quickfix-title*
+每个 quickfix 和位置列表都有一个标题。默认情况下，标题设置为创建列表的命令。|getqflist()| 和 |getloclist()| 函数可分别用于获取 quickfix 和位置列表的标题。|setqflist()| 和 |setloclist()| 函数可分别用于修改 quickfix 和位置列表的标题。示例： >
+	call setqflist([], 'a', {'title' : 'Cmd output'})
+	echo getqflist({'title' : 1})
+	call setloclist(3, [], 'a', {'title' : 'Cmd output'})
+	echo getloclist(3, {'title' : 1})
+<
+							*quickfix-index*
+当你使用任何 quickfix 命令（例如 |:cc|、|:cnext|、|:cprev| 等）跳转到 quickfix/位置列表条目时，该条目将成为当前选中的条目。可以使用 getqflist()/getloclist() 函数获取 quickfix/位置列表中当前选中条目的索引。示例： >
+	echo getqflist({'idx' : 0}).idx
+	echo getqflist({'id' : qfid, 'idx' : 0}).idx
+	echo getloclist(2, {'idx' : 0}).idx
+<
+对于新的 quickfix 列表，第一个条目被选中，索引为 1。可以使用 setqflist() 函数将任何 quickfix/位置列表中的任何条目设置为当前选中的条目。示例： >
+	call setqflist([], 'a', {'idx' : 12})
+	call setqflist([], 'a', {'id' : qfid, 'idx' : 7})
+	call setloclist(1, [], 'a', {'idx' : 7})
+<
+							*quickfix-size*
+你可以分别使用 |getqflist()| 和 |getloclist()| 函数获取 quickfix 和位置列表中的条目数（大小）。示例： >
+	echo getqflist({'size' : 1})
+	echo getloclist(5, {'size' : 1})
+<
+							*quickfix-context*
+任何 Vim 类型都可以作为上下文与 quickfix 或位置列表关联。|setqflist()| 和 |setloclist()| 函数可分别用于将上下文与 quickfix 和位置列表关联。|getqflist()| 和 |getloclist()| 函数可分别用于检索 quickfix 和位置列表的上下文。这对于处理多个 quickfix/位置列表的 Vim 插件很有用。
+示例： >
+
+	let somectx = {'name' : 'Vim', 'type' : 'Editor'}
+	call setqflist([], 'a', {'context' : somectx})
+	echo getqflist({'context' : 1})
+
+	let newctx = ['red', 'green', 'blue']
+	call setloclist(2, [], 'a', {'id' : qfid, 'context' : newctx})
+	echo getloclist(2, {'id' : qfid, 'context' : 1})
+<
+*quickfix-parse*
+你可以使用 'errorformat' 解析行列表，而无需创建或修改 quickfix 列表，方法是使用 |getqflist()| 函数。示例： >
+	echo getqflist({'lines' : ["F1:10:Line10", "F2:20:Line20"]})
+	echo getqflist({'lines' : systemlist('grep -Hn quickfix *')})
+这将返回一个字典，其中 "items" 键包含从行解析出的 quickfix 条目列表。下面展示了如何使用自定义的 'errorformat' 来解析行，而无需修改 'errorformat' 选项： >
+	echo getqflist({'efm' : '%f#%l#%m', 'lines' : ['F1#10#Line']})
+<
+
+在 QUICKFIX 或位置列表中的所有缓冲区中执行命令：
+							*:cdo*
+:cdo[!] {cmd}		在 quickfix 列表中的每个有效条目中执行 {cmd}。
+			它的工作方式类似于： >
+				:cfirst
+				:{cmd}
+				:cnext
+				:{cmd}
+				等等。
+<			当无法 |abandon| 当前文件且不存在 [!] 时，命令失败。
+			当跳转到下一个条目失败时，执行停止。
+			最后一个缓冲区（或发生错误的缓冲区）成为当前缓冲区。
+			{cmd} 可以包含 '|' 来连接多个命令。
+
+			仅使用 quickfix 列表中的有效条目。
+			可以使用范围来选择条目，例如： >
+				:10,$cdo cmd
+<			跳过第 1 到 9 个条目。
+
+			注意：在执行此命令时，语法自动命令事件通过将其添加
+			到 'eventignore' 而被禁用。这大大加快了编辑每个
+			缓冲区的速度。
+			另请参见 |:bufdo|、|:tabdo|、|:argdo|、|:windo|、
+			|:ldo|、|:cfdo| 和 |:lfdo|。
+
+							*:cfd* *:cfdo*
+:cfd[o][!] {cmd}	在 quickfix 列表中的每个文件中执行 {cmd}。
+			它的工作方式类似于： >
+				:cfirst
+				:{cmd}
+				:cnfile
+				:{cmd}
+				等等。
+<			除此之外，其工作方式与 `:cdo` 相同。
+
+							*:ld* *:ldo*
+:ld[o][!] {cmd}		在当前窗口的位置列表中的每个有效条目中执行 {cmd}。
+			它的工作方式类似于： >
+				:lfirst
+				:{cmd}
+				:lnext
+				:{cmd}
+				等等。
+<			仅使用位置列表中的有效条目。
+			除此之外，其工作方式与 `:cdo` 相同。
+
+							*:lfd* *:lfdo*
+:lfd[o][!] {cmd}	在当前窗口的位置列表中的每个文件中执行 {cmd}。
+			它的工作方式类似于： >
+				:lfirst
+				:{cmd}
+				:lnfile
+				:{cmd}
+				等等。
+<			除此之外，其工作方式与 `:ldo` 相同。
+
+过滤 QUICKFIX 或位置列表：
+		    *cfilter-plugin* *:Cfilter* *:Lfilter* *package-cfilter*
+如果你的 quickfix 列表中有太多条目，你可以使用 cfilter 插件来减少条目数量。使用以下命令加载插件： >vim
+
+    packadd cfilter
+
+然后，你可以使用以下命令来过滤 quickfix/位置列表： >
+
+    :Cfilter[!] /{pat}/
+    :Lfilter[!] /{pat}/
+
+|:Cfilter| 命令根据当前 quickfix 列表中与 {pat} 匹配的条目创建一个新的 quickfix 列表。{pat} 是一个 Vim |regular-expression| 模式。条目的文件名和文本都会与 {pat} 进行匹配。如果提供了可选的 !，则使用与 {pat} 不匹配的条目。模式可以选择使用以下字符之一括起来：'、'、"、/。如果模式为空，则使用上次使用的搜索模式。
+
+|:Lfilter| 命令与 |:Cfilter| 相同，但操作于当前位置列表。
+
+这些命令不会修改当前的 quickfix/位置列表，因此你可以使用 |:colder|/|:lolder| 命令返回到未过滤的列表。
+
+=============================================================================
+2. 错误窗口						*quickfix-window*
+
+					    *:cope* *:copen* *w:quickfix_title*
+:cope[n] [height]	打开一个窗口以显示当前的错误列表。
+
+			如果指定了 [height]，窗口将变成那么高（如果有空间）。
+			如果省略 [height]，窗口将设置为十行高。
+
+			如果已经存在一个 quickfix 窗口，它将成为当前窗口。
+			不可能打开第二个 quickfix 窗口。如果指定了 [height]，
+			现有窗口将调整到该高度。
+
+							*quickfix-buffer*
+			该窗口将包含一个特殊的缓冲区，其 'buftype' 等于
+			"quickfix"。不要更改此设置！
+			该窗口将设置 w:quickfix_title 变量，该变量指示生成
+			quickfix 列表的命令。如果正确调整了 'statusline'
+			的值，这可用于组合自定义状态行。
+			每当 quickfix 命令或函数修改此缓冲区时，|b:changedtick|
+			变量就会递增。你可以通过传递 "qfbufnr" 项，使用
+			getqflist() 和 getloclist() 函数获取此缓冲区的编号。
+			对于位置列表，当位置列表被移除时，此缓冲区将被清除。
+
+							*:lop* *:lopen*
+:lop[en] [height]	打开一个窗口以显示当前窗口的位置列表。
+			仅当当前窗口的位置列表存在时有效。你可以同时打开多
+			个位置窗口。除此之外，其行为与 ":copen" 相同。
+
+							*:ccl* *:cclose*
+:ccl[ose]		关闭 quickfix 窗口。
+
+							*:lcl* *:lclose*
+:lcl[ose]		关闭显示当前窗口位置列表的窗口。
+
+							*:cw* *:cwindow*
+:cw[indow] [height]	当存在可识别的错误时打开 quickfix 窗口。如果窗口已
+			打开且没有可识别的错误，则关闭窗口。
+
+			打开窗口时，如果指定了 [height]，窗口将变成那么高
+			（如果有空间）。如果省略 [height]，窗口将设置为十
+			行高。
+
+							*:lw* *:lwindow*
+:lw[indow] [height]	与 ":cwindow" 相同，不同之处在于使用显示当前窗口位
+			置列表的窗口。
+
+							*:cbo* *:cbottom*
+:cbo[ttom]		将光标放在 quickfix 窗口的最后一行并滚动以使其可见。
+			这对于异步回调添加错误时很有用。
+			如果有很多更新，请偶尔调用一次，以避免大量重绘。
+
+							*:lbo* *:lbottom*
+:lbo[ttom]		与 ":cbottom" 相同，不同之处在于使用显示当前窗口位
+			置列表的窗口。
+
+通常 quickfix 窗口位于屏幕底部。如果有垂直拆分，它位于最右侧窗口列的底部。要使其始终占据全宽： >
+	:botright cwindow
+你可以使用 |window-moving| 命令移动窗口。例如，将其移动到顶部：CTRL-W K
+'winfixheight' 选项将被设置，这意味着窗口将大致保持其高度，忽略 'winheight' 和 'equalalways'。你可以手动更改高度（例如，用鼠标拖动其上方状态行）。
+
+在 quickfix 窗口中，每一行是一个错误。行号等于错误编号。当前条目使用 QuickFixLine 高亮显示。你可以根据自己的喜好更改它，例如： >
+	:hi QuickFixLine ctermbg=Yellow guibg=Yellow
+
+你可以使用 ":.cc" 跳转到光标下的错误。按 <Enter> 键或双击鼠标在某行上具有相同的效果。包含错误的文件将在 quickfix 窗口上方的窗口中打开。如果该文件已经有一个窗口，则使用该窗口。如果所用窗口中的缓冲区已更改，并且错误在另一个文件中，则跳转到错误将失败。你首先必须确保该窗口包含一个可以放弃的缓冲区。
+
+当你从 quickfix 窗口中选择一个文件时，将使用以下步骤来查找编辑该文件的窗口：
+
+1. 如果当前标签页中存在一个显示所选文件的窗口（从 quickfix 窗口之前的窗口开始），则使用该窗口。
+2. 如果上述步骤失败，并且 'switchbuf' 包含 "usetab"，并且任何标签页（从第一个标签页开始）中存在一个显示所选文件的窗口，则使用该窗口。
+3. 如果上述步骤失败，则使用当前标签页中显示 'buftype' 未设置的缓冲区的窗口（从 quickfix 窗口之前的窗口开始）。
+4. 如果上述步骤失败，并且 'switchbuf' 包含 "uselast"，则使用先前访问过的窗口。
+5. 如果上述步骤失败，则使用 quickfix 窗口之前的窗口。如果没有之前的窗口，则使用 quickfix 窗口之后的窗口。
+6. 如果上述步骤失败，则在 quickfix 窗口上方使用一个新的水平拆分窗口。
+
+					*CTRL-W_<Enter>* *CTRL-W_<CR>*
+你可以使用 CTRL-W <Enter> 打开一个新窗口并跳转到其中的错误。
+
+当 quickfix 窗口被填充后，会触发两个自动命令事件。首先，'filetype' 选项被设置为 "qf"，这会触发 FileType 事件（另请参见 |qf.vim|）。然后，触发 BufReadPost 事件，缓冲区名称为 "quickfix"。这可用于对列出的错误执行某些操作。示例： >
+	au BufReadPost quickfix  setlocal modifiable
+		\ | silent exe 'g/^/s//\=line(".") .. " "/'
+		\ | setlocal nomodifiable
+这在每行前面加上行号。注意在 ":s" 命令的替换字符串中使用了 "\="，它用于计算表达式。
+还会触发 BufWinEnter 事件，缓冲区名称同样使用 "quickfix"。
+
+注意：添加到现有 quickfix 列表时，不会触发自动命令。
+
+注意：在 quickfix 窗口中进行更改对错误列表没有影响。'modifiable' 被关闭以避免进行更改。如果你仍然删除或插入行，文本和错误编号之间的关系就会混乱。如果你真的想这样做，你可以将 quickfix 窗口的内容写入一个文件，并使用 ":cfile" 将其解析并用作新的错误列表。
+
+						*location-list-window*
+位置列表窗口显示位置列表中的条目。当你打开一个位置列表窗口时，它会在当前窗口下方创建，并显示当前窗口的位置列表。位置列表窗口类似于 quickfix 窗口，不同之处在于你可以同时打开多个位置列表窗口。当你在此窗口中使用位置列表命令时，将使用显示的位置列表。
+
+当你从位置列表窗口中选择一个文件时，将使用以下步骤来查找编辑该文件的窗口：
+
+1. 如果当前标签页中存在一个与位置列表关联的非 quickfix 窗口，则使用该窗口。
+2. 如果上述步骤失败，并且该文件已在当前标签页的另一个窗口中打开，则使用该窗口。
+3. 如果上述步骤失败，并且 'switchbuf' 包含 "usetab"，并且该文件在任何标签页的窗口中打开，则使用该窗口。
+4. 如果上述步骤失败，则使用当前标签页中显示 'buftype' 未设置的缓冲区的窗口。
+5. 如果上述步骤失败，则在新窗口中编辑该文件。
+
+在上述所有情况下，如果所选窗口的位置列表尚未设置，则将其设置为位置列表窗口中显示的位置列表。
+
+							*quickfix-window-ID*
+你可以使用 |getqflist()| 和 |getloclist()| 函数分别获取 quickfix 窗口和位置列表窗口（如果存在）的窗口 ID。示例： >
+	echo getqflist({'winid' : 1}).winid
+	echo getloclist(2, {'winid' : 1}).winid
+<
+							*getqflist-examples*
+|getqflist()| 和 |getloclist()| 函数可分别用于获取 quickfix 和位置列表的各种属性。下面是一些使用这些函数的示例：
+>
+    " 获取当前 quickfix 列表的标题
+    :echo getqflist({'title' : 0}).title
+
+    " 获取当前 quickfix 列表的标识符
+    :let qfid = getqflist({'id' : 0}).id
+
+    " 获取堆栈中第四个 quickfix 列表的标识符
+    :let qfid = getqflist({'nr' : 4, 'id' : 0}).id
+
+    " 检查具有特定标识符的 quickfix 列表是否存在
+    :if getqflist({'id' : qfid}).id == qfid
+
+    " 获取堆栈中当前 quickfix 列表的索引
+    :let qfnum = getqflist({'nr' : 0}).nr
+
+    " 获取由标识符指定的 quickfix 列表的项
+    :echo getqflist({'id' : qfid, 'items' : 0}).items
+
+    " 获取由 id 指定的 quickfix 列表中的条目数
+    :echo getqflist({'id' : qfid, 'size' : 0}).size
+
+    " 获取堆栈中第三个 quickfix 列表的上下文
+    :echo getqflist({'nr' : 3, 'context' : 0}).context
+
+    " 获取堆栈中 quickfix 列表的数量
+    :echo getqflist({'nr' : '$'}).nr
+
+    " 获取当前 quickfix 列表被更改的次数
+    :echo getqflist({'changedtick' : 0}).changedtick
+
+    " 获取由标识符指定的 quickfix 列表中的当前条目
+    :echo getqflist({'id' : qfid, 'idx' : 0}).idx
+
+    " 使用标识符获取所有 quickfix 列表属性
+    :echo getqflist({'id' : qfid, 'all' : 0})
+
+    " 从行列表解析文本并返回一个 quickfix 列表
+    :let myList = ["a.java:10:L10", "b.java:20:L20"]
+    :echo getqflist({'lines' : myList}).items
+
+    " 使用自定义 'efm' 解析文本并返回一个 quickfix 列表
+    :echo getqflist({'lines' : ['a.c#10#Line 10'], 'efm':'%f#%l#%m'}).items
+
+    " 获取 quickfix 列表窗口 id
+    :echo getqflist({'winid' : 0}).winid
+
+    " 获取 quickfix 列表窗口缓冲区编号
+    :echo getqflist({'qfbufnr' : 0}).qfbufnr
+
+    " 获取当前位置列表的上下文
+    :echo getloclist(0, {'context' : 0}).context
+
+    " 获取第三个窗口的位置列表窗口 id
+    :echo getloclist(3, {'winid' : 0}).winid
+
+    " 获取第三个窗口的位置列表窗口缓冲区编号
+    :echo getloclist(3, {'qfbufnr' : 0}).qfbufnr
+
+    " 获取位置列表窗口的文件窗口 id（winnr: 4）
+    :echo getloclist(4, {'filewinid' : 0}).filewinid
+<
+							*setqflist-examples*
+|setqflist()| 和 |setloclist()| 函数可分别用于设置 quickfix 和位置列表的各种属性。下面是一些使用这些函数的示例：
+>
+    " 创建一个带有标题和上下文的空 quickfix 列表
+    :let t = 'Search results'
+    :let c = {'cmd' : 'grep'}
+    :call setqflist([], ' ', {'title' : t, 'context' : c})
+
+    " 设置当前 quickfix 列表的标题
+    :call setqflist([], 'a', {'title' : 'Mytitle'})
+
+    " 更改由标识符指定的列表中的当前条目
+    :call setqflist([], 'a', {'id' : qfid, 'idx' : 10})
+
+    " 设置由标识符指定的 quickfix 列表的上下文
+    :call setqflist([], 'a', {'id' : qfid, 'context' : {'val' : 100}})
+
+    " 从命令输出创建一个新的 quickfix 列表
+    :call setqflist([], ' ', {'lines' : systemlist('grep -Hn main *.c')})
+
+    " 使用自定义 efm 解析文本并添加到特定的 quickfix 列表
+    :call setqflist([], 'a', {'id' : qfid,
+		\ 'lines' : ["a.c#10#L10", "b.c#20#L20"], 'efm':'%f#%l#%m'})
+
+    " 向由标识符指定的 quickfix 列表添加项
+    :let newItems = [{'filename' : 'a.txt', 'lnum' : 10, 'text' : "Apple"},
+		    \ {'filename' : 'b.txt', 'lnum' : 20, 'text' : "Orange"}]
+    :call setqflist([], 'a', {'id' : qfid, 'items' : newItems})
+
+    " 清空由标识符指定的 quickfix 列表
+    :call setqflist([], 'r', {'id' : qfid, 'items' : []})
+
+    " 释放堆栈中的所有 quickfix 列表
+    :call setqflist([], 'f')
+
+    " 设置第四个 quickfix 列表的标题
+    :call setqflist([], 'a', {'nr' : 4, 'title' : 'SomeTitle'})
+
+    " 在堆栈末尾创建一个新的 quickfix 列表
+    :call setqflist([], ' ', {'nr' : '$',
+			\ 'lines' : systemlist('grep -Hn class *.java')})
+
+    " 从命令输出创建一个新的位置列表
+    :call setloclist(0, [], ' ', {'lines' : systemlist('grep -Hn main *.c')})
+
+    " 替换第三个窗口的位置列表条目
+    :call setloclist(3, [], 'r', {'items' : newItems})
+<
+=============================================================================
+3. 使用多个错误列表					*quickfix-error-lists*
+
+到目前为止，我们假设只有一个错误列表。实际上，可以记住多个使用的列表；请参见 'chistory' 和 'lhistory'。
+当启动一个新列表时，之前的列表会自动保留。可以使用两个命令来访问更早的错误列表。它们将现有的某个错误列表设置为当前列表。
+
+						*:colder* *:col* *E380*
+:col[der] [count]	转到更旧的错误列表。如果指定了 [count]，则执行
+			此操作 [count] 次。如果已经在最旧的错误列表，则
+			给出错误消息。
+
+						*:lolder* *:lol*
+:lol[der] [count]	与 `:colder` 相同，不同之处在于使用当前窗口的位
+			置列表而不是 quickfix 列表。
+
+						*:cnewer* *:cnew* *E381*
+:cnew[er] [count]	转到更新的错误列表。如果指定了 [count]，则执行
+			此操作 [count] 次。如果已经在最新的错误列表，则
+			给出错误消息。
+
+						*:lnewer* *:lnew*
+:lnew[er] [count]	与 `:cnewer` 相同，不同之处在于使用当前窗口的位
+			置列表而不是 quickfix 列表。
+
+						*:chistory* *:chi*
+:[count]chi[story]	显示错误列表的列表。当前列表用 ">" 标记。输出
+			看起来像： >
+			  error list 1 of 3; 43 errors   :make
+			> error list 2 of 3; 0 errors    :helpgrep tag
+			  error list 3 of 3; 15 errors   :grep ex_help *.c
+<
+			如果指定了 [count]，则第 count 个 quickfix 列表将
+			成为当前列表。示例： >
+				" 使第 4 个 quickfix 列表成为当前列表
+				:4chistory
+<
+						*:lhistory* *:lhi*
+:[count]lhi[story]	显示位置列表的列表，除此之外类似于 `:chistory`。
+
+当添加一个新的错误列表时，它会成为当前列表。
+
+当使用了 ":colder" 并且使用 ":make" 或 ":grep" 添加一个新的错误列表时，会覆盖一个较新的列表。如果你正在使用 ":grep" |grep| 浏览，这尤其有用。如果你想保留较新的错误列表，请先使用 ":cnewer 99"。
+
+要获取 quickfix 和位置列表堆栈中的列表数量，你可以分别使用 |getqflist()| 和 |getloclist()| 函数，并将列表编号设置为特殊值 '$'。示例： >
+	echo getqflist({'nr' : '$'}).nr
+	echo getloclist(3, {'nr' : '$'}).nr
+要获取堆栈中当前列表的编号： >
+	echo getqflist({'nr' : 0}).nr
+<
+=============================================================================
+4. 使用 :make						*:make_makeprg*
+
+							*:mak* *:make*
+:mak[e][!] [arguments]	1. 执行所有相关的 |QuickFixCmdPre| 自动命令。
+			2. 如果 'autowrite' 选项开启，则写入任何已更改的
+			   缓冲区。
+			3. 从 'makeef' 生成一个错误文件名。如果 'makeef'
+			   不包含 "##"，并且已存在同名文件，则将其删除。
+			4. 使用可选的 [arguments] 启动由 'makeprg' 选项
+			   给出的程序（默认为 "make"），并将输出保存在
+			   错误文件中（在 Unix 上，它也会回显到屏幕上）。
+			5. 使用 'errorformat' 读取错误文件。
+			6. 执行所有相关的 |QuickFixCmdPost| 自动命令。
+			   参见下面的示例。
+			7. 如果没有给出 [!]，则跳转到第一个错误。
+			8. 删除错误文件。
+			9. 现在你可以使用像 |:cnext| 和 |:cprevious| 这样的
+			   命令在错误之间移动，如上所述。
+			此命令不接受注释，任何 " 字符都被视为参数的一部分。
+			如果程序输出的编码与 'encoding' 选项不同，你可以
+			使用 'makeencoding' 选项指定编码。
+
+							*:lmak* *:lmake*
+:lmak[e][!] [arguments]
+			与 ":make" 相同，不同之处在于使用当前窗口的位置列
+			表而不是 quickfix 列表。
+
+":make" 命令执行由 'makeprg' 选项给出的命令。这是通过将该命令传递给由 'shell' 选项给出的 shell 来完成的。这几乎类似于键入
+
+	":!{makeprg} [arguments] {shellpipe} {errorfile}"。
+
+{makeprg} 是由 'makeprg' 选项给出的字符串。可以使用任何命令，不仅仅是 "make"。字符 '%' 和 '#' 会像在命令行中一样被展开。你可以使用 "%<" 插入不带扩展名的当前文件名，或使用 "#<" 插入不带扩展名的备用文件名，例如： >
+   :set makeprg=make\ #<.o
+
+[arguments] 是在 ":make" 之后键入的任何内容。
+{shellpipe} 是 'shellpipe' 选项。
+{errorfile} 是 'makeef' 选项，其中 ## 被替换以使其唯一。
+
+如果命令需要在其参数之后添加一些额外的字符，可以使用占位符 "$*" 来表示 {makeprg} 中的参数列表。然后 $* 将被所有参数替换。示例： >
+   :set makeprg=latex\ \\\\nonstopmode\ \\\\input\\{$*}
+或更简单 >
+   :let &mp = 'latex \\nonstopmode \\input\{$*}'
+"$*" 可以多次给出，例如： >
+   :set makeprg=gcc\ -o\ $*\ $*
+
+'shellpipe' 选项在 Win32 上默认为 "2>&1| tee"。
+这意味着编译器的输出被保存在一个文件中，而不会直接显示在屏幕上。对于 Unix，使用 "| tee"。编译器的输出会同时显示在屏幕上并保存在一个文件中。根据所使用的 shell，默认值是 "|& tee" 或 "2>&1| tee"，因此 stderr 输出也会被包含在内。
+
+如果 'shellpipe' 为空，则将省略 {errorfile} 部分。这对于那些自己写入错误文件的编译器很有用。
+
+
+使用 QuickFixCmdPost 修复编码 ~
+
+可能 'encoding' 设置为你构建程序生成的消息不同的编码。此示例展示了如何在 Vim 读取错误消息后修复此问题： >
+
+	function QfMakeConv()
+	   let qflist = getqflist()
+	   for i in qflist
+	      let i.text = iconv(i.text, "cp936", "utf-8")
+	   endfor
+	   call setqflist(qflist)
+	endfunction
+
+	au QuickfixCmdPost make call QfMakeConv()
+
+（Faque Cheng 的示例）
+另一种选择是使用 'makeencoding'。
+
+==============================================================================
+5. 使用 :vimgrep 和 :grep				*grep* *lid*
+
+Vim 有两种查找模式匹配项的方法：内部和外部。内部 grep 的优点是它适用于所有系统，并使用强大的 Vim 搜索模式。当 Vim grep 不能满足你的需求时，可以使用外部 grep 程序。
+
+内部方法会比较慢，因为文件会被读入内存。其优点是：
+- 行分隔符和编码会被自动识别，就像编辑文件一样。
+- 使用 Vim 搜索模式。可以使用多行模式。
+- 当启用插件时：可以搜索压缩和远程文件。
+	|gzip| |netrw|
+
+为了能够做到这一点，Vim 像编辑每个文件一样加载它。当文件中没有匹配项时，相关的缓冲区会被再次清除。这里的 'hidden' 选项被忽略，以避免在搜索许多文件时耗尽内存或文件描述符。但是，当使用 |:hide| 命令修饰符时，缓冲区会保持加载状态。这使得在相同文件中进行后续搜索的速度快得多。
+
+请注意，|:copen|（或用于 |:lgrep| 的 |:lopen|）可用于打开一个缓冲区，该缓冲区以链接形式包含搜索结果。|:silent| 命令可用于抑制默认的全屏 grep 输出。|:grep| 命令的 ":grep!" 形式不会自动跳转到第一个匹配项。这些命令可以组合起来创建一个 NewGrep 命令： >
+
+        command! -nargs=+ NewGrep execute 'silent grep! <args>' | copen 42
+
+
+5.1 使用 Vim 的内部 grep
+
+					*:vim* *:vimgrep* *E682* *E683*
+:vim[grep][!] /{pattern}/[g][j][f] {file} ...
+			在文件 {file} ... 中搜索 {pattern}，并将错误列
+			表设置为匹配项。匹配 'wildignore' 的文件被忽略；
+			'suffixes' 中的文件最后被搜索。
+
+			{pattern} 是一个 Vim 搜索模式。可以使用任何非 ID
+			字符（参见 'isident'）代替 / 将其括起来，只要该
+			字符不出现在 {pattern} 中即可。
+			'ignorecase' 适用。要覆盖它，可以在模式中放入
+			|/\c| 来忽略大小写，或放入 |/\C| 来匹配大小写。
+			'smartcase' 不被使用。
+			如果 {pattern} 为空（例如指定了 //），则使用上次使
+			用的搜索模式。|last-pattern|
+
+			标志：
+			'g'  不带 'g' 标志时，每行只添加一次。带 'g' 时，
+			      每个匹配项都会被添加。
+
+			'j'  不带 'j' 标志时，Vim 会跳转到第一个匹配项。
+			      带 'j' 时，只更新 quickfix 列表。使用 [!] 时，
+			      当前缓冲区中的任何更改都将被放弃。
+
+			'f'  当指定 'f' 标志时，使用模糊字符串匹配来查找匹
+			      配行。在这种情况下，{pattern} 被视为字面字符
+			      串而不是正则表达式。有关模糊匹配字符串的更多
+			      信息，请参见 |fuzzy-matching|。
+
+			触发 |QuickFixCmdPre| 和 |QuickFixCmdPost|。
+			为匹配而打开的文件可能会使用一个缓冲区编号，但为了
+			避免消耗缓冲区编号，会尽可能地重用。
+
+:{count}vim[grep] ...
+			如果在命令前放置一个数字，它将被用作要查找的最大匹
+			配项数。使用 ":1vimgrep pattern file" 只查找第一个。
+			如果你只想检查是否存在匹配项并在找到后快速退出，这
+			将很有用。
+
+			大约每隔一秒，会显示正在搜索的文件名，让你了解进度。
+			示例： >
+				:vimgrep /an error/ *.c
+				:vimgrep /\<FileName\>/ *.h include/*
+				:vimgrep /myfunc/ **/*.c
+<			关于 "**" 的使用，请参见 |starstar-wildcard|。
+
+:vim[grep][!] {pattern} {file} ...
+			与上面类似，但不是将模式括在非 ID 字符中，而是使用
+			空格分隔的模式。模式必须以 ID 字符开头。
+			示例： >
+				:vimgrep Error *.c
+<
+							*:lv* *:lvimgrep*
+:lv[imgrep][!] /{pattern}/[g][j][f] {file} ...
+:lv[imgrep][!] {pattern} {file} ...
+			与 ":vimgrep" 相同，不同之处在于使用当前窗口的位
+			置列表而不是 quickfix 列表。
+
+						*:vimgrepa* *:vimgrepadd*
+:vimgrepa[dd][!] /{pattern}/[g][j][f] {file} ...
+:vimgrepa[dd][!] {pattern} {file} ...
+			就像 ":vimgrep" 一样，但不是创建一个新的错误列表，
+			而是将匹配项追加到当前列表中。
+
+						*:lvimgrepa* *:lvimgrepadd*
+:lvimgrepa[dd][!] /{pattern}/[g][j][f] {file} ...
+:lvimgrepa[dd][!] {pattern} {file} ...
+			与 ":vimgrepadd" 相同，不同之处在于使用当前窗口的
+			位置列表而不是 quickfix 列表。
+
+5.2 外部 grep
+
+Vim 可以以类似于其编译器集成的方式（参见上面的 |:make|）与 "grep" 和类似 grep 的程序（例如 GNU id-utils）交互。
+
+[Unix 趣闻：Unix "grep" 命令的名称来自 ":g/re/p"，其中 "re" 代表正则表达式。]
+
+							    *:gr* *:grep*
+:gr[ep][!] [arguments]	就像 ":make" 一样，但使用 'grepprg' 代替 'makeprg'，
+			使用 'grepformat' 代替 'errorformat'。
+			当 'grepprg' 为 "internal" 时，其工作方式类似于
+			|:vimgrep|。请注意，模式需要用分隔符括起来。
+			如果程序输出的编码与 'encoding' 选项不同，你可以
+			使用 'makeencoding' 选项指定编码。
+
+							    *:lgr* *:lgrep*
+:lgr[ep][!] [arguments]	与 ":grep" 相同，不同之处在于使用当前窗口的位
+			置列表而不是 quickfix 列表。
+
+							*:grepa* *:grepadd*
+:grepa[dd][!] [arguments]
+			就像 ":grep" 一样，但不是创建一个新的错误列表，
+			而是将匹配项追加到当前列表中。
+			示例： >
+				:call setqflist([])
+				:bufdo grepadd! something %
+<			第一个命令创建一个新的空错误列表。第二个命令为每个
+			列出的缓冲区执行 "grepadd"。注意使用 ! 是为了避免
+			":grepadd" 跳转到第一个错误，这在 |:bufdo| 中是不
+			允许的。
+			一个使用参数列表并避免无匹配文件错误的示例： >
+				:silent argdo try
+				  \ | grepadd! something %
+				  \ | catch /E480:/
+				  \ | endtry"
+<
+			如果程序输出的编码与 'encoding' 选项不同，你可以
+			使用 'makeencoding' 选项指定编码。
+
+							*:lgrepa* *:lgrepadd*
+:lgrepa[dd][!] [arguments]
+			与 ":grepadd" 相同，不同之处在于使用当前窗口的位
+			置列表而不是 quickfix 列表。
+
+5.3 设置外部 grep
+
+如果你安装了标准的 "grep" 程序，:grep 命令可能使用默认值就能很好地工作。其语法与标准命令非常相似： >
+
+	:grep foo *.c
+
+这将搜索所有扩展名为 .c 的文件，查找子字符串 "foo"。:grep 的参数直接传递给 "grep" 程序，因此你可以使用你的 "grep" 支持的任何选项。
+
+默认情况下，:grep 调用 grep 时使用 -n 选项（显示文件名和行号）。你可以通过 'grepprg' 选项更改此设置。在以下情况下，你需要设置 'grepprg'：
+
+a)	你使用的程序不叫 "grep"
+b)	你需要使用完整路径调用 grep
+c)	你想自动传递其他选项（例如，不区分大小写的搜索）。
+
+一旦 "grep" 执行完毕，Vim 会使用 'grepformat' 选项解析结果。此选项的工作方式与 'errorformat' 选项相同 - 详情请参见该选项。如果你的 grep 输出格式非标准，或者你正在使用其他具有特殊格式的程序，你可能需要更改默认的 'grepformat'。
+
+解析结果后，Vim 会加载包含匹配项的第一个文件，并跳转到相应的行，就像在 |quickfix| 模式下跳转到编译器错误一样。然后，你可以使用 |:cnext|、|:clist| 等命令查看其他匹配项。
+
+
+5.4 将 :grep 与 id-utils 一起使用
+
+你可以像这样设置 :grep 以使用 GNU id-utils： >
+
+	:set grepprg=lid\ -Rgrep\ -s
+	:set grepformat=%f:%l:%m
+
+然后 >
+	:grep (regexp)
+
+按你期望的方式工作。
+（前提是你记得先运行 mkid :）
+
+
+5.5 使用 :vimgrep 或 :grep 浏览源代码
+
+利用 Vim 保存的错误列表堆栈，你可以浏览文件以查找函数及其调用的函数。例如，假设你必须向 read_file() 函数添加一个参数。你可以输入以下命令： >
+
+	:vimgrep /\<read_file\>/ *.c
+
+你使用 ":cn" 沿着匹配列表并添加参数。在某处，你需要从更高级别的函数 msg() 获取新参数，并且也需要更改该函数。因此你使用： >
+
+	:vimgrep /\<msg\>/ *.c
+
+在更改 msg() 函数时，你发现另一个函数需要从更高级别获取参数。你可以再次使用 ":vimgrep" 来查找这些函数。一旦你完成了一个函数的修改，你可以使用 >
+
+	:colder
+
+返回到前一个函数。
+
+这就像浏览一棵树：":vimgrep" 向下深入一层，创建一个分支列表。":colder" 返回到上一层。你可以混合使用 ":vimgrep" 和 "colder" 以树状方式浏览所有位置。如果你始终如一地这样做，你将找到所有位置，而无需写下 "待办事项" 列表。
+
+=============================================================================
+6. 选择编译器					*compiler-select*
+
+						*:comp* *:compiler* *E666*
+:comp[iler][!] {name}		设置选项以使用编译器 {name}。
+				不带 "!" 时，为当前缓冲区设置选项。带 "!" 时，
+				设置全局选项。
+				如果你在 "file.foo" 中使用 ":compiler foo"，然后
+				在另一个缓冲区中使用 ":compiler! bar"，Vim 将在
+				"file.foo" 中继续使用 "foo"。
+
+"compiler" 目录中的 Vim 插件将设置选项以使用选定的编译器。对于 `:compiler`，设置局部选项；对于 `:compiler!`，设置全局选项。
+							*current_compiler*
+为了支持旧版本的 Vim，插件始终使用 "current_compiler" 而不是 "b:current_compiler"。该命令实际执行以下操作：
+
+- 删除 "current_compiler" 和 "b:current_compiler" 变量。
+- 定义 "CompilerSet" 用户命令。带 "!" 时，它执行 ":set"；不带 "!" 时，它执行 ":setlocal"。
+- 执行 ":runtime! compiler/{name}.{vim,lua}"。插件应使用 "CompilerSet" 设置选项，并将 "current_compiler" 变量设置为编译器的名称。
+- 删除 "CompilerSet" 用户命令。
+- 将 "b:current_compiler" 设置为 "current_compiler" 的值。
+- 不带 "!" 时，恢复 "current_compiler" 的旧值。
+
+关于编写编译器插件，请参见 |write-compiler-plugin|。
+
+使用 |compiler-make| 插件来撤销编译器插件的效果。
+
+BIOME				      *compiler-biome* *quickfix-biome*
+
+Biome 检查可对 JavaScript、TypeScript、JSX、TSX、JSON、JSONC、HTML、Vue、Svelte、Astro、CSS、GraphQL 和 GritQL 文件进行 lint。
+
+可以通过设置 b/g:biome_makeprg_params 变量将常用的编译器选项添加到 'makeprg'。例如（全局默认为 ""）： >
+
+  let b:biome_makeprg_params = "--diagnostic-level=error --staged"
+
+
+CPPCHECK			*quickfix-cppcheck* *compiler-cppcheck*
+
+使用 g/b:`c_cppcheck_params` 来设置 cppcheck 参数。全局默认设置包括：
+
+- `--verbose`：启用详细输出。
+- `--force`：强制检查所有配置。
+- `--inline-suppr`：允许内联抑制。
+- `--enable=...`：启用特定检查，如警告、样式、性能、可移植性、信息和缺失的包含。
+- `-j`：如果可用，利用多处理器，由 `getconf` 命令确定（如果可用）（需要省略 unusedFunction 检查）。
+
+对于 C++ 文件（`filetype == 'cpp'`），会添加 `--language=c++` 选项以确保 Cppcheck 将该文件视为 C++。
+
+如果 compile_commands.json 存在于当前目录中，它将作为 `--project` 参数添加到命令行。否则，默认情况下，&path 中的目录会作为包含目录传递。这些可以通过 g/b:`c_cppcheck_includes` 设置为 `-I` 标志的列表。Tim Pope 的 vim-apathy 插件 [0] 可以展开 &path。要同时附加 git 仓库中的文件夹，请使用 >
+
+  let &l:path = join(systemlist('git ls-tree -d --name-only -r HEAD'), ',')
+
+[0] https://github.com/tpope/vim-apathy
+
+DOTNET							*compiler-dotnet*
+
+.NET CLI 编译器默认同时输出错误和警告。通过将 g:dotnet_errors_only 变量设置为 |v:true|，可以将输出限制为仅包含错误。
+
+每个错误和警告中都包含关联的项目名称。要抑制项目名称，请将 g:dotnet_show_project_file 变量设置为 |v:false|。
+
+示例：将输出限制为仅显示错误，并抑制项目名称： >
+	let dotnet_errors_only = v:true
+	let dotnet_show_project_file = v:false
+	compiler dotnet
+<
+GCC					*quickfix-gcc*	*compiler-gcc*
+
+有一个变量可以为 GCC 编译器设置：
+
+g:compiler_gcc_ignore_unmatched_lines
+				忽略与为 GCC 定义的任何模式都不匹配的行。
+				如果从 make 运行的命令输出产生误报，则很有用。
+
+JAVAC							*compiler-javac*
+
+可以通过设置 b/g:javac_makeprg_params 变量将常用的编译器选项添加到 'makeprg'。例如： >
+
+	let g:javac_makeprg_params = "-Xlint:all -encoding utf-8"
+
+MAVEN							*compiler-maven*
+
+可以通过设置 b/g:maven_makeprg_params 变量将常用的编译器选项添加到 'makeprg'。例如： >
+
+	let g:maven_makeprg_params = "-DskipTests -U -X"
+
+SPOTBUGS						*compiler-spotbugs*
+
+SpotBugs 是一个静态分析工具，可用于查找 Java 中的错误。它扫描当前打开缓冲区中所有类的 Java 字节码。
+（因此，不支持 `:compiler! spotbugs`。）
+
+可以通过设置 "b:" 或 "g:spotbugs_makeprg_params" 变量将常用的编译器选项添加到 'makeprg'。例如： >vim
+
+	let b:spotbugs_makeprg_params = "-longBugCodes -effort:max -low"
+
+全局默认值是 "-workHard -experimental"。
+
+默认情况下，类文件在源文件所在的目录中搜索。但是，典型的 Java 项目对源文件和类文件使用不同的目录。为了让 SpotBugs 知道这两个目录，请将其路径（相对于其公共根目录的不同路径）分配给以下属性（使用一个常见的 Maven 项目示例）： >vim
+
+	let g:spotbugs_properties = {
+		\ 'sourceDirPath':	['src/main/java'],
+		\ 'classDirPath':	['target/classes'],
+		\ 'testSourceDirPath':	['src/test/java'],
+		\ 'testClassDirPath':	['target/test-classes'],
+	\ }
+
+请注意，源路径和类路径条目预期成对出现：如果你至少考虑其中一个，请同时定义 "sourceDirPath" 和 "classDirPath"，并对 "testSourceDirPath" 和 "testClassDirPath" 应用相同的逻辑。
+请注意，路径键的值仅描述 SpotBugs 应在何处查找文件；有关更多信息，请参阅特定编译器插件的文档。
+
+为 Ant、Maven 和 Javac 编译器插件提供了默认的编译器前后操作，可以通过将编译器插件的名称（`ant`、`maven` 或 `javac`）分配给 "compiler" 键来选择： >vim
+
+	let g:spotbugs_properties = {
+		\ 'compiler':		'maven',
+	\ }
+
+这个单一设置基本上等同于下面的所有设置，除了 "PreCompilerAction" 和 "PreCompilerTestAction" 的值：它们列出的 |Funcref| 将获得无操作实现，而 "compiler" 键的隐式 Funcref 将获得请求的默认值（如果可用）。 >vim
+
+	let g:spotbugs_properties = {
+		\ 'PreCompilerAction':
+			\ function('spotbugs#DefaultPreCompilerAction'),
+		\ 'PreCompilerTestAction':
+			\ function('spotbugs#DefaultPreCompilerTestAction'),
+		\ 'PostCompilerAction':
+			\ function('spotbugs#DefaultPostCompilerAction'),
+		\ 'sourceDirPath':	['src/main/java'],
+		\ 'classDirPath':	['target/classes'],
+		\ 'testSourceDirPath':	['src/test/java'],
+		\ 'testClassDirPath':	['target/test-classes'],
+	\ }
+
+使用默认操作时，一旦加载 Java 语法文件，所选的编译器将尝试为缓冲区（可能为整个项目）重建类文件；然后，`spotbugs` 将尝试分析缓冲区编译单元的质量。
+
+精通 'makeprg' [0] 的 Vim 命令可以与默认操作组合。首先考虑你需要为哪个支持的键（"DefaultPreCompilerCommand"、"DefaultPreCompilerTestCommand" 或 "DefaultPostCompilerCommand"）编写实现，注意这些键中的每一个都对应于一个特定的 "*Action" 键。然后定义一个始终声明一个字符串类型参数并使用与 |:make| 等效的命令的新函数，并将其 |Funcref| 分配给选定的键。例如： >vim
+	function! GenericPostCompilerCommand(arguments) abort
+		execute 'make ' .. a:arguments
+	endfunction
+
+	let g:spotbugs_properties = {
+		\ 'DefaultPostCompilerCommand':
+			\ function('GenericPostCompilerCommand'),
+	\ }
+
+当 "PostCompilerAction" 可用时，也支持 "PostCompilerActionExecutor"。其值必须是一个指向函数的 Funcref，该函数始终声明一个字符串类型的参数，并在确定 |:cc|（或 |:ll|）的当前状态后，决定是否可以在其参数（包含一个挂起的编译器后操作）上分派 |:execute|： >vim
+
+	function! GenericPostCompilerActionExecutor(action) abort
+		try
+			cc
+		catch /\<E42:/
+			execute a:action
+		endtry
+	endfunction
+
+补充说明，一些或所有可用的 "Pre*Action"（或 "*Pre*Command"）可以在 |:make|（或其等效命令）之前在其实现中运行 `:doautocmd java_spotbugs_post User`，以定义一个一次性的 |ShellCmdPost| `:autocmd`，该命令将安排调用 "PostCompilerActionExecutor"；然后运行 `:doautocmd java_spotbugs_post ShellCmdPost` 来消费此事件： >vim
+
+	function! GenericPreCompilerCommand(arguments) abort
+		if !exists('g:spotbugs_compilation_done')
+			doautocmd java_spotbugs_post User
+			execute 'make ' .. a:arguments
+			" 仅当 :make 同步时才运行 doautocmd
+			" 参见下面的说明
+			doautocmd java_spotbugs_post ShellCmdPost " XXX: (a)
+			let g:spotbugs_compilation_done = 1
+		else
+			cc
+		endif
+	endfunction
+
+	function! GenericPreCompilerTestCommand(arguments) abort
+		if !exists('g:spotbugs_test_compilation_done')
+			doautocmd java_spotbugs_post User
+			execute 'make ' .. a:arguments
+			" 仅当 :make 同步时才运行 doautocmd
+			" 参见下面的说明
+			doautocmd java_spotbugs_post ShellCmdPost " XXX: (b)
+			let g:spotbugs_test_compilation_done = 1
+		else
+			cc
+		endif
+	endfunction
+
+	let g:spotbugs_properties = {
+		\ 'compiler':		'maven',
+		\ 'DefaultPreCompilerCommand':
+			\ function('GenericPreCompilerCommand'),
+		\ 'DefaultPreCompilerTestCommand':
+			\ function('GenericPreCompilerTestCommand'),
+		\ 'PostCompilerActionExecutor':
+			\ function('GenericPostCompilerActionExecutor'),
+	\ }
+
+如果一个与 `:make` 等效的命令能够异步执行并消费 `ShellCmdPost` 事件，则必须从此类 "*Action"（或 "*Command"）实现中删除 `:doautocmd java_spotbugs_post ShellCmdPost`（即示例中的 `(a)` 和 `(b)` 行），以保持非阻塞执行的顺序，并且必须抑制任何通知（见下文）。可以通过将 `ShellCmdPost` `:autocmd` 的名称分配给 "augroupForPostCompilerAction" 键，将其与任何 |:augroup| 关联。
+
+当默认操作不适合期望的工作流程时，可以自己编写任意函数，并将其 Funcref 匹配到支持的键："PreCompilerAction"、"PreCompilerTestAction" 和 "PostCompilerAction"。
+
+下一个示例为 Maven 项目重新实现了默认的预编译器操作，并使用 "compiler" 条目请求其他默认 Maven 设置：
+>vim
+	function! MavenPreCompilerAction() abort
+		call spotbugs#DeleteClassFiles()
+		compiler maven
+		make compile
+		cc
+	endfunction
+
+	function! MavenPreCompilerTestAction() abort
+		call spotbugs#DeleteClassFiles()
+		compiler maven
+		make test-compile
+		cc
+	endfunction
+
+	let g:spotbugs_properties = {
+		\ 'compiler':		'maven',
+		\ 'PreCompilerAction':
+			\ function('MavenPreCompilerAction'),
+		\ 'PreCompilerTestAction':
+			\ function('MavenPreCompilerTestAction'),
+	\ }
+
+请注意，所有输入的自定义设置将优先于 "g:spotbugs_properties" 中匹配的默认设置。
+请注意，在进行进一步工作之前，有必要将预编译器操作的结果通知插件。在操作的最后一条命令中，在 |:make|（或 |:lmake|）之后使用 |:cc|（或 |:ll|）是这种通信的支持方式。
+
+提供了两个命令 "SpotBugsRemoveBufferAutocmd" 和 "SpotBugsDefineBufferAutocmd"，用于切换缓冲区局部自动命令的操作。例如，要也在任何 |BufWritePost| 和 |Signal| 事件上运行操作，请将这些行添加到 `~/.config/nvim/after/ftplugin/java.vim`： >vim
+
+	if exists(':SpotBugsDefineBufferAutocmd') == 2
+		SpotBugsDefineBufferAutocmd BufWritePost Signal
+	endif
+
+否则，你可以随时使用 `:doautocmd java_spotbugs User`。
+
+Java 文件类型插件（|ft-java-plugin|）会参考 "g:spotbugs_properties" 变量来安排所描述的自动化，因此，必须在为加载了 Java 源文件的缓冲区触发 |FileType| 事件之前定义它。例如，可以在由 [1] 加载的项目局部 |vimrc| 中设置它。
+
+"g:spotbugs_properties" 和 "b:spotbugs_properties" 都被识别，并且必须是可修改的（|:unlockvar|）。"*Command" 条目始终被视为在所有 Java 缓冲区之间共享的全局函数。
+
+SpotBugs Java 库，以及其分发的 shell 脚本，在 `-textui` 模式下不支持包含空白字符的目录名路径名 [2]。要解决此限制，请考虑从名称中没有空白字符的目录创建一个指向此类目录的符号链接，并将此信息传递给 SpotBugs： >vim
+
+	let g:spotbugs_alternative_path = {
+		\ 'fromPath':	'path/to/dir_without_blanks',
+		\ 'toPath':	'path/to/dir with blanks',
+	\ }
+
+[0] https://github.com/Konfekt/vim-compilers
+[1] https://github.com/MarcWeber/vim-addon-local-vimrc
+[2] https://github.com/spotbugs/spotbugs/issues/909
+
+GNU MAKE						*compiler-make*
+
+由于默认的 make 程序是 "make"，因此 make 的编译器插件 `:compiler make` 会将 'makeprg' 和 'errorformat' 选项重置为默认值，并取消设置可能由先前编译器插件设置的任何变量。
+
+GROFF					*quickfix-groff* *compiler-groff*
+
+GROFF 编译器插件使用 mom 宏集（在 groff_mom 手册页中有记录）作为输入，并期望将输出文件类型扩展名传递给 make，例如 `:make html` 或 `:make pdf`。
+
+可以通过在 `b:groff_compiler_args` 或 `g:groff_compiler_args` 中设置其他参数来传递给 groff。传递给 groff 的 `language` 参数使用 'spelllang' 设置；可以通过设置 `b:groff_compiler_lang` 来覆盖它。默认编码为 `UTF-8`，可以通过设置 `b:groff_compiler_encoding` 或 `g:groff_compiler_encoding` 来更改。
+
+PANDOC					*quickfix-pandoc* *compiler-pandoc*
+
+Pandoc 编译器插件期望将输出文件类型扩展名传递给 make，例如 `:make html` 或 `:make pdf`。
+
+可以向 pandoc 传递额外参数：
+
+- 通过将它们附加到 make，例如 `:make html --self-contained`。
+- 或者在 `b:pandoc_compiler_args` 或 `g:pandoc_compiler_args` 中设置它们。
+
+`--from` 参数是根据缓冲区文件类型做出的有根据的猜测；可以通过设置 `b:pandoc_compiler_from` 来覆盖它。
+`--metadata lang` 参数使用 'spelllang' 设置；
+如果假定 `--from=markdown` 并且未在标题头或 YAML 块中设置标题，则使用文件名（不带扩展名）作为标题。
+
+PERL					*quickfix-perl* *compiler-perl*
+
+Perl 编译器插件实际上并不编译，而是调用 Perl 的内部语法检查功能，并解析输出中的可能错误，以便你可以在 quick-fix 模式下纠正它们。
+
+无论被检查文件中是否有 "no warnings" 或 "$^W = 0"，都会强制显示警告。要禁用此功能，请将 g:perl_compiler_force_warnings 设置为零值。例如： >
+	let g:perl_compiler_force_warnings = 0
+
+MYPY 类型检查器					*compiler-mypy*
+
+可以通过设置 b/g:mypy_makeprg_params 变量将常用的编译器选项添加到 'makeprg'。例如： >
+
+	let b:mypy_makeprg_params = "--warn-unused-ignores"
+
+全局默认值是 "--strict --ignore-missing-imports"。
+
+PYRIGHT 类型检查器					*compiler-pyright*
+
+可以通过设置 b/g:pyright_makeprg_params 变量将常用的编译器选项添加到 'makeprg'。
+
+全局默认值是 "pyright"。
+
+TY 类型检查器						*compiler-ty*
+
+常用的编译器选项和可执行文件可以通过 b/g:ty_makeprg 变量设置。例如： >
+
+	let b:ty_makeprg = "uv run ty"
+
+全局默认值是 "ty --no-progress --color=never"。
+
+RUFF 检查器						*compiler-ruff*
+
+可以通过设置 b/g:ruff_makeprg_params 变量将常用的编译器选项添加到 'makeprg'。例如： >
+
+	let b:ruff_makeprg_params = "--max-line-length "..&textwidth
+
+全局默认值是 "--preview"。
+
+PYLINT 检查器						*compiler-pylint*
+
+可以通过设置 b/g:pylint_makeprg_params 变量将常用的编译器选项添加到 'makeprg'。例如： >
+
+	let b:pylint_makeprg_params = "--max-line-length "..&textwidth
+
+全局默认值是 "--jobs=0" 以使用（几乎）所有核心。
+
+PYUNIT 编译器						*compiler-pyunit*
+
+这实际上不是一个编译器，而是一个用于 Python 语言的单元测试框架。从 2.0 版本开始，它被包含在标准 Python 发行版中。对于更旧的版本，你可以从 https://pyunit.sourceforge.net 获取它。
+
+当你在框架的帮助下运行测试时，Vim 会解析可能的错误，并在 quick-fix 模式下呈现给你。
+
+不幸的是，没有标准的方法来运行测试。alltests.py 脚本似乎经常被使用，仅此而已。因此，'makeprg' 选项的有用值是：
+ setlocal makeprg=./alltests.py " 运行测试套件
+ setlocal makeprg=python\ %:S   " 运行单个测试用例
+
+PYTEST 编译器						*compiler-pytest*
+可以通过设置 b/g:pytest_makeprg_params 变量将常用的编译器选项添加到 'makeprg'。例如： >
+
+  let b:pytest_makeprg_params = "--verbose --no-summary --disable-warnings"
+
+全局默认值是 "--tb=short --quiet"；Python 警告被抑制。
+
+TEX 编译器						*compiler-tex*
+
+发行版中包含的 TeX 编译器（$VIMRUNTIME/compiler/tex.vim）尽可能使用 make 命令。如果编译器在当前目录中找到名为 "Makefile" 或 "makefile" 的文件，它会假定你想使用 make 处理你的 `*TeX` 文件，并且 makefile 会执行正确的工作。在这种情况下，编译器会为 `*TeX` 输出设置 'errorformat'，并保持 'makeprg' 不变。如果既没有找到 "Makefile" 也没有找到 "makefile"，编译器将不会使用 make。你可以通过定义 b:tex_ignore_makefile 或 g:tex_ignore_makefile 变量（仅检查它们是否存在）来强制编译器忽略 makefile。
+
+如果编译器选择不使用 make，它需要选择一个正确的程序来处理你的输入。如果 b:tex_flavor 或 g:tex_flavor（按此优先级）变量存在，它将定义用于 :make 的 TeX 风格（实际上，这是所执行命令的名称），如果两个变量都不存在，则默认为 "latex"。例如，在编辑从以 AMS-TeX 编写的 mypaper.tex 中 \input-ed 的 chapter2.tex 时： >
+
+	:let b:tex_flavor = 'amstex'
+	:compiler tex
+<	[编辑...] >
+	:make mypaper
+
+请注意，你必须将要处理的文件名指定为参数（以便在编辑 \input-ed 或 \include-ed 文件时处理正确的文件；欢迎提出用 % 替换无参数的可移植解决方案）。这不符合 make 的语义，在 make 中你指定的是目标，而不是源，但你可以指定不带 ".tex" 扩展名的文件名，并意味着 "根据编译器生成 filename.dvi 或 filename.pdf 或 filename.some_result_extension"。
+
+注意：tex 命令行语法设置为既可用于 MikTeX（Srinath Avadhanula 的建议）也可用于 teTeX（Artem Chuprina 检查过）。来自 |errorformat-LaTeX| 的建议过于复杂，无法使其在不同的 shell 和操作系统上保持工作，并且也不允许使用其他可用的 TeX 选项（如果有）。如果你的 TeX 不支持 "-interaction=nonstopmode"，请报告并提供从命令行表示 \nonstopmode 的其他方法。
+
+TOMBI					*quickfix-toml* *compiler-tombi*
+
+tombi 编译器插件不进行编译。
+
+它运行 "tombi lint" 并将诊断信息解析到 quickfix 列表中。
+
+从检查器输出中剥离颜色代码，以保持 |errorformat| 解析的可靠性。对于旧版本的 tombi 检查器，这可能需要一个能正常工作的 "sed"。
+
+TSC 编译器						*compiler-tsc*
+
+可执行文件和编译器选项可以通过设置 b/g:tsc_makeprg 变量添加到 'makeprg'。例如： >
+
+	let b:tsc_makeprg = "npx tsc --noEmit"
+
+TYPST 编译器						*compiler-typst*
+
+Vim 包含一个用于 Typst 文件的编译器插件。此编译器由 Typst 文件类型插件 |ft-typst-plugin| 在 Typst 缓冲区中自动启用。运行 |:make| 以编译当前的 Typst 文件。
+
+							*g:typst_cmd*
+默认情况下，Vim 将使用 "typst" 作为运行 Typst 编译器的命令。可以通过设置 |g:typst_cmd| 变量来更改： >
+	let g:typst_cmd = "/path/to/other/command"
+
+=============================================================================
+7. 错误格式						*error-file-format*
+
+					*errorformat* *E372* *E373* *E374*
+						*E375* *E376* *E377* *E378*
+'errorformat' 选项指定了一个可识别的格式列表。使用与错误消息匹配的第一个格式。你可以为编译器产生的不同消息添加几种格式，甚至可以为多个编译器添加条目。参见 |efm-entries|。
+
+'errorformat' 中的每个条目都是一个类似 scanf 的字符串，用于描述格式。首先，你需要了解 scanf 的工作原理。请查阅你的 C 编译器文档。下面你可以找到 Vim 能理解的 % 项。其他项无效。
+
+'errorformat' 中的特殊字符是逗号和反斜杠。关于如何处理它们，请参见 |efm-entries|。请注意，字面量 "%" 由 "%%" 匹配，因此它不会用反斜杠转义。
+请记住，在 `:make` 和 `:grep` 的输出中，所有 NUL 字符都被替换为 SOH（0x01）。
+
+注意：默认情况下，忽略大小写之间的差异。如果要匹配大小写，请在模式中添加 "\C" |/\C|。
+
+Vim 将读取任意长度的行，但只使用前 4095 个字节，其余部分被忽略。项的长度只能为 1023 字节。
+
+
+基本项
+
+	%f		文件名（查找字符串）
+	%b		缓冲区编号（查找数字）
+	%o		模块名（查找字符串）
+	%l		行号（查找数字）
+	%e		结束行号（查找数字）
+	%c		列号（查找代表错误字符列的数字，字节索引，一个 <tab> 为 1 个字符列）
+	%v		虚拟列号（查找代表错误屏幕列的数字（1 个 <tab> == 8 个屏幕列））
+	%k		结束列号（查找代表错误字符列的数字，字节索引，或者如果与 %v 一起使用，则代表错误屏幕结束列的数字）
+	%t		错误类型（查找单个字符）：
+			    e - 错误消息
+			    w - 警告消息
+			    i - 信息消息
+			    n - 注意消息
+	%n		错误编号（查找数字）
+	%m		错误消息（查找字符串）
+	%r		匹配单行文件消息的“剩余部分” %O/P/Q
+	%p		指针行（查找由 '-'、'.'、' ' 或制表符组成的序列，并使用其长度作为列号）
+	%*{conv}	任何 scanf 非赋值转换
+	%%		单个 '%' 字符
+	%s		搜索文本（查找字符串）
+
+"%f" 转换可能依赖于当前的 'isfname' 设置。"~/" 会展开到主目录，环境变量也会被展开。
+
+"%f" 和 "%m" 转换必须检测字符串的结尾。这通常通过匹配后面的字符和项来实现。当后面没有内容时，匹配行的其余部分。如果 "%f" 后面跟着 '%' 或反斜杠，它将查找一系列 'isfname' 字符。
+
+在 Windows 上，开头的 "C:" 将被包含在 "%f" 中，即使使用 "%f:"。这意味着无法检测到单个字母的文件名。
+
+"%b" 转换用于解析缓冲区编号。这对于引用临时缓冲区或无名称缓冲区中的行很有用。如果不存在具有匹配编号的缓冲区，则该行将用作非错误行。
+
+"%p" 转换通常后面跟一个 "^"。它用于输出如下行的编译器： >
+	    ^
+或 >
+   ---------^
+以指示错误的列。这用于多行错误消息。有关有用的示例，请参见 |errorformat-javac|。
+
+"%s" 转换指定要搜索的文本，以定位错误行。该文本用作字面字符串。锚点 "^" 和 "$" 被添加到文本中，以精确定位与搜索文本完全匹配的错误行，并且文本以 "\V" 原子为前缀，使其成为“very nomagic”。"%s" 转换可用于定位错误输出中没有行号的行。例如 "grep" shell 命令的输出。当模式存在时，将不使用行号。
+
+"%o" 转换指定 quickfix 条目中的模块名称。如果存在，它将在 quickfix 错误窗口中代替文件名使用。模块名称仅用于显示目的，跳转到文件时使用文件名。
+
+更改目录
+
+以下大写转换字符指定特殊格式字符串的类型。在单个逗号分隔的格式模式的开头，最多只能有一个作为前缀给出。
+一些编译器产生的消息包含目录名，这些目录名必须添加到每个由 %f 读取的文件名之前（例如 GNU make）。以下代码可用于扫描这些目录名；它们将被存储在一个内部目录堆栈中。					*E379*
+	%D		"进入目录" 格式字符串；期望后面跟一个找到目录名的 %f
+	%X		"离开目录" 格式字符串；期望后面跟 %f
+
+在定义“进入目录”或“离开目录”格式时，必须在该子字符串的开头给出 "%D" 或 "%X"。Vim 会跟踪目录更改，并将当前目录添加到每个找到的具有相对路径的错误文件之前。有关详细信息、提示和限制，请参见 |quickfix-directory-stack|。
+
+
+多行消息				*errorformat-multi-line*
+
+可以读取产生多行消息的程序输出，即占用多行的错误字符串。可能的前缀有：
+	%E		多行错误消息的开始
+	%W		多行警告消息的开始
+	%I		多行信息消息的开始
+	%N		多行注意消息的开始
+	%A		多行消息的开始（未指定类型）
+	%>		对于下一行，再次从当前模式开始 |efm-%>|
+	%C		多行消息的继续
+	%Z		多行消息的结束
+这些可以与 '+' 和 '-' 一起使用，请参见下面的 |efm-ignore|。
+
+在模式中使用 "\n" 无法匹配多行消息。
+
+示例：你的编译器恰好以以下格式输出错误（前面的行号不是实际输出的一部分）：
+
+     1	Error 275 ~
+     2	line 42 ~
+     3	column 3 ~
+     4	' ' expected after '--' ~
+
+适当的错误格式字符串必须如下所示： >
+   :set efm=%EError\ %n,%Cline\ %l,%Ccolumn\ %c,%Z%m
+
+为此错误生成的 |:clist| 错误消息是：
+
+ 1:42 col 3 error 275:  ' ' expected after '--'
+
+另一个示例：考虑一个 Python 解释器，它产生以下错误消息（行号不是实际输出的一部分）：
+
+     1	==============================================================
+     2	FAIL: testGetTypeIdCachesResult (dbfacadeTest.DjsDBFacadeTest)
+     3	--------------------------------------------------------------
+     4	Traceback (most recent call last):
+     5	  File "unittests/dbfacadeTest.py", line 89, in testFoo
+     6	    self.assertEquals(34, dtid)
+     7	  File "/usr/lib/python3.8/unittest.py", line 286, in
+     8	 failUnlessEqual
+     9	    raise self.failureException, \
+    10	AssertionError: 34 != 33
+    11
+    12	--------------------------------------------------------------
+    13	Ran 27 tests in 0.063s
+
+假设你希望 |:clist| 仅写入此消息的相关信息，即：
+ 5 unittests/dbfacadeTest.py:89:  AssertionError: 34 != 33
+
+那么错误格式字符串可以定义如下： >
+  :set efm=%C\ %.%#,%A\ \ File\ \"%f\"\\,\ line\ %l%.%#,%Z%[%^\ ]%\\@=%m
+
+请注意，%C 字符串在这里放在 %A 之前：因为表达式 ' %.%#'（代表正则表达式 ' .*'）匹配每一个以空格开头、后跟任意字符直到行尾的行，它也隐藏了第 7 行，否则该行会触发单独的错误消息。
+错误格式字符串总是逐个模式解析，直到发生第一次匹配。
+							*efm-%>*
+%> 项可用于避免尝试 'errorformat' 中较早出现的模式。这对于匹配几乎所有内容的模式很有用。
+例如，如果错误如下所示：
+
+	Error in line 123 of foo.c: ~
+	unknown variable "i" ~
+
+这可以通过以下方式找到： >
+	:set efm=xxx,%E%>Error in line %l of %f:,%Z%m
+其中 "xxx" 有一个也会匹配第二行的模式。
+
+重要提示：没有关于之前匹配了 errorformat 的哪一部分的记忆；错误文件中的每一行都会重新完整地遍历错误格式行。例如，如果有： >
+  setlocal efm=aa,bb,cc,dd,ee
+其中 aa、bb 等是错误格式字符串。错误文件的每一行都将首先匹配模式 aa，然后匹配 bb，然后匹配 cc，依此类推。仅仅因为 cc 匹配了上一行错误，_并不_意味着在当前行会首先尝试 dd，即使 cc 和 dd 是多行 errorformat 字符串。
+
+
+
+单独的文件名			*errorformat-separate-filename*
+
+如果文件名只给出一次，而后面跟着多个引用此文件名的消息，则这些前缀很有用。
+	%O		单行文件消息：过度读取匹配的部分
+	%P		单行文件消息：将文件 %f 压入堆栈
+	%Q		单行文件消息：从堆栈中弹出最后一个文件
+
+示例：给定一个编译器，它产生以下错误日志文件（没有前导行号）：
+
+     1	[a1.tt]
+     2	(1,17)  error: ';' missing
+     3	(21,2)  warning: variable 'z' not defined
+     4	(67,3)  error: end of file found before string ended
+     5
+     6	[a2.tt]
+     7
+     8	[a3.tt]
+     9	NEW compiler v1.1
+    10	(2,2)   warning: variable 'x' not defined
+    11	(67,3)  warning: 's' already defined
+
+此日志文件列出了包含在 [...] 中的每个文件的几条消息，这些消息可以通过如下错误格式正确解析： >
+  :set efm=%+P[%f],(%l\\,%c)%*[\ ]%t%*[^:]:\ %m,%-Q
+
+调用 |:clist| 会相应地写出它们及其正确的文件名：
+
+  2 a1.tt:1 col 17 error: ';' missing
+  3 a1.tt:21 col 2 warning: variable 'z' not defined
+  4 a1.tt:67 col 3 error: end of file found before string ended
+  8 a3.tt:2 col 2 warning: variable 'x' not defined
+  9 a3.tt:67 col 3 warning: 's' already defined
+
+与其他都匹配整行的前缀不同，%P、%Q 和 %O 可用于在同一行中匹配多个模式。因此，甚至可以解析像下面一行中那样的嵌套文件： >
+  {"file1" {"file2" error1} error2 {"file3" error3 {"file4" error4 error5}}}
+<
+然后 %O 解析那些不包含任何推入/弹出文件名信息的字符串。有关扩展示例，请参见 |errorformat-LaTeX|。
+
+
+忽略和使用整个消息					*efm-ignore*
+
+代码 '+' 或 '-' 可以与上面的大写代码组合使用；在这种情况下，它们必须放在字母之前，例如 '%+A' 或 '%-G'：
+	%-		不要在任何输出中包含匹配的多行消息
+	%+		将匹配的整行包含在 %m 错误字符串中
+
+有一个前缀仅在与 '+' 或 '-' 组合时有用，即 %G。它用于解析包含通用信息的行，例如编译器版本字符串或其他可以跳过的头信息。
+	%-G		忽略此消息
+	%+G		通用消息
+
+
+模式匹配
+
+为了与旧版本的 Vim 向后兼容，支持类似 scanf() 的 "%*[]" 表示法。然而，也可以在格式字符串中指定（几乎）任何 Vim 支持的正则表达式。
+由于正则表达式语言的元字符可能是普通匹配字符串或文件名的一部分（因此在内部必须进行转义），因此元符号必须用前导 '%' 书写：
+	%\		单个 '\' 字符。请注意，在 ":set errorformat=" 定义中，这必须被转义（"%\\"）。
+	%.		单个 '.' 字符。
+	%#		单个 "*"（！）字符。
+	%^		单个 '^' 字符。请注意，这没有用，因为模式已经匹配行首。
+	%$		单个 '$' 字符。请注意，这没有用，因为模式已经匹配行尾。
+	%[		用于 [] 字符范围的单个 '[' 字符。
+	%~		单个 '~' 字符。
+在表达式中使用字符类时（概述参见 |/\i|），可以使用 scanf() "%*" 表示法编写包含 "\+" 量词的项。示例："%\\d%\\+"（"\d\+"，"任意数字"）等同于 "%*\\d"。
+重要提示：子匹配的 \(...\) 分组不能在格式规范中使用，因为它保留给内部转换。
+
+
+'errorformat' 中的多个条目				*efm-entries*
+
+为了能够检测来自多个编译器的输出，可以在 'errorformat' 中放置多个格式模式，用逗号分隔（注意：逗号后的空格将被忽略）。使用第一个完全匹配的模式。如果没有找到匹配项，将使用最后一个模式的匹配部分，但文件名会被移除，错误消息将设置为整个消息。如果有一个模式可能匹配来自多个编译器的输出（但方式不正确），请将其放在更严格的模式之后。
+
+要在模式中包含逗号，请在它前面加一个反斜杠（在 ":set" 命令中必须输入两个）。要包含反斜杠本身，请给出两个反斜杠（在 ":set" 命令中必须输入四个）。你还需要在空格前加一个反斜杠，以便用于 ":set"。
+
+
+有效匹配						*quickfix-valid*
+
+如果一行不完全匹配 'errorformat' 中的任何一个条目，则整行将被放入错误消息中，并且该条目被标记为“无效”。使用 ":cn" 和 ":cp" 命令时会跳过这些行（除非根本没有有效行）。你可以使用 ":cl!" 显示所有错误消息。
+
+如果错误格式不包含文件名，Vim 无法切换到正确的文件。你将需要手动执行此操作。
+
+
+例如，Amiga Aztec 编译器的输出格式为：
+
+	filename>linenumber:columnnumber:errortype:errornumber:errormessage
+
+	filename	检测到错误的文件名
+	linenumber	检测到错误的行号
+	columnnumber	检测到错误的列号
+	errortype	错误类型，通常是单个 'E' 或 'W'
+	errornumber	错误编号（用于在手册中查找）
+	errormessage	错误描述
+
+这可以通过以下 'errorformat' 条目匹配：
+	%f>%l:%c:%t:%n:%m
+
+一些产生单行错误输出的 C 编译器的示例：
+%f:%l:\ %t%*[^0123456789]%n:\ %m	用于 Manx/Aztec C 错误消息
+					（scanf() 不理解 [0-9]）
+%f\ %l\ %t%*[^0-9]%n:\ %m		用于 SAS C
+\"%f\"\\,%*[^0-9]%l:\ %m		用于通用 C 编译器
+%f:%l:\ %m				用于 GCC
+%f:%l:\ %m,%Dgmake[%*\\d]:\ Entering\ directory\ `%f',
+%Dgmake[%*\\d]:\ Leaving\ directory\ `%f'
+				用于带有 gmake 的 GCC（连接行！）
+%f(%l)\ :\ %*[^:]:\ %m			旧的 SCO C 编译器（pre-OS5）
+%f(%l)\ :\ %t%*[^0-9]%n:\ %m		同上，带有错误类型和编号
+%f:%l:\ %m,In\ file\ included\ from\ %f:%l:,\^I\^Ifrom\ %f:%l%m
+				用于 GCC，带有一些额外内容
+
+下面给出了处理多行消息的扩展示例，请参见 |errorformat-Jikes| 和 |errorformat-LaTeX|。
+
+注意空格和双引号前面的反斜杠。这对于 :set 命令是必需的。逗号前面有两个反斜杠，一个用于 :set 命令，另一个用于避免将逗号识别为错误格式的分隔符。
+
+
+过滤消息
+
+如果你有一个编译器产生的错误消息不符合格式字符串，你可以编写一个程序将错误消息转换为此格式。你可以通过更改 'makeprg' 选项，将此程序与 ":make" 命令一起使用。例如： >
+   :set mp=make\ \\\|&\ error_filter
+管道字符之前的反斜杠是必需的，以避免将其识别为命令分隔符。每个空格之前的反斜杠是 set 命令所必需的。
+
+=============================================================================
+8. 目录堆栈					*quickfix-directory-stack*
+
+Quickfix 维护一个堆栈，用于保存从 make 输出中解析出的所有使用的目录。对于 GNU-make 来说，这相当简单，因为它总是打印它进入和离开的所有目录的绝对路径。无论这是通过 makefile 中的 'cd' 命令还是通过参数 "-C dir"（在读取 makefile 之前切换到目录）完成的。使用开关 "-w" 强制 GNU-make 在处理前后打印工作目录可能很有用。
+
+如果你不使用 GNU-make，维护正确的目录会更复杂。例如，AIX-make 不打印任何关于其工作目录的信息。那么你需要增强 makefile。在 LessTif 的 makefile 中，有一个命令会回显 "Making {target} in {dir}"。这里的特殊问题是它不打印离开目录的信息，也不打印绝对路径。
+
+为了解决相对路径和缺少“离开目录”消息的问题，Vim 使用以下算法：
+
+1) 检查给定目录是否是当前目录的子目录。如果是，则将其存储为当前目录。
+2) 如果不是当前目录的子目录，则尝试检查它是否是上层目录之一的子目录。
+3) 如果仍然找不到该目录，则假定它是 Vim 当前目录的子目录。
+
+此外，对于每个文件，都会检查它是否确实存在于已识别的目录中。如果不存在，则在目录堆栈的所有其他目录（不是目录子树！）中搜索。如果仍然找不到，则假定它在 Vim 的当前目录中。
+
+此算法存在局限性。以下示例假设 make 仅以 "Making all in dir" 的形式打印有关进入目录的信息。
+
+1) 假设你有以下目录和文件：
+   ./dir1
+   ./dir1/file1.c
+   ./file1.c
+
+   如果 make 在当前目录之前处理目录 "./dir1"，并且文件 "./file1.c" 中存在错误，Vim 最终将加载文件 "./dir1/file.c"。
+
+   这只能通过“离开目录”消息来解决。
+
+2) 假设你有以下目录和文件：
+   ./dir1
+   ./dir1/dir2
+   ./dir2
+
+   你会得到以下结果：
+
+   Make 输出			  Vim 解释的目录
+   ------------------------	  ----------------------------
+   Making all in dir1		  ./dir1
+   Making all in dir2		  ./dir1/dir2
+   Making all in dir2		  ./dir1/dir2
+
+   这可以通过在“进入目录”消息中打印绝对目录或通过打印“离开目录”消息来解决。
+
+为了避免此问题，请确保打印绝对目录名和“离开目录”消息。
+
+Makefile 示例：
+
+Unix:
+    libs:
+	    for dn in $(LIBDIRS); do				\
+		(cd $$dn; echo "Entering dir '$$(pwd)'"; make); \
+		echo "Leaving dir";				\
+	    done
+
+添加
+    %DEntering\ dir\ '%f',%XLeaving\ dir
+到你的 'errorformat' 以处理上述输出。
+
+请注意，Vim 不检查“离开目录”消息中的目录名是否是当前目录。这就是为什么你可以直接使用消息 "Leaving dir"。
+
+=============================================================================
+9. 特定的错误文件格式					*errorformats*
+
+						*errorformat-Jikes*
+Jikes(TM)，IBM Research 发布的一个源码到字节码的 Java 编译器，产生简单的多行错误消息。
+
+下面显示了一个匹配所产生消息的 'errorformat' 字符串。以下行可以放在用户的 |init.vim| 中以覆盖 Vim 识别的默认格式，或者参见 |:set+=| 了解如何将此格式额外安装到默认格式中。 >
+
+  :set efm=%A%f:%l:%c:%*\\d:%*\\d:,
+	\%C%*\\s%trror:%m,
+	\%+C%*[^:]%trror:%m,
+	\%C%*\\s%tarning:%m,
+	\%C%m
+<
+使用选项 "+E" 调用时，Jikes(TM) 会产生单行错误消息，可以使用以下方式匹配： >
+
+  :setl efm=%f:%l:%v:%*\\d:%*\\d:%*\\s%m
+<
+						*errorformat-javac*
+据报道，以下 'errorformat' 对 javac 效果很好，javac 输出带有 "^" 的行来指示错误的列： >
+  :setl efm=%A%f:%l:\ %m,%-Z%p^,%-C%.%#
+或： >
+  :setl efm=%A%f:%l:\ %m,%+Z%p^,%+C%.%#,%-G%.%#
+<
+这是 Michael F. Lamb 为 Unix 提供的另一种方法，它首先过滤错误： >
+  :setl errorformat=%Z%f:%l:\ %m,%A%p^,%-G%*[^sl]%.%#
+  :setl makeprg=javac\ %:S\ 2>&1\ \\\|\ vim-javac-filter
+
+你需要将以下内容放在路径中的某个位置（例如，在 ~/bin 中）的 "vim-javac-filter" 中，并使其可执行： >
+   #!/bin/sed -f
+   /\^$/s/\t/\ /g;/:[0-9]\+:/{h;d};/^[ \t]*\^/G;
+
+用英语来说，这个 sed 脚本：
+- 将单个制表符更改为单个空格，并且
+- 将包含文件名、行号、错误消息的行移动到指针行之后。这样，中间未使用的错误文本不会破坏 vim 的“多行消息”概念，也不会强制我们将其包含为“多行消息的继续”。
+
+						*errorformat-ant*
+对于 ant (https://jakarta.apache.org/)，必须修改上述 errorformat 以处理每个 javac 输出行前面的 [javac]： >
+  :set efm=%A\ %#[javac]\ %f:%l:\ %m,%-Z\ %#[javac]\ %p^,%-C%.%#
+
+'errorformat' 也可以配置为同时处理 ant 与 javac 或 jikes。如果你使用 jikes，你应该告诉 ant 使用 jikes 的 +E 命令行开关，这强制 jikes 生成单行错误消息。下面的 build.xml 文件的第二行就是这样做的： >
+  <property name = "build.compiler"       value = "jikes"/>
+  <property name = "build.compiler.emacs" value = "true"/>
+
+同时处理 ant 与 javac 和 jikes 的 'errorformat' 是： >
+  :set efm=\ %#[javac]\ %#%f:%l:%c:%*\\d:%*\\d:\ %t%[%^:]%#:%m,
+	   \%A\ %#[javac]\ %f:%l:\ %m,%-Z\ %#[javac]\ %p^,%-C%.%#
+<
+						*errorformat-jade*
+解析 jade（参见 http://www.jclark.com/）错误很简单： >
+  :set efm=jade:%f:%l:%c:%t:%m
+<
+						*errorformat-LaTeX*
+以下是一个如何为 (La)TeX 排版系统指定 'errorformat' 字符串的示例，该系统显示多行错误消息。":clist" 和 ":cc" 等命令的输出会将多行显示为单行，并删除前导空格。
+应该很容易将上述 LaTeX errorformat 适配到任何由多行错误组成的编译器输出。
+
+这些命令可以放在 |vimrc| 文件或其他 Vim 脚本文件中，例如，一个包含 LaTeX 相关内容的脚本，仅在编辑 LaTeX 源时加载。
+确保复制示例的所有行（按给定顺序），然后删除注释行。对于某些行开头的 '\' 表示法，请参见 |line-continuation|。
+
+		首先准备 'makeprg'，以便 LaTeX 报告多个错误；不要在第一个错误发生时停止： >
+ :set makeprg=latex\ \\\\nonstopmode\ \\\\input\\{$*
+<
+		多行错误消息的开始： >
+ :set efm=%E!\ LaTeX\ %trror:\ %m,
+	\%E!\ %m,
+<		多行警告消息的开始；前两个还包含行号。一些正则表达式的含义：
+		  - "%.%#"  (`.*`)   匹配一个（可能为空的）字符串
+		  - "%*\\d" ("\d\+") 匹配一个数字 >
+	\%+WLaTeX\ %.%#Warning:\ %.%#line\ %l%.%#,
+	\%+W%.%#\ at\ lines\ %l--%*\\d,
+	\%WLaTeX\ %.%#Warning:\ %m,
+<		错误/警告消息的可能继续；第一个还包含行号： >
+	\%Cl.%l\ %m,
+	\%+C\ \ %m.,
+	\%+C%.%#-%.%#,
+	\%+C%.%#[]%.%#,
+	\%+C[]%.%#,
+	\%+C%.%#%[{}\\]%.%#,
+	\%+C<%.%#>%.%#,
+	\%C\ \ %m,
+<		匹配以下模式的行不包含任何重要信息；不要将它们包含在消息中： >
+	\%-GSee\ the\ LaTeX%m,
+	\%-GType\ \ H\ <return>%m,
+	\%-G\ ...%.%#,
+	\%-G%.%#\ (C)\ %.%#,
+	\%-G(see\ the\ transcript%.%#),
+<		通常排除任何空行或仅包含空格的行，使其不被显示： >
+	\%-G\\s%#,
+<		LaTeX 输出日志不指定每行错误源文件的名称；而是全局给出，用括号括起来。
+		以下模式尝试匹配这些名称并将其存储在内部堆栈中。这些模式可能会扫描同一输入行（一个接一个），尾随的 "%r" 转换指示行的“剩余部分”，该部分将在下一次解析，直到到达行尾。
+
+		过度读取用 '('...')' 括起来的文件名；不要将其压入堆栈，因为该文件显然不包含任何错误： >
+	\%+O(%f)%r,
+<		将文件名压入堆栈。名称在 '(' 之后给出： >
+	\%+P(%f%r,
+	\%+P\ %\\=(%f%r,
+	\%+P%*[^()](%f%r,
+	\%+P[%\\d%[^()]%#(%f%r,
+<		当扫描到 ')' 时，弹出最后存储的文件名： >
+	\%+Q)%r,
+	\%+Q%*[^()])%r,
+	\%+Q[%\\d%*[^()])%r
+
+请注意，在某些情况下，LaTeX 输出日志中的文件名无法正确解析。解析器可能因括号不平衡而混乱。上面的示例仅试图捕获最相关的情况。
+你可以自定义给定的设置以满足你自己的目的，例如，所有烦人的 "Overfull ..." 警告可以被排除，不被识别为错误。
+除了过滤 LaTeX 编译器输出之外，还可以直接读取 [La]TeX 编译器生成的 `*.log` 文件。其中包含有关可能错误原因的更多有用信息。然而，要正确解析如此复杂的文件，应该使用外部过滤器。请参阅上面的说明，了解如何使 Vim 知道此类过滤器。
+
+
+=============================================================================
+10. 自定义 quickfix 窗口				*quickfix-window-function*
+
+quickfix 窗口和位置列表窗口中显示的行的默认格式为：
+>
+    <filename>|<lnum> col <col>|<text>
+<
+每行中显示的值对应于 |getqflist()| 函数返回的 "bufnr"、"lnum"、"col" 和 "text" 字段。
+
+对于某些 quickfix/位置列表，需要自定义显示的文本。例如，如果 quickfix 条目仅存在文件名，则文件名后面的两个 "|" 字段分隔符是不需要的。另一个用例是自定义为文件名显示的路径。默认情况下，对于不在当前目录树下的文件，会显示完整路径（可能太长）。文件路径可能需要简化为一个公共的父目录。
+
+可以通过将 'quickfixtextfunc' 选项设置为一个 Vim 函数来自定义显示的文本。此函数将使用一个字典参数调用，并应返回一个字符串列表，以便在 quickfix 或位置列表窗口中显示。字典参数将包含以下字段：
+
+    quickfix	当为 quickfix 列表调用时设置为 1，为位置列表调用时设置为 0。
+    winid	对于位置列表，设置为具有位置列表的窗口的 id。对于 quickfix 列表，设置为 0。可用于 getloclist() 以获取位置列表条目。
+    id		quickfix 或位置列表标识符
+    start_idx	应为其返回文本的第一个条目的索引
+    end_idx	应为其返回文本的最后一个条目的索引
+
+该函数应为从 start_idx 到 end_idx 的每个条目返回一行要在 quickfix 窗口中显示的文本。该函数可以使用 |getqflist()| 函数并指定 quickfix 列表标识符 "id" 来获取有关条目的信息。对于位置列表，可以将 getloclist() 函数与 "winid" 参数一起使用。如果返回一个空列表，则使用默认格式显示所有条目。如果返回列表中的某个项目是空字符串，则使用默认格式显示相应的条目。
+
+如果需要特定于 quickfix 或位置列表的自定义，则可以使用 |setqflist()| 或 |setloclist()| 函数设置列表的 'quickfixtextfunc' 属性。这将覆盖全局的 'quickfixtextfunc' 选项。
+
+下面的示例在 quickfix 窗口中显示旧文件列表（|v:oldfiles|）。由于每个条目没有关联的行、列号和错误文本信息，因此 'quickfixtextfunc' 函数仅返回文件名。
+示例： >vim
+    " 从 v:oldfiles 创建一个 quickfix 列表
+    call setqflist([], ' ', {'lines' : v:oldfiles, 'efm' : '%f',
+					\ 'quickfixtextfunc' : 'QfOldFiles'})
+    func QfOldFiles(info)
+	" 获取一定范围的 quickfix 条目的信息
+	let items = getqflist({'id' : a:info.id, 'items' : 1}).items
+	let l = []
+	for idx in range(a:info.start_idx - 1, a:info.end_idx - 1)
+	    " 使用简化的文件名
+	  call add(l, fnamemodify(bufname(items[idx].bufnr), ':p:.'))
+	endfor
+	return l
+    endfunc
+>
+ vim:tw=78:ts=8:noet:ft=help:norl:

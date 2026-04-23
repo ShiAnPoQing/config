@@ -457,14 +457,13 @@ return {
       "n",
       desc = "Lsp Workspace Symbols",
     },
-    ["<leader>llws"] = {
-
-      function()
-        require("fzf-lua").lsp_live_workspace_symbols()
-      end,
-      "n",
-      desc = "Lsp Live Workspace Symbols",
-    },
+    -- ["<leader>llws"] = {
+    --   function()
+    --     require("fzf-lua").lsp_live_workspace_symbols()
+    --   end,
+    --   "n",
+    --   desc = "Lsp Live Workspace Symbols",
+    -- },
     ["<leader>ltd"] = {
       function()
         require("fzf-lua").lsp_typedefs()

@@ -1,0 +1,191 @@
+*tui.txt*      Nvim
+
+                            NVIM 参考手册
+
+
+终端 UI						*TUI* *tui*
+
+默认情况下，当你运行 `nvim`（不带 |--embed| 或 |--headless|）时，它会启动内置的“终端 UI”（TUI）。这个默认 UI 是可选的：你可以将 Nvim 作为“无头”服务器运行，也可以使用 |GUI|。
+
+                                       键入 |gO| 查看目录。
+
+==============================================================================
+启动					*startup-tui* *startup-terminal*
+
+Nvim 采用客户端-服务器架构：默认情况下，当你运行 `nvim` 时，它会启动内置的 UI 客户端，该客户端会启动一个 `nvim --embed` 服务器（子进程），UI 客户端会连接到该服务器。连接到服务器后，UI 客户端会调用 |nvim_set_client_info()|（如所有 UI |dev-ui| 所推荐）并在其通道上设置以下字段： >
+
+  client = {
+    attributes = {
+      license = 'Apache 2',
+      pid = …,
+      website = 'https://neovim.io',
+    },
+    name = 'nvim-tui',
+    type = 'ui',
+    version = { … },
+  }
+
+Nvim 在启动时猜测终端类型（|--embed| 和 |--headless| 模式除外）。|$TERM| 环境变量是决定终端类型的主要提示。
+
+					*terminfo* *E557* *E558* *E559*
+为了显示其用户界面，Nvim 从系统 terminfo 数据库（如果找不到 terminfo，则使用内置默认值）读取“终端能力”列表。如果该信息错误，屏幕可能会显示混乱，或者按键可能无法被识别。
+
+用于读取 terminfo 的 Unibilium 库允许你用 "$HOME/.terminfo/" 目录中的 terminfo 覆盖系统 terminfo。构建你自己的 terminfo 通常像运行以下命令一样简单：
+>
+  curl -LO https://invisible-island.net/datafiles/current/terminfo.src.gz
+  gunzip terminfo.src.gz
+  tic -x terminfo.src
+<
+								*$TERM*
+$TERM 环境变量必须与你正在使用的终端匹配！否则 Nvim 无法知道你的终端期望什么序列，会导致奇怪或次优的行为（滚动异常、颜色错误等）。
+
+$TERM 也很重要，因为它会被 SSH 转发到远程会话，这与大多数其他环境变量不同。
+
+>
+   对于此终端           设置 $TERM 为                  |builtin-terms|
+  -------------------------------------------------------------------------
+  ansi                        (未知)                           Y
+  Ghostty                     ghostty, xterm-ghostty              Y
+  iTerm (原始版本)            iterm, iTerm.app                    N
+  iTerm2 (新能力)             iterm2, iTerm2.app                  Y
+  Konsole                     konsole-256color                    N
+  基于 libvte 的终端         vte, vte-256color                   Y
+   （例如 GNOME Terminal）    (别名: gnome, gnome-256color)
+  Linux 虚拟终端             linux, linux-256color               Y
+  PuTTY                       putty, putty-256color               Y
+  rxvt                        rxvt, rxvt-256color                 Y
+  screen                      screen, screen-256color             Y
+  simple terminal (st)        st, st-256color                     Y
+  Terminal.app                nsterm                              N
+  tmux                        tmux, tmux-256color                 Y
+  Windows/ConEmu              conemu                              Y
+  Windows/Cygwin 构建的 Nvim  cygwin                              Y
+  Windows/Interix             interix                             Y
+  Windows/legacy console      win32con                            Y
+  Windows/VTP 控制台          vtpcon                              Y
+  xterm 或兼容终端           xterm, xterm-256color               Y
+<
+
+					*builtin-terms* *builtin_terms*
+如果出现以下情况，Nvim 将根据上表将 |$TERM| 映射到内置条目：
+
+- 系统上没有可用的 |terminfo| 数据库
+- 未找到当前检测到的终端的 terminfo 条目
+- Nvim 构建时没有 terminfo 支持（`has('terminfo')==0`）
+
+内置的 terminfo 不会与任何外部的 terminfo 数据库结合，也不能优先于外部数据库使用。因此，你可以通过提供一个包含终端类型条目的外部 terminfo 数据库，来完全覆盖内置 terminfo 数据库中的任何遗漏或过时信息。
+
+例如，"TERM=putty-256color" 将被映射到内置的 "putty" 条目。另请参见 |tui-colors|。
+
+依赖于终端的设置			*term-dependent-settings*
+
+如果你想设置依赖于终端的选项或映射，你可以在你的 init.vim 中执行此操作。示例： >vim
+
+    if $TERM =~ '^\(rxvt\|screen\|interix\|putty\)\(-.*\)\?$'
+        set notermguicolors
+    elseif $TERM =~ '^\(tmux\|iterm\|vte\|gnome\)\(-.*\)\?$'
+        set termguicolors
+    elseif $TERM =~ '^\(xterm\)\(-.*\)\?$'
+        if $XTERM_VERSION != ''
+            set termguicolors
+        elseif $KONSOLE_PROFILE_NAME != ''
+            set termguicolors
+        elseif $VTE_VERSION != ''
+            set termguicolors
+        else
+            set notermguicolors
+        endif
+    elseif $TERM =~ ...
+        ... 等等 ...
+    endif
+<
+					*scroll-region* *xterm-scroll-region*
+在可能的情况下，Nvim 将使用终端设置滚动区域的能力，以便在滚动窗口时更快地重绘。如果终端的 terminfo 描述描述了设置顶部和底部滚动边距的能力，则会使用该能力。
+
+这不会加速在非终端全宽的窗口中的滚动。Xterm 有一个额外的能力，不是由 terminfo 描述的，也可以设置左右滚动边距。如果 Nvim 检测到终端是 Xterm，它将利用此能力来加速非终端全宽的滚动。
+
+								*tui-input*
+历史上，终端模拟器无法区分某些控制键修饰符和其他键。例如，<C-I> 和 <Tab> 以相同的方式表示，<Esc> 和 <C-[>、<CR> 和 <C-M>、以及 <NL> 和 <C-J> 也是如此。
+
+现代终端模拟器能够通过以不同方式编码控制修饰符来区分这些键对。有两种常见但不同的方式，称为 "modifyOtherKeys" 和 "CSI u"。Nvim 支持这两种编码方法，并在启动时告诉终端模拟器它理解这些键编码。如果你的终端模拟器支持，这将允许你单独映射上面列出的键对。|<Tab>|
+
+Nvim 使用 libtermkey 将终端转义序列转换为键码。首先使用 |terminfo|，并且不在 |terminfo| 中的 CSI 序列（包括扩展键，也称为 "modifyOtherKeys" 或 "CSI u"）也可以被解析。
+
+例如，在 tmux 中运行 Nvim 时，这使得 Nvim 退出插入模式并转到下方的窗口： >
+        tmux send-keys 'Escape' [ 2 7 u 'C-W' j
+其中 `'Escape' [ 2 7 u` 是 <Esc> 键的一个明确的 "CSI u" 序列。
+
+kitty 键盘协议 https://sw.kovidgoyal.net/kitty/keyboard-protocol/ 得到部分支持，包括 Unicode 私用区中的键盘按键。例如，Nvim 将此序列识别为 <C-kEnter>： >
+        CSI 57414 ; 5 u
+并且可以在映射中与 <C-CR> 不同地使用。
+
+						*tui-modifyOtherKeys* *tui-csiu*
+在启动时，Nvim 将查询你的终端以查看它是否支持 "CSI u" 编码，通过写入序列 >
+        CSI ? u CSI c
+如果你的终端模拟器响应 >
+        CSI ? <flags> u
+这意味着你的终端支持 "CSI u" 编码，Nvim 将通过写入序列告诉你的终端启用它 >
+        CSI > 1 u
+如果你的终端不支持 "CSI u"，那么 Nvim 将改为通过写入序列启用 "modifyOtherKeys" 编码 >
+        CSI > 4 ; 2 m
+
+当 Nvim 干净地退出时，它将发送相应的序列以禁用特殊的键编码。如果 Nvim 没有干净地退出，那么你的终端模拟器可能处于不良状态。如果发生这种情况，只需运行 "reset"。
+
+							*tui-colors*
+Nvim 默认使用 256 种颜色，对于大多数终端类型（包括 "linux"（其虚拟终端自 4.8 起就支持 256 色）和任何声称是 "xterm" 的终端），忽略 |terminfo|。同样当 $COLORTERM 或 $TERM 包含字符串 "256" 时。
+
+Nvim 同样假设任何将 $COLORTERM 设置为任意值的终端模拟器，至少能够进行 16 色操作。
+
+						*true-color* *xterm-true-color*
+如果设置了 'termguicolors'，Nvim 会在终端中发出真（24 位）色。
+
+它使用 "setrgbf" 和 "setrgbb" |terminfo| 扩展（由 Rüdiger Sonderfeld 于 2013 年提出）。如果你的 terminfo 定义缺少它们，那么 Nvim 将决定是否将它们添加到你的 terminfo 定义中，使用 ISO 8613-6:1994/ITU T.416:1993 控制序列来设置 RGB 颜色（但修改为使用分号而不是冒号，除非已知终端遵循标准）。
+
+另一个由 tmux 在 2016 年开创的约定是 "Tc" terminfo 扩展。如果 terminfo 有此标志，Nvim 将添加构造的 "setrgbf" 和 "setrgbb" 能力，就好像它们已经在 terminfo 定义中一样。
+
+如果 terminfo（尚）没有此标志，Nvim 将回退到 $TERM 和其他环境变量。它将在 "rxvt"、"linux"、"st"、"tmux" 和 "iterm" 终端类型的情况下，或者当检测到 Konsole、真正的 Xterm、版本 0.36 或更高版本的基于 libvte 的终端模拟器、或者将 COLORTERM 环境变量设置为 "truecolor" 的终端模拟器时，添加构造的 "setrgbf" 和 "setrgbb" 能力。
+
+							*xterm-resize*
+Nvim 可以在一些实现了 dtterm 开创的扩展的终端上调整终端显示的大小。|terminfo| 没有此扩展的标志。因此，Nvim 简单地假设（所有）"dtterm"、"xterm"、"teraterm"、"rxvt" 终端类型以及 Konsole 都能够做到这一点。
+
+							*tui-cursor-shape*
+Nvim 将在支持它的终端上，在插入模式（或由 'guicursor' 选项指定）下将光标的形状从块状调整为线状。它为此使用了由 tmux 开创的相同的 |terminfo| 扩展："Ss" 和 "Se"。
+类似地，如果你将光标高亮组设置为 blend=100，Nvim 会通过 "cvvis" 和 "civis" 扩展隐藏光标。
+
+如果你的 terminfo 定义缺少它们，那么 Nvim 将通过查看 $TERM 和其他环境变量来决定是否将它们添加到你的 terminfo 定义中。对于 "rxvt"、"putty"、"linux"、"screen"、"teraterm" 和 "iterm" 终端类型，或者当检测到 Konsole、基于 libvte 的终端模拟器或真正的 Xterm 时，它将添加构造的 "Ss" 和 "Se" 能力。
+
+							*tui-cursor-tmux*
+在 tmux 中，可能看起来 Nvim 没有更改光标，但实际上，是 tmux 收到了 Nvim 更改光标的指令，但不知道如何相应地操作。tmux 必须将其从 Nvim 接收到的内容转换为主机终端适当的任何控制序列。它与 Nvim 共享一个通用机制，即如果存在，则使用（输出终端的）terminfo 中的 "Ss" 和 "Se" 能力。与 Nvim 不同，如果它们不在 terminfo 中，你必须通过在 ~/.tmux.conf 中设置 "terminal-overrides" 来添加它们。
+
+有关如何在 tmux 配置文件中执行操作以及执行哪些操作的详细信息，请参阅 tmux(1) 手册页。它看起来像这样： >bash
+        set -ga terminal-overrides '*:Ss=\E[%p1%d q:Se=\E[ q'
+或者（唉！）对于 Konsole 18.07.70 或更早版本，可能更复杂一些，如下所示： >bash
+        set -ga terminal-overrides 'xterm*:\E]50;CursorShape=%?%p1%{3}%<%t%{0}%e%{1}%;%d\007'
+<
+==============================================================================
+窗口大小						*window-size*
+
+[这是关于 Vim 使用的整个窗口的大小，而不是通过 ":split" 命令创建的窗口的大小。]
+
+在 Unix 系统上，尝试三种方法来获取窗口大小：
+
+- 一个 ioctl 调用（TIOCGSIZE 或 TIOCGWINSZ，取决于你的系统）
+- 环境变量 "LINES" 和 "COLUMNS"
+- 来自 |terminfo| 条目的 "lines" 和 "columns"
+
+如果一切失败，则假定默认大小为 24 行和 80 列。如果接收到窗口调整大小信号，将再次设置大小。如果窗口大小错误，你可以使用 'lines' 和 'columns' 选项来设置正确的值。参见 |:mode|。
+
+==============================================================================
+慢速和快速终端				*slow-fast-terminal*
+						*slow-terminal*
+
+如果你有一个慢速终端，你可能想要重置 'showcmd' 和 'ruler' 选项。命令字符和光标位置将不会显示在状态行中（这涉及到每次按键或移动时的大量光标移动和属性更改）。如果终端滚动非常慢，将 'scrolljump' 设置为 5 左右。如果光标移出屏幕（例如，使用 "j"），Vim 将一次滚动 5 行。另一种可能性是使用命令 "z{height}<CR>" 来减少 Vim 使用的行数。
+
+如果来自终端的字符到达时间间隔超过 1 秒，你可能想要设置 'timeout' 和/或 'ttimeout' 选项。
+
+如果你正在使用一个彩色终端，并且在显示缓冲区末尾之外的行时速度很慢，这是因为 Nvim 使用了两种颜色和属性集绘制了两次空白字符。为了防止这种情况，请使用以下命令： >vim
+        hi NonText cterm=NONE ctermfg=NONE
+这将使用默认的颜色和属性绘制空格，从而可以优化掉第二遍绘制。注意：尽管理论上空白字符的颜色无关紧要，但在实践中，它们会改变跨越它们的光标和选择的颜色。这可能对一些 UI 产生可见但轻微的影响。
+
+
+ vim:et:sw=2:tw=78:ts=8:ft=help:norl:

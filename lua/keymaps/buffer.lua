@@ -17,8 +17,12 @@
 return {
   ["<Tab>j"] = {
     function()
-      ---@diagnostic disable-next-line: param-type-mismatch
-      pcall(vim.cmd, { cmd = "bn", count = vim.v.count1 })
+      local function callback()
+        ---@diagnostic disable-next-line: param-type-mismatch
+        pcall(vim.cmd, { cmd = "bn", count = vim.v.count1 })
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Goto the next [count] buffer",
@@ -56,8 +60,12 @@ return {
   },
   ["<Tab>k"] = {
     function()
-      ---@diagnostic disable-next-line: param-type-mismatch
-      pcall(vim.cmd, { cmd = "bp", count = vim.v.count1 })
+      local function callback()
+        ---@diagnostic disable-next-line: param-type-mismatch
+        pcall(vim.cmd, { cmd = "bp", count = vim.v.count1 })
+        require("repeat").set_motion(callback)
+      end
+      callback()
     end,
     "n",
     desc = "Goto the previous [count] buffer",
@@ -114,11 +122,7 @@ return {
     "n",
     desc = "Vertical split and open all buffer [limit count windows]",
   },
-  ["<tab>b"] = {
-    "<cmd>buffer#<cr>",
-    "n",
-    desc = "Go to the most recently accessed buffer",
-  },
+  ["<tab>b"] = { "<cmd>buffer#<cr>", "n", desc = "Go to the most recently accessed buffer" },
   ["<tab>m"] = {
     function()
       ---@diagnostic disable-next-line: param-type-mismatch

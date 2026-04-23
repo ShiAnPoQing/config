@@ -235,6 +235,27 @@ return {
   },
   ["<leader>6"] = {
     function()
+      --
+      -- local r = vim.fn.searchpairpos(
+      --   [[\v[\(\)\[\]\{\}]], -- open pattern
+      --   "", -- middle (optional)
+      --   [[\v[\(\)\[\]\{\}]], -- close pattern
+      --   "W" -- flags
+      -- )
+      local open_r, open_c = unpack(vim.fn.searchpairpos("|", "", "|", "bnW"))
+
+      -- 找闭括号
+      local close_r, close_c = unpack(vim.fn.searchpairpos("|", "", "|", "nW"))
+
+      local text = vim.api.nvim_buf_get_text(
+        0,
+        open_r - 1,
+        open_c, -- 注意：不包含 '('
+        close_r - 1,
+        close_c - 1, -- 不包含 ')'
+        {}
+      )
+      vim.print(text)
       ------@param r number 0-255
       ------@param g number 0-255
       ------@param b number 0-255
