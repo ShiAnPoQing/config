@@ -68,4 +68,7 @@ require("native-packer").setup({
   -- require("plugins.download.ai.copilot"),
   require("plugins.local.test.bufferman"),
   require("plugins.download.ai.opencode"),
+  require("plugins.local.test.lsp-layer"),
 })
+
+local a = 1
