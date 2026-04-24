@@ -75,22 +75,16 @@ function MyTabLabel(n)
   })[vim.diagnostic.severity.ERROR]
   local label = filename
   if label == "" then
-    label = "[No Name]"
-    return label
-  end
-  if error_count and error_count > 0 then
-    label = label .. " %#TabLineError#" .. " " .. "%#TabLine#"
+    return "[No Name]"
   end
   if modified then
     label = label .. " ●"
   end
-  if label == "" then
-    return "[No Name]"
-  else
-    -- vim.print(label)
-    -- return ""
-    return label
+  if error_count and error_count > 0 then
+    label = label .. " %#TabLineError#" .. " "
   end
+  label = label
+  return label
 end
 
 function _G.MyTabLine()

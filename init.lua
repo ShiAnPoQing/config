@@ -24,7 +24,6 @@ require("native-packer").setup({
   require("plugins.local.move-word"),
   require("plugins.local.cursorline"),
   require("plugins.local.file-details"),
-  require("plugins.local.code-action"),
   require("plugins.local.op-register"),
   require("plugins.local.simple-translate"),
   require("plugins.download.misc.lazydev"),
@@ -70,5 +69,3 @@ require("native-packer").setup({
   require("plugins.download.ai.opencode"),
   require("plugins.local.test.lsp-layer"),
 })
-
-local a = 1
