@@ -213,25 +213,46 @@ return {
                   context = { bufnr = bufnr, method = method },
                 }
 
-                local float_buf = vim.api.nvim_create_buf(false, true)
-                local float_win = vim.api.nvim_open_win(float_buf, true, {
+                local height = math.ceil(vim.o.lines * 0.3)
+                local row
+                local winline = vim.fn.winline()
+                local below_height = vim.o.lines - winline - vim.o.cmdheight - 2
+
+                if vim.o.laststatus > 1 then
+                  below_height = below_height - 1
+                end
+                if below_height >= winline then
+                  height = math.min(below_height, height)
+                  row = 1
+                else
+                  height = math.min(winline, height)
+                  row = -height - 2
+                end
+                local _buf = vim.uri_to_bufnr(list.items[1].user_data.targetUri)
+                list.items[1].bufnr = _buf
+                vim.fn.bufload(_buf)
+                local width = #vim.api.nvim_buf_get_lines(_buf, list.items[1].lnum - 1, list.items[1].lnum, false)[1]
+                width = math.max(width, 10)
+
+                local float_win = vim.api.nvim_open_win(_buf, true, {
                   relative = "cursor",
-                  width = math.ceil(vim.o.columns * 0.5),
-                  height = math.ceil(vim.o.lines * 0.5),
+                  width = width,
+                  height = height,
                   style = "minimal",
-                  row = 1,
+                  row = row,
                   col = 0,
                   title = "Tag: " .. tagname,
                   title_pos = "center",
                   border = "single",
                 })
-                vim.api.nvim_set_option_value("cursorline", true, {
-                  win = float_win,
-                })
+                vim.api.nvim_set_option_value("signcolumn", "no", { win = float_win })
                 vim.fn.setqflist({}, " ", list)
                 local tagstack = { { tagname = tagname, from = from } }
                 vim.fn.settagstack(vim.fn.win_getid(win), { items = tagstack }, "t")
                 vim.cmd("cfirst")
+                vim.schedule(function()
+                  vim.api.nvim_set_option_value("cursorline", true, { win = float_win })
+                end)
                 vim.api.nvim_set_current_win(win)
                 vim.api.nvim_create_autocmd("CursorMoved", {
                   callback = function()

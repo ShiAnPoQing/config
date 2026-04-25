@@ -45,6 +45,7 @@ function M:float()
   vim.api.nvim_set_option_value("winfixbuf", true, { win = winid })
   vim.keymap.set("n", "<cr>", function()
     U.on_user_choice(response[vim.fn.line(".")])
+    vim.api.nvim_win_close(winid, true)
   end, {
     buf = bufnr,
   })
