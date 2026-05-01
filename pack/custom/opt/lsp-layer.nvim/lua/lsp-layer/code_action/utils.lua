@@ -15,10 +15,10 @@ local function range_from_selection(bufnr, mode)
   -- A user can start visual selection at the end and move backwards
   -- Normalize the range to start < end
   if start_row == end_row and end_col < start_col then
-    end_col, start_col = start_col, end_col --- @type integer, integer
+    end_col, start_col = start_col, end_col ---@type integer, integer
   elseif end_row < start_row then
-    start_row, end_row = end_row, start_row --- @type integer, integer
-    start_col, end_col = end_col, start_col --- @type integer, integer
+    start_row, end_row = end_row, start_row ---@type integer, integer
+    start_col, end_col = end_col, start_col ---@type integer, integer
   end
   if mode == "V" then
     start_col = 1
@@ -73,7 +73,7 @@ function M.create_code_action_params(client, context, win, bufnr, mode)
   else
     params = vim.lsp.util.make_range_params(win, client.offset_encoding)
   end
-  --- @cast params lsp.CodeActionParams
+  ---@cast params lsp.CodeActionParams
   if context.diagnostics then
     params.context = context
   else
@@ -92,7 +92,7 @@ local function apply_action(action, client, ctx)
   local a_cmd = action.command
   if a_cmd then
     local command = type(a_cmd) == "table" and a_cmd or action
-    --- @cast command lsp.Command
+    ---@cast command lsp.Command
     client:exec_cmd(command, ctx)
   end
 end

@@ -11,7 +11,7 @@ return {
       { "n", "x" },
       desc = "Code Action(float)",
     },
-    ["<leader><leader>gd"] = {
+    ["<leader>gd"] = {
       function()
         require("lsp-layer.definition"):request():tolocation():float()
       end,

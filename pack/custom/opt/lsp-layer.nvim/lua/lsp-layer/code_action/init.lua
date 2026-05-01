@@ -1,14 +1,14 @@
 local Response = require("lsp-layer.code_action.response")
 local U = require("lsp-layer.code_action.utils")
 
---- @class LspLayer.CodeAction
+---@class LspLayer.CodeAction
 local M = {}
 
---- @class LspLayer.CodeActionOpts
---- @field context? lsp.CodeActionContext
+---@class LspLayer.CodeActionOpts
+---@field context? lsp.CodeActionContext
 
---- @param opts? LspLayer.CodeActionOpts
---- @return LspLayer.CodeAction.Response
+---@param opts? LspLayer.CodeActionOpts
+---@return LspLayer.CodeAction.Response
 function M:request(opts)
   opts = opts or {}
   local RS = Response:new()

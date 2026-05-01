@@ -1,5 +1,5 @@
---- @class LspLayer.Definition.Location
---- @field result table
+---@class LspLayer.Definition.Location
+---@field result table
 local M = {}
 
 ---@return LspLayer.Definition.PipelineLocationResult
@@ -28,12 +28,13 @@ function M:tolocation()
     items = all_items,
     context = { bufnr = ctx.bufnr, method = ctx.method },
   }
-  --- @type LspLayer.Definition.PipelineLocationResult
+  ---@type LspLayer.Definition.PipelineLocationResult
   local result = {
     result = list,
     context = ctx,
     type = "location",
   }
+  vim.fn.setqflist({}, " ", list)
   return result
 end
 

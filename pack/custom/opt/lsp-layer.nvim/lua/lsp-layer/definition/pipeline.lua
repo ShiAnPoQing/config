@@ -3,19 +3,19 @@
 ---@field result LspLayer.Definition.PipelineSourceResult
 local M = {}
 
---- @alias LspLayer.Definition.PipelineResult
+---@alias LspLayer.Definition.PipelineResult
 --- | LspLayer.Definition.PipelineLocationResult
 --- | LspLayer.Definition.PipelineSourceResult
 
---- @class LspLayer.Definition.PipelineLocationResult
---- @field type "location"
---- @field result vim.fn.setqflist.what
---- @field context table
+---@class LspLayer.Definition.PipelineLocationResult
+---@field type "location"
+---@field result vim.fn.setqflist.what
+---@field context table
 
---- @class LspLayer.Definition.PipelineSourceResult
---- @field type "source"
---- @field result table
---- @field context table
+---@class LspLayer.Definition.PipelineSourceResult
+---@field type "source"
+---@field result table
+---@field context table
 
 ---@param results any
 ---@param context table

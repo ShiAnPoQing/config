@@ -1,5 +1,5 @@
---- @class LspLayer.CodeAction._Transform
---- @field response LspLayer.CodeAction.Action[]
+---@class LspLayer.CodeAction._Transform
+---@field response LspLayer.CodeAction.Action[]
 local M = {}
 
 ---@param filter fun(x: lsp.CodeAction|lsp.Command, client_id: integer): boolean

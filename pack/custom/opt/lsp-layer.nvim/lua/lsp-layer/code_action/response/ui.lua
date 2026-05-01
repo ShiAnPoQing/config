@@ -1,7 +1,7 @@
 local U = require("lsp-layer.code_action.utils")
 
 ---@class LspLayer.CodeAction._UI
---- @field response LspLayer.CodeAction.Action[]
+---@field response LspLayer.CodeAction.Action[]
 local M = {}
 
 function M:float()

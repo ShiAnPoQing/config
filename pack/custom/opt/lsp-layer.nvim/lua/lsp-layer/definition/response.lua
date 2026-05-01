@@ -2,11 +2,11 @@ local PL = require("lsp-layer.definition.pipeline")
 local LC = require("lsp-layer.definition.location")
 local FT = require("lsp-layer.definition.float")
 
---- @class LspLayer.Definition.Response:LspLayer.Definition._Float
+---@class LspLayer.Definition.Response:LspLayer.Definition.Float
 local M = {}
 
---- @class LspLayer.Definition.Float
---- @field float fun(self, opts)
+---@class LspLayer.Definition.Float
+---@field float fun(self, opts)
 
 M.__index = function(t, key)
   if type(PL[key]) == "function" then

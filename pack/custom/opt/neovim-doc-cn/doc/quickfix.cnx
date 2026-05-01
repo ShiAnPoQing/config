@@ -1836,4 +1836,5 @@ quickfix 窗口和位置列表窗口中显示的行的默认格式为：
 	return l
     endfunc
 >
- vim:tw=78:ts=8:noet:ft=help:norl:
+
+vim:tw=78:ts=8:noet:ft=help:norl:
