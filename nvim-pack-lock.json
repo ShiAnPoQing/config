@@ -9,8 +9,12 @@
       "src": "https://github.com/L3MON4D3/LuaSnip"
     },
     "blink.cmp": {
-      "rev": "b4b7cbb52bab6c716b317433fa9348a070cccee5",
+      "rev": "80f5dd3f11049f1c3a87557718d4e55556a0e3f5",
       "src": "https://github.com/saghen/blink.cmp"
+    },
+    "blink.lib": {
+      "rev": "f29d8bac6549bc1e7d699c83f680823d7def98bd",
+      "src": "https://github.com/saghen/blink.lib"
     },
     "conform.nvim": {
       "rev": "086a40dc7ed8242c03be9f47fbcee68699cc2395",
@@ -92,12 +96,8 @@
       "rev": "7dd72465673b7347905a0c48511838c5ba0ceabe",
       "src": "https://github.com/BrokenSunny/native-packer"
     },
-    "neo-packer": {
-      "rev": "f840f3667f9144a4d0cdf1ec5288e785fe4737f5",
-      "src": "https://github.com/BrokenSunny/neo-packer"
-    },
     "neo-tree.nvim": {
-      "rev": "b48ed11632c8208ffb27dab6acfbf16e4f9e3376",
+      "rev": "ff84e6e1608b24773f1b73cd4182e0bcf2b3d637",
       "src": "https://github.com/nvim-neo-tree/neo-tree.nvim"
     },
     "neotest": {
@@ -199,7 +199,7 @@
       "src": "https://github.com/nvim-lua/plenary.nvim"
     },
     "render-markdown.nvim": {
-      "rev": "2247dcd1ff0c223cfa7e317783f89b8d00457ce6",
+      "rev": "3f3eea97b80839f629c951ca660ffd125bfa5b34",
       "src": "https://github.com/MeanderingProgrammer/render-markdown.nvim"
     },
     "repeat.nvim": {

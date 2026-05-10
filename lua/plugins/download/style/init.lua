@@ -33,7 +33,7 @@ return {
   {
     "folke/tokyonight.nvim",
     priority = 1000,
-    lazy = true,
+    -- lazy = false,
     colorscheme = {
       "tokyonight",
       "tokyonight-day",
@@ -43,7 +43,7 @@ return {
     },
     config = function()
       require("tokyonight").setup({
-        -- transparent = true,
+        transparent = true,
       })
       vim.cmd.colorscheme("tokyonight-night")
     end,

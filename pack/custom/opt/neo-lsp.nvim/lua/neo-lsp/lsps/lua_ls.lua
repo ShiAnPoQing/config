@@ -23,7 +23,7 @@ return {
         library = {
           vim.env.VIMRUNTIME,
           "/usr/share/lua/5.3",
-          "~/.local/share/LuaAddons",
+          -- "~/.local/share/LuaAddons",
           -- '${3rd}/luv/library'
           -- '${3rd}/busted/library'
         },

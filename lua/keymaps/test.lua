@@ -1,93 +1,111 @@
 return {
   ["<leader>1"] = {
     function()
-      local ns = vim.api.nvim_create_namespace("cmdline_ui")
+      -- Load image bytes from disk and display at row 5, column 10
+      local id = vim.ui.img.set(
+        vim.fn.readblob("/home/luoqing/Pictures/wallpapers/wallhaven-mlwz78_2560x1440.png"),
+        { row = 5, col = 10, width = 40, height = 20, zindex = 50 }
+      )
 
-      local win
-      local buf
+      -- Update the image position
+      vim.ui.img.set(id, { row = 8, col = 12 })
 
-      local function open_cmdline()
-        buf = vim.api.nvim_create_buf(false, true)
+      -- -- Retrieve the current image opts
+      -- local opts = vim.ui.img.get(id)
+      --
+      -- -- Remove the image
+      -- vim.ui.img.del(id)
+      --
+      -- -- Remove all images
+      -- vim.ui.img.del(math.huge)
 
-        win = vim.api.nvim_open_win(buf, true, {
-          relative = "editor",
-          row = 10,
-          col = 20,
-          width = 40,
-          height = 1,
-          style = "minimal",
-          border = "rounded",
-          -- focusable = true,
-          noautocmd = true,
-        })
-        -- vim.api.nvim_buf_call(buf, function()
-        --   vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "test" })
-        -- end)
-      end
-
-      local function close_cmdline()
-        if win and vim.api.nvim_win_is_valid(win) then
-          vim.api.nvim_win_close(win, true)
-          win = nil
-        end
-      end
-      local timer = vim.loop.new_timer()
-      vim.ui_attach(ns, { ext_cmdline = true }, function(event, ...)
-        if win and event == "cmdline_hide" then
-          close_cmdline()
-        end
-
-        if event == "cmdline_show" then
-          if not win then
-            timer:start(
-              0,
-              0,
-              vim.schedule_wrap(function()
-                timer:stop()
-                open_cmdline()
-                -- vim.cmd.redraw()
-                -- vim.schedule(function()
-                vim.api.nvim_win_set_cursor(win, { 1, 0 })
-                vim.cmd.startinsert()
-                vim.api.nvim__redraw({ cursor = true, win = win, flush = true })
-                -- vim.cmd.redraw()
-                -- end)
-              end)
-            )
-            return true
-          end
-          -- vim.print(event)
-          -- local content = select(1, ...)
-          -- local text = ""
-          --
-          -- for _, chunk in ipairs(content[1]) do
-          --   text = text .. chunk[1]
-          -- end
-          --
-        elseif event == "cmdline_pos" then
-          timer:start(
-            0,
-            0,
-            vim.schedule_wrap(function()
-              timer:stop()
-              vim.print("test")
-              vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "test" })
-              -- vim.cmd.redraw()
-              -- vim.schedule(function()
-              -- vim.cmd.startinsert()
-              vim.api.nvim__redraw({ buf = buf, win = win, flush = true })
-              -- vim.cmd.redraw()
-              -- end)
-            end)
-          )
-          --   vim.schedule(function()
-          --     vim.api.nvim_win_set_cursor(win, { 1, 0 })
-          --   end)
-          -- elseif event == "cmdline_hide" then
-          --   close_cmdline()
-        end
-        return true
-      end)
+      -- local ns = vim.api.nvim_create_namespace("cmdline_ui")
+      --
+      -- local win
+      -- local buf
+      --
+      -- local function open_cmdline()
+      --   buf = vim.api.nvim_create_buf(false, true)
+      --
+      --   win = vim.api.nvim_open_win(buf, true, {
+      --     relative = "editor",
+      --     row = 10,
+      --     col = 20,
+      --     width = 40,
+      --     height = 1,
+      --     style = "minimal",
+      --     border = "rounded",
+      --     -- focusable = true,
+      --     noautocmd = true,
+      --   })
+      --   -- vim.api.nvim_buf_call(buf, function()
+      --   --   vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "test" })
+      --   -- end)
+      -- end
+      --
+      -- local function close_cmdline()
+      --   if win and vim.api.nvim_win_is_valid(win) then
+      --     vim.api.nvim_win_close(win, true)
+      --     win = nil
+      --   end
+      -- end
+      -- local timer = vim.loop.new_timer()
+      -- vim.ui_attach(ns, { ext_cmdline = true }, function(event, ...)
+      --   if win and event == "cmdline_hide" then
+      --     close_cmdline()
+      --   end
+      --
+      --   if event == "cmdline_show" then
+      --     if not win then
+      --       timer:start(
+      --         0,
+      --         0,
+      --         vim.schedule_wrap(function()
+      --           timer:stop()
+      --           open_cmdline()
+      --           -- vim.cmd.redraw()
+      --           -- vim.schedule(function()
+      --           vim.api.nvim_win_set_cursor(win, { 1, 0 })
+      --           vim.cmd.startinsert()
+      --           vim.api.nvim__redraw({ cursor = true, win = win, flush = true })
+      --           -- vim.cmd.redraw()
+      --           -- end)
+      --         end)
+      --       )
+      --       return true
+      --     end
+      --     -- vim.print(event)
+      --     -- local content = select(1, ...)
+      --     -- local text = ""
+      --     --
+      --     -- for _, chunk in ipairs(content[1]) do
+      --     --   text = text .. chunk[1]
+      --     -- end
+      --     --
+      --   elseif event == "cmdline_pos" then
+      --     timer:start(
+      --       0,
+      --       0,
+      --       vim.schedule_wrap(function()
+      --         timer:stop()
+      --         vim.print("test")
+      --         vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "test" })
+      --         -- vim.cmd.redraw()
+      --         -- vim.schedule(function()
+      --         -- vim.cmd.startinsert()
+      --         vim.api.nvim__redraw({ buf = buf, win = win, flush = true })
+      --         -- vim.cmd.redraw()
+      --         -- end)
+      --       end)
+      --     )
+      --     --   vim.schedule(function()
+      --     --     vim.api.nvim_win_set_cursor(win, { 1, 0 })
+      --     --   end)
+      --     -- elseif event == "cmdline_hide" then
+      --     --   close_cmdline()
+      --   end
+      --   return true
+      -- end)
     end,
     "n",
   },

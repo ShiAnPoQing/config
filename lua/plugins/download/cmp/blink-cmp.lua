@@ -1,15 +1,8 @@
 return {
   "saghen/blink.cmp",
-  depend = {
-    -- { 'L3MON4D3/LuaSnip', version = 'v2.*' },
-  },
+  depend = { 'saghen/blink.lib' },
   run = function(plug)
-    vim
-      .system({ "cargo", "+nightly", "build", "--release" }, {
-        cwd = plug.path,
-        text = true,
-      })
-      :wait()
+    require('blink.cmp').build():wait(600000)
   end,
   event = { "InsertEnter", "CmdlineEnter" },
   config = function()
