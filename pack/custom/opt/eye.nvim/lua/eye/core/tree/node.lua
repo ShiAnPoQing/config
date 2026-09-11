@@ -64,9 +64,19 @@ end
 function M:start()
   self.root:before_node_start(self)
   self:highlight({})
+  self:spread({})
   vim.cmd.redraw()
   local char = vim.fn.getcharstr()
   self:finish({ char = vim.fn.keytrans(char) })
+end
+
+function M:spread(targets)
+  if self.label ~= "[[empty]]" then
+    table.insert(targets, self)
+  end
+  for _, child in pairs(self.children or {}) do
+    child:spread(vim.tbl_extend("force", targets, {}))
+  end
 end
 
 --- @param ctx table

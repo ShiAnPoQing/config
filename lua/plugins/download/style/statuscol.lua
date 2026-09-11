@@ -5,18 +5,17 @@ return {
     local builtin = require("statuscol.builtin")
     require("statuscol").setup({
       setopt = true,
-      ft_ignore = { "neo-tree" },
+      ft_ignore = { "neo-tree", "neo-tagstack" },
       bt_ignore = { "neo-tree" },
       segments = {
         {
-          text = {
-            function(args)
-              return ("%3d %2d "):format(args.lnum, args.relnum)
-            end,
-            " ",
+          sign = {
+            namespace = { "gitsigns.*" },
+            name = { "gitsigns.*" },
+            colwidth = 1,
+            maxwidth = 1,
+            auto = true
           },
-          condition = { true, builtin.not_empty },
-          click = "v:lua.ScLa",
         },
         {
           sign = {
@@ -25,13 +24,14 @@ return {
           },
         },
         {
-          sign = {
-            namespace = { "gitsigns.*" },
-            name = { "gitsigns.*" },
-            auto = true,
+          text = {
+            builtin.lnumfunc,
+            " ",
           },
+          condition = { true, builtin.not_empty },
+          click = "v:lua.ScLa",
         },
-        { text = { builtin.foldfunc }, click = "v:lua.ScFa" },
+        { text = { builtin.foldfunc, " " }, click = "v:lua.ScFa" },
       },
     })
   end,

@@ -9,6 +9,7 @@ local M = {}
 --- @field css string
 --- @field json string
 local lsp_collects = {
+  emmylua = "emmylua_ls",
   lua = "lua_ls",
   vue = { "vue_ls", "vtsls" },
   ts = "ts_ls",
@@ -55,8 +56,8 @@ function M.setup(opts)
   local lsps = require_lspconfig(enables)
   for _, lsp in ipairs(lsps) do
     if type(lsp.config) == "table" then
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-      lsp.config.capabilities = require("blink.cmp").get_lsp_capabilities(capabilities, true)
+      -- local capabilities = vim.lsp.protocol.make_client_capabilities()
+      -- lsp.config.capabilities = require("blink.cmp").get_lsp_capabilities(capabilities, true)
       vim.lsp.config(lsp.name, lsp.config)
       vim.lsp.enable(lsp.name)
     end

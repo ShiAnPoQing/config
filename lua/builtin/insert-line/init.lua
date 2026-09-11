@@ -68,4 +68,12 @@ function M.below_no_follow_no_indent()
   end)
 end
 
+function M.above_and_below()
+  insert_line(false, true, true)
+  insert_line(true, true, true)
+  vim.schedule(function()
+    require("repeat").set_operation(M.above_and_below)
+  end)
+end
+
 return M

@@ -1,11 +1,11 @@
 return {
   name = "neo-lsp.nvim",
   event = { "BufReadPre", "BufNewFile" },
-  depend = { "saghen/blink.cmp" },
   config = function()
     require("neo-lsp").setup({
       enable = function(opts)
         return {
+          -- opts.emmylua,
           opts.lua,
           opts.ts,
           -- opts.vue,
@@ -19,202 +19,202 @@ return {
         }
       end,
     })
-    local Methods = vim.lsp.protocol.Methods
-    local callbacks = {
-      [Methods.textDocument_documentSymbol] = function(args)
-        require("native-packer.key").add({
-          ["<leader>ds"] = {
-            function()
-              vim.lsp.buf.document_symbol()
-            end,
-            "n",
-            buf = args.buf,
-            desc = "LSP Document Symbol",
-          },
-        })
-      end,
-      [Methods.textDocument_codeAction] = function(args, client)
-        require("native-packer.key").add({
-          ["<leader>C"] = {
-            function()
-              vim.lsp.codelens.enable(not vim.lsp.codelens.is_enabled())
-            end,
-            "n",
-            buf = args.buf,
-            desc = "Toggle codelens",
-          },
-        })
-        -- local group = vim.api.nvim_create_augroup("LspCodeLens" .. args.buf, { clear = true })
-        -- vim.api.nvim_create_autocmd("CursorHold", {
-        --   group = group,
-        --   buffer = args.buf,
-        --   callback = function()
-        --     vim.lsp.codelens.enable(true, { bufnr = args.buf })
-        --   end,
-        -- })
-        -- vim.api.nvim_create_autocmd({ "CursorMoved", "InsertLeave" }, {
-        --   group = group,
-        --   buffer = args.buf,
-        --   callback = function()
-        --     vim.lsp.codelens.enable(false, { bufnr = args.buf })
-        --   end,
-        -- })
-      end,
-      [Methods.textDocument_documentHighlight] = function(args)
-        -- local group = vim.api.nvim_create_augroup("document-highlight", { clear = false })
-        -- vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI", "InsertLeave" }, {
-        --   group = group,
-        --   buffer = args.buf,
-        --   callback = vim.lsp.buf.document_highlight,
-        -- })
-        -- vim.api.nvim_create_autocmd({ "CursorMoved", "InsertEnter" }, {
-        --   group = group,
-        --   buffer = args.buf,
-        --   callback = vim.lsp.buf.clear_references,
-        -- })
-      end,
-      [Methods.textDocument_inlayHint] = function(args)
-        require("native-packer.key").add({
-          ["<leader>hi"] = {
-            function()
-              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({}))
-            end,
-            "n",
-            buf = args.buf,
-            desc = "Toggle inlay hint",
-          },
-        })
-      end,
-      [Methods.callHierarchy_incomingCalls] = function(args)
-        require("native-packer.key").add({
-          ["<leader>ic"] = {
-            function()
-              vim.lsp.buf.incoming_calls()
-            end,
-            "n",
-            buf = args.buf,
-            desc = "Lists all the call sites of the symbol under the cursor in the |quickfix| window.",
-          },
-        })
-      end,
-      [Methods.textDocument_selectionRange] = function(args)
-        require("native-packer.key").add({
-          ["er"] = {
-            function()
-              vim.lsp.buf.selection_range(vim.v.count1)
-            end,
-            "x",
-            buf = args.buf,
-            desc = "Perform an incremental selection at the cursor position based on ranges given by the LSP.",
-          },
-        })
-      end,
-      [Methods.callHierarchy_outgoingCalls] = function(args)
-        require("native-packer.key").add({
-          ["<leader>oc"] = {
-            function()
-              vim.lsp.buf.incoming_calls()
-            end,
-            "n",
-            buf = args.buf,
-            desc = "Lists all the items that are called by the symbol under the cursor in the |quickfix| window.",
-          },
-        })
-      end,
-      [Methods.textDocument_documentColor] = function()
-        vim.lsp.document_color.enable(true, nil, { style = "virtual" })
-      end,
-      [Methods.textDocument_linkedEditingRange] = function(args, client)
-        vim.lsp.linked_editing_range.enable(true, { client_id = client.id })
-      end,
-      [Methods.textDocument_definition] = function(args)
-        require("native-packer.key").add({
-          ["gd"] = {
-            function()
-              vim.opt.switchbuf = "uselast"
-              vim.lsp.buf.definition()
-            end,
-            "n",
-            desc = "Goto Lsp definition",
-            buf = args.buf,
-          },
-          ["<tab>gd"] = {
-            function()
-              vim.opt.switchbuf = "newtab"
-              vim.lsp.buf.definition()
-            end,
-            "n",
-            desc = "Goto Lsp definition(New Tab)",
-            buf = args.buf,
-          },
-          ["ad"] = {
-            function()
-              vim.opt.switchbuf = "vsplit"
-              vim.lsp.buf.definition()
-            end,
-            "n",
-            desc = "Goto Lsp definition(vsplit)",
-            buf = args.buf,
-          },
-          ["sd"] = {
-            function()
-              vim.opt.switchbuf = "split"
-              vim.lsp.buf.definition()
-            end,
-            "n",
-            desc = "Goto Lsp definition(vsplit)",
-            buf = args.buf,
-          },
-        })
-      end,
-      [Methods.textDocument_typeDefinition] = function(args)
-        require("native-packer.key").add({
-          ["gy"] = {
-            function()
-              vim.lsp.buf.type_definition()
-            end,
-            "n",
-            desc = "Got Lsp type definition",
-            buf = args.buf,
-          },
-        })
-      end,
-      [Methods.textDocument_hover] = function(args)
-        require("native-packer.key").add({
-          ["<leader>k"] = {
-            function()
-              vim.lsp.buf.hover()
-            end,
-            "n",
-            buf = args.buf,
-            desc = "LSP Hover",
-          },
-        })
-      end,
-      [Methods.textDocument_signatureHelp] = function(args)
-        require("native-packer.key").add({
-          ["gs"] = {
-            function()
-              vim.lsp.buf.signature_help()
-            end,
-            "n",
-            buf = args.buf,
-            desc = "LSP Signature Help",
-          },
-        })
-      end,
-    }
-
-    vim.api.nvim_create_autocmd("LspAttach", {
-      group = vim.api.nvim_create_augroup("my.lsp", {}),
-      callback = function(args)
-        local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
-        for method, callback in pairs(callbacks) do
-          if client:supports_method(method) then
-            callback(args, client)
-          end
-        end
-      end,
-    })
+    -- local Methods = vim.lsp.protocol.Methods
+    -- local callbacks = {
+    --   [Methods.textDocument_documentSymbol] = function(args)
+    --     require("native-packer.key").add({
+    --       ["<leader>ds"] = {
+    --         function()
+    --           vim.lsp.buf.document_symbol()
+    --         end,
+    --         "n",
+    --         buf = args.buf,
+    --         desc = "LSP Document Symbol",
+    --       },
+    --     })
+    --   end,
+    --   [Methods.textDocument_codeAction] = function(args, client)
+    --     require("native-packer.key").add({
+    --       ["<leader>C"] = {
+    --         function()
+    --           vim.lsp.codelens.enable(not vim.lsp.codelens.is_enabled())
+    --         end,
+    --         "n",
+    --         buf = args.buf,
+    --         desc = "Toggle codelens",
+    --       },
+    --     })
+    --     -- local group = vim.api.nvim_create_augroup("LspCodeLens" .. args.buf, { clear = true })
+    --     -- vim.api.nvim_create_autocmd("CursorHold", {
+    --     --   group = group,
+    --     --   buffer = args.buf,
+    --     --   callback = function()
+    --     --     vim.lsp.codelens.enable(true, { bufnr = args.buf })
+    --     --   end,
+    --     -- })
+    --     -- vim.api.nvim_create_autocmd({ "CursorMoved", "InsertLeave" }, {
+    --     --   group = group,
+    --     --   buffer = args.buf,
+    --     --   callback = function()
+    --     --     vim.lsp.codelens.enable(false, { bufnr = args.buf })
+    --     --   end,
+    --     -- })
+    --   end,
+    --   [Methods.textDocument_documentHighlight] = function(args)
+    --     -- local group = vim.api.nvim_create_augroup("document-highlight", { clear = false })
+    --     -- vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI", "InsertLeave" }, {
+    --     --   group = group,
+    --     --   buffer = args.buf,
+    --     --   callback = vim.lsp.buf.document_highlight,
+    --     -- })
+    --     -- vim.api.nvim_create_autocmd({ "CursorMoved", "InsertEnter" }, {
+    --     --   group = group,
+    --     --   buffer = args.buf,
+    --     --   callback = vim.lsp.buf.clear_references,
+    --     -- })
+    --   end,
+    --   [Methods.textDocument_inlayHint] = function(args)
+    --     require("native-packer.key").add({
+    --       ["<leader>hi"] = {
+    --         function()
+    --           vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({}))
+    --         end,
+    --         "n",
+    --         buf = args.buf,
+    --         desc = "Toggle inlay hint",
+    --       },
+    --     })
+    --   end,
+    --   [Methods.callHierarchy_incomingCalls] = function(args)
+    --     require("native-packer.key").add({
+    --       ["<leader>ic"] = {
+    --         function()
+    --           vim.lsp.buf.incoming_calls()
+    --         end,
+    --         "n",
+    --         buf = args.buf,
+    --         desc = "Lists all the call sites of the symbol under the cursor in the |quickfix| window.",
+    --       },
+    --     })
+    --   end,
+    --   [Methods.textDocument_selectionRange] = function(args)
+    --     require("native-packer.key").add({
+    --       ["er"] = {
+    --         function()
+    --           vim.lsp.buf.selection_range(vim.v.count1)
+    --         end,
+    --         "x",
+    --         buf = args.buf,
+    --         desc = "Perform an incremental selection at the cursor position based on ranges given by the LSP.",
+    --       },
+    --     })
+    --   end,
+    --   [Methods.callHierarchy_outgoingCalls] = function(args)
+    --     require("native-packer.key").add({
+    --       ["<leader>oc"] = {
+    --         function()
+    --           vim.lsp.buf.incoming_calls()
+    --         end,
+    --         "n",
+    --         buf = args.buf,
+    --         desc = "Lists all the items that are called by the symbol under the cursor in the |quickfix| window.",
+    --       },
+    --     })
+    --   end,
+    --   [Methods.textDocument_documentColor] = function()
+    --     vim.lsp.document_color.enable(true, nil, { style = "virtual" })
+    --   end,
+    --   [Methods.textDocument_linkedEditingRange] = function(args, client)
+    --     vim.lsp.linked_editing_range.enable(true, { client_id = client.id })
+    --   end,
+    --   [Methods.textDocument_definition] = function(args)
+    --     require("native-packer.key").add({
+    --       ["gd"] = {
+    --         function()
+    --           vim.opt.switchbuf = "uselast"
+    --           vim.lsp.buf.definition()
+    --         end,
+    --         "n",
+    --         desc = "Goto Lsp definition",
+    --         buf = args.buf,
+    --       },
+    --       ["<tab>gd"] = {
+    --         function()
+    --           vim.opt.switchbuf = "newtab"
+    --           vim.lsp.buf.definition()
+    --         end,
+    --         "n",
+    --         desc = "Goto Lsp definition(New Tab)",
+    --         buf = args.buf,
+    --       },
+    --       ["ad"] = {
+    --         function()
+    --           vim.opt.switchbuf = "vsplit"
+    --           vim.lsp.buf.definition()
+    --         end,
+    --         "n",
+    --         desc = "Goto Lsp definition(vsplit)",
+    --         buf = args.buf,
+    --       },
+    --       ["sd"] = {
+    --         function()
+    --           vim.opt.switchbuf = "split"
+    --           vim.lsp.buf.definition()
+    --         end,
+    --         "n",
+    --         desc = "Goto Lsp definition(vsplit)",
+    --         buf = args.buf,
+    --       },
+    --     })
+    --   end,
+    --   [Methods.textDocument_typeDefinition] = function(args)
+    --     require("native-packer.key").add({
+    --       ["gy"] = {
+    --         function()
+    --           vim.lsp.buf.type_definition()
+    --         end,
+    --         "n",
+    --         desc = "Got Lsp type definition",
+    --         buf = args.buf,
+    --       },
+    --     })
+    --   end,
+    --   [Methods.textDocument_hover] = function(args)
+    --     require("native-packer.key").add({
+    --       ["<leader>k"] = {
+    --         function()
+    --           vim.lsp.buf.hover()
+    --         end,
+    --         "n",
+    --         buf = args.buf,
+    --         desc = "LSP Hover",
+    --       },
+    --     })
+    --   end,
+    --   [Methods.textDocument_signatureHelp] = function(args)
+    --     require("native-packer.key").add({
+    --       ["gs"] = {
+    --         function()
+    --           vim.lsp.buf.signature_help()
+    --         end,
+    --         "n",
+    --         buf = args.buf,
+    --         desc = "LSP Signature Help",
+    --       },
+    --     })
+    --   end,
+    -- }
+    --
+    -- vim.api.nvim_create_autocmd("LspAttach", {
+    --   group = vim.api.nvim_create_augroup("my.lsp", {}),
+    --   callback = function(args)
+    --     local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+    --     for method, callback in pairs(callbacks) do
+    --       if client:supports_method(method) then
+    --         callback(args, client)
+    --       end
+    --     end
+    --   end,
+    -- })
   end,
 }

@@ -202,7 +202,7 @@ return {
       "s",
       desc = "Expand word[left]",
     },
-    { "<C-left>", "t" },
+    -- { "<C-left>", "t" },
     {
       function()
         require("builtin.cmdline").prev_word_start()
@@ -214,7 +214,7 @@ return {
   ["<M-o>"] = {
     { "ea", "n", desc = "Forword to the end of the word[count] and start insert mode" },
     { "<Esc>ea", "i" },
-    { "<C-right>", "t" },
+    -- { "<C-right>", "t" },
     {
       function()
         require("builtin.expand-select").expand_select_right_word()

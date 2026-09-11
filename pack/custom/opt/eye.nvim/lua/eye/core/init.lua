@@ -77,15 +77,15 @@ end
 --- @param config Eye.Config
 function M.gaze(config)
   config = C:resolve(config or {})
-  local layer = Layer:new({}, config.layer)
+  -- local layer = Layer:new({}, config.layer)
   local root = Root:new(config)
   root:on("LeafCreatePost", attach_label_to_leaf)
-  root:on("BeforeNodeStart", function()
-    layer:draw()
-  end)
-  root:on("BuildPost", function()
-    set_default_layers(config.layers, layer, root)
-  end)
+  -- root:on("BeforeNodeStart", function()
+  --   layer:draw()
+  -- end)
+  -- root:on("BuildPost", function()
+  --   set_default_layers(config.layers, layer, root)
+  -- end)
   root:build()
   return root
 end

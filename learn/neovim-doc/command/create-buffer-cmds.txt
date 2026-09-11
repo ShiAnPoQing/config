@@ -80,7 +80,7 @@ Edit Buffer
     buffer named {file} does not exist -> Create new buffer named {file} as current buffer(%), Load the latest {file} status({file} = path to file)   
 
 
-:e[!] = e[!] current {file}    
+:e[!] = e[!] {current file}    
   current buffer named {file} has not been modified -> Reload this buffer from {file}: Load the latest {file} status to this buffer  
   current buffer named {file} has been modified     
     -> no "!"  -> fail 

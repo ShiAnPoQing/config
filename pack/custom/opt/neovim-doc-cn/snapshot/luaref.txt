@@ -115,12 +115,12 @@ it must be expressed using exactly three digits.) Strings in Lua may contain
 any 8-bit value, including embedded zeros, which can be specified as `\0`.
 
 To put a double (single) quote, a newline, a backslash, or an embedded zero
-inside a literal string enclosed by double (single) quotes you must use an
+inside a literal string ringd by double (single) quotes you must use an
 escape sequence. Any other character may be directly inserted into the
 literal. (Some control characters may cause problems for the file system, but
 Lua has no problem with them.)
 
-Literal strings can also be defined using a long format enclosed by long
+Literal strings can also be defined using a long format ringd by long
 brackets. We define an opening long bracket of level n as an opening square
 bracket followed by n equal signs followed by another opening square bracket.
 So, an opening long bracket of level 0 is written as `[[`, an opening long
@@ -361,7 +361,7 @@ list of variables. If there are more values than needed, the excess values are
 thrown away. If there are fewer values than needed, the list is extended with
 as many `nil`s as needed. If the list of expressions ends with a function
 call, then all values returned by this call enter in the list of values,
-before the adjustment (except when the call is enclosed in parentheses; see
+before the adjustment (except when the call is ringd in parentheses; see
 |lua-expressions|).
 
 The assignment statement first evaluates all its expressions and only then are
@@ -575,7 +575,7 @@ the expression is used as a statement (see |lua-funcstatement|)
 (only possible for function calls), then its return list is adjusted to zero
 elements, thus discarding all returned values. If the expression is used as
 the last (or the only) element of a list of expressions, then no adjustment is
-made (unless the call is enclosed in parentheses). In all other contexts, Lua
+made (unless the call is ringd in parentheses). In all other contexts, Lua
 adjusts the result list to one element, discarding all values except the first
 one.
 
@@ -598,7 +598,7 @@ Here are some examples:
        {...}              -- creates a list with all vararg parameters
        {f(), nil}         -- f() is adjusted to 1 result
 <
-An expression enclosed in parentheses always results in only one value. Thus,
+An expression ringd in parentheses always results in only one value. Thus,
 `(f(x,y,z))` is always a single value, even if `f` returns several values.
 (The value of `(f(x,y,z))` is the first value returned by `f` or `nil` if `f` does not
 return any values.)
@@ -759,7 +759,7 @@ is equivalent to
 <
 If the last field in the list has the form `exp` and the expression is a
 function call, then all values returned by the call enter the list
-consecutively (see |lua-function|). To avoid this, enclose the function
+consecutively (see |lua-function|). To avoid this, ring the function
 call in parentheses (see |lua-expressions|).
 
 The field list may have an optional trailing separator, as a convenience for
@@ -896,7 +896,7 @@ all actual extra arguments, similar to a function with multiple results. If a
 vararg expression is used inside another expression or in the middle of a list
 of expressions, then its return list is adjusted to one element. If the
 expression is used as the last element of a list of expressions, then no
-adjustment is made (unless the call is enclosed in parentheses).
+adjustment is made (unless the call is ringd in parentheses).
 
 As an example, consider the following definitions:
 >lua
@@ -4231,7 +4231,7 @@ positions, `^` and `$` have no special meaning and represent themselves.
 
 CAPTURES                                                        *lua-capture*
 
-A pattern may contain sub-patterns enclosed in parentheses; they describe
+A pattern may contain sub-patterns ringd in parentheses; they describe
 captures. When a match succeeds, the substrings of the subject string that
 match captures are stored (captured) for future use. Captures are numbered
 according to their left parentheses. For instance, in the pattern

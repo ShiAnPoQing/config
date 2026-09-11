@@ -27,7 +27,34 @@ return {
         require("buffer-swap").buffer_swap("up")
       end,
       "n",
-
+      desc = "Swap buffers with the above window",
+    },
+    ["<C-w>H"] = {
+      function()
+        require("buffer-swap").buffer_swap("left")
+      end,
+      "n",
+      desc = "Swap buffers with the left window",
+    },
+    ["<C-w>L"] = {
+      function()
+        require("buffer-swap").buffer_swap("right")
+      end,
+      "n",
+      desc = "Swap buffers with the right window",
+    },
+    ["<C-w>J"] = {
+      function()
+        require("buffer-swap").buffer_swap("down")
+      end,
+      "n",
+      desc = "Swap buffers with the below window",
+    },
+    ["<C-w>K"] = {
+      function()
+        require("buffer-swap").buffer_swap("up")
+      end,
+      "n",
       desc = "Swap buffers with the above window",
     },
   },

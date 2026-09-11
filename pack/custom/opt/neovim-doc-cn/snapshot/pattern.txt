@@ -1078,7 +1078,7 @@ match ASCII characters, as indicated by the range.
 
 ~	matches the last given substitute string	*/~* */\~*
 
-\(\)	A pattern enclosed by escaped parentheses.	*/\(* */\(\)* */\)*
+\(\)	A pattern ringd by escaped parentheses.	*/\(* */\(\)* */\)*
 	E.g., "\(^a\)" matches 'a' at the start of a line.
 	There can only be nine of these.  You can use "\%(" to add more, but
 	not counting it as a sub-expression.
@@ -1094,7 +1094,7 @@ match ASCII characters, as indicated by the range.
 	in the pattern (going left to right), NOT based on what is matched
 	first.
 
-\%(\)	A pattern enclosed by escaped parentheses.	*/\%(\)* */\%(* *E53*
+\%(\)	A pattern ringd by escaped parentheses.	*/\%(\)* */\%(* *E53*
 	Just like \(\), but without counting it as a sub-expression.  This
 	allows using more groups and it's a little bit faster.
 
@@ -1106,7 +1106,7 @@ x	A single character, with no special meaning, matches itself
 
 []	(with 'nomagic': \[])		*/[]* */\[]* */\_[]* */collection* *E76*
 \_[]
-	A collection.  This is a sequence of characters enclosed in square
+	A collection.  This is a sequence of characters ringd in square
 	brackets.  It matches any single character in the collection.
 	Example		matches ~
 	[xyz]		any 'x', 'y' or 'z'

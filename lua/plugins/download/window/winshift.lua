@@ -1,6 +1,62 @@
 return {
   "sindrets/winshift.nvim",
   cmd = "WinShift",
+  key = {
+    ["<C-W>?"] = {
+      function()
+        require("winshift").cmd_winshift("swap")
+      end,
+      { "n", "x"}
+    },
+    ["<C-W>H"] = {
+      function()
+        require("winshift").cmd_winshift("left")
+      end,
+      { "n", "x" },
+    },
+    ["<C-W>L"] = {
+      function()
+        require("winshift").cmd_winshift("right")
+      end,
+      { "n", "x" },
+    },
+    ["<C-W>J"] = {
+      function()
+        require("winshift").cmd_winshift("down")
+      end,
+      { "n", "x" },
+    },
+    ["<C-W>K"] = {
+      function()
+        require("winshift").cmd_winshift("up")
+      end,
+      { "n", "x" },
+    },
+    ["<C-W><C-W>H"] = {
+      function()
+        require("winshift").cmd_winshift("far_left")
+      end,
+      { "n", "x" },
+    },
+    ["<C-W><C-W>L"] = {
+      function()
+        require("winshift").cmd_winshift("far_right")
+      end,
+      { "n", "x" },
+    },
+    ["<C-W><C-W>J"] = {
+      function()
+        require("winshift").cmd_winshift("far_down")
+      end,
+      { "n", "x" },
+    },
+    ["<C-W><C-W>K"] = {
+      function()
+        require("winshift").cmd_winshift("far_up")
+      end,
+      { "n", "x" },
+    },
+  },
   config = function()
     -- Lua
     require("winshift").setup({

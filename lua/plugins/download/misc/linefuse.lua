@@ -18,7 +18,7 @@ return {
         end,
         "n",
         expr = true,
-        exclude_ft = "oil",
+        exclude_ft = { "oil", "netrw", "directory" },
       },
       desc = "Join One Line",
     },

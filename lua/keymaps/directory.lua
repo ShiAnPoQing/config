@@ -15,21 +15,10 @@
 ---------------------------------------------------------------------------------------------------+
 
 return {
-  ["<leader>cd"] = {
-    "<cmd>CdFileDir<CR>",
-    "n",
-    desc = "Change directory to file",
-  },
-  ["<leader>tcd"] = {
-    "<cmd>TcdFileDir<CR>",
-    "n",
-    desc = "Change directory to file(Tab page)",
-  },
-  ["<leader>lcd"] = {
-    "<cmd>LcdFileDir<CR>",
-    "n",
-    desc = "Change directory to file(Current Buffer)",
-  },
+  ["<leader>cd"] = { "<cmd>Cd<CR>", "n", desc = "Change directory to file(Global)" },
+  ["<leader>tcd"] = { "<cmd>Tcd<CR>", "n", desc = "Change directory to file(Current Tabpage)" },
+  ["<leader>lcd"] = { "<cmd>Lcd<CR>", "n", desc = "Change directory to file(Current Window)" },
+  ["<leader>bcd"] = { "<cmd>Bcd<CR>", "n", desc = "Change directory to file(Current Buffer)" },
 }
 
 --[[

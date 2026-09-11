@@ -3,6 +3,12 @@ return {
     "nvim-treesitter/nvim-treesitter-textobjects",
     version = "main",
     key = {
+      ["<leader><leader>fo"] = {
+        function()
+          require("nvim-treesitter-textobjects.select").select_textobject("@function.outer", "textobjects")
+        end,
+        { "n", "x" },
+      },
       ["]f"] = {
         function()
           require("nvim-treesitter-textobjects.move").goto_next_start("@function.outer", "textobjects")
@@ -31,34 +37,34 @@ return {
         "n",
         desc = "Previous function end",
       },
-      ["]c"] = {
-        function()
-          require("nvim-treesitter-textobjects.move").goto_next_start("@comment.outer", "textobjects")
-        end,
-        "n",
-        desc = "Next comment start",
-      },
-      ["[c"] = {
-        function()
-          require("nvim-treesitter-textobjects.move").goto_previous_start("@comment.outer", "textobjects")
-        end,
-        "n",
-        desc = "Previous comment start",
-      },
-      ["]C"] = {
-        function()
-          require("nvim-treesitter-textobjects.move").goto_next_end("@comment.outer", "textobjects")
-        end,
-        "n",
-        desc = "Next comment end",
-      },
-      ["[C"] = {
-        function()
-          require("nvim-treesitter-textobjects.move").goto_previous_end("@comment.outer", "textobjects")
-        end,
-        "n",
-        desc = "Previous comment end",
-      },
+      -- ["]c"] = {
+      --   function()
+      --     require("nvim-treesitter-textobjects.move").goto_next_start("@comment.outer", "textobjects")
+      --   end,
+      --   "n",
+      --   desc = "Next comment start",
+      -- },
+      -- ["[c"] = {
+      --   function()
+      --     require("nvim-treesitter-textobjects.move").goto_previous_start("@comment.outer", "textobjects")
+      --   end,
+      --   "n",
+      --   desc = "Previous comment start",
+      -- },
+      -- ["]C"] = {
+      --   function()
+      --     require("nvim-treesitter-textobjects.move").goto_next_end("@comment.outer", "textobjects")
+      --   end,
+      --   "n",
+      --   desc = "Next comment end",
+      -- },
+      -- ["[C"] = {
+      --   function()
+      --     require("nvim-treesitter-textobjects.move").goto_previous_end("@comment.outer", "textobjects")
+      --   end,
+      --   "n",
+      --   desc = "Previous comment end",
+      -- },
     },
     config = function()
       require("nvim-treesitter-textobjects").setup({
@@ -106,14 +112,14 @@ return {
         "bash",
         "html",
         "css",
-        "vimdoc",
+        -- "vimdoc",
         "xml",
         "jsdoc",
         "json",
         "diff",
         "query",
         "vue",
-        "vim",
+        -- "vim",
         "commonlisp",
       }
       local TS = require("nvim-treesitter")

@@ -79,7 +79,6 @@ function Line_break:line_break(line, cursor)
 end
 
 local function _line_break()
-  local mode = vim.api.nvim_get_mode().mode
   local cursor_pos = vim.api.nvim_win_get_cursor(0)
   local virtcol = vim.fn.virtcol(".")
   return function(type)

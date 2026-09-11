@@ -3,13 +3,13 @@ return {
   -- lazy = false,
   priority = 1000,
   key = {
-    ["<leader>e"] = {
-      function()
-        Snacks.explorer()
-      end,
-      "n",
-      desc = "File Explorer",
-    },
+    -- ["<leader>e"] = {
+    --   function()
+    --     Snacks.explorer()
+    --   end,
+    --   "n",
+    --   desc = "File Explorer",
+    -- },
     ["<leader>,"] = {
       function()
         Snacks.picker.buffers()
@@ -67,7 +67,7 @@ return {
           -- { section = "startup" },
         },
       },
-      explorer = { enabled = true },
+      explorer = { enabled = false },
       indent = { enabled = true, char = "│", animate = { enabled = false } },
       input = {
         enabled = true,

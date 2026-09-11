@@ -1,3 +1,7 @@
 # My Neovim Config
 
-仅供参考！
+keymap
+autocmd
+command
+local plugin
+repo plugin

@@ -1,5 +1,3 @@
-local count = 0
-
 return {
   "rebelot/heirline.nvim",
   config = function()

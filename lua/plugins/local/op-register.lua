@@ -19,6 +19,7 @@ return {
       function()
         require("op-register").copy("yy")
       end,
+      { "n", "x" },
       desc = "Yank to register",
     },
     ["<space>p"] = {
@@ -53,6 +54,7 @@ return {
       function()
         require("op-register").delete("dd")
       end,
+      { "n", "x" },
       desc = "Delete into register",
     },
     ["<space>x"] = {
@@ -87,6 +89,7 @@ return {
       function()
         require("op-register").change("cc")
       end,
+      { "n", "x" },
       desc = "Change into register",
     },
   },

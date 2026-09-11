@@ -12,7 +12,7 @@ return {
   depend = { "echasnovski/mini.icons" },
   cmd = { "Oil" },
   key = {
-    ["<leader>oi"] = { "<cmd>Oil<cr>", "n" },
+    ["<leader>oi"] = { "<cmd>Oil<cr>", "n", "oil.nvim: <cmd>Oil<cr>" },
   },
   config = function()
     require("oil").setup({

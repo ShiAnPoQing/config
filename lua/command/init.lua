@@ -1,27 +1,33 @@
-vim.api.nvim_create_user_command("CdFileDir", function()
+vim.api.nvim_create_user_command("Cd", function()
   local path = vim.fn.expand("%:p:h")
   if path ~= nil and vim.uv.fs_stat(path) then
-    vim.fn.chdir(path)
-    vim.api.nvim_echo({ { "cd: ", "Special" }, { path, "String" } }, true, {})
+    vim.cmd.cd(path)
   end
 end, {})
 
-vim.api.nvim_create_user_command("TcdFileDir", function()
+vim.api.nvim_create_user_command("Tcd", function()
   local path = vim.fn.expand("%:p:h")
   if path ~= nil and vim.uv.fs_stat(path) then
     vim.cmd.tcd(path)
-    vim.api.nvim_echo({ { "tcd: ", "Special" }, { path, "String" } }, true, {})
   end
 end, {})
 
-vim.api.nvim_create_user_command("LcdFileDir", function()
+vim.api.nvim_create_user_command("Lcd", function()
   local path = vim.fn.expand("%:p:h")
   if path ~= nil and vim.uv.fs_stat(path) then
     vim.cmd.lcd(path)
-    vim.api.nvim_echo({ { "lcd: ", "Special" }, { path, "String" } }, true, {})
   end
 end, {})
 
+vim.api.nvim_create_user_command("Bcd", function()
+  local path = vim.fn.expand("%:p:h")
+  if path ~= nil and vim.uv.fs_stat(path) then
+    vim.cmd.bcd(path)
+  end
+end, {})
+
+require("command.help")
+require("command.buffer")
 -- -- 创建工作区目录列表
 -- local workspaces = {
 --   "~/Project",

@@ -1,0 +1,60 @@
+*textobject.txt* 
+
+==============================================================================
+textobject
+
+which textobject ~
+							    *textobject-logic*
+
+1. 在操作符之后使用：
+    1. 对于非块对象：
+	1. outer object: 如果对象后没有空白，或者光标在对象前的空白中，则包括对象前的空白
+	2. inner object: 如果光标在对象上，操作符应用于对象。
+			 如果光标在空白上，操作符应用于空白
+    2. 对于块对象：操作符应用于光标所在的块，或者光标位于其括号之一的块
+	1. outer block: 包括 surround
+	2. inner block: 不包括 surround
+
+2. 在可视模式使用：
+    1.当可视区域的开始和结束相同时（刚输入 "v" 之后）
+	1. 选中文本对象，就像操作符
+    2.当可视区域的开始和结束不相同时
+	1. 对于非块对象：扩展对象，方向取决于光标位于可视区域的哪一侧
+		1. outer object: 扩展一个对象直到下一个对象的空白(包括)
+		2. inner object: 扩展一个对象(不包括空白)
+	2. 对于块对象：块向外扩展一级
+
+==============================================================================
+Create Custom Textobject
+
+							  *create-textobject*
+>vim
+    " text-object: entire buffer
+    function! s:line_outer_movement(count) abort
+      if empty(getline(1)) && 1 == line('$')
+        return "\<Esc>"
+      endif
+      let [lopen, copen, lclose, cclose] = [1, 1, line('$'), 1]
+      call setpos("'[", [0, lopen, copen, 0])
+      call setpos("']", [0, lclose, cclose, 0])
+      return "'[o']"
+    endfunction
+    xnoremap <expr>   al <SID>line_outer_movement(v:count1)
+    onoremap <silent> al :normal Val<CR>
+
+    " text-object: line
+    function! s:line_inner_movement(count) abort
+      "TODO: handle count
+      if empty(getline('.'))
+        return "\<Esc>"
+      endif
+      let [lopen, copen, lclose, cclose] = [line('.'), 1, line('.'), col('$')-1]
+      call setpos("'[", [0, lopen, copen, 0])
+      call setpos("']", [0, lclose, cclose, 0])
+      return "`[o`]"
+    endfunction
+    xnoremap <expr>   il <SID>line_inner_movement(v:count1)
+    onoremap <silent> il :normal vil<CR>
+<
+
+vim:tw=78:ts=8:noet:ft=help:norl:

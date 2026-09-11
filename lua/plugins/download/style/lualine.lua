@@ -7,10 +7,9 @@ return {
   config = function()
     local navic = require("nvim-navic")
     navic.setup({
-      ---@diagnostic disable-next-line: missing-fields
       lsp = {
         auto_attach = true,
-        preference = nil,
+        preference = { "emmylua_ls", "lua_ls" },
       },
       highlight = true,
     })
@@ -27,7 +26,8 @@ return {
         ignore_focus = {},
         always_divide_middle = true,
         always_show_tabline = true,
-        globalstatus = false,
+        --- laststatus = 3
+        globalstatus = true,
         refresh = {
           statusline = 1000,
           tabline = 1000,
@@ -61,17 +61,17 @@ return {
               newfile = "[New]", -- Text to show for newly created file before first write
             },
           },
-          -- {
-          --   function()
-          --     local n = navic.get_location() or ""
-          --     return n:gsub("(%*%%#(NavicIcons%w+)#)(.-)(%%*%%#)NavicText#", function(full, icon, middle, prefix)
-          --       return full .. middle .. prefix .. icon .. "#"
-          --     end)
-          --   end,
-          --   cond = function()
-          --     return navic.is_available()
-          --   end,
-          -- },
+          {
+            function()
+              local n = navic.get_location() or ""
+              return n:gsub("(%*%%#(NavicIcons%w+)#)(.-)(%%*%%#)NavicText#", function(full, icon, middle, prefix)
+                return full .. middle .. prefix .. icon .. "#"
+              end)
+            end,
+            cond = function()
+              return navic.is_available()
+            end,
+          },
         },
         lualine_x = { "filetype" },
         lualine_y = { "progress" },

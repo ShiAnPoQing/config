@@ -16,12 +16,18 @@
 
 return {
   ["<CR>"] = {
-    "zo",
+    function()
+      if vim.fn.foldlevel(vim.fn.line(".")) > 0 then
+        return "zo"
+      end
+    end,
     "n",
+    expr = true,
+    exclude_ft = { "prompt", "qf", "neo-tree", "netrw" },
   },
   -- ["<S-CR>"] = {
   --   "zMzv",
   --   "n",
-  --   desc = "Focus current Fold",
+  --   desc = "Focus current Fold",   
   -- },
 }

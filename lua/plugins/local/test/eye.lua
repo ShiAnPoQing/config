@@ -1,7 +1,6 @@
 return {
   name = "eye.nvim",
   depend = "reasonable-scroll.nvim",
-  lazy = false,
   key = {
     ["0k"] = {
       {
@@ -368,6 +367,7 @@ return {
     },
     ["0eW"] = {
       function()
+        -- 中文
         require("eye.plugin.word").gaze({
           regex = function(ctx)
             return ctx["WORD.inner"]

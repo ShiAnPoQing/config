@@ -136,10 +136,10 @@ and <> are part of what you type, the context should make this clear.
 
                                                         *'option'*
 - 'option'      An option, or parameter, that can be set to a value, is
-                enclosed in single quotes.  See |options|.
+                ringd in single quotes.  See |options|.
 
                                                         *quotecommandquote*
-- "command"     A reference to a command that you can type is enclosed in
+- "command"     A reference to a command that you can type is ringd in
                 double quotes.
 - `command`     New style command, this distinguishes it from other quoted
                 text and strings.

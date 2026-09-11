@@ -1,21 +1,17 @@
 local M = {}
 
 function M.setup()
-  vim.api.nvim_create_autocmd("RecordingEnter", {
-    callback = function()
-      require("native-macro.record"):start()
-    end,
-  })
-  vim.api.nvim_create_autocmd("RecordingLeave", {
-    callback = function()
-      require("native-macro.record"):stop()
-    end,
-  })
+  require("native-macro._record").init()
+  require("native-macro._repeat").init()
 end
+
+-- {0-9a-z".=*+}
 function M._repeat()
   ---@diagnostic disable-next-line: param-type-mismatch
   local char = vim.fn.nr2char(vim.fn.getchar())
-  require("native-macro.repeat"):_repeat(char)
+  require("native-macro._repeat"):_repeat(char)
 end
+
+function M.user() end
 
 return M

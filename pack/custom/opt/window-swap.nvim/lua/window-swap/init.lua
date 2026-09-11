@@ -88,4 +88,6 @@ function M.window_swap(direction)
   end
 end
 
+local wins = vim.api.n
+
 return M

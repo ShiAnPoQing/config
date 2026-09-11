@@ -1,12 +1,98 @@
 return {
   "ibhagwan/fzf-lua",
   depend = { "nvim-tree/nvim-web-devicons" },
+  cmd = { "FzfLua", "FzfDir", "FzfFt", "FzfPlugin" },
+  before = function()
+    vim.api.nvim_create_user_command("FzfDir", function(ev)
+      local fzf_lua = require("fzf-lua")
+      local root = ev.args == "" and "." or ev.args
+      local opts = {
+        winopts = {
+          title = "Directory",
+        },
+        cwd = root,
+        fzf_opts = {
+          ["--preview"] = [[
+          p={};
+          p="${p/#\~/$HOME}";
+          tree "$p"
+          ]],
+          ["--preview-window"] = "nohidden,right,50%",
+        },
+        actions = {
+          ["default"] = function(selected)
+            ---@diagnostic disable-next-line: param-type-mismatch
+            pcall(vim.cmd, "Explore " .. selected[1])
+          end,
+        },
+        fn_transform = function(x)
+          local ansi_codes = require("fzf-lua.utils").ansi_codes
+
+          local display = x
+
+          if vim.startswith(x, ".") then
+            display = x:sub(3)
+          end
+
+          return ansi_codes.magenta(display)
+        end,
+      }
+      local path = vim.fn.fnamemodify(root, ":p")
+      if vim.startswith(path, vim.env.HOME) then
+        path = path:gsub(vim.env.HOME, "~")
+      end
+      opts.prompt = path .. ""
+      fzf_lua.fzf_exec("find -mindepth 1 -type d \\( -name .git -print -prune -o -type d -print \\)", opts)
+    end, {
+      nargs = "?",
+      complete = "dir",
+    })
+    vim.api.nvim_create_user_command("FzfFt", function()
+      require("fzf-lua").filetypes()
+    end, {})
+    vim.api.nvim_create_user_command("FzfPlugin", function(ev)
+      local opts = {
+        winopts = {
+          title = "Plugins",
+          row = 1, -- window row position (0=top, 1=bottom)
+          col = 0.50,
+          width = 1,
+          height = 0.5,
+          backdrop = 100,
+        },
+        query = table.concat(ev.fargs, " "),
+        fzf_opts = {
+          ["--style"] = "minimal",
+          ["--with-nth"] = "1",
+          ["--delimiter"] = "\t",
+          ["--nth"] = "1",
+          ["--preview"] = "tree {2}",
+          ["--preview-window"] = "nohidden,right,50%",
+        },
+        actions = {
+          ["default"] = function(selected)
+            local path = vim.fn.split(selected[1], "\t")[2]
+            if path then
+              vim.cmd("cd " .. path)
+              vim.cmd("e " .. path)
+            end
+          end,
+        },
+      }
+      local search = string.format(
+        "find %s -path '*/pack/*/opt/*' -maxdepth 4 -type d -printf '%%f\\t%%p\\n'",
+        table.concat(vim.opt.packpath:get(), " ")
+      )
+      require("fzf-lua").fzf_exec(search, opts)
+    end, {
+      nargs = "*",
+    })
+  end,
   key = {
     ["<leader>fd"] = {
-      "<cmd>FzFDirectories<CR>",
+      "<cmd>FzfDir<CR>",
       "n",
     },
-    -- Hot
     ["<leader>ff"] = {
       function()
         require("fzf-lua").files()
@@ -457,13 +543,13 @@ return {
       "n",
       desc = "Lsp Workspace Symbols",
     },
-    -- ["<leader>llws"] = {
-    --   function()
-    --     require("fzf-lua").lsp_live_workspace_symbols()
-    --   end,
-    --   "n",
-    --   desc = "Lsp Live Workspace Symbols",
-    -- },
+    ["<leader>ws"] = {
+      function()
+        require("fzf-lua").lsp_live_workspace_symbols()
+      end,
+      "n",
+      desc = "Lsp Live Workspace Symbols",
+    },
     ["<leader>ltd"] = {
       function()
         require("fzf-lua").lsp_typedefs()
@@ -520,10 +606,6 @@ return {
     },
   },
   config = function()
-    local fzf = require("fzf-lua")
-    vim.api.nvim_create_user_command("FzfFileTypes", function()
-      fzf.filetypes()
-    end, {})
     require("fzf-lua").setup({
       winopts = {
         -- split = "belowright new",
@@ -567,32 +649,5 @@ return {
         },
       },
     })
-    vim.api.nvim_create_user_command("FzFDirectories", function()
-      local fzf_lua = require("fzf-lua")
-      local opts = {
-        winopts = {
-          title = "Directory",
-        },
-      }
-      local path = vim.fn.getcwd(0)
-      opts.prompt = path .. "> "
-
-      opts.fn_transform = function(x)
-        local ansi_codes = require("fzf-lua.utils").ansi_codes
-        return ansi_codes.magenta(x)
-      end
-
-      opts.fzf_opts = {
-        ["--preview"] = "tree {}",
-        ["--preview-window"] = "nohidden,right,50%",
-      }
-
-      opts.actions = {
-        ["default"] = function(selected)
-          vim.cmd("cd " .. selected[1])
-        end,
-      }
-      fzf_lua.fzf_exec("fd --type d --hidden", opts)
-    end, {})
   end,
 }

@@ -5559,7 +5559,7 @@ A jump table for the options with a short description can be found at |Q_op|.
 	See |option-backslash| about including spaces and backslashes.
 	Environment variables are expanded |:set_env|.
 
-	If the name of the shell contains a space, you need to enclose it in
+	If the name of the shell contains a space, you need to ring it in
 	quotes.  Example with quotes: >vim
 		set shell=\"c:\program\ files\unix\sh.exe\"\ -f
 <	Note the backslash before each quote (to avoid starting a comment) and

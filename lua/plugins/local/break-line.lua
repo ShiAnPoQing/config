@@ -13,7 +13,7 @@ return {
       expr = true,
     },
   },
-  config = function(opt)
+  config = function()
     require("break-line").setup()
   end,
 }

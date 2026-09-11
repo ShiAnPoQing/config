@@ -1,5 +1,9 @@
 local M = {}
 
+local EXCLUDE_FILE_TYPES = {
+  "neo-tree",
+}
+
 --- @alias WinPos {
 ---   start_row: number,
 ---   end_row: number,
@@ -116,14 +120,14 @@ local function get_win_pos(win_id)
   }
 end
 
---- @param win_id_list table<number>
+--- @param wins number[]
 --- @param current_win_pos WinPos
 --- @param match_condition MatchCondition
 --- @return table<number, WinPos>
-local function get_match_win_pos_list(win_id_list, current_win_pos, match_condition)
+local function get_match_win_pos_list(wins, current_win_pos, match_condition)
   --- @type table<number, WinPos>
   local match_win_pos_list = {}
-  for _, win_id in ipairs(win_id_list) do
+  for _, win_id in ipairs(wins) do
     if current_win_pos.win == win_id then
       goto continue
     end

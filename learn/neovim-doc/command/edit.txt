@@ -1,3 +1,29 @@
+编辑一个 buffer
+
+- edit exist buffer
+    - buffer 存在 path to file
+    - buffer 不存在 paht to file
+- create a new buffer named {file}
+
+1. 判断是否能切换 buffer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 							*:ex*
 :ex [++opt] [+cmd] [file]
 			与 |:edit| 相同。

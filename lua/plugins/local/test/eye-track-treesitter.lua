@@ -600,80 +600,80 @@ return {
         desc = "@statement.inner",
       },
     },
-    ["0cd"] = {
-      {
-        function()
-          require("eye-track-treesitter").treesitter({
-            language = "lua",
-            query = "condition",
-            scm = "textobjects",
-          })
-        end,
-        { "x", "o" },
-        ft = "lua",
-        desc = "@condition",
-      },
-      {
-        function()
-          require("eye-track-treesitter").treesitter({
-            language = "typescript",
-            query = "condition",
-            scm = "textobjects",
-          })
-        end,
-        { "x", "o" },
-        ft = "typescript",
-        desc = "@condition",
-      },
-      {
-        function()
-          require("eye-track-treesitter").treesitter({
-            language = "tsx",
-            query = "condition",
-            scm = "textobjects",
-          })
-        end,
-        { "x", "o" },
-        ft = "typescriptreact",
-        desc = "@condition",
-      },
-      {
-        function()
-          require("eye-track-treesitter").treesitter({
-            language = "javascript",
-            query = "condition",
-            scm = "textobjects",
-          })
-        end,
-        { "x", "o" },
-        ft = "javascript",
-        desc = "@condition",
-      },
-      {
-        function()
-          require("eye-track-treesitter").treesitter({
-            language = "c",
-            query = "condition",
-            scm = "textobjects",
-          })
-        end,
-        { "x", "o" },
-        ft = "c",
-        desc = "@condition",
-      },
-      {
-        function()
-          require("eye-track-treesitter").treesitter({
-            language = "latex",
-            query = "command",
-            scm = "textobjects",
-          })
-        end,
-        { "x", "o" },
-        ft = "tex",
-        desc = "@command",
-      },
-    },
+    -- ["0cd"] = {
+    --   {
+    --     function()
+    --       require("eye-track-treesitter").treesitter({
+    --         language = "lua",
+    --         query = "condition",
+    --         scm = "textobjects",
+    --       })
+    --     end,
+    --     { "x", "o" },
+    --     ft = "lua",
+    --     desc = "@condition",
+    --   },
+    --   {
+    --     function()
+    --       require("eye-track-treesitter").treesitter({
+    --         language = "typescript",
+    --         query = "condition",
+    --         scm = "textobjects",
+    --       })
+    --     end,
+    --     { "x", "o" },
+    --     ft = "typescript",
+    --     desc = "@condition",
+    --   },
+    --   {
+    --     function()
+    --       require("eye-track-treesitter").treesitter({
+    --         language = "tsx",
+    --         query = "condition",
+    --         scm = "textobjects",
+    --       })
+    --     end,
+    --     { "x", "o" },
+    --     ft = "typescriptreact",
+    --     desc = "@condition",
+    --   },
+    --   {
+    --     function()
+    --       require("eye-track-treesitter").treesitter({
+    --         language = "javascript",
+    --         query = "condition",
+    --         scm = "textobjects",
+    --       })
+    --     end,
+    --     { "x", "o" },
+    --     ft = "javascript",
+    --     desc = "@condition",
+    --   },
+    --   {
+    --     function()
+    --       require("eye-track-treesitter").treesitter({
+    --         language = "c",
+    --         query = "condition",
+    --         scm = "textobjects",
+    --       })
+    --     end,
+    --     { "x", "o" },
+    --     ft = "c",
+    --     desc = "@condition",
+    --   },
+    --   {
+    --     function()
+    --       require("eye-track-treesitter").treesitter({
+    --         language = "latex",
+    --         query = "command",
+    --         scm = "textobjects",
+    --       })
+    --     end,
+    --     { "x", "o" },
+    --     ft = "tex",
+    --     desc = "@command",
+    --   },
+    -- },
     ["0el"] = {
       {
         function()
@@ -798,52 +798,52 @@ return {
       ft = "c",
       desc = "@include.path",
     },
-    ["0co"] = {
-      {
-        function()
-          local function callback()
-            require("eye-track-treesitter").treesitter({
-              language = "lua",
-              query = "comment.outer",
-              scm = "textobjects",
-            })
-            require("repeat").set_operation(callback)
-          end
-          callback()
-        end,
-        { "x", "o" },
-        ft = "lua",
-        desc = "@comment.outer",
-      },
-      {
-        function()
-          local function callback()
-            require("eye-track-treesitter").treesitter({
-              language = "latex",
-              query = "comment.outer",
-              scm = "textobjects",
-            })
-            require("repeat").set_operation(callback)
-          end
-          callback()
-        end,
-        { "x", "o" },
-        ft = "tex",
-        desc = "@comment.outer",
-      },
-    },
-    ["0ci"] = {
-      function()
-        require("eye-track-treesitter").treesitter({
-          language = "lua",
-          query = "comment.inner",
-          scm = "textobjects",
-        })
-      end,
-      { "x", "o" },
-      ft = "lua",
-      desc = "@comment.inner",
-    },
+    -- ["0co"] = {
+    --   {
+    --     function()
+    --       local function callback()
+    --         require("eye-track-treesitter").treesitter({
+    --           language = "lua",
+    --           query = "comment.outer",
+    --           scm = "textobjects",
+    --         })
+    --         require("repeat").set_operation(callback)
+    --       end
+    --       callback()
+    --     end,
+    --     { "x", "o" },
+    --     ft = "lua",
+    --     desc = "@comment.outer",
+    --   },
+    --   {
+    --     function()
+    --       local function callback()
+    --         require("eye-track-treesitter").treesitter({
+    --           language = "latex",
+    --           query = "comment.outer",
+    --           scm = "textobjects",
+    --         })
+    --         require("repeat").set_operation(callback)
+    --       end
+    --       callback()
+    --     end,
+    --     { "x", "o" },
+    --     ft = "tex",
+    --     desc = "@comment.outer",
+    --   },
+    -- },
+    -- ["0ci"] = {
+    --   function()
+    --     require("eye-track-treesitter").treesitter({
+    --       language = "lua",
+    --       query = "comment.inner",
+    --       scm = "textobjects",
+    --     })
+    --   end,
+    --   { "x", "o" },
+    --   ft = "lua",
+    --   desc = "@comment.inner",
+    -- },
     ["ev"] = {
       function()
         require("eye-track-treesitter").treesitter({
@@ -880,29 +880,29 @@ return {
       ft = "tex",
       desc = "@package.include",
     },
-    ["0cn"] = {
-      function()
-        require("eye-track-treesitter").treesitter({
-          language = "latex",
-          query = "command.name",
-          scm = "textobjects",
-        })
-      end,
-      { "x", "o" },
-      ft = "tex",
-      desc = "@command.name",
-    },
-    ["0ca"] = {
-      function()
-        require("eye-track-treesitter").treesitter({
-          language = "latex",
-          query = "command.arg",
-          scm = "textobjects",
-        })
-      end,
-      { "x", "o" },
-      ft = "tex",
-      desc = "@command.arg",
-    },
+    -- ["0cn"] = {
+    --   function()
+    --     require("eye-track-treesitter").treesitter({
+    --       language = "latex",
+    --       query = "command.name",
+    --       scm = "textobjects",
+    --     })
+    --   end,
+    --   { "x", "o" },
+    --   ft = "tex",
+    --   desc = "@command.name",
+    -- },
+    -- ["0ca"] = {
+    --   function()
+    --     require("eye-track-treesitter").treesitter({
+    --       language = "latex",
+    --       query = "command.arg",
+    --       scm = "textobjects",
+    --     })
+    --   end,
+    --   { "x", "o" },
+    --   ft = "tex",
+    --   desc = "@command.arg",
+    -- },
   },
 }

@@ -1,5 +1,14 @@
 return {
   {
+    "slugbyte/lackluster.nvim",
+    -- lazy = false,
+    priority = 1000,
+    colorscheme = "lackluster",
+    config = function()
+      vim.cmd.colorscheme("lackluster")
+    end,
+  },
+  {
     "rose-pine/neovim",
     -- lazy = false,
     colorscheme = {
@@ -23,10 +32,6 @@ return {
     config = function()
       vim.g.moonflyTransparent = true
       vim.g.moonflyVirtualTextColor = true
-      require("moonfly").custom_colors({
-        -- bg = "#000000",
-        -- violet = "#ff74b8",
-      })
       vim.cmd([[colorscheme moonfly]])
     end,
   },
@@ -42,8 +47,9 @@ return {
       "tokyonight-moon",
     },
     config = function()
+      ---@diagnostic disable-next-line: missing-fields
       require("tokyonight").setup({
-        transparent = true,
+        -- transparent = true,
       })
       vim.cmd.colorscheme("tokyonight-night")
     end,
@@ -54,6 +60,9 @@ return {
     lazy = false,
     colorscheme = "paradox",
     config = function()
+      -- require("paradox.utils").set_surface_hsl(50, 30)
+      require("paradox.utils").set_surface_hsl(200, 30)
+      -- require("paradox.utils").offset_hue_hsl(20, 10)
       require("paradox").setup()
       local time = tonumber(os.date("%H"))
       if time >= 17 or time < 7 then
@@ -61,8 +70,15 @@ return {
       else
         vim.o.background = "light"
       end
-      vim.o.background = "light"
       vim.cmd([[colorscheme paradox]])
+
+      local colors = require("paradox").get_colors()
+      local r_h, _ = require("paradox.utils").hex_to_hsl(colors.hues.hue72)
+      local _, s, l = require("paradox.utils").hex_to_hsl(colors.names.bg)
+      local c = require("paradox.utils").hsl_to_hex(r_h, s, l)
+      vim.api.nvim_set_hl(0, "DiagnosticLineError", { bg = c })
+      vim.api.nvim_set_hl(0, "DiagnosticNumberError", { fg = colors.names.red, bg = c })
+      vim.api.nvim_set_hl(0, "TabLineSelModified", { fg = colors.names.yellow_green })
     end,
   },
   {
@@ -76,6 +92,7 @@ return {
   {
     "AlexvZyl/nordic.nvim",
     priority = 1000,
+    -- lazy = false,
     colorscheme = "nordic",
     config = function()
       ---@diagnostic disable-next-line: missing-parameter
@@ -101,13 +118,13 @@ return {
     colorscheme = "everforest",
     config = function()
       vim.g.everforest_enable_italic = true
-      vim.opt.background = "dark"
+      vim.o.background = "dark"
       vim.cmd.colorscheme("everforest")
     end,
   },
   {
     "Iron-E/nvim-highlite",
-    lazy = true,
+    -- lazy = false,
     colorscheme = {
       "highlite",
       "highlite-ayu",
@@ -120,7 +137,7 @@ return {
     },
     config = function()
       require("highlite").setup({ generator = { plugins = { vim = false }, syntax = false } })
-      vim.cmd("colorscheme highlite-iceberg")
+      vim.cmd("colorscheme highlite-everforest")
     end,
     -- version = "^4.0.0",
   },
@@ -147,13 +164,22 @@ return {
     end,
   },
   {
-    "rmehri01/onenord.nvim",
-    priority = 1000,
-    lazy = true,
-    colorscheme = "onenord",
+    "shaunsingh/nord.nvim",
+    -- lazy = false,
+    colorscheme = "nord",
     config = function()
-      require("onenord").setup()
-      vim.cmd("colorscheme onenord")
+      require("nord")
+      vim.cmd([[colorscheme nord]])
     end,
   },
+  -- {
+  --   "rmehri01/onenord.nvim",
+  --   priority = 1000,
+  --   -- lazy = true,
+  --   colorscheme = "onenord",
+  --   config = function()
+  --     require("onenord").setup()
+  --     vim.cmd("colorscheme onenord")
+  --   end,
+  -- },
 }

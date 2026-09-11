@@ -1,10 +1,10 @@
 return {
   "stevearc/conform.nvim",
-  event = "BufFilePost",
+  event = "BufWritePre",
   key = {
-    ["<leader>="] = {
+    ["+"] = {
       function()
-        require("conform").format({ async = true, lsp_fallback = true })
+        require("conform").format({ async = true })
       end,
       { "n", "x" },
       desc = "Format the current buffer",

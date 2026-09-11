@@ -84,12 +84,12 @@ end
 return M
 
 --[[
-	      Command		       global value	   local value	       condition ~
-      :set option=value	     set	          set
- :setlocal option=value	      -		          set
-:setglobal option=value	     set	           -
-      :set option?	          -		        display	    local value is set
-      :set option?	       display	         -	      local value is not set
- :setlocal option?	          -		        display
-:setglobal option?	       display	         -
+        Command          global value    local value         condition ~
+      :set option=value      set            set
+ :setlocal option=value       -             set
+:setglobal option=value      set             -
+      :set option?            -           display     local value is set
+      :set option?         display           -        local value is not set
+ :setlocal option?            -           display
+:setglobal option?         display           -
 --]]

@@ -1,13 +1,13 @@
 return {
   "folke/flash.nvim",
   key = {
-    -- ["0f"] = {
-    --   function()
-    --     require("flash").jump()
-    --   end,
-    --   { "n", "x", "o" },
-    --   desc = "Flash",
-    -- },
+    ["0s"] = {
+      function()
+        require("flash").jump()
+      end,
+      { "n", "x", "o" },
+      desc = "Flash",
+    },
     ["0R"] = {
       function()
         --- test

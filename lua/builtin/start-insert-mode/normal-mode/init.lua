@@ -30,7 +30,15 @@ function M.last_non_blank_character()
     if line:find("^%s*$") then
       key = "I<C-f>"
     else
-      key = "<Esc>g_" .. count .. "a"
+      key = "<Ignore>"
+      local marks = vim.api.nvim_buf_get_extmarks(0, vim.api.nvim_create_namespace("nvim.multicursor"), 0, -1)
+      if #marks > 0 then
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>1q=g_", true, false, true), "n", false)
+        vim.api.nvim_feedkeys("2q=", "nt", false)
+      else
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>g_", true, false, true), "n", false)
+      end
+      vim.api.nvim_feedkeys(count .. "a", "nt", false)
     end
   end
 

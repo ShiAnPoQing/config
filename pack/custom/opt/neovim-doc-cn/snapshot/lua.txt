@@ -3554,7 +3554,7 @@ vim.json.decode({str}, {opts})                             *vim.json.decode()*
                   JavaScript-style comments within JSON data. Comments are
                   treated as whitespace and may appear anywhere whitespace is
                   valid in JSON. Supports single-line comments beginning with
-                  '//' and block comments enclosed with '/' and '/'.
+                  '//' and block comments ringd with '/' and '/'.
 
     Return: ~
         (`any`)

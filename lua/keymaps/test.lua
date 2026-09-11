@@ -1,14 +1,36 @@
 return {
   ["<leader>1"] = {
     function()
-      -- Load image bytes from disk and display at row 5, column 10
-      local id = vim.ui.img.set(
-        vim.fn.readblob("/home/luoqing/Pictures/wallpapers/wallhaven-mlwz78_2560x1440.png"),
-        { row = 5, col = 10, width = 40, height = 20, zindex = 50 }
-      )
-
-      -- Update the image position
-      vim.ui.img.set(id, { row = 8, col = 12 })
+      local curr_win = vim.api.nvim_get_current_win()
+      local buf = vim.api.nvim_create_buf(false, true)
+      local win= vim.api.nvim_open_win(buf, true, {
+        win = vim.api.nvim_get_current_win(),
+        split = "right",
+      })
+      vim.api.nvim_set_option_value("winhighlight", "Normal:Normal,WinSeparator:ErrorMsg", {
+        win = curr_win
+      })
+      -- vim.api.nvim_exec_autocmds("User", { pattern = "Macro" })
+      -- vim.api.nvim_create_autocmd("CmdAtom", {
+      --   group = vim.api.nvim_create_augroup("CmdAtom-test"),
+      --   callback = function(ev)
+      --     if ev.data.keys then
+      --       ev.data.keys = vim.fn.keytrans(ev.data.keys)
+      --     end
+      --     if ev.data.lhs then
+      --       ev.data.lhs = vim.fn.keytrans(ev.data.lhs)
+      --     end
+      --     table.insert(CmdAtoms, ev.data)
+      --   end,
+      -- })
+      -- -- Load image bytes from disk and display at row 5, column 10
+      -- local id = vim.ui.img.set(
+      --   vim.fn.readblob("/home/luoqing/Pictures/wallpapers/wallhaven-mlwz78_2560x1440.png"),
+      --   { row = 5, col = 10, width = 40, height = 20, zindex = 50 }
+      -- )
+      --
+      -- -- Update the image position
+      -- vim.ui.img.set(id, { row = 8, col = 12 })
 
       -- -- Retrieve the current image opts
       -- local opts = vim.ui.img.get(id)
@@ -18,7 +40,6 @@ return {
       --
       -- -- Remove all images
       -- vim.ui.img.del(math.huge)
-
       -- local ns = vim.api.nvim_create_namespace("cmdline_ui")
       --
       -- local win
@@ -108,53 +129,55 @@ return {
       -- end)
     end,
     "n",
+    group = "Macro",
   },
   ["<leader>2"] = {
     function()
-      vim.opt.statusline = "%!v:lua.require('test').statusline()"
-      vim.cmd("redrawstatus")
-      vim.cmd("redrawstatus")
-      vim.print("test")
-      vim.cmd("redrawstatus")
-      vim.cmd("redrawstatus")
+      vim.schedule(function()
+        vim.api.nvim_clear_autocmds({ group = "CmdAtom-test" })
+      end)
     end,
-    "n",
+    "i",
   },
   ["<leader>3"] = {
     function()
-      local function input(opts, cb)
-        local buf = vim.api.nvim_create_buf(false, true)
-
-        vim.bo[buf].buftype = "prompt"
-
-        local win = vim.api.nvim_open_win(buf, true, {
-          relative = "editor",
-          width = 40,
-          height = 1,
-          row = 10,
-          col = 10,
-          border = "single",
-        })
-
-        vim.fn.prompt_setprompt(buf, opts.prompt or "")
-
-        vim.fn.prompt_setcallback(buf, function(text)
-          vim.api.nvim_win_close(win, true)
-          cb(text)
-        end)
-
-        vim.fn.prompt_setinterrupt(buf, function()
-          vim.api.nvim_win_close(win, true)
-          cb(nil)
-        end)
-
-        vim.cmd("startinsert")
-      end
-      input({ prompt = "Input: " }, function(text)
-        vim.print("You entered: " .. (text or ""))
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, false, true), "n", false)
+      vim.schedule(function()
+        vim.api.nvim_feedkeys("i", "n", false)
       end)
+      -- local function input(opts, cb)
+      --   local buf = vim.api.nvim_create_buf(false, true)
+      --
+      --   vim.bo[buf].buftype = "prompt"
+      --
+      --   local win = vim.api.nvim_open_win(buf, true, {
+      --     relative = "editor",
+      --     width = 40,
+      --     height = 1,
+      --     row = 10,
+      --     col = 10,
+      --     border = "single",
+      --   })
+      --
+      --   vim.fn.prompt_setprompt(buf, opts.prompt or "")
+      --
+      --   vim.fn.prompt_setcallback(buf, function(text)
+      --     vim.api.nvim_win_close(win, true)
+      --     cb(text)
+      --   end)
+      --
+      --   vim.fn.prompt_setinterrupt(buf, function()
+      --     vim.api.nvim_win_close(win, true)
+      --     cb(nil)
+      --   end)
+      --
+      --   vim.cmd("startinsert")
+      -- end
+      -- input({ prompt = "Input: " }, function(text)
+      --   vim.print("You entered: " .. (text or ""))
+      -- end)
     end,
-    "n",
+    "i",
   },
   ["<leader>`"] = {
     function()
@@ -381,7 +404,7 @@ export namespace SymbolKind {
 	export const Event = 24;
 	export const Operator = 25;
 	export const TypeParameter = 26;
-}
+;}
 
 export type SymbolKind = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26;
 --]]

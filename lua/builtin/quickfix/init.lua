@@ -38,7 +38,7 @@ function M.goto_prev_error()
 end
 
 function M.toggle()
-  local is_open = vim.fn.getqflist({ winid = 0 }).winid ~= 0
+  local is_open = M.is_open()
   if is_open then
     vim.cmd("cclose")
   else
@@ -48,6 +48,10 @@ function M.toggle()
     end
     vim.cmd("copen " .. count)
   end
+end
+
+function M.is_open()
+  return vim.fn.getqflist({ winid = 0 }).winid ~= 0
 end
 
 return M

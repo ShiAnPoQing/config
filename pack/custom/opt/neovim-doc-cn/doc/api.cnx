@@ -3101,25 +3101,28 @@ nvim_get_option_value({name}, {opts})                *nvim_get_option_value()*
     返回值: ~
         (`任意`) 选项值
 
-                                                     *nvim_set_option_value()*
+                                                    *nvim_set_option_value()*
 nvim_set_option_value({name}, {value}, {opts})
-    设置选项的值。此函数的行为与 |:set| 一致：对于全局-局部选项，除非使用 {scope}
-    另有指定，否则全局值和局部值都会被设置。
+    设置选项的值。此函数的行为与 |:set| 匹配：对于全局-局部选项，除非使用 {scope} 另行指定，否则全局和局部值都会被设置。
 
-    注意选项 {win} 和 {buf} 不能同时使用。
+    注意，选项 {win} 和 {buf} 不能同时使用。
 
-    属性: ~
-        始于: 0.7.0
+    属性： ~
+        自 0.7.0 版本起可用
 
-    参数: ~
-      • {name}   (`字符串`) 选项名称
-      • {value}  (`任意`) 新的选项值
-      • {opts}   (`vim.api.keyset.option`) 可选参数
-                 • scope: "global" 或 "local" 之一。分别类似于 |:setglobal|
-                   和 |:setlocal|。
-                 • win: |window-ID|。用于设置窗口局部选项。
+    参数： ~
+      • {name}   (`string`) 选项名称
+      • {value}  (`any`) 新的选项值
+      • {opts}   (`vim.api.keyset.option?`) 可选参数
                  • buf: 缓冲区编号。用于设置缓冲区局部选项。
+                 • dry_run: (`boolean?`, 默认值: false) 如果为 true，则不实际设置选项值。
+                 • operation: 取值为 "set"、"append"、"prepend" 或 "remove" 之一。分别对应于 |:set=|、|:set+=|、|:set^=| 和 |:set-=|。默认值为 "set"。
+                 • scope: 取值为 "global" 或 "local" 之一。分别类似于 |:setglobal| 和 |:setlocal|。
+                 • tab: 用于标签页局部选项（目前仅有 'cmdheight'）的 |tab-ID|。标签页 0 表示当前标签页。如果指定了非当前标签页，则该值将在切换到该标签页时生效。
+                 • win: 用于设置窗口局部选项的 |window-ID|。
 
+    返回值： ~
+        (`any`) 选项值
 
 ==============================================================================
 标签页函数                                                      *api-tabpage*

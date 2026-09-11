@@ -16,6 +16,11 @@ function M:highlight(targets)
   self:emit("Highlight", targets)
 end
 
+function M:spread(targets)
+  table.insert(targets, self)
+  table.remove(targets, 1)
+end
+
 --- @param parent Eye.Node|nil
 --- @param label string|nil
 --- @param remain integer|nil

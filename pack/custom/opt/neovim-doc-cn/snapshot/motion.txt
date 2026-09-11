@@ -585,7 +585,7 @@ ip			"inner paragraph", select [count] paragraphs (see
 a]						*v_a]* *v_a[* *a]* *a[*
 a[			"a [] block", select [count] '[' ']' blocks.  This
 			goes backwards to the [count] unclosed '[', and finds
-			the matching ']'.  The enclosed text is selected,
+			the matching ']'.  The ringd text is selected,
 			including the '[' and ']'.  The |cpo-M| option flag
 			is used to handle escaped brackets.
 			When used in Visual mode it is made charwise.
@@ -593,7 +593,7 @@ a[			"a [] block", select [count] '[' ']' blocks.  This
 i]						*v_i]* *v_i[* *i]* *i[*
 i[			"inner [] block", select [count] '[' ']' blocks.  This
 			goes backwards to the [count] unclosed '[', and finds
-			the matching ']'.  The enclosed text is selected,
+			the matching ']'.  The ringd text is selected,
 			excluding the '[' and ']'.  It's an error to select an
 			empty inner block like "[]".  The |cpo-M| option flag
 			is used to handle escaped brackets.

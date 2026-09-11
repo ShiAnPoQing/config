@@ -77,10 +77,10 @@ return {
   ["k"] = { k, { "n", "x", "o" }, expr = true },
   ["<down>"] = { j, { "n", "x", "o" }, expr = true },
   ["<up>"] = { k, { "n", "x", "o" }, expr = true },
-  ["gj"] = { gj, { "n", "x", "o" }, expr = true },
-  ["gk"] = { gk, { "n", "x", "o" }, expr = true },
-  ["gl"] = { gl, { "n", "x", "o" }, expr = true },
-  ["gh"] = { gl, { "n", "x", "o" }, expr = true },
+  -- ["gj"] = { gj, { "n", "x", "o" }, expr = true },
+  -- ["gk"] = { gk, { "n", "x", "o" }, expr = true },
+  -- ["gl"] = { gl, { "n", "x", "o" }, expr = true },
+  -- ["gh"] = { gh, { "n", "x", "o" }, expr = true },
   ["[k"] = { "-", { "n", "x", "o" }, desc = "[count] lines upward, on the first non-blank character [linewise]" },
   ["]k"] = { "kg_", { "n", "x", "o" }, desc = "[count] lines upward, on the last non-blank character [linewise]" },
   ["[j"] = { "+", { "n", "x", "o" }, desc = "[count] lines downward, on the first non-blank character [linewise]" },
@@ -154,7 +154,7 @@ return {
       "i",
     },
     { "<C-G>^<C-G>", "s" },
-    { "<Home><C-right>", "t" },
+    -- { "<Home><C-right>", "t" },
     {
       function()
         require("builtin.cmdline").first_non_blank_character()
@@ -180,34 +180,6 @@ return {
       "i",
     },
     { "<C-G>g_<C-G>", "s" },
-    {
-      function()
-        vim.cmd.stopinsert()
-        vim.schedule(function()
-          local line_count = vim.api.nvim_buf_line_count(0)
-          local function run(count)
-            if count == 0 then
-              return
-            end
-            local line = vim.api.nvim_buf_get_lines(0, count - 1, count, false)[1]
-            if #line > 0 then
-              return line
-            else
-              return run(count - 1)
-            end
-          end
-          local line = run(line_count) or ""
-          local key = "<end>"
-          local offset = #line - #line:gsub("%s*$", "")
-          if offset > 0 then
-            key = key .. ("<left>"):rep(offset)
-          end
-          vim.cmd.startinsert()
-          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<end>" .. key, true, false, true), "n", false)
-        end)
-      end,
-      "t",
-    },
     {
       function()
         require("builtin.cmdline").last_non_blank_character()
@@ -344,4 +316,32 @@ return {
   ["<M-e><M-e><M-k>"] = { "<Esc>k$a", "i" },
   ["<M-w><M-w><M-j>"] = { "<C-o>j0i", "i" },
   ["<M-e><M-e><M-j>"] = { "<Esc>j$a", "i" },
+  ["<C-,>"] = {
+    function()
+      return vim.v.count == 0 and "gk^" or "k^"
+    end,
+    "n",
+    expr = true,
+  },
+  ["<M-,>"] = {
+    function()
+      return vim.v.count == 0 and "gj^" or "j^"
+    end,
+    "n",
+    expr = true,
+  },
+  ["<C-.>"] = {
+    function()
+      return vim.v.count == 0 and "gkg_" or "kg_"
+    end,
+    "n",
+    expr = true,
+  },
+  ["<M-.>"] = {
+    function()
+      return vim.v.count == 0 and "gjg_" or "jg_"
+    end,
+    "n",
+    expr = true,
+  },
 }

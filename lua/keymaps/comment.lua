@@ -15,6 +15,39 @@
 ---------------------------------------------------------------------------------------------------+
 
 return {
+  ["<C-_>"] = {
+    {
+      function()
+        return require("vim._comment").operator() .. "_"
+      end,
+      "n",
+      expr = true,
+      desc = "Toggle comment line",
+    },
+    {
+      function()
+        return require("vim._comment").operator()
+      end,
+      "x",
+      expr = true,
+      desc = "Toggle Comment",
+    },
+    {
+      function()
+        require("vim._comment").textobject()
+      end,
+      "o",
+      desc = "Comment textobject",
+    },
+    {
+      function()
+        return "<Esc>" .. require("vim._comment").operator() .. "_a"
+      end,
+      "i",
+      desc = "Toggle Comment",
+      expr = true,
+    },
+  },
   ["<C-/>"] = {
     {
       function()
@@ -39,5 +72,13 @@ return {
       "o",
       desc = "Comment textobject",
     },
-  },
+    {
+      function()
+        return "<Esc>" .. require("vim._comment").operator() .. "_a"
+      end,
+      "i",
+      desc = "Toggle Comment",
+      expr = true,
+    },
+  }
 }

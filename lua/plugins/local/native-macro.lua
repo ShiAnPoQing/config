@@ -1,6 +1,7 @@
 return {
   name = "native-macro.nvim",
-  depend = "BrokenSunny/repeat.nvim",
+  -- depend = "BrokenSunny/repeat.nvim",
+  lazy = false,
   key = {
     ["@"] = {
       function()

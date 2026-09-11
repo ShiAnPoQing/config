@@ -36,19 +36,19 @@ local paths = {
   "keymaps/tagstack",
   "keymaps/terminal",
   "keymaps/textobject",
-  "keymaps/tmux-fixed",
   "keymaps/undo",
   "keymaps/window",
   "keymaps/word-move",
   "keymaps/test",
+  "keymaps/cmdwin",
+  "keymaps/dir",
+  "keymaps/multicursor",
 }
 
 for _, path in ipairs(paths) do
   local ok, keymaps = pcall(require, path)
   if ok then
     Key.add(keymaps)
-  else
-    print(path .. " not found")
   end
 end
 Key.del({

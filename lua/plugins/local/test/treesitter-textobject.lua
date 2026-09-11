@@ -1,5 +1,5 @@
 return {
-  name = "treesitter-textobject",
+  name = "treesitter-textobject.nvim",
   key = {
     ["<leader>ims"] = {
       {

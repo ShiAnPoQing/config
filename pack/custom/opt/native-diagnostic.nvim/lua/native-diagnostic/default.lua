@@ -1,8 +1,13 @@
 local Sign = require("native-diagnostic.config.sign")
 local Highlight = require("native-diagnostic.config.highlight")
 
+--- @type vim.diagnostic.Opts
 local diagnostic_config = {
-  underline = true,
+  underline = {
+    severity = {
+      vim.diagnostic.severity.HINT,
+    },
+  },
   float = {
     border = {
       { "╔", "Label" },
@@ -40,7 +45,22 @@ local diagnostic_config = {
   virtual_lines = false,
   severity_sort = true,
   signs = {
-    text = Sign,
+    text = {
+      [vim.diagnostic.severity.ERROR] = "█",
+      [vim.diagnostic.severity.WARN] = "█",
+      [vim.diagnostic.severity.INFO] = "█",
+      [vim.diagnostic.severity.HINT] = "█",
+    },
+    linehl = {
+      [vim.diagnostic.severity.ERROR] = "DiagnosticLineError",
+      [vim.diagnostic.severity.WARN] = "DiagnosticLineWarn",
+      [vim.diagnostic.severity.INFO] = "DiagnosticLineInfo",
+    },
+    numhl = {
+      [vim.diagnostic.severity.ERROR] = "DiagnosticNumberError",
+      [vim.diagnostic.severity.WARN] = "DiagnosticLineWarn",
+      [vim.diagnostic.severity.INFO] = "DiagnosticLineInfo",
+    },
   },
 }
 

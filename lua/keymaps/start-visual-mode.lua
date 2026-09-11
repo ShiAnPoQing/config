@@ -1,5 +1,14 @@
 return {
-  ["<space>gv"] = { "`[v`]", { "n" }, desc = "Visual Select last inserted text" },
+  ["gV"] = {
+    { "`[v`]", "n", desc = "Visual Select last inserted or puted text" },
+    {
+      function()
+        vim.api.nvim_feedkeys("`[v`]", "nx", true)
+      end,
+      "o",
+      desc = "[Textobject]: last inserted or put text",
+    },
+  },
   -- ["<space>v"] = {
   --   function()
   --     vim.api.nvim_feedkeys("v", "n", true)

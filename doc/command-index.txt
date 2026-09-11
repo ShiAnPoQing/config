@@ -1,0 +1,589 @@
+*command-index.txt*
+
+==============================================================================
+Ex command sorted					   *Ex-command-sorted*
+
+
+|:|             :               什么也不做
+|:range|        :{range}        跳转到 {range} 中的最后一行
+|:!|            :!              过滤行或执行外部命令
+|:!!|           :!!             重复上一个 ":!" 命令
+|:#|            :#              与 ":number" 相同
+|:&|            :&              重复上一个 ":substitute"
+|:star|         :*              使用上一个可视区域，如 ":'<,'>"
+|:<|            :<              将行向左移动一个 'shiftwidth'
+|:=|            :=              打印最后一行行号
+|:>|            :>              将行向右移动一个 'shiftwidth'
+|:@|            :@              执行寄存器的内容
+|:@@|           :@@             重复上一个 ":@"
+|:2match|       :2mat[ch]       定义要高亮的第二个匹配项
+|:3match|       :3mat[ch]       定义要高亮的第三个匹配项
+|:Next|         :N[ext]         跳转到参数列表中的上一个文件
+|:append|       :a[ppend]       追加文本
+|:abbreviate|   :ab[breviate]   输入缩写
+|:abclear|      :abc[lear]      删除所有缩写
+|:aboveleft|    :abo[veleft]    使拆分窗口出现在左侧或上方
+|:all|          :al[l]          为参数列表中的每个文件打开一个窗口
+|:args|         :ar[gs]         打印参数列表
+|:argadd|       :arga[dd]       向参数列表添加项目
+|:argdedupe|    :argded[upe]    从参数列表中删除重复项
+|:argdelete|    :argd[elete]    从参数列表中删除项目
+|:argedit|      :arge[dit]      添加项目到参数列表并编辑它
+|:argdo|        :argdo          对参数列表中的所有项目执行命令
+|:argglobal|    :argg[lobal]    定义全局参数列表
+|:arglocal|     :argl[ocal]     定义局部参数列表
+|:argument|     :argu[ment]     跳转到参数列表中的特定文件
+|:ascii|        :as[cii]        打印光标下字符的 ascii 值
+|:autocmd|      :au[tocmd]      输入或显示自动命令
+|:augroup|      :aug[roup]      选择要使用的自动命令组
+|:buffer|       :b[uffer]       跳转到缓冲区列表中的特定缓冲区
+|:bNext|        :bN[ext]        跳转到缓冲区列表中的上一个缓冲区
+|:ball|         :ba[ll]         为缓冲区列表中的每个缓冲区打开一个窗口
+|:badd|         :bad[d]         向缓冲区列表添加缓冲区
+|:balt|         :balt           类似于 ":badd"，但也设置备用文件
+|:bdelete|      :bd[elete]      从缓冲区列表中删除缓冲区
+|:belowright|   :bel[owright]   使拆分窗口出现在右侧或下方
+|:bfirst|       :bf[irst]       跳转到缓冲区列表中的第一个缓冲区
+|:blast|        :bl[ast]        跳转到缓冲区列表中的最后一个缓冲区
+|:bmodified|    :bm[odified]    跳转到缓冲区列表中已修改的下一个缓冲区
+|:bnext|        :bn[ext]        跳转到缓冲区列表中的下一个缓冲区
+|:botright|     :bo[tright]     使拆分窗口出现在底部或最右侧
+|:bprevious|    :bp[revious]    跳转到缓冲区列表中的上一个缓冲区
+|:brewind|      :br[ewind]      跳转到缓冲区列表中的第一个缓冲区
+|:break|        :brea[k]        跳出 while 循环
+|:breakadd|     :breaka[dd]     添加调试器断点
+|:breakdel|     :breakd[el]     删除调试器断点
+|:breaklist|    :breakl[ist]    列出调试器断点
+|:browse|       :bro[wse]       使用文件选择对话框
+|:bufdo|        :bufd[o]        在每个列出的缓冲区中执行命令
+|:buffers|      :buffers        列出缓冲区列表中的所有文件
+|:bunload|      :bun[load]      卸载特定缓冲区
+|:bwipeout|     :bw[ipeout]     真正删除缓冲区
+|:change|       :c[hange]       替换一行或一系列行
+|:cNext|        :cN[ext]        跳转到上一个错误
+|:cNfile|       :cNf[ile]       跳转到上一个文件中的最后一个错误
+|:cabbrev|      :ca[bbrev]      类似于 ":abbreviate"，但用于命令行模式
+|:cabclear|     :cabc[lear]     清除命令行模式的所有缩写
+|:cabove|       :cabo[ve]       跳转到当前行上方的错误
+|:caddbuffer|   :cad[dbuffer]   从缓冲区添加错误
+|:caddexpr|     :cadde[xpr]     从表达式添加错误
+|:caddfile|     :caddf[ile]     将错误消息添加到当前 quickfix 列表
+|:cafter|       :caf[ter]       跳转到当前光标之后的错误
+|:call|         :cal[l]         调用函数
+|:catch|        :cat[ch]        :try 命令的一部分
+|:cbefore|      :cbe[fore]      跳转到当前光标之前的错误
+|:cbelow|       :cbel[ow]       跳转到当前行下方的错误
+|:cbottom|      :cbo[ttom]      滚动到 quickfix 窗口的底部
+|:cbuffer|      :cb[uffer]      解析错误消息并跳转到第一个错误
+|:cc|           :cc             跳转到特定错误
+|:cclose|       :ccl[ose]       关闭 quickfix 窗口
+|:cd|           :cd             更改目录
+|:cdo|          :cdo            在每个有效的错误列表条目中执行命令
+|:cfdo|         :cfd[o]         在错误列表中的每个文件中执行命令
+|:center|       :ce[nter]       将行居中对齐
+|:cexpr|        :cex[pr]        从表达式读取错误并跳转到第一个
+|:cfile|        :cf[ile]        读取包含错误消息的文件并跳转到第一个
+|:cfirst|       :cfir[st]       跳转到指定的错误，默认为第一个
+|:cgetbuffer|   :cgetb[uffer]   从缓冲区获取错误
+|:cgetexpr|     :cgete[xpr]     从表达式获取错误
+|:cgetfile|     :cg[etfile]     读取包含错误消息的文件
+|:changes|      :changes        打印更改列表
+|:chdir|        :chd[ir]        更改目录
+|:checkhealth|  :che[ckhealth]  运行健康检查
+|:checkpath|    :checkp[ath]    列出包含的文件
+|:checktime|    :checkt[ime]    检查已加载缓冲区的时间戳
+|:chistory|     :chi[story]     列出错误列表
+|:clast|        :cla[st]        跳转到指定的错误，默认为最后一个
+|:clearjumps|   :cle[arjumps]   清除跳转列表
+|:clist|        :cl[ist]        列出所有错误
+|:close|        :clo[se]        关闭当前窗口
+|:cnext|        :cn[ext]        跳转到下一个错误
+|:cnewer|       :cnew[er]       跳转到更新的错误列表
+|:cnfile|       :cnf[ile]       跳转到下一个文件中的第一个错误
+|:cnoreabbrev|  :cnorea[bbrev]  类似于 ":noreabbrev"，但用于命令行模式
+|:copy|         :co[py]         复制行
+|:colder|       :col[der]       跳转到更旧的错误列表
+|:colorscheme|  :colo[rscheme]  加载特定颜色方案
+|:command|      :com[mand]      创建用户自定义命令
+|:comclear|     :comc[lear]     清除所有用户自定义命令
+|:compiler|     :comp[iler]     为特定编译器进行设置
+|:continue|     :con[tinue]     返回到 :while
+|:confirm|      :conf[irm]      需要确认时提示用户
+|:const|        :cons[t]        创建常量变量
+|:copen|        :cope[n]        打开 quickfix 窗口
+|:cprevious|    :cp[revious]    跳转到上一个错误
+|:cpfile|       :cpf[ile]       跳转到上一个文件中的最后一个错误
+|:cquit|        :cq[uit]        带错误码退出 Vim
+|:crewind|      :cr[ewind]      跳转到指定的错误，默认为第一个
+|:cunabbrev|    :cuna[bbrev]    类似于 ":unabbrev"，但用于命令行模式
+|:cwindow|      :cw[indow]      打开或关闭 quickfix 窗口
+|:delete|       :d[elete]       删除行
+|:debug|        :deb[ug]        在调试模式下运行命令
+|:debuggreedy|  :debugg[reedy]  从正常输入读取调试模式命令
+|:defer|        :defe[r]        在当前函数完成时调用函数
+|:delcommand|   :delc[ommand]   删除用户自定义命令
+|:delfunction|  :delf[unction]  删除用户函数
+|:delmarks|     :delm[arks]     删除标记
+|:detach|       :detach         分离当前 UI
+|:diffupdate|   :dif[fupdate]   更新 'diff' 缓冲区
+|:diffget|      :diffg[et]      移除当前缓冲区中的差异
+|:diffoff|      :diffo[ff]      关闭 diff 模式
+|:diffpatch|    :diffp[atch]    应用补丁并显示差异
+|:diffput|      :diffpu[t]      移除其他缓冲区中的差异
+|:diffsplit|    :diffs[plit]    显示与另一个文件的差异
+|:diffthis|     :difft[his]     使当前窗口成为 diff 窗口
+|:digraphs|     :dig[raphs]     显示或输入二合字母
+|:display|      :di[splay]      显示寄存器
+|:djump|        :dj[ump]        跳转到 #define
+|:dl|           :dl             |:delete| 带 'l' 标志的简写
+|:dlist|        :dli[st]        列出 #defines
+|:doautocmd|    :do[autocmd]    对当前缓冲区应用自动命令
+|:doautoall|    :doautoa[ll]    对所有已加载缓冲区应用自动命令
+|:dp|           :d[elete]p      |:delete| 带 'p' 标志的简写
+|:drop|         :dr[op]         跳转到编辑文件的窗口或在当前窗口编辑文件
+|:dsearch|      :ds[earch]      列出一个 #define
+|:dsplit|       :dsp[lit]       拆分窗口并跳转到 #define
+|:edit|         :e[dit]         编辑文件
+|:earlier|      :ea[rlier]      跳转到更早的更改，撤销
+|:echo|         :ec[ho]         回显表达式的结果
+|:echoerr|      :echoe[rr]      类似于 :echo，显示为错误并使用历史记录
+|:echohl|       :echoh[l]       为 echo 命令设置高亮
+|:echomsg|      :echom[sg]      与 :echo 相同，将消息放入历史记录
+|:echon|        :echon          与 :echo 相同，但不带 <EOL>
+|:else|         :el[se]         :if 命令的一部分
+|:elseif|       :elsei[f]       :if 命令的一部分
+|:endif|        :en[dif]        结束之前的 :if
+|:endfor|       :endfo[r]       结束之前的 :for
+|:endfunction|  :endf[unction]  以 :function 开始的用户函数的结束
+|:endtry|       :endt[ry]       结束之前的 :try
+|:endwhile|     :endw[hile]     结束之前的 :while
+|:enew|         :ene[w]         编辑新的未命名缓冲区
+|:eval|         :ev[al]         计算表达式并丢弃结果
+|:ex|           :ex             与 ":edit" 相同
+|:execute|      :exe[cute]      执行表达式的结果
+|:exit|         :exi[t]         与 ":xit" 相同
+|:exusage|      :exu[sage]      Ex 命令概览
+|:fclose|       :fc[lose]       关闭浮动窗口
+|:file|         :f[ile]         显示或设置当前文件名
+|:files|        :files          列出缓冲区列表中的所有文件
+|:filetype|     :filet[ype]     开启/关闭文件类型检测
+|:filter|       :filt[er]       过滤后续命令的输出
+|:find|         :fin[d]         在 'path' 中查找文件并编辑它
+|:finally|      :fina[lly]      :try 命令的一部分
+|:finish|       :fini[sh]       退出正在执行的 Vim 脚本
+|:first|        :fir[st]        跳转到参数列表中的第一个文件
+|:fold|         :fo[ld]         创建折叠
+|:foldclose|    :foldc[lose]    关闭折叠
+|:folddoopen|   :foldd[oopen]   对不在关闭折叠中的行执行命令
+|:folddoclosed| :folddoc[losed] 对在关闭折叠中的行执行命令
+|:foldopen|     :foldo[pen]     打开折叠
+|:for|          :for            for 循环
+|:function|     :fu[nction]     定义用户函数
+|:global|       :g[lobal]       对匹配的行执行命令
+|:goto|         :go[to]         跳转到缓冲区中的字节
+|:grep|         :gr[ep]         运行 'grepprg' 并跳转到第一个匹配项
+|:grepadd|      :grepa[dd]      类似于 :grep，但追加到当前列表
+|:gui|          :gu[i]          启动 GUI
+|:gvim|         :gv[im]         启动 GUI
+|:help|         :h[elp]         打开帮助窗口
+|:helpclose|    :helpc[lose]    关闭一个帮助窗口
+|:helpgrep|     :helpg[rep]     类似于 ":grep"，但搜索帮助文件
+|:helptags|     :helpt[ags]     为目录生成帮助标签
+|:highlight|    :hi[ghlight]    指定高亮方法
+|:hide|         :hid[e]         为命令隐藏当前缓冲区
+|:history|      :his[tory]      打印历史记录列表
+|:horizontal|   :hor[izontal]   后续窗口命令水平工作
+|:insert|       :i[nsert]       插入文本
+|:iabbrev|      :ia[bbrev]      类似于 ":abbrev"，但用于插入模式
+|:iabclear|     :iabc[lear]     类似于 ":abclear"，但用于插入模式
+|:if|           :if             当条件满足时执行命令
+|:ijump|        :ij[ump]        跳转到标识符的定义
+|:ilist|        :il[ist]        列出标识符匹配的行
+|:inoreabbrev|  :inorea[bbrev]  类似于 ":noreabbrev"，但用于插入模式
+|:intro|        :int[ro]        打印介绍信息
+|:iput|         :ip[ut]         类似于 |:put|，但调整缩进以适应当前行
+|:isearch|      :is[earch]      列出一行标识符匹配的位置
+|:isplit|       :isp[lit]       拆分窗口并跳转到标识符的定义
+|:iunabbrev|    :iuna[bbrev]    类似于 ":unabbrev"，但用于插入模式
+|:join|         :j[oin]         连接行
+|:jumps|        :ju[mps]        打印跳转列表
+|:k|            :k              设置标记
+|:keepalt|      :keepa[lt]      后续命令保持备用文件不变
+|:keepmarks|    :kee[pmarks]    后续命令保持标记在原位
+|:keepjumps|    :keepj[umps]    后续命令保持跳转列表和标记
+|:keeppatterns| :keepp[atterns] 后续命令保持搜索模式历史记录
+|:lNext|        :lN[ext]        跳转到位置列表中的上一个条目
+|:lNfile|       :lNf[ile]       跳转到上一个文件中的最后一个条目
+|:list|         :l[ist]         打印行
+|:labove|       :lab[ove]       跳转到当前行上方的位置
+|:laddexpr|     :lad[dexpr]     从表达式添加位置
+|:laddbuffer|   :laddb[uffer]   从缓冲区添加位置
+|:laddfile|     :laddf[ile]     添加位置到当前位置列表
+|:lafter|       :laf[ter]       跳转到当前光标之后的位置
+|:last|         :la[st]         跳转到参数列表中的最后一个文件
+|:language|     :lan[guage]     设置语言（区域设置）
+|:later|        :lat[er]        跳转到更新的更改，重做
+|:lbefore|      :lbe[fore]      跳转到当前光标之前的位置
+|:lbelow|       :lbel[ow]       跳转到当前行下方的位置
+|:lbottom|      :lbo[ttom]      滚动到位置窗口的底部
+|:lbuffer|      :lb[uffer]      解析位置并跳转到第一个位置
+|:lcd|          :lc[d]          本地更改目录
+|:lchdir|       :lch[dir]       本地更改目录
+|:lclose|       :lcl[ose]       关闭位置窗口
+|:ldo|          :ld[o]          在有效的位置列表条目中执行命令
+|:lfdo|         :lfd[o]         在位置列表中的每个文件中执行命令
+|:left|         :le[ft]         左对齐行
+|:leftabove|    :lefta[bove]    使拆分窗口出现在左侧或上方
+|:let|          :let            给变量或选项赋值
+|:lexpr|        :lex[pr]        从表达式读取位置并跳转到第一个
+|:lfile|        :lf[ile]        读取包含位置的文件并跳转到第一个
+|:lfirst|       :lfir[st]       跳转到指定的位置，默认为第一个
+|:lgetbuffer|   :lgetb[uffer]   从缓冲区获取位置
+|:lgetexpr|     :lgete[xpr]     从表达式获取位置
+|:lgetfile|     :lg[etfile]     读取包含位置的文件
+|:lgrep|        :lgr[ep]        运行 'grepprg' 并跳转到第一个匹配项
+|:lgrepadd|     :lgrepa[dd]     类似于 :grep，但追加到当前列表
+|:lhelpgrep|    :lh[elpgrep]    类似于 ":helpgrep"，但使用位置列表
+|:lhistory|     :lhi[story]     列出位置列表
+|:ll|           :ll             跳转到特定位置
+|:llast|        :lla[st]        跳转到指定的位置，默认为最后一个
+|:llist|        :lli[st]        列出所有位置
+|:lmake|        :lmak[e]        执行外部命令 'makeprg' 并解析错误消息
+|:lnext|        :lne[xt]        跳转到下一个位置
+|:lnewer|       :lnew[er]       跳转到更新的位置列表
+|:lnfile|       :lnf[ile]       跳转到下一个文件中的第一个位置
+|:loadview|     :lo[adview]     从文件加载当前窗口的视图
+|:lockmarks|    :loc[kmarks]    后续命令保持标记在原位
+|:lockvar|      :lockv[ar]      锁定变量
+|:log|          :log            查看日志文件
+|:lolder|       :lol[der]       跳转到更旧的位置列表
+|:lopen|        :lop[en]        打开位置窗口
+|:lprevious|    :lp[revious]    跳转到上一个位置
+|:lpfile|       :lpf[ile]       跳转到上一个文件中的最后一个位置
+|:lrewind|      :lr[ewind]      跳转到指定的位置，默认为第一个
+|:ls|           :ls             列出所有缓冲区
+|:lsp|          :lsp            语言服务器协议
+|:ltag|         :lt[ag]         跳转到标签并将匹配的标签添加到位置列表
+|:lua|          :lua            执行 |Lua| 命令
+|:luado|        :luad[o]        对每一行执行 Lua 命令
+|:luafile|      :luaf[ile]      执行 |Lua| 脚本文件
+|:lvimgrep|     :lv[imgrep]     在文件中搜索模式
+|:lvimgrepadd|  :lvimgrepa[dd]  类似于 :vimgrep，但追加到当前列表
+|:lwindow|      :lw[indow]      打开或关闭位置窗口
+|:move|         :m[ove]         移动行
+|:mark|         :ma[rk]         设置标记
+|:make|         :mak[e]         执行外部命令 'makeprg' 并解析错误消息
+|:marks|        :marks          列出所有标记
+|:match|        :mat[ch]        定义要高亮的匹配项
+|:messages|     :mes[sages]     查看之前显示的消息
+|:mkexrc|       :mk[exrc]       将当前映射和设置写入文件
+|:mksession|    :mks[ession]    将会话信息写入文件
+|:mkspell|      :mksp[ell]      生成 .spl 拼写文件
+|:mkvimrc|      :mkv[imrc]      将当前映射和设置写入文件
+|:mkview|       :mkvie[w]       将当前窗口的视图写入文件
+|:mode|         :mod[e]         显示或更改屏幕模式
+|:next|         :n[ext]         跳转到参数列表中的下一个文件
+|:new|          :new            创建新的空窗口
+|:noautocmd|    :noa[utocmd]    后续命令不触发自动命令
+|:nohlsearch|   :noh[lsearch]   暂停 'hlsearch' 高亮
+|:noreabbrev|   :norea[bbrev]   输入不会被重映射的缩写
+|:normal|       :norm[al]       执行普通模式命令
+|:noswapfile|   :nos[wapfile]   后续命令不创建交换文件
+|:number|       :nu[mber]       带行号打印行
+|:oldfiles|     :ol[dfiles]     列出 |shada| 文件中有标记的文件
+|:only|         :on[ly]         关闭除当前窗口外的所有窗口
+|:options|      :opt[ions]      打开选项窗口
+|:packadd|      :pa[ckadd]      从 'packpath' 添加插件
+|:packloadall|  :packl[oadall]  加载 'packpath' 下的所有包
+|:pbuffer|      :pb[uffer]      在预览窗口中编辑缓冲区
+|:pclose|       :pc[lose]       关闭预览窗口
+|:pedit|        :ped[it]        在预览窗口中编辑文件
+|:perl|         :pe[rl]         执行 perl 命令
+|:perldo|       :perld[o]       对每一行执行 perl 命令
+|:perlfile|     :perlf[ile]     执行 perl 脚本文件
+|:print|        :p[rint]        打印行
+|:profdel|      :profd[el]      停止对函数或脚本的性能分析
+|:profile|      :prof[ile]      对函数和脚本进行性能分析
+|:pop|          :po[p]          跳转到标签栈中更旧的条目
+|:popup|        :popu[p]        按名称弹出菜单
+|:ppop|         :pp[op]         在预览窗口中执行 ":pop"
+|:preserve|     :pre[serve]     将所有文本写入交换文件
+|:previous|     :prev[ious]     跳转到参数列表中的上一个文件
+|:psearch|      :ps[earch]      类似于 ":ijump"，但在预览窗口中显示匹配项
+|:put|          :pu[t]          将寄存器内容插入文本
+|:pwd|          :pw[d]          打印当前目录
+|:py3|          :py3            执行 Python 3 命令
+|:python3|      :python3        与 :py3 相同
+|:py3do|        :py3d[o]        对每一行执行 Python 3 命令
+|:py3file|      :py3f[ile]      执行 Python 3 脚本文件
+|:python|       :py[thon]       执行 Python 命令
+|:pydo|         :pyd[o]         对每一行执行 Python 命令
+|:pyfile|       :pyf[ile]       执行 Python 脚本文件
+|:pyx|          :pyx            执行 |python_x| 命令
+|:pythonx|      :pythonx        与 :pyx 相同
+|:pyxdo|        :pyxd[o]        对每一行执行 |python_x| 命令
+|:pyxfile|      :pyxf[ile]      执行 |python_x| 脚本文件
+|:quit|         :q[uit]         退出当前窗口（当只有一个窗口时退出 Vim）
+|:quitall|      :quita[ll]      退出 Vim
+|:qall|         :qa[ll]         退出 Vim
+|:read|         :r[ead]         将文件读入文本
+|:recover|      :rec[over]      从交换文件恢复文件
+|:redo|         :red[o]         重做一个撤销的更改
+|:redir|        :redi[r]        将消息重定向到文件或寄存器
+|:redraw|       :redr[aw]       强制重绘显示
+|:redrawstatus| :redraws[tatus] 强制重绘状态行和窗口栏
+|:redrawtabline|  :redrawt[abline] 强制重绘标签行
+|:registers|    :reg[isters]    显示寄存器的内容
+|:resize|       :res[ize]       更改当前窗口高度
+|:restart|      :restart        重启 Nvim 服务器
+|:retab|        :ret[ab]        更改制表符大小
+|:return|       :retu[rn]       从用户函数返回
+|:rewind|       :rew[ind]       跳转到参数列表中的第一个文件
+|:right|        :ri[ght]        右对齐文本
+|:rightbelow|   :rightb[elow]   使拆分窗口出现在右侧或下方
+|:rshada|       :rsh[ada]       从 |shada| 文件读取
+|:ruby|         :rub[y]         执行 Ruby 命令
+|:rubydo|       :rubyd[o]       对每一行执行 Ruby 命令
+|:rubyfile|     :rubyf[ile]     执行 Ruby 脚本文件
+|:rundo|        :rund[o]        从文件读取撤销信息
+|:runtime|      :ru[ntime]      在 'runtimepath' 中执行 vim 脚本
+|:substitute|   :s[ubstitute]   查找和替换文本
+|:sNext|        :sN[ext]        拆分窗口并跳转到参数列表中的上一个文件
+|:sandbox|      :san[dbox]      在沙盒中执行命令
+|:sargument|    :sa[rgument]    拆分窗口并跳转到参数列表中的特定文件
+|:sall|         :sal[l]         为参数列表中的每个文件打开一个窗口
+|:saveas|       :sav[eas]       将文件另存为其他名称。
+|:sbuffer|      :sb[uffer]      拆分窗口并跳转到缓冲区列表中的特定文件
+|:sbNext|       :sbN[ext]       拆分窗口并跳转到缓冲区列表中的上一个文件
+|:sball|        :sba[ll]        为缓冲区列表中的每个文件打开一个窗口
+|:sbfirst|      :sbf[irst]      拆分窗口并跳转到缓冲区列表中的第一个文件
+|:sblast|       :sbl[ast]       拆分窗口并跳转到缓冲区列表中的最后一个文件
+|:sbmodified|   :sbm[odified]   拆分窗口并跳转到缓冲区列表中已修改的文件
+|:sbnext|       :sbn[ext]       拆分窗口并跳转到缓冲区列表中的下一个文件
+|:sbprevious|   :sbp[revious]   拆分窗口并跳转到缓冲区列表中的上一个文件
+|:sbrewind|     :sbr[ewind]     拆分窗口并跳转到缓冲区列表中的第一个文件
+|:scriptnames|  :scr[iptnames]  列出所有已加载 Vim 脚本的名称
+|:scriptencoding| :scripte[ncoding] 已加载 Vim 脚本中使用的编码
+|:set|          :se[t]          显示或设置选项
+|:setfiletype|  :setf[iletype]  设置 'filetype'，除非它已经被设置过
+|:setglobal|    :setg[lobal]    显示选项的全局值
+|:setlocal|     :setl[ocal]     局部显示或设置选项
+|:sfind|        :sf[ind]        拆分当前窗口并在 'path' 中编辑文件
+|:sfirst|       :sfir[st]       拆分窗口并跳转到参数列表中的第一个文件
+|:sign|         :sig[n]         操作符号
+|:silent|       :sil[ent]       静默运行命令
+|:sleep|        :sl[eep]        暂停几秒钟
+|:sleep!|       :sl[eep]!       暂停几秒钟，光标不可见
+|:slast|        :sla[st]        拆分窗口并跳转到参数列表中的最后一个文件
+|:smagic|       :sm[agic]       使用 'magic' 的 :substitute
+|:snext|        :sn[ext]        拆分窗口并跳转到参数列表中的下一个文件
+|:snomagic|     :sno[magic]     使用 'nomagic' 的 :substitute
+|:sort|         :sor[t]         排序行
+|:source|       :so[urce]       从文件读取 Vim 或 Ex 命令
+|:spelldump|    :spelld[ump]    拆分窗口并用所有正确单词填充
+|:spellgood|    :spe[llgood]    为拼写添加正确单词
+|:spellinfo|    :spelli[nfo]    显示关于已加载拼写文件的信息
+|:spellrare|    :spellra[re]    为拼写添加罕见单词
+|:spellrepall|  :spellr[epall]  像上次 |z=| 一样替换所有错误单词
+|:spellundo|    :spellu[ndo]    移除正确或错误单词
+|:spellwrong|   :spellw[rong]   添加拼写错误
+|:split|        :sp[lit]        拆分当前窗口
+|:sprevious|    :spr[evious]    拆分窗口并跳转到参数列表中的上一个文件
+|:srewind|      :sre[wind]      拆分窗口并跳转到参数列表中的第一个文件
+|:stop|         :st[op]         挂起编辑器或退回到 shell
+|:stag|         :sta[g]         拆分窗口并跳转到标签
+|:startinsert|  :star[tinsert]  启动插入模式
+|:startgreplace|  :startg[replace] 启动虚拟替换模式
+|:startreplace| :startr[eplace] 启动替换模式
+|:stopinsert|   :stopi[nsert]   停止插入模式
+|:stjump|       :stj[ump]       执行 ":tjump" 并拆分窗口
+|:stselect|     :sts[elect]     执行 ":tselect" 并拆分窗口
+|:sunhide|      :sun[hide]      与 ":unhide" 相同
+|:suspend|      :sus[pend]      与 ":stop" 相同
+|:sview|        :sv[iew]        拆分窗口并以只读方式编辑文件
+|:swapname|     :sw[apname]     显示当前交换文件的名称
+|:syntax|       :sy[ntax]       语法高亮
+|:syntime|      :synti[me]      测量语法高亮速度
+|:syncbind|     :sync[bind]     同步滚动绑定
+|:t|            :t              与 ":copy" 相同
+|:tNext|        :tN[ext]        跳转到上一个匹配的标签
+|:tabNext|      :tabN[ext]      转到上一个标签页
+|:tabclose|     :tabc[lose]     关闭当前标签页
+|:tabdo|        :tabd[o]        在每个标签页中执行命令
+|:tabedit|      :tabe[dit]      在新标签页中编辑文件
+|:tabfind|      :tabf[ind]      在 'path' 中查找文件，在新标签页中编辑它
+|:tabfirst|     :tabfir[st]     转到第一个标签页
+|:tablast|      :tabl[ast]      转到最后一个标签页
+|:tabmove|      :tabm[ove]      将标签页移动到其他位置
+|:tabnew|       :tabnew         在新标签页中编辑文件
+|:tabnext|      :tabn[ext]      转到下一个标签页
+|:tabonly|      :tabo[nly]      关闭除当前标签页外的所有标签页
+|:tabprevious|  :tabp[revious]  转到上一个标签页
+|:tabrewind|    :tabr[ewind]    转到第一个标签页
+|:tabs|         :tabs           列出标签页及其包含的内容
+|:tab|          :tab            打开新窗口时创建新标签页
+|:tag|          :ta[g]          跳转到标签
+|:tags|         :tags           显示标签栈的内容
+|:tcd|          :tc[d]          更改标签页的目录
+|:tchdir|       :tch[dir]       更改标签页的目录
+|:terminal|     :te[rminal]     打开一个终端缓冲区
+|:tfirst|       :tf[irst]       跳转到第一个匹配的标签
+|:throw|        :th[row]        抛出异常
+|:tjump|        :tj[ump]        类似于 ":tselect"，但当只有一个匹配项时直接跳转
+|:tlast|        :tl[ast]        跳转到最后一个匹配的标签
+|:tnext|        :tn[ext]        跳转到下一个匹配的标签
+|:topleft|      :to[pleft]      使拆分窗口出现在顶部或最左侧
+|:tprevious|    :tp[revious]    跳转到上一个匹配的标签
+|:trewind|      :tr[ewind]      跳转到第一个匹配的标签
+|:trust|        :trust          从信任数据库中添加或删除文件
+|:try|          :try            执行命令，出错或异常时中止
+|:tselect|      :ts[elect]      列出匹配的标签并选择一个
+|:undo|         :u[ndo]         撤销最近的更改
+|:undojoin|     :undoj[oin]     将下一次更改与之前的撤销块合并
+|:undolist|     :undol[ist]     列出撤销树的叶子节点
+|:unabbreviate| :una[bbreviate] 删除缩写
+|:unhide|       :unh[ide]       为缓冲区列表中的每个已加载文件打开一个窗口
+|:uniq|         :uni[q]         去重行
+|:unlet|        :unl[et]        删除变量
+|:unlockvar|    :unlo[ckvar]    解锁变量
+|:unsilent|     :uns[ilent]     非静默运行命令
+|:update|       :up[date]       如果缓冲区已修改则写入
+|:vglobal|      :v[global]      对不匹配的行执行命令
+|:version|      :ve[rsion]      打印版本号和其他信息
+|:verbose|      :verb[ose]      设置 'verbose' 后执行命令
+|:vertical|     :vert[ical]     使后续命令垂直拆分
+|:vimgrep|      :vim[grep]      在文件中搜索模式
+|:vimgrepadd|   :vimgrepa[dd]   类似于 :vimgrep，但追加到当前列表
+|:visual|       :vi[sual]       与 ":edit" 相同，但关闭 "Ex" 模式
+|:viusage|      :viu[sage]      普通模式命令概览
+|:view|         :vie[w]         以只读方式编辑文件
+|:vnew|         :vne[w]         创建一个新的空窗口，垂直拆分
+|:vsplit|       :vs[plit]       垂直拆分当前窗口
+|:windo|        :wind[o]        在每个窗口中执行命令
+|:write|        :w[rite]        写入文件
+|:wNext|        :wN[ext]        写入文件并跳转到参数列表中的上一个文件
+|:wall|         :wa[ll]         写入所有（已更改的）缓冲区
+|:while|        :wh[ile]        当条件满足时循环执行
+|:winsize|      :wi[nsize]      获取或设置窗口大小（已过时）
+|:wincmd|       :winc[md]       执行窗口 (CTRL-W) 命令
+|:winpos|       :winp[os]       获取或设置窗口位置
+|:wnext|        :wn[ext]        写入文件并跳转到参数列表中的下一个文件
+|:wprevious|    :wp[revious]    写入文件并跳转到参数列表中的上一个文件
+|:wq|           :wq             写入文件并退出窗口或 Vim
+|:wqall|        :wqa[ll]        写入所有已更改的缓冲区并退出 Vim
+|:wshada|       :wsh[ada]       写入 ShaDa 文件
+|:wundo|        :wu[ndo]        将撤销信息写入文件
+|:xit|          :x[it]          如果缓冲区已更改则写入并关闭窗口
+|:xall|         :xa[ll]         与 ":wqall" 相同
+|:yank|         :y[ank]         将行抽取到寄存器中
+|:z|            :z              打印一些行
+|:~|            :~              重复上一个 ":substitute"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+|:amenu|        :am[enu]        为所有模式输入新菜单项
+|:anoremenu|    :an[oremenu]    为所有模式输入一个不会被重映射的新菜单
+|:aunmenu|      :aun[menu]      删除所有模式的菜单
+|:cmenu|        :cme[nu]        为命令行模式添加菜单
+|:cnoremenu|    :cnoreme[nu]    类似于 ":noremenu"，但用于命令行模式
+|:cunmenu|      :cunme[nu]      删除命令行模式的菜单
+|:emenu|        :em[enu]        按名称执行菜单
+|:imenu|        :ime[nu]        为插入模式添加菜单
+|:inoremenu|    :inoreme[nu]    类似于 ":noremenu"，但用于插入模式
+|:iunmenu|      :iunme[nu]      删除插入模式的菜单
+|:menu|         :me[nu]         输入新菜单项
+|:menutranslate|  :menut[ranslate] 添加菜单翻译项
+|:nmenu|        :nme[nu]        为普通模式添加菜单
+|:nnoremenu|    :nnoreme[nu]    类似于 ":noremenu"，但用于普通模式
+|:noremenu|     :noreme[nu]     输入不会被重映射的菜单
+|:nunmenu|      :nunme[nu]      删除普通模式的菜单
+|:omenu|        :ome[nu]        为操作符待决模式添加菜单
+|:onoremenu|    :onoreme[nu]    类似于 ":noremenu"，但用于操作符待决模式
+|:ounmenu|      :ounme[nu]      删除操作符待决模式的菜单
+|:smenu|        :sme[nu]        为选择模式添加菜单
+|:snoremenu|    :snoreme[nu]    类似于 ":noremenu"，但用于选择模式
+|:sunmenu|      :sunme[nu]      删除选择模式的菜单
+|:tlmenu|       :tlm[enu]       为 |Terminal-mode| 添加菜单
+|:tlnoremenu|   :tln[oremenu]   类似于 ":noremenu"，但用于 |Terminal-mode|
+|:tlunmenu|     :tlu[nmenu]     为 |Terminal-mode| 删除菜单
+|:tmenu|        :tm[enu]        定义菜单工具提示
+|:tunmenu|      :tu[nmenu]      删除菜单工具提示
+|:unmenu|       :unme[nu]       删除菜单
+|:vmenu|        :vme[nu]        为可视+选择模式添加菜单
+|:vnoremenu|    :vnoreme[nu]    类似于 ":noremenu"，但用于可视+选择模式
+|:vunmenu|      :vunme[nu]      删除可视+选择模式的菜单
+|:xmenu|        :xme[nu]        为可视模式添加菜单
+|:xnoremenu|    :xnoreme[nu]    类似于 ":noremenu"，但用于可视模式
+|:xunmenu|      :xunme[nu]      删除可视模式的菜单
+
+
+|:cmap|         :cm[ap]         类似于 ":map"，但用于命令行模式
+|:cmapclear|    :cmapc[lear]    清除命令行模式的所有映射
+|:cnoremap|     :cno[remap]     类似于 ":noremap"，但用于命令行模式
+|:cunmap|       :cu[nmap]       类似于 ":unmap"，但用于命令行模式
+|:imap|         :im[ap]         类似于 ":map"，但用于插入模式
+|:imapclear|    :imapc[lear]    类似于 ":mapclear"，但用于插入模式
+|:inoremap|     :ino[remap]     类似于 ":noremap"，但用于插入模式
+|:iunmap|       :iu[nmap]       类似于 ":unmap"，但用于插入模式
+|:lmap|         :lm[ap]         类似于 ":map!"，但包括 Lang-Arg 模式
+|:lmapclear|    :lmapc[lear]    类似于 ":mapclear!"，但包括 Lang-Arg 模式
+|:lnoremap|     :ln[oremap]     类似于 ":noremap!"，但包括 Lang-Arg 模式
+|:loadkeymap|   :loadk[eymap]   加载后续的键盘映射直到 EOF
+|:lunmap|       :lu[nmap]       类似于 ":unmap!"，但包括 Lang-Arg 模式
+|:map|          :map            显示或输入映射
+|:mapclear|     :mapc[lear]     清除普通模式和可视模式的所有映射
+|:nmap|         :nm[ap]         类似于 ":map"，但用于普通模式
+|:nmapclear|    :nmapc[lear]    清除普通模式的所有映射
+|:nnoremap|     :nn[oremap]     类似于 ":noremap"，但用于普通模式
+|:noremap|      :no[remap]      输入不会被重映射的映射
+|:nunmap|       :nun[map]       类似于 ":unmap"，但用于普通模式
+|:omap|         :om[ap]         类似于 ":map"，但用于操作符待决模式
+|:omapclear|    :omapc[lear]    删除操作符待决模式的所有映射
+|:onoremap|     :ono[remap]     类似于 ":noremap"，但用于操作符待决模式
+|:ounmap|       :ou[nmap]       类似于 ":unmap"，但用于操作符待决模式
+|:smap|         :smap           类似于 ":map"，但用于选择模式
+|:smapclear|    :smapc[lear]    删除选择模式的所有映射
+|:snoremap|     :snor[emap]     类似于 ":noremap"，但用于选择模式
+|:sunmap|       :sunm[ap]       类似于 ":unmap"，但用于选择模式
+|:tmapclear|    :tmapc[lear]    删除 |Terminal-mode| 的所有映射
+|:tmap|         :tma[p]         类似于 ":map"，但用于 |Terminal-mode|
+|:tnoremap|     :tno[remap]     类似于 ":noremap"，但用于 |Terminal-mode|
+|:tunmap|       :tunma[p]       类似于 ":unmap"，但用于 |Terminal-mode|
+|:unmap|        :unm[ap]        删除映射
+|:vmap|         :vm[ap]         类似于 ":map"，但用于可视+选择模式
+|:vmapclear|    :vmapc[lear]    删除可视+选择模式的所有映射
+|:vnoremap|     :vn[oremap]     类似于 ":noremap"，但用于可视+选择模式
+|:vunmap|       :vu[nmap]       类似于 ":unmap"，但用于可视+选择模式
+|:xmapclear|    :xmapc[lear]    删除可视模式的所有映射
+|:xmap|         :xm[ap]         类似于 ":map"，但用于可视模式
+|:xnoremap|     :xn[oremap]     类似于 ":noremap"，但用于可视模式
+|:xunmap|       :xu[nmap]       类似于 ":unmap"，但用于可视模式
+
+
+|:ptag|         :pt[ag]         在预览窗口中显示标签
+|:ptNext|       :ptN[ext]       在预览窗口中执行 |:tNext|
+|:ptfirst|      :ptf[irst]      在预览窗口中执行 |:trewind|
+|:ptjump|       :ptj[ump]       执行 |:tjump| 并在预览窗口中显示标签
+|:ptlast|       :ptl[ast]       在预览窗口中执行 |:tlast|
+|:ptnext|       :ptn[ext]       在预览窗口中执行 |:tnext|
+|:ptprevious|   :ptp[revious]   在预览窗口中执行 |:tprevious|
+|:ptrewind|     :ptr[ewind]     在预览窗口中执行 |:trewind|
+|:ptselect|     :pts[elect]     执行 |:tselect| 并在预览窗口中显示标签
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:

@@ -33,12 +33,12 @@ local function set_extmark(up_col, down_col, up_line, down_line)
     hl_eol = true,
   })
   pcall(vim.api.nvim_buf_set_extmark, 0, ns_id, up_line, 0, {
-    virt_text = { { "k", "EyeLabel" } },
+    virt_text = { { "k", "Search" } },
     virt_text_win_col = up_col,
     hl_mode = "combine",
   })
   pcall(vim.api.nvim_buf_set_extmark, 0, ns_id, down_line, 0, {
-    virt_text = { { "j", "EyeLabel" } },
+    virt_text = { { "j", "Search" } },
     virt_text_win_col = down_col,
     hl_mode = "combine",
   })
@@ -97,11 +97,13 @@ function M.first_non_blank_character()
 
   if count == 0 then
     local cursor1 = vim.api.nvim_win_get_cursor(0)
-    vim.api.nvim_feedkeys("^", "nx", false)
-    local cursor2 = vim.api.nvim_win_get_cursor(0)
-    if cursor1[2] == cursor2[2] then
-      vim.api.nvim_feedkeys("0", "nx", false)
-    end
+    vim.api.nvim_feedkeys("^", "nt", false)
+    vim.schedule(function()
+      local cursor2 = vim.api.nvim_win_get_cursor(0)
+      if cursor1[2] == cursor2[2] then
+        vim.api.nvim_feedkeys("0", "nt", false)
+      end
+    end)
     return
   end
   local cursor_row = get_cursor_row()
@@ -118,11 +120,13 @@ function M.last_non_blank_character()
 
   if count == 0 then
     local cursor1 = vim.api.nvim_win_get_cursor(0)
-    vim.api.nvim_feedkeys("g_", "nx", false)
-    local cursor2 = vim.api.nvim_win_get_cursor(0)
-    if cursor1[2] == cursor2[2] then
-      vim.api.nvim_feedkeys("$", "nx", false)
-    end
+    vim.api.nvim_feedkeys("g_", "nt", false)
+    vim.schedule(function()
+      local cursor2 = vim.api.nvim_win_get_cursor(0)
+      if cursor1[2] == cursor2[2] then
+        vim.api.nvim_feedkeys("$", "nt", false)
+      end
+    end)
     return
   end
 

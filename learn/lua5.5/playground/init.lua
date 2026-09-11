@@ -1,7 +1,8 @@
-global a = 1
+local t = {}
 
-local function f(...)
-  local args = { ... }
+setmetatable(t, { test = 1 })
+
+for key, value in ipairs(t) do
+  print(key, value)
 end
-
-f(1, 3, 4, 5)
+print(_VERSION)

@@ -31,11 +31,75 @@ local function visual_mode_textobject(textobject)
   end
 end
 
+local function set_textobject_range(buf, start_line, start_col, end_line, end_col)
+  vim.api.nvim_buf_set_mark(buf, "[", start_line, start_col, {})
+  vim.api.nvim_buf_set_mark(buf, "]", end_line, end_col, {})
+end
+
+--- (1, 0) 索引
+local function get_visual_range()
+  local v_start_line, v_start_col = unpack(vim.api.nvim_win_get_cursor(0))
+  local _, v_end_line, v_end_col = unpack(vim.fn.getpos("v"))
+  v_end_col = v_end_col - 1
+  return v_start_line, v_start_col, v_end_line, v_end_col
+end
+
+local function is_same_pos(start_line, start_col, end_line, end_col)
+  return start_line == end_line and start_col == end_col
+end
+
+local function is_forward_visual(start_line, start_col, end_line, end_col)
+  return start_line < end_line or (start_line == end_line and start_col <= end_col)
+end
+
+local function line_outer_movement(count)
+  vim.validate("count", count, "number")
+  local line_text = vim.api.nvim_get_current_line()
+  local v_start_line, v_start_col, v_end_line, v_end_col = get_visual_range()
+  local is_same = is_same_pos(v_start_line, v_start_col, v_end_line, v_end_col)
+  if #line_text == 0 and is_same then
+    return
+  end
+  local offset = count - 1
+
+  local start_line, start_col, end_line, end_col
+  local expand_select_key = ""
+  if #line_text ~= 1 and is_same then
+    start_line, start_col, end_line = v_start_line, 0, v_start_line + offset
+    end_line = math.min(end_line, vim.api.nvim_buf_line_count(0))
+    end_col = #vim.api.nvim_buf_get_lines(0, end_line - 1, end_line, false)[1] - 1
+    expand_select_key = "`[o`]"
+  else
+    if is_forward_visual(v_start_line, v_start_col, v_end_line, v_end_col) then
+      start_line, start_col, end_line, end_col = v_start_line - offset, 0, v_end_line, v_end_col
+      if v_start_col == 0 then
+        start_line = start_line - 1
+      end
+      start_line = math.max(start_line, 1)
+      expand_select_key = "`]o`["
+    else
+      start_line, start_col, end_line = v_end_line, v_end_col, v_start_line + offset
+      if #line_text == 0 or (v_start_col == #line_text - 1) then
+        end_line = end_line + 1
+      end
+      end_line = math.min(end_line, vim.api.nvim_buf_line_count(0))
+      end_col = #vim.api.nvim_buf_get_lines(0, end_line - 1, end_line, false)[1] - 1
+      expand_select_key = "`[o`]"
+    end
+  end
+  set_textobject_range(0, start_line, start_col, end_line, end_col)
+  return expand_select_key
+end
+
 return {
-  ["ww"] = { "aw", { "x", "o" }, desc = "outer word" },
-  ["ew"] = { "iw", { "x", "o" }, desc = "inner word" },
-  ["wW"] = { "aW", { "x", "o" }, desc = "outer WORD" },
-  ["eW"] = { "iW", { "x", "o" }, desc = "inner WORD" },
+  ["wi"] = { "aw", { "x", "o" }, desc = "[textobject]: outer word" },
+  ["ei"] = { "iw", { "x", "o" }, desc = "[textobject]: inner word" },
+  ["wI"] = { "aW", { "x", "o" }, desc = "[textobject]: outer WORD" },
+  ["eI"] = { "iW", { "x", "o" }, desc = "[textobject]: inner WORD" },
+  ["wo"] = { "aw", { "x", "o" }, desc = "[textobject]: outer word" },
+  ["eo"] = { "iw", { "x", "o" }, desc = "[textobject]: inner word" },
+  ["wO"] = { "aW", { "x", "o" }, desc = "[textobject]: outer WORD" },
+  ["eO"] = { "iW", { "x", "o" }, desc = "[textobject]: inner WORD" },
   ["ws"] = {
     { "as", "o" },
     {
@@ -44,7 +108,7 @@ return {
       end,
       "x",
     },
-    desc = "outer sentence",
+    desc = "[textobject]: outer sentence",
   },
   ["es"] = {
     { "is", "o" },
@@ -54,7 +118,7 @@ return {
       end,
       "x",
     },
-    desc = "inner sentence",
+    desc = "[textobject]: inner sentence",
   },
   ["wp"] = {
     {
@@ -67,8 +131,18 @@ return {
       end,
       "x",
     },
-    desc = "outer paragraph",
+    desc = "[textobject]: outer paragraph",
   },
+  -- ["yep"] = {
+  --   function()
+  --
+  --     local old_cursor = vim.api.nvim_win_get_cursor(0)
+  --     vim.api.nvim_feedkeys("yip", "nx", false)
+  --     vim.api.nvim_win_set_cursor(0, old_cursor)
+  --
+  --   end,
+  --   "n"
+  -- },
   ["ep"] = {
     {
       "ip",
@@ -80,30 +154,43 @@ return {
       end,
       "x",
     },
-    desc = "inner paragraph",
+    desc = "[textobject]: inner paragraph",
   },
-  ["w["] = { "a[", { "x", "o" }, desc = "outer []" },
-  ["e["] = { "i[", { "x", "o" }, desc = "inner []" },
-  ["w]"] = { "a]", { "x", "o" }, desc = "outer []" },
-  ["e]"] = { "i]", { "x", "o" }, desc = "inner []" },
-  ["w{"] = { "a}", { "x", "o" }, desc = "outer {}" },
-  ["e{"] = { "i}", { "x", "o" }, desc = "inner {}" },
-  ["w}"] = { "a}", { "x", "o" }, desc = "outer {}" },
-  ["e}"] = { "i}", { "x", "o" }, desc = "inner {}" },
-  ["w("] = { "a)", { "x", "o" }, desc = "outer ()" },
-  ["e("] = { "i)", { "x", "o" }, desc = "inner ()" },
-  ["w)"] = { "a)", { "x", "o" }, desc = "outer ()" },
-  ["e)"] = { "i)", { "x", "o" }, desc = "inner ()" },
-  ["w>"] = { "a>", { "x", "o" }, desc = "outer <>" },
-  ["e>"] = { "i>", { "x", "o" }, desc = "inner <>" },
-  ["w<"] = { "a>", { "x", "o" }, desc = "outer <>" },
-  ["e<"] = { "i>", { "x", "o" }, desc = "inner <>" },
-  ['w"'] = { 'a"', { "x", "o" }, desc = 'outer ""' },
-  ['e"'] = { 'i"', { "x", "o" }, desc = 'inner ""' },
-  ["w'"] = { "a'", { "x", "o" }, desc = "outer ''" },
-  ["e'"] = { "i'", { "x", "o" }, desc = "inner ''" },
-  ["w`"] = { "a`", { "x", "o" }, desc = "outer ``" },
-  ["e`"] = { "i`", { "x", "o" }, desc = "inner ``" },
+  ["w["] = { "a[", { "x", "o" }, desc = "[textobject]: outer []" },
+  ["e["] = { "i[", { "x", "o" }, desc = "[textobject]: inner []" },
+  ["w]"] = { "a]", { "x", "o" }, desc = "[textobject]: outer []" },
+  ["e]"] = { "i]", { "x", "o" }, desc = "[textobject]: inner []" },
+  ["w{"] = { "a}", { "x", "o" }, desc = "[textobject]: outer {}" },
+  -- ["W{"] = {
+  --   function()
+  --     if vim.v.operator == "d" then
+  --       vim.schedule(function()
+  --         vim.fn.searchpos("}", "bcW")
+  --         vim.api.nvim_feedkeys("va}", "n", false)
+  --       end)
+  --       return "<esc>"
+  --     end
+  --   end,
+  --   "o",
+  --   expr = true,
+  -- },
+  ["e{"] = { "i}", { "x", "o" }, desc = "[textobject]: inner {}" },
+  ["w}"] = { "a}", { "x", "o" }, desc = "[textobject]: outer {}" },
+  ["e}"] = { "i}", { "x", "o" }, desc = "[textobject]: inner {}" },
+  ["w("] = { "a)", { "x", "o" }, desc = "[textobject]: outer ()" },
+  ["e("] = { "i)", { "x", "o" }, desc = "[textobject]: inner ()" },
+  ["w)"] = { "a)", { "x", "o" }, desc = "[textobject]: outer ()" },
+  ["e)"] = { "i)", { "x", "o" }, desc = "[textobject]: inner ()" },
+  ["w>"] = { "a>", { "x", "o" }, desc = "[textobject]: outer <>" },
+  ["e>"] = { "i>", { "x", "o" }, desc = "[textobject]: inner <>" },
+  ["w<"] = { "a>", { "x", "o" }, desc = "[textobject]: outer <>" },
+  ["e<"] = { "i>", { "x", "o" }, desc = "[textobject]: inner <>" },
+  ['w"'] = { 'a"', { "x", "o" }, desc = '[textobject]: outer ""' },
+  ['e"'] = { 'i"', { "x", "o" }, desc = '[textobject]: inner ""' },
+  ["w'"] = { "a'", { "x", "o" }, desc = "[textobject]: outer ''" },
+  ["e'"] = { "i'", { "x", "o" }, desc = "[textobject]: inner ''" },
+  ["w`"] = { "a`", { "x", "o" }, desc = "[textobject]: outer ``" },
+  ["e`"] = { "i`", { "x", "o" }, desc = "[textobject]: inner ``" },
   ["el"] = {
     { "^og_", "x" },
     {
@@ -112,20 +199,28 @@ return {
       end,
       "o",
     },
-    desc = "inner line",
+    desc = "[textobject]: inner line",
   },
   ["wl"] = {
-    { "0o$h", "x" },
     {
       function()
-        vim.api.nvim_feedkeys("0v$h", "nx", false)
+        return line_outer_movement(vim.v.count1)
+      end,
+      "x",
+      expr = true,
+    },
+    {
+      function()
+        local count = vim.v.count1
+        vim.api.nvim_feedkeys("v", "nx", false)
+        vim.api.nvim_feedkeys(line_outer_movement(count) or "", "nx", false)
       end,
       "o",
     },
-    desc = "outer line",
+    desc = "[textobject]: outer line",
   },
-  ["wt"] = { "at", { "x", "o" }, desc = "outer tag block" },
-  ["et"] = { "it", { "x", "o" }, desc = "inner tag block" },
+  ["wt"] = { "at", { "x", "o" }, desc = "[textobject]: outer tag block" },
+  ["et"] = { "it", { "x", "o" }, desc = "[textobject]: inner tag block" },
   ["wa"] = {
     { "vggVG", "x" },
     {
@@ -134,7 +229,7 @@ return {
       end,
       "o",
     },
-    desc = "all(line)",
+    desc = "[textobject]: all buffer",
   },
   ["ea"] = {
     { "vgovG$", "x" },
@@ -144,7 +239,7 @@ return {
       end,
       "o",
     },
-    desc = "all",
+    desc = "[textobject]: all buffer",
   },
   --- /usr/share/nvim/runtime/lua/vim/_core/defaults.lua
   --- an
@@ -157,7 +252,7 @@ return {
       end
     end,
     { "x", "o" },
-    desc = "Select parent (outer) node",
+    desc = "[textobject]: outer treesitter node",
   },
   ["en"] = {
     function()
@@ -168,6 +263,6 @@ return {
       end
     end,
     { "x", "o" },
-    desc = "Select child (inner) node",
+    desc = "[textobject]: inner treesitter node",
   },
 }

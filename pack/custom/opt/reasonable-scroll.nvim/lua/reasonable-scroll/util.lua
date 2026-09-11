@@ -6,11 +6,27 @@ end
 
 function M.insert_mode(callback)
   return function()
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    local winview = vim.fn.winsaveview()
+    vim.api.nvim_create_autocmd("InsertLeave", {
+      once = true,
+      callback = function()
+        vim.fn.winrestview({ curswant = winview.curswant })
+        callback()
+        vim.api.nvim_create_autocmd("CursorMovedI", {
+          once = true,
+          callback = function()
+            vim.fn.winrestview({ curswant = winview.curswant })
+          end,
+        })
+        local start_insert = "i<right>"
+        if cursor[2] == 0 then
+          start_insert = "a<left>"
+        end
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(start_insert, true, false, true), "in", false)
+      end,
+    })
     vim.cmd.stopinsert()
-    vim.schedule(function()
-      callback()
-      vim.api.nvim_feedkeys("a", "n", false)
-    end)
   end
 end
 

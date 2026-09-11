@@ -19,18 +19,22 @@ return {
         },
       },
       workspace = {
+        fileOperations = {
+          willRename = true,
+          didRename = true,
+        },
         checkThirdParty = false,
         library = {
           vim.env.VIMRUNTIME,
           "/usr/share/lua/5.3",
           -- "~/.local/share/LuaAddons",
-          -- '${3rd}/luv/library'
-          -- '${3rd}/busted/library'
+          "${3rd}/luv/library",
+          "${3rd}/busted/library",
         },
       },
     },
   },
   on_attach = function(client, bufnr)
-    -- require("neo-winbar.winbar").attach(client, bufnr)
+    vim.wo[0][0].foldexpr = vim.lsp.foldexpr
   end,
 }

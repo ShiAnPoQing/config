@@ -25,58 +25,105 @@ local types = require("luasnip.util.types")
 local parse = require("luasnip.util.parser").parse_snippet
 local utils = require("snippets.utils")
 
+local function resolve_lua_ls_annotation(snippet, line_to_cursor, matched_trigger, captures)
+  local from = line_to_cursor:find("%-*%s*")
+
+  if not from then
+    return
+  end
+
+  -- from 是 Lua 1-based column
+  return {
+    clear_region = {
+      from = {
+        vim.fn.line(".") - 1,
+        from - 1,
+      },
+      to = {
+        vim.fn.line(".") - 1,
+        #line_to_cursor,
+      },
+    },
+  }
+end
+
+--- @param line_to_cursor string
+local function only_blank_or_comment_line(line_to_cursor)
+  local from = line_to_cursor:find("%-*%s*")
+  if not from then
+    return false
+  end
+  return true
+end
+
 local snippets = {
-  s("@version", {
+  s({
+    trig = "--",
+    hidden = true,
+  }, {
+    t({ "--[[", "" }),
+    f(function()
+      local tab = vim.bo.softtabstop
+      return vim.fn["repeat"](" ", tab)
+    end),
+    i(0),
+    t({ "", "--]]" }),
+  }),
+  s({
+    trig = "@version",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @version "),
     i(1),
   }),
-  s("@type", {
+  s({ trig = "@type", show_condition = only_blank_or_comment_line }, {
     t("--- @type "),
     i(1, "type"),
   }),
-  s("@source", {
+  s({ trig = "@source", show_condition = only_blank_or_comment_line }, {
     t("--- @source "),
     i(1, "path"),
   }),
-  s("@see", {
+  s({ trig = "@see", show_condition = only_blank_or_comment_line }, {
     t("--- @see "),
     i(1, "symbol"),
   }),
-  s("@protected", {
+  s({ trig = "@protected", show_condition = only_blank_or_comment_line }, {
     t("--- @protected"),
   }),
-  s("@private", {
-    t("--- @private"),
-  }),
-  s("@package", {
+  -- s("@private", {
+  --   t("--- @private"),
+  -- }),
+  s({ trig = "@package", show_condition = only_blank_or_comment_line }, {
     t("--- @package"),
   }),
-  s("@overload", {
+  s({ trig = "@overload", show_condition = only_blank_or_comment_line }, {
     t("--- @overload fun("),
     i(1),
     t(") "),
     i(2),
   }),
-  s("@operator", {
+  s({ trig = "@operator", show_condition = only_blank_or_comment_line }, {
     t("--- @operator"),
   }),
-  s("@nodiscard", {
+  s({ trig = "@nodiscard", show_condition = only_blank_or_comment_line }, {
     t("--- @nodiscard"),
   }),
-  s("@module", {
+  s({ trig = "@module", show_condition = only_blank_or_comment_line }, {
     t("--- @module"),
     i(1, "name"),
   }),
-  s("@meta", {
+  s({ trig = "@meta", show_condition = only_blank_or_comment_line }, {
     t("--- @meta "),
     i(1, "name"),
   }),
-  s("@generic", {
+  s({ trig = "@generic", show_condition = only_blank_or_comment_line }, {
     t("--- @generic "),
     i(1, "name"),
   }),
   s(
-    "@enum",
+    { trig = "@enum", show_condition = only_blank_or_comment_line },
     c(1, {
       {
         t("--- @enum "),
@@ -88,35 +135,43 @@ local snippets = {
       },
     })
   ),
-  s("@deprecated", {
+  s({ trig = "@deprecated", show_condition = only_blank_or_comment_line }, {
     t("--- @deprecated"),
   }),
-  s("@cast", {
+  s({ trig = "@cast", show_condition = only_blank_or_comment_line }, {
     t("--- @cast "),
     i(1, "value"),
     t(" "),
     i(2, "name"),
   }),
-  s("@async", {
+  s({ trig = "@async", show_condition = only_blank_or_comment_line }, {
     t("--- @async"),
   }),
   s(
-    "@return",
+    {
+      trig = "@return",
+      show_condition = only_blank_or_comment_line,
+      resolveExpandParams = resolve_lua_ls_annotation,
+    },
     c(1, {
-      {
-        t("--- @return "),
-        i(1, "type"),
-        t(" "),
-        i(2),
-      },
-      {
-        t("--- @return "),
-        i(1, "type"),
-        t(" "),
-        i(2, "name"),
-        t(" "),
-        i(3),
-      },
+      d(1, function()
+        return sn(nil, {
+          t("--- @return "),
+          i(1, "type"),
+          t(" "),
+          i(2),
+        })
+      end),
+      d(2, function()
+        return sn(nil, {
+          t("--- @return "),
+          i(1, "type"),
+          t(" "),
+          i(2, "name"),
+          t(" "),
+          i(3),
+        })
+      end),
     })
   ),
   s("@as", {
@@ -124,23 +179,23 @@ local snippets = {
     i(1, "type"),
     t("]]"),
   }),
-  s("@alias", {
+  s({ trig = "@alias", show_condition = only_blank_or_comment_line }, {
     t("--- @alias "),
     i(1, "name"),
     t(" "),
     i(2, "type"),
   }),
-  s("@diagnostic", {
+  s({ trig = "@diagnostic", show_condition = only_blank_or_comment_line }, {
     t("--- @diagnostic "),
     i(1),
   }),
-  s("@field", {
+  s({ trig = "@field", show_condition = only_blank_or_comment_line }, {
     t("--- @field "),
     i(1, "name"),
     t(" "),
     i(2, "type"),
   }),
-  s("@class", {
+  s({ trig = "@class", show_condition = only_blank_or_comment_line }, {
     t("--- @class "),
     i(1),
   }),
@@ -165,7 +220,10 @@ local snippets = {
     i(1),
     t("))"),
   }),
-  s("fun", {
+  s({
+    trig = "fun",
+    regTrig = true,
+  }, {
     t("function "),
     i(1),
     t("("),
@@ -314,42 +372,45 @@ return snippets
 --    {}),
 
 -- s(
--- 	"fun",
--- 	c(1, {
--- 		{
--- 			t("function"),
--- 			extras.nonempty(1, " ", ""),
--- 			r(1, "funcname"),
--- 			t("("),
--- 			r(2, "args"),
--- 			t(")"),
--- 			t({ "", "\t" }),
--- 			r(3, "return"),
--- 			m(3, "return", " ", ""),
--- 			r(4, "code"),
--- 			t({ "", "end" }),
--- 			i(5),
--- 		},
--- 		{
--- 			t("local "),
--- 			r(1, "funcname"),
--- 			t(" = function("),
--- 			r(2, "args"),
--- 			t(")"),
--- 			t({ "", "\t" }),
--- 			r(3, "return"),
--- 			m(3, "return", " ", ""),
--- 			r(4, "code"),
--- 			t({ "", "end" }),
--- 			i(5),
--- 		},
--- 	}),
--- 	{
--- 		stored = {
--- 			["funcname"] = i(1),
--- 			["args"] = i(2, "Args"),
--- 			["return"] = i(3, "return"),
--- 			["code"] = i(4),
--- 		},
--- 	}
+--  "fun",
+--  c(1, {
+--    {
+--      t("function"),
+--      extras.nonempty(1, " ", ""),
+--      r(1, "funcname"),
+--      t("("),
+--      r(2, "args"),
+--      t(")"),
+--      t({ "", "\t" }),
+--      r(3, "return"),
+--      m(3, "return", " ", ""),
+--      r(4, "code"),
+--      t({ "", "end" }),
+--      i(5),
+--    },
+--    {
+--      t("local "),
+--      r(1, "funcname"),
+--      t(" = function("),
+--      r(2, "args"),
+--      t(")"),
+--      t({ "", "\t" }),
+--      r(3, "return"),
+--      m(3, "return", " ", ""),
+--      r(4, "code"),
+--      t({ "", "end" }),
+--      i(5),
+--    },
+--  }),
+--  {
+--    stored = {
+--      ["funcname"] = i(1),
+--      ["args"] = i(2, "Args"),
+--      ["return"] = i(3, "return"),
+--      ["code"] = i(4),
+--    },
+--  }
 -- ),
+--
+--
+--

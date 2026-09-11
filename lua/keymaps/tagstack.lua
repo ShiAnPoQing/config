@@ -1,22 +1,64 @@
 return {
-  ["<C-[>"] = {
-    "<C-t>",
+  ["[t"] = {
+    function()
+      ---@diagnostic disable-next-line: param-type-mismatch
+      local ok = pcall(vim.cmd, vim.v.count1 .. "tprevious")
+      if vim.v.count1 == 1 then
+        if not ok then
+          ---@diagnostic disable-next-line: param-type-mismatch
+          pcall(vim.cmd, "tlast")
+        end
+      else
+        if not ok then
+          ---@diagnostic disable-next-line: param-type-mismatch
+          pcall(vim.cmd, "trewind")
+        end
+      end
+    end,
     "n",
-    desc = "Jump to [count] older entry in the tag stack (default 1)",
+    desc = ":tprevious",
   },
-  ["<C-]>"] = {
-    "<cmd>tag<cr>",
+  ["]t"] = {
+    function()
+      ---@diagnostic disable-next-line: param-type-mismatch
+      local ok = pcall(vim.cmd, vim.v.count1 .. "tnext")
+      if vim.v.count1 == 1 then
+        if not ok then
+          ---@diagnostic disable-next-line: param-type-mismatch
+          pcall(vim.cmd, "trewind")
+        end
+      else
+        if not ok then
+          ---@diagnostic disable-next-line: param-type-mismatch
+          pcall(vim.cmd, "tlast")
+        end
+      end
+    end,
     "n",
-    desc = "Jump to [count] older entry in tag stack (default 1)",
+    desc = ":tnext",
   },
-  ["a]"] = {
-    "<C-]>",
-    "n",
-    desc = "Jump to the definition of the keyword under the cursor",
+  -- 如果当前不在 tagstack 栈顶或栈底
+  -- :0tag<cr> 和 :0pop<cr> 跳转到当前 tag 位置
+  ["{t"] = {
+    {
+      function()
+        return "<cmd>" .. vim.v.count1 .. "pop | tags<cr>"
+      end,
+      "n",
+      expr = true,
+      desc = "Jump to [count] older entry in the tag stack (default 1)",
+    },
   },
-  ["g]"] = {
-    "g<C-]>",
-    "n",
+  ["}t"] = {
+    {
+      function()
+        return "<cmd>" .. vim.v.count1 .. "tag | tags<cr>"
+      end,
+      "n",
+      expr = true,
+      desc = "Jump to [count] older entry in tag stack (default 1)",
+    },
+    { "<nop>", "x" },
   },
   -- ["<space>]"] = {
   --   function()

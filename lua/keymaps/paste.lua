@@ -17,14 +17,14 @@ return {
   --   { "<C-G>u<C-R>+", { "i" } },
   --   { "<C-R>+", { "c" }, { silent = false } },
   -- },
-  ["<C-S-v>"] = {
-    { "<C-\\><C-N>pi", "t" },
-  },
-  ["<C-space><C-v>"] = { "<C-G>u<C-R>+", { "i" } },
-  ["<C-space><C-space><C-v>"] = { "<C-G>u<C-R>*", { "i" } },
-
-  ["<M-space><M-v>"] = { "<C-G>u<C-R>'", { "i" } },
-  ["<M-space><M-space><M-v>"] = { "<C-G>u<C-R>*", { "i" } },
+  -- ["<C-S-v>"] = {
+  --   { "<C-\\><C-N>pi", "t" },
+  -- },
+  -- ["<C-space><C-v>"] = { "<C-G>u<C-R>+", { "i" } },
+  -- ["<C-space><C-space><C-v>"] = { "<C-G>u<C-R>*", { "i" } },
+  --
+  -- ["<M-space><M-v>"] = { "<C-G>u<C-R>'", { "i" } },
+  -- ["<M-space><M-space><M-v>"] = { "<C-G>u<C-R>*", { "i" } },
 }
 --map('c', '<C-v>', '<C-R>\'', Opts)
 -- { '<C-G>u<C-R><C-o>"', { "i" } },

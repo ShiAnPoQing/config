@@ -1,47 +1,49 @@
-vim.opt.cmdheight = 0
+if vim.fn.has("nvim-0.13") ~= 1 then
+  return
+end
+-- vim.opt.cmdheight = 0
+--- @see ui2
+--- @see messagesopt
 require("vim._core.ui2").enable({
   enable = true, -- Whether to enable or disable the UI.
   msg = { -- Options related to the message module.
-    ---@type 'cmd'|'msg' Default message target, either in the
-    ---cmdline or in a separate ephemeral message window.
     ---@type string|table<string, 'cmd'|'msg'|'pager'> Default message target
-    ---or table mapping |ui-messages| kinds and triggers to a target.
+    ---or table mapping |ui-messages| kinds, triggers and IDs to a target.
+    ---Table keys are are matched as a Lua pattern to the message ID. 'default'
+    ---mapping applies to any omitted kind: { default = 'cmd', progress = 'msg' }.
     targets = "cmd",
-    cmd = { -- Options related to messages in the cmdline window.
-      height = 0.5, -- Maximum height while expanded for messages beyond 'cmdheight'.
-    },
     dialog = { -- Options related to dialog window.
       height = 0.5, -- Maximum height.
     },
     msg = { -- Options related to msg window.
       height = 0.5, -- Maximum height.
-      timeout = 4000, -- Time a message is visible in the message window.
     },
     pager = { -- Options related to message window.
-      height = 1, -- Maximum height.
+      height = 0.999, -- Maximum height.
     },
   },
 })
-vim.api.nvim_create_autocmd("LspAttach", {
-  callback = function(ev)
-    local client = vim.lsp.get_client_by_id(ev.data.client_id)
-    vim.api.nvim_echo({ { "[" }, { client.name }, { "] Attached" } }, true, {})
-  end,
-})
 
-vim.api.nvim_create_autocmd("LspProgress", {
-  callback = function(ev)
-    local value = ev.data.params.value
-    local client = vim.lsp.get_client_by_id(ev.data.client_id)
-    local status = vim.lsp.status()
-
-    if value.kind == "begin" then
-      id = vim.api.nvim_echo({ { "[" }, { client.name }, { "] " }, { value.title } }, true, {})
-    elseif value.kind == "end" then
-      vim.api.nvim_echo({ { "[" }, { client.name }, { "]" }, { value.title } }, true, {})
-    end
-  end,
-})
+-- vim.api.nvim_create_autocmd("LspAttach", {
+--   callback = function(ev)
+--     local client = vim.lsp.get_client_by_id(ev.data.client_id)
+--     vim.api.nvim_echo({ { "[" }, { client.name }, { "] Attached" } }, true, {})
+--   end,
+-- })
+--
+-- vim.api.nvim_create_autocmd("LspProgress", {
+--   callback = function(ev)
+--     local value = ev.data.params.value
+--     local client = vim.lsp.get_client_by_id(ev.data.client_id)
+--     local status = vim.lsp.status()
+--
+--     if value.kind == "begin" then
+--       id = vim.api.nvim_echo({ { "[" }, { client.name }, { "] " }, { value.title } }, true, {})
+--     elseif value.kind == "end" then
+--       vim.api.nvim_echo({ { "[" }, { client.name }, { "]" }, { value.title } }, true, {})
+--     end
+--   end,
+-- })
 --
 -- -- local function test()
 -- --   local cursor = vim.api.nvim_win_get_cursor(0)

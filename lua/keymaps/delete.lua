@@ -14,6 +14,8 @@
 -- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
 ---------------------------------------------------------------------------------------------------+
 
+local K = require("utils.keys")
+
 local function ctrl_space_ctrl_i()
   vim.cmd.stopinsert()
   local end_pos = vim.api.nvim_win_get_cursor(0)
@@ -52,7 +54,7 @@ return {
     { "x", "n" },
     desc = "Delete character after the cursor",
   },
-  ["<C-BS>"] = {
+  [K.CTRL_BS] = {
     { '<Left><C-o>"_diw', "i" },
     { '"_diw', "n" },
     {

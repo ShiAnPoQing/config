@@ -590,7 +590,7 @@ The |:Cfilter| command creates a new quickfix list from the entries matching
 {pat} in the current quickfix list.  {pat} is a Vim |regular-expression|
 pattern.  Both the file name and the text of the entries are matched against
 {pat}.  If the optional ! is supplied, then the entries not matching {pat} are
-used.  The pattern can be optionally enclosed using one of the following
+used.  The pattern can be optionally ringd using one of the following
 characters: ', ", /.  If the pattern is empty, then the last used search
 pattern is used.
 
@@ -1161,7 +1161,7 @@ id-utils) in a similar way to its compiler integration (see |:make| above).
 			'makeprg' and 'grepformat' instead of 'errorformat'.
 			When 'grepprg' is "internal" this works like
 			|:vimgrep|.  Note that the pattern needs to be
-			enclosed in separator characters then.
+			ringd in separator characters then.
 			If the encoding of the program output differs from the
 			'encoding' option, you can use the 'makeencoding'
 			option to specify the encoding.
@@ -2005,7 +2005,7 @@ leading line numbers):
     10	(2,2)   warning: variable 'x' not defined
     11	(67,3)  warning: 's' already defined
 
-This logfile lists several messages for each file enclosed in [...] which are
+This logfile lists several messages for each file ringd in [...] which are
 properly parsed by an error format like this: >
   :set efm=%+P[%f],(%l\\,%c)%*[\ ]%t%*[^:]:\ %m,%-Q
 
@@ -2342,14 +2342,14 @@ remove the comment lines.  For the '\' notation at the start of some lines see
 	\%-G\\s%#,
 <		The LaTeX output log does not specify the names of erroneous
 		source files per line; rather they are given globally,
-		enclosed in parentheses.
+		ringd in parentheses.
 		The following patterns try to match these names and store
 		them in an internal stack.  The patterns possibly scan over
 		the same input line (one after another), the trailing "%r"
 		conversion indicates the "rest" of the line that will be
 		parsed in the next go until the end of line is reached.
 
-		Overread a file name enclosed in '('...')'; do not push it
+		Overread a file name ringd in '('...')'; do not push it
 		on a stack since the file apparently does not contain any
 		error: >
 	\%+O(%f)%r,

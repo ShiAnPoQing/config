@@ -1,4 +1,21 @@
 return {
+  ["<M-=>"] = {
+    "<C-\\>e",
+    "c",
+    desc = "<C-\\>e",
+  },
+  ["gy"] = {
+    function()
+      local reg = vim.v.register
+      vim.api.nvim_feedkeys('"' .. reg .. "y", "nx", false)
+      local text = vim.fn.getreg(reg)
+      text = text:gsub("\n$", "")
+      vim.fn.setreg(reg, text)
+    end,
+    "x",
+    desc = "Like y, but trim trailing \\n",
+  },
+  ["<C-space><C-v>"] = { "<C-K>", "i" },
   [","] = { ",<C-g>u", "i" },
   ["."] = { ".<C-g>u", "i" },
   [";"] = { ";<C-g>u", "i" },
@@ -37,11 +54,11 @@ return {
   ["<space>D"] = { "xd^", "n" },
   ["<esc>"] = {
     function()
-      ---@diagnostic disable-next-line: undefined-field
-      vim.opt.hlsearch = not vim.opt.hlsearch:get()
+      return '<Cmd>nohlsearch|diffupdate|call nvim_buf_clear_namespace(0, nvim_create_namespace("nvim.multicursor"), 0, -1)|normal! <C-L><CR>'
     end,
     "n",
-    desc = "Toggle highlight search",
+    expr = true,
+    desc = "<C-L>",
   },
   ["<leader>X"] = {
     "<cmd>source %<cr>",

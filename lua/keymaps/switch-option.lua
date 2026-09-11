@@ -1,24 +1,29 @@
-local color_column = ""
-
-local function switch(option)
-  vim.opt[option] = not vim.opt[option]:get()
-end
-
 return {
-  ["<leader>wb"] = {
+  -- ["<leader>wb"] = {
+  --   function()
+  --     local winbar = vim.opt.winbar:get()
+  --   end,
+  --   "n",
+  -- },
+  ["<leader>bg"] = {
     function()
-      local winbar = vim.opt.winbar:get()
+      local bg = vim.o.background
+      if bg == "dark" then
+        vim.o.background = "light"
+      else
+        vim.o.background = "dark"
+      end
     end,
     "n",
   },
   ["<leader>so"] = {
     function()
-      ---@diagnostic disable-next-line: undefined-field
-      local scrolloff = vim.opt_local.scrolloff:get()
+      --'scrolloff': global or local to window
+      local scrolloff = vim.wo.scrolloff
       if scrolloff ~= 999 then
-        vim.opt_local.scrolloff = 999
+        vim.wo.scrolloff = 999
       else
-        vim.opt_local.scrolloff = 0
+        vim.wo.scrolloff = 0
       end
     end,
     "n",
@@ -26,12 +31,12 @@ return {
   },
   ["<leader>vso"] = {
     function()
-      ---@diagnostic disable-next-line: undefined-field
-      local scrolloff = vim.opt_local.scrolloff:get()
-      if scrolloff ~= 999 then
-        vim.opt_local.sidescrolloff = 999
+      --'sidescrolloff': global or local to window
+      local sidescrolloff = vim.wo.sidescrolloff
+      if sidescrolloff ~= 999 then
+        vim.wo.sidescrolloff = 999
       else
-        vim.opt_local.sidescrolloff = 0
+        vim.wo.sidescrolloff = 999
       end
     end,
     "n",
@@ -40,8 +45,8 @@ return {
   ["<leader>st"] = {
     function()
       ---@diagnostic disable-next-line: undefined-field
-      local value = vim.opt.laststatus:get()
-      if value == 0 then
+      local laststatus = vim.opt.laststatus:get()
+      if laststatus == 0 then
         vim.opt.laststatus = 3
       else
         vim.opt.laststatus = 0
@@ -52,6 +57,7 @@ return {
   },
   ["<leader>vt"] = {
     function()
+      -- 'virtualedit': global or local to window
       ---@diagnostic disable-next-line: undefined-field
       local value = vim.opt.virtualedit:get()[1]
       if value == "all" then
@@ -65,11 +71,12 @@ return {
   },
   ["<space><space>-"] = {
     function()
-      ---@diagnostic disable-next-line: undefined-field
-      if vim.opt["wrap"]:get() then
-        vim.opt.wrap = false
+      -- 'wrap': local to window
+      local wrap = vim.wo[0][0].wrap
+      if wrap then
+        vim.wo[0][0].wrap = false
       else
-        vim.opt.wrap = true
+        vim.wo[0][0].wrap = true
       end
     end,
     "n",
@@ -77,12 +84,12 @@ return {
   },
   ["<leader>sh"] = {
     function()
-      ---@diagnostic disable-next-line: undefined-field
-      local value = vim.opt["signcolumn"]:get()
+      -- 'signcolumn': local to window
+      local value = vim.wo[0][0].signcolumn
       if string.sub(value, 1, 1) == "y" then
-        vim.opt["signcolumn"] = "no"
+        vim.wo[0][0].signcolumn = "no"
       else
-        vim.opt["signcolumn"] = "yes:1"
+        vim.wo[0][0].signcolumn = "yes:1"
       end
     end,
     "n",
@@ -90,11 +97,12 @@ return {
   },
   ["<leader>nb"] = {
     function()
-      ---@diagnostic disable-next-line: undefined-field
-      if vim.opt["number"]:get() then
-        vim.opt.number = false
+      -- 'number': local to window
+      local value = vim.wo[0][0].number
+      if value then
+        vim.wo[0][0].number = false
       else
-        vim.opt.number = true
+        vim.wo[0][0].number = true
       end
     end,
     "n",
@@ -102,11 +110,12 @@ return {
   },
   ["<leader>Nb"] = {
     function()
-      ---@diagnostic disable-next-line: undefined-field
-      if vim.opt["relativenumber"]:get() then
-        vim.opt.relativenumber = false
+      -- 'relativenumber': local to window
+      local value = vim.wo[0][0].relativenumber
+      if value then
+        vim.wo[0][0].relativenumber = false
       else
-        vim.opt.relativenumber = true
+        vim.wo[0][0].relativenumber = true
       end
     end,
     "n",
@@ -131,29 +140,36 @@ return {
   },
   ["<leader>cll"] = {
     function()
-      color_column = color_column == "72" and "" or "72"
-      vim.opt.colorcolumn = color_column
+      -- 'colorcolumn': local to window
+      if vim.wo[0][0].colorcolumn == "" then
+        vim.wo[0][0].colorcolumn = "72"
+      else
+        vim.wo[0][0].colorcolumn = ""
+      end
     end,
     "n",
-    desc = "Switch color column",
+    desc = "Switch colorcolumn",
   },
   ["<leader>ig"] = {
     function()
-      switch("ignorecase")
+      -- 'ignorecase': global
+      vim.o.ignorecase = not vim.o.ignorecase
     end,
     "n",
     desc = "Switch ignorecase",
   },
   ["<leader>li"] = {
     function()
-      switch("list")
+      -- 'list': local to window
+      vim.wo[0][0].list = not vim.wo[0][0].list
     end,
     "n",
     desc = "Switch list",
   },
   ["<leader>hl"] = {
     function()
-      switch("hlsearch")
+      -- 'hlsearch': global
+      vim.o.hlsearch = not vim.o.hlsearch
     end,
     "n",
     desc = "Switch hlsearch",

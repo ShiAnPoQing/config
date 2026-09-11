@@ -1,0 +1,234 @@
+*help.txt*
+
+==============================================================================
+帮助标签约定          
+
+	   内容		前缀		示例
+	普通模式命令			:help x
+	可视模式命令	v_		:help v_u
+	插入模式命令	i_		:help i_<Esc>
+	命令行命令	:		:help :quit
+	命令行编辑	c_		:help c_<Del>
+	Vim 命令参数	-		:help -r
+	选项		'		:help 'textwidth'
+	正则表达式	/ 		:help /[
+
+==============================================================================
+:help
+
+分割打开或复用当前标签页存在的帮助窗口，以只读模式显示帮助文件，并跳转到标签
+
+语言的选择：
+	1. 默认语言
+		'helplang' 		逗号分隔的语言列表。Vim 将使用第一种可以找到所需帮助的语言。
+					英语帮助将始终作为最后手段使用
+	2. 显式指定语言 @xx >
+		:help api@cn
+<
+
+标签的匹配： 
+	1. 将在 'runtimepath' 选项中指定目录的所有 “doc/tags” 文件中搜索指定的标签
+	2. {subject} 越长，匹配数量越少
+	3. 只有会选择一种 “最佳” 匹配：
+	      - 相同大小写的匹配远优于不同大小写的匹配。
+	      - 在非字母数字字符之后开始的匹配优于单词中间的匹配。
+	      - 在标签开头或附近开始的匹配优于更靠后的匹配。
+	      - 匹配的字母数字字符越多越好。
+	      - 匹配的长度越短越好。
+	4. 若需要跳转其他匹配项：使用 tag 功能 
+		1. |:tag|: >
+			:help
+			:tag .*mode
+<
+		2. |:tselect|: >
+			:help index
+			:tselect /.*mode
+<	
+		
+
+			*self-:help*
+:h[elp]			打开只读由 'helpfile' 给定的文件
+				1. 当前标签页中有帮助窗口，使用该窗口
+				2. split 当前窗口  
+
+			*self-:help!*
+:h[elp]!		根据光标位置的 |WORD| 猜测帮助标签
+			>lua
+        local v = vim.version.parse(vim.system({'foo'}):wait().stdout)
+<
+
+:h[elp] {subject}	同时跳转到 {subject} tag
+			{subject}
+				1. 可以包含通配符，如 "*"、"?" 和 "[a-z]"
+					:help z?	跳转到任何 "z" 命令的帮助
+					:help z.	跳转到 "z." 的帮助
+					当标签存在时，它会被字面理解:
+						:help :?
+				2. 通过附加 "@ab" 在特定语言中查找标签
+
+:h[elp]! {subject}	类似 ":help"，但优先选择与当前文件相同 |help-translated| 语言的标签
+			与 |:h[elp]!| 逻辑无关
+
+
+:exu[sage]		显示 Ex 命令的帮助
+			same: >
+			:help Ex-command
+<
+
+:viu[sage]		显示普通模式命令的帮助
+			same: >
+			:help normal-index
+<
+==============================================================================
+grep
+
+
+写入 help window |quickfix| ~
+
+:helpg[rep] {pattern}[@xx]	搜索所有帮助文本文件
+				列出包含 {pattern} 匹配项的行。
+				跳转到第一个匹配项。
+      				可选的 [@xx] 指定仅查找 “xx” 语言中的匹配项
+
+				{pattern} Vim 正则表达式 |pattern|
+				不支持换行
+				不使用 'ignorecase'，添加 "\c" 可忽略大小写 >
+				:helpgrep uganda\c
+<
+				注意：后面不能跟另一个命令，所有内容都用作模式的一部分
+					
+写入 help window |location-list|~
+
+:lh[elpgrep] {pattern}[@xx]
+
+==============================================================================
+help window
+
+特点：
+	1. help window 锁 "filetype=help"：
+		如 ":bn" ":bp" 都是 help buffer 
+		若 ":e other_filetype" 则 help window 退化 normal window
+
+	2. 帮助窗口的初始高度可以通过 'helpheight' 选项设置（默认 20）
+
+:helpc[lose]			关闭一个帮助窗口(如果存在)
+
+				Vim 将尝试将窗口布局（包括光标位置）
+				恢复到最初打开帮助窗口之前的布局。
+				这可能会导致触发多个自动命令。
+==============================================================================
+help buffer
+
+默认行为选项：
+    'iskeyword'   几乎所有 ASCII 字符，除了 ' '、'*'、'"' 和 '|'
+    'foldmethod'  “manual”
+    'tabstop'   8
+    'arabic'    关闭
+    'binary'    关闭
+    'buflisted'   关闭
+    'cursorbind'  关闭
+    'diff'     关闭
+    'foldenable'  关闭
+    'list'      关闭
+    'modifiable'  关闭
+    'number'    关闭
+    'relativenumber'  关闭
+    'rightleft'   关闭
+    'scrollbind'  关闭
+    'spell'     关闭
+
+映射 `g==` 执行当前的 Lua/Vimscript 代码块 >lua
+	vim.print("你好")
+>
+
+==============================================================================
+write local help
+
+语法 ~
+
+第一行 >
+	*plugin_name.txt* {插件的简短描述}
+<
+	"plugin_name.txt" for ":help plugin_name" 
+	将显示在主帮助文件的 “LOCAL ADDITIONS” 部分。
+	检查它是否正确显示： |local-additions|。
+
+定义标签："*tag-name*"，通常右对齐
+引用标签: "|tag-name|"，如 |help-writing|
+引用 Vim 选项： 单引号之间, 如 'statusline'
+
+高亮 ~
+
+see '$VIMRUNTIME/syntax/help.vim'
+
+引用技术术语 "`~/.path/to/init.vim`"，内联代码（与代码块相对）
+列标题：行尾使用 "~"，空格隔开 
+章节分割："====" 任意数量 "="
+代码块：
+	开始块: 行尾 ">"，前面需要一个空格
+	结束块: 第一个非空字符 "<"
+
+	例如 >
+		  function Example_Func()
+		    echo "Example"
+		  endfunction
+<
+	启用语法高亮：在 ">" 后放置语言名称注释
+
+	例如 >vim
+		  function Example_Func()
+		    echo "Example"
+		  endfunction
+<
+特殊键名高亮： <PageDown>
+{braces}高亮： {lhs} {rhs}
+NOTE、TODO、ERROR 高亮
+
+帮助标签补全 ~
+
+|ft-help-omni|
+
+|i_CTRL-X_CTRL-O|
+
+生成标签文件 ~
+
+:helpt[ags] [++t] {dir}		为 {dir} 生成帮助标签文件	
+
+				{dir}
+					1. ALL 'runtimepath' 所有 "doc" 目录
+					扫描目录和子目录中的所有 “*.txt” 和 “*.??x” 文件，
+					以查找星号之间的帮助标签定义。
+					“*.??x” 文件用于翻译文档，
+					它们生成 “tags-??” 文件，参见 |help-translated|。
+					生成的标签文件已排序。
+					当存在重复项时，会给出错误消息。
+					现有的标签文件会被静默覆盖
+						
+					2. doc 目录
+					例如：重建运行时目录中的帮助标签 >
+					:helptags $VIMRUNTIME/doc
+<
+
+
+				可选的 “++t” 参数强制添加 “help-tags” 标签。
+				当 {dir} 等于 $VIMRUNTIME/doc 时，也会执行此操作。
+
+
+==============================================================================
+技巧			*self-help-tips*
+
+1. 在新标签页中打开 help window >
+	:tab help 
+<
+2. 水平打开 help window >
+	:vert help
+<
+2. 将当前标签页变为一个 help window >
+	:help | only
+<
+
+3. 将当前窗口变为一个 help window >
+
+<
+
+vim:tw=78:ts=8:noet:ft=help:norl:
