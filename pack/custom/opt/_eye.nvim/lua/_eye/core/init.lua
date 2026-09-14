@@ -182,14 +182,4 @@ function M:active(config)
   }):active(config)
 end
 
---- @param config? _Eye.Active.Config
-function M:_active(config)
-  return Active:new({
-    config = config or {},
-    actived_leafs = {},
-    actived_nodes = {},
-    actived_node_queue = { self._.root },
-  }):_active(config)
-end
-
 return M

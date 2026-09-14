@@ -58,8 +58,8 @@ local diagnostic_config = {
     },
     numhl = {
       [vim.diagnostic.severity.ERROR] = "DiagnosticNumberError",
-      [vim.diagnostic.severity.WARN] = "DiagnosticLineWarn",
-      [vim.diagnostic.severity.INFO] = "DiagnosticLineInfo",
+      [vim.diagnostic.severity.WARN] = "DiagnosticNumberWarn",
+      [vim.diagnostic.severity.INFO] = "DiagnosticNumberInfo"
     },
   },
 }

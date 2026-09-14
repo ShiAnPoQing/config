@@ -25,10 +25,16 @@ local function get_diagnostic_hl(buf)
     [vim.diagnostic.severity.INFO] = "DiagnosticInfo",
     [vim.diagnostic.severity.HINT] = "DiagnosticHint",
   }
-  for severity, hl_group in pairs(signs) do
-    local count = vim.diagnostic.count(buf, { severity = severity })[severity]
+  --- := vim.diagnostic.severity
+  --- ERROR: 1
+  --- WARNING: 2
+  --- INFO: 3
+  --- HINT: 4
+  for i = 1, 4 do
+    local hl = signs[i]
+    local count = vim.diagnostic.count(buf, { severity = i })[i]
     if count and count > 0 then
-      return hl_group
+      return hl
     end
   end
 end

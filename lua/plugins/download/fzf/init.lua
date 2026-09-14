@@ -608,12 +608,15 @@ return {
   config = function()
     require("fzf-lua").setup({
       winopts = {
-        -- split = "belowright new",
         row = 1, -- window row position (0=top, 1=bottom)
-        col = 0.50,
         width = 1,
-        height = 0.5,
-        backdrop = 100,
+        height = 0.7,
+        backdrop = 80,
+        -- layout = "vertical",
+        preview = {
+          layout = "vertical",
+          vertical = "down:40%",
+        },
       },
       actions = {
         -- Below are the default actions, setting any value in these tables will override

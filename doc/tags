@@ -2,9 +2,12 @@ Ex-command-sorted	command-index.txt	/*Ex-command-sorted*
 command-index.txt	command-index.txt	/*command-index.txt*
 create-textobject	textobject.txt	/*create-textobject*
 current-directory.txt	current-directory.txt	/*current-directory.txt*
+diff:write:update	write-update-diff.txt	/*diff:write:update*
 fold.txt	fold.txt	/*fold.txt*
 foldmethod=manual	fold.txt	/*foldmethod=manual*
 line-break.txt	line-break.txt	/*line-break.txt*
+my.diagnostic-quickstart	my.diagnostic.txt	/*my.diagnostic-quickstart*
+my.diagnostic.txt	my.diagnostic.txt	/*my.diagnostic.txt*
 real-line-break	line-break.txt	/*real-line-break*
 textobject-logic	textobject.txt	/*textobject-logic*
 textobject.txt	textobject.txt	/*textobject.txt*

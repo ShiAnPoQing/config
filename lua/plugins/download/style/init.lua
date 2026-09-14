@@ -60,10 +60,25 @@ return {
     lazy = false,
     colorscheme = "paradox",
     config = function()
+      require("paradox").setup({
+        after_load = function()
+          local colors = require("paradox").get_colors()
+          local r_h, _ = require("paradox.utils").hex_to_hsl(colors.names.red)
+          local y_h, _ = require("paradox.utils").hex_to_hsl(colors.names.yellow_green)
+          local _, s, l = require("paradox.utils").hex_to_hsl(colors.names.bg)
+          local error = require("paradox.utils").hsl_to_hex(r_h, s, l)
+          local warn = require("paradox.utils").hsl_to_hex(y_h, s, l)
+          vim.api.nvim_set_hl(0, "DiagnosticLineError", { bg = error })
+          vim.api.nvim_set_hl(0, "DiagnosticNumberError", { fg = colors.names.red, bg = error })
+          vim.api.nvim_set_hl(0, "DiagnosticLineWarn", { bg = warn })
+          vim.api.nvim_set_hl(0, "DiagnosticNumberWarn", { fg = colors.names.yellow_green, bg = warn })
+
+          vim.api.nvim_set_hl(0, "TabLineSelModified", { fg = colors.names.yellow_green })
+        end,
+      })
       -- require("paradox.utils").set_surface_hsl(50, 30)
       require("paradox.utils").set_surface_hsl(200, 30)
       -- require("paradox.utils").offset_hue_hsl(20, 10)
-      require("paradox").setup()
       local time = tonumber(os.date("%H"))
       if time >= 17 or time < 7 then
         vim.o.background = "dark"
@@ -71,14 +86,6 @@ return {
         vim.o.background = "light"
       end
       vim.cmd([[colorscheme paradox]])
-
-      local colors = require("paradox").get_colors()
-      local r_h, _ = require("paradox.utils").hex_to_hsl(colors.hues.hue72)
-      local _, s, l = require("paradox.utils").hex_to_hsl(colors.names.bg)
-      local c = require("paradox.utils").hsl_to_hex(r_h, s, l)
-      vim.api.nvim_set_hl(0, "DiagnosticLineError", { bg = c })
-      vim.api.nvim_set_hl(0, "DiagnosticNumberError", { fg = colors.names.red, bg = c })
-      vim.api.nvim_set_hl(0, "TabLineSelModified", { fg = colors.names.yellow_green })
     end,
   },
   {

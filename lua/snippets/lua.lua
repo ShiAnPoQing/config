@@ -123,7 +123,7 @@ local snippets = {
     i(1, "name"),
   }),
   s(
-    { trig = "@enum", show_condition = only_blank_or_comment_line },
+    { trig = "@enum", show_condition = only_blank_or_comment_line, resolveExpandParams = resolve_lua_ls_annotation },
     c(1, {
       {
         t("--- @enum "),

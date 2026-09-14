@@ -24,6 +24,10 @@ return {
           buf = b,
         }) then
           local bufname = vim.api.nvim_buf_get_name(b)
+          bufname = vim.fn.fnamemodify(bufname, ":p:.")
+          if bufname == "" then
+            bufname = "[[No Name]]"
+          end
           local line = "#" .. b .. " " .. bufname
           maxlen = math.max(maxlen, #line)
           table.insert(lines, line)

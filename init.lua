@@ -6,13 +6,13 @@ require("autocmds")
 require("keymaps")
 require("test")
 require("native-packer").add({
+  require("plugins.local.neo-lsp"),
   require("plugins.download.style"),
   require("plugins.download.style.statuscol"),
   require("plugins.download.style.lualine"),
   require("plugins.download.misc.nvim-navic"),
   require("plugins.local.native-macro"),
   require("plugins.download.misc.repeat"),
-  require("plugins.local.neo-lsp"),
   require("plugins.local.native-diagnostic"),
   require("plugins.local.reasonable-scroll"),
   require("plugins.local.reasonable-screen-move"),
@@ -28,7 +28,7 @@ require("native-packer").add({
   require("plugins.download.git.gitsigns"),
   require("plugins.download.snippet.luasnip"),
   require("plugins.download.cmp.blink-cmp"),
-  -- require("plugins.download.fzf"),
+  require("plugins.download.fzf"),
   require("plugins.download.format.conform"),
   require("plugins.download.treesitter"),
   require("plugins.download.filemanager.oil"),

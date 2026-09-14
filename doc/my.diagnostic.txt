@@ -1,0 +1,158 @@
+*my.diagnostic.txt*
+==============================================================================
+
+1. External Tools(like linter or LSP) support diagnostic
+
+2. Nvim provides a framework for displaying errors or warnings: |vim.diagnostic|
+
+|vim.diagnostic|>lua
+  Producer
+  |
+  vim.diagnostic.set(namespace, buf, diagnostics, opts) / vim.diagnostic.show(namespace, buf, diagnostics, opts)
+  |								    |
+  store namespace, buf, diagnostics,				    |
+  |								    |
+  vim.diagnostic.show(namespace, buf, nil, opts)		    |
+  |                                                                 |
+  vim.diagnostic.handlers -> handler.show(namespace, buf, diagnostics, opts)
+<
+|vim.diagnostic.Opts|>lua
+  vim.diagnostic.config({ handler = opts }) -> vim.diagnostic.set/vim.diagnostic.show not specified opts
+  |
+  handler.show(namespace, buf, diagnostics, opts)/.. 
+<
+
+>lua
+  --- @type vim.diagnostic.Set[]
+  local diagnostics = {}
+  vim.diagnostic.set(namespace, buf, diagnostics, opts) 
+    -> 1. store namespace, buf, diagnostics, 
+    -> 2. vim.diagnostic.show(namespace, buf, nil, opts)
+  vim.diagnostic.show(namespace, buf, diagnostics, opts) 
+    -> vim.diagnostic.handlers.show(namespace, buf, diagnostics, opts)
+
+  vim.diagnostic.show(namespace, buf, diagnostics, nil)
+    -> vim.diagnostic.show(namespace, buf, diagnostics, vim.diagnostic.config(nil, namespace))
+  vim.diagnostic.show(namespace, buf, nil, nil)
+    -> vim.diagnostic.show(namespace, buf, stored_namespace_buf_diagnostics, vim.diagnostic.config(nil, namespace))
+  vim.diagnostic.show(namespace, nil, nil, nil)  
+    -> vim.diagnostic.show(namespace, all_bufs, stored_namespace_buf_diagnostics, vim.diagnostic.config(nil, namespace))
+  vim.diagnostic.show(nil, nil, nil, nil)  
+    -> vim.diagnostic.show(all_namespaces, all_bufs, all_stored_namespace_buf_diagnostics, vim.diagnostic.config(nil, namespace))
+
+  --- global diagnostic opts
+  --- for |vim.diagnostic.set()| or |vim.diagnostic.show| not specified opts 
+  vim.diagnostic.config(opts, namespace)
+  vim.diagnostic.config(opts)
+  local config = vim.diagnostic.config()
+<
+
+
+==============================================================================
+*my.diagnostic-quickstart*
+
+1. Create a namespace |nvim_create_namespace()|. 
+  Note that the namespace must have a name. Anonymous namespaces WILL NOT WORK.
+2. (Optional) Configure options for the diagnostic namespace
+   |vim.diagnostic.config()|.
+3. Generate diagnostics.
+4. Set the diagnostics for the buffer |vim.diagnostic.set()|.
+5. Repeat from step 3.
+
+>lua
+  local namespace = vim.api.nvim_create_namespace('my_namespace')
+  --- @type vim.diagnostic.Set[]
+  local diagnostics = {}
+  --- @type vim.diagnostic.Opts
+  local opts = {}
+  vim.diagnostic.set(namespace, diagnostics, opts)
+  vim.diagnostic.show(namespace, diagnostics, opts)
+
+  vim.diagnostic.config({
+    virtual_text = {},
+    virtual_liness = {},
+    signs = {},
+    underline = {},
+    ["my/notify"] = {
+      log_level = vim.log.levels.INFO,
+      severity = vim.diagnostic.severity.ERROR,
+    },
+  })
+
+  --- Override the default diagnostic handler
+  local ns = vim.api.nvim_create_namespace("my_namespace")
+  local orig_signs_handler = vim.diagnostic.handlers.signs
+  vim.diagnostic.handlers.signs = {
+    show = function(_, bufnr, _, opts)
+      local diagnostics = vim.diagnostic.get(bufnr)
+
+      local max_severity_per_line = {}
+      for _, d in pairs(diagnostics) do
+	local m = max_severity_per_line[d.lnum]
+	if not m or d.severity < m.severity then
+	  max_severity_per_line[d.lnum] = d
+	end
+      end
+
+      local filtered_diagnostics = vim.tbl_values(max_severity_per_line)
+      orig_signs_handler.show(ns, bufnr, filtered_diagnostics, opts)
+    end,
+    hide = function(_, bufnr)
+      orig_signs_handler.hide(ns, bufnr)
+    end
+  }
+
+  --- Create a new handler
+  vim.diagnostic.handlers["my/notify"] = {
+    show = function(namespace, bufnr, diagnostic, opts)
+      local level = opts["my/notify"].log_level
+
+      local name = vim.diagnostic.get_namespace(namespace).name
+      local msg = string.format("%d diagnostic in buffer %d from %s", #diagnostic, bufnr, name)
+      vim.notify(msg, level)
+    end,
+  }
+<
+
+
+|vim.diagnostic.Set| >lua
+--- Diagnostics use the same indexing as the rest of the Nvim API (i.e. 0-based
+--- rows, and columns given as 0-based byte indices). |api-indexing|
+--- @class vim.Diagnostic.Set
+---
+--- The starting line of the diagnostic (0-indexed)
+--- @field lnum integer
+---
+--- The starting column of the diagnostic (0-indexed)
+--- (default: `0`)
+--- @field col? integer
+---
+--- The final line of the diagnostic (0-indexed)
+--- (default: `lnum`)
+--- @field end_lnum? integer
+---
+--- The final column of the diagnostic (0-indexed)
+--- (default: `col`)
+--- @field end_col? integer
+---
+--- The severity of the diagnostic |vim.diagnostic.severity|
+--- (default: `vim.diagnostic.severity.ERROR`)
+--- @field severity? vim.diagnostic.Severity
+---
+--- The diagnostic text
+--- @field message string
+---
+--- The source of the diagnostic
+--- @field source? string
+---
+--- The diagnostic code
+--- @field code? string|integer
+---
+--- @field _tags? { deprecated: boolean, unnecessary: boolean}
+---
+--- Arbitrary data plugins or users can add
+--- @field user_data? any arbitrary data plugins can add
+>
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:

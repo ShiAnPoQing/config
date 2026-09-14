@@ -1,3 +1,14 @@
+local function in_snippet_snippet_forward(cmp)
+  local luasnip = require("luasnip")
+  if luasnip.in_snippet() then
+    return cmp.snippet_forward()
+  end
+end
+local function is_lsp_snippet_selected(cmp)
+  local selected_item = cmp.get_selected_item()
+  return selected_item and selected_item.source_id == "lsp" and selected_item.kind == 15
+end
+
 return {
   {
     "saghen/blink.lib",
@@ -53,7 +64,7 @@ return {
           },
         },
         completion = {
-          documentation = { auto_show = true, auto_show_delay_ms = 0 },
+          documentation = { auto_show = true, auto_show_delay_ms = 100 },
           menu = {
             max_height = 1000,
             -- border = "single",
@@ -121,16 +132,11 @@ return {
             },
             ["<Tab>"] = {
               function(cmp)
-                if cmp.is_menu_visible() then
-                  cmp.select_and_accept()
-                  return true
-                else
+                if not cmp.is_menu_visible() then
                   cmp.show()
-                  cmp.select_and_accept()
-                  return true
                 end
+                return cmp.select_and_accept()
               end,
-              -- "select_and_accept",
               "fallback",
             },
           },
@@ -178,15 +184,6 @@ return {
               module = "lazydev.integrations.blink",
               score_offset = 100,
             },
-            cmdline = {
-              min_keyword_length = function(ctx)
-                -- when typing a command, only show when the keyword is 3 characters or longer
-                if ctx.mode == "cmdline" and string.find(ctx.line, " ") == nil then
-                  return 2
-                end
-                return 0
-              end,
-            },
           },
         },
         fuzzy = { implementation = "prefer_rust_with_warning" },
@@ -214,29 +211,16 @@ return {
           },
           ["<C-n>"] = {
             function(cmp)
-              -- local luasnip = require("luasnip")
-              -- if luasnip.choice_active() and luasnip.in_snippet() then
-              --   vim.schedule(function()
-              --     luasnip.change_choice(1)
-              --   end)
-              --   return
-              -- end
               if cmp.is_menu_visible() then
-                cmp.select_next()
+                return cmp.select_next()
               else
-                cmp.show()
+                return cmp.show()
               end
             end,
+            "fallback",
           },
           ["<C-p>"] = {
             function(cmp)
-              -- local luasnip = require("luasnip")
-              -- if luasnip.choice_active() and luasnip.in_snippet() then
-              --   vim.schedule(function()
-              --     luasnip.change_choice(-1)
-              --   end)
-              --   return
-              -- end
               if cmp.is_menu_visible() then
                 cmp.select_prev()
               else
@@ -244,88 +228,41 @@ return {
               end
             end,
           },
-          ["<CR>"] = {
-            --- 使用 Luasnip API 触发 snippet，而非 blink-cmp 内置行为
-            --- 示例 snippet 通过 clear_region 来修正 -- @version 的显示
-            --- blink-cmp 内置行为导致 resolveExpandParams 失效
-            --[[
-            s({
-              trig = "@version",
-              show_condition = function(line_to_cursor)
-                local from = line_to_cursor:find("%-*%s*")
-                if not from then
-                  return false
-                end
-                return true
-              end,
-              resolveExpandParams = function(snippet, line_to_cursor, matched_trigger, captures)
-                local from = line_to_cursor:find("%-+%s*@version$")
-
-                if not from then
-                  return
-                end
-
-                -- from 是 Lua 1-based column
-                return {
-                  clear_region = {
-                    from = {
-                      vim.fn.line(".") - 1,
-                      from - 1,
-                    },
-                    to = {
-                      vim.fn.line(".") - 1,
-                      #line_to_cursor,
-                    },
-                  },
-                }
-              end
-            }, {
-              t("--- @version "),
-              i(1),
-            }),
-            --]]
-            function()
-              local luasnip = require("luasnip")
-              local expandable = luasnip.expandable()
-              if expandable then
-                vim.schedule(function()
-                  luasnip.expand()
-                end)
-                return true
-              end
-            end,
-            "accept",
-            "fallback",
-          },
+          ["<CR>"] = { "accept", "fallback" },
           --- 补全方案：
           ---        preselect = false,
           ---        auto_insert = true,
-          --- <Tab> 用于在不预选 menu 中第一个 item 且不主动选择的情况下：
-          ---        选中 menu 第一个 item，并接受该 item
-          --- ISSUE: 如果 keyword 本身就是 snippet 的 trigger，但是 menu 第一个 item 却不是该 snippet
-          ---        导致 snippet 没有触发，这里我选择 snippet 的优先级更高
-          --- SOLUTION: "select_and_accept" 作为 snippet trigger 的 fallback
-          ---           同时修复 snippet 处于 active 状态下，
-          ---           <Tab> 用于 snippet jump 而不是 expand snippet 或 select_and_accept
+          --- <Tab>:
+          ---       1. menu show -> expand snippet -> in snippet and snippet forward -> select_and_accept -> fallback
+          ---       2. menu hide -> in snippet and snippet forward -> expand snippet -> select_and_accept -> fallback
+          --- Limitation：
+          ---         1. snippet jumpable and snippet expandable and menu hide:
+          ---             <Tab> can't expand: use <C-n>/<C-e> to show menu, then use <Tab> to expand snippet
+          ---         1. snippet jumpable and snippet expandable and menu show:
+          ---             <Tab> can't select and accept: use <C-n> to select, then use <CR> to accept
           ["<Tab>"] = {
-            function()
+            function(cmp)
               local luasnip = require("luasnip")
-              local expandable = luasnip.expandable()
-              if expandable then
-                vim.schedule(function()
-                  luasnip.expand()
-                end)
-                return true
+              if cmp.is_menu_visible() then
+                return luasnip.expand()
+              else
+                --- Only in snippet, snippet forward
+                return in_snippet_snippet_forward(cmp)
               end
-              if luasnip.in_snippet() then
-                vim.schedule(function()
-                  luasnip.jump(1)
-                end)
-                return true
+            end,
+            function(cmp)
+              local luasnip = require("luasnip")
+              if cmp.is_menu_visible() then
+                --- If seleted item is lsp snippet, select and accept
+                if not is_lsp_snippet_selected(cmp) then
+                  --- Only in snippet, snippet forward
+                  return in_snippet_snippet_forward(cmp)
+                end
+              else
+                return luasnip.expand()
               end
             end,
             "select_and_accept",
-            "snippet_forward",
             "fallback",
           },
           ["<S-Tab>"] = { "snippet_backward", "fallback" },
@@ -336,8 +273,7 @@ return {
           ["<C-1>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                cmp.accept({ index = 1 })
-                return true
+                return cmp.accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -345,8 +281,7 @@ return {
           ["<C-2>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                cmp.accept({ index = 1 })
-                return true
+                return cmp.accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -354,8 +289,7 @@ return {
           ["<C-3>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                cmp.accept({ index = 1 })
-                return true
+                return cmp.accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -363,8 +297,7 @@ return {
           ["<C-4>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                cmp.accept({ index = 1 })
-                return true
+                return cmp.accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -372,8 +305,7 @@ return {
           ["<C-5>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                cmp.accept({ index = 1 })
-                return true
+                return cmp.accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -381,8 +313,7 @@ return {
           ["<C-6>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                cmp.accept({ index = 1 })
-                return true
+                return cmp.accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -390,8 +321,7 @@ return {
           ["<C-7>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                cmp.accept({ index = 1 })
-                return true
+                return cmp.accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -399,8 +329,7 @@ return {
           ["<C-8>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                cmp.accept({ index = 1 })
-                return true
+                return cmp.accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -408,8 +337,7 @@ return {
           ["<C-9>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                cmp.accept({ index = 1 })
-                return true
+                return cmp.accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -417,8 +345,7 @@ return {
           ["<C-0>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                cmp.accept({ index = 1 })
-                return true
+                return cmp.accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",

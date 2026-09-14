@@ -126,15 +126,22 @@ function _G.custom_foldtext()
   return results
 end
 
-vim.go.foldcolumn = "auto"
-vim.go.foldmethod = "expr"
-vim.go.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+-- vim.go.foldcolumn = "auto"
+vim.o.foldcolumn = "auto"
+-- vim.go.foldmethod = "expr"
+vim.o.foldmethod = "expr"
+-- vim.go.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 -- 打开文件时启用折叠
-vim.go.foldenable = true
+-- vim.go.foldenable = true
+vim.o.foldenable = true
 -- 默认展开所有
-vim.go.foldlevel = 99
+-- vim.go.foldlevel = 99
+vim.o.foldlevel = 99
 -- 打开文件时不折叠
 vim.o.foldlevelstart = 99
 -- 最大嵌套折叠层数
-vim.go.foldnestmax = 20
-vim.go.foldtext = "v:lua.custom_foldtext()"
+-- vim.go.foldnestmax = 20
+vim.o.foldnestmax = 20
+-- vim.go.foldtext = "v:lua.custom_foldtext()"
+vim.o.foldtext = "v:lua.custom_foldtext()"

@@ -21,7 +21,7 @@ function M.delete(continue)
   local del_mark_count = 0
   local H = require("_eye.core.highlight")
   local eye = require("_eye.core"):new(labels)
-  eye:_active({
+  eye:active({
     active = function(ctx)
       if #ctx.entries > 0 then
         local hls = {}

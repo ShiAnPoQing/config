@@ -57,6 +57,7 @@ local to window: 强调不同 buffer 的 option 的独立性，强调相同 buff
 global or local to buffer: 强调特定 buffer 的 option 的特殊性
               1. 未指定 local value 的 buffer：则 global value 是该 buffer 的 Effect value
               2. 指定了 local value 的 buffer：则 local value 是该 buffer 的 Effect value，而 local value 初始化为 global value
+              注意：默认值会被视为 local value
 
                  global value
                       │
@@ -188,18 +189,29 @@ vim.o.title = true
 vim.o.titlestring = "MuHuiXueLuoAnPoQing"
 vim.o.showmode = false
 
-vim.go.cmdheight = 1
+-- vim.go.cmdheight = 1
+vim.o.cmdheight = 1
 -- 在开始新行时（在插入模式下键入 <CR> 或使用 "o" 或 "O" 命令）从当前行 复制缩进
-vim.go.autoindent = true
+-- vim.go.autoindent = true
+vim.o.autoindent = true
 -- 启用自动 C 程序缩进
-vim.go.cindent = true
+-- vim.go.cindent = true
+vim.o.cindent = true
 -- 在开始新行时进行智能自动缩进
-vim.go.smartindent = true
+-- vim.go.smartindent = true
+vim.o.smartindent = true
 -- 当前窗口的最小列数
 vim.o.winwidth = 2
 vim.o.winaltkeys = "no"
-vim.go.number = true
-vim.go.relativenumber = true
+--- 不能保证 intro window 显示行号，
+--- 似乎被覆盖了，导致该 window 即使切换了 buffer，也不会显示行号
+-- 显示行号
+-- vim.go.number = true
+-- 保证 intro 页面也显示行号
+vim.o.number = true
+-- 显示相对行号
+-- vim.go.relativenumber = true
+vim.o.relativenumber = true
 -- 高亮显示其所有匹配项
 vim.o.hlsearch = true
 -- 在键入搜索命令时，显示到目前为止键入的模式匹配的位置
@@ -208,41 +220,65 @@ vim.o.incsearch = true
 vim.o.ignorecase = true
 -- 如果搜索模式包含大写字符，则覆盖 'ignorecase' 选项
 vim.o.smartcase = true
-vim.go.concealcursor = ""
-vim.go.cursorline = false
-vim.go.linebreak = false
+-- vim.go.concealcursor = ""
+vim.o.concealcursor = ""
+-- vim.go.cursorline = false
+vim.o.cursorline = false
+-- vim.go.linebreak = false
+vim.o.linebreak = false
 vim.o.ruler = true
-vim.go.conceallevel = 0
-vim.go.list = true
-vim.go.autoread = true
-vim.go.signcolumn = "yes:2"
+-- vim.go.conceallevel = 0
+vim.o.conceallevel = 0
+-- vim.go.list = true
+vim.o.list = true
+-- vim.go.autoread = true
+vim.o.autoread = true
+-- vim.go.signcolumn = "yes:2"
+vim.o.signcolumn = "yes:2"
 vim.o.laststatus = 3
 
-vim.go.tabstop = 2
-vim.go.softtabstop = 2
-vim.go.shiftwidth = 2
-vim.go.expandtab = true
-vim.go.smarttab = true
+-- vim.go.tabstop = 2
+vim.o.tabstop = 2
+-- vim.go.softtabstop = 2
+vim.o.softtabstop = 2
+-- vim.go.shiftwidth = 2
+vim.o.shiftwidth = 2
+-- vim.go.expandtab = true
+vim.o.expandtab = true
+-- vim.go.smarttab = true
+vim.o.smarttab = true
 
-vim.go.wrap = false
-vim.go.showbreak = "󱞩 "
-vim.go.scrolloff = 0
-vim.go.swapfile = false
+-- vim.go.wrap = false
+vim.o.wrap = false
+-- vim.go.showbreak = "󱞩 "
+vim.o.showbreak = "󱞩 "
+-- vim.go.scrolloff = 0
+vim.o.scrolloff = 0
+-- vim.go.swapfile = false
+vim.o.swapfile = false
 vim.o.backup = false
-vim.go.undofile = true
+-- vim.go.undofile = true
+vim.o.undofile = true
 vim.o.timeout = false
 
 -- vim.o.pumheight = 8
 vim.o.helplang = "cn"
-vim.go.matchpairs = "(:),{:},[:],<:>,【:】,《:》,（:）,`:`"
-vim.go.formatoptions = "jcroqql/"
-vim.go.fillchars = "vert:│,horiz:─,fold: ,foldopen:,foldsep: ,foldclose:"
-vim.go.virtualedit = "none"
-vim.go.textwidth = 0
+-- vim.go.matchpairs = "(:),{:},[:],<:>,【:】,《:》,（:）,`:`"
+vim.o.matchpairs = "(:),{:},[:],<:>,【:】,《:》,（:）,`:`"
+-- vim.go.formatoptions = "jcroqql/"
+vim.o.formatoptions = "jcroqql/"
+-- vim.go.fillchars = "vert:│,horiz:─,fold: ,foldopen:,foldsep: ,foldclose:"
+vim.o.fillchars = "vert:│,horiz:─,fold: ,foldopen:,foldsep: ,foldclose:"
+-- vim.go.virtualedit = "none"
+vim.o.virtualedit = "none"
+-- vim.go.textwidth = 0
+vim.o.textwidth = 0
 -- 设置分割窗口新窗口的位置
 vim.o.splitbelow = true
 vim.o.splitright = true
-vim.go.listchars = "extends:⭆,tab:󰌥󰌒,trail:·"
+-- vim.go.listchars = "extends:⭆,tab:󰌥󰌒,trail:·"
+vim.o.listchars = "extends:⭆,tab:󰌥󰌒,trail:·"
+-- vim.o.guicursor = "n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175"
 
 require("option.fold")
-require("option.tabline")
+-- require("option.tabline")

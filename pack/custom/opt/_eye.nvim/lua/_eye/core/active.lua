@@ -118,118 +118,12 @@ function M:new(opts)
   o.config = opts.config
   return o
 end
+
 --- @param config? _Eye.Active.Config
 --- @return _Eye.Active
 function M:active(config)
   config = Cfg.merge_active_config(config or {})
-  local queue = self.actived_node_queue
-  local actived_leafs = self.actived_leafs
-  local actived_nodes = self.actived_nodes
-  local node = table.remove(queue, #queue)
-
-  local prev = {}
-  local actions = config.actions
-
-  local rollback = function(count)
-    count = count or 1
-    vim.validate("count", count, "number")
-    count = math.min(math.floor(count), 1)
-    count = math.min(count, #queue - 1)
-    for _ = 1, count do
-      table.remove(queue, #queue)
-    end
-    node = queue[#queue]
-  end
-
-  --- @type _Eye.ActionContext
-  local action_context = {
-    rollback = rollback,
-    finish = function(cb)
-      node = nil
-      prev.done = cb
-    end,
-  }
-
-  --- @param n _Eye.Node|_Eye.Leaf
-  --- @return fun()|nil
-  local function actived(n)
-    return U.try(config.active, {
-      entries = create_entries(n, actived_leafs, actived_nodes),
-      active = n.label,
-      data = n.data,
-      rollback = rollback,
-    })
-  end
-
-  while node do
-    if node ~= prev.node then
-      U.try(prev.clean)
-    end
-
-    if is_leaf(node) then
-      collect_actived_node(node, actived_leafs, actived_nodes)
-      local clean = actived(node)
-      prev = {
-        node = node,
-        clean = function()
-          U.try(clean)
-          return { type = "complete" }
-        end,
-      }
-      node = nil
-    else
-      if node ~= prev.node then
-        table.insert(queue, node)
-        local clean = actived(node)
-        prev = {
-          node = node,
-          clean = function()
-            U.try(clean)
-            return { type = "cancel" }
-          end,
-        }
-      end
-      local char = U.get_char()
-      local action = actions[char:lower()]
-      if action then
-        U.try(action, action_context)
-      else
-        node = node.children[char]
-        if _is_actived_node(node, actived_leafs, actived_nodes) then
-          node = nil
-        end
-      end
-    end
-  end
-
-  local finish_context = U.try(prev.clean)
-  if finish_context then
-    if finish_context.type == "complete" then
-      U.try(config.complete)
-    elseif finish_context.type == "cancel" then
-      U.try(config.cancel)
-    end
-    U.try(config.finish, finish_context)
-    U.try(prev.done)
-  end
-
-  local clone_queue = vim.tbl_extend("force", {}, queue)
-  if _is_actived_node(clone_queue[#clone_queue], actived_leafs, actived_nodes) then
-    table.remove(clone_queue, #clone_queue)
-  end
-  return M:new({
-    config = config,
-    actived_leafs = vim.tbl_extend("force", {}, actived_leafs),
-    actived_nodes = vim.tbl_extend("force", {}, actived_nodes),
-    actived_node_queue = clone_queue,
-  })
-end
-
---- @param config? _Eye.Active.Config
---- @return _Eye.Active
-function M:_active(config)
-  config = Cfg.merge_active_config(config or {})
-  local queue = self.actived_node_queue
+  local queue = vim.tbl_extend("force", {}, self.actived_node_queue)
   local actived_leafs = self.actived_leafs
   local actived_nodes = self.actived_nodes
   local node = table.remove(queue, #queue)
@@ -321,6 +215,7 @@ function M:_active(config)
   if _is_actived_node(clone_queue[#clone_queue], actived_leafs, actived_nodes) then
     table.remove(clone_queue, #clone_queue)
   end
+
   return M:new({
     config = config,
     actived_leafs = vim.tbl_extend("force", {}, actived_leafs),
