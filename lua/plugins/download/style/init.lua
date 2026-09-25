@@ -74,10 +74,36 @@ return {
           vim.api.nvim_set_hl(0, "DiagnosticNumberWarn", { fg = colors.names.yellow_green, bg = warn })
 
           vim.api.nvim_set_hl(0, "TabLineSelModified", { fg = colors.names.yellow_green })
+          local blink_cmp_hls = {
+            "BlinkCmpKindFunction",
+            "BlinkCmpKindField",
+            "BlinkCmpKindValue",
+            "BlinkCmpKindEnum",
+            "BlinkCmpKindProperty",
+            "BlinkCmpKindVariable",
+            "BlinkCmpKindSnippet",
+            "BlinkCmpKindText",
+            "BlinkCmpKindClass",
+            "BlinkCmpKindMethod",
+            "BlinkCmpKindKeyword",
+            "BlinkCmpKindFolder",
+            "BlinkCmpKindFile",
+            "BlinkCmpKindModule",
+          }
+          for _, group in ipairs(blink_cmp_hls) do
+            local hl = vim.api.nvim_get_hl(0, { name = group, link = false })
+            vim.api.nvim_set_hl(0, group .. "Block", { fg = hl.bg })
+            vim.api.nvim_set_hl(0, group .. "Selected", { bg = hl.bg, fg = hl.fg, reverse = true })
+            -- vim.api.nvim_set_hl(0, group .. "BlockSelected", { bg = hl.bg, fg = hl.bg, reverse = true })
+            vim.api.nvim_set_hl(0, group .. "Source", { fg = hl.bg, bold = true })
+          end
+          local BlinkCmpMenu = vim.api.nvim_get_hl(0, { name = "BlinkCmpMenu", link = false })
+          vim.api.nvim_set_hl(0, "BlinkCmpMenuBackground", { fg = BlinkCmpMenu.bg, bg = BlinkCmpMenu.bg })
         end,
       })
       -- require("paradox.utils").set_surface_hsl(50, 30)
-      require("paradox.utils").set_surface_hsl(200, 30)
+      -- require("paradox.utils").set_surface_hsl(150, 30)
+      require("paradox.utils").set_surface_hsl(230, 20)
       -- require("paradox.utils").offset_hue_hsl(20, 10)
       local time = tonumber(os.date("%H"))
       if time >= 17 or time < 7 then

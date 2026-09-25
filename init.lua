@@ -1,7 +1,28 @@
+--- @class my
+--- @field command my.command
+--- @field keymap my.keymap
+--- @field window my.window
+
+--- @type my
+_G.my = _G.my or {}
+my._submodules = {
+  command = true,
+  keymap = true,
+  window = true,
+}
+setmetatable(my, {
+  __index = function(t, key)
+    if my._submodules[key] then
+      t[key] = require("my." .. key)
+      return t[key]
+    end
+  end,
+})
+my.window.float.drag.enable()
 vim.pack.add({ { src = "https://github.com/BrokenSunny/native-packer", version = "branch" } })
+require("command")
 require("global")
 require("option")
-require("command")
 require("autocmds")
 require("keymaps")
 require("test")
@@ -32,7 +53,7 @@ require("native-packer").add({
   require("plugins.download.format.conform"),
   require("plugins.download.treesitter"),
   require("plugins.download.filemanager.oil"),
-  require("plugins.download.filemanager.neo-tree"),
+  -- require("plugins.download.filemanager.neo-tree"),
   require("plugins.download.misc.autopairs"),
   require("plugins.download.misc.nvim-ts-autotag"),
   require("plugins.download.misc.supermaven"),
@@ -73,6 +94,7 @@ require("native-packer").add({
   require("plugins.test._eye"),
   require("plugins.builtin"),
   require("plugins.test.command-proxy"),
+  require("plugins.local.native-dir"),
   -- require("plugins.local.neo-tagstack"),
   -- require("plugins.local.visual-move"),
   -- require("plugins.local.bufferman"),

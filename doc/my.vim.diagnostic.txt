@@ -1,4 +1,4 @@
-*my.diagnostic.txt*
+*my.vim.diagnostic.txt*
 ==============================================================================
 
 1. External Tools(like linter or LSP) support diagnostic

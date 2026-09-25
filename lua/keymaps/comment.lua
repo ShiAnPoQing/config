@@ -15,7 +15,7 @@
 ---------------------------------------------------------------------------------------------------+
 
 return {
-  ["<C-_>"] = {
+  [my.keymap.keys.TOGGLE_COMMENT] = {
     {
       function()
         return require("vim._comment").operator() .. "_"
@@ -48,7 +48,7 @@ return {
       expr = true,
     },
   },
-  ["<C-/>"] = {
+  [my.keymap.keys.TOGGLE_COMMENT_ALT1] = {
     {
       function()
         return require("vim._comment").operator() .. "_"
@@ -80,5 +80,5 @@ return {
       desc = "Toggle Comment",
       expr = true,
     },
-  }
+  },
 }

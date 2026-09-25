@@ -21,29 +21,39 @@ local Active = require("_eye.core.active")
 --- @class _Eye.Build.Spec: _Eye.Build.Spec.Share
 --- @field include string[]
 
---- @class _Eye.ActiveContext.Entry
---- @field labels string[]
---- @field data any
-
---- @class _Eye.ActiveContext
---- @field label string
---- @field entries _Eye.ActiveContext.Entry[]
---- @field data any
---- @field rollback fun(count?: integer)
-
---- @class _Eye.FinishContext
---- @field type "complete"|"cancel"|"action"
-
---- @class _Eye.ActionContext
---- @field rollback fun(count?: integer)
---- @field finish fun(cb?: fun())
-
 --- @class _Eye.Config
 --- @field build? _Eye.Config.Build|fun(total: integer):_Eye.Config.Build
 
 --- @class _Eye._Label
 --- @field root _Eye.Node
 --- @field config _Eye.Config
+
+--- @class _Eye.PressContext
+--- @field char string
+
+--- @class _Eye.ActiveContext
+--- @field label string
+--- @field data any
+
+--- @class _Eye.CompleteContext: _Eye.ActiveContext
+--- @field rollback fun(count?: integer)
+
+--- @class _Eye.UpdateContext
+--- @field labels string[]
+--- @field data any
+
+--- @class _Eye.ActionContext
+--- @field rollback fun(count?: integer)
+--- @field complete fun()
+
+--- @class _Eye.Active.Config
+--- @field active? fun(ctx: _Eye.ActiveContext): fun()|nil
+--- @field update? fun(ctx: _Eye.UpdateContext): fun()|nil
+--- @field flush? fun()
+--- @field press? fun(ctx: _Eye.PressContext)
+--- @field complete? fun(ctx: _Eye.ActiveContext): nil|boolean
+--- @field cancel? fun()
+--- @field actions? table<string, fun(api: _Eye.ActionContext)>
 
 --- @class _Eye.Tree
 --- @field private _ _Eye._Label
@@ -165,20 +175,16 @@ function M:build(labels)
   end
 end
 
---- @class _Eye.Active.Config
---- @field active? fun(ctx: _Eye.ActiveContext): fun()|nil
---- @field finish? fun(ctx: _Eye.FinishContext)
---- @field complete? fun()
---- @field cancel? fun()
---- @field actions? table<string, fun(api: _Eye.ActionContext)>
-
 --- @param config? _Eye.Active.Config
 function M:active(config)
   return Active:new({
     config = config or {},
-    actived_leafs = {},
-    actived_nodes = {},
-    actived_node_queue = { self._.root },
+    state = {
+      current = { node = self._.root, cleanups = {} },
+      queue = { self._.root },
+      activated_leafs = {},
+      activated_nodes = {},
+    },
   }):active(config)
 end
 

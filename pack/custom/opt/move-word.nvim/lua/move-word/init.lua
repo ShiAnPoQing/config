@@ -1,7 +1,6 @@
 local M = {}
 
 function M.move_word(direction)
-  local count = vim.v.count1
   local line = vim.api.nvim_get_current_line()
   local cursor = vim.api.nvim_win_get_cursor(0)
   local regex = vim.regex("\\k\\+")

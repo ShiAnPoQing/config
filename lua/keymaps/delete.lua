@@ -14,8 +14,6 @@
 -- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
 ---------------------------------------------------------------------------------------------------+
 
-local K = require("utils.keys")
-
 local function ctrl_space_ctrl_i()
   vim.cmd.stopinsert()
   local end_pos = vim.api.nvim_win_get_cursor(0)
@@ -47,14 +45,15 @@ return {
   ["<BS>"] = {
     { "s", "n", desc = "same as 's'" },
     { "d", "x", desc = "same as 'd'" },
-    { " <bs>", "s" },
+    { "<esc>", "o", desc = "same as <esc>" },
+    { " <bs>", "s", desc = "like s" },
   },
   ["<S-BS>"] = {
     { "<Del>", { "i", "c", "t" } },
     { "x", "n" },
     desc = "Delete character after the cursor",
   },
-  [K.CTRL_BS] = {
+  [my.keymap.keys.CTRL_BS] = {
     { '<Left><C-o>"_diw', "i" },
     { '"_diw', "n" },
     {

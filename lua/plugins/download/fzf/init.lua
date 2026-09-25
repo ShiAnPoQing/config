@@ -608,14 +608,16 @@ return {
   config = function()
     require("fzf-lua").setup({
       winopts = {
-        row = 1, -- window row position (0=top, 1=bottom)
-        width = 1,
-        height = 0.7,
-        backdrop = 80,
+        -- row = 1, -- window row position (0=top, 1=bottom)
+        -- width = 1,
+        -- height = 1,
+        fullscreen = true,
+        -- backdrop = 80,
         -- layout = "vertical",
         preview = {
+          border = "none",
           layout = "vertical",
-          vertical = "down:40%",
+          vertical = "up:70%",
         },
       },
       actions = {

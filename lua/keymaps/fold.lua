@@ -23,7 +23,7 @@ return {
     end,
     "n",
     expr = true,
-    exclude_ft = { "prompt", "qf", "neo-tree", "netrw" },
+    exclude_ft = { "prompt", "qf", "neo-tree", "netrw", "oil" },
   },
   -- ["<S-CR>"] = {
   --   "zMzv",

@@ -41,7 +41,7 @@ local snippets = {
         if type(snip.env.TM_SELECTED_TEXT) == "table" and next(snip.env.TM_SELECTED_TEXT) ~= nil then
           return snip.env.TM_SELECTED_TEXT
         end
-        return "select_text"
+        return ""
       end
       return sn(1, { t("`"), i(1, text()), t("`") })
     end)
@@ -1137,11 +1137,17 @@ local snippets = {
     i(1),
   }),
 
-  s("false", {
+  s({
+    trig = "false",
+    hidden = true,
+  }, {
     t("true"),
     i(1),
   }),
-  s("true", {
+  s({
+    trig = "true",
+    hidden = true,
+  }, {
     t("false"),
     i(1),
   }),

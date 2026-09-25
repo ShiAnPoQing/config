@@ -15,10 +15,22 @@
 ---------------------------------------------------------------------------------------------------+
 
 return {
-  ["<leader>cd"] = { "<cmd>Cd<CR>", "n", desc = "Change directory to file(Global)" },
-  ["<leader>tcd"] = { "<cmd>Tcd<CR>", "n", desc = "Change directory to file(Current Tabpage)" },
-  ["<leader>lcd"] = { "<cmd>Lcd<CR>", "n", desc = "Change directory to file(Current Window)" },
-  ["<leader>bcd"] = { "<cmd>Bcd<CR>", "n", desc = "Change directory to file(Current Buffer)" },
+  ["<leader>cd"] = { "<cmd>" .. my.command.constants.Cd .. "<CR>", "n", desc = "Change directory to file(Global)" },
+  ["<leader>tcd"] = {
+    "<cmd>" .. my.command.constants.Tcd .. "<CR>",
+    "n",
+    desc = "Change directory to file(Current Tabpage)",
+  },
+  ["<leader>lcd"] = {
+    "<cmd>" .. my.command.constants.Lcd .. "<CR>",
+    "n",
+    desc = "Change directory to file(Current Window)",
+  },
+  ["<leader>bcd"] = {
+    "<cmd>" .. my.command.constants.Bcd .. "<CR>",
+    "n",
+    desc = "Change directory to file(Current Buffer)",
+  },
 }
 
 --[[

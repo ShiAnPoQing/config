@@ -1,5 +1,6 @@
 --- new tab help
-vim.api.nvim_create_user_command("Thelp", function(ev)
+
+my.command.define("TAB_HELP", "Thelp", function(ev)
   vim.cmd("tab help" .. (ev.bang and "! " or " ") .. ev.args)
 end, {
   nargs = "?",
@@ -7,7 +8,8 @@ end, {
   bang = true,
   bar = true,
 })
-vim.api.nvim_create_user_command("Th", function(ev)
+
+my.command.define("TAB_H", "Th", function(ev)
   vim.cmd("tab help" .. (ev.bang and "! " or " ") .. ev.args)
 end, {
   nargs = "?",
@@ -17,7 +19,7 @@ end, {
 })
 
 --- vertical help
-vim.api.nvim_create_user_command("Vhelp", function(ev)
+my.command.define("VERTICAL_HELP", "Vhelp", function(ev)
   vim.cmd("vert help" .. (ev.bang and "! " or " ") .. ev.args)
 end, {
   nargs = "?",
@@ -25,7 +27,8 @@ end, {
   bang = true,
   bar = true,
 })
-vim.api.nvim_create_user_command("Vh", function(ev)
+
+my.command.define("VERTICAL_H", "Vh", function(ev)
   vim.cmd("vert help" .. (ev.bang and "! " or " ") .. ev.args)
 end, {
   nargs = "?",
@@ -35,7 +38,7 @@ end, {
 })
 
 --- current window help
-vim.api.nvim_create_user_command("Help", function(ev)
+my.command.define("HELP", "Help", function(ev)
   local subject = ev.args
   local buf = vim.api.nvim_get_current_buf()
   local help = "help" .. (ev.bang and "! " or " ") .. subject

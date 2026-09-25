@@ -14,42 +14,12 @@
 -- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
 ---------------------------------------------------------------------------------------------------+
 
-local function switch_virtualedit()
-  ---@diagnostic disable-next-line: undefined-field
-  local virt = vim.opt_local.virtualedit:get()[1]
-  if virt == "all" then
-    vim.opt_local.virtualedit = "none"
-  else
-    vim.opt_local.virtualedit = "all"
-  end
-end
-
 local j = function()
   return vim.v.count == 0 and "gj" or "j"
 end
 
 local k = function()
   return vim.v.count == 0 and "gk" or "k"
-end
-
-local gj = function()
-  switch_virtualedit()
-  return vim.v.count == 0 and "gj" or "j"
-end
-
-local gk = function()
-  switch_virtualedit()
-  return vim.v.count == 0 and "gk" or "k"
-end
-
-local gl = function()
-  switch_virtualedit()
-  return "l"
-end
-
-local gh = function()
-  switch_virtualedit()
-  return "h"
 end
 
 local c_mode_middle = function()

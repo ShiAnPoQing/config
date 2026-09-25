@@ -15,7 +15,7 @@
 ---------------------------------------------------------------------------------------------------+
 
 return {
-  ["gi"] = {
+  [my.keymap.keys.GOTO_OLDER_CHANGE] = {
     function()
       local changelist = vim.fn.getchangelist(vim.api.nvim_get_current_buf())
       local idx = changelist[2]
@@ -28,7 +28,7 @@ return {
     expr = true,
     desc = "Go to [count] older position in change list.",
   },
-  ["go"] = {
+  [my.keymap.keys.GOTO_NEWER_CHANGE] = {
     function()
       local changelist = vim.fn.getchangelist(vim.api.nvim_get_current_buf())
       local list = changelist[1]

@@ -41,7 +41,7 @@ local paths = {
   "keymaps/word-move",
   "keymaps/test",
   "keymaps/cmdwin",
-  "keymaps/dir",
+  -- "keymaps/dir",
   "keymaps/multicursor",
 }
 

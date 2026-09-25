@@ -120,38 +120,36 @@ function M.eye(config)
     labels[#labels + 1] = label
   end)
 
-  local H = require("_eye.core.highlight")
+  local ns = vim.api.nvim_create_namespace("EyeWord")
   local eye = require("_eye.core"):new(labels, {})
   eye:active({
-    active = function(ctx)
-      if #ctx.entries > 0 then
-        local hls = {}
-        for _, entry in ipairs(ctx.entries) do
-          local text = vim.fn.join(entry.labels, "")
-          if entry.data then
-            table.insert(hls, {
-              buf = entry.data.buf,
-              row = entry.data.row - 1,
-              col = entry.data.col,
-              virt_text = { { text:sub(1, 1), H.EyeLabel } },
-            })
-          end
-          table.insert(hls, {
-            buf = entry.data.buf,
-            row = entry.data.row - 1,
-            col = entry.data.col + 1,
-            virt_text = { { text:sub(2), H.EyeNextLabel } },
-          })
-        end
-        local clean = H.highlight(hls, {})
-        return function()
-          clean()
-        end
-      else
-        ctx.rollback(1)
+    complete = function(ctx)
+      vim.print("hao")
+    end,
+    flush = function()
+      vim.cmd.redraw()
+    end,
+    update = function(ctx)
+      local label = vim.fn.join(ctx.labels, "")
+      local id1 = vim.api.nvim_buf_set_extmark(ctx.data.buf, ns, ctx.data.row - 1, ctx.data.col, {
+        virt_text = { { label:sub(1, 1), "SpecialKey" } },
+        virt_text_pos = "overlay",
+        hl_mode = "combine",
+      })
+      local id2 = vim.api.nvim_buf_set_extmark(ctx.data.buf, ns, ctx.data.row - 1, ctx.data.col + 1, {
+        virt_text = { { label:sub(2), "SpecialKey" } },
+        virt_text_pos = "overlay",
+        hl_mode = "combine",
+      })
+      return function()
+        vim.api.nvim_buf_del_extmark(ctx.data.buf, ns, id1)
+        vim.api.nvim_buf_del_extmark(ctx.data.buf, ns, id2)
       end
     end,
     actions = {
+      ["<esc>"] = function(ctx)
+        ctx.complete()
+      end,
       ["<bs>"] = function(ctx)
         ctx.rollback(1)
       end,

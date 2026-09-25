@@ -5,14 +5,14 @@ return {
     "SmiteshP/nvim-navic",
   },
   config = function()
-    local navic = require("nvim-navic")
-    navic.setup({
-      lsp = {
-        auto_attach = true,
-        preference = { "emmylua_ls", "lua_ls" },
-      },
-      highlight = true,
-    })
+    -- local navic = require("nvim-navic")
+    -- navic.setup({
+    --   lsp = {
+    --     auto_attach = true,
+    --     preference = { "emmylua_ls", "lua_ls" },
+    --   },
+    --   highlight = true,
+    -- })
     require("lualine").setup({
       options = {
         icons_enabled = true,
@@ -49,7 +49,7 @@ return {
       },
       sections = {
         lualine_a = { "mode" },
-        lualine_b = { "branch", "diff", "diagnostics" },
+        lualine_b = { "branch", "diff" },
         lualine_c = {
           {
             "filename",
@@ -61,19 +61,19 @@ return {
               newfile = "[New]", -- Text to show for newly created file before first write
             },
           },
-          {
-            function()
-              local n = navic.get_location() or ""
-              return n:gsub("(%*%%#(NavicIcons%w+)#)(.-)(%%*%%#)NavicText#", function(full, icon, middle, prefix)
-                return full .. middle .. prefix .. icon .. "#"
-              end)
-            end,
-            cond = function()
-              return navic.is_available()
-            end,
-          },
+          -- {
+          --   function()
+          --     local n = navic.get_location() or ""
+          --     return n:gsub("(%*%%#(NavicIcons%w+)#)(.-)(%%*%%#)NavicText#", function(full, icon, middle, prefix)
+          --       return full .. middle .. prefix .. icon .. "#"
+          --     end)
+          --   end,
+          --   cond = function()
+          --     return navic.is_available()
+          --   end,
+          -- },
         },
-        lualine_x = { "filetype" },
+        lualine_x = {"diagnostics", "filetype" },
         lualine_y = { "progress" },
         lualine_z = { "location" },
       },

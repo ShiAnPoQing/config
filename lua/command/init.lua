@@ -1,33 +1,3 @@
-vim.api.nvim_create_user_command("Cd", function()
-  local path = vim.fn.expand("%:p:h")
-  if path ~= nil and vim.uv.fs_stat(path) then
-    vim.cmd.cd(path)
-  end
-end, {})
-
-vim.api.nvim_create_user_command("Tcd", function()
-  local path = vim.fn.expand("%:p:h")
-  if path ~= nil and vim.uv.fs_stat(path) then
-    vim.cmd.tcd(path)
-  end
-end, {})
-
-vim.api.nvim_create_user_command("Lcd", function()
-  local path = vim.fn.expand("%:p:h")
-  if path ~= nil and vim.uv.fs_stat(path) then
-    vim.cmd.lcd(path)
-  end
-end, {})
-
-vim.api.nvim_create_user_command("Bcd", function()
-  local path = vim.fn.expand("%:p:h")
-  if path ~= nil and vim.uv.fs_stat(path) then
-    vim.cmd.bcd(path)
-  end
-end, {})
-
-require("command.help")
-require("command.buffer")
 -- -- 创建工作区目录列表
 -- local workspaces = {
 --   "~/Project",
@@ -206,53 +176,43 @@ require("command.buffer")
 --   end,
 -- })
 
-vim.api.nvim_create_user_command("Put", function(args)
-  local command = ""
-  for _, cmd in ipairs(args.fargs) do
-    command = command .. " " .. cmd
-  end
-  local output = vim.api.nvim_exec2(command, { output = true }).output
-  vim.api.nvim_put(vim.split(output, "\n"), "l", args.bang and true or false, false)
+my.command.define("Put", "Put", function(args)
+  local result = vim.api.nvim_exec2(args.args, { output = true })
+  vim.api.nvim_put(vim.split(result.output, "\n", { plain = true }), "l", args.bang and true or false, false)
 end, {
   nargs = "*",
   bang = true,
   complete = "command",
 })
 
-vim.api.nvim_create_user_command("Yank", function(args)
-  local command = ""
-  for _, cmd in ipairs(args.fargs) do
-    command = command .. " " .. cmd
+my.command.define("Bcd", "Bcd", function()
+  local path = vim.fn.expand("%:p:h")
+  if path ~= nil and vim.uv.fs_stat(path) then
+    vim.cmd.bcd(path)
+    vim.api.nvim_echo({ { "cwd: " .. vim.fn.getcwd(), "Normal" } }, true, {})
   end
-  local output = vim.api.nvim_exec2(command, { output = true }).output
-  vim.fn.setreg(vim.v.register, output)
-end, {
-  nargs = "*",
-  complete = "command",
-})
+end)
+my.command.define("Cd", "Cd", function()
+  local path = vim.fn.expand("%:p:h")
+  if path ~= nil and vim.uv.fs_stat(path) then
+    vim.cmd.cd(path)
+    vim.api.nvim_echo({ { "cwd: " .. vim.fn.getcwd(), "Normal" } }, true, {})
+  end
+end)
+my.command.define("Tcd", "Tcd", function()
+  local path = vim.fn.expand("%:p:h")
+  if path ~= nil and vim.uv.fs_stat(path) then
+    vim.cmd.tcd(path)
+    vim.api.nvim_echo({ { "cwd: " .. vim.fn.getcwd(), "Normal" } }, true, {})
+  end
+end)
+my.command.define("Lcd", "Lcd", function()
+  local path = vim.fn.expand("%:p:h")
+  if path ~= nil and vim.uv.fs_stat(path) then
+    vim.cmd.lcd(path)
+    vim.api.nvim_echo({ { "cwd: " .. vim.fn.getcwd(), "Normal" } }, true, {})
+  end
+end)
 
-vim.api.nvim_create_user_command("Show", function(args)
-  local command = ""
-  for _, cmd in ipairs(args.fargs) do
-    command = command .. " " .. cmd
-  end
-  local output = vim.api.nvim_exec2(command, { output = true }).output
-  local lines = vim.split(output, "\n")
-  local buffer = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_open_win(buffer, true, {
-    relative = "laststatus",
-    style = "minimal",
-    row = 0,
-    col = 10000,
-    width = 10000,
-    height = #lines,
-    border = { "", { " ", "MsgSeparator" }, "", "", "", "", "", "" },
-    zindex = 197,
-    anchor = "SE",
-    mouse = true,
-  })
-  vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
-end, {
-  nargs = "*",
-  complete = "command",
-})
+require("command.commands.buffer")
+require("command.commands.help")

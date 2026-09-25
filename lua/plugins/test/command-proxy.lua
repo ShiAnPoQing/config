@@ -2,6 +2,13 @@ return {
   name = "command-proxy.nvim",
   event = "CmdlineEnter",
   config = function()
+    local function cmd_to_reg(cmd)
+      if vim.v.register ~= "+" then
+        local output = vim.api.nvim_exec2(cmd, { output = true }).output
+        vim.fn.setreg(vim.v.register, output)
+      end
+    end
+
     local function eye_buffer()
       local curr_win = vim.api.nvim_get_current_win()
       local curr_buf = vim.api.nvim_get_current_buf()
@@ -37,9 +44,7 @@ return {
               buf = buf,
               row = #bufs,
               col = 0,
-              data = {
-                bufnr = b,
-              },
+              bufnr = b,
             })
           else
             curr_buf_row = #bufs
@@ -98,16 +103,16 @@ return {
 
       local vim_resized_id = vim.api.nvim_create_autocmd("VimResized", {
         callback = function()
-          local height = vim.api.nvim_win_text_height(win, {
+          local h = vim.api.nvim_win_text_height(win, {
             start_row = 0,
             end_row = vim.api.nvim_buf_line_count(buf) - 1,
           }).all
 
-          vim.api.nvim_win_resize(win, -1, height)
+          vim.api.nvim_win_resize(win, -1, h)
         end,
       })
 
-      local ns_id = vim.api.nvim_create_namespace("adaf")
+      local ns_id = vim.api.nvim_create_namespace("eye-buffer")
       vim.api.nvim_buf_set_extmark(buf, ns_id, curr_buf_row - 1, 0, {
         line_hl_group = "Directory",
       })
@@ -123,69 +128,39 @@ return {
         bold = true,
       })
 
-      local H = require("_eye.core.highlight")
-
-      local function step()
-        local eye = require("_eye.core"):new(labels)
-        eye:active({
-          finish = function(ctx)
-            if ctx.type == "complete" or ctx.type == "cancel" then
-              close_win()
-            end
-          end,
-          active = function(ctx)
-            if #ctx.entries > 0 then
-              local hls = {}
-              for _, entry in ipairs(ctx.entries) do
-                local text = vim.fn.join(entry.labels, "")
-                table.insert(hls, {
-                  buf = entry.data.buf,
-                  row = entry.data.row - 1,
-                  col = 0,
-                  sign_text = text,
-                  sign_hl_group = "EyeSignLabel",
-                })
-                table.insert(hls, {
-                  buf = entry.data.buf,
-                  row = entry.data.row - 1,
-                  col = 0,
-                  virt_text = { { text, "EyeSignLabel" } },
-                  virt_text_pos = "eol",
-                })
-              end
-              local clean = H.highlight(hls, {})
-              return function()
-                clean()
-              end
-            else
-              local data = ctx.data or {}
-              if type(data.data) == "table" then
-                if data.data.bufnr ~= curr_buf then
-                  vim.api.nvim_win_set_buf(curr_win, data.data.bufnr)
-                end
-              end
-            end
-          end,
-          actions = {
-            ["<c-n>"] = function()
-              vim.schedule(function()
-                step()
-              end)
-            end,
-            ["<c-p>"] = function()
-              vim.schedule(function()
-                step()
-              end)
-            end,
-          },
-        })
-      end
-      vim.schedule(function()
-        step()
-      end)
+      local eye = require("_eye.core"):new(labels)
+      eye:active({
+        flush = function()
+          vim.cmd.redraw()
+        end,
+        complete = function(ctx)
+          local data = ctx.data or {}
+          if data.bufnr ~= curr_buf then
+            vim.api.nvim_win_set_buf(curr_win, data.bufnr)
+            close_win()
+          end
+        end,
+        cancel = function()
+          close_win()
+        end,
+        update = function(ctx)
+          local text = vim.fn.join(ctx.labels, "")
+          local id1 = vim.api.nvim_buf_set_extmark(ctx.data.buf, ns_id, ctx.data.row - 1, ctx.data.col, {
+            virt_text = { { text, "EyeSignLabel" } },
+          })
+          local id2 = vim.api.nvim_buf_set_extmark(ctx.data.buf, ns_id, ctx.data.row - 1, 0, {
+            sign_text = text,
+            sign_hl_group = "EyeSignLabel",
+          })
+          return function()
+            vim.api.nvim_buf_del_extmark(ctx.data.buf, ns_id, id1)
+            vim.api.nvim_buf_del_extmark(ctx.data.buf, ns_id, id2)
+          end
+        end,
+      })
     end
 
-    local function eye_buffer_delete()
+    local function eye_bdelete()
       local curr_buf = vim.api.nvim_get_current_buf()
       local buf = vim.api.nvim_create_buf(false, true)
       local bufs = {}
@@ -212,9 +187,7 @@ return {
             buf = buf,
             row = #bufs,
             col = 0,
-            data = {
-              bufnr = b,
-            },
+            bufnr = b,
           })
           if b == curr_buf then
             curr_buf_row = #bufs
@@ -271,16 +244,16 @@ return {
 
       local vim_resized_id = vim.api.nvim_create_autocmd("VimResized", {
         callback = function()
-          local height = vim.api.nvim_win_text_height(win, {
+          local h = vim.api.nvim_win_text_height(win, {
             start_row = 0,
             end_row = vim.api.nvim_buf_line_count(buf) - 1,
           }).all
 
-          vim.api.nvim_win_resize(win, -1, height)
+          vim.api.nvim_win_resize(win, -1, h)
         end,
       })
 
-      local ns_id = vim.api.nvim_create_namespace("adaf")
+      local ns_id = vim.api.nvim_create_namespace("eye-bdelete")
       vim.api.nvim_buf_set_extmark(buf, ns_id, curr_buf_row - 1, 0, {
         line_hl_group = "Directory",
       })
@@ -296,64 +269,34 @@ return {
         bold = true,
       })
 
-      local H = require("_eye.core.highlight")
-
-      local function step()
-        local eye = require("_eye.core"):new(labels)
-        eye:active({
-          finish = function(ctx)
-            if ctx.type == "complete" or ctx.type == "cancel" then
-              close_win()
-            end
-          end,
-          active = function(ctx)
-            if #ctx.entries > 0 then
-              local hls = {}
-              for _, entry in ipairs(ctx.entries) do
-                local text = vim.fn.join(entry.labels, "")
-                table.insert(hls, {
-                  buf = entry.data.buf,
-                  row = entry.data.row - 1,
-                  col = 0,
-                  sign_text = text,
-                  sign_hl_group = "EyeSignLabel",
-                })
-                table.insert(hls, {
-                  buf = entry.data.buf,
-                  row = entry.data.row - 1,
-                  col = 0,
-                  virt_text = { { text, "EyeSignLabel" } },
-                  virt_text_pos = "eol",
-                })
-              end
-              local clean = H.highlight(hls, {})
-              return function()
-                clean()
-              end
-            else
-              local data = ctx.data or {}
-              if type(data.data) == "table" then
-                pcall(vim.api.nvim_buf_delete, data.data.bufnr, { force = false })
-              end
-            end
-          end,
-          actions = {
-            -- ["<c-n>"] = function()
-            --   vim.schedule(function()
-            --     step()
-            --   end)
-            -- end,
-            -- ["<c-p>"] = function()
-            --   vim.schedule(function()
-            --     step()
-            --   end)
-            -- end,
-          },
-        })
-      end
-      vim.schedule(function()
-        step()
-      end)
+      local eye = require("_eye.core"):new(labels)
+      eye:active({
+        flush = function()
+          vim.cmd.redraw()
+        end,
+        cancel = function()
+          close_win()
+        end,
+        complete = function(ctx)
+          local data = ctx.data or {}
+          pcall(vim.api.nvim_buf_delete, data.bufnr, { force = false })
+          close_win()
+        end,
+        update = function(ctx)
+          local text = vim.fn.join(ctx.labels, "")
+          local id1 = vim.api.nvim_buf_set_extmark(ctx.data.buf, ns_id, ctx.data.row - 1, ctx.data.col, {
+            virt_text = { { text, "EyeSignLabel" } },
+          })
+          local id2 = vim.api.nvim_buf_set_extmark(ctx.data.buf, ns_id, ctx.data.row - 1, 0, {
+            sign_text = text,
+            sign_hl_group = "EyeSignLabel",
+          })
+          return function()
+            vim.api.nvim_buf_del_extmark(ctx.data.buf, ns_id, id1)
+            vim.api.nvim_buf_del_extmark(ctx.data.buf, ns_id, id2)
+          end
+        end,
+      })
     end
 
     local cmdproxy = require("command-proxy")
@@ -361,25 +304,33 @@ return {
       proxy = {
         ["bdelete"] = function(cmd_info)
           if cmd_info.count == 0 then
-            eye_buffer_delete()
+            vim.schedule(function()
+              eye_bdelete()
+            end)
             return true
           end
         end,
         ["buffer"] = function(cmd_info)
           if not cmd_info.range and #cmd_info.args == 0 then
-            eye_buffer()
+            vim.schedule(function()
+              eye_buffer()
+            end)
             return true
           end
         end,
         ["bprevious"] = function(cmd_info)
           if cmd_info.count == 0 then
-            eye_buffer()
+            vim.schedule(function()
+              eye_buffer()
+            end)
             return true
           end
         end,
         ["bnext"] = function(cmd_info)
           if cmd_info.count == 0 then
-            eye_buffer()
+            vim.schedule(function()
+              eye_buffer()
+            end)
             return true
           end
         end,
@@ -392,14 +343,9 @@ return {
             return "update"
           end
         end,
+        -- :0close<cr>
         ["close"] = function(cmd_info)
           if cmd_info.count == 0 then
-            return true
-          end
-        end,
-        ["restart"] = function(cmd_info)
-          if cmd_info.args and #cmd_info.args == 0 then
-            vim.cmd("restart e %")
             return true
           end
         end,
@@ -418,10 +364,17 @@ return {
             return true
           end
         end,
-        ["marks"] = function(cmd_info)
-          -- if cmd_info.args and #cmd_info.args == 0 then
-          --   return true0i
-          -- end
+        ["ls"] = function()
+          cmd_to_reg("ls")
+        end,
+        ["buffers"] = function()
+          cmd_to_reg("buffers")
+        end,
+        ["pwd"] = function()
+          cmd_to_reg("pwd")
+        end,
+        [my.command.constants.FILETYPE_LS] = function()
+          cmd_to_reg("Fls")
         end,
       },
     })

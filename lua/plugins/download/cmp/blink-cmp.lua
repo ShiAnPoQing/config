@@ -4,6 +4,7 @@ local function in_snippet_snippet_forward(cmp)
     return cmp.snippet_forward()
   end
 end
+
 local function is_lsp_snippet_selected(cmp)
   local selected_item = cmp.get_selected_item()
   return selected_item and selected_item.source_id == "lsp" and selected_item.kind == 15
@@ -16,7 +17,7 @@ return {
   },
   {
     "saghen/blink.cmp",
-    depend = { "saghen/blink.lib", "L3MON4D3/LuaSnip" },
+    depend = { "saghen/blink.lib", "L3MON4D3/LuaSnip", "folke/lazydev.nvim" },
     run = function()
       vim.schedule(function()
         ---@diagnostic disable-next-line: undefined-field
@@ -25,56 +26,123 @@ return {
     end,
     event = { "InsertEnter", "CmdlineEnter" },
     config = function()
-      require("blink-cmp").setup({
+      local cmp = require("blink-cmp")
+      local idx_icons = { "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹", "⁰" }
+
+      cmp.setup({
         ---@module 'blink.cmp'
         ---@type blink.cmp.Config
         appearance = {
           nerd_font_variant = "mono",
           kind_icons = {
-            Text = "󰉿",
-            Method = "󰆧",
-            Function = "󰊕",
+            -- Text = "󰦨",
+            Method = "",
+            Function = "󰡱",
             Constructor = "",
-
             Field = "󰜢",
             Variable = "󰆦",
             Property = "󰜢",
-
             Class = "󰠱",
             Interface = "",
             Struct = "󰙅",
             Module = "",
-
-            Unit = "󰑭",
-            Value = "󰎠",
-            Enum = "",
-            EnumMember = "",
-
-            Keyword = "󰌋",
+            --
+            -- Unit = "󰑭",
+            -- Value = "󰎠",
+            -- Enum = "",
+            -- EnumMember = "",
+            Keyword = "",
             Constant = "󰏿",
-
-            Snippet = "",
+            Snippet = "󱃖",
             Color = "󰏘",
             File = "󰈙",
-            Reference = "󰈇",
-            Folder = "󰉋",
-            Event = "",
+            -- Reference = "󰈇",
+            -- Folder = "󰉋",
+            -- Event = "",
             Operator = "󰆕",
             TypeParameter = "󰬛",
           },
         },
         completion = {
-          documentation = { auto_show = true, auto_show_delay_ms = 100 },
+          documentation = { auto_show = true, auto_show_delay_ms = 100, window = { border = "single" } },
           menu = {
-            max_height = 1000,
-            -- border = "single",
+            scrollbar = false,
+            max_height = 10,
             draw = {
-              padding = 1,
+              gap = 0,
+              align_to = "label",
+              snippet_indicator = "󱑽",
+              padding = { 0, 0 },
               columns = {
-                { "kind_icon", "label", gap = 1 },
-                { "source_name" },
+                { "kind_icon", "left_block" },
+                { "label", "source_name", gap = 1 },
+                { "right_black" },
+              },
+              components = {
+                right_black = {
+                  ellipsis = false,
+                  text = function()
+                    return "▐"
+                  end,
+                  highlight = function(ctx)
+                    local idx = cmp.get_selected_item_idx()
+                    if ctx.idx == idx then
+                      return { { group = ctx.kind_hl .. "Block", priority = 20000 } }
+                    end
+                    return { { group = "BlinkCmpMenuBackground" } }
+                  end,
+                },
+                test = {
+                  ellipsis = false,
+                  text = function(ctx)
+                    local idx_icon = idx_icons[ctx.idx] or ""
+                    return idx_icon
+                  end,
+                  highlight = function(ctx)
+                    return { { group = ctx.kind_hl .. "Block", priority = 20000 } }
+                  end,
+                },
+                left_block = {
+                  ellipsis = false,
+                  text = function()
+                    return "▌"
+                  end,
+                  highlight = function(ctx)
+                    return { { group = ctx.kind_hl .. "Block", priority = 20000 } }
+                  end,
+                },
+                kind_icon = {
+                  ellipsis = false,
+                  text = function(ctx)
+                    return " " .. ctx.kind_icon .. " "
+                  end,
+                  highlight = function(ctx)
+                    return { { group = ctx.kind_hl, priority = 20000 } }
+                  end,
+                },
+                source_name = {
+                  width = { max = 30 },
+                  text = function(ctx)
+                    return ctx.source_name
+                  end,
+                  highlight = function(ctx)
+                    local idx = cmp.get_selected_item_idx()
+                    if ctx.idx == idx then
+                      return { { group = ctx.kind_hl .. "Source", priority = 20000 } }
+                    end
+                    return { { group = "BlinkCmpSource", priority = 20000 } }
+                  end,
+                },
               },
             },
+            cmdline_position = function()
+              if vim.g.ui_cmdline_pos ~= nil then
+                local pos = vim.g.ui_cmdline_pos -- (1, 0)-indexed
+                return { pos[1] - 1, pos[2] }
+              end
+              local height = (vim.o.cmdheight == 0) and 1 or vim.o.cmdheight
+              return { vim.o.lines - height, 0 }
+            end,
           },
           list = {
             selection = {
@@ -137,7 +205,6 @@ return {
                 end
                 return cmp.select_and_accept()
               end,
-              "fallback",
             },
           },
           completion = {
@@ -162,12 +229,20 @@ return {
               inherit_defaults = true,
               "lazydev",
             },
-            -- snacks_input = {
-            --   "path",
-            -- },
-            -- vim = { inherit_defaults = true, 'cmdline' },
           },
           providers = {
+            cmdline = {
+              -- min_keyword_length = function(ctx)
+              --   --- 手动激活
+              --   if ctx.trigger.initial_kind == "manual" then
+              --     return 0
+              --   end
+              --   if ctx.mode == "cmdline" and string.find(ctx.line, " ") == nil then
+              --     return 3
+              --   end
+              --   return 0
+              -- end,
+            },
             snippets = {
               transform_items = function(_, items)
                 for _, item in ipairs(items) do
@@ -273,7 +348,7 @@ return {
           ["<C-1>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                return cmp.accept({ index = 1 })
+                return cmp.select_and_accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -281,7 +356,7 @@ return {
           ["<C-2>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                return cmp.accept({ index = 1 })
+                return cmp.select_and_accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -289,7 +364,7 @@ return {
           ["<C-3>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                return cmp.accept({ index = 1 })
+                return cmp.select_and_accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -297,7 +372,7 @@ return {
           ["<C-4>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                return cmp.accept({ index = 1 })
+                return cmp.select_and_accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -305,7 +380,7 @@ return {
           ["<C-5>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                return cmp.accept({ index = 1 })
+                return cmp.select_and_accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -313,7 +388,7 @@ return {
           ["<C-6>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                return cmp.accept({ index = 1 })
+                return cmp.select_and_accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -321,7 +396,7 @@ return {
           ["<C-7>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                return cmp.accept({ index = 1 })
+                return cmp.select_and_accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -329,7 +404,7 @@ return {
           ["<C-8>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                return cmp.accept({ index = 1 })
+                return cmp.select_and_accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -337,7 +412,7 @@ return {
           ["<C-9>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                return cmp.accept({ index = 1 })
+                return cmp.select_and_accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",
@@ -345,7 +420,7 @@ return {
           ["<C-0>"] = {
             function(cmp)
               if cmp.is_menu_visible() then
-                return cmp.accept({ index = 1 })
+                return cmp.select_and_accept({ index = 1 })
               end
             end,
             "fallback_to_mappings",

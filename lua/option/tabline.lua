@@ -49,6 +49,10 @@ local function custom_tablabel(opts)
   if filename == "" then
     if filetype == "" then
       filename = "[No Name]"
+    elseif filetype == "directory" then
+      filename = "[Dir]"
+    elseif filetype == "oil" then
+      filename = "[Oil]"
     end
   end
   local icon, icon_hl = require("nvim-web-devicons").get_icon_by_filetype(filetype)
@@ -92,11 +96,22 @@ function _G.custom_tabline()
     if i == cur_tabnr then
       tablabel_opts.selected = true
     end
-    tabline = tabline .. custom_tablabel(tablabel_opts)
+    tabline = tabline .. "%" .. i .. "T" .. custom_tablabel(tablabel_opts)
   end
 
-  tabline = tabline .. "%#TabLineFill#%T"
+  tabline = tabline .. "%#TabLineFill#%T" .. "%=%@v:lua.custom_tabline_click_theme_bar@  "
   return tabline
+end
+
+function _G.custom_tabline_click_theme_bar(_, _, button, modifier_key)
+  if button == "l" and not modifier_key:find("%S") then
+    local bg = vim.o.background
+    if bg == "dark" then
+      vim.o.background = "light"
+    else
+      vim.o.background = "dark"
+    end
+  end
 end
 
 vim.api.nvim_create_autocmd("DiagnosticChanged", {
@@ -106,5 +121,8 @@ vim.api.nvim_create_autocmd("DiagnosticChanged", {
   end,
 })
 
-vim.o.showtabline = 1
+-- 0: 从不
+-- 1: 仅当至少有两个标签页时
+-- 2: 总是
+vim.o.showtabline = 2
 vim.o.tabline = "%!v:lua.custom_tabline()"

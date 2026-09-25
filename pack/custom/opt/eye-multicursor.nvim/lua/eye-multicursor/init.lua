@@ -2,10 +2,8 @@ local M = {}
 
 --- @param continue? boolean
 function M.delete(continue)
-  local topline = vim.fn.line("w0")
-  local botline = vim.fn.line("w$")
-  local ns_id = vim.api.nvim_create_namespace("nvim.multicursor")
-  local marks = vim.api.nvim_buf_get_extmarks(0, ns_id, { topline - 1, 0 }, { botline - 1, 0 })
+  local mc_ns_id = vim.api.nvim_create_namespace("nvim.multicursor")
+  local marks = vim.api.nvim_buf_get_extmarks(0, mc_ns_id, { vim.fn.line("w0") - 1, 0 }, { vim.fn.line("w$") - 1, 0 })
   if #marks == 0 then
     return
   end
@@ -19,34 +17,28 @@ function M.delete(continue)
     })
   end
   local del_mark_count = 0
-  local H = require("_eye.core.highlight")
+  local ns_id = vim.api.nvim_create_namespace("eye-multicursor")
   local eye = require("_eye.core"):new(labels)
   eye:active({
-    active = function(ctx)
-      if #ctx.entries > 0 then
-        local hls = {}
-        for _, entry in ipairs(ctx.entries) do
-          local text = vim.fn.join(entry.labels, "")
-          table.insert(hls, {
-            virt_text = { { text:sub(1, 1), H.EyeLabel } },
-            row = entry.data.row - 1,
-            col = entry.data.col,
-            buf = entry.data.buf,
-          })
-        end
-        local clean = H.highlight(hls, {})
-        return function()
-          clean()
-        end
-      else
-        local data = ctx.data
-        vim.api.nvim_buf_del_extmark(0, ns_id, data.id)
-        del_mark_count = del_mark_count + 1
-        if continue then
-          if del_mark_count < #marks then
-            ctx.rollback(1)
-          end
-        end
+    flush = function()
+      vim.cmd.redraw()
+    end,
+    update = function(ctx)
+      local text = vim.fn.join(ctx.labels, "")
+      local id = vim.api.nvim_buf_set_extmark(ctx.data.buf, ns_id, ctx.data.row - 1, ctx.data.col, {
+        virt_text = { { text:sub(1, 1), "ErrorMsg" } },
+        virt_text_pos = "overlay",
+      })
+      return function()
+        vim.api.nvim_buf_del_extmark(ctx.data.buf, ns_id, id)
+      end
+    end,
+    complete = function(ctx)
+      local data = ctx.data
+      vim.api.nvim_buf_del_extmark(0, mc_ns_id, data.id)
+      del_mark_count = del_mark_count + 1
+      if continue and del_mark_count < #marks then
+        ctx.rollback(1)
       end
     end,
   })

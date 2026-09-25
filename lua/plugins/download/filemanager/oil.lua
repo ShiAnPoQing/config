@@ -9,7 +9,9 @@ end
 
 return {
   "stevearc/oil.nvim",
-  depend = { "echasnovski/mini.icons" },
+  depend = {
+    "nvim-mini/mini.icons",
+  },
   cmd = { "Oil" },
   key = {
     ["<leader>oi"] = { "<cmd>Oil<cr>", "n", "oil.nvim: <cmd>Oil<cr>" },

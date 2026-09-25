@@ -78,8 +78,9 @@ end
 --- @param proxy CommandProxy.Cmd
 --- @return boolean|nil
 local function exec_cmd(cmd_info, proxy)
-  local cmd = type(proxy) == "function" and proxy(cmd_info) or proxy
   cmd_info = vim.tbl_deep_extend("force", cmd_info, {})
+  local cmd = type(proxy) == "function" and proxy(cmd_info) or proxy
+
   if cmd == true then
     return true
   end

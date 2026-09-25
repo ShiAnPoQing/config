@@ -92,15 +92,15 @@ local function line_outer_movement(count)
 end
 
 return {
-  ["wi"] = { "aw", { "x", "o" }, desc = "[textobject]: outer word" },
-  ["ei"] = { "iw", { "x", "o" }, desc = "[textobject]: inner word" },
-  ["wI"] = { "aW", { "x", "o" }, desc = "[textobject]: outer WORD" },
-  ["eI"] = { "iW", { "x", "o" }, desc = "[textobject]: inner WORD" },
-  ["wo"] = { "aw", { "x", "o" }, desc = "[textobject]: outer word" },
-  ["eo"] = { "iw", { "x", "o" }, desc = "[textobject]: inner word" },
-  ["wO"] = { "aW", { "x", "o" }, desc = "[textobject]: outer WORD" },
-  ["eO"] = { "iW", { "x", "o" }, desc = "[textobject]: inner WORD" },
-  ["ws"] = {
+  ["ei"] = { "aw", { "x", "o" }, desc = "[textobject]: outer word" },
+  ["wi"] = { "iw", { "x", "o" }, desc = "[textobject]: inner word" },
+  ["eI"] = { "aW", { "x", "o" }, desc = "[textobject]: outer WORD" },
+  ["wI"] = { "iW", { "x", "o" }, desc = "[textobject]: inner WORD" },
+  ["eo"] = { "aw", { "x", "o" }, desc = "[textobject]: outer word" },
+  ["wo"] = { "iw", { "x", "o" }, desc = "[textobject]: inner word" },
+  ["eO"] = { "aW", { "x", "o" }, desc = "[textobject]: outer WORD" },
+  ["wO"] = { "iW", { "x", "o" }, desc = "[textobject]: inner WORD" },
+  ["es"] = {
     { "as", "o" },
     {
       function()
@@ -110,7 +110,7 @@ return {
     },
     desc = "[textobject]: outer sentence",
   },
-  ["es"] = {
+  ["ws"] = {
     { "is", "o" },
     {
       function()
@@ -120,7 +120,7 @@ return {
     },
     desc = "[textobject]: inner sentence",
   },
-  ["wp"] = {
+  ["ep"] = {
     {
       "ap",
       "o",
@@ -143,7 +143,7 @@ return {
   --   end,
   --   "n"
   -- },
-  ["ep"] = {
+  ["wp"] = {
     {
       "ip",
       "o",
@@ -156,11 +156,11 @@ return {
     },
     desc = "[textobject]: inner paragraph",
   },
-  ["w["] = { "a[", { "x", "o" }, desc = "[textobject]: outer []" },
-  ["e["] = { "i[", { "x", "o" }, desc = "[textobject]: inner []" },
-  ["w]"] = { "a]", { "x", "o" }, desc = "[textobject]: outer []" },
-  ["e]"] = { "i]", { "x", "o" }, desc = "[textobject]: inner []" },
-  ["w{"] = { "a}", { "x", "o" }, desc = "[textobject]: outer {}" },
+  ["e["] = { "a[", { "x", "o" }, desc = "[textobject]: outer []" },
+  ["w["] = { "i[", { "x", "o" }, desc = "[textobject]: inner []" },
+  ["e]"] = { "a]", { "x", "o" }, desc = "[textobject]: outer []" },
+  ["w]"] = { "i]", { "x", "o" }, desc = "[textobject]: inner []" },
+  ["e{"] = { "a}", { "x", "o" }, desc = "[textobject]: outer {}" },
   -- ["W{"] = {
   --   function()
   --     if vim.v.operator == "d" then
@@ -174,24 +174,24 @@ return {
   --   "o",
   --   expr = true,
   -- },
-  ["e{"] = { "i}", { "x", "o" }, desc = "[textobject]: inner {}" },
-  ["w}"] = { "a}", { "x", "o" }, desc = "[textobject]: outer {}" },
-  ["e}"] = { "i}", { "x", "o" }, desc = "[textobject]: inner {}" },
-  ["w("] = { "a)", { "x", "o" }, desc = "[textobject]: outer ()" },
-  ["e("] = { "i)", { "x", "o" }, desc = "[textobject]: inner ()" },
-  ["w)"] = { "a)", { "x", "o" }, desc = "[textobject]: outer ()" },
-  ["e)"] = { "i)", { "x", "o" }, desc = "[textobject]: inner ()" },
-  ["w>"] = { "a>", { "x", "o" }, desc = "[textobject]: outer <>" },
-  ["e>"] = { "i>", { "x", "o" }, desc = "[textobject]: inner <>" },
-  ["w<"] = { "a>", { "x", "o" }, desc = "[textobject]: outer <>" },
-  ["e<"] = { "i>", { "x", "o" }, desc = "[textobject]: inner <>" },
-  ['w"'] = { 'a"', { "x", "o" }, desc = '[textobject]: outer ""' },
-  ['e"'] = { 'i"', { "x", "o" }, desc = '[textobject]: inner ""' },
-  ["w'"] = { "a'", { "x", "o" }, desc = "[textobject]: outer ''" },
-  ["e'"] = { "i'", { "x", "o" }, desc = "[textobject]: inner ''" },
-  ["w`"] = { "a`", { "x", "o" }, desc = "[textobject]: outer ``" },
-  ["e`"] = { "i`", { "x", "o" }, desc = "[textobject]: inner ``" },
-  ["el"] = {
+  ["w{"] = { "i}", { "x", "o" }, desc = "[textobject]: inner {}" },
+  ["e}"] = { "a}", { "x", "o" }, desc = "[textobject]: outer {}" },
+  ["w}"] = { "i}", { "x", "o" }, desc = "[textobject]: inner {}" },
+  ["e("] = { "a)", { "x", "o" }, desc = "[textobject]: outer ()" },
+  ["w("] = { "i)", { "x", "o" }, desc = "[textobject]: inner ()" },
+  ["e)"] = { "a)", { "x", "o" }, desc = "[textobject]: outer ()" },
+  ["w)"] = { "i)", { "x", "o" }, desc = "[textobject]: inner ()" },
+  ["e>"] = { "a>", { "x", "o" }, desc = "[textobject]: outer <>" },
+  ["w>"] = { "i>", { "x", "o" }, desc = "[textobject]: inner <>" },
+  ["e<"] = { "a>", { "x", "o" }, desc = "[textobject]: outer <>" },
+  ["w<"] = { "i>", { "x", "o" }, desc = "[textobject]: inner <>" },
+  ['e"'] = { 'a"', { "x", "o" }, desc = '[textobject]: outer ""' },
+  ['w"'] = { 'i"', { "x", "o" }, desc = '[textobject]: inner ""' },
+  ["e'"] = { "a'", { "x", "o" }, desc = "[textobject]: outer ''" },
+  ["w'"] = { "i'", { "x", "o" }, desc = "[textobject]: inner ''" },
+  ["e`"] = { "a`", { "x", "o" }, desc = "[textobject]: outer ``" },
+  ["w`"] = { "i`", { "x", "o" }, desc = "[textobject]: inner ``" },
+  ["wl"] = {
     { "^og_", "x" },
     {
       function()
@@ -201,7 +201,7 @@ return {
     },
     desc = "[textobject]: inner line",
   },
-  ["wl"] = {
+  ["el"] = {
     {
       function()
         return line_outer_movement(vim.v.count1)
@@ -219,9 +219,9 @@ return {
     },
     desc = "[textobject]: outer line",
   },
-  ["wt"] = { "at", { "x", "o" }, desc = "[textobject]: outer tag block" },
-  ["et"] = { "it", { "x", "o" }, desc = "[textobject]: inner tag block" },
-  ["wa"] = {
+  ["et"] = { "at", { "x", "o" }, desc = "[textobject]: outer tag block" },
+  ["wt"] = { "it", { "x", "o" }, desc = "[textobject]: inner tag block" },
+  ["ea"] = {
     { "vggVG", "x" },
     {
       function()
@@ -231,7 +231,7 @@ return {
     },
     desc = "[textobject]: all buffer",
   },
-  ["ea"] = {
+  ["wa"] = {
     { "vgovG$", "x" },
     {
       function()
@@ -243,7 +243,7 @@ return {
   },
   --- /usr/share/nvim/runtime/lua/vim/_core/defaults.lua
   --- an
-  ["wn"] = {
+  ["en"] = {
     function()
       if vim.treesitter.get_parser(nil, nil, { error = false }) then
         require("vim.treesitter._select").select_parent(vim.v.count1)
@@ -254,7 +254,7 @@ return {
     { "x", "o" },
     desc = "[textobject]: outer treesitter node",
   },
-  ["en"] = {
+  ["wn"] = {
     function()
       if vim.treesitter.get_parser(nil, nil, { error = false }) then
         require("vim.treesitter._select").select_child(vim.v.count1)
