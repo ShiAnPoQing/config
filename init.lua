@@ -4,6 +4,8 @@
 --- @field window my.window
 --- @field multicursor my.multicursor
 --- @field insert my.insert
+--- @field operator my.operator
+--- @field util my.util
 
 --- @type my
 _G.my = _G.my or {}
@@ -13,6 +15,8 @@ my._submodules = {
   window = true,
   multicursor = true,
   insert = true,
+  operator = true,
+  util = true
 }
 setmetatable(my, {
   __index = function(t, key)
@@ -23,7 +27,30 @@ setmetatable(my, {
   end,
 })
 my.window.float.drag.enable()
-my.multicursor.register.enable()
+
+local wrap_opts = {
+  enter = function()
+    return { cursor = vim.api.nvim_win_get_cursor(0) }
+  end,
+  done = function(ctx)
+    vim.api.nvim_win_set_cursor(0, ctx.cursor)
+  end,
+}
+local wrap_opts2 = {
+  enter = function()
+    return { cursors = my.multicursor.get(0, 0, -1) }
+  end,
+  done = function(ctx)
+    for _, c in ipairs(ctx.cursors) do
+      vim.api.nvim_buf_set_extmark(0, vim.api.nvim_create_namespace("nvim.multicursor"), c[2], c[3], { id = c[1] })
+    end
+  end,
+}
+
+my.operator.wrap("gu", wrap_opts, wrap_opts2)
+my.operator.wrap("gU", wrap_opts, wrap_opts2)
+my.operator.wrap("g~", wrap_opts, wrap_opts2)
+my.operator.wrap("y", wrap_opts, wrap_opts2)
 
 vim.pack.add({ { src = "https://github.com/BrokenSunny/native-packer", version = "branch" } })
 require("command")

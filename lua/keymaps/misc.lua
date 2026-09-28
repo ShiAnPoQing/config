@@ -28,22 +28,22 @@ return {
   [","] = { ",<C-g>u", "i" },
   ["."] = { ".<C-g>u", "i" },
   [";"] = { ";<C-g>u", "i" },
-  ["y:"] = {
-    function()
-      vim.ui.input({
-        prompt = "Yank:",
-        completion = "command",
-      }, function(input)
-        if input == "or" or input == nil then
-          return
-        end
-        local output = vim.api.nvim_exec2(input, { output = true }).output
-        vim.fn.setreg(vim.v.register, output)
-      end)
-    end,
-    "n",
-    desc = "Yank command output to register",
-  },
+  -- ["y:"] = {
+  --   function()
+  --     vim.ui.input({
+  --       prompt = "Yank:",
+  --       completion = "command",
+  --     }, function(input)
+  --       if input == "or" or input == nil then
+  --         return
+  --       end
+  --       local output = vim.api.nvim_exec2(input, { output = true }).output
+  --       vim.fn.setreg(vim.v.register, output)
+  --     end)
+  --   end,
+  --   "n",
+  --   desc = "Yank command output to register",
+  -- },
   ["<leader>p:"] = {
     function()
       vim.ui.input({
