@@ -189,12 +189,9 @@ function M.visual_line_first_non_blank()
   end
 
   vim.api.nvim_feedkeys(count .. "i", "nt", false)
-  local atom_total = 2
-  local atom_count = 0
   vim.api.nvim_create_autocmd("CmdAtom", {
-    callback = function()
-      atom_count = atom_count + 1
-      if atom_count == atom_total then
+    callback = function(ev)
+      if ev.data.type == "insert" then
         vim.api.nvim_buf_clear_namespace(0, mc, 0, -1)
         return true
       end
@@ -223,12 +220,9 @@ function M.visual_line_last_non_blank()
   end
 
   vim.api.nvim_feedkeys(count .. "a", "nt", false)
-  local atom_total = 2
-  local atom_count = 0
   vim.api.nvim_create_autocmd("CmdAtom", {
-    callback = function()
-      atom_count = atom_count + 1
-      if atom_count == atom_total then
+    callback = function(ev)
+      if ev.data.type == "insert" then
         vim.api.nvim_buf_clear_namespace(0, mc, 0, -1)
         return true
       end
@@ -254,12 +248,9 @@ function M.visual_block_first()
   end
 
   vim.api.nvim_feedkeys(count .. "i", "nt", false)
-  local atom_total = 2
-  local atom_count = 0
   vim.api.nvim_create_autocmd("CmdAtom", {
-    callback = function()
-      atom_count = atom_count + 1
-      if atom_count == atom_total then
+    callback = function(ev)
+      if ev.data.type == "insert" then
         vim.api.nvim_buf_clear_namespace(0, mc, 0, -1)
         return true
       end
@@ -283,15 +274,12 @@ function M.visual_block_last()
       end
     end
     vim.api.nvim_feedkeys(count .. "a", "nt", false)
-    local atom_total = 2
-    local atom_count = 0
     vim.api.nvim_create_autocmd("CmdAtom", {
-      callback = function()
-        atom_count = atom_count + 1
-        if atom_count == atom_total then
-          vim.api.nvim_buf_clear_namespace(0, mc, 0, -1)
-          return true
-        end
+      callback = function(ev)
+      if ev.data.type == "insert" then
+        vim.api.nvim_buf_clear_namespace(0, mc, 0, -1)
+        return true
+      end
       end,
     })
   end

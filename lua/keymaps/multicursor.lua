@@ -14,119 +14,59 @@
 -- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
 ---------------------------------------------------------------------------------------------------+
 local mc = vim.api.nvim_create_namespace("nvim.multicursor")
-local target_win
-local path
-
---- @return vim.api.keyset.get_extmark_item|nil
-local function get_mouse_cursor(mousepos)
-  return vim.api.nvim_buf_get_extmarks(
-    0,
-    mc,
-    { mousepos.line - 1, mousepos.column - 1 },
-    { mousepos.line - 1, mousepos.column - 1 }
-  )[1]
-end
-
---- reset path
---- mouse cursor is not rollback cursor
---- 则删除 mouse cursor,，也表明历史断了，所以重置历史
---- @param cursor vim.api.keyset.get_extmark_item
-local function reset_path(cursor)
-  pcall(vim.api.nvim_buf_del_extmark, 0, mc, cursor[1])
-  path = {}
-end
-
---- advance path
---- 创建光标，更新历史，新光标成为 head
-local function advance_path(mousepos)
-  local ok = pcall(vim.api.nvim_mcursor, 0, { mousepos.line, mousepos.column - 1 })
-  if not ok then
-    return
-  end
-  local cursor = get_mouse_cursor(mousepos)
-  if cursor then
-    table.insert(path, cursor[1])
-  end
-end
-
---- rollback path
---- mouse 位置光标是 head 的前一个
-local function rollback_path(mousepos)
-  pcall(vim.api.nvim_buf_del_extmark, 0, mc, path[#path])
-  table.remove(path, #path)
-  --- rollback cursor 需要成为最新 head，
-  --- 这里选择删除它(即使它本来就存在)，
-  --- 后续 advance_path 会再次创建它，并成为最新 head
-  table.remove(path, #path)
-  advance_path(mousepos)
-end
-
---- @param cursor vim.api.keyset.get_extmark_item|nil
-local function should_reset_path(cursor)
-  return cursor and cursor[1] ~= path[#path - 1]
-end
-
---- @param cursor vim.api.keyset.get_extmark_item|nil
-local function should_rollback_path(cursor)
-  return cursor and cursor[1] == path[#path - 1]
-end
 
 return {
+  --- multi-cursor yank
+  --- 1. 目前指针对于 unamed register 有效，同时考虑 */+ 寄存器继承问题
+  ---    因为 "ay 总是需要显式 yank，所以有待考量
+  --- 2. 非显式 yank 时，默认合并
+  --- 3. 显式 yank 时，不合并
+  -- ["y"] = {
+  --   function()
+  --     --- For clipboard = unamedplus
+  --     --- yy ==
+  --     -- vim.print(vim.v.register)
+  --     if #vim.api.nvim_buf_get_extmarks(0, mc, 0, -1, { limit = 1 }) > 0 then
+  --       yanking = true
+  --       multicursor_yanks = {}
+  --       vim.api.nvim_create_autocmd("CmdAtom", {
+  --         callback = function(ev)
+  --           local data = ev.data --[[@as vim.event.cmdatom.data]]
+  --           --- Perform an explicit yank during multi-cursor editing; do not concatenate or merge.
+  --           --- 保留原始行为
+  --           -- if data.operator == "y" and data.reg and data.reg ~= "" then
+  --           -- else
+  --           --   vim.fn.setreg(data.reg)
+  --           -- end
+  --           -- vim.print(multicursor_yanks)
+  --           yanking = nil
+  --           multicursor_yanks = nil
+  --           return true
+  --         end,
+  --       })
+  --     end
+  --     return "y"
+  --   end,
+  --   "n",
+  --   expr = true,
+  -- },
   ["<C-LeftMouse>"] = {
     function()
-      local mousepos = vim.fn.getmousepos()
-      target_win = mousepos.winid
-      --- Avoid using the native `<C-LeftMouse>`,
-      --- as exiting Insert mode causes the multicursor to lose track,
-      --- resulting in a misalignment between the primary and secondary cursors.
-      local cursor = get_mouse_cursor(mousepos)
-      if cursor then
-        pcall(vim.api.nvim_buf_del_extmark, 0, mc, cursor[1])
-      else
-        pcall(vim.api.nvim_mcursor, 0, { mousepos.line, mousepos.column - 1 })
-        path = { get_mouse_cursor(mousepos)[1] }
-      end
+      my.multicursor.mouse.click()
     end,
     { "n", "i" },
   },
   ["<C-LeftDrag>"] = {
     function()
-      local mousepos = vim.fn.getmousepos()
-      if mousepos.winid ~= target_win then
-        return
-      end
-      local cursor = get_mouse_cursor(mousepos)
-      if should_reset_path(cursor) then
-        reset_path(cursor --[[@as vim.api.keyset.get_extmark_item]])
-        return
-      end
-      if should_rollback_path(cursor) then
-        rollback_path(mousepos)
-        return
-      end
-      advance_path(mousepos)
+      my.multicursor.mouse.drag()
     end,
     { "n", "i" },
   },
   ["<C-LeftRelease>"] = {
-    {
-      function()
-        path = {}
-      end,
-      "n",
-    },
-    {
-      function()
-        path = {}
-        --- Re-enter Insert mode and activate cascading.
-        if vim.fn.col(".") == 1 then
-          return "<esc>i"
-        end
-        return "<esc>a"
-      end,
-      "i",
-      expr = true,
-    },
+    function()
+      my.multicursor.mouse.release()
+    end,
+    { "n", "i" },
   },
   ["q-"] = {
     function()

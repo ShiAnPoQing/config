@@ -23,6 +23,7 @@ setmetatable(my, {
   end,
 })
 my.window.float.drag.enable()
+my.multicursor.register.enable()
 
 vim.pack.add({ { src = "https://github.com/BrokenSunny/native-packer", version = "branch" } })
 require("command")

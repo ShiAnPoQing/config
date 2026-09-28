@@ -1,6 +1,72 @@
 --- @class my.multicursor
-local M = vim._defer_require("my.multicursor", {})
+--- @field mouse my.multicursor.mouse
+--- @field register my.multicursor.register
+local M = vim._defer_require("my.multicursor", {
+  mouse = ..., --- @module 'my.multicursor.mouse'
+  register = ..., --- @module 'my.multicursor.register'
+})
 
-function M.test() end
+local mc = vim.api.nvim_create_namespace("nvim.multicursor")
+
+--- @return boolean
+function M.active()
+  return #vim.api.nvim_buf_get_extmarks(0, mc, 0, -1, { limit = 1 }) > 0
+end
+
+--- @param buf number
+--- @param pos [integer, integer]
+--- @return integer
+function M.add(buf, pos)
+  return vim.api.nvim_mcursor(buf, pos)
+end
+
+--- @param buf integer
+function M.clear(buf)
+  vim.api.nvim_buf_clear_namespace(buf, mc, 0, -1)
+end
+
+--- @param buf integer
+--- @param id integer
+--- @return boolean
+function M.remove(buf, id)
+  return vim.api.nvim_buf_del_extmark(buf, mc, id)
+end
+
+--- @param buf integer
+--- @return vim.api.keyset.get_extmark_item[]
+function M._all(buf)
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local items = M.get(buf, 0, -1)
+  table.insert(items, 1, { 0, cursor[1] - 1, cursor[2] })
+  return items
+end
+
+--- @param buf integer
+--- @param start any
+--- @param end_ any
+--- @param opts? vim.api.keyset.get_extmarks
+--- @return vim.api.keyset.get_extmark_item[]
+function M.get(buf, start, end_, opts)
+  opts = opts or {}
+  return vim.api.nvim_buf_get_extmarks(buf, mc, start, end_, opts)
+end
+
+local snapshots = {}
+
+--- @param buf integer
+function M.snapshot(buf)
+  if buf == 0 then
+    buf = vim.api.nvim_get_current_buf()
+  end
+  snapshots[tostring(buf)] = M._all(buf)
+end
+
+--- @param buf integer
+function M.get_snapshot(buf)
+  if buf == 0 then
+    buf = vim.api.nvim_get_current_buf()
+  end
+  return snapshots[tostring(buf)]
+end
 
 return M
