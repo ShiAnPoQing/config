@@ -14,6 +14,10 @@
 -- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
 ---------------------------------------------------------------------------------------------------+
 
+-- {motion}
+--    1.string/expr: "h", "j", "k", "l", "<cmd>normal! v{textobject}<cr>"
+--    2.feedkeys("viw", "nx", false)
+
 --- 兼容 visual block 模式
 local function visual_mode_textobject(textobject)
   local mode = vim.api.nvim_get_mode().mode
@@ -191,12 +195,20 @@ return {
   ["w'"] = { "i'", { "x", "o" }, desc = "[textobject]: inner ''" },
   ["e`"] = { "a`", { "x", "o" }, desc = "[textobject]: outer ``" },
   ["w`"] = { "i`", { "x", "o" }, desc = "[textobject]: inner ``" },
+  ["<Plug>(textobject-line-inner)"] = {
+    function()
+      vim.api.nvim_feedkeys("^vg_", "nx", false)
+    end,
+    "o",
+  },
   ["wl"] = {
     { "^og_", "x" },
+    -- {
+    --   "<cmd>normal! viw<cr>",
+    --   "o",
+    -- },
     {
-      function()
-        vim.api.nvim_feedkeys("^vg_", "nx", false)
-      end,
+      "<Plug>(textobject-line-inner)",
       "o",
     },
     desc = "[textobject]: inner line",

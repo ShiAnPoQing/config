@@ -4,16 +4,6 @@ local M = vim._defer_require("my.window.float", {
   drag = ..., --- @module 'my.window.float.drag'
 })
 
---- @param win integer
---- @return vim.api.keyset.win_config|nil
-local function get_float_config(win)
-  local config = vim.api.nvim_win_get_config(win)
-  if not config.relative or config.relative == "" then
-    return
-  end
-  return config
-end
-
 --- @param opts my.window.float.ResizeOpts?
 --- @return my.window.float.ResizeOpts
 local function resolve_resize_opts(opts)
@@ -30,10 +20,7 @@ local function resolve_resize_opts(opts)
     error("my.window.float.resize: invalid anchor.y")
   end
 
-  return {
-    relative = opts.relative,
-    anchor = anchor,
-  }
+  return { relative = opts.relative, anchor = anchor }
 end
 
 --- @class my.window.float.Anchor
@@ -53,14 +40,16 @@ function M.resize(win, width, height, opts)
   vim.validate("width", width, "number")
   vim.validate("height", height, "number")
   vim.validate("opts", opts, "table", true)
+
   if not vim.api.nvim_win_is_valid(win) then
     error("my.window.float.resize: invalid window")
   end
-  local config = get_float_config(win)
-  if not config then
+
+  if not M.is_float(win) then
     error("my.window.float.resize: not a floating window")
-    return
   end
+
+  local config = vim.api.nvim_win_get_config(win)
 
   opts = resolve_resize_opts(opts)
   local w_delta, h_delta
@@ -104,9 +93,7 @@ local function resolve_place_opts(opts)
   then
     error("my.window.float.place: invalid anchor")
   end
-  return {
-    anchor = anchor,
-  }
+  return { anchor = anchor }
 end
 
 local function get_border_size(border)
@@ -125,14 +112,16 @@ function M.place(win, row, col, opts)
   vim.validate("row", row, "number")
   vim.validate("col", col, "number")
   vim.validate("opts", opts, "table", true)
+
   if not vim.api.nvim_win_is_valid(win) then
     error("my.window.float.place: invalid window")
   end
-  local config = get_float_config(win)
-  if not config then
+
+  if not M.is_float(win) then
     error("my.window.float.place: not a floating window")
-    return
   end
+
+  local config = vim.api.nvim_win_get_config(win)
   opts = resolve_place_opts(opts)
   local pos = vim.api.nvim_win_get_position(win)
   local offset_row, offset_col = 0, 0
@@ -172,15 +161,16 @@ function M.move(win, drow, dcol, opts)
   vim.validate("drow", drow, "number")
   vim.validate("dcol", dcol, "number")
   vim.validate("opts", opts, "table", true)
+
   if not vim.api.nvim_win_is_valid(win) then
     error("my.window.float.move: invalid window")
   end
 
-  local config = get_float_config(win)
-  if not config then
+  if not M.is_float(win) then
     error("my.window.float.move: not a floating window")
-    return
   end
+
+  local config = vim.api.nvim_win_get_config(win)
   opts = resolve_move_opts(opts)
   local border_size = get_border_size(config.border)
   config.row = config.row + drow
@@ -195,32 +185,6 @@ function M.move(win, drow, dcol, opts)
   config.col = math.min(config.col, vim.o.columns - 2 * border_size - config.width)
   vim.api.nvim_win_set_config(win, config)
 end
---
--- local width = 4
--- local height = 2
--- local buf = vim.api.nvim_create_buf(false, true)
--- local win = vim.api.nvim_open_win(buf, true, {
---   relative = "editor",
---   width = width,
---   height = height,
---   row = 0,
---   col = 0,
---   style = "minimal",
---   border = "single",
--- })
--- --
--- -- vim.keymap.set("n", "<M-l>", function()
--- --   M.move(win, 0, 1)
--- -- end, { buf = buf })
--- -- vim.keymap.set("n", "<M-h>", function()
--- --   M.move(win, 0, -1)
--- -- end, { buf = buf })
--- -- vim.keymap.set("n", "<M-k>", function()
--- --   M.move(win, -1, 0)
--- -- end, { buf = buf })
--- -- vim.keymap.set("n", "<M-j>", function()
--- --   M.move(win, 1, 0)
--- -- end, { buf = buf })
 
 --- @param win integer
 --- @return boolean
@@ -232,5 +196,62 @@ function M.is_float(win)
   end
   return false
 end
+
+--- @param file string?
+function M.edit(file)
+  file = file or vim.api.nvim_buf_get_name(0)
+  local buf = vim.api.nvim_create_buf(false, true)
+  local width = math.floor(0.5 * vim.o.columns)
+  local height = math.floor(0.5 * vim.o.lines)
+  local row = math.floor(vim.o.lines / 2 - (height + 2) / 2)
+  local col = math.floor(vim.o.columns / 2 - (width + 2) / 2)
+  vim.api.nvim_open_win(buf, true, {
+    relative = "editor",
+    width = math.floor(0.5 * vim.o.columns),
+    height = math.floor(0.5 * vim.o.lines),
+    row = row,
+    col = col,
+    title = file,
+    title_pos = "center",
+    style = "minimal",
+    border = "single",
+  })
+  vim.cmd.edit(file)
+end
+
+function M.view(file)
+  file = file or vim.api.nvim_buf_get_name(0)
+  local buf = vim.api.nvim_create_buf(false, true)
+  local width = math.floor(0.5 * vim.o.columns)
+  local height = math.floor(0.5 * vim.o.lines)
+  local row = math.floor(vim.o.lines / 2 - (height + 2) / 2)
+  local col = math.floor(vim.o.columns / 2 - (width + 2) / 2)
+  vim.api.nvim_open_win(buf, true, {
+    relative = "editor",
+    width = math.floor(0.5 * vim.o.columns),
+    height = math.floor(0.5 * vim.o.lines),
+    row = row,
+    col = col,
+    title = file,
+    title_pos = "center",
+    border = "single",
+  })
+  vim.cmd.edit(file)
+  vim.bo.readonly = true
+end
+
+vim.api.nvim_create_user_command("FloatEdit", function(args)
+  my.window.float.edit(args.fargs[1])
+end, {
+  nargs = "?",
+  complete = "file",
+})
+
+vim.api.nvim_create_user_command("FloatView", function(args)
+  my.window.float.view(args.fargs[1])
+end, {
+  nargs = "?",
+  complete = "file",
+})
 
 return M

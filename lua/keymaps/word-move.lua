@@ -40,6 +40,12 @@ return {
     },
     desc = "Backward to the start of word[count]",
   },
+  ["ao"] = {
+    function()
+      vim.api.nvim_feedkeys(vim.fn["repeat"]("eQ", vim.v.count1 - 1) .. "e", "n", false)
+    end,
+    "n",
+  },
   ["o"] = {
     {
       function()

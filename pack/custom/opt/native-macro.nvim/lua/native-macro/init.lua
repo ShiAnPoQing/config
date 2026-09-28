@@ -12,6 +12,4 @@ function M._repeat()
   require("native-macro._repeat"):_repeat(char)
 end
 
-function M.user() end
-
 return M

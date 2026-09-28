@@ -14,11 +14,15 @@ local start_col
 local dragging_win
 local dragging_win_config
 
-local function buf_win_enable(buf, win, mouse_key)
+local function _enable()
+  local mouse_key = _config.mouse:lower() --[[@as string]]
+  local mouse_drag_key = mouse_key:gsub("mouse>$", "drag>")
+  local mouse_release_key = mouse_key:gsub("mouse>$", "release>")
   vim.keymap.set("n", mouse_key, function()
+    local win = vim.api.nvim_get_current_win()
     local config = vim.api.nvim_win_get_config(win)
     if config.relative == "" then
-      return
+      return mouse_key
     end
     dragging_win_config = config
     dragging_win = win
@@ -26,11 +30,10 @@ local function buf_win_enable(buf, win, mouse_key)
     local mouse = vim.fn.getmousepos()
     start_row = mouse.screenrow
     start_col = mouse.screencol
-  end, { buf = buf })
-
-  vim.keymap.set("n", mouse_key:gsub("mouse>$", "drag>"), function()
+  end, { expr = true })
+  vim.keymap.set("n", mouse_drag_key, function()
     if not dragging then
-      return
+      return mouse_drag_key
     end
     local mouse = vim.fn.getmousepos()
     local drow = mouse.screenrow - start_row
@@ -40,34 +43,14 @@ local function buf_win_enable(buf, win, mouse_key)
     my.window.float.move(dragging_win, drow, dcol)
     start_row = mouse.screenrow
     start_col = mouse.screencol
-  end, { buf = buf })
-  vim.keymap.set("n", mouse_key:gsub("mouse>$", "release>"), function()
-    dragging = false
-  end, { buf = buf })
-end
+  end, { expr = true })
 
-local function _enable()
-  local mouse_key = _config.mouse:lower() --[[@as string]]
-  for _, tab in ipairs(vim.api.nvim_list_tabpages()) do
-    local wins = vim.api.nvim_tabpage_list_wins(tab)
-    for _, win in ipairs(wins) do
-      if my.window.float.is_float(win) then
-        local buf = vim.api.nvim_win_get_buf(win)
-        buf_win_enable(buf, win, mouse_key)
-      end
+  vim.keymap.set("n", mouse_release_key, function()
+    if not dragging then
+      return mouse_release_key
     end
-  end
-
-  vim.api.nvim_create_autocmd("WinNew", {
-    callback = function(ev)
-      vim.schedule(function()
-        if not my.window.float.is_float(ev.win) then
-          return
-        end
-        buf_win_enable(vim.api.nvim_win_get_buf(ev.win), ev.win, mouse_key)
-      end)
-    end,
-  })
+    dragging = false
+  end, { expr = true })
 end
 
 --- @param enable boolean|nil

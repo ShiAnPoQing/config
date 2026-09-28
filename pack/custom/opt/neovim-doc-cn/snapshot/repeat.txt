@@ -13,7 +13,7 @@ Chapter 26 of the user manual introduces repeating |usr_26.txt|.
 ==============================================================================
 Single repeat						*single-repeat*
 
-							*.*
+							*.* *dot-repeat*
 .			Repeat last change, with count replaced with [count].
 			Also repeat a yank command, when the 'y' flag is
 			included in 'cpoptions'.  Does not repeat a
@@ -22,9 +22,9 @@ Single repeat						*single-repeat*
 							*@:*
 @:			Repeat last command-line [count] times.
 
-Simple changes can be repeated with the "." command.  Without a count, the
-count of the last change is used.  If you enter a count, it will replace the
-last one.  |v:count| and |v:count1| will be set.
+Simple changes (edits) can be repeated with the "." command.  Without a count,
+the count of the last change is used.  If you enter a count, it will replace
+the last one.  |v:count| and |v:count1| will be set.
 
 If the last change included a specification of a numbered register, the
 register number will be incremented.  See |redo-register| for an example how
@@ -37,8 +37,11 @@ jumps (mouse, |i_<PageUp>|, …) split an insert session.
 Repeating a Visual-mode command re-executes the captured keysequence,
 selection included.  See |visual-repeat|.
 
+To repeat non-changes, see |motion-repeat|. To repeat multiple actions, see
+|cmdatom-macro| and |complex-repeat|.
+
 ==============================================================================
-Semantic repeat				*action-repeat* *cmdatom* *excalibur*
+Semantic repeat				*action-repeat* *cmdatom* *excalibur* 🗡️
 
 Every user action emits a |CmdAtom| event. This avoids the need for plugins to
 "announce" the repeatable unit, thus plugins like vim-repeat aren't needed.
@@ -327,19 +330,23 @@ q			Stops recording.
 ==============================================================================
 Multiple cursors					*mcursor* *multicursor*
 
-You can place extra cursors ("multicursors") in a buffer, to repeat operations
-at each cursor, as-you-type. This is like a live |macro|, but unlike macros (a
-stream of keys without any context), actions (|CmdAtom|) replay "semantically".
+You can place extra cursors ("multicursor") in a buffer, to repeat operations
+at each cursor as-you-type. Unlike a |macro| (a stream of keys without any
+context), multicursor replays actions "semantically" (|CmdAtom|).
 
-- Mappings and Normal-mode operators are applied at each cursor.
+- Normal-mode commands, Mappings, and even Macros (|@|) replay at each cursor.
 - Insert-mode edits appear at each cursor as you type.
-- Motions (|q=|) and Visual-mode sequences replay at each cursor: "viweex"
-  re-executes the selection there, so the extents are per-cursor (each
-  cursor's own word, block, …).
-- Macros (|@|) replay at each cursor.
+- Motions (|q=|) and Visual sequences replay at each cursor: "viweex"
+  re-executes the selection so the extents are per-cursor (each cursor's own
+  word, block, …).
 - Registers are cursor-local. Each cursor reads/writes its own registers.
   The yanks are joined (linewise) when the multicursor session ends.
 - Undo is atomic: |u| reverts the aggregate edits from all cursors at once.
+- Folds are ignored during replay. Edits replay within folds ("dd" deletes the
+  line at cursor, not the entire folded contents). Motions step into folds
+  instead of skipping over them. The primary cursor keeps the usual
+  |fold-behavior|.
+- Cursors are per-buffer, and cascade only while their buffer is current.
 - CTRL-C interrupts the cascade.
 
 Example: place a cursor on every matching pattern: >
@@ -371,24 +378,33 @@ COMMANDS
 Q			Toggles a multicursor at the current cursor position.
 			Disables follow-mode |q=|.
 
-			With a [count]: places a cursor at every match (|gn|)
-			of the last search pattern. Example:
+[count]Q		Places a cursor at every match (|gn|) of the last
+			search pattern. Example:
 			1. Search for something ("*", "/pattern<CR>", …).
 			2. Type "1Q".
+
+							*v_Q*
+{Visual}Q		Places a cursor on each line of the Visual selection.
+			Enables follow-mode |q=|.
+
+{Visual}[count]Q	Places a cursor at each match of the last search pattern
+			within the Visually-selected lines.
 
 							*mcursor-mouse* *<C-LeftMouse>*
 <C-LeftMouse>		Toggles a multicursor at the click position, without
 			moving the primary cursor (or changing windows). Does
 			NOT disable follow-mode |q=|. No-op in Insert-mode.
 
-							*v_Q*
-{Visual}Q		Places a cursor on each line of the Visual selection.
-			Enables follow-mode |q=|.
-
 							*q=*
-q=			Toggles follow-mode: motions (not jumps/scrolls) are
-			replayed per-cursor. Cursors arriving at the same
-			position (e.g. "G") are merged (deduplicated).
+q=			Toggles follow-mode: cursor-relative motions ("w",
+			"fx", "*") are replayed per-cursor. Cursors arriving
+			at the same position (e.g. "9j" at the last line) are
+			merged (deduplicated).
+
+			Not replayed:
+			- Absolute motions (scrolls/jumps: "G", marks,
+			  CTRL-O).
+			- Motions that fail/beep ("j" on the last line).
 
 			Use [count] to force the mode instead of toggling:
 			"1q=" on, "2q=" off.
@@ -397,8 +413,13 @@ q=			Toggles follow-mode: motions (not jumps/scrolls) are
 CTRL-L			Clears multicursors in the current buffer.
 			|CTRL-L-default|
 
+			Cursors can also be cleared by clearing the namespace: >lua
+			    local mc_ns = vim.api.nvim_create_namespace('nvim.multicursor')
+			    vim.api.nvim_buf_clear_namespace(0, mc_ns, 0, -1)
+<
 							*gQ*
-gQ			Restores the previous multicursors.
+gQ			Restores the previous multicursors, and the primary
+			cursor position. No-op during a multicursor session.
 
 							*g_CTRL-A*
 g CTRL-A		During a multicursor session, inserts an ascending
@@ -408,21 +429,57 @@ g CTRL-A		During a multicursor session, inserts an ascending
 
 							*]C*
 ]C			Jump to the [count]'th next cursor.
+			Hint: "]CQ" removes cursors one at a time.
 
 							*[C*
 [C			Jump to the [count]'th previous cursor.
 
 
+EXAMPLES						*mcursor-examples*
+
+Example: "]C" mapping which places a cursor before jumping to the next, so you
+can "rotate" through the cursors. |nvim_mcursor()| is a no-op if a cursor is
+already there (unlike |Q|, which toggles). >lua
+
+    vim.keymap.set('n', ']C', function()
+      vim.api.nvim_mcursor(0, vim.api.nvim_win_get_cursor(0))
+      vim.cmd('normal! ]C')
+    end)
+<
+Example: a "follow-once" mapping: "q-{motion}" replays {motion} at every
+cursor, then disables follow-mode again. >lua
+
+    vim.keymap.set('n', 'q-', function()
+      vim.cmd('normal! 1q=')
+      vim.api.nvim_create_autocmd('CmdAtom', {
+        callback = function(ev)
+          if ev.data.lhs == 'q-' then
+            return -- Skip the mapping itself.
+          end
+          vim.cmd('normal! 2q=')
+          return true -- Delete the handler.
+        end,
+      })
+    end)
+<
+
 LIMITATIONS						*mcursor-limitations*
 
-- Extra cursors on the same line can be lost or misplaced by an edit that
-  shifts columns (e.g. inserting text): the cursors shift each other.
-- Undo restores the buffer, not (per-cursor) registers.
+- During Insert-mode completion, live mirroring pauses if a preview could
+  shift or overlap the primary's completion (same-line edits before the
+  primary, or line insertions/deletions before it).
+- Cursor is removed if its Insert-entering operation fails. E.g. "ct;" on
+  a line without ";", "cgn" with no match.
+- Explicit clipboard registers (`"*yy`, `"+yy`) are global, not per-cursor. On
+  multicursor exit, you can set the clipboard to the joined yank: >
+      :let @+=@"
+- Implicit 'clipboard' ("unnamed"/"unnamedplus") updates the clipboard on
+  multicursor exit.
+- Same-line cursors may be lost/misplaced by an edit that shifts columns (e.g.
+  inserting text).
 - Time-travel undo (|g-|, |g+|, |:earlier|) clears all cursors.
 - Reloading/unloading a buffer (|:edit!|, 'autoread') clears its cursors
   (extmarks limitation).
-- An operator replayed at a cursor inside a closed fold applies to the whole
-  fold, like any operator (|fold-behavior|).
 - |Q| is not allowed while recording or executing a macro.
 - An 'operatorfunc' that caches its |getchar()| input instead of re-reading it
   misbehaves at the extra cursors: the unconsumed input runs as a normal-mode

@@ -5,15 +5,24 @@ return {
     desc = "<C-\\>e",
   },
   ["gy"] = {
-    function()
-      local reg = vim.v.register
-      vim.api.nvim_feedkeys('"' .. reg .. "y", "nx", false)
-      local text = vim.fn.getreg(reg)
-      text = text:gsub("\n$", "")
-      vim.fn.setreg(reg, text)
-    end,
-    "x",
-    desc = "Like y, but trim trailing \\n",
+    {
+      function()
+        local reg = vim.v.register
+        vim.api.nvim_feedkeys('"' .. reg .. "y", "nx", false)
+        local text = vim.fn.getreg(reg)
+        text = text:gsub("\n$", "")
+        vim.fn.setreg(reg, text)
+      end,
+      "x",
+      desc = "Like y, but trim trailing \\n",
+    },
+    {
+      function()
+        return string.format('gv"%sy', vim.v.register)
+      end,
+      expr = true,
+      "n",
+    },
   },
   ["<C-space><C-v>"] = { "<C-K>", "i" },
   [","] = { ",<C-g>u", "i" },

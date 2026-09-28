@@ -2,6 +2,8 @@
 --- @field command my.command
 --- @field keymap my.keymap
 --- @field window my.window
+--- @field multicursor my.multicursor
+--- @field insert my.insert
 
 --- @type my
 _G.my = _G.my or {}
@@ -9,6 +11,8 @@ my._submodules = {
   command = true,
   keymap = true,
   window = true,
+  multicursor = true,
+  insert = true,
 }
 setmetatable(my, {
   __index = function(t, key)
@@ -19,6 +23,7 @@ setmetatable(my, {
   end,
 })
 my.window.float.drag.enable()
+
 vim.pack.add({ { src = "https://github.com/BrokenSunny/native-packer", version = "branch" } })
 require("command")
 require("global")
@@ -87,7 +92,7 @@ require("native-packer").add({
   -- require("plugins.download.ai.opencode"),
   require("plugins.local.test.lsp-layer"),
   -- require("plugins.test.pulseline"),
-  require("plugins.local.shell-connect"),
+  -- require("plugins.local.shell-connect"),
   -- require("plugins.test.luma"),
   require("plugins.test.ring"),
   require("plugins.test.window-resize"),
@@ -104,3 +109,29 @@ require("native-packer").add({
   -- require("plugins.local.neo-winbar"),
   -- require("plugins.local.test.eye-track"),
 })
+
+-- local width = 4
+-- local height = 2
+-- local buf = vim.api.nvim_create_buf(false, true)
+-- local win = vim.api.nvim_open_win(buf, true, {
+--   relative = "editor",
+--   width = width,
+--   height = height,
+--   row = 0,
+--   col = 0,
+--   style = "minimal",
+--   border = "single",
+-- })
+-- --
+-- -- vim.keymap.set("n", "<M-l>", function()
+-- --   M.move(win, 0, 1)
+-- -- end, { buf = buf })
+-- -- vim.keymap.set("n", "<M-h>", function()
+-- --   M.move(win, 0, -1)
+-- -- end, { buf = buf })
+-- -- vim.keymap.set("n", "<M-k>", function()
+-- --   M.move(win, -1, 0)
+-- -- end, { buf = buf })
+-- -- vim.keymap.set("n", "<M-j>", function()
+-- --   M.move(win, 1, 0)
+-- -- end, { buf = buf })

@@ -1,37 +1,28 @@
----@class NativeMacro._Repeat
-local M = {
-  last_register_name = nil,
-  pendings = {},
-}
-
 local Record = require("native-macro._record")
 
-function M:_repeat(register_name)
-  if register_name == "@" then
-    register_name = self.last_register_name
+---@class NativeMacro._Repeat
+local M = { last_reg = nil }
+
+--- @param reg string
+function M:_repeat(reg)
+  if not reg then
+    return
+  end
+  if reg == "@" then
+    reg = self.last_reg
   else
-    self.last_register_name = register_name
+    self.last_reg = reg
   end
-  local datas = Record.records[register_name]
 
-  for _, data in ipairs(datas) do
-    data = data --[[@as vim.event.cmdatom.data]]
-    if data.type == "excmd" then
-      vim.api.nvim_feedkeys("", "nx", false)
-      vim.api.nvim_command(data.text)
-    else
-      if data.lhs then
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(data.lhs, true, false, true), "m", false)
-      end
-    end
+  for _, atom in ipairs(Record.records[reg] or {}) do
+    vim.api.nvim_feedkeys(
+      vim.api.nvim_replace_termcodes(atom.keys or atom.lhs, true, false, true),
+      atom.keys and "n" or "m",
+      false
+    )
   end
 end
 
-function M.init()
-  vim.api.nvim_create_autocmd("User", {
-    pattern = "Macro",
-    callback = function(ev) end,
-  })
-end
+function M.init() end
 
 return M

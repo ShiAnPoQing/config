@@ -169,14 +169,14 @@ return {
       end,
       [Methods.textDocument_typeDefinition] = function(args)
         require("native-packer.key").add({
-          ["gy"] = {
-            function()
-              vim.lsp.buf.type_definition()
-            end,
-            "n",
-            desc = "Got Lsp type definition",
-            buf = args.buf,
-          },
+          -- ["gy"] = {
+          --   function()
+          --     vim.lsp.buf.type_definition()
+          --   end,
+          --   "n",
+          --   desc = "Got Lsp type definition",
+          --   buf = args.buf,
+          -- },
         })
       end,
       [Methods.textDocument_hover] = function(args)

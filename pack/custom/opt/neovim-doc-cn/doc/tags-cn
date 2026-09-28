@@ -1596,6 +1596,8 @@ $XDG_STATE_HOME	starting.cnx	/*$XDG_STATE_HOME*
 :ex	editing.cnx	/*:ex*
 :exi	editing.cnx	/*:exi*
 :exit	editing.cnx	/*:exit*
+:exm	intro.cnx	/*:exm*
+:exmode	intro.cnx	/*:exmode*
 :exu	helphelp.cnx	/*:exu*
 :exusage	helphelp.cnx	/*:exusage*
 :f	editing.cnx	/*:f*
@@ -3997,6 +3999,7 @@ distribution	intro.cnx	/*distribution*
 diw	motion.cnx	/*diw*
 dl	change.cnx	/*dl*
 dofile()	luaref.cnx	/*dofile()*
+dot-repeat	repeat.cnx	/*dot-repeat*
 download	intro.cnx	/*download*
 e	motion.cnx	/*e*
 edit-a-file	editing.cnx	/*edit-a-file*
@@ -4362,7 +4365,6 @@ gF	editing.cnx	/*gF*
 gJ	change.cnx	/*gJ*
 gM	motion.cnx	/*gM*
 gP	change.cnx	/*gP*
-gQ	intro.cnx	/*gQ*
 gQ	repeat.cnx	/*gQ*
 gR	change.cnx	/*gR*
 gT	tabpage.cnx	/*gT*
@@ -5189,6 +5191,7 @@ math.tanh()	luaref.cnx	/*math.tanh()*
 max()	vimfn.cnx	/*max()*
 mcursor	repeat.cnx	/*mcursor*
 mcursor-clear	repeat.cnx	/*mcursor-clear*
+mcursor-examples	repeat.cnx	/*mcursor-examples*
 mcursor-limitations	repeat.cnx	/*mcursor-limitations*
 mcursor-mouse	repeat.cnx	/*mcursor-mouse*
 menu_get()	vimfn.cnx	/*menu_get()*

@@ -37,8 +37,9 @@ end, {
   bar = true,
 })
 
---- current window help
-my.command.define("HELP", "Help", function(ev)
+
+--- @param ev vim.api.keyset.create_user_command.command_args
+local cwindow_help_cmd = function(ev)
   local subject = ev.args
   local buf = vim.api.nvim_get_current_buf()
   local help = "help" .. (ev.bang and "! " or " ") .. subject
@@ -54,9 +55,14 @@ my.command.define("HELP", "Help", function(ev)
       vim.api.nvim_set_option_value("buftype", buftype, { buf = buf })
     end)
   end
-end, {
+end
+
+local cwindow_help_cmd_opts = {
   nargs = "?",
   complete = "help",
   bang = true,
   bar = true,
-})
+}
+
+my.command.define("HELP", "Help", cwindow_help_cmd, cwindow_help_cmd_opts)
+my.command.define("H", "H", cwindow_help_cmd, cwindow_help_cmd_opts)

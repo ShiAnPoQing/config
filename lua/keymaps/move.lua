@@ -229,17 +229,54 @@ return {
     { "$h", "x" },
     desc = "Move to the last character of the line",
   },
-  ["<C-9>"] = { "-", { "n", "x", "o" }, desc = "[count] lines upward, on the first non-blank character (linewise)." },
-  ["<C-0>"] = {
-    "<up>g_",
-    { "n", "x", "o" },
-    desc = "[count] lines upward, on the last non-blank character (linewise).",
+
+  [my.keymap.keys.CTRL_9] = {
+    {
+      "-",
+      { "n", "x", "o" },
+      desc = "[count] lines upward, on the first non-blank character (linewise).",
+    },
+    {
+      "<C-o>-",
+      "i",
+      desc = "line upward, on the first non-blank character (linewise).",
+    },
   },
-  ["<M-9>"] = { "+", { "n", "x", "o" }, desc = "[count] lines downward, on the first non-blank character (linewise)." },
+  [my.keymap.keys.CTRL_0] = {
+    {
+      "<up>g_",
+      { "n", "x", "o" },
+      desc = "[count] lines upward, on the last non-blank character (linewise).",
+    },
+    {
+      "<up><esc>g_a",
+      "i",
+      desc = "line upward, on the last non-blank character (linewise).",
+    },
+  },
+  ["<M-9>"] = {
+    {
+      "+",
+      { "n", "x", "o" },
+      desc = "[count] lines downward, on the first non-blank character (linewise).",
+    },
+    {
+      "<C-o>+",
+      "i",
+      desc = "line downward, on the first non-blank character (linewise).",
+    },
+  },
   ["<M-0>"] = {
-    "<down>g_",
-    { "n", "x", "o" },
-    desc = "[count] lines downward, on the last non-blank character (linewise).",
+    {
+      "<down>g_",
+      { "n", "x", "o" },
+      desc = "[count] lines downward, on the last non-blank character (linewise).",
+    },
+    {
+      "<down><esc>g_a",
+      "i",
+      desc = "line downward, on the last non-blank character (linewise).",
+    },
   },
   ["<M-a><M-h>"] = { "<C-o>g^", "i", desc = "Screen First Character" },
   ["<M-a><M-l>"] = { "<esc>g<end>a", "i", desc = "Screen Last Character" },

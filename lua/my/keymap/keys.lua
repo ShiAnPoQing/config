@@ -15,12 +15,15 @@ local keys = {
   TOGGLE_COMMENT_ALT1 = "<C-_>",
 
   CTRL_BS = "<C-BS>",
+  CTRL_0 = "<C-0>",
+  CTRL_9 = "<C-9>",
   -- CTRL_/
 }
 
 if vim.env.TERM == "xterm-ghostty" or vim.env.TERM == "tmux-256color" then
   keys.CTRL_BS = "<F17>"
+  keys.CTRL_0 = "<F18>"
+  keys.CTRL_9 = "<F19>"
 end
 
-return keys 
-
+return keys

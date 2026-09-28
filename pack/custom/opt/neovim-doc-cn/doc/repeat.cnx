@@ -8,78 +8,69 @@
 
 用户手册第 26 章介绍了重复 |usr_26.txt|。
 
-键入 |gO| 可查看目录。
+                                     输入 |gO| 查看目录。
 
 ==============================================================================
 单次重复						*single-repeat*
 
-							*.*
-.			重复上次更改，计数替换为 [count]。
-			当 'cpoptions' 中包含 'y' 标志时，
-			也重复复制命令。不重复
-			命令行命令。
+							*.* *dot-repeat*
+.			重复上一次更改，计数替换为 [count]。
+			当 'cpoptions' 中包含 'y' 标志时，也重复 yank 命令。不重复命令行命令。
 
 							*@:*
-@:			重复上次命令行 [count] 次。
+@:			重复上一次命令行 [count] 次。
 
-简单更改可以使用 "." 命令重复。如果不带计数，
-则使用上次更改的计数。如果您输入计数，它将替换
-上一个计数。|v:count| 和 |v:count1| 将被设置。
+简单的更改（编辑）可以用 "." 命令重复。没有计数时，使用上次更改的计数。如果输入计数，它将替换上一次的计数。 |v:count| 和 |v:count1| 将被设置。
 
-如果上次更改包含编号寄存器的指定，
-则寄存器编号将递增。关于如何使用此功能的示例，
-请参见 |redo-register|。
+如果上次更改包含编号寄存器的指定，寄存器编号将递增。有关如何使用此功能的示例，请参阅 |redo-register|。
 
-重复插入 |ins-repeat| 会重新执行整个会话，包括
-非跳转光标移动："iab<Left>c<Esc>." 产生 "acb"，而不是 "c"。
-注意，跳转（鼠标、|i_<PageUp>| 等）会分割插入会话。
+重复插入 |ins-repeat| 会重新执行整个会话，包括非跳转光标移动："iab<Left>c<Esc>." 产生 "acb"，而不是 "c"。请注意，跳转（鼠标、 |i_<PageUp>| 等）会拆分插入会话。
 
-重复可视模式命令会重新执行捕获的键序列，
-包括选择。请参见 |visual-repeat|。
+重复可视模式命令会重新执行捕获的按键序列，包括选择。请参阅 |visual-repeat|。
+
+要重复非更改操作，请参阅 |motion-repeat|。要重复多个操作，请参阅 |cmdatom-macro| 和 |complex-repeat|。
 
 ==============================================================================
-语义重复				*action-repeat* *cmdatom* *excalibur*
+语义重复				*action-repeat* *cmdatom* *excalibur* 🗡️
 
-每个用户操作都会发出一个 |CmdAtom| 事件。这避免了插件需要
-"宣告" 可重复单元，因此像 vim-repeat 这样的插件不是必需的。
+每个用户操作都会发出一个 |CmdAtom| 事件。这避免了插件需要“宣告”可重复单元，因此不需要像 vim-repeat 这样的插件。
 
-`CmdAtom.lhs` 是在操作期间收集的高级用户输入，
-包括 getchar() 输入。这很重要：它反映了语义
-意图。`CmdAtom.keys` 揭示了生成的底层内部命令。
+`CmdAtom.lhs` 是在操作期间收集的高层用户输入，包括 |getchar()| 输入。这很重要：它反映了语义意图。 `CmdAtom.keys` 揭示了产生的底层内部命令。
 
-	输入 (`lhs`)	解析 (`keys`) ~
-	dw		"dw"		未被转换。
-	zfa{		"zfa{"		不是编辑操作 (`changed=false`)。
-	x		"dl"		转换的内置命令。
+	输入（`lhs`）	解析（`keys`） ~
+	dw		"dw"		未翻译。
+	zfa{		"zfa{"		不是编辑（`changed=false`）。
+	x		"dl"		翻译后的内置命令。
 	,d		"dl"		映射 `:nnoremap ,d x`。
 	@q		"dl"		宏 `@q = "x"`。
-	<F6>		"dlw"		组合 `:nnoremap <F6> xw`:
+	<F6>		"dlw"		复合 `:nnoremap <F6> xw`：
 					`type='mapping'`，子原子 "dl" 和 "w"
-					连接成组合键。
-	,Dw		"dw"		不完整的映射：在操作中间结束
+					连接到复合 keys。
+	,Dw		"dw"		不完整映射：在操作中途结束
 					(`:nnoremap ,D d`)，
-					捕获其后续部分 ("w")。
-	ds)		":call …<NL>)"	"有效载荷" 映射（例如 vim-surround
-					"ds'" 读取 |getchar()|）。
+					捕获其延续（"w"）。
+	ds)		":call …<NL>)"	“载荷”映射（例如 vim-surround
+					的 "ds'" 读取 |getchar()|）。
 	]q		nil		Lua 映射。
-	V<C-E>d		""		不可重放：依赖于视口的
-					可视序列；`lhs` 仅是一个
+	V<C-E>d		""		不可重放：依赖视口的
+					可视序列； `lhs` 只是
 					提示/标签。
 
-要重复一个原子，如果 `keys=nil`，则输入 `keys`（模式 "n"），否则输入 `lhs`（模式 "m"）。 >lua
+要重复一个原子，馈送 `keys`（模式 "n"），或者如果 `keys=nil` 则馈送 `lhs`（模式 "m"）。
+>lua
 
     local function replay(a)
       vim.api.nvim_feedkeys(a.keys or a.lhs, a.keys and 'n' or 'm', false)
     end
 <
 							*motion-repeat*
-示例：此 "," 映射重复上次移动（"zj"、"3w"、"fx"、
-"/pat<CR>"、"]c"、任何设置 `moved=true` 的映射/命令）。 >lua
+示例：这个 "," 映射重复上一次移动（"zj"、"3w"、"fx"、"/pat<CR>"、"]c"，任何设置 `moved=true` 的映射/命令）。
+>lua
 
     local last ---@type vim.event.cmdatom.data?
     vim.api.nvim_create_autocmd('CmdAtom', {
       callback = function(ev)
-        -- Skip edits, and the "," mapping itself.
+        -- 跳过编辑，以及 "," 映射本身。
         local motion = ev.data.moved or ev.match == 'motion'
         if motion and not (ev.data.changed or ev.data.lhs == ',') then
           last = ev.data
@@ -87,7 +78,7 @@
       end,
     })
     vim.keymap.set('n', ',', function()
-      -- CmdAtom is deferred; schedule the replay, in case "," follows a motion.
+      -- CmdAtom 是延迟的；调度重放，以防 "," 跟在移动之后。
       vim.schedule(function()
         if last then
           vim.api.nvim_feedkeys(last.keys or last.lhs, last.keys and 'n' or 'm', false)
@@ -96,8 +87,8 @@
     end)
 <
 							*edit-repeat*
-示例：此 "." 映射重复任何编辑操作（撤消/重做除外），包括由
-插件提供的操作，无需通过 vim-repeat 或类似方式进行 "宣告"。 >lua
+示例：这个 "." 映射重复任何编辑（撤销/重做除外），包括插件提供的操作，无需通过 vim-repeat 或类似方式“宣告”。
+>lua
 
     local last ---@type vim.event.cmdatom.data?
     vim.api.nvim_create_autocmd('CmdAtom', {
@@ -110,13 +101,13 @@
       end,
     })
     vim.keymap.set('n', '.', function()
-      -- 多个光标：降级为内置 "."（级联）。
+      -- 多光标：降级为内置 "."（级联）。
       local mc = vim.api.nvim_create_namespace('nvim.multicursor')
       if #vim.api.nvim_buf_get_extmarks(0, mc, 0, -1, { limit = 1 }) > 0 then
         vim.api.nvim_feedkeys('.', 'n', false)
         return
       end
-      -- CmdAtom is deferred; schedule the replay, in case "." follows an edit.
+      -- CmdAtom 是延迟的；调度重放，以防 "." 跟在编辑之后。
       vim.schedule(function()
         if last then
           vim.api.nvim_feedkeys(last.keys or last.lhs, last.keys and 'n' or 'm', false)
@@ -125,15 +116,15 @@
     end)
 <
 							*cmdatom-macro*
-示例：此 "[count]<Space>" 映射将最后 [count] 个原子保存为可编辑的宏：
-"2<Space>" 打开 |cmdwin|，列出最后 [count] 个原子（您可以删除/编辑步骤），
-<Enter> 保存它。不带计数的 "<Space>" 重放该宏。 >lua
+示例：这个 "[count]<Space>" 映射将最后 [count] 个原子保存为可编辑的宏："2<Space>" 打开 |cmdwin|，
+列出最后 [count] 个原子（如果需要，你可以删除/编辑步骤），<Enter> 保存它。不带计数的 "<Space>" 重放该宏。
+>lua
 
-    -- Track the last 20 atoms.
+    -- 跟踪最后 20 个原子。
     local atom_ring = {} ---@type vim.event.cmdatom.data[]
     vim.api.nvim_create_autocmd('CmdAtom', {
       callback = function(ev)
-        -- Skip this mapping itself, and cmdwin edits.
+        -- 跳过此映射本身，以及 cmdwin 编辑。
         if ev.data.lhs ~= ' ' and vim.fn.getcmdwintype() == '' then
           atom_ring[#atom_ring + 1] = ev.data
           if #atom_ring > 20 then
@@ -142,14 +133,14 @@
         end
       end,
     })
-    -- [count]<space> shows a cmdwin where the user can edit/save the last [count] atoms as a "macro".
-    -- <space> (no count) replays it.
+    -- [count]<space> 显示一个 cmdwin，用户可以在其中编辑/保存最后 [count] 个原子作为“宏”。
+    -- <space>（无计数）重放它。
     vim.keymap.set('n', '<Space>', function()
       local count = vim.v.count
-      -- CmdAtom is deferred; schedule it so pending events land in the ring first.
+      -- CmdAtom 是延迟的；调度它，以便待处理事件先进入环形缓冲区。
       vim.schedule(function()
         count = math.min(count, #atom_ring)
-        if count == 0 then -- Replay the saved macro.
+        if count == 0 then -- 重放保存的宏。
           for _, step in ipairs(vim.g.atom_macro or {}) do
             vim.api.nvim_feedkeys(vim.keycode(step.keys or step.lhs), step.keys and 'n' or 'm', false)
           end
@@ -163,22 +154,21 @@
           parts[#parts + 1] = ('{%s=%q},'):format(field, vim.fn.keytrans(keys))
         end
         local cmd = ('lua vim.g.atom_macro = { %s }'):format(table.concat(parts, ' '))
-        -- Draft it on the cmdline; CTRL-F opens the cmdwin to edit it.
+        -- 在命令行上起草它；CTRL-F 打开 cmdwin 以编辑它。
         vim.api.nvim_feedkeys((':%s%s'):format(cmd, vim.keycode('<C-f>')), 'n', false)
       end)
     end)
 <
 							*restore-undo-cursor*
-默认情况下，|undo| 将光标返回到其原始位置。如果您不喜欢
-这样，您可以使用此代码片段来获得 Vim 的行为： >lua
+默认情况下， |undo| 将光标返回到其原始位置。如果你不喜欢那样，可以使用此代码片段改为获得 Vim 的行为： >lua
 
     vim.api.nvim_create_autocmd('CmdAtom', {
       callback = function(ev)
-        -- Undo/redo: the buffer changed to an already-seen undo state.
+        -- 撤销/重做：缓冲区更改为已经见过的撤销状态。
         local undid = ev.data.changed and (ev.data.undoseq or 0) <= (vim.b[ev.buf].maxseq or 0)
         vim.b[ev.buf].maxseq = math.max(vim.b[ev.buf].maxseq or 0, ev.data.undoseq or 0)
         if undid then
-          vim.cmd('normal! `[') -- Start of the changed text.
+          vim.cmd('normal! `[') -- 更改文本的开始。
         end
       end,
     })
@@ -189,12 +179,10 @@
 
 						*:g* *:global* *E148*
 :[range]g[lobal]/{pattern}/[cmd]
-			在 [range] 内匹配 {pattern} 的行上执行 Ex 命令
-			[cmd]（默认为 ":p"）。
+			在 [range] 内 {pattern} 匹配的行上执行 Ex 命令 [cmd]（默认 ":p"）。
 
 :[range]g[lobal]!/{pattern}/[cmd]
-			在 [range] 内不匹配 {pattern} 的行上执行 Ex 命令
-			[cmd]（默认为 ":p"）。
+			在 [range] 内 {pattern} 不匹配的行上执行 Ex 命令 [cmd]（默认 ":p"）。
 
 							*:v* *:vglobal*
 :[range]v[global]/{pattern}/[cmd]
@@ -202,221 +190,194 @@
 
 示例： >
 	:g/^Obsolete/d _
-在 `:d` 之后使用下划线可避免破坏寄存器或剪贴板。
-这也使其更快。
+在 `:d` 后使用下划线可避免覆盖寄存器或剪贴板。这也使它更快。
 
-您可以使用任何其他单字节字符来代替包围 {pattern} 的 '/'，
-但不能使用字母字符、'\'、'"'、'|' 或 '!'。
-如果您想在搜索模式或替换字符串中包含 '/'，
-这很有用。
+包围 {pattern} 的 '/' 可以用任何其他单字节字符替换，但不能是字母字符、'\'、'"'、'|' 或 '!'。当你想在搜索模式或替换字符串中包含 '/' 时，这很有用。
 
-关于模式的定义，请参见 |pattern|。
+有关模式的定义，请参阅 |pattern|。
 
-注意 [cmd] 可以包含范围；示例请参见 |collapse| 和 |edit-paragraph-join|。
+注意 [cmd] 可以包含范围；示例请参阅 |collapse| 和 |edit-paragraph-join|。
 
-全局命令的工作原理是首先扫描 [range] 行并
-标记发生匹配的每一行（对于多行模式，只有匹配的
-开始位置重要）。
-在第二次扫描中，对每个标记的行执行 [cmd]，就像光标
-在该行一样。对于 ":v" 和 ":g!"，对每个未标记的行执行
-命令。如果一行被删除，其标记消失。
-[range] 的默认值是整个缓冲区 (1,$)。使用 "CTRL-C" 可中断
-该命令。如果某行给出错误消息，则该行的命令
-被中止，全局命令继续处理下一个标记或
-未标记的行。
+全局命令的工作原理是：首先扫描 [range] 行，并标记每个发生匹配的行（对于多行模式，只有匹配的开始位置重要）。
+在第二次扫描中，对每个标记的行执行 [cmd]，就像光标在该行一样。对于 ":v" 和 ":g!"，命令对每个未标记的行执行。如果一行被删除，其标记消失。
+[range] 的默认值是整个缓冲区（1,$）。使用 "CTRL-C" 中断命令。如果某行给出错误消息，该行的命令被中止，全局命令继续处理下一个标记或未标记的行。
 								*E147*
-当命令被递归使用时，它只在一行上工作。此时不允许
-指定范围。这对于查找所有匹配某个模式但
-不匹配另一个模式的行很有用： >
+当命令被递归使用时，它只对一行有效。此时不允许给出范围。这对于查找所有匹配一个模式且不匹配另一个模式的行很有用： >
 	:g/found/v/notfound/{cmd}
-这首先查找所有包含 "found" 的行，但仅当没有匹配
-"notfound" 时才执行 {cmd}。
+这首先找到所有包含 "found" 的行，但仅当没有 "notfound" 的匹配时才执行 {cmd}。
 
-可以使用任何 Ex 命令，请参见 |ex-cmd-index|。要执行普通模式
-命令，您可以使用 `:normal` 命令： >
+可以使用任何 Ex 命令，请参阅 |ex-cmd-index|。要执行普通模式命令，可以使用 `:normal` 命令： >
 	:g/pat/normal {commands}
-确保 {commands} 以一个完整的命令结束，否则 Vim 将等待
-您为每个匹配键入命令的其余部分。屏幕不会
-更新，所以您不知道自己在做什么。请参见 |:normal|。
+确保 {commands} 以一个完整命令结束，否则 Vim 将等待你为每个匹配输入命令的其余部分。屏幕不会更新，所以你不知道自己在做什么。请参阅 |:normal|。
 
-撤消/重做命令将一次性撤消/重做整个全局命令。
-之前的上下文标记只会被设置一次（使用 "''" 您可以返回到
-执行全局命令之前光标所在的位置）。
+撤销/重做命令将一次性撤销/重做整个全局命令。
+上一个上下文标记只会设置一次（使用 "''" 可以回到全局命令之前光标所在的位置）。
 
-全局命令同时设置上次使用的搜索模式和上次使用的
-替换模式（这与 Vi 兼容）。这使得全局替换字符串
-变得容易： >
+全局命令同时设置最后使用的搜索模式和最后使用的替换模式（这与 vi 兼容）。这使得全局替换字符串变得容易： >
 	:g/pat/s//PAT/g
-这将所有出现的 "pat" 替换为 "PAT"。同样的操作可以通过以下方式完成： >
+这将所有出现的 "pat" 替换为 "PAT"。也可以用以下命令完成： >
 	:%s/pat/PAT/g
-这短了两个字符！
+这少了两个字符！
 
 ==============================================================================
-复杂重复						*complex-repeat*
+复杂重复					*complex-repeat*
 
 							*q* *recording* *macro*
-q{0-9a-zA-Z"}		将键入的字符录制到寄存器 {0-9a-zA-Z"}
-			（大写字母表示追加）。执行寄存器时，'q' 命令被禁用，
-			并且它在映射和 |:normal| 中不起作用。
+q{0-9a-zA-Z"}		将键入的字符记录到寄存器 {0-9a-zA-Z"}
+			（大写表示追加）。'q' 命令在执行寄存器时被禁用，并且在映射和 |:normal| 中不起作用。
 
-			注意：如果用于录制的寄存器也用于
-			|y| 和 |p|，结果很可能不是
-			预期的，因为放置操作会粘贴录制的宏，
-			而复制操作会覆盖录制的宏。
+			注意：如果用于记录的寄存器也用于 |y| 和 |p|，结果很可能不是预期的，因为 put 将粘贴记录的宏，而 yank 将覆盖记录的宏。
 
-			注意：录制发生在您键入时，重放
-			寄存器的过程就像键来自映射一样。
-			这很重要，例如，对于撤消操作，它只在
-			命令被键入时同步。
+			注意：记录发生在你输入时，重放寄存器时就像按键来自映射一样。这很重要，例如对于撤销，它仅在命令被键入时同步。
 
-q			停止录制。
-			实现说明：停止录制的 'q' 不会存储在寄存器中，
-			除非它是映射的结果。
+q			停止记录。
+			实现说明：停止记录的 'q' 不会存储在寄存器中，除非它是映射的结果
 
 							*@*
-@{0-9a-z".=*+}		执行寄存器 {0-9a-z".=*+} 的内容 [count]
-			次。注意，寄存器 '%'（当前文件的名称）和
-			'#'（交替文件的名称）不能使用。
-			寄存器的执行方式类似于映射，这意味着
-			'wildchar' 和 'wildcharm' 之间的区别
-			适用，并且撤消可能不会以相同的方式同步。
-			对于 "@="，系统会提示您输入一个表达式。然后执行
-			表达式的结果。
-			另请参见 |@:|。
+@{0-9a-z".=*+}		执行寄存器 {0-9a-z".=*+} 的内容 [count] 次。请注意，寄存器 '%'（当前文件名）和 '#'（备用文件名）不能使用。
+			寄存器像映射一样被执行，这意味着 'wildchar' 和 'wildcharm' 之间的差异适用，并且撤销可能不会以相同方式同步。
+			对于 "@="，会提示你输入表达式。然后执行该表达式的结果。
+			另请参阅 |@:|。
 
 							*@@* *E748*
-@@			重复之前的 @{0-9a-z":*} [count] 次。
+@@			重复上一个 @{0-9a-z":*} [count] 次。
 
 							*v_@-default*
-{Visual}@{0-9a-z".=*+}	在行方式可视模式下，对每个选定的行执行
-{Visual}@@		寄存器的内容。
-			请参见 |visual-repeat|、|default-mappings|。
+{Visual}@{0-9a-z".=*+}	在行可视模式下，为每个选中行执行寄存器的内容。
+{Visual}@@		请参阅 |visual-repeat|、|default-mappings|。
 
 							*:@*
-:[addr]@{0-9a-z".=*+}	执行寄存器 {0-9a-z".=*+} 的内容作为
-			Ex 命令。首先将光标设置在 [addr] 行（默认
-			是当前行）。当寄存器中的最后一行
-			没有 <CR> 时，如果 'cpoptions' 中存在 'e'
-			标志，则会自动添加。
-			对于 ":@="，使用上次使用的表达式。表达式
-			求值的结果作为 Ex 命令执行。
+:[addr]@{0-9a-z".=*+}	将寄存器 {0-9a-z".=*+} 的内容作为 Ex 命令执行。首先将光标设置在行 [addr]（默认是当前行）。当寄存器中的最后一行没有 <CR> 时，如果 'cpoptions' 中有 'e' 标志，它将自动添加。
+			对于 ":@="，使用最后使用的表达式。计算表达式的结果作为 Ex 命令执行。
 			这些命令中不识别映射。
-			当行方式寄存器的某行开头存在
-			|line-continuation| 字符 (\) 时，
-			它会与前一行合并。这对于复制和
-			执行 Vim 脚本的部分内容很有用。
+			当行式寄存器中行首存在 |line-continuation| 字符（\）时，它会与上一行合并。这对于 yank 和执行 Vim 脚本的部分内容很有用。
 
 							*:@:*
-:[addr]@:		重复上次命令行。首先将光标设置在
-			[addr] 行（默认为当前行）。
+:[addr]@:		重复上一次命令行。首先将光标设置在行 [addr]（默认是当前行）。
 
 :[addr]@						*:@@*
-:[addr]@@		重复之前的 :@{register}。首先将光标设置在
-			[addr] 行（默认为当前行）。
+:[addr]@@		重复上一个 :@{register}。首先将光标设置在行 [addr]（默认是当前行）。
 
 ==============================================================================
-多个光标					*mcursor* *multicursor*
+多光标					*mcursor* *multicursor*
 
-您可以在缓冲区中放置额外的光标（"多个光标"），以便在每个光标处
-重复操作，边操作边显示。这类似于实时的 |macro|，但与宏（无上下文的
-按键流）不同，操作（|CmdAtom|）会 "语义化" 地重放。
+你可以在缓冲区中放置额外光标（“多光标”），以在每个光标处随输入重复操作。与 |macro|（没有任何上下文的按键流）不同，多光标“语义地”重放操作（|CmdAtom|）。
 
-- 映射和普通模式操作符会应用于每个光标。
-- 插入模式编辑会在您键入时出现在每个光标处。
-- 移动（|q=|）和可视模式序列会在每个光标处重放："viweex"
-  会在那里重新执行选择，因此范围是每个光标自己的（每个
-  光标自己的单词、块等）。
-- 宏（|@|）会在每个光标处重放。
-- 寄存器是光标本地的。每个光标读取/写入自己的寄存器。
-  当多个光标会话结束时，复制的内容会（按行方式）合并。
-- 撤消是原子的：|u| 会一次性恢复所有光标的聚合编辑。
-- CTRL-C 会中断级联操作。
+- 普通模式命令、映射，甚至宏（|@|）都会在每个光标处重放。
+- 插入模式编辑在你输入时出现在每个光标处。
+- 移动（|q=|）和可视序列在每个光标处重放："viweex" 重新执行选择，因此范围是按光标计算的（每个光标自己的单词、块等）。
+- 寄存器是光标局部的。每个光标读取/写入自己的寄存器。当多光标会话结束时，yank 会（按行）合并。
+- 撤销是原子的：|u| 一次性还原所有光标的聚合编辑。
+- 重放期间忽略折叠。编辑在折叠内重放（"dd" 删除光标处的行，而不是整个折叠内容）。移动会步入折叠而不是跳过它们。主光标保持通常的 |fold-behavior|。
+- 光标是按缓冲区的，仅当其缓冲区为当前缓冲区时级联。
+- CTRL-C 中断级联。
 
-示例：在每个匹配的模式上放置一个光标： >
+示例：在每个匹配模式处放置一个光标： >
     :g/pattern/normal! nQ
 <
-示例：在每个 |quickfix| 项或范围上放置一个光标： >
+示例：在每个 |quickfix| 项或范围处放置一个光标： >
     :cdo normal! Q
     :2,4cdo normal! Q
 <
-示例：使用 API 在每个匹配项上放置光标： >lua
+示例：使用 API 在每个匹配处放置一个光标：>lua
     for _, m in ipairs(vim.fn.matchbufline('%', [[pattern]], 1, '$')) do
       vim.api.nvim_mcursor(0, { m.lnum, m.byteidx })
     end
 <
-插件可以使用 |nvim_mcursor()| 放置光标，并通过 |CmdAtom| 事件
-检查用户操作。
+插件可以使用 |nvim_mcursor()| 放置光标，并通过 |CmdAtom| 事件检查用户操作。
 
-光标位置作为 |extmarks| 在 "nvim.multicursor" 命名空间中跟踪。
-使用 |nvim_buf_get_extmarks()| 查询它们；删除 extmark 即删除
-光标。您也可以使用 |:marks| 查看光标： >
+光标位置在 "nvim.multicursor" 命名空间中作为 |extmarks| 跟踪。使用 |nvim_buf_get_extmarks()| 查询它们；删除一个 extmark 会删除该光标。你也可以使用 |:marks| 查看光标： >
     :marks nvim.multicursor
 <
-多个光标会显示为 |hl-MCursor| 高亮，除非您的（终端）UI
-支持 Kitty 多光标协议。
+多光标显示为 |hl-MCursor| 高亮，除非你的（终端）UI 支持 Kitty 多光标协议。
 
 
 命令
 							*Q*
-Q			在当前光标位置切换多个光标。
+Q			在当前光标位置切换一个多光标。
 			禁用跟随模式 |q=|。
 
-			带有 [count]：在上次搜索模式的每个匹配（|gn|）
-			处放置一个光标。示例：
-			1. 搜索某些内容（"*"、"/pattern<CR>" 等）。
-			2. 键入 "1Q"。
-
-							*mcursor-mouse* *<C-LeftMouse>*
-<C-LeftMouse>		在点击位置切换多个光标，而不移动
-			主光标（或更改窗口）。不会禁用跟随模式 |q=|。
-			在插入模式下无操作。
+[count]Q		在最后一个搜索模式的每个匹配（|gn|）处放置一个光标。示例：
+			1. 搜索某内容（"*"、"/pattern<CR>" 等）。
+			2. 输入 "1Q"。
 
 							*v_Q*
 {Visual}Q		在可视选择的每一行上放置一个光标。
 			启用跟随模式 |q=|。
 
-							*q=*
-q=			切换跟随模式：移动（非跳转/滚动）会
-			在每个光标处重放。到达相同位置的光标
-			（例如 "G"）会被合并（去重）。
+{Visual}[count]Q	在可视选择的每一行内最后一个搜索模式的每个匹配处放置一个光标。
 
-			使用 [count] 强制模式而不是切换：
-			"1q=" 开启，"2q=" 关闭。
+							*mcursor-mouse* *<C-LeftMouse>*
+<C-LeftMouse>		在点击位置切换一个多光标，不移动主光标（也不更改窗口）。不会禁用跟随模式 |q=|。在插入模式下无效。
+
+							*q=*
+q=			切换跟随模式：光标相对移动（"w"、"fx"、"*"）按光标重放。到达相同位置的光标（例如最后一行上的 "9j"）会被合并（去重）。
+
+			不重放：
+			- 绝对移动（滚动/跳转："G"、标记、CTRL-O）。
+			- 失败/蜂鸣的移动（最后一行上的 "j"）。
+
+			使用 [count] 强制该模式而不是切换："1q=" 开启，"2q=" 关闭。
 
 							*mcursor-clear*
-CTRL-L			清除当前缓冲区中的多个光标。
+CTRL-L			清除当前缓冲区中的多光标。
 			|CTRL-L-default|
 
+			也可以通过清除命名空间来清除光标：>lua
+			    local mc_ns = vim.api.nvim_create_namespace('nvim.multicursor')
+			    vim.api.nvim_buf_clear_namespace(0, mc_ns, 0, -1)
+<
 							*gQ*
-gQ			恢复之前的多个光标。
+gQ			恢复之前的多光标和主光标位置。在多光标会话期间无效。
 
 							*g_CTRL-A*
-g CTRL-A		在多个光标会话期间，在每个光标处插入一个
-			递增的数字（"计数器"），因此一列
-			光标变为 1、2、3、…。使用 [count] 选择
-			初始数字。
+g CTRL-A		在多光标会话期间，在每个光标处插入一个递增数字（“计数器”），因此一列光标变成 1、2、3、…。使用 [count] 选择初始数字。
 
 							*]C*
 ]C			跳转到第 [count] 个下一个光标。
+			提示："]CQ" 一次删除一个光标。
 
 							*[C*
 [C			跳转到第 [count] 个上一个光标。
 
 
+示例						*mcursor-examples*
+
+示例：" ]C" 映射在跳转到下一个光标之前放置一个光标，这样你可以“轮转”光标。如果光标已经在那里， |nvim_mcursor()| 是空操作（与 |Q| 不同，后者是切换）。 >lua
+
+    vim.keymap.set('n', ']C', function()
+      vim.api.nvim_mcursor(0, vim.api.nvim_win_get_cursor(0))
+      vim.cmd('normal! ]C')
+    end)
+<
+示例：“跟随一次”映射："q-{motion}" 在每个光标处重放 {motion}，然后再次禁用跟随模式。 >lua
+
+    vim.keymap.set('n', 'q-', function()
+      vim.cmd('normal! 1q=')
+      vim.api.nvim_create_autocmd('CmdAtom', {
+        callback = function(ev)
+          if ev.data.lhs == 'q-' then
+            return -- 跳过映射本身。
+          end
+          vim.cmd('normal! 2q=')
+          return true -- 删除该处理程序。
+        end,
+      })
+    end)
+<
+
 限制						*mcursor-limitations*
 
-- 同一行上的额外光标可能会因更改列偏移的编辑操作（例如插入文本）
-  而丢失或错位：光标会相互偏移。
-- 撤消会恢复缓冲区，但不会恢复（每个光标的）寄存器。
-- 时间旅行撤消（|g-|、|g+|、|:earlier|）会清除所有光标。
-- 重新加载/卸载缓冲区（|:edit!|、'autoread'）会清除其光标
-  （extmarks 限制）。
-- 在闭合折叠内的光标处重放的操作符会应用于整个
-  折叠，就像任何操作符一样（|fold-behavior|）。
-- 录制或执行宏时不允许使用 |Q|。
-- 缓存其 |getchar()| 输入而不是重新读取它的 'operatorfunc'
-  在额外光标处表现异常：未消耗的输入会作为普通模式
-  键运行。
+- 在插入模式补全期间，如果预览可能移动或重叠主光标的补全（主光标之前的同行编辑，或其之前的行插入/删除），实时镜像会暂停。
+- 如果光标的进入插入操作失败，光标将被移除。例如，在没有 ";" 的行上 "ct;"，没有匹配时的 "cgn"。
+- 显式剪贴板寄存器（`"*yy`、`"+yy`）是全局的，不是按光标的。在多光标退出时，你可以将剪贴板设置为合并的 yank： >
+      :let @+=@"
+- 隐式 'clipboard'（"unnamed"/"unnamedplus"）在多光标退出时更新剪贴板。
+- 同行光标可能会因移动列的编辑（例如插入文本）而丢失/错位。
+- 时间旅行撤销(|g-|、 |g+|、 |:earlier|)会清除所有光标。
+- 重新加载/卸载缓冲区(|:edit!|、 'autoread')会清除其光标（extmarks 限制）。
+- 在记录或执行宏时不允许 |Q|。
+- 一个 'operatorfunc' 如果缓存其 |getchar()| 输入而不是重新读取它，在额外光标处会行为异常：未消费的输入会作为普通模式键运行。
 
 
  vim:tw=78:ts=8:noet:ft=help:norl:
