@@ -17,6 +17,7 @@ local mc = vim.api.nvim_create_namespace("nvim.multicursor")
 local target_win
 local path
 
+--- @return vim.api.keyset.get_extmark_item|nil
 local function get_mouse_cursor(mousepos)
   return vim.api.nvim_buf_get_extmarks(
     0,
@@ -27,8 +28,9 @@ local function get_mouse_cursor(mousepos)
 end
 
 --- reset path
---- 当前位置的光标不是 rollback 的目标光标
---- 则删除当前位置的光标，也表明历史断了，所以重置历史，并结束
+--- mouse cursor is not rollback cursor
+--- 则删除 mouse cursor,，也表明历史断了，所以重置历史
+--- @param cursor vim.api.keyset.get_extmark_item
 local function reset_path(cursor)
   pcall(vim.api.nvim_buf_del_extmark, 0, mc, cursor[1])
   path = {}
@@ -48,18 +50,23 @@ local function advance_path(mousepos)
 end
 
 --- rollback path
---- 当前位置的光标是我们最后一个光标的前一个：rollback action
+--- mouse 位置光标是 head 的前一个
 local function rollback_path(mousepos)
   pcall(vim.api.nvim_buf_del_extmark, 0, mc, path[#path])
   table.remove(path, #path)
+  --- rollback cursor 需要成为最新 head，
+  --- 这里选择删除它(即使它本来就存在)，
+  --- 后续 advance_path 会再次创建它，并成为最新 head
   table.remove(path, #path)
   advance_path(mousepos)
 end
 
+--- @param cursor vim.api.keyset.get_extmark_item|nil
 local function should_reset_path(cursor)
   return cursor and cursor[1] ~= path[#path - 1]
 end
 
+--- @param cursor vim.api.keyset.get_extmark_item|nil
 local function should_rollback_path(cursor)
   return cursor and cursor[1] == path[#path - 1]
 end
@@ -90,7 +97,7 @@ return {
       end
       local cursor = get_mouse_cursor(mousepos)
       if should_reset_path(cursor) then
-        reset_path(cursor)
+        reset_path(cursor --[[@as vim.api.keyset.get_extmark_item]])
         return
       end
       if should_rollback_path(cursor) then
