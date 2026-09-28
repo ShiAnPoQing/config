@@ -43,13 +43,13 @@ local function enable_wrap(operator, opts, opts2)
         local wrap = wraps[op]
         if not primary then
           primary = {}
-          my.util.try(wrap.primary.enter)
+          primary.context = my.util.try(wrap.primary.enter)
           return
         end
 
         if not secondary and my.multicursor.active() then
           secondary = {}
-          my.util.try(wrap.secondary.enter)
+          secondary.context = my.util.try(wrap.secondary.enter)
         end
       end
     end,

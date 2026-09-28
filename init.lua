@@ -16,7 +16,7 @@ my._submodules = {
   multicursor = true,
   insert = true,
   operator = true,
-  util = true
+  util = true,
 }
 setmetatable(my, {
   __index = function(t, key)
@@ -51,6 +51,32 @@ my.operator.wrap("gu", wrap_opts, wrap_opts2)
 my.operator.wrap("gU", wrap_opts, wrap_opts2)
 my.operator.wrap("g~", wrap_opts, wrap_opts2)
 my.operator.wrap("y", wrap_opts, wrap_opts2)
+
+do
+  --- Visual cancel Cursor back
+  local in_visual_mode
+  local cursor
+  vim.api.nvim_create_autocmd("ModeChanged", {
+    callback = function(ev)
+      local from, to = unpack(vim.split(ev.match, ":"))
+      if not in_visual_mode then
+        if vim.list_contains({ "V", "v", "" }, to) and from == "n" then
+          in_visual_mode = true
+          cursor = vim.api.nvim_win_get_cursor(0)
+        end
+      else
+        if ev.match == "v:V" or ev.match == "V:v" then
+          return
+        end
+        in_visual_mode = nil
+        if vim.list_contains({ "V", "v", "" }, from) and to == "n" then
+          vim.api.nvim_win_set_cursor(0, cursor)
+          cursor = nil
+        end
+      end
+    end,
+  })
+end
 
 vim.pack.add({ { src = "https://github.com/BrokenSunny/native-packer", version = "branch" } })
 require("command")
@@ -159,7 +185,7 @@ require("native-packer").add({
 -- -- end, { buf = buf })
 -- -- vim.keymap.set("n", "<M-k>", function()
 -- --   M.move(win, -1, 0)
--- -- end, { buf = buf })
+-- end, { buf = buf })
 -- -- vim.keymap.set("n", "<M-j>", function()
 -- --   M.move(win, 1, 0)
 -- -- end, { buf = buf })

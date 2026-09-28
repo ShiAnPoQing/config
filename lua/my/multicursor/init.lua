@@ -1,16 +1,33 @@
 --- @class my.multicursor
 --- @field mouse my.multicursor.mouse
 --- @field register my.multicursor.register
-local M = vim._defer_require("my.multicursor", {
-  mouse = ..., --- @module 'my.multicursor.mouse'
-  register = ..., --- @module 'my.multicursor.register'
-})
+--- @field ns integer
+--- @field cursor my.multicursor.cursor
+--- @field visual my.multicursor.visual
+local M = {
+  _submodules = {
+    mouse = true,
+    register = true,
+    cursor = true,
+    visual = true,
+  },
+}
 
-local mc = vim.api.nvim_create_namespace("nvim.multicursor")
+setmetatable(M, {
+  --- @param t table<any,any>
+  __index = function(t, key)
+    if M._submodules[key] then
+      t[key] = require("my.multicursor." .. key)
+      return t[key]
+    elseif key == "ns" then
+      return vim.api.nvim_create_namespace("nvim.multicursor")
+    end
+  end,
+})
 
 --- @return boolean
 function M.active()
-  return #vim.api.nvim_buf_get_extmarks(0, mc, 0, -1, { limit = 1 }) > 0
+  return #vim.api.nvim_buf_get_extmarks(0, M.ns, 0, -1, { limit = 1 }) > 0
 end
 
 --- @param buf number
@@ -22,14 +39,14 @@ end
 
 --- @param buf integer
 function M.clear(buf)
-  vim.api.nvim_buf_clear_namespace(buf, mc, 0, -1)
+  vim.api.nvim_buf_clear_namespace(buf, M.ns, 0, -1)
 end
 
 --- @param buf integer
 --- @param id integer
 --- @return boolean
 function M.remove(buf, id)
-  return vim.api.nvim_buf_del_extmark(buf, mc, id)
+  return vim.api.nvim_buf_del_extmark(buf, M.ns, id)
 end
 
 --- @param buf integer
@@ -48,7 +65,7 @@ end
 --- @return vim.api.keyset.get_extmark_item[]
 function M.get(buf, start, end_, opts)
   opts = opts or {}
-  return vim.api.nvim_buf_get_extmarks(buf, mc, start, end_, opts)
+  return vim.api.nvim_buf_get_extmarks(buf, M.ns, start, end_, opts)
 end
 
 local snapshots = {}

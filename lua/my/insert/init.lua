@@ -107,8 +107,7 @@ end
 
 function M.visual_line_first()
   local count = vim.v.count1
-  local mc = vim.api.nvim_create_namespace("nvim.multicursor")
-  local extmarks = vim.api.nvim_buf_get_extmarks(0, mc, 0, -1, { limit = 1 })
+  local extmarks = my.multicursor.get(0, 0, -1, { limit = 1 })
   if #extmarks == 0 then
     vim.cmd("normal! " .. VISUAL_LINE)
     local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
@@ -129,7 +128,7 @@ function M.visual_line_first()
     callback = function()
       atom_count = atom_count + 1
       if atom_count == atom_total then
-        vim.api.nvim_buf_clear_namespace(0, mc, 0, -1)
+        my.multicursor.clear(0)
         return true
       end
     end,
@@ -138,8 +137,7 @@ end
 
 function M.visual_line_last()
   local count = vim.v.count1
-  local mc = vim.api.nvim_create_namespace("nvim.multicursor")
-  local extmarks = vim.api.nvim_buf_get_extmarks(0, mc, 0, -1, { limit = 1 })
+  local extmarks = my.multicursor.get(0, 0, -1, { limit = 1 })
   if #extmarks == 0 then
     vim.cmd("normal! " .. VISUAL_LINE)
     local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
@@ -161,7 +159,7 @@ function M.visual_line_last()
     callback = function()
       atom_count = atom_count + 1
       if atom_count == atom_total then
-        vim.api.nvim_buf_clear_namespace(0, mc, 0, -1)
+        my.multicursor.clear(0)
         return true
       end
     end,
@@ -170,8 +168,7 @@ end
 
 function M.visual_line_first_non_blank()
   local count = vim.v.count1
-  local mc = vim.api.nvim_create_namespace("nvim.multicursor")
-  local extmarks = vim.api.nvim_buf_get_extmarks(0, mc, 0, -1, { limit = 1 })
+  local extmarks = my.multicursor.get(0, 0, -1, { limit = 1 })
   if #extmarks == 0 then
     vim.cmd("normal! " .. VISUAL_LINE)
     local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
@@ -192,7 +189,7 @@ function M.visual_line_first_non_blank()
   vim.api.nvim_create_autocmd("CmdAtom", {
     callback = function(ev)
       if ev.data.type == "insert" then
-        vim.api.nvim_buf_clear_namespace(0, mc, 0, -1)
+        my.multicursor.clear(0)
         return true
       end
     end,
@@ -201,8 +198,7 @@ end
 
 function M.visual_line_last_non_blank()
   local count = vim.v.count1
-  local mc = vim.api.nvim_create_namespace("nvim.multicursor")
-  local extmarks = vim.api.nvim_buf_get_extmarks(0, mc, 0, -1, { limit = 1 })
+  local extmarks = my.multicursor.get(0, 0, -1, { limit = 1 })
   if #extmarks == 0 then
     vim.cmd("normal! " .. VISUAL_LINE)
     local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
@@ -223,7 +219,7 @@ function M.visual_line_last_non_blank()
   vim.api.nvim_create_autocmd("CmdAtom", {
     callback = function(ev)
       if ev.data.type == "insert" then
-        vim.api.nvim_buf_clear_namespace(0, mc, 0, -1)
+        my.multicursor.clear(0)
         return true
       end
     end,
@@ -232,8 +228,7 @@ end
 
 function M.visual_block_first()
   local count = vim.v.count1
-  local mc = vim.api.nvim_create_namespace("nvim.multicursor")
-  local extmarks = vim.api.nvim_buf_get_extmarks(0, mc, 0, -1, { limit = 1 })
+  local extmarks = my.multicursor.get(0, 0, -1, { limit = 1 })
   if #extmarks == 0 then
     vim.cmd("normal! " .. VISUAL_BLOCK)
     local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
@@ -251,7 +246,7 @@ function M.visual_block_first()
   vim.api.nvim_create_autocmd("CmdAtom", {
     callback = function(ev)
       if ev.data.type == "insert" then
-        vim.api.nvim_buf_clear_namespace(0, mc, 0, -1)
+        my.multicursor.clear(0)
         return true
       end
     end,
@@ -260,8 +255,7 @@ end
 
 function M.visual_block_last()
   local count = vim.v.count1
-  local mc = vim.api.nvim_create_namespace("nvim.multicursor")
-  local extmarks = vim.api.nvim_buf_get_extmarks(0, mc, 0, -1, { limit = 1 })
+  local extmarks = my.multicursor.get(0, 0, -1, { limit = 1 })
   if #extmarks == 0 then
     vim.cmd("normal! " .. VISUAL_BLOCK)
     local start_row = unpack(vim.api.nvim_buf_get_mark(0, "<"))
@@ -276,10 +270,10 @@ function M.visual_block_last()
     vim.api.nvim_feedkeys(count .. "a", "nt", false)
     vim.api.nvim_create_autocmd("CmdAtom", {
       callback = function(ev)
-      if ev.data.type == "insert" then
-        vim.api.nvim_buf_clear_namespace(0, mc, 0, -1)
-        return true
-      end
+        if ev.data.type == "insert" then
+          my.multicursor.clear(0)
+          return true
+        end
       end,
     })
   end
