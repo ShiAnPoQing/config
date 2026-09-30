@@ -122,12 +122,9 @@ function M.visual_line_first()
   end
 
   vim.api.nvim_feedkeys(count .. "i", "nt", false)
-  local atom_total = 2
-  local atom_count = 0
   vim.api.nvim_create_autocmd("CmdAtom", {
-    callback = function()
-      atom_count = atom_count + 1
-      if atom_count == atom_total then
+    callback = function(ev)
+      if ev.data.type == "insert" then
         my.multicursor.clear(0)
         return true
       end
