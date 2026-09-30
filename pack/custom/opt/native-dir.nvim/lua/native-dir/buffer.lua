@@ -37,8 +37,7 @@ function M:init()
   local buf = self.buf
   local dir = vim.api.nvim_buf_get_name(buf)
   local win = vim.api.nvim_get_current_win()
-  local a = vim.fn.fnamemodify(dir, ":~")
-  vim.wo[win][0].winbar = "%#Directory#" .. a .. ""
+  vim.wo[win][0].winbar = "%#Directory#" .. vim.fn.fnamemodify(dir, ":~") .. ""
   vim.keymap.set("n", ".", function()
     local had_filter
     local removes = {}
@@ -58,9 +57,17 @@ function M:init()
     Dir.reload()
   end, { buf = buf })
 
-  vim.keymap.set("n", "m", function()
+  vim.keymap.set("n", "c", function()
+    local name = vim.api.nvim_get_current_line()
+    local path = vim.fs.joinpath(dir, (name:gsub("/$", "")))
+    local prompt = "Create: "
+    local default
+    if vim.fn.isdirectory(path) == 1 then
+      default = name
+    end
     vim.ui.input({
-      prompt = "Create New File/Folder: " .. dir,
+      prompt = prompt .. vim.fn.fnamemodify(dir, ":~"),
+      default = default,
     }, function(input)
       if not input or input == "" then
         return

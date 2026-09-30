@@ -14,190 +14,34 @@
 -- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
 ---------------------------------------------------------------------------------------------------+
 
-local o_mode_space_i = function()
-  vim.api.nvim_feedkeys("vgeloh", "nx", false)
-end
+-- /\%(\%(\k\)\@!.\)\+
 
-local o_mode_space_I = function()
-  vim.api.nvim_feedkeys("vgEloh", "nx", false)
-end
+-- ["ao"] = {
+--   function()
+--     vim.api.nvim_feedkeys(vim.fn["repeat"]("eQ", vim.v.count1 - 1) .. "e", "n", false)
+--   end,
+--   "n",
+-- },
 
 return {
-  ["i"] = {
-    {
-      function()
-        local function callback()
-          vim.api.nvim_feedkeys(vim.v.count1 .. "b", "n", false)
-          require("repeat").set_motion(callback)
-        end
-        callback()
-      end,
-      { "n", "x" },
-    },
-    {
-      "b",
-      "o",
-    },
-    desc = "Backward to the start of word[count]",
-  },
-  ["ao"] = {
-    function()
-      vim.api.nvim_feedkeys(vim.fn["repeat"]("eQ", vim.v.count1 - 1) .. "e", "n", false)
-    end,
-    "n",
-  },
-  ["o"] = {
-    {
-      function()
-        local function callback()
-          vim.api.nvim_feedkeys(vim.v.count1 .. "e", "n", false)
-          require("repeat").set_motion(callback)
-        end
-        callback()
-      end,
-      { "n", "x" },
-    },
-    {
-      "e",
-      "o",
-    },
-    desc = "Forword to the end of the word[count]",
-  },
-  ["I"] = {
-    {
-      function()
-        local function callback()
-          vim.api.nvim_feedkeys(vim.v.count1 .. "B", "n", false)
-          require("repeat").set_motion(callback)
-        end
-        callback()
-      end,
-      { "n", "x" },
-    },
-    {
-      "B",
-      "o",
-    },
-    desc = "Backward to the start of WORD[count]",
-  },
-  ["O"] = {
-    {
-      function()
-        local function callback()
-          vim.api.nvim_feedkeys("E", "n", false)
-          require("repeat").set_motion(callback)
-        end
-        callback()
-      end,
-      { "n", "x" },
-    },
-    {
-      "E",
-      "o",
-    },
-    desc = "Forword to the end of the WORD[count]",
-  },
-  ["<space>i"] = {
-    {
-      function()
-        local function callback()
-          vim.api.nvim_feedkeys(vim.v.count1 .. "ge", "n", false)
-          require("repeat").set_motion(callback)
-        end
-        callback()
-      end,
-      "n",
-    },
-    { "hgel", "x", desc = "Backward to the end of word[count](left exclusion)" },
-    { o_mode_space_i, "o", desc = "Backward to the end of word[count](left exclusion)" },
-    desc = "Backward to the end of word[count]",
-  },
-  ["<space>o"] = {
-    {
-      function()
-        local function callback()
-          vim.api.nvim_feedkeys(vim.v.count1 .. "w", "n", false)
-          require("repeat").set_motion(callback)
-        end
-        callback()
-      end,
-      "n",
-    },
-    {
-      "w",
-      "o",
-    },
-    { "lwh", "x", desc = "Forword to the start of the word[count](right exclusion)" },
-    desc = "Forword to the start of the word[count]",
-  },
-  ["<S-space>I"] = {
-    {
-      function()
-        local function callback()
-          vim.api.nvim_feedkeys(vim.v.count1 .. "gE", "n", false)
-          require("repeat").set_motion(callback)
-        end
-        callback()
-      end,
-      "n",
-    },
-    { "hgEl", "x", desc = "Backward to the end of WORD[count](left exclusion)" },
-    { o_mode_space_I, "o", desc = "Backward to the end of WORD[count](left exclusion)" },
-    desc = "Backward to the end of WORD[count]",
-  },
-  ["<space>I"] = {
-    {
-      function()
-        local function callback()
-          vim.api.nvim_feedkeys(vim.v.count1 .. "gE", "n", false)
-          require("repeat").set_motion(callback)
-        end
-        callback()
-      end,
-      "n",
-    },
-    { "hgEl", "x", desc = "Backward to the end of WORD[count](left exclusion)" },
-    { o_mode_space_I, "o", desc = "Backward to the end of WORD[count](left exclusion)" },
-    desc = "Backward to the end of WORD[count]",
-  },
-  ["<S-space>O"] = {
-    {
-      function()
-        local function callback()
-          vim.api.nvim_feedkeys(vim.v.count1 .. "W", "n", false)
-          require("repeat").set_motion(callback)
-        end
-        callback()
-      end,
-      "n",
-    },
-    {
-      "W",
-      "o",
-      desc = "Forword to the start of the WORD[count](right exclusion)",
-    },
-    { "lWh", "x", desc = "Forword to the start of the WORD[count](right exclusion)" },
-    desc = "Forword to the start of the WORD[count]",
-  },
-  ["<space>O"] = {
-    {
-      function()
-        local function callback()
-          vim.api.nvim_feedkeys(vim.v.count1 .. "W", "n", false)
-          require("repeat").set_motion(callback)
-        end
-        callback()
-      end,
-      "n",
-    },
-    {
-      "W",
-      "o",
-      desc = "Forword to the start of the WORD[count](right exclusion)",
-    },
-    { "lWh", "x", desc = "Forword to the start of the WORD[count](right exclusion)" },
-    desc = "Forword to the start of the WORD[count]",
-  },
+  ["i"] = { "<cmd>lua my.motion.backward_word_start()<cr>", { "n", "x", "o" }, desc = "[count] backward word start" },
+  ["o"] = { "<cmd>lua my.motion.forward_word_end()<cr>", { "n", "x", "o" }, desc = "[count] forward word end" },
+  ["I"] = { "<cmd>lua my.motion.backward_WORD_start()<cr>", { "n", "x", "o" }, desc = "[count] backward WORD start" },
+  ["O"] = { "<cmd>lua my.motion.forward_WORD_end()<cr>", { "n", "x", "o" }, desc = "[count] forward WORD end" },
+  ["<space>i"] = { "<cmd>lua my.motion.backward_word_end()<cr>", { "n", "x", "o" }, desc = "[count] backward word end" },
+  --- stylua: ignore
+  ["<space>I"] = { "<cmd>lua my.motion.backward_WORD_end()<cr>", { "n", "x", "o" }, desc = "[count] backward WORD end" },
+  -- stylua: ignore
+  ["<S-space>I"] = { "<cmd>lua my.motion.backward_WORD_end()<cr>", { "n", "x", "o" }, desc = "[count] backward WORD end" },
+  -- stylua: ignore
+  ["<space>o"] = { "<cmd>lua my.motion.forward_word_start()<cr>", { "n", "x", "o" }, desc = "[count] forward word start", },
+  -- stylua: ignore
+  ["<space>O"] = { "<cmd>lua my.motion.forward_WORD_start()<cr>", { "n", "x", "o" }, desc = "[count] forward WORD start", },
+  -- stylua: ignore
+  ["<S-space>O"] = { "<cmd>lua my.motion.forward_WORD_start()<cr>", { "n", "x", "o" }, desc = "[count] forward WORD start", },
+  -- { "lWh", "x", desc = "Forword to the start of the WORD[count](right exclusion)" },
+  -- { "lwh", "x", desc = "Forword to the start of the word[count](right exclusion)" },
+
   ["<M-i>"] = {
     { "bi", "n", desc = "Backward to the start of word[count] and start insert mode" },
     { "<S-left>", "i" },

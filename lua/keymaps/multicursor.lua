@@ -13,7 +13,6 @@
 -- tmap / tnoremap  |    -   |   -    |    -    |   -    |   -    |    -     |    @     |    -     |
 -- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
 ---------------------------------------------------------------------------------------------------+
-local mc = vim.api.nvim_create_namespace("nvim.multicursor")
 
 return {
   --- multi-cursor yank
@@ -91,11 +90,11 @@ return {
       if vim.v.operator == "d" then
         local count = vim.v.count1
         local cursor = vim.api.nvim_win_get_cursor(0)
-        local marks = vim.api.nvim_buf_get_extmarks(0, mc, { cursor[1] - 1, cursor[2] }, -1)
+        local marks = my.multicursor.get(0, { cursor[1] - 1, cursor[2] }, -1)
         for i = 1, math.min(count, #marks) do
           local mark = marks[i]
           if mark then
-            vim.api.nvim_buf_del_extmark(0, mc, mark[1])
+            my.multicursor.del(0, mark[1])
           end
         end
         return "<esc>"

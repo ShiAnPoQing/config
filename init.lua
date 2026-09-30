@@ -5,7 +5,16 @@
 --- @field multicursor my.multicursor
 --- @field insert my.insert
 --- @field operator my.operator
+--- @field motion my.motion
+--- @field cursor my.cursor
 --- @field util my.util
+--- @field g my.g
+--- @field b my.b
+
+--- @class my.g: { [string]: any }
+--- @class my.b: vim.var_accessor
+--- @class my.w: vim.var_accessor
+--- @class my.t: vim.var_accessor
 
 --- @type my
 _G.my = _G.my or {}
@@ -14,10 +23,59 @@ my._submodules = {
   keymap = true,
   window = true,
   multicursor = true,
+  cursor = true,
   insert = true,
   operator = true,
+  motion = true,
   util = true,
 }
+
+do
+  --- @param scope string
+  --- @param handle? false|integer
+  --- @return vim.var_accessor
+  local function make_dict_accessor(scope, handle)
+    vim.validate("scope", scope, "string")
+    local mt = {}
+    --- @param k string
+    --- @param v any
+    function mt.__newindex(_, k, v)
+      if handle then
+        local vars = vim[scope][handle].my or {}
+        vars[k] = v
+        vim[scope][handle].my = vars
+      else
+        local vars = vim[scope].my or {}
+        vars[k] = v
+        vim[scope].my = vars
+      end
+    end
+    --- @param k string|integer
+    function mt.__index(_, k)
+      if handle == nil and type(k) == "number" then
+        return make_dict_accessor(scope, k)
+      end
+      if handle then
+        if vim[scope][handle].my == nil then
+          return nil
+        end
+        return vim[scope][handle].my[k]
+      else
+        if vim[scope].my == nil then
+          return nil
+        end
+        return vim[scope].my[k]
+      end
+    end
+    return setmetatable({}, mt)
+  end
+
+  my.g = make_dict_accessor("g", false)
+  my.b = make_dict_accessor("b")
+  my.w = make_dict_accessor("w")
+  my.t = make_dict_accessor("t")
+end
+
 setmetatable(my, {
   __index = function(t, key)
     if my._submodules[key] then
@@ -28,33 +86,37 @@ setmetatable(my, {
 })
 my.window.float.drag.enable()
 
-local wrap_opts = {
-  enter = function()
-    return { cursor = vim.api.nvim_win_get_cursor(0) }
-  end,
-  done = function(ctx)
-    vim.api.nvim_win_set_cursor(0, ctx.cursor)
-  end,
-}
-local wrap_opts2 = {
-  enter = function()
-    return { cursors = my.multicursor.get(0, 0, -1) }
-  end,
-  done = function(ctx)
-    for _, c in ipairs(ctx.cursors) do
-      vim.api.nvim_buf_set_extmark(0, vim.api.nvim_create_namespace("nvim.multicursor"), c[2], c[3], { id = c[1] })
-    end
-  end,
-}
+do
+  local wrap_opts = {
+    enter = function()
+      return { cursor = vim.api.nvim_win_get_cursor(0) }
+    end,
+    done = function(ctx)
+      vim.api.nvim_win_set_cursor(0, ctx.cursor)
+    end,
+  }
 
-my.operator.wrap("gu", wrap_opts, wrap_opts2)
-my.operator.wrap("gU", wrap_opts, wrap_opts2)
-my.operator.wrap("g~", wrap_opts, wrap_opts2)
-my.operator.wrap("y", wrap_opts, wrap_opts2)
+  local wrap_opts2 = {
+    enter = function()
+      return { cursors = my.multicursor.get(0, 0, -1) }
+    end,
+    done = function(ctx)
+      for _, c in ipairs(ctx.cursors) do
+        vim.api.nvim_buf_set_extmark(0, my.multicursor.ns, c[2], c[3], { id = c[1] })
+      end
+    end,
+  }
+
+  my.operator.wrap("gu", wrap_opts, wrap_opts2)
+  my.operator.wrap("gU", wrap_opts, wrap_opts2)
+  my.operator.wrap("g~", wrap_opts, wrap_opts2)
+  my.operator.wrap("y", wrap_opts, wrap_opts2)
+end
 
 do
   --- Visual cancel Cursor back
   local in_visual_mode
+  local changed_tick
   local cursor
   vim.api.nvim_create_autocmd("ModeChanged", {
     callback = function(ev)
@@ -62,17 +124,23 @@ do
       if not in_visual_mode then
         if vim.list_contains({ "V", "v", "" }, to) and from == "n" then
           in_visual_mode = true
+          changed_tick = vim.api.nvim_buf_get_changedtick(0)
           cursor = vim.api.nvim_win_get_cursor(0)
         end
       else
         if ev.match == "v:V" or ev.match == "V:v" then
           return
         end
-        in_visual_mode = nil
-        if vim.list_contains({ "V", "v", "" }, from) and to == "n" then
-          vim.api.nvim_win_set_cursor(0, cursor)
-          cursor = nil
+        if
+          vim.list_contains({ "V", "v", "" }, from)
+          and to == "n"
+          and changed_tick == vim.api.nvim_buf_get_changedtick(0)
+        then
+          pcall(vim.api.nvim_win_set_cursor, 0, cursor)
         end
+        cursor = nil
+        in_visual_mode = nil
+        changed_tick = nil
       end
     end,
   })
@@ -163,29 +231,3 @@ require("native-packer").add({
   -- require("plugins.local.neo-winbar"),
   -- require("plugins.local.test.eye-track"),
 })
-
--- local width = 4
--- local height = 2
--- local buf = vim.api.nvim_create_buf(false, true)
--- local win = vim.api.nvim_open_win(buf, true, {
---   relative = "editor",
---   width = width,
---   height = height,
---   row = 0,
---   col = 0,
---   style = "minimal",
---   border = "single",
--- })
--- --
--- -- vim.keymap.set("n", "<M-l>", function()
--- --   M.move(win, 0, 1)
--- -- end, { buf = buf })
--- -- vim.keymap.set("n", "<M-h>", function()
--- --   M.move(win, 0, -1)
--- -- end, { buf = buf })
--- -- vim.keymap.set("n", "<M-k>", function()
--- --   M.move(win, -1, 0)
--- end, { buf = buf })
--- -- vim.keymap.set("n", "<M-j>", function()
--- --   M.move(win, 1, 0)
--- -- end, { buf = buf })

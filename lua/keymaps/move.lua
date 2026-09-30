@@ -26,6 +26,9 @@ local c_mode_middle = function()
   require("builtin.cmdline").middle()
 end
 
+--- Don't use 'expr=true'
+--- because if user press count, the final count will be spliced with 3.
+--- like: user press '3H', the final count will be '33H'
 local H = function()
   vim.api.nvim_feedkeys(vim.v.count1 * 3 .. "h", "n", false)
 end
@@ -43,14 +46,10 @@ local K = function()
 end
 
 return {
-  ["j"] = { j, { "n", "x", "o" }, expr = true },
-  ["k"] = { k, { "n", "x", "o" }, expr = true },
-  ["<down>"] = { j, { "n", "x", "o" }, expr = true },
-  ["<up>"] = { k, { "n", "x", "o" }, expr = true },
-  -- ["gj"] = { gj, { "n", "x", "o" }, expr = true },
-  -- ["gk"] = { gk, { "n", "x", "o" }, expr = true },
-  -- ["gl"] = { gl, { "n", "x", "o" }, expr = true },
-  -- ["gh"] = { gh, { "n", "x", "o" }, expr = true },
+  ["j"] = { j, { "n", "x", "o" }, expr = true, desc = "Move down [count] lines" },
+  ["k"] = { k, { "n", "x", "o" }, expr = true, desc = "Move up [count] lines" },
+  ["<down>"] = { j, { "n", "x", "o" }, expr = true, desc = "Move down [count] lines" },
+  ["<up>"] = { k, { "n", "x", "o" }, expr = true, desc = "Move up [count] lines" },
   ["[k"] = { "-", { "n", "x", "o" }, desc = "[count] lines upward, on the first non-blank character [linewise]" },
   ["]k"] = { "kg_", { "n", "x", "o" }, desc = "[count] lines upward, on the last non-blank character [linewise]" },
   ["[j"] = { "+", { "n", "x", "o" }, desc = "[count] lines downward, on the first non-blank character [linewise]" },
@@ -91,18 +90,38 @@ return {
       "n",
     },
     { "^", "x" },
-    --- contains the character under the cursor
-    { "v^", "o" },
+    {
+      "^",
+      -- function()
+      --   if my.cursor.is_word_end() then
+      --     return "v^"
+      --   end
+      --   return "^"
+      -- end,
+      "o",
+      -- expr = true,
+    },
     desc = "Move to the first non-blank character of the line",
   },
   ["<space>l"] = {
     {
       function()
-        require("builtin.start-end-move").last_non_blank_character()
+        my.motion.line_last_non_blank()
       end,
       "n",
     },
-    { "g_", { "x", "o" } },
+    { "g_", "x" },
+    {
+      "g_",
+      -- function()
+      --   if my.cursor.is_word_end() then
+      --     return "<cmd>normal! lvg_<cr>"
+      --   end
+      --   return "g_"
+      -- end,
+      "o",
+      -- expr = true,
+    },
     desc = "Move to the last non-blank character of the line",
   },
   ["<space><M-h>"] = { "I", "n" },
@@ -110,16 +129,15 @@ return {
   ["<M-space><M-h>"] = {
     {
       function()
-        vim.cmd.stopinsert()
-        vim.schedule(function()
-          local cursor1 = vim.api.nvim_win_get_cursor(0)
-          vim.api.nvim_feedkeys("^", "nx", false)
-          local cursor2 = vim.api.nvim_win_get_cursor(0)
-          if cursor1[2] + 1 == cursor2[2] then
-            vim.api.nvim_feedkeys("0", "nx", false)
-          end
-          vim.api.nvim_feedkeys("i", "n", false)
-        end)
+        -- vim.keymap.set("n", "<F1000>", function()
+        --   --- like native: insert mode motion auto follow
+        --   vim.bo.follow = true
+        --   my.motion.line_last_non_blank()
+        --   vim.bo.follow = false
+        -- end)
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<F1000>", true, false, true), "mt", false)
+        vim.api.nvim_feedkeys("i", "nt", false)
       end,
       "i",
     },
@@ -136,16 +154,26 @@ return {
   ["<M-space><M-l>"] = {
     {
       function()
-        vim.cmd.stopinsert()
-        vim.schedule(function()
-          local cursor1 = vim.api.nvim_win_get_cursor(0)
-          vim.api.nvim_feedkeys("g_", "nx", false)
-          local cursor2 = vim.api.nvim_win_get_cursor(0)
-          if cursor1[2] == cursor2[2] then
-            vim.api.nvim_feedkeys("$", "nx", false)
-          end
-          vim.api.nvim_feedkeys("a", "n", false)
+        --- 创建临时 keymap 使其进入 feedkeys 流: <esc><F1000>a,
+        --- CmdAtom 删除临时 keymap
+        vim.keymap.set("n", "<F1000>", function()
+          --- like native: insert mode motion auto follow
+          vim.bo.follow = true
+          my.motion.line_last_non_blank()
+          vim.bo.follow = false
         end)
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<F1000>", true, false, true), "mt", false)
+        vim.api.nvim_feedkeys("a", "nt", false)
+
+        vim.api.nvim_create_autocmd("CmdAtom", {
+          callback = function(ev)
+            if ev.data.lhs == "<F1000>" then
+              vim.keymap.del("n", "<F1000>")
+              return true
+            end
+          end,
+        })
       end,
       "i",
     },
@@ -166,8 +194,17 @@ return {
       "n",
     },
     { "0", "x" },
-    --- contains the character under the cursor
-    { "v0", "o" },
+    {
+      "0",
+      -- function()
+      --   if my.cursor.is_word_end() then
+      --     return "v0"
+      --   end
+      --   return "0"
+      -- end,
+      "o",
+      -- expr = true,
+    },
     desc = "Move to the first character of the line",
   },
   ["<space>H"] = {
@@ -195,14 +232,19 @@ return {
     desc = "Move to the first character of the line",
   },
   ["<space><space>l"] = {
-    {
-      function()
-        require("builtin.start-end-move").last_character()
-      end,
-      "n",
-    },
+    { "<End>", "n" },
     { "$h", "x" },
-    { "$", "o" },
+    {
+      "$",
+      -- function()
+      --   if my.cursor.is_word_end() then
+      --     return "<cmd>normal! lv$h<cr>"
+      --   end
+      --   return "$"
+      -- end,
+      "o",
+      -- expr = true,
+    },
     desc = "Move to the last character of the line",
   },
   ["<M-space><M-space><M-l>"] = { "<End>", { "i", "c", "s", "t" } },
@@ -352,3 +394,32 @@ return {
     expr = true,
   },
 }
+
+-- vim.keymap.set("n", "<F1000>", function()
+--   vim.bo.follow = true
+--   local cursor = vim.api.nvim_win_get_cursor(0)
+--   local line = vim.api.nvim_get_current_line()
+--   local s = line:reverse():find("%S") or 0
+--   local col = #line - s
+--   if cursor[2] + 1 == #line:sub(1, col + 1) then
+--     vim.api.nvim_win_set_cursor(0, { cursor[1], #line })
+--   else
+--     vim.api.nvim_win_set_cursor(0, { cursor[1], col })
+--   end
+--   vim.bo.follow = false
+-- end)
+--
+-- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+-- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<F1000>", true, false, true), "mt", false)
+-- vim.api.nvim_feedkeys("a", "nt", false)
+--
+-- vim.cmd.stopinsert()
+-- vim.schedule(function()
+--   local cursor1 = vim.api.nvim_win_get_cursor(0)
+--   vim.api.nvim_feedkeys("g_", "nx", false)
+--   local cursor2 = vim.api.nvim_win_get_cursor(0)
+--   if cursor1[2] == cursor2[2] then
+--     vim.api.nvim_feedkeys("$", "nx", false)
+--   end
+--   vim.api.nvim_feedkeys("a", "n", false)
+-- end)

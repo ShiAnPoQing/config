@@ -7,7 +7,6 @@ function M.init()
   local ns = vim.api.nvim_create_namespace("native-dir")
   local buffers = {}
 
-  -- vim.fs.no
   vim.api.nvim_create_autocmd("User", {
     pattern = "DirReadPost",
     callback = function(args)
@@ -84,6 +83,7 @@ function M.init()
           virt_text_pos = "inline",
         })
       end
+      ---@diagnostic disable-next-line: return-type-mismatch
       return end_row
     end,
   })

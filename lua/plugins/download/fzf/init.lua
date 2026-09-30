@@ -1,8 +1,57 @@
 return {
   "ibhagwan/fzf-lua",
   depend = { "nvim-tree/nvim-web-devicons" },
-  cmd = { "FzfLua", "FzfDir", "FzfFt", "FzfPlugin" },
+  cmd = { "FzfLua", "FzfDir", "FzfFt", "FzfPlugin", "FzfMultiCursor" },
   before = function()
+    vim.api.nvim_create_user_command("FzfMultiCursor", function()
+      local fzf_lua = require("fzf-lua")
+      local builtin = require("fzf-lua.previewer.builtin")
+
+      -- Inherit from the "buffer_or_file" previewer
+      local MyPreviewer = builtin.buffer_or_file:extend()
+
+      function MyPreviewer:new(o, opts, fzf_win)
+        MyPreviewer.super.new(self, o, opts, fzf_win)
+        setmetatable(self, MyPreviewer)
+        return self
+      end
+
+      function MyPreviewer:parse_entry(entry_str)
+        -- Assume an arbitrary entry in the format of 'file:line'
+        local path, line = entry_str:match("([^:]+):?(.*)")
+        return {
+          path = path,
+          line = tonumber(line) or 1,
+          col = 5,
+        }
+      end
+      local opts = {
+        winopts = {
+          title = "MultiCursor",
+          fullscreen = false,
+          row = 1,
+          col = 0.50,
+          width = 1,
+          height = 0.5,
+          -- backdrop = 100,
+          preview = {
+            border = "none",
+            layout = "vertical",
+            vertical = "down:50%",
+          },
+        },
+        previewer = "builtin",
+      }
+      local lines = {}
+      local buf_name = vim.api.nvim_buf_get_name(0)
+      for _, mark in ipairs(my.multicursor.get(0, 0, -1)) do
+        table.insert(lines, buf_name .. ":" .. mark[2])
+      end
+      fzf_lua.fzf_exec(lines, opts)
+    end, {
+      nargs = 0,
+    })
+
     vim.api.nvim_create_user_command("FzfDir", function(ev)
       local fzf_lua = require("fzf-lua")
       local root = ev.args == "" and "." or ev.args

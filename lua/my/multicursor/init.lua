@@ -38,14 +38,22 @@ function M.add(buf, pos)
 end
 
 --- @param buf integer
-function M.clear(buf)
-  vim.api.nvim_buf_clear_namespace(buf, M.ns, 0, -1)
+--- @param line_start integer?
+--- @param line_end integer?
+function M.clear(buf, line_start, line_end)
+  if not line_start then
+    line_start = 0
+  end
+  if not line_end then
+    line_end = -1
+  end
+  vim.api.nvim_buf_clear_namespace(buf, M.ns, line_start, line_end)
 end
 
 --- @param buf integer
 --- @param id integer
 --- @return boolean
-function M.remove(buf, id)
+function M.del(buf, id)
   return vim.api.nvim_buf_del_extmark(buf, M.ns, id)
 end
 
