@@ -16,14 +16,42 @@
 
 -- /\%(\%(\k\)\@!.\)\+
 
--- ["ao"] = {
---   function()
---     vim.api.nvim_feedkeys(vim.fn["repeat"]("eQ", vim.v.count1 - 1) .. "e", "n", false)
---   end,
---   "n",
--- },
+local zq_maps = {
+  ["i"] = { "o", "w" },
+  ["o"] = { "o", "e" },
+}
 
 return {
+  -- :h zq
+  -- Not supported:
+  -- - Text objects
+  -- - Lua, |<Cmd>| or ":" mappings (except |:map-<expr>|).
+  -- Issue:
+  --    If some o mode motion keymap is not expr=true, zq{motion} will be failed
+  -- Solution:
+  --    remap `zq`: when typed zq, reset o mode motion keymap as expr=true
+  ["zq"] = {
+    function()
+      local maps = {}
+      for key, map in pairs(zq_maps) do
+        table.insert(maps, vim.fn.maparg(key, "o", false, true))
+        vim.keymap.set(map[1], key, map[2], map[3] or {})
+      end
+      vim.api.nvim_create_autocmd("CmdAtom", {
+        callback = function(ev)
+          if ev.data.operator == "zq" then
+            for _, map in ipairs(maps) do
+              vim.fn.mapset(map)
+            end
+          end
+          return true
+        end,
+      })
+      return "zq"
+    end,
+    { "n", "x" },
+    expr = true,
+  },
   ["i"] = { "<cmd>lua my.motion.backward_word_start()<cr>", { "n", "x", "o" }, desc = "[count] backward word start" },
   ["o"] = { "<cmd>lua my.motion.forward_word_end()<cr>", { "n", "x", "o" }, desc = "[count] forward word end" },
   ["I"] = { "<cmd>lua my.motion.backward_WORD_start()<cr>", { "n", "x", "o" }, desc = "[count] backward WORD start" },

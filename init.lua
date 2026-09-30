@@ -114,7 +114,7 @@ do
 end
 
 do
-  --- Visual cancel Cursor back
+  -- Visual cancel Cursor back
   local in_visual_mode
   local changed_tick
   local cursor
@@ -127,21 +127,22 @@ do
           changed_tick = vim.api.nvim_buf_get_changedtick(0)
           cursor = vim.api.nvim_win_get_cursor(0)
         end
-      else
-        if ev.match == "v:V" or ev.match == "V:v" then
-          return
-        end
-        if
-          vim.list_contains({ "V", "v", "" }, from)
-          and to == "n"
-          and changed_tick == vim.api.nvim_buf_get_changedtick(0)
-        then
-          pcall(vim.api.nvim_win_set_cursor, 0, cursor)
-        end
-        cursor = nil
-        in_visual_mode = nil
-        changed_tick = nil
+        return
       end
+
+      if ev.match == "v:V" or ev.match == "V:v" then
+        return
+      end
+      if
+        vim.list_contains({ "V", "v", "" }, from)
+        and to == "n"
+        and changed_tick == vim.api.nvim_buf_get_changedtick(0)
+      then
+        pcall(vim.api.nvim_win_set_cursor, 0, cursor)
+      end
+      cursor = nil
+      in_visual_mode = nil
+      changed_tick = nil
     end,
   })
 end

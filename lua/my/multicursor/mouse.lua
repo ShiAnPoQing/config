@@ -21,7 +21,7 @@ end
 --- advance path
 --- 创建光标，更新历史，新光标成为 head
 local function advance_path(mousepos)
-  local ok = pcall(my.multicursor.add, 0, { mousepos.line, mousepos.column - 1 })
+  local ok = pcall(my.multicursor.set, 0, mousepos.line - 1, mousepos.column - 1)
   if not ok then
     return
   end
@@ -63,7 +63,7 @@ function M.click()
   if cursor then
     my.multicursor.del(0, cursor[1])
   else
-    pcall(my.multicursor.add, 0, { mousepos.line, mousepos.column - 1 })
+    my.multicursor.set(0, mousepos.line - 1, mousepos.column - 1)
     path = { get_mouse_cursor(mousepos)[1] }
   end
 end

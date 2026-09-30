@@ -7,17 +7,6 @@ local M = vim._defer_require("my.motion", {})
 --- 所以不能使用 motion + cascade 方式实现
 --- 只能通过 reset multicursor 实现
 
-local function zq_motion(key)
-  if vim.v.operator == "zq" then
-    vim.api.nvim_feedkeys(
-      vim.api.nvim_replace_termcodes("<esc>zq" .. vim.v.count1 .. key, true, false, true),
-      "nt",
-      false
-    )
-    return true
-  end
-end
-
 --- 尊重 'follow'
 function M.line_last_non_blank()
   --- multicursor and follow mode
@@ -30,9 +19,9 @@ function M.line_last_non_blank()
       local s = line:reverse():find("%S") or 0
       local col = #line - s
       if extmark[3] + 1 == #line:sub(1, col + 1) then
-        my.multicursor.add(0, { extmark[2] + 1, #line })
+        my.multicursor.set(0, extmark[2], #line)
       else
-        my.multicursor.add(0, { extmark[2] + 1, col })
+        my.multicursor.set(0, extmark[2], col)
       end
     end
     local line = vim.api.nvim_get_current_line()
@@ -59,7 +48,7 @@ function M.line_last()
     my.multicursor.clear(0)
     for _, extmark in ipairs(extmarks) do
       local line = vim.api.nvim_buf_get_lines(0, extmark[2], extmark[2] + 1, false)[1]
-      my.multicursor.add(0, { extmark[2] + 1, #line })
+      my.multicursor.set(0, extmark[2], #line)
     end
     local line = vim.api.nvim_get_current_line()
     vim.api.nvim_win_set_cursor(0, { vim.fn.line("."), #line })
@@ -80,9 +69,6 @@ local function backward_word_start(key)
   end
 
   if mode == "no" then
-    if zq_motion(key) then
-      return
-    end
     if my.cursor.is_word_start() then
       vim.cmd("normal! " .. key)
       return
@@ -100,14 +86,15 @@ local function backward_word_end(key)
   end
 
   if vim.list_contains({ "v", "V", "" }, mode) then
-    vim.cmd("normal! " .. "h" .. key .. "l")
+    if vim.fn.col(".") == 1 then
+      vim.cmd("normal! " .. key .. "l")
+    else
+      vim.cmd("normal! " .. "h" .. key .. "l")
+    end
     return
   end
 
   if mode == "no" then
-    if zq_motion(key) then
-      return
-    end
     --- If cursor is at the start of the word,
     --- Do not include the cursor
     if my.cursor.is_word_start() then
@@ -137,9 +124,6 @@ local function forward_word_end(key)
   end
 
   if mode == "no" then
-    if zq_motion(key) then
-      return
-    end
     if my.cursor.is_word_end() then
       vim.cmd("normal! v" .. key .. "ol")
       return
@@ -158,14 +142,15 @@ local function forward_word_start(key)
   end
 
   if vim.list_contains({ "v", "V", "" }, mode) then
-    vim.cmd("normal! " .. "l" .. key .. "h")
+    if vim.fn.col(".") == 1 then
+      vim.cmd("normal! " .. key .. "h")
+    else
+      vim.cmd("normal! " .. "l" .. key .. "h")
+    end
     return
   end
 
   if mode == "no" then
-    if zq_motion(key) then
-      return
-    end
     if my.cursor.is_word_end() then
       local col1 = vim.fn.col(".")
       vim.cmd("normal! vw")

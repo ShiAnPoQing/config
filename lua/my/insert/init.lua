@@ -116,7 +116,7 @@ function M.visual_line_first()
       if i == end_row then
         vim.api.nvim_win_set_cursor(0, { i, 0 })
       else
-        vim.api.nvim_mcursor(0, { i, 0 })
+        vim.api.nvim_buf_set_extmark(0, my.multicursor.ns, i - 1, 0, {})
       end
     end
   end
@@ -147,7 +147,7 @@ function M.visual_line_last()
       if i == end_row then
         vim.api.nvim_win_set_cursor(0, { i, #line })
       else
-        vim.api.nvim_mcursor(0, { i, #line })
+        vim.api.nvim_buf_set_extmark(0, my.multicursor.ns, i - 1, #line, {})
       end
     end
   end
@@ -180,7 +180,7 @@ function M.visual_line_first_non_blank()
       if i == end_row then
         vim.api.nvim_win_set_cursor(0, { i, col })
       else
-        vim.api.nvim_mcursor(0, { i, col })
+        vim.api.nvim_buf_set_extmark(0, my.multicursor.ns, i - 1, col, {})
       end
     end
   end
@@ -210,7 +210,7 @@ function M.visual_line_last_non_blank()
       if i == end_row then
         vim.api.nvim_win_set_cursor(0, { i, col })
       else
-        vim.api.nvim_mcursor(0, { i, col })
+        vim.api.nvim_buf_set_extmark(0, my.multicursor.ns, i - 1, col, {})
       end
     end
   end
@@ -237,7 +237,7 @@ function M.visual_block_first()
       if i == end_row then
         vim.api.nvim_win_set_cursor(0, { i, start_col })
       else
-        vim.api.nvim_mcursor(0, { i, start_col })
+        vim.api.nvim_buf_set_extmark(0, my.multicursor.ns, i - 1, start_col, {})
       end
     end
   end
@@ -264,7 +264,7 @@ function M.visual_block_last()
       if i == end_row then
         vim.api.nvim_win_set_cursor(0, { i, end_col })
       else
-        vim.api.nvim_mcursor(0, { i, end_col })
+        vim.api.nvim_buf_set_extmark(0, my.multicursor.ns, i - 1, end_col, {})
       end
     end
     vim.api.nvim_feedkeys(count .. "a", "nt", false)

@@ -4,7 +4,7 @@ Option type:
   local to buffer
   local to window
   global or local to buffer
-  global or local to window 
+  global or local to window
 
 每一种选项类型都有 local value 和 global value
 
@@ -260,7 +260,6 @@ vim.o.backup = false
 -- vim.go.undofile = true
 vim.o.undofile = true
 vim.o.timeout = false
-
 -- vim.o.pumheight = 8
 vim.o.helplang = "cn"
 -- vim.go.matchpairs = "(:),{:},[:],<:>,【:】,《:》,（:）,`:`"
@@ -278,6 +277,7 @@ vim.o.splitbelow = true
 vim.o.splitright = true
 -- vim.go.listchars = "extends:⭆,tab:󰌥󰌒,trail:·"
 vim.o.listchars = "extends:⭆,tab:󰌥󰌒,trail:·"
+-- ⣿
 -- vim.o.guicursor = "n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175"
 
 require("option.fold")

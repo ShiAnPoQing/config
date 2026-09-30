@@ -30,11 +30,13 @@ function M.active()
   return #vim.api.nvim_buf_get_extmarks(0, M.ns, 0, -1, { limit = 1 }) > 0
 end
 
---- @param buf number
---- @param pos [integer, integer]
+--- @param buf integer
+--- @param line integer
+--- @param col integer
+--- @param opts vim.api.keyset.set_extmark?
 --- @return integer
-function M.add(buf, pos)
-  return vim.api.nvim_mcursor(buf, pos)
+function M.set(buf, line, col, opts)
+  return vim.api.nvim_buf_set_extmark(buf, M.ns, line, col, opts or {})
 end
 
 --- @param buf integer
