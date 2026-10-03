@@ -133,7 +133,7 @@ function M.get_snapshot(buf)
   return snapshots[tostring(buf)]
 end
 
-function M.search_add()
+function M.add_by_search()
   local mode = vim.api.nvim_get_mode().mode
   local ctx = {}
   if mode == "V" then

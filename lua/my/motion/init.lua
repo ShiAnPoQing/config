@@ -41,6 +41,9 @@ function M.line_last_non_blank()
   elseif vim.list_contains({ "v", "V", "" }, mode) then
     vim.cmd("normal! g_")
   else
+    if mode == "nt" then
+      mode = "n"
+    end
     M[mode].last_non_blank()
   end
 end
@@ -59,6 +62,9 @@ function M.line_first_non_blank()
   elseif vim.list_contains({ "v", "V", "" }, mode) then
     vim.cmd("normal! ^")
   else
+    if mode == "nt" then
+      mode = "n"
+    end
     M[mode].first_non_blank()
   end
 end
@@ -84,6 +90,8 @@ function M.line_last()
   local mode = vim.api.nvim_get_mode().mode
   if mode == "n" then
     vim.cmd("normal! $")
+  elseif mode == "nt" then
+    vim.cmd("normal! $")
   elseif vim.list_contains({ "v", "V", "" }, mode) then
     --- :h $
     --- native: In Visual mode the cursor goes to just after the last character in the line
@@ -97,6 +105,8 @@ end
 function M.line_first()
   local mode = vim.api.nvim_get_mode().mode
   if mode == "n" then
+    vim.cmd("normal! 0")
+  elseif mode == "nt" then
     vim.cmd("normal! 0")
   elseif vim.list_contains({ "v", "V", "" }, mode) then
     vim.cmd("normal! 0")

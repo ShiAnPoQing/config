@@ -51,7 +51,7 @@ return {
   -- },
   ["<leader>/"] = {
     function()
-      my.multicursor.search_add()
+      my.multicursor.add_by_search()
     end,
     { "n", "x" },
   },

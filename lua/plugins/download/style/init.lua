@@ -103,7 +103,7 @@ return {
       })
       -- require("paradox.utils").set_surface_hsl(50, 30)
       -- require("paradox.utils").set_surface_hsl(150, 30)
-      require("paradox.utils").set_surface_hsl(260, 20)
+      require("paradox.utils").set_surface_hsl(170, 20)
       -- require("paradox.utils").offset_hue_hsl(20, 10)
       -- local time = tonumber(os.date("%H"))
       -- if time >= 17 or time < 7 then

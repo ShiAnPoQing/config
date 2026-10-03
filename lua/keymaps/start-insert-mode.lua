@@ -12,7 +12,7 @@ local last_character = {
   function()
     my.insert.last()
   end,
-  { "n", "x" },
+  { "n", "x", "t" },
   desc = "Start insert mode to the right of the last character in the current line",
 }
 
