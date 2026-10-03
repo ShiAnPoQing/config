@@ -73,7 +73,7 @@ return {
           --   end,
           -- },
         },
-        lualine_x = { "diagnostics", "filetype" },
+        lualine_x = { "diagnostics", "filetype", "lsp_status" },
         lualine_y = { "progress" },
         lualine_z = { "location" },
       },

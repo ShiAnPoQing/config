@@ -56,7 +56,7 @@ function M.jump_global_scope(direction)
   else
     jump_key = Shared.JUMP_OLD_KEY
   end
-  vim.api.nvim_feedkeys(count .. jump_key, "nx", false)
+  vim.cmd("silent! normal! " .. count .. jump_key)
 end
 
 return M

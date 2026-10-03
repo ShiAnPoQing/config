@@ -66,6 +66,7 @@ return {
           local r_h, _ = require("paradox.utils").hex_to_hsl(colors.names.red)
           local y_h, _ = require("paradox.utils").hex_to_hsl(colors.names.yellow_green)
           local _, s, l = require("paradox.utils").hex_to_hsl(colors.names.bg)
+          s = math.max(15, s)
           local error = require("paradox.utils").hsl_to_hex(r_h, s, l)
           local warn = require("paradox.utils").hsl_to_hex(y_h, s, l)
           vim.api.nvim_set_hl(0, "DiagnosticLineError", { bg = error })
@@ -79,6 +80,7 @@ return {
             "BlinkCmpKindField",
             "BlinkCmpKindValue",
             "BlinkCmpKindEnum",
+            "BlinkCmpKindEnumMember",
             "BlinkCmpKindProperty",
             "BlinkCmpKindVariable",
             "BlinkCmpKindSnippet",
@@ -103,7 +105,7 @@ return {
       })
       -- require("paradox.utils").set_surface_hsl(50, 30)
       -- require("paradox.utils").set_surface_hsl(150, 30)
-      require("paradox.utils").set_surface_hsl(170, 20)
+      -- require("paradox.utils").set_surface_hsl(50, 5)
       -- require("paradox.utils").offset_hue_hsl(20, 10)
       -- local time = tonumber(os.date("%H"))
       -- if time >= 17 or time < 7 then

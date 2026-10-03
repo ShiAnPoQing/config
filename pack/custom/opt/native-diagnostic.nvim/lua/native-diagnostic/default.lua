@@ -113,8 +113,8 @@ vim.diagnostic.handlers.underline = {
     underline.show(ns, bufnr, diagnostics, opts)
   end,
   hide = function(ns, bufnr)
-    underline.hide(ns, bufnr) 
-  end
+    underline.hide(ns, bufnr)
+  end,
 }
 local my_ns = vim.api.nvim_create_namespace("native-diagnostic.underline")
 local pre_cursor_dignostics = {}
@@ -128,7 +128,7 @@ vim.api.nvim_create_autocmd({ "DiagnosticChanged", "CursorMoved" }, {
         if
           (diagnostic.lnum < cursor[1] - 1 and diagnostic.end_lnum > cursor[1] - 1)
           or (diagnostic.lnum == cursor[1] - 1 and diagnostic.end_lnum > cursor[1] - 1 and diagnostic.col <= cursor[2])
-          or (diagnostic.lnum < cursor[1] - 1 and diagnostic.end_lnum == cursor[1] - 1 and diagnostic.end_col <= cursor[2])
+          or (diagnostic.lnum < cursor[1] - 1 and diagnostic.end_lnum == cursor[1] - 1 and diagnostic.end_col >= cursor[2])
           or (
             diagnostic.lnum == cursor[1] - 1
             and diagnostic.end_lnum == cursor[1] - 1

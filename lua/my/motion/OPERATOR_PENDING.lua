@@ -89,20 +89,76 @@ function M.forward_WORD_start()
   forward_word_start("W")
 end
 
+-- :h $
+-- :h g_
 function M.last_non_blank()
+  local line = vim.api.nvim_get_current_line()
+  local last_non_blank_col = line:reverse():find("%S")
+  if not last_non_blank_col then
+    vim.cmd("normal! v0")
+    return
+  end
+  last_non_blank_col = #line - last_non_blank_col + 1
+  local col = vim.fn.col(".")
+  if col == last_non_blank_col then
+    vim.cmd("normal! lv$h")
+    return
+  end
+  if col > last_non_blank_col then
+    vim.cmd("normal! vg_l")
+    return
+  end
   vim.cmd("normal! vg_")
 end
 
 function M.first_non_blank()
-  vim.cmd("normal! ^")
+  local line = vim.api.nvim_get_current_line()
+  local first_non_blank_col = line:find("%S")
+  if not first_non_blank_col then
+    vim.cmd("normal! v0")
+    return
+  end
+  local col = vim.fn.col(".")
+  if col == first_non_blank_col then
+    vim.cmd("normal! 0")
+    return
+  end
+  if col < first_non_blank_col then
+    vim.cmd("normal! v^h")
+    return
+  end
+  vim.cmd("normal! v^")
 end
 
 function M.last()
+  local line = vim.api.nvim_get_current_line()
+  local last_non_blank_col = line:reverse():find("%S")
+  if not last_non_blank_col then
+    vim.cmd("normal! v0")
+    return
+  end
+  last_non_blank_col = #line - last_non_blank_col + 1
+  local col = vim.fn.col(".")
+  if col == last_non_blank_col then
+    vim.cmd("normal! lv$h")
+    return
+  end
   vim.cmd("normal! v$h")
 end
 
 function M.first()
-  vim.cmd("normal! 0")
+  local line = vim.api.nvim_get_current_line()
+  local first_non_blank_col = line:find("%S")
+  if not first_non_blank_col then
+    vim.cmd("normal! v0")
+    return
+  end
+  local col = vim.fn.col(".")
+  if first_non_blank_col == col then
+    vim.cmd("normal! 0")
+    return
+  end
+  vim.cmd("normal! v0")
 end
 
 return M
