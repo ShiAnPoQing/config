@@ -8,18 +8,22 @@ function M:_repeat(reg)
   if not reg then
     return
   end
+
   if reg == "@" then
     reg = self.last_reg
   else
     self.last_reg = reg
   end
 
-  for _, atom in ipairs(Record.records[reg] or {}) do
-    vim.api.nvim_feedkeys(
-      vim.api.nvim_replace_termcodes(atom.keys or atom.lhs, true, false, true),
-      atom.keys and "n" or "m",
-      false
-    )
+  local count = vim.v.count1
+  for _ = 1, count do
+    for _, atom in ipairs(Record.records[reg] or {}) do
+      vim.api.nvim_feedkeys(
+        vim.api.nvim_replace_termcodes(atom.keys or atom.lhs, true, false, true),
+        atom.keys and "n" or "m",
+        false
+      )
+    end
   end
 end
 

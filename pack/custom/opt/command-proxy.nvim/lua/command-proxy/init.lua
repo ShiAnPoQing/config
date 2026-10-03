@@ -106,6 +106,7 @@ function M.setup(config)
       local input = vim.fn.keytrans(key)
       if input == "<CR>" then
         local cmd_info = get_cmd_info()
+        -- vim.print(a_info)
         if not cmd_info then
           return
         end

@@ -376,6 +376,9 @@ return {
         [my.command.constants.FILETYPE_LS] = function()
           cmd_to_reg("Fls")
         end,
+        ["/"] = function(i)
+          vim.print(i)
+        end,
       },
     })
     vim.api.nvim_create_autocmd("CmdwinEnter", {

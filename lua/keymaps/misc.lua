@@ -25,9 +25,38 @@ return {
     },
   },
   ["<C-space><C-v>"] = { "<C-K>", "i" },
-  [","] = { ",<C-g>u", "i" },
-  ["."] = { ".<C-g>u", "i" },
-  [";"] = { ";<C-g>u", "i" },
+
+  [","] = {
+    function()
+      if my.multicursor.active() then
+        return ","
+      end
+      return ",<C-g>u"
+    end,
+    "i",
+    expr = true,
+  },
+  ["."] = {
+    function()
+      if my.multicursor.active() then
+        return "."
+      end
+      return ".<C-g>u"
+    end,
+    "i",
+    expr = true,
+  },
+  [";"] = {
+    function()
+      if my.multicursor.active() then
+        return ";"
+      end
+      return ";<C-g>u"
+    end,
+    "i",
+    expr = true,
+  },
+
   -- ["y:"] = {
   --   function()
   --     vim.ui.input({

@@ -1,77 +1,42 @@
 local first_character = {
   {
-    "gI",
-    "n",
-    desc = "Start insert mode to the left of the first character in the current line",
-  },
-  {
     function()
-      my.insert.visual_first()
+      my.insert.first()
     end,
-    { "x", "s" },
+    { "n", "x" },
     desc = "Start insert mode to the left of the first character in the visual area",
   },
 }
 
 local last_character = {
-  {
-    function()
-      return require("builtin.start-insert-mode.normal-mode").last_character()
-    end,
-    "n",
-    desc = "Start insert mode to the right of the last character in the current line",
-    expr = true,
-  },
-  {
-    function()
-      my.insert.visual_last()
-    end,
-    desc = "Start insert mode to the right of the last character in the visual area",
-    { "x", "s" },
-  },
+  function()
+    my.insert.last()
+  end,
+  { "n", "x" },
+  desc = "Start insert mode to the right of the last character in the current line",
 }
 
 return {
   ["w"] = { "i", "n", desc = "Cursor left insert" },
   ["e"] = { "a", "n", desc = "Cursor right insert" },
-  ["W"] = first_character,
-  ["E"] = last_character,
   ["<space>w"] = {
-    {
-      function()
-        return require("builtin.start-insert-mode.normal-mode").first_non_blank_character()
-      end,
-      "n",
-      desc = "Start insert mode to the left of the first non-blank character in the current line",
-      expr = true,
-    },
-    {
-      function()
-        my.insert.visual_first_non_blank()
-      end,
-      { "x", "s" },
-      desc = "Start insert mode to the left of the first non-blank character in the visual area",
-    },
+    function()
+      my.insert.first_non_blank()
+    end,
+    { "n", "x" },
+    desc = "Start insert mode to the left of the first non-blank character in the current line",
   },
   ["<space>e"] = {
-    {
-      function()
-        return require("builtin.start-insert-mode.normal-mode").last_non_blank_character()
-      end,
-      "n",
-      desc = "Start insert mode to the right of the last non-blank character in the current line",
-      expr = true,
-    },
-    {
-      function()
-        my.insert.visual_last_non_blank()
-      end,
-      { "x", "s" },
-      desc = "Start insert mode to the right of the last non-blank character in the visual area",
-    },
+    function()
+      my.insert.last_non_blank()
+    end,
+    { "n", "x" },
+    desc = "Start insert mode to the right of the last non-blank character in the current line",
   },
   ["<space><space>w"] = first_character,
   ["<space><space>e"] = last_character,
+  ["W"] = first_character,
+  ["E"] = last_character,
   ["<space>W"] = {
     function()
       local count = vim.v.count1

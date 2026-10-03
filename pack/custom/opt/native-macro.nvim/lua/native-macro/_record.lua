@@ -5,8 +5,8 @@ local M = {
 }
 
 -- {0-9a-z".=*+}
-function M.start()
-  local reg = vim.fn.reg_recording()
+--- @param reg string
+function M.start(reg)
   local atoms = {}
   M.records[tostring(reg)] = atoms
   vim.api.nvim_create_autocmd("CmdAtom", {
@@ -26,19 +26,24 @@ function M.start()
   })
 end
 
-function M.stop()
+--- @param reg string
+function M.stop(reg)
+  local atoms = M.records[tostring(reg)] or {}
+  table.remove(atoms, 1)
   pcall(vim.api.nvim_clear_autocmds, { group = "native-macro" })
 end
 
 function M.init()
+  local reg
   vim.api.nvim_create_autocmd("RecordingEnter", {
     callback = function()
-      M.start()
+      reg = vim.fn.reg_recording()
+      M.start(reg)
     end,
   })
   vim.api.nvim_create_autocmd("RecordingLeave", {
     callback = function()
-      M.stop()
+      M.stop(reg)
       vim.print(M.records)
     end,
   })

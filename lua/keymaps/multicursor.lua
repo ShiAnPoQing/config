@@ -49,6 +49,12 @@ return {
   --   "n",
   --   expr = true,
   -- },
+  ["<leader>/"] = {
+    function()
+      my.multicursor.search_add()
+    end,
+    { "n", "x" },
+  },
   ["<C-LeftMouse>"] = {
     function()
       my.multicursor.mouse.click()

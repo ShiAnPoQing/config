@@ -82,131 +82,35 @@ return {
   ["<space>n"] = { "M", { "n", "x", "o" } },
   ["<space>k"] = { "{", { "n", "x", "o" } },
   ["<space>j"] = { "}", { "n", "x", "o" } },
-  ["<space>h"] = {
-    {
-      function()
-        require("builtin.start-end-move").first_non_blank_character()
-      end,
-      "n",
-    },
-    { "^", "x" },
-    {
-      "^",
-      -- function()
-      --   if my.cursor.is_word_end() then
-      --     return "v^"
-      --   end
-      --   return "^"
-      -- end,
-      "o",
-      -- expr = true,
-    },
-    desc = "Move to the first non-blank character of the line",
-  },
-  ["<space>l"] = {
-    {
-      function()
-        my.motion.line_last_non_blank()
-      end,
-      "n",
-    },
-    { "g_", "x" },
-    {
-      "g_",
-      -- function()
-      --   if my.cursor.is_word_end() then
-      --     return "<cmd>normal! lvg_<cr>"
-      --   end
-      --   return "g_"
-      -- end,
-      "o",
-      -- expr = true,
-    },
-    desc = "Move to the last non-blank character of the line",
-  },
-  ["<space><M-h>"] = { "I", "n" },
-  ["<space><M-l>"] = { "A", "n" },
+  -- stylua: ignore
+  ["<space>h"] = { "<cmd>lua my.motion.line_first_non_blank()<cr>", { "n", "o", "x" }, desc = "Move to the first non-blank character of the line" },
+  -- stylua: ignore
+  ["<space>l"] = { "<cmd>lua my.motion.line_last_non_blank()<cr>", { "n", "x", "o" }, desc = "Move to the last non-blank character of the line" },
+  -- stylua: ignore
+  ["<space><space>h"] = { "<cmd>lua my.motion.line_first()<cr>", { "n", "x", "o" }, desc = "Move to the first character of the line" },
+  -- stylua: ignore
+  ["<space><space>l"] = { "<cmd>lua my.motion.line_last()<cr>", { "n", "x", "o" }, desc = "Move to the last character of the line", },
+
+  -- ["<space><M-h>"] = { "I", "n" },
+  -- ["<space><M-l>"] = { "A", "n" },
   ["<M-space><M-h>"] = {
     {
-      function()
-        -- vim.keymap.set("n", "<F1000>", function()
-        --   --- like native: insert mode motion auto follow
-        --   vim.bo.follow = true
-        --   my.motion.line_last_non_blank()
-        --   vim.bo.follow = false
-        -- end)
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<F1000>", true, false, true), "mt", false)
-        vim.api.nvim_feedkeys("i", "nt", false)
-      end,
-      "i",
+      "<cmd>lua my.motion.line_first_non_blank()<cr>",
+      { "i", "c" },
     },
     { "<C-G>^<C-G>", "s" },
-    -- { "<Home><C-right>", "t" },
-    {
-      function()
-        require("builtin.cmdline").first_non_blank_character()
-      end,
-      "c",
-    },
     desc = "Move to the first non-blank character",
   },
   ["<M-space><M-l>"] = {
     {
-      function()
-        --- 创建临时 keymap 使其进入 feedkeys 流: <esc><F1000>a,
-        --- CmdAtom 删除临时 keymap
-        vim.keymap.set("n", "<F1000>", function()
-          --- like native: insert mode motion auto follow
-          vim.bo.follow = true
-          my.motion.line_last_non_blank()
-          vim.bo.follow = false
-        end)
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<F1000>", true, false, true), "mt", false)
-        vim.api.nvim_feedkeys("a", "nt", false)
-
-        vim.api.nvim_create_autocmd("CmdAtom", {
-          callback = function(ev)
-            if ev.data.lhs == "<F1000>" then
-              vim.keymap.del("n", "<F1000>")
-              return true
-            end
-          end,
-        })
-      end,
-      "i",
+      "<cmd>lua my.motion.line_last_non_blank()<cr>",
+      { "i", "c" },
     },
     { "<C-G>g_<C-G>", "s" },
-    {
-      function()
-        require("builtin.cmdline").last_non_blank_character()
-      end,
-      "c",
-    },
     desc = "Move to the last non-blank character",
   },
-  ["<space><space>h"] = {
-    {
-      function()
-        require("builtin.start-end-move").first_character()
-      end,
-      "n",
-    },
-    { "0", "x" },
-    {
-      "0",
-      -- function()
-      --   if my.cursor.is_word_end() then
-      --     return "v0"
-      --   end
-      --   return "0"
-      -- end,
-      "o",
-      -- expr = true,
-    },
-    desc = "Move to the first character of the line",
-  },
+  ["<M-space><M-space><M-l>"] = { "<End>", { "i", "c", "s", "t" } },
+  ["<M-space><M-space><M-h>"] = { "<Home>", { "i", "c", "s", "t" } },
   ["<space>H"] = {
     {
       function()
@@ -231,24 +135,6 @@ return {
     { "v0", "o" },
     desc = "Move to the first character of the line",
   },
-  ["<space><space>l"] = {
-    { "<End>", "n" },
-    { "$h", "x" },
-    {
-      "$",
-      -- function()
-      --   if my.cursor.is_word_end() then
-      --     return "<cmd>normal! lv$h<cr>"
-      --   end
-      --   return "$"
-      -- end,
-      "o",
-      -- expr = true,
-    },
-    desc = "Move to the last character of the line",
-  },
-  ["<M-space><M-space><M-l>"] = { "<End>", { "i", "c", "s", "t" } },
-  ["<M-space><M-space><M-h>"] = { "<Home>", { "i", "c", "s", "t" } },
   ["<space>L"] = {
     {
       function()
@@ -394,32 +280,3 @@ return {
     expr = true,
   },
 }
-
--- vim.keymap.set("n", "<F1000>", function()
---   vim.bo.follow = true
---   local cursor = vim.api.nvim_win_get_cursor(0)
---   local line = vim.api.nvim_get_current_line()
---   local s = line:reverse():find("%S") or 0
---   local col = #line - s
---   if cursor[2] + 1 == #line:sub(1, col + 1) then
---     vim.api.nvim_win_set_cursor(0, { cursor[1], #line })
---   else
---     vim.api.nvim_win_set_cursor(0, { cursor[1], col })
---   end
---   vim.bo.follow = false
--- end)
---
--- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
--- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<F1000>", true, false, true), "mt", false)
--- vim.api.nvim_feedkeys("a", "nt", false)
---
--- vim.cmd.stopinsert()
--- vim.schedule(function()
---   local cursor1 = vim.api.nvim_win_get_cursor(0)
---   vim.api.nvim_feedkeys("g_", "nx", false)
---   local cursor2 = vim.api.nvim_win_get_cursor(0)
---   if cursor1[2] == cursor2[2] then
---     vim.api.nvim_feedkeys("$", "nx", false)
---   end
---   vim.api.nvim_feedkeys("a", "n", false)
--- end)
