@@ -46,8 +46,8 @@ local K = function()
 end
 
 return {
-  ["j"] = { j, { "n", "x", "o" }, expr = true, desc = "Move down [count] lines" },
-  ["k"] = { k, { "n", "x", "o" }, expr = true, desc = "Move up [count] lines" },
+  -- ["j"] = { j, { "n", "x", "o" }, expr = true, desc = "Move down [count] lines" },
+  -- ["k"] = { k, { "n", "x", "o" }, expr = true, desc = "Move up [count] lines" },
   ["<down>"] = { j, { "n", "x", "o" }, expr = true, desc = "Move down [count] lines" },
   ["<up>"] = { k, { "n", "x", "o" }, expr = true, desc = "Move up [count] lines" },
   ["[k"] = { "-", { "n", "x", "o" }, desc = "[count] lines upward, on the first non-blank character [linewise]" },
@@ -82,20 +82,12 @@ return {
   ["<space>n"] = { "M", { "n", "x", "o" } },
   ["<space>k"] = { "{", { "n", "x", "o" } },
   ["<space>j"] = { "}", { "n", "x", "o" } },
-  -- stylua: ignore
-  ["<space>h"] = { "<cmd>lua my.motion.line_first_non_blank()<cr>", { "n", "o", "x" }, desc = "Move to the first non-blank character of the line" },
-  -- stylua: ignore
-  ["<space>l"] = { "<cmd>lua my.motion.line_last_non_blank()<cr>", { "n", "x", "o" }, desc = "Move to the last non-blank character of the line" },
-  -- stylua: ignore
-  ["<space><space>h"] = { "<cmd>lua my.motion.line_first()<cr>", { "n", "x", "o" }, desc = "Move to the first character of the line" },
-  -- stylua: ignore
-  ["<space><space>l"] = { "<cmd>lua my.motion.line_last()<cr>", { "n", "x", "o" }, desc = "Move to the last character of the line", },
 
   -- ["<space><M-h>"] = { "I", "n" },
   -- ["<space><M-l>"] = { "A", "n" },
   ["<M-space><M-h>"] = {
     {
-      "<cmd>lua my.motion.line_first_non_blank()<cr>",
+      "<cmd>lua my.motion.first_non_blank()<cr>",
       { "i", "c" },
     },
     { "<C-G>^<C-G>", "s" },
@@ -103,7 +95,7 @@ return {
   },
   ["<M-space><M-l>"] = {
     {
-      "<cmd>lua my.motion.line_last_non_blank()<cr>",
+      "<cmd>lua my.motion.last_non_blank()<cr>",
       { "i", "c" },
     },
     { "<C-G>g_<C-G>", "s" },

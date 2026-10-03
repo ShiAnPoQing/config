@@ -13,7 +13,6 @@
 -- tmap / tnoremap  |    -   |   -    |    -    |   -    |   -    |    -     |    @     |    -     |
 -- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
 ---------------------------------------------------------------------------------------------------+
-
 return {
   ["<leader>cd"] = { "<cmd>" .. my.command.constants.Cd .. "<CR>", "n", desc = "Change directory to file(Global)" },
   ["<leader>tcd"] = {

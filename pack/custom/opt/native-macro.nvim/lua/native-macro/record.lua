@@ -1,63 +1,52 @@
----@class NativeMacro.Record
----@field ns_id integer
----@field history {[string]: NativeMacro.Record.Segment[][]}
+--- @class NativeMacro._Record
+--- @field records table<string, vim.event.cmdatom.data[]>
 local M = {
-  history = {},
+  records = {},
 }
 
-local Command = require("native-macro.command")
-
----@class NativeMacro.Record.Segment
----@field type "keymap" | "command"
----@field key string
-
----@type NativeMacro.Record.Segment[]
-local current_keys
----@type string
-local current_register_name
-
-function M:start()
-  Command:init({
-    enter = function()
-      table.remove(current_keys, #current_keys)
-    end,
-    leave = function(ctx)
-      current_keys[#current_keys + 1] = {
-        type = "command",
-        key = ctx.command,
-      }
+-- {0-9a-z".=*+}
+--- @param reg string
+function M.start(reg)
+  local atoms = {}
+  M.records[tostring(reg)] = atoms
+  vim.api.nvim_create_autocmd("CmdAtom", {
+    group = vim.api.nvim_create_augroup("native-macro", { clear = true }),
+    callback = function(ev)
+      local data = ev.data --[[@as vim.event.cmdatom.data]]
+      if vim.fn.getcmdwintype() == "" then
+        if data.keys then
+          data.keys = vim.fn.keytrans(data.keys)
+        end
+        if data.lhs then
+          data.lhs = vim.fn.keytrans(data.lhs)
+        end
+        atoms[#atoms + 1] = data
+      end
     end,
   })
-  self.ns_id = self.ns_id or vim.api.nvim_create_namespace("native-record")
-  current_register_name = vim.fn.reg_recording()
-  current_keys = {}
-  vim.on_key(function(_, typed)
-    typed = vim.fn.keytrans(typed)
-    if Command:create(typed) then
-      return
-    end
-    if typed ~= "" then
-      current_keys[#current_keys + 1] = {
-        type = "keymap",
-        key = typed,
-      }
-    end
-  end, self.ns_id)
 end
 
-function M:stop()
-  vim.on_key(nil, self.ns_id)
-  if self.history[current_register_name] then
-    if #self.history[current_register_name] > 20 then
-      self.history[current_register_name] = nil
-    end
-  end
-  local history = self.history[current_register_name]
-  if history == nil then
-    history = {}
-    self.history[current_register_name] = history
-  end
-  table.insert(history, current_keys)
+--- @param reg string
+function M.stop(reg)
+  local atoms = M.records[tostring(reg)] or {}
+  table.remove(atoms, 1)
+  pcall(vim.api.nvim_clear_autocmds, { group = "native-macro" })
+end
+
+function M.init()
+  local reg
+  vim.api.nvim_create_autocmd("RecordingEnter", {
+    callback = function()
+      reg = vim.fn.reg_recording()
+      M.start(reg)
+    end,
+  })
+  vim.api.nvim_create_autocmd("RecordingLeave", {
+    callback = function()
+      M.stop(reg)
+      vim.print(M.records)
+    end,
+  })
 end
 
 return M

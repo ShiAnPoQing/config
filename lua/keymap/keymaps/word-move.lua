@@ -52,23 +52,6 @@ return {
     { "n", "x" },
     expr = true,
   },
-  ["i"] = { "<cmd>lua my.motion.backward_word_start()<cr>", { "n", "x", "o" }, desc = "[count] backward word start" },
-  ["o"] = { "<cmd>lua my.motion.forward_word_end()<cr>", { "n", "x", "o" }, desc = "[count] forward word end" },
-  ["I"] = { "<cmd>lua my.motion.backward_WORD_start()<cr>", { "n", "x", "o" }, desc = "[count] backward WORD start" },
-  ["O"] = { "<cmd>lua my.motion.forward_WORD_end()<cr>", { "n", "x", "o" }, desc = "[count] forward WORD end" },
-  ["<space>i"] = { "<cmd>lua my.motion.backward_word_end()<cr>", { "n", "x", "o" }, desc = "[count] backward word end" },
-  --- stylua: ignore
-  ["<space>I"] = { "<cmd>lua my.motion.backward_WORD_end()<cr>", { "n", "x", "o" }, desc = "[count] backward WORD end" },
-  -- stylua: ignore
-  ["<S-space>I"] = { "<cmd>lua my.motion.backward_WORD_end()<cr>", { "n", "x", "o" }, desc = "[count] backward WORD end" },
-  -- stylua: ignore
-  ["<space>o"] = { "<cmd>lua my.motion.forward_word_start()<cr>", { "n", "x", "o" }, desc = "[count] forward word start", },
-  -- stylua: ignore
-  ["<space>O"] = { "<cmd>lua my.motion.forward_WORD_start()<cr>", { "n", "x", "o" }, desc = "[count] forward WORD start", },
-  -- stylua: ignore
-  ["<S-space>O"] = { "<cmd>lua my.motion.forward_WORD_start()<cr>", { "n", "x", "o" }, desc = "[count] forward WORD start", },
-  -- { "lWh", "x", desc = "Forword to the start of the WORD[count](right exclusion)" },
-  -- { "lwh", "x", desc = "Forword to the start of the word[count](right exclusion)" },
 
   ["<M-i>"] = {
     { "bi", "n", desc = "Backward to the start of word[count] and start insert mode" },

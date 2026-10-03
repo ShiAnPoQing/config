@@ -1,74 +1,13 @@
 require("my")
-my.window.float.drag.enable()
-
-do
-  local wrap_opts = {
-    enter = function()
-      return { cursor = vim.api.nvim_win_get_cursor(0) }
-    end,
-    done = function(ctx)
-      vim.api.nvim_win_set_cursor(0, ctx.cursor)
-    end,
-  }
-
-  local wrap_opts2 = {
-    enter = function()
-      return { cursors = my.multicursor.get(0, 0, -1) }
-    end,
-    done = function(ctx)
-      for _, c in ipairs(ctx.cursors) do
-        vim.api.nvim_buf_set_extmark(0, my.multicursor.ns, c[2], c[3], { id = c[1] })
-      end
-    end,
-  }
-
-  my.operator.wrap("gu", wrap_opts, wrap_opts2)
-  my.operator.wrap("gU", wrap_opts, wrap_opts2)
-  my.operator.wrap("g~", wrap_opts, wrap_opts2)
-  my.operator.wrap("y", wrap_opts, wrap_opts2)
-end
-
-do
-  -- Visual cancel Cursor back
-  local in_visual_mode
-  local changed_tick
-  local cursor
-  vim.api.nvim_create_autocmd("ModeChanged", {
-    callback = function(ev)
-      local from, to = unpack(vim.split(ev.match, ":"))
-      if not in_visual_mode then
-        if vim.list_contains({ "V", "v", "" }, to) and from == "n" then
-          in_visual_mode = true
-          changed_tick = vim.api.nvim_buf_get_changedtick(0)
-          cursor = vim.api.nvim_win_get_cursor(0)
-        end
-        return
-      end
-
-      if ev.match == "v:V" or ev.match == "V:v" then
-        return
-      end
-      if
-        vim.list_contains({ "V", "v", "" }, from)
-        and to == "n"
-        and changed_tick == vim.api.nvim_buf_get_changedtick(0)
-      then
-        pcall(vim.api.nvim_win_set_cursor, 0, cursor)
-      end
-      cursor = nil
-      in_visual_mode = nil
-      changed_tick = nil
-    end,
-  })
-end
-
 vim.pack.add({ { src = "https://github.com/BrokenSunny/native-packer", version = "branch" } })
+require("operator").setup()
+require("window").setup()
+require("test").setup()
 require("command")
 require("global")
 require("option")
 require("autocmds")
-require("keymaps")
-require("test")
+require("keymap").setup()
 require("native-packer").add({
   require("plugins.local.neo-lsp"),
   require("plugins.download.style"),
@@ -184,27 +123,3 @@ vim.keymap.set("n", "m/", function()
   end, ns)
   vim.api.nvim_feedkeys("/", "n", true)
 end)
-
--- vim.api.nvim_create_user_command("Mc", function(ev)
---   local args = ev.args
---   local regex = vim.regex(args)
---   local total = vim.api.nvim_buf_line_count(0)
---   local matches = {}
---   local buf = vim.api.nvim_get_current_buf()
---   for i = 1, total do
---     local start_pos = 0
---     while true do
---       local start, end_ = regex:match_line(buf, i - 1, start_pos)
---       if not start or not end_ or (start == 0 and end_ == 0) then
---         break
---       end
---       table.insert(matches, { line = i, col = start + start_pos, end_col = end_ + start_pos })
---       start_pos = start_pos + end_
---     end
---   end
---   for _, m in ipairs(matches) do
---     vim.api.nvim_buf_set_extmark(0, my.multicursor.ns, m.line - 1, m.col, {})
---   end
--- end, {
---   nargs = "*",
--- })

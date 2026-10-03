@@ -13,15 +13,15 @@ function M.first()
   else
     vim.api.nvim_feedkeys("0" .. vim.v.count1 .. "i", "n", false)
     -- Fallback:
-    --[[
-       -- First Atom: <Cmd>lua my.insert.NORMAL._reset_multicursor_to_line_first_character()<CR>
-       vim.api.nvim_feedkeys(
-         vim.keycode("<Cmd>lua my.insert.NORMAL._reset_multicursor_to_line_first_character()<CR>"),
-         "nt",
-         false
-       )
-       -- Second Atom: insert session
-       vim.api.nvim_feedkeys(vim.v.count1 .. "i", "n", false)
+    -- [[
+    -- First Atom: <Cmd>lua my.insert.NORMAL._reset_multicursor_to_line_first_character()<CR>
+    -- vim.api.nvim_feedkeys(
+    --   vim.keycode("<Cmd>lua my.insert.NORMAL._reset_multicursor_to_line_first_character()<CR>"),
+    --   "nt",
+    --   false
+    -- )
+    -- -- Second Atom: insert session
+    -- vim.api.nvim_feedkeys(vim.v.count1 .. "i", "n", false)
     --]]
   end
 end

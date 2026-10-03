@@ -19,6 +19,7 @@ local M = my.util.defer_require("my.insert", {
   ["v"] = "VISUAL",
   ["V"] = "VISUAL_LINE",
   [""] = "VISUAL_BLOCK",
+  ["<C-V>"] = "VISUAL_BLOCK",
   ["nt"] = "TERMINAL",
 })
 
@@ -31,7 +32,12 @@ function M.last()
 end
 
 function M.first_non_blank()
-  my.insert[my.util.get_mode()].first_non_blank()
+  local mode = my.util.get_mode()
+  if mode == "n" then
+    vim.api.nvim_feedkeys(vim.keycode("<cmd>lua my.insert.NORMAL.first_non_blank()<cr>"), "n", false)
+    return
+  end
+  my.insert[mode].first_non_blank()
 end
 
 function M.last_non_blank()

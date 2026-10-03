@@ -12,7 +12,7 @@ function M._reset_multicursor_to_first_non_blank()
   --- like native: insert mode motion auto follow
   vim.bo.follow = true
   --- ISSUE: if cursor is at line first non blank, feedkey <Esc>, the cursor will not be at the line first non blank
-  my.motion.NORMAL._line_first_non_blank(-1)
+  my.motion.NORMAL._first_non_blank(-1)
   vim.bo.follow = false
 end
 

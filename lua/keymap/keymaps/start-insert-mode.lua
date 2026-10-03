@@ -1,42 +1,37 @@
-local first_character = {
-  {
-    function()
-      my.insert.first()
-    end,
-    { "n", "x" },
-    desc = "Start insert mode to the left of the first character in the visual area",
-  },
-}
-
-local last_character = {
-  function()
-    my.insert.last()
-  end,
-  { "n", "x", "t" },
-  desc = "Start insert mode to the right of the last character in the current line",
-}
-
 return {
   ["w"] = { "i", "n", desc = "Cursor left insert" },
   ["e"] = { "a", "n", desc = "Cursor right insert" },
   ["<space>w"] = {
-    function()
-      my.insert.first_non_blank()
-    end,
+    "<cmd>lua my.insert.first_non_blank()<cr>",
     { "n", "x" },
-    desc = "Start insert mode to the left of the first non-blank character in the current line",
+    desc = "Insert text before the first non-blank character [count]",
   },
   ["<space>e"] = {
-    function()
-      my.insert.last_non_blank()
-    end,
+    "<cmd>lua my.insert.last_non_blank()<cr>",
     { "n", "x" },
-    desc = "Start insert mode to the right of the last non-blank character in the current line",
+    desc = "Insert text after the last non-blank character [count]",
   },
-  ["<space><space>w"] = first_character,
-  ["<space><space>e"] = last_character,
-  ["W"] = first_character,
-  ["E"] = last_character,
+  ["<space><space>w"] = {
+    "<cmd>lua my.insert.first()<CR>",
+    { "n", "x", "t" },
+    desc = "Insert text before the first character [count]",
+  },
+  ["<space><space>e"] = {
+    "<cmd>lua my.insert.last()<CR>",
+    { "n", "x", "t" },
+    desc = "Insert text after the last character [count]",
+  },
+  ["W"] = {
+    "<cmd>lua my.insert.first()<CR>",
+    { "n", "x", "t" },
+    desc = "Insert text before the first character [count]",
+  },
+  ["E"] = {
+    "<cmd>lua my.insert.last()<CR>",
+    { "n", "x", "t" },
+    desc = "Insert text before the first character [count]",
+  },
+
   ["<space>W"] = {
     function()
       local count = vim.v.count1

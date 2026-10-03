@@ -40,15 +40,15 @@ vim.keymap.set("n", "<F6>", "<cmd>lua last()<cr>")
 local M = {}
 
 function M.setup()
-  require("native-macro._record").init()
-  require("native-macro._repeat").init()
+  require("native-macro.record").init()
+  require("native-macro.repeat").init()
 end
 
 -- {0-9a-z".=*+}
 function M._repeat()
   ---@diagnostic disable-next-line: param-type-mismatch
   local char = vim.fn.nr2char(vim.fn.getchar())
-  require("native-macro._repeat"):_repeat(char)
+  require("native-macro.repeat"):_repeat(char)
 end
 
 return M

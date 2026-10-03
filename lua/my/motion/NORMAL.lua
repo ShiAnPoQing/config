@@ -37,7 +37,7 @@ function M.last_non_blank()
   end
 end
 
-function M._line_first_non_blank(offset_col)
+function M._first_non_blank(offset_col)
   offset_col = offset_col or 0
   -- Update multicursors
   vim.bo.follow = false
@@ -68,7 +68,7 @@ end
 -- otherwise move to the first character of the line
 function M.first_non_blank()
   if my.multicursor.active() and vim.bo.follow then
-    M._line_first_non_blank(0)
+    M._first_non_blank(0)
   else
     local col1 = vim.fn.col(".")
     vim.cmd("normal! ^")

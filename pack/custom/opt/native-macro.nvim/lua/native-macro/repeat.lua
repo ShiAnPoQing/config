@@ -1,40 +1,32 @@
----@class NativeMacro.Repeat
-local M = {
-  last_register_name = nil,
-}
 local Record = require("native-macro.record")
 
-function M:_repeat(register_name)
-  if register_name == "@" then
-    register_name = self.last_register_name
-  else
-    self.last_register_name = register_name
-  end
-  local history = Record.history[register_name]
-  if history == nil then
-    local function callback()
-      vim.api.nvim_feedkeys("@" .. register_name, "nx", true)
-      require("repeat").set_operation(callback)
-    end
-    callback()
+---@class NativeMacro._Repeat
+local M = { last_reg = nil }
+
+--- @param reg string
+function M:_repeat(reg)
+  if not reg then
     return
   end
 
-  local keys = history[#history]
-
-  for i, value in ipairs(keys) do
-    if i == #keys then
-      return
-    end
-    vim.schedule(function()
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(value.key, true, true, true), "m", true)
-    end)
+  if reg == "@" then
+    reg = self.last_reg
+  else
+    self.last_reg = reg
   end
-  vim.schedule(function()
-    require("repeat").set_operation(function()
-      self:_repeat(register_name)
-    end)
-  end)
+
+  local count = vim.v.count1
+  for _ = 1, count do
+    for _, atom in ipairs(Record.records[reg] or {}) do
+      vim.api.nvim_feedkeys(
+        vim.api.nvim_replace_termcodes(atom.keys or atom.lhs, true, false, true),
+        atom.keys and "nt" or "mt",
+        false
+      )
+    end
+  end
 end
+
+function M.init() end
 
 return M

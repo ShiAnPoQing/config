@@ -2,6 +2,7 @@
 --- @field INSERT my.motion.INSERT
 --- @field COMMAND my.motion.COMMAND
 --- @field NORMAL my.motion.NORMAL
+--- @field OPERATOR_PENDING my.motion.OPERATOR_PENDING
 --- @field ['i'] my.motion.INSERT
 --- @field ['c'] my.motion.COMMAND
 --- @field ['n'] my.motion.NORMAL
@@ -9,9 +10,11 @@ local M = my.util.defer_require("my.motion", {
   INSERT = true,
   COMMAND = true,
   NORMAL = true,
+  OPERATOR_PENDING = true,
   ["c"] = "COMMAND",
   ["n"] = "NORMAL",
   ["i"] = "INSERT",
+  ["no"] = "OPERATOR_PENDING",
   -- VISUAL = true,
   -- VISUAL_LINE = true,
   -- VISUAL_BLOCK = true,
@@ -34,15 +37,19 @@ local M = my.util.defer_require("my.motion", {
 --    1. mode: n, no, v, V, , i
 --    2. multicursor
 --    3. CmdAtom LHS repeat
-function M.line_last_non_blank()
+function M.last_non_blank()
   local mode = vim.api.nvim_get_mode().mode
   if mode == "no" then
-    vim.cmd("normal! vg_")
+    M[mode].last_non_blank()
   elseif vim.list_contains({ "v", "V", "" }, mode) then
     vim.cmd("normal! g_")
   else
     if mode == "nt" then
       mode = "n"
+    end
+    if mode == "n" then
+      vim.api.nvim_feedkeys(vim.keycode("<cmd>lua my.motion.NORMAL.last_non_blank()<cr>"), "n", true)
+      return
     end
     M[mode].last_non_blank()
   end
@@ -55,22 +62,27 @@ end
 --    1. mode: n, no, v, V, , i
 --    2. multicursor
 --    3. CmdAtom LHS repeat
-function M.line_first_non_blank()
+function M.first_non_blank()
   local mode = vim.api.nvim_get_mode().mode
   if mode == "no" then
-    vim.cmd("normal! ^")
+    M[mode].first_non_blank()
   elseif vim.list_contains({ "v", "V", "" }, mode) then
     vim.cmd("normal! ^")
   else
     if mode == "nt" then
       mode = "n"
     end
+    if mode == "n" then
+      --- REAL ATOM
+      vim.api.nvim_feedkeys(vim.keycode("<cmd>lua my.motion.NORMAL.first_non_blank()<cr>"), "n", true)
+      return
+    end
     M[mode].first_non_blank()
   end
 end
 
 --- <End> 测试可行，这是后备方案
-function M.line_last()
+function M.last()
   -- --- multicursor and follow mode
   -- if my.multicursor.active() and vim.bo.follow then
   --   vim.bo.follow = false
@@ -98,11 +110,11 @@ function M.line_last()
     --- I don't wana this
     vim.cmd("normal! $h")
   elseif mode == "no" then
-    vim.cmd("normal! v$h")
+    M[mode].last()
   end
 end
 
-function M.line_first()
+function M.first()
   local mode = vim.api.nvim_get_mode().mode
   if mode == "n" then
     vim.cmd("normal! 0")
@@ -111,9 +123,20 @@ function M.line_first()
   elseif vim.list_contains({ "v", "V", "" }, mode) then
     vim.cmd("normal! 0")
   elseif mode == "no" then
-    vim.cmd("normal! 0")
+    M[mode].first()
   end
 end
+
+local word_map = {
+  ["b"] = "backward_word_start",
+  ["B"] = "backward_WORD_start",
+  ["e"] = "forward_word_end",
+  ["E"] = "forward_WORD_end",
+  ["w"] = "forward_word_start",
+  ["W"] = "forward_WORD_start",
+  ["ge"] = "backward_word_end",
+  ["gE"] = "backward_WORD_end",
+}
 
 local function backward_word_start(key)
   local mode = vim.api.nvim_get_mode().mode
@@ -123,11 +146,7 @@ local function backward_word_start(key)
   end
 
   if mode == "no" then
-    if my.cursor.is_word_start() then
-      vim.cmd("normal! " .. key)
-      return
-    end
-    vim.cmd("normal! v" .. key)
+    M[mode][word_map[key]]()
     return
   end
 end
@@ -149,23 +168,7 @@ local function backward_word_end(key)
   end
 
   if mode == "no" then
-    --- If cursor is at the start of the word,
-    --- Do not include the cursor
-    if my.cursor.is_word_start() then
-      local col1 = vim.fn.col(".")
-      --- The motion must be triggered at the cursor position.
-      vim.cmd("normal! v" .. key)
-      local col2 = vim.fn.col(".")
-      --- Exclude the endpoints:
-      --- If cursor just move left one character, Do not include the cursor
-      if col2 == col1 - 1 then
-        vim.cmd("normal! v")
-      else
-        vim.cmd("normal! loh")
-      end
-      return
-    end
-    vim.cmd("normal! v" .. key .. "l")
+    M[mode][word_map[key]]()
     return
   end
 end
@@ -178,11 +181,7 @@ local function forward_word_end(key)
   end
 
   if mode == "no" then
-    if my.cursor.is_word_end() then
-      vim.cmd("normal! v" .. key .. "ol")
-      return
-    end
-    vim.cmd("normal! v" .. key)
+    M[mode][word_map[key]]()
     return
   end
 end
@@ -205,19 +204,7 @@ local function forward_word_start(key)
   end
 
   if mode == "no" then
-    if my.cursor.is_word_end() then
-      local col1 = vim.fn.col(".")
-      vim.cmd("normal! vw")
-      local col2 = vim.fn.col(".")
-      if col2 == col1 + 1 then
-        vim.cmd("normal! v")
-      else
-        vim.cmd("normal! hol")
-      end
-      return
-    end
-    vim.cmd("normal! w")
-    return
+    M[mode][word_map[key]]()
   end
 end
 
