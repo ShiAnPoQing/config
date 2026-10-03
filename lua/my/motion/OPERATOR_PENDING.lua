@@ -49,7 +49,13 @@ end
 
 local function forward_word_end(key)
   if my.cursor.is_word_end() then
+    local col = vim.fn.col(".")
     vim.cmd("normal! v" .. key .. "ol")
+    vim.schedule(function()
+      if col < vim.fn.col(".") then
+        vim.cmd("normal! h")
+      end
+    end)
     return
   end
   vim.cmd("normal! v" .. key)
@@ -75,6 +81,11 @@ local function forward_word_start(key)
     else
       vim.cmd("normal! hol")
     end
+    vim.schedule(function()
+      if col1 < vim.fn.col(".") then
+        vim.cmd("normal! h")
+      end
+    end)
     return
   end
   vim.cmd("normal! w")

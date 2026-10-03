@@ -13,22 +13,22 @@ return {
   },
   ["<space><space>w"] = {
     "<cmd>lua my.insert.first()<CR>",
-    { "n", "x", "t" },
+    { "n", "x" },
     desc = "Insert text before the first character [count]",
   },
   ["<space><space>e"] = {
     "<cmd>lua my.insert.last()<CR>",
-    { "n", "x", "t" },
+    { "n", "x" },
     desc = "Insert text after the last character [count]",
   },
   ["W"] = {
     "<cmd>lua my.insert.first()<CR>",
-    { "n", "x", "t" },
+    { "n", "x" },
     desc = "Insert text before the first character [count]",
   },
   ["E"] = {
     "<cmd>lua my.insert.last()<CR>",
-    { "n", "x", "t" },
+    { "n", "x" },
     desc = "Insert text before the first character [count]",
   },
 
