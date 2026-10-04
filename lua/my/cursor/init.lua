@@ -111,10 +111,10 @@ end
 --- @param pattern string
 --- @return table|nil
 function M.match_prev(pattern)
+  local regex = vim.regex(pattern)
   local is_in_word = M.at_match(pattern)
   local topline = 1
   local botline, end_col = unpack(vim.api.nvim_win_get_cursor(0))
-  local regex = vim.regex(pattern)
   local match
   for i = botline, topline, -1 do
     local is_cursor_line = i == botline
@@ -122,6 +122,7 @@ function M.match_prev(pattern)
     local line_matchs = {}
     while true do
       local start, end_
+
       if is_cursor_line then
         start, end_ = regex:match_line(0, i - 1, start_pos, end_col + 1)
       else

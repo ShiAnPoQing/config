@@ -88,9 +88,11 @@ return {
             "BlinkCmpKindClass",
             "BlinkCmpKindMethod",
             "BlinkCmpKindKeyword",
+            "BlinkCmpKindConstant",
             "BlinkCmpKindFolder",
             "BlinkCmpKindFile",
             "BlinkCmpKindModule",
+            "BlinkCmpKindInterface",
           }
           for _, group in ipairs(blink_cmp_hls) do
             local hl = vim.api.nvim_get_hl(0, { name = group, link = false })
@@ -104,7 +106,7 @@ return {
         end,
       })
       -- require("paradox.utils").set_surface_hsl(50, 30)
-      -- require("paradox.utils").set_surface_hsl(150, 30)
+      require("paradox.utils").set_surface_hsl(230, 15)
       -- require("paradox.utils").set_surface_hsl(50, 5)
       -- require("paradox.utils").offset_hue_hsl(20, 10)
       local time = tonumber(os.date("%H"))

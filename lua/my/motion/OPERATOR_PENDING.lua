@@ -241,7 +241,17 @@ function M.last_non_blank()
   last_non_blank_col = #line - last_non_blank_col + 1
   local col = vim.fn.col(".")
   if col == last_non_blank_col then
-    vim.cmd("normal! lv$h")
+    if col == #line then
+      -- :h 'selection'
+      -- past line
+      vim.cmd("normal! v$ol")
+    else
+      vim.cmd("normal! lv$h")
+    end
+    return
+  end
+  if my.cursor.at_word_end() then
+    vim.cmd("normal! vg_ol")
     return
   end
   if col > last_non_blank_col then
@@ -260,7 +270,17 @@ function M.first_non_blank()
   end
   local col = vim.fn.col(".")
   if col == first_non_blank_col then
-    vim.cmd("normal! 0")
+    if col == 1 then
+      --- :h 'selection'
+      --- past line
+      vim.cmd("normal! v" .. vim.keycode("<bs>") .. "o" .. vim.keycode("<bs>"))
+    else
+      vim.cmd("normal! 0")
+    end
+    return
+  end
+  if my.cursor.at_word_start() then
+    vim.cmd("normal! ^")
     return
   end
   if col < first_non_blank_col then
@@ -279,8 +299,18 @@ function M.last()
   end
   last_non_blank_col = #line - last_non_blank_col + 1
   local col = vim.fn.col(".")
+  if col == #line then
+    -- :h 'selection'
+    -- past line
+    vim.cmd("normal! v$ol")
+    return
+  end
   if col == last_non_blank_col then
     vim.cmd("normal! lv$h")
+    return
+  end
+  if my.cursor.at_word_end() then
+    vim.cmd("normal! v$hol")
     return
   end
   vim.cmd("normal! v$h")
@@ -294,7 +324,17 @@ function M.first()
     return
   end
   local col = vim.fn.col(".")
-  if first_non_blank_col == col then
+  if col == 1 then
+    --- :h 'selection'
+    --- past line
+    vim.cmd("normal! v" .. vim.keycode("<bs>") .. "o" .. vim.keycode("<bs>"))
+    return
+  end
+  if col == first_non_blank_col then
+    vim.cmd("normal! 0")
+    return
+  end
+  if my.cursor.at_word_start() then
     vim.cmd("normal! 0")
     return
   end
