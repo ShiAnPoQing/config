@@ -87,6 +87,18 @@ require("native-packer").add({
   -- require("plugins.local.test.eye-track"),
 })
 
+do
+  -- Set the SRGB color of all other cursors. Needs to be done manually if your
+  -- terminal implements the kitty multiple-cursors protocol
+  -- TODO: reset the colors when leaving nvim
+  -- See https://github.com/neovim/neovim/issues/41603
+  vim.api.nvim_create_autocmd("UIEnter", {
+    callback = function()
+      vim.api.nvim_ui_send("\027[>40;2:170:170:170 q")
+    end,
+  })
+end
+
 vim.keymap.set("n", "m/", function()
   local ns = vim.api.nvim_create_namespace("my.search")
   vim.on_key(function(key)

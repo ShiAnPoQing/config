@@ -141,7 +141,7 @@ local word_map = {
 local function backward_word_start(key)
   local mode = vim.api.nvim_get_mode().mode
   if vim.list_contains({ "n", "v", "V", "" }, mode) then
-    vim.cmd("normal! " .. key)
+    vim.cmd("normal! " .. vim.v.count1 .. key)
     return
   end
 
@@ -154,15 +154,15 @@ end
 local function backward_word_end(key)
   local mode = vim.api.nvim_get_mode().mode
   if mode == "n" then
-    vim.cmd("normal! " .. key)
+    vim.cmd("normal! " .. vim.v.count1 .. key)
     return
   end
 
   if vim.list_contains({ "v", "V", "" }, mode) then
     if vim.fn.col(".") == 1 then
-      vim.cmd("normal! " .. key .. "l")
+      vim.cmd("normal! " .. vim.v.count1 .. key .. "l")
     else
-      vim.cmd("normal! " .. "h" .. key .. "l")
+      vim.cmd("normal! " .. "h" .. vim.v.count1 .. key .. "l")
     end
     return
   end
@@ -176,7 +176,7 @@ end
 local function forward_word_end(key)
   local mode = vim.api.nvim_get_mode().mode
   if vim.list_contains({ "n", "v", "V", "" }, mode) then
-    vim.cmd("normal! " .. key)
+    vim.cmd("normal! " .. vim.v.count1 .. key)
     return
   end
 
@@ -190,15 +190,15 @@ local function forward_word_start(key)
   local mode = vim.api.nvim_get_mode().mode
 
   if mode == "n" then
-    vim.cmd("normal! " .. key)
+    vim.cmd("normal! " .. vim.v.count1 .. key)
     return
   end
 
   if vim.list_contains({ "v", "V", "" }, mode) then
     if vim.fn.col(".") == 1 then
-      vim.cmd("normal! " .. key .. "h")
+      vim.cmd("normal! " .. vim.v.count1 .. key .. "h")
     else
-      vim.cmd("normal! " .. "l" .. key .. "h")
+      vim.cmd("normal! " .. "l" .. vim.v.count1 .. key .. "h")
     end
     return
   end

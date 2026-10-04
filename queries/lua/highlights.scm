@@ -2,13 +2,13 @@
 
 ;; ERROR / FIXME / DEPRECATED  →  @comment.error
 ((comment) @comment.error
- (#match? @comment.error "ERROR|FIXME|DEPRECATED")
+ (#match? @comment.error "ERROR|FIXME|DEPRECATED|BUG")
  (#set! priority 130)
  )
 
 ;; WARNING / FIX / HACK  →  @comment.warning
 ((comment) @comment.warning
- (#match? @comment.warning "WARNING|FIX|HACK")
+ (#match? @comment.warning "WARNING|FIX|HACK|LIMIT")
  (#set! priority 130)
  )
 
