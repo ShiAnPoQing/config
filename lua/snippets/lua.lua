@@ -1,6 +1,8 @@
 local ls = require("luasnip")
 local s = ls.snippet
 local sn = ls.snippet_node
+local k = require("luasnip.nodes.key_indexer").new_key
+local opt = require("luasnip.nodes.optional_arg").new_opt
 local isn = ls.indent_snippet_node
 local t = ls.text_node
 local i = ls.insert_node
@@ -55,6 +57,8 @@ local function only_blank_or_comment_line(line_to_cursor)
   end
   return true
 end
+
+local enter
 
 local snippets = {
   s({
@@ -219,6 +223,14 @@ local snippets = {
     t("print(vim.inspect("),
     i(1),
     t("))"),
+  }),
+  s({
+    trig = "do",
+  }, {
+    t("do"),
+    t({ "", "\t" }),
+    i(1),
+    t({ "", "end" }),
   }),
   s({
     trig = "fun",

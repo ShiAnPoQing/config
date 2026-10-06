@@ -335,66 +335,88 @@ local snippets = {
     })
   ),
 
-  s(
-    {
-      trig = "{}",
-      regTrig = true,
-      hidden = true,
-      wordTrig = false,
-    },
-    c(1, {
-      d(1, function(_, snip)
-        if next(snip.env.TM_SELECTED_TEXT) == nil then
-          return sn(1, { t("{"), r(1, "select_text"), t("}") })
-        else
-          return sn(1, {
-            t("{"),
-            r(1, "select_text", i(1, snip.env.TM_SELECTED_TEXT)),
-            t("}"),
-          })
+  -- s(
+  --   {
+  --     trig = "{}",
+  --     regTrig = true,
+  --     hidden = true,
+  --     wordTrig = false,
+  --   },
+  --   c(1, {
+  --     d(1, function(_, snip)
+  --       if next(snip.env.TM_SELECTED_TEXT) == nil then
+  --         return sn(1, { t("{"), r(1, "select_text"), t("}") })
+  --       else
+  --         return sn(1, {
+  --           t("{"),
+  --           r(1, "select_text", i(1, snip.env.TM_SELECTED_TEXT)),
+  --           t("}"),
+  --         })
+  --       end
+  --     end),
+  --     d(1, function(_, snip)
+  --       if next(snip.env.TM_SELECTED_TEXT) == nil then
+  --         return sn(1, { t("("), r(1, "select_text"), t(")") })
+  --       else
+  --         return sn(1, {
+  --           t("("),
+  --           r(1, "select_text"),
+  --           t(")"),
+  --         })
+  --       end
+  --     end),
+  --     d(1, function(_, snip)
+  --       if next(snip.env.TM_SELECTED_TEXT) == nil then
+  --         return sn(1, { t("["), r(1, "select_text"), t("]") })
+  --       else
+  --         return sn(1, {
+  --           t("["),
+  --           r(1, "select_text"),
+  --           t("]"),
+  --         })
+  --       end
+  --     end),
+  --     d(1, function(_, snip)
+  --       if next(snip.env.TM_SELECTED_TEXT) == nil then
+  --         return sn(1, { t("<"), r(1, "select_text"), t(">") })
+  --       else
+  --         return sn(1, {
+  --           t("<"),
+  --           r(1, "select_text"),
+  --           t(">"),
+  --         })
+  --       end
+  --     end),
+  --
+  --     i(1),
+  --   }, {
+  --     stored = {
+  --       ["select_text"] = i(1),
+  --     },
+  --
+  s({ trig = "{}", regTrig = true, hidden = true, wordTrig = false }, {
+    d(1, function(_, snip)
+      local TM_SELECTED_TEXT = snip.env.TM_SELECTED_TEXT
+      if #TM_SELECTED_TEXT > 1 then
+        local texts = {}
+        for i, line in ipairs(TM_SELECTED_TEXT) do
+          local col = line:find("%S")
+          local text = line:sub(col or 1)
+          if i ~= 1 then
+            text = "\t" .. text
+          end
+          texts[#texts + 1] = text
         end
-      end),
-      d(1, function(_, snip)
-        if next(snip.env.TM_SELECTED_TEXT) == nil then
-          return sn(1, { t("("), r(1, "select_text"), t(")") })
-        else
-          return sn(1, {
-            t("("),
-            r(1, "select_text"),
-            t(")"),
-          })
-        end
-      end),
-      d(1, function(_, snip)
-        if next(snip.env.TM_SELECTED_TEXT) == nil then
-          return sn(1, { t("["), r(1, "select_text"), t("]") })
-        else
-          return sn(1, {
-            t("["),
-            r(1, "select_text"),
-            t("]"),
-          })
-        end
-      end),
-      d(1, function(_, snip)
-        if next(snip.env.TM_SELECTED_TEXT) == nil then
-          return sn(1, { t("<"), r(1, "select_text"), t(">") })
-        else
-          return sn(1, {
-            t("<"),
-            r(1, "select_text"),
-            t(">"),
-          })
-        end
-      end),
-
-      i(1),
-    }, {
-      stored = {
-        ["select_text"] = i(1),
-      },
-    })
-  ),
+        return sn(nil, {
+          t({ "{", "\t" }),
+          isn(1, i(1, texts), "$PARENT_INDENT"),
+          t({ "", "}" }),
+        })
+      end
+      return sn(i, { t("{"), i(1, TM_SELECTED_TEXT), t("}") })
+    end),
+    i(2),
+  }),
   s(
     {
       trig = "%(%)",
@@ -412,7 +434,6 @@ local snippets = {
       return sn(1, { t("("), i(1, text()), t(")") })
     end)
   ),
-
   -- s(
   --   {
   --     trig = "%(%)",

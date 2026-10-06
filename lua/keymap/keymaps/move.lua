@@ -46,18 +46,68 @@ local K = function()
 end
 
 return {
-  -- ["j"] = { j, { "n", "x", "o" }, expr = true, desc = "Move down [count] lines" },
-  -- ["k"] = { k, { "n", "x", "o" }, expr = true, desc = "Move up [count] lines" },
+  ["X"] = {
+    function()
+      vim.cmd("normal! xh")
+    end,
+    "n",
+  },
+  ["h"] = {
+    function()
+      vim.cmd("normal! vh")
+    end,
+    "o"
+  },
+  ["l"] = {
+    function()
+      vim.cmd("normal! vl")
+    end,
+    "o",
+  },
+  ["j"] = { j, { "n", "x", "o" }, expr = true, desc = "Move down [count] lines" },
+  ["k"] = { k, { "n", "x", "o" }, expr = true, desc = "Move up [count] lines" },
   ["<down>"] = { j, { "n", "x", "o" }, expr = true, desc = "Move down [count] lines" },
   ["<up>"] = { k, { "n", "x", "o" }, expr = true, desc = "Move up [count] lines" },
   ["[k"] = { "-", { "n", "x", "o" }, desc = "[count] lines upward, on the first non-blank character [linewise]" },
   ["]k"] = { "kg_", { "n", "x", "o" }, desc = "[count] lines upward, on the last non-blank character [linewise]" },
   ["[j"] = { "+", { "n", "x", "o" }, desc = "[count] lines downward, on the first non-blank character [linewise]" },
   ["]j"] = { "jg_", { "n", "x", "o" }, desc = "[count] lines downward, on the last non-blank character [linewise]" },
-  ["H"] = { H, { "n", "x", "o" } },
-  ["J"] = { J, { "n", "x", "o" } },
-  ["K"] = { K, { "n", "x", "o" } },
-  ["L"] = { L, { "n", "x", "o" } },
+  ["H"] = {
+    { H, { "n", "x" } },
+    {
+      function()
+        vim.cmd("normal! " .. vim.v.count1 * 3 .. "h")
+      end,
+      "o",
+    },
+  },
+  ["J"] = {
+    { J, { "n", "x" } },
+    {
+      function()
+        vim.cmd("normal! " .. vim.v.count1 * 3 .. "gj")
+      end,
+      "o",
+    },
+  },
+  ["K"] = {
+    { K, { "n", "x" } },
+    {
+      function()
+        vim.cmd("normal! " .. vim.v.count1 * 3 .. "gk")
+      end,
+      "o",
+    },
+  },
+  ["L"] = {
+    { L, { "n", "x" } },
+    {
+      function()
+        vim.cmd("normal! " .. vim.v.count1 * 3 .. "l")
+      end,
+      "o",
+    },
+  },
   ["<M-j>"] = { "<down>", { "i", "c", "s", "t" }, desc = "Down" },
   ["<M-k>"] = { "<up>", { "i", "c", "s", "t" }, desc = "Up" },
   ["<M-h>"] = { "<left>", { "i", "c", "s", "t" }, desc = "Left" },

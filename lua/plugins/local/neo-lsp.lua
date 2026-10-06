@@ -183,7 +183,7 @@ return {
         require("native-packer.key").add({
           ["<leader>k"] = {
             function()
-              vim.lsp.buf.hover()
+              vim.lsp.buf.hover({ border = "single" })
             end,
             "n",
             buf = args.buf,

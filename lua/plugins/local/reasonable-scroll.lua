@@ -137,7 +137,23 @@ return {
     ["<C-S-l>"] = {
       {
         function()
+          local old = vim.o.virtualedit
+          vim.o.virtualedit = "all"
           require("reasonable-scroll").scroll_half_page_right()
+          local line = vim.api.nvim_get_current_line()
+          local virtcol = vim.fn.virtcol(".")
+          if virtcol >= #line then
+            vim.api.nvim_create_autocmd("CursorMoved", {
+              callback = function()
+                local line = vim.api.nvim_get_current_line()
+                local virtcol = vim.fn.virtcol(".")
+                if virtcol <= #line then
+                  vim.o.virtualedit = old
+                  return true
+                end
+              end,
+            })
+          end
         end,
         { "n", "x" },
       },

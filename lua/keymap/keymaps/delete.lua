@@ -55,7 +55,7 @@ return {
   },
   [my.keymap.keys.CTRL_BS] = {
     { '<Left><C-o>"_diw', "i" },
-    { '"_diw', "n" },
+    { '"_diwi', "n" },
     {
       function()
         require("builtin.cmdline").delete_cword_before()
@@ -66,7 +66,7 @@ return {
   },
   ["<M-BS>"] = {
     { '<C-o>"_diw', "i" },
-    { '"_diw', "n" },
+    { '"_diwi', "n" },
     {
       function()
         require("builtin.cmdline").delete_cword_after()

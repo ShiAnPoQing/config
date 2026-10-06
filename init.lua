@@ -1,4 +1,6 @@
 require("my")
+my.profile.promax.config({})
+my.profile.pro.config({})
 vim.pack.add({ { src = "https://github.com/BrokenSunny/native-packer", version = "branch" } })
 require("operator").setup()
 require("window").setup()

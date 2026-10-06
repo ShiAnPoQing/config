@@ -8,6 +8,8 @@
 --- @field motion my.motion
 --- @field cursor my.cursor
 --- @field util my.util
+--- @field option my.option
+--- @field profile my.profile
 --- @field g my.g
 --- @field b my.b
 --- @field w my.w
@@ -29,6 +31,8 @@ my._submodules = {
   insert = true,
   operator = true,
   motion = true,
+  profile = true,
+  option = true,
   util = true,
 }
 
@@ -44,13 +48,29 @@ setmetatable(my, {
 do
   --- @param scope string
   --- @param handle? false|integer
+  --- @param opts { setvar: fun(scope: string, handle:any, k: any, v: any): any; getvar: fun(scope: string, handle:any, k: any): any }
   --- @return vim.var_accessor
-  local function make_dict_accessor(scope, handle)
+  local function make_dict_accessor(scope, handle, opts)
     vim.validate("scope", scope, "string")
     local mt = {}
     --- @param k string
     --- @param v any
     function mt.__newindex(_, k, v)
+      return opts.setvar(scope, handle, k, v)
+    end
+
+    --- @param k string|integer
+    function mt.__index(_, k)
+      if handle == nil and type(k) == "number" then
+        return make_dict_accessor(scope, k, opts)
+      end
+      return opts.getvar(scope, handle, k)
+    end
+    return setmetatable({}, mt)
+  end
+
+  local opts = {
+    setvar = function(scope, handle, k, v)
       if handle then
         local vars = vim[scope][handle].my or {}
         vars[k] = v
@@ -60,12 +80,9 @@ do
         vars[k] = v
         vim[scope].my = vars
       end
-    end
-    --- @param k string|integer
-    function mt.__index(_, k)
-      if handle == nil and type(k) == "number" then
-        return make_dict_accessor(scope, k)
-      end
+      return true
+    end,
+    getvar = function(scope, handle, k)
       if handle then
         if vim[scope][handle].my == nil then
           return nil
@@ -77,12 +94,22 @@ do
         end
         return vim[scope].my[k]
       end
-    end
-    return setmetatable({}, mt)
-  end
+    end,
+  }
 
-  my.g = make_dict_accessor("g", false)
-  my.b = make_dict_accessor("b")
-  my.w = make_dict_accessor("w")
-  my.t = make_dict_accessor("t")
+  my.g = make_dict_accessor("g", false, opts)
+  my.b = make_dict_accessor("b", nil, opts)
+  my.w = make_dict_accessor("w", nil, opts)
+  my.t = make_dict_accessor("t", nil, opts)
+
+  local _opts = {
+    setvar = function(scope, handle, k, v)
+      return my.option.set(scope, handle, k, v)
+    end,
+    getvar = function(scope, handle, k)
+      return my.option.get(scope, handle, k)
+    end,
+  }
+  my.go = make_dict_accessor("g", false, _opts)
+  my.bo = make_dict_accessor("b", nil, _opts)
 end

@@ -15,13 +15,6 @@ local M = my.util.defer_require("my.motion", {
   ["n"] = "NORMAL",
   ["i"] = "INSERT",
   ["no"] = "OPERATOR_PENDING",
-  -- VISUAL = true,
-  -- VISUAL_LINE = true,
-  -- VISUAL_BLOCK = true,
-  -- NORMAL = true,
-  -- ["v"] = "VISUAL",
-  -- ["V"] = "VISUAL_LINE",
-  -- [""] = "VISUAL_BLOCK",
 })
 
 --- secondary cursor 应当 apply primary cursor 的 motion，各自评估

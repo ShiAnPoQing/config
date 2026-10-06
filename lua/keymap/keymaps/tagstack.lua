@@ -1,4 +1,35 @@
+-- local lsp_attached
+--
+-- vim.api.nvim_create_autocmd("LspProgress", {
+--   callback = function(ev)
+--     if ev.data.params.value.title == "Diagnosing workspace" then
+--       lsp_attached = true
+--       return true
+--     end
+--   end,
+-- })
+--
+-- -- Give it more time!!!!!!
+-- local function test()
+--   if not lsp_attached then
+--     vim.wait(1100, function()
+--       vim.v.errmsg = ""
+--       vim.cmd("silent! normal! " .. vim.keycode("<C-]>"))
+--       return vim.v.errmsg == ""
+--     end, 100)
+--     return
+--   end
+--   vim.cmd("normal! " .. vim.keycode("<C-]>"))
+-- end
+
 return {
+  ["<C-]>"] = {
+    function()
+      -- Shut up!!!!!
+      vim.cmd("silent! normal! " .. vim.keycode("<C-]>"))
+    end,
+    "n",
+  },
   ["[t"] = {
     function()
       ---@diagnostic disable-next-line: param-type-mismatch

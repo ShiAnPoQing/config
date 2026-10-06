@@ -43,7 +43,7 @@ return {
             "Filetype",
             "CursorMoved",
             "CursorMovedI",
-            -- "ModeChanged",
+            "ModeChanged",
           },
         },
       },

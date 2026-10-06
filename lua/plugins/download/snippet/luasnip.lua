@@ -45,18 +45,14 @@ return {
     },
     config = function()
       require("luasnip.loaders.from_lua").lazy_load({ paths = vim.fn.stdpath("config") .. "/lua/snippets/" })
-
       local ls = require("luasnip")
-
-      local options = {
+      ls.setup({
         history = true,
-        updateevents = "TextChanged,TextChangedI",
+        update_events = "TextChanged,TextChangedI",
         enable_autosnippets = true,
         cut_selection_keys = "<Tab>",
-      }
-
-      ls.config.set_config(options)
-      ls.config.setup({ store_selection_keys = "<Tab>" })
+        store_selection_keys = "<Tab>",
+      })
     end,
   },
 }
