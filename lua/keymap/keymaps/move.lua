@@ -52,15 +52,9 @@ return {
     end,
     "n",
   },
-  ["h"] = {
-    function()
-      vim.cmd("normal! vh")
-    end,
-    "o"
-  },
   ["l"] = {
     function()
-      vim.cmd("normal! vl")
+      vim.cmd("normal! v" .. vim.v.count1 .. "lol")
     end,
     "o",
   },

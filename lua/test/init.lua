@@ -1,9 +1,6 @@
 local M = {}
 
 function M.setup()
-  if vim.fn.has("nvim-0.13") ~= 1 then
-    return
-  end
   -- vim.opt.cmdheight = 0
   --- @see ui2
   --- @see messagesopt

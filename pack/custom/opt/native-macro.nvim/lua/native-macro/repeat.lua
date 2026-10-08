@@ -18,6 +18,13 @@ function M:_repeat(reg)
   local count = vim.v.count1
   for _ = 1, count do
     for _, atom in ipairs(Record.records[reg] or {}) do
+      if not atom.keys and atom.lhs then
+        -- ISSUE: custom operator g@
+        local fix = atom.lhs:find("lua my.operator", 1, true)
+        if fix then
+          atom.lhs = "<Cmd>" .. atom.lhs:sub(fix)
+        end
+      end
       vim.api.nvim_feedkeys(
         vim.api.nvim_replace_termcodes(atom.keys or atom.lhs, true, false, true),
         atom.keys and "nt" or "mt",

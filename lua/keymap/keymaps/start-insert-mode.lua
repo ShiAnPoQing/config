@@ -1,36 +1,36 @@
 return {
-  ["w"] = { "i", "n", desc = "Cursor left insert" },
-  ["e"] = { "a", "n", desc = "Cursor right insert" },
-  ["<space>w"] = {
-    "<cmd>lua my.insert.first_non_blank()<cr>",
-    { "n", "x" },
-    desc = "Insert text before the first non-blank character [count]",
-  },
-  ["<space>e"] = {
-    "<cmd>lua my.insert.last_non_blank()<cr>",
-    { "n", "x" },
-    desc = "Insert text after the last non-blank character [count]",
-  },
-  ["<space><space>w"] = {
-    "<cmd>lua my.insert.first()<CR>",
-    { "n", "x" },
-    desc = "Insert text before the first character [count]",
-  },
-  ["<space><space>e"] = {
-    "<cmd>lua my.insert.last()<CR>",
-    { "n", "x" },
-    desc = "Insert text after the last character [count]",
-  },
-  ["W"] = {
-    "<cmd>lua my.insert.first()<CR>",
-    { "n", "x" },
-    desc = "Insert text before the first character [count]",
-  },
-  ["E"] = {
-    "<cmd>lua my.insert.last()<CR>",
-    { "n", "x" },
-    desc = "Insert text before the first character [count]",
-  },
+  -- ["w"] = { "i", "n", desc = "Cursor left insert" },
+  -- ["e"] = { "a", "n", desc = "Cursor right insert" },
+  -- ["<space>w"] = {
+  --   "<cmd>lua my.insert.first_non_blank()<cr>",
+  --   { "n", "x" },
+  --   desc = "Insert text before the first non-blank character [count]",
+  -- },
+  -- ["<space>e"] = {
+  --   "<cmd>lua my.insert.last_non_blank()<cr>",
+  --   { "n", "x" },
+  --   desc = "Insert text after the last non-blank character [count]",
+  -- },
+  -- ["<space><space>w"] = {
+  --   "<cmd>lua my.insert.first()<CR>",
+  --   { "n", "x" },
+  --   desc = "Insert text before the first character [count]",
+  -- },
+  -- ["<space><space>e"] = {
+  --   "<cmd>lua my.insert.last()<CR>",
+  --   { "n", "x" },
+  --   desc = "Insert text after the last character [count]",
+  -- },
+  -- ["W"] = {
+  --   "<cmd>lua my.insert.first()<CR>",
+  --   { "n", "x" },
+  --   desc = "Insert text before the first character [count]",
+  -- },
+  -- ["E"] = {
+  --   "<cmd>lua my.insert.last()<CR>",
+  --   { "n", "x" },
+  --   desc = "Insert text before the first character [count]",
+  -- },
 
   ["<space>W"] = {
     function()

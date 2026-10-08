@@ -1,9 +1,4 @@
 ---------------------------------------------------------------------------------------------------+
----
----vim.schedule(fu)
--- vim.schedule(fu)
--- vim.schedule(fu)
--- vim.schedule(fu)
 -- map! / noremap!  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    -     |
 -- imap / inoremap  |    -   |   @    |    -    |   -    |   -    |    -     |    -     |    -     |
 -- cmap / cnoremap  |    -   |   -    |    @    |   -    |   -    |    -     |    -     |    -     |
@@ -46,6 +41,40 @@
 -- },
 
 return {
+  ["y"] = {
+    {
+      function()
+        my.operator.yank()
+      end,
+      { "n", "x" },
+    },
+    {
+      function()
+        if my.operator.is_yank_operator() then
+          return "_"
+        end
+      end,
+      "o",
+      expr = true,
+    },
+  },
+  ["d"] = {
+    {
+      function()
+        my.operator.delete()
+      end,
+      { "n", "x" },
+    },
+    {
+      function()
+        if my.operator.is_delete_operator() then
+          return "_"
+        end
+      end,
+      "o",
+      expr = true,
+    },
+  },
   ["<M-c>"] = { "<C-o>c", "i", desc = "c" },
   ["<M-x>"] = { "<C-o>x", "i", desc = "x" },
   ["<M-S-`>"] = { "<C-o>~", "i", desc = "`" },

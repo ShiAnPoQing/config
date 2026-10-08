@@ -95,4 +95,112 @@ function M.wrap(operator, opts, opts2)
   end
 end
 
+-- local origin
+--
+-- function M.get_origin()
+--   return origin
+-- end
+--
+-- function M.init()
+--   vim.api.nvim_create_autocmd("ModeChanged", {
+--     pattern = "*:no*",
+--     callback = function()
+--       origin = vim.api.nvim_win_get_cursor(0)
+--     end,
+--   })
+-- end
+
+local operator_context
+
+function M._pending_delete_(context)
+  vim.o.operatorfunc = "v:lua.my.operator._delete_"
+  operator_context = context
+  operator_context.origin = vim.api.nvim_win_get_cursor(0)
+end
+
+--- @param type "char"|"line"|"block"
+function M._delete_(type)
+  -- vim.api.nvim_create_autocmd("CmdAtom", {
+  --   callback = function(ev)
+  --     ev.data.lhs = vim.fn.keytrans(ev.data.lhs)
+  --     vim.print(ev.data)
+  --     return true
+  --   end,
+  -- })
+  local origin = operator_context.origin
+  local d = '"' .. operator_context.reg .. "d"
+  if type == "char" then
+    local start_pos = vim.fn.getpos("'[")
+    vim.cmd("normal! `[v`]" .. d)
+    if start_pos[2] == origin[1] and start_pos[3] > origin[2] then
+      vim.api.nvim_win_set_cursor(0, origin)
+    end
+    return
+  end
+
+  if type == "line" then
+    vim.cmd("normal! '[V']" .. d)
+    return
+  end
+
+  if type == "block" then
+    vim.cmd("normal! `[" .. vim.keycode("<C-V>") .. "`]" .. d)
+    return
+  end
+end
+
+function M.is_delete_operatorfunc()
+  return vim.o.operatorfunc == "v:lua.my.operator._delete_"
+end
+
+function M.is_delete_operator()
+  return vim.v.operator == "g@" and M.is_delete_operatorfunc()
+end
+
+function M.delete()
+  local pending_cmd = string.format(
+    "<Cmd>lua my.operator._pending_delete_(%s)<Cr>",
+    vim.fn.join(vim.fn.split(vim.inspect({ reg = vim.v.register }), "\n"), "")
+  )
+  vim.api.nvim_feedkeys(vim.keycode(pending_cmd), "nt", false)
+  vim.api.nvim_feedkeys(vim.v.count1 .. "g@", "n", false)
+end
+
+function M._pending_yank_(context)
+  vim.o.operatorfunc = "v:lua.my.operator._yank_"
+  operator_context = context
+  operator_context.origin = vim.api.nvim_win_get_cursor(0)
+end
+
+--- @param type "char"|"line"|"block"
+function M._yank_(type)
+  local origin = operator_context.origin
+  local y = '"' .. operator_context.reg .. "y"
+  if type == "char" then
+    vim.cmd("normal! `[v`]" .. y)
+  elseif type == "line" then
+    vim.cmd("normal! '[V']" .. y)
+  elseif type == "block" then
+    vim.cmd("normal! `[" .. vim.keycode("<C-V>") .. "`]" .. y)
+  end
+  vim.api.nvim_win_set_cursor(0, origin)
+end
+
+function M.is_yank_operatorfunc()
+  return vim.o.operatorfunc == "v:lua.my.operator._yank_"
+end
+
+function M.is_yank_operator()
+  return vim.v.operator == "g@" and M.is_yank_operatorfunc()
+end
+
+function M.yank()
+  local pending_cmd = string.format(
+    "<Cmd>lua my.operator._pending_yank_(%s)<Cr>",
+    vim.fn.join(vim.fn.split(vim.inspect({ reg = vim.v.register }), "\n"), "")
+  )
+  vim.api.nvim_feedkeys(vim.keycode(pending_cmd), "nt", false)
+  vim.api.nvim_feedkeys("g@", "n", false)
+end
+
 return M

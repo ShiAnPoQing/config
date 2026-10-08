@@ -1,0 +1,208 @@
+-- --- @class my.profile.pro._config
+-- --- @field _config my.profile.pro.Opts
+-- local M = {}
+--
+-- --- @type my.profile.pro.Opts
+-- local default_config = {
+--   keymap = {
+--     preset = "default",
+--     ["<space>h"] = {
+--       n = "motion.NORMAL.first_non_blank",
+--       x = "motion.VISUAL.first_non_blank",
+--       o = "motion.OPERATOR.first_non_blank",
+--     },
+--     -- ["<space>j"] = {
+--     --   n = "motion.NORMAL.first_non_blank",
+--     --   x = "motion.VISUAL.first_non_blank",
+--     --   o = "motion.OPERATOR.first_non_blank",
+--     -- },
+--     -- ["<space>k"] = {
+--     --   n = "motion.NORMAL.first_non_blank",
+--     --   x = "motion.VISUAL.first_non_blank",
+--     --   o = "motion.OPERATOR.first_non_blank",
+--     -- },
+--     ["<space>l"] = {
+--       n = "motion.NORMAL.last_non_blank",
+--       x = "motion.VISUAL.last_non_blank",
+--       o = "motion.OPERATOR.last_non_blank",
+--     },
+--     ["<space><space>h"] = {
+--       n = "motion.NORMAL.first",
+--       x = "motion.VISUAL.first",
+--       o = "motion.OPERATOR.first",
+--     },
+--     -- ["<space><space>j"] = {
+--     --   n = "motion.NORMAL.first",
+--     --   x = "motion.VISUAL.first",
+--     --   o = "motion.OPERATOR.first",
+--     -- },
+--     -- ["<space><space>k"] = {
+--     --   n = "motion.NORMAL.first",
+--     --   x = "motion.VISUAL.first",
+--     --   o = "motion.OPERATOR.first",
+--     -- },
+--     ["<space><space>l"] = {
+--       n = "motion.NORMAL.last",
+--       x = "motion.VISUAL.last",
+--       o = "motion.OPERATOR.last",
+--     },
+--     ["w"] = {},
+--     ["e"] = {},
+--     ["W"] = {},
+--     ["E"] = {},
+--     ["i"] = {
+--       n = "motion.NORMAL.backward_word_start",
+--       x = "motion.VISUAL.backward_word_start",
+--       o = "motion.OPERATOR.backward_word_start",
+--     },
+--     ["I"] = {
+--       n = "motion.NORMAL.backward_WORD_start",
+--       x = "motion.VISUAL.backward_WORD_start",
+--       o = "motion.OPERATOR.backward_WORD_start",
+--     },
+--     ["o"] = {
+--       n = "motion.NORMAL.forward_word_end",
+--       x = "motion.VISUAL.forward_word_end",
+--       o = "motion.OPERATOR.forward_word_end",
+--     },
+--     ["O"] = {
+--       n = "motion.NORMAL.forward_WORD_end",
+--       x = "motion.VISUAL.forward_WORD_end",
+--       o = "motion.OPERATOR.forward_WORD_end",
+--     },
+--     ["<space>i"] = {
+--       n = "motion.NORMAL.backward_word_end",
+--       x = "motion.VISUAL.backward_word_end",
+--       o = "motion.OPERATOR.backward_word_end",
+--     },
+--     ["<space>I"] = {
+--       n = "motion.NORMAL.backward_WORD_end",
+--       x = "motion.VISUAL.backward_WORD_end",
+--       o = "motion.OPERATOR.backward_WORD_end",
+--     },
+--     ["<space>o"] = {
+--       n = "motion.NORMAL.forward_word_start",
+--       x = "motion.VISUAL.forward_word_start",
+--       o = "motion.OPERATOR.forward_word_start",
+--     },
+--     ["<space>O"] = {
+--       n = "motion.NORMAL.forward_WORD_start",
+--       x = "motion.VISUAL.forward_WORD_start",
+--       o = "motion.OPERATOR.forward_WORD_start",
+--     },
+--     ["<M-i>"] = {
+--       i = "motion.INSERT.backward_word_start",
+--       c = "motion.",
+--     },
+--     ["<M-I>"] = {
+--       i = "motion.INSERT.backward_WORD_start",
+--     },
+--     ["<M-o>"] = {
+--       i = "motion.INSERT.forward_word_end",
+--     },
+--     ["<M-O>"] = {
+--       i = "motion.INSERT.forward_WORD_end",
+--     },
+--     ["<M-space><M-i>"] = {
+--       i = "motion.INSERT.backward_word_end",
+--     },
+--     ["<M-S-space><M-I>"] = {
+--       i = "motion.INSERT.backward_WORD_end",
+--     },
+--     ["<M-space><M-o>"] = {
+--       i = "motion.INSERT.forward_word_start",
+--     },
+--     ["<M-S-space><M-O>"] = {
+--       i = "motion.INSERT.forward_WORD_start",
+--     },
+--   },
+-- }
+--
+-- --- @class my.profile.pro.Opts.Keymap.Spec
+-- --- @field n? string
+-- --- @field v? string
+-- --- @field o? string
+-- --- @field x? string
+-- --- @field i? string
+-- --- @field c? string
+-- --- @field s? string
+-- --- @field t? string
+--
+-- --- @class my.profile.pro.Opts.Keymap
+-- --- @field [string] string|my.profile.pro.Opts.Keymap.Spec
+-- --- @field preset? "default"|"none"
+--
+-- --- @class my.profile.pro.Opts
+-- --- @field keymap? my.profile.pro.Opts.Keymap
+--
+-- --- @param path string
+-- local function resolve_action(path)
+--   local value = my.profile.pro
+--
+--   local parts = vim.split(path, ".", { plain = true })
+--   for i, part in ipairs(parts) do
+--     if i < #parts then
+--       if type(value[part]) == "table" then
+--         value = value[part]
+--       end
+--     else
+--       if type(value[part]) == "function" then
+--         value = value[part]
+--       end
+--     end
+--   end
+--   return value
+-- end
+--
+-- ---@param source my.profile.pro.Opts.Keymap
+-- ---@param keymap my.profile.pro.Opts.Keymap
+-- local function resolve_keymap(source, keymap)
+--   if source.preset == "default" then
+--     for lhs, value in ipairs(source) do
+--       if lhs ~= "preset" then
+--         if type(value) == "table" then
+--           for mode, action in pairs(value) do
+--             if vim.list_contains({ "n", "i", "x", "o", "t", "c", "s", "v" }, mode) then
+--               if not M._config.keymap[lhs] then
+--                 M._config.keymap[lhs] = {}
+--               end
+--               M._config.keymap[lhs][mode] = action
+--             end
+--           end
+--         end
+--       end
+--     end
+--   elseif source.preset == "none" then
+--     --- nothing to do
+--   else
+--     --
+--   end
+--   for lhs, value in pairs(keymap) do
+--     if lhs ~= "preset" then
+--       if type(value) == "table" then
+--         for mode, action in pairs(value) do
+--           if vim.list_contains({ "n", "i", "x", "o", "t", "c", "s", "v" }, mode) then
+--             local rhs = resolve_action(action)
+--             if type(rhs) == "function" or type(rhs) == "string" then
+--               keymap[lhs][mode] = rhs
+--             end
+--           end
+--         end
+--       end
+--     end
+--   end
+-- end
+--
+-- ---@param opts my.profile.pro.Opts?
+-- function M.config(opts)
+--   opts = vim.tbl_deep_extend("force", {}, opts or {})
+--   vim.validate("opts", opts, "table")
+--   vim.validate("opts.keymap", opts.keymap, "table", true)
+--   M._config = { keymap = vim.tbl_deep_extend("force", default_config.keymap, {}) }
+--   opts.keymap = opts.keymap or {}
+--   opts.keymap.preset = opts.keymap.preset or "default"
+--   vim.validate("opts.keymap.preset", opts.keymap.preset, "string", true)
+--   resolve_keymap(opts.keymap, M._config.keymap)
+-- end
+--
+-- return M

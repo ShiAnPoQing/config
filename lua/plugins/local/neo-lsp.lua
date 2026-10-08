@@ -156,15 +156,15 @@ return {
             desc = "Goto Lsp definition(vsplit)",
             buf = args.buf,
           },
-          ["sd"] = {
-            function()
-              vim.opt.switchbuf = "split"
-              vim.lsp.buf.definition()
-            end,
-            "n",
-            desc = "Goto Lsp definition(vsplit)",
-            buf = args.buf,
-          },
+          -- ["sd"] = {
+          --   function()
+          --     vim.opt.switchbuf = "split"
+          --     vim.lsp.buf.definition()
+          --   end,
+          --   "n",
+          --   desc = "Goto Lsp definition(vsplit)",
+          --   buf = args.buf,
+          -- },
         })
       end,
       [Methods.textDocument_typeDefinition] = function(args)

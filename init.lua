@@ -1,6 +1,4 @@
 require("my")
-my.profile.promax.config({})
-my.profile.pro.config({})
 vim.pack.add({ { src = "https://github.com/BrokenSunny/native-packer", version = "branch" } })
 require("operator").setup()
 require("window").setup()
@@ -73,7 +71,7 @@ require("native-packer").add({
   -- require("plugins.test.pulseline"),
   -- require("plugins.local.shell-connect"),
   -- require("plugins.test.luma"),
-  require("plugins.test.ring"),
+  -- require("plugins.test.ring"),
   require("plugins.test.window-resize"),
   require("plugins.test._eye"),
   require("plugins.builtin"),
@@ -125,3 +123,6 @@ vim.keymap.set("n", "m/", function()
   end, ns)
   vim.api.nvim_feedkeys("/", "n", true)
 end)
+
+-- require("promax")
+require("pro")

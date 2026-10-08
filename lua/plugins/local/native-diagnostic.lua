@@ -532,7 +532,7 @@ return {
       "n",
       desc = "Goto first diagnostic",
     },
-    ["scd"] = {
+    ["<leader>scd"] = {
       function()
         require("native-diagnostic").choose()
       end,

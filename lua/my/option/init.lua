@@ -2,13 +2,13 @@
 local M = vim._defer_require("my.option", {})
 
 local option_specs = {
-  profile = {
+  env = {
     type = "string",
-    list = { "pro", "promax" },
+    -- list = { "pro", "promax" },
     scope = { "g" },
     default = "pro",
     setter = function(_, _, _, v)
-      my.profile.set(v)
+      my.env.set(vim.api.nvim_create_namespace(v))
     end,
   },
 }

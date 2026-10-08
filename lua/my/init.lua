@@ -1,7 +1,9 @@
 --- @class my
+--- @field env my.env
 --- @field command my.command
 --- @field keymap my.keymap
 --- @field window my.window
+--- @field scroll my.scroll
 --- @field multicursor my.multicursor
 --- @field insert my.insert
 --- @field operator my.operator
@@ -9,7 +11,6 @@
 --- @field cursor my.cursor
 --- @field util my.util
 --- @field option my.option
---- @field profile my.profile
 --- @field g my.g
 --- @field b my.b
 --- @field w my.w
@@ -28,19 +29,25 @@ my._submodules = {
   window = true,
   multicursor = true,
   cursor = true,
-  insert = true,
   operator = true,
-  motion = true,
-  profile = true,
   option = true,
   util = true,
+  env = true,
+  scroll = true,
 }
 
 setmetatable(my, {
   __index = function(t, key)
+    if type(key) == "number" then
+      return my.env.get(key)
+    end
     if my._submodules[key] then
       t[key] = require("my." .. key)
       return t[key]
+    end
+    local env = my.env.get(0)
+    if env then
+      return env[key]
     end
   end,
 })
