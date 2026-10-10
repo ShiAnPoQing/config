@@ -14,7 +14,6 @@ require("native-packer").add({
   require("plugins.download.style.statuscol"),
   require("plugins.download.style.lualine"),
   require("plugins.download.misc.nvim-navic"),
-  require("plugins.local.native-macro"),
   require("plugins.download.misc.repeat"),
   require("plugins.local.native-diagnostic"),
   require("plugins.local.reasonable-scroll"),

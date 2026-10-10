@@ -52,12 +52,12 @@ return {
     end,
     "n",
   },
-  ["l"] = {
-    function()
-      vim.cmd("normal! v" .. vim.v.count1 .. "lol")
-    end,
-    "o",
-  },
+  -- ["l"] = {
+  --   function()
+  --     vim.cmd("normal! v" .. vim.v.count1 .. "lol")
+  --   end,
+  --   "o",
+  -- },
   ["j"] = { j, { "n", "x", "o" }, expr = true, desc = "Move down [count] lines" },
   ["k"] = { k, { "n", "x", "o" }, expr = true, desc = "Move up [count] lines" },
   ["<down>"] = { j, { "n", "x", "o" }, expr = true, desc = "Move down [count] lines" },

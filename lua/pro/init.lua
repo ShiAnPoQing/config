@@ -96,3 +96,5 @@ vim.keymap.set("i", "<M-space><M-space><M-l>", "<End>")
 
 vim.keymap.set("n", "<M-space><M-space><M-h>", "<Home>i")
 vim.keymap.set("n", "<M-space><M-space><M-l>", "<End>a")
+
+vim.keymap.set("n", "@", "<cmd>lua my.macro._repeat()<cr>")

@@ -11,6 +11,7 @@
 --- @field cursor my.cursor
 --- @field util my.util
 --- @field option my.option
+--- @field macro my.macro
 --- @field g my.g
 --- @field b my.b
 --- @field w my.w
@@ -34,6 +35,7 @@ my._submodules = {
   util = true,
   env = true,
   scroll = true,
+  macro = true,
 }
 
 setmetatable(my, {
@@ -120,3 +122,5 @@ do
   my.go = make_dict_accessor("g", false, _opts)
   my.bo = make_dict_accessor("b", nil, _opts)
 end
+
+my.macro.enable()

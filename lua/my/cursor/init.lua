@@ -124,7 +124,10 @@ function M.match_prev(pattern)
       local start, end_
 
       if is_cursor_line then
-        start, end_ = regex:match_line(0, i - 1, start_pos, end_col + 1)
+        local line = vim.api.nvim_get_current_line()
+        if end_col < #line then
+          start, end_ = regex:match_line(0, i - 1, start_pos, end_col + 1)
+        end
       else
         start, end_ = regex:match_line(0, i - 1, start_pos)
       end

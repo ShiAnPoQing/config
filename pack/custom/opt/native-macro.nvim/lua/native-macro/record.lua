@@ -20,19 +20,25 @@ function M.start(reg)
   })
 end
 
-function M.stop()
+function M.stop(reg)
+  local atoms = M.records[tostring(reg)] or {}
+  if atoms[1] and atoms[1].cmd == "q" then
+    table.remove(atoms, 1)
+  end
   pcall(vim.api.nvim_clear_autocmds, { group = "native-macro" })
 end
 
 function M.init()
+  local reg
   vim.api.nvim_create_autocmd("RecordingEnter", {
     callback = function()
-      M.start(vim.fn.reg_recording())
+      reg = vim.fn.reg_recording()
+      M.start(reg)
     end,
   })
   vim.api.nvim_create_autocmd("RecordingLeave", {
     callback = function()
-      M.stop()
+      M.stop(reg)
       vim.print(M.records)
     end,
   })

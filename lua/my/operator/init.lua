@@ -95,44 +95,79 @@ function M.wrap(operator, opts, opts2)
   end
 end
 
--- local origin
---
--- function M.get_origin()
---   return origin
--- end
---
--- function M.init()
---   vim.api.nvim_create_autocmd("ModeChanged", {
---     pattern = "*:no*",
---     callback = function()
---       origin = vim.api.nvim_win_get_cursor(0)
---     end,
---   })
--- end
+local op_ctx
 
-local operator_context
+local function get_operator_origins()
+  local origins = { vim.api.nvim_win_get_cursor(0) }
+  for _, cursor in ipairs(my.multicursor.get(0, 0, -1)) do
+    table.insert(origins, { cursor[2] + 1, cursor[3] })
+  end
+  return origins
+end
 
 function M._pending_delete_(context)
   vim.o.operatorfunc = "v:lua.my.operator._delete_"
-  operator_context = context
-  operator_context.origin = vim.api.nvim_win_get_cursor(0)
+  op_ctx = context
+  op_ctx.origins = get_operator_origins()
+  op_ctx.mode = vim.api.nvim_get_mode().mode
+end
+
+--- @param ... [integer, integer]
+--- @return boolean
+local function is_same_pos(...)
+  local first_pos
+  for _, pos in ipairs({ ... }) do
+    if not first_pos then
+      first_pos = pos
+    else
+      if pos[1] ~= first_pos[1] or pos[2] ~= first_pos[2] then
+        return false
+      end
+    end
+  end
+  return true
+end
+
+--- @param start_pos [integer, integer]
+--- @param end_pos [integer, integer]
+--- @param origin [integer, integer]
+--- @return boolean
+local function is_delete_empty(start_pos, end_pos, origin)
+  if start_pos[1] == end_pos[1] and is_same_pos(origin, start_pos) and math.abs(end_pos[2] - start_pos[2]) == 1 then
+    return true
+  end
+  if start_pos[1] ~= end_pos[1] and start_pos[2] == 0 and start_pos[1] == end_pos[1] + 1 then
+    local line = vim.api.nvim_buf_get_lines(0, end_pos[1] - 1, end_pos[1], false)[1]
+    if #line == end_pos[2] + 1 then
+      return true
+    end
+  end
+  return false
 end
 
 --- @param type "char"|"line"|"block"
 function M._delete_(type)
-  -- vim.api.nvim_create_autocmd("CmdAtom", {
-  --   callback = function(ev)
-  --     ev.data.lhs = vim.fn.keytrans(ev.data.lhs)
-  --     vim.print(ev.data)
-  --     return true
-  --   end,
-  -- })
-  local origin = operator_context.origin
-  local d = '"' .. operator_context.reg .. "d"
+  local origin = table.remove(op_ctx.origins, 1)
+  local d = '"' .. op_ctx.reg .. "d"
   if type == "char" then
-    local start_pos = vim.fn.getpos("'[")
+    local start_pos = vim.api.nvim_buf_get_mark(0, "[")
+    local end_pos = vim.api.nvim_buf_get_mark(0, "]")
+    start_pos = math.min(start_pos[1], end_pos[1]) and start_pos or end_pos
+    end_pos = math.max(start_pos[1], end_pos[1]) and end_pos or start_pos
+    if is_delete_empty(start_pos, end_pos, origin) then
+      return
+    end
+    -- 强制使用 inclusive 选择模式
+    -- 修复 exclusive 模式下的 {motion} range
+    local selection = vim.o.selection
+    local virtualedit = vim.o.virtualedit
+    vim.o.virtualedit = "onemore"
+    vim.o.selection = "inclusive"
     vim.cmd("normal! `[v`]" .. d)
-    if start_pos[2] == origin[1] and start_pos[3] > origin[2] then
+    vim.o.selection = selection
+    vim.o.virtualedit = virtualedit
+
+    if start_pos[1] == origin[1] and start_pos[2] > origin[2] then
       vim.api.nvim_win_set_cursor(0, origin)
     end
     return
@@ -140,6 +175,9 @@ function M._delete_(type)
 
   if type == "line" then
     vim.cmd("normal! '[V']" .. d)
+    if op_ctx.mode ~= "V" then
+      vim.api.nvim_win_set_cursor(0, origin)
+    end
     return
   end
 
@@ -168,14 +206,14 @@ end
 
 function M._pending_yank_(context)
   vim.o.operatorfunc = "v:lua.my.operator._yank_"
-  operator_context = context
-  operator_context.origin = vim.api.nvim_win_get_cursor(0)
+  op_ctx = context
+  op_ctx.origins = get_operator_origins()
 end
 
 --- @param type "char"|"line"|"block"
 function M._yank_(type)
-  local origin = operator_context.origin
-  local y = '"' .. operator_context.reg .. "y"
+  local origin = table.remove(op_ctx.origins, 1)
+  local y = '"' .. op_ctx.reg .. "y"
   if type == "char" then
     vim.cmd("normal! `[v`]" .. y)
   elseif type == "line" then

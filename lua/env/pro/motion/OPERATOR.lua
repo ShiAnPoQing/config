@@ -56,36 +56,37 @@ local function backward_word_end(is_WORD)
       if not (col == 1 and vim.fn.line(".") == 1) then
         vim.cmd("normal! v" .. vim.v.count1 .. key .. "o" .. vim.keycode("<bs>"))
       else
+        vim.print("hao")
         -- one case: cursor is at the start of the buffer
         -- nothing need to do
       end
       return
     end
+
     local line = vim.fn.line(".")
-    if line == prev_word.line then
-      if col ~= prev_word.end_col + 1 then
-        vim.cmd("normal! v" .. vim.v.count1 .. key .. "lo" .. vim.keycode("<bs>"))
-      else
-        -- like '....|H|ello'
-      end
-    elseif line == prev_word.line + 1 then
-      -- has no blank line
-      -- like 'Hello\n|w|orld'
-      -- like 'Hello\n   |w|orld'
-      vim.cmd("normal! v" .. vim.v.count1 .. key .. "lo" .. vim.keycode("<bs>"))
+    -- like '....|H|ello'
+    if not (line == prev_word.line and col == prev_word.end_col + 1) then
+      local old_selection = vim.o.selection
+      vim.o.selection = "exclusive"
+      vim.cmd("normal! v" .. vim.v.count1 .. key .. "l")
+      vim.api.nvim_feedkeys(vim.keycode(string.format("<cmd>set selection=%s<cr>", old_selection)), "ni", true)
     else
-      -- BUG: `vgelo<bs>` if `l` press in a blank line, `vgelo<bs>` will not work well.
-      -- has blank line
-      vim.cmd("normal! v" .. vim.v.count1 .. key .. "o" .. vim.keycode("<bs>"))
+      -- nothing to do
     end
     return
   end
+
   -- Change builtin behavior: 1 1 -> 0 1
   local prev_word = my.cursor[string.format("match_prev_%s", TYPE)]() -- (1, 0) based
-  vim.cmd("normal! v" .. vim.v.count1 .. key)
   -- If there were no prev word, No need to exclude the end point of the previous word.
   if prev_word then
-    vim.cmd("normal! l")
+    local old_virtualedit = vim.o.virtualedit
+    vim.o.virtualedit = "onemore"
+    vim.cmd("normal! v" .. vim.v.count1 .. key .. "l")
+    vim.api.nvim_feedkeys(vim.keycode(string.format("<cmd>set virtualedit=%s<cr>", old_virtualedit)), "ni", true)
+  else
+    vim.print("hao")
+    vim.cmd("normal! v" .. vim.v.count1 .. key)
   end
 end
 
