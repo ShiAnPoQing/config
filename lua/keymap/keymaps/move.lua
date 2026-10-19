@@ -124,11 +124,49 @@ return {
   ["<M-space><M-space><M-j>"] = { "<down><home>", { "i" } },
   ["<space>m"] = { "gM", { "n", "x", "o" } },
   ["<space>n"] = { "M", { "n", "x", "o" } },
-  ["<space>k"] = { "{", { "n", "x", "o" } },
-  ["<space>j"] = { "}", { "n", "x", "o" } },
-
+  ["<space>k"] = {
+    {
+      "<cmd>lua my.motion.NORMAL.backward_paragraph_start()<cr>",
+      { "n", "x" },
+    },
+    {
+      "<cmd>lua my.motion.OPERATOR.backward_paragraph_start()<cr>",
+      "o",
+    },
+  },
+  ["<space>j"] = {
+    {
+      "<cmd>lua my.motion.NORMAL.forward_paragraph_end()<cr>",
+      { "n", "x" },
+    },
+    {
+      "<cmd>lua my.motion.OPERATOR.forward_paragraph_end()<cr>",
+      "o",
+    },
+  },
+  ["<space><space>k"] = {
+    {
+      "<cmd>lua my.motion.NORMAL.backward_paragraph_end()<cr>",
+      { "n", "x" },
+    },
+    {
+      "<cmd>lua my.motion.OPERATOR.backward_paragraph_end()<cr>",
+      "o",
+    },
+  },
+  ["<space><space>j"] = {
+    {
+      "<cmd>lua my.motion.NORMAL.forward_paragraph_start()<cr>",
+      { "n", "x" },
+    },
+    {
+      "<cmd>lua my.motion.OPERATOR.forward_paragraph_start()<cr>",
+      "o",
+    },
+  },
   -- ["<space><M-h>"] = { "I", "n" },
   -- ["<space><M-l>"] = { "A", "n" },
+
   ["<M-space><M-h>"] = {
     {
       "<cmd>lua my.motion.first_non_blank()<cr>",

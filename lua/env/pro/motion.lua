@@ -4,19 +4,24 @@
 --- @field INSERT my.env.pro.motion.INSERT
 --- @field VISUAL my.env.pro.motion.VISUAL
 --- @field OPERATOR my.env.pro.motion.OPERATOR
+--- @field COMMAND my.env.pro.motion.COMMAND
 --- @field ['n'] my.env.pro.motion.NORMAL
 --- @field ['i'] my.env.pro.motion.INSERT
 --- @field ['x'] my.env.pro.motion.VISUAL
 --- @field ['o'] my.env.pro.motion.OPERATOR
+--- @field ['c'] my.env.pro.motion.COMMAND
 local M = my.util.defer_require(..., {
   NORMAL = true,
   INSERT = true,
   VISUAL = true,
   OPERATOR = true,
+  COMMAND = true,
   ["n"] = "NORMAL",
   ["i"] = "INSERT",
   ["x"] = "VISUAL",
   ["o"] = "OPERATOR",
+  ["c"] = "COMMAND",
+  _shared = true,
 })
 
 return M

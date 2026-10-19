@@ -1,4 +1,57 @@
 return {
+  ["0<esc>"] = {
+    function()
+      local map = {
+        {
+          item = "clear multicursor",
+          select = function()
+            my.multicursor.clear(0, 0, -1)
+          end,
+          condition = function()
+            return my.multicursor.active()
+          end,
+        },
+        {
+          item = "no hlsearch",
+          select = function()
+            vim.o.hlsearch = false
+          end,
+          condition = function()
+            return vim.o.hlsearch
+          end,
+        },
+        {
+          item = "hlsearch",
+          select = function()
+            vim.o.hlsearch = true
+          end,
+          condition = function()
+            return not vim.o.hlsearch
+          end,
+        },
+        {
+          item = "diffupdate",
+          select = function()
+            vim.cmd("diffupdate")
+          end,
+        },
+      }
+      local items = {}
+      for _, value in ipairs(map) do
+        local condition = not value.condition and true or value.condition()
+        if condition then
+          items[#items + 1] = value.item
+        end
+      end
+      vim.ui.select(items, { prompt = "Super <Esc>" }, function(_, idx)
+        if idx then
+          map[idx].select()
+        end
+      end)
+    end,
+    "n",
+    desc = "super <esc>",
+  },
   ["<M-=>"] = {
     "<C-\\>e",
     "c",
@@ -56,7 +109,6 @@ return {
     "i",
     expr = true,
   },
-
   -- ["y:"] = {
   --   function()
   --     vim.ui.input({
@@ -90,14 +142,6 @@ return {
     desc = "Put command output",
   },
   ["<space>D"] = { "xd^", "n" },
-  ["<esc>"] = {
-    function()
-      return '<Cmd>nohlsearch|diffupdate|call nvim_buf_clear_namespace(0, nvim_create_namespace("nvim.multicursor"), 0, -1)|normal! <C-L><CR>'
-    end,
-    "n",
-    expr = true,
-    desc = "<C-L>",
-  },
   ["<leader>X"] = {
     "<cmd>source %<cr>",
     "n",
@@ -142,14 +186,8 @@ return {
   -- gh: normal mode into select mode
   -- normal mode into select block mode
   ["<space>gh"] = { "g<C-h>", "n" },
-  ["gh"] = {
-    { "<C-g>", "x" },
-    { "<C-g>", "s" },
-  },
-  ["gH"] = {
-    { "<C-g>", "s" },
-    { "<C-g>", "x" },
-  },
+  ["gh"] = { { "<C-g>", "x" }, { "<C-g>", "s" } },
+  ["gH"] = { { "<C-g>", "s" }, { "<C-g>", "x" } },
   ["<space>r"] = { "gR", "n" },
   ["<M-f>"] = { ";", { "n" }, desc = "Repeat latest f, t, F or T [count] times" },
   ["<C-f>"] = { ",", { "n" }, desc = "Repeat latest f, t, F or T in opposite direction [count] times" },

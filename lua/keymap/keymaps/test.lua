@@ -3,12 +3,12 @@ return {
     function()
       local curr_win = vim.api.nvim_get_current_win()
       local buf = vim.api.nvim_create_buf(false, true)
-      local win= vim.api.nvim_open_win(buf, true, {
+      local win = vim.api.nvim_open_win(buf, true, {
         win = vim.api.nvim_get_current_win(),
         split = "right",
       })
       vim.api.nvim_set_option_value("winhighlight", "Normal:Normal,WinSeparator:ErrorMsg", {
-        win = curr_win
+        win = curr_win,
       })
       -- vim.api.nvim_exec_autocmds("User", { pattern = "Macro" })
       -- vim.api.nvim_create_autocmd("CmdAtom", {
@@ -137,7 +137,7 @@ return {
         vim.api.nvim_clear_autocmds({ group = "CmdAtom-test" })
       end)
     end,
-    "i",
+    "n",
   },
   ["<leader>3"] = {
     function()
@@ -177,7 +177,7 @@ return {
       --   vim.print("You entered: " .. (text or ""))
       -- end)
     end,
-    "i",
+    "n",
   },
   ["<leader>`"] = {
     function()

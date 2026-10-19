@@ -95,6 +95,13 @@ local function line_outer_movement(count)
   return expand_select_key
 end
 
+-- local ns = vim.api.nvim_create_namespace("textobject.nvim")
+-- vim.on_key(function(k, t)
+--   if t == 'd' then
+--     vim.print('delee')
+--   end
+-- end, ns)
+
 return {
   ["ei"] = { "aw", { "x", "o" }, desc = "[textobject]: outer word" },
   ["wi"] = { "iw", { "x", "o" }, desc = "[textobject]: inner word" },
@@ -203,10 +210,6 @@ return {
   },
   ["wl"] = {
     { "^og_", "x" },
-    -- {
-    --   "<cmd>normal! viw<cr>",
-    --   "o",
-    -- },
     {
       "<Plug>(textobject-line-inner)",
       "o",
@@ -276,5 +279,25 @@ return {
     end,
     { "x", "o" },
     desc = "[textobject]: inner treesitter node",
+  },
+  ["sh"] = {
+    "<cmd>lua my.motion.OPERATOR.line_lead_whitespace()<CR>",
+    "o",
+    desc = "[textobject]: line leading whitespace",
+  },
+  ["sl"] = {
+    "<cmd>lua my.motion.OPERATOR.line_trail_whitespace()<CR>",
+    "o",
+    desc = "[textobject]: line trailing whitespace",
+  },
+  ["sk"] = {
+    "<cmd>lua my.motion.OPERATOR.paragraph_lead_whitespace()<CR>",
+    "o",
+    desc = "[textobject]: paragraph leading whitespace",
+  },
+  ["sj"] = {
+    "<cmd>lua my.motion.OPERATOR.paragraph_trail_whitespace()<CR>",
+    "o",
+    desc = "[textobject]: paragraph trailing whitespace",
   },
 }

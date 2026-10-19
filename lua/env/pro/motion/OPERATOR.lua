@@ -23,9 +23,10 @@ local M = {}
 -- 1 0 db
 -- 1 0 d:normal! b
 -- 1 0 d:normal! vb
+--- @param is_WORD boolean|nil
 local function backward_word_start(is_WORD)
-  local TYPE = is_WORD and "WORD" or "word"
   local key = is_WORD and "B" or "b"
+  local TYPE = is_WORD and "WORD" or "word"
   --- Builtin behavior: Cursor at the start of the word, exclude the cursor point
   if my.cursor[string.format("at_%s_start", TYPE)]() then
     vim.cmd("normal! " .. vim.v.count1 .. key)
@@ -43,51 +44,41 @@ end
 -- 1 1 dge
 -- 1 0 d:normal! vge          <-
 -- 1 0 d:normal! ge
+--- @param is_WORD boolean|nil
 local function backward_word_end(is_WORD)
   local TYPE = is_WORD and "WORD" or "word"
-  local key = is_WORD and "gE" or "ge"
-  -- Change builtin behavior:
-  --  1. Cursor is at the start of the word, exclude the cursor point(1 1 -> 1 0)
-  --  2. exclude backward word end point(1 0 -> 0 0)
-  if my.cursor[string.format("at_%s_start", TYPE)]() then
-    local col = vim.fn.col(".")
-    local prev_word = my.cursor[string.format("match_prev_%s", TYPE)]() -- (1, 0) based
-    if not prev_word then
-      if not (col == 1 and vim.fn.line(".") == 1) then
-        vim.cmd("normal! v" .. vim.v.count1 .. key .. "o" .. vim.keycode("<bs>"))
-      else
-        vim.print("hao")
-        -- one case: cursor is at the start of the buffer
-        -- nothing need to do
-      end
-      return
-    end
+  local motion = "normal! v" .. vim.v.count1 .. (is_WORD and "gE" or "ge")
+  local prev_word = my.cursor[string.format("match_prev_%s", TYPE)]() -- (1, 0) based
+  local at_word_start = my.cursor[string.format("at_%s_start", TYPE)]()
 
-    local line = vim.fn.line(".")
-    -- like '....|H|ello'
-    if not (line == prev_word.line and col == prev_word.end_col + 1) then
-      local old_selection = vim.o.selection
-      vim.o.selection = "exclusive"
-      vim.cmd("normal! v" .. vim.v.count1 .. key .. "l")
-      vim.api.nvim_feedkeys(vim.keycode(string.format("<cmd>set selection=%s<cr>", old_selection)), "ni", true)
-    else
-      -- nothing to do
+  if not at_word_start then
+    if prev_word then
+      motion = motion .. "l"
     end
+  else
+    local col = vim.fn.col(".")
+    local line = vim.fn.line(".")
+    if not prev_word then
+      if col == 1 and line == 1 then
+        return
+      end
+    else
+      if line == prev_word.line and col == prev_word.end_col + 1 then
+        return
+      end
+      motion = motion .. "l"
+    end
+  end
+
+  if at_word_start then
+    local old_selection = vim.o.selection
+    vim.o.selection = "exclusive"
+    vim.cmd(motion)
+    vim.api.nvim_feedkeys(vim.keycode(string.format("<cmd>set selection=%s<cr>", old_selection)), "ni", true)
     return
   end
 
-  -- Change builtin behavior: 1 1 -> 0 1
-  local prev_word = my.cursor[string.format("match_prev_%s", TYPE)]() -- (1, 0) based
-  -- If there were no prev word, No need to exclude the end point of the previous word.
-  if prev_word then
-    local old_virtualedit = vim.o.virtualedit
-    vim.o.virtualedit = "onemore"
-    vim.cmd("normal! v" .. vim.v.count1 .. key .. "l")
-    vim.api.nvim_feedkeys(vim.keycode(string.format("<cmd>set virtualedit=%s<cr>", old_virtualedit)), "ni", true)
-  else
-    vim.print("hao")
-    vim.cmd("normal! v" .. vim.v.count1 .. key)
-  end
+  vim.cmd(motion)
 end
 
 -- 'selection'='inclusive'
@@ -99,9 +90,10 @@ end
 -- 1 1 d:normal! ve
 -- 1 0 d:normal! e
 
+--- @param is_WORD boolean|nil
 local function forward_word_end(is_WORD)
-  local TYPE = is_WORD and "WORD" or "word"
   local key = is_WORD and "E" or "e"
+  local TYPE = is_WORD and "WORD" or "word"
   --- Change builtin behavior: Cursor at the end of the word: exclude the cursor point(1 1 -> 0 1)
   --- case1: next word exists
   --- case2: next word doesn't exist
@@ -115,7 +107,7 @@ local function forward_word_end(is_WORD)
       vim.cmd("normal! v" .. vim.v.count1 .. key .. "ol")
     else
       -- case2:
-      -- BUG: I don't know why 'veol' doesn't work.
+      -- -- BUG: I don't know why 'veol' doesn't work.
       vim.cmd("normal! vG$ol")
     end
     return
@@ -132,9 +124,10 @@ end
 -- 1 0 dw
 -- 1 0 d:normal! w
 -- 1 0 d:normal! vw
+--- @param is_WORD boolean|nil
 local function forward_word_start(is_WORD)
-  local TYPE = is_WORD and "WORD" or "word"
   local key = is_WORD and "W" or "w"
+  local TYPE = is_WORD and "WORD" or "word"
   -- Change builtin behavior: 1 0 -> 0 0
   -- case1: next word exists
   -- case2: next word doesn't exist
@@ -151,7 +144,10 @@ local function forward_word_start(is_WORD)
     if not next_word then
       if not is_forward_no_next_word_and_no_blank(col) then
         -- case2.2:
-        vim.cmd("normal! v" .. vim.v.count1 .. key .. vim.keycode("<bs>ol"))
+        local old_selection = vim.o.selection
+        vim.o.selection = "exclusive"
+        vim.cmd("normal! v" .. vim.v.count1 .. key .. "ol")
+        vim.api.nvim_feedkeys(vim.keycode(string.format("<cmd>set selection=%s<cr>", old_selection)), "ni", true)
       else
         -- case2.1: not moved, nothing to do
         -- one case: cursor is at the end of the buffer
@@ -164,13 +160,19 @@ local function forward_word_start(is_WORD)
       if col ~= next_word.col then
         -- has space between the two words.
         -- like: "Hell|o|    World"
-        vim.cmd("normal! v" .. vim.v.count1 .. key .. vim.keycode("<bs>ol"))
+        local old_selection = vim.o.selection
+        vim.o.selection = "exclusive"
+        vim.cmd("normal! v" .. vim.v.count1 .. key .. "ol")
+        vim.api.nvim_feedkeys(vim.keycode(string.format("<cmd>set selection=%s<cr>", old_selection)), "ni", true)
       else
         -- has no space between the two words, nothing to do
         -- like: 'Hell|o|.....'
       end
     else
-      vim.cmd("normal! v" .. vim.v.count1 .. key .. vim.keycode("<bs>ol"))
+      local old_selection = vim.o.selection
+      vim.o.selection = "exclusive"
+      vim.cmd("normal! v" .. vim.v.count1 .. key .. "ol")
+      vim.api.nvim_feedkeys(vim.keycode(string.format("<cmd>set selection=%s<cr>", old_selection)), "ni", true)
     end
     return
   end
@@ -326,6 +328,115 @@ function M.first()
     return
   end
   vim.cmd("normal! v0")
+end
+
+function M.forward_paragraph_end()
+  local shared = my.motion._shared --[[@as my.env.pro.motion._shared]]
+  local lnum = shared.find_forward_paragraph_end(vim.v.count1)
+  if not lnum then
+    return
+  end
+  vim.api.nvim_buf_set_mark(0, "[", vim.fn.line("."), vim.fn.col("."))
+  vim.api.nvim_buf_set_mark(0, "]", lnum, vim.fn.col("."))
+  vim.cmd("normal! `[V`]")
+end
+
+function M.backward_paragraph_start()
+  local shared = my.motion._shared --[[@as my.env.pro.motion._shared]]
+  local lnum = shared.find_backward_paragraph_start(vim.v.count1)
+  if not lnum then
+    return
+  end
+  vim.api.nvim_buf_set_mark(0, "[", vim.fn.line("."), vim.fn.col("."))
+  vim.api.nvim_buf_set_mark(0, "]", lnum, vim.fn.col("."))
+  vim.cmd("normal! `[V`]")
+end
+
+function M.backward_paragraph_end()
+  local shared = my.motion._shared --[[@as my.env.pro.motion._shared]]
+  local backward_paragraph_start_lnum = shared.find_backward_paragraph_start(1, vim.fn.line(".") + 1)
+  local lnum = shared.find_backward_paragraph_end(vim.v.count1)
+  if not lnum then
+    return
+  end
+  local start_line = vim.fn.line(".")
+  if start_line == backward_paragraph_start_lnum then
+    start_line = start_line - 1
+  end
+  vim.api.nvim_buf_set_mark(0, "[", start_line, vim.fn.col("."))
+  vim.api.nvim_buf_set_mark(0, "]", lnum + 1, vim.fn.col("."))
+  vim.cmd("normal! `[V`]")
+end
+
+function M.forward_paragraph_start()
+  local shared = my.motion._shared --[[@as my.env.pro.motion._shared]]
+  local forward_paragraph_end_lnum = shared.find_forward_paragraph_end(1, vim.fn.line(".") - 1)
+  local lnum = shared.find_forward_paragraph_start(vim.v.count1)
+  if not lnum then
+    return
+  end
+  local start_line = vim.fn.line(".")
+  if start_line == forward_paragraph_end_lnum then
+    start_line = start_line + 1
+  end
+  vim.api.nvim_buf_set_mark(0, "[", start_line, vim.fn.col("."))
+  vim.api.nvim_buf_set_mark(0, "]", lnum - 1, vim.fn.col("."))
+  vim.cmd("normal! `[V`]")
+end
+
+function M.paragraph_lead_whitespace()
+  local shared = my.motion._shared --[[@as my.env.pro.motion._shared]]
+  local start_lnum = shared.find_backward_paragraph_end(1)
+  local end_lnum = shared.find_backward_paragraph_start(1, vim.fn.line(".") + 1)
+  if not end_lnum or not start_lnum then
+    return
+  end
+  vim.api.nvim_buf_set_mark(0, "[", start_lnum + 1, vim.fn.col("."))
+  vim.api.nvim_buf_set_mark(0, "]", end_lnum - 1, vim.fn.col("."))
+  vim.cmd("normal! `[V`]")
+end
+
+function M.paragraph_trail_whitespace()
+  local shared = my.motion._shared --[[@as my.env.pro.motion._shared]]
+  local start_lnum = shared.find_forward_paragraph_end(1, vim.fn.line(".") - 1)
+  local end_lnum = shared.find_forward_paragraph_start(1)
+  if not end_lnum or not start_lnum then
+    return
+  end
+  vim.api.nvim_buf_set_mark(0, "[", start_lnum + 1, vim.fn.col("."))
+  vim.api.nvim_buf_set_mark(0, "]", end_lnum - 1, vim.fn.col("."))
+  vim.cmd("normal! `[V`]")
+end
+
+function M.line_lead_whitespace()
+  local lnum = vim.fn.line(".")
+  local line = vim.api.nvim_get_current_line()
+  local col = line:find("%S") or #line + 1
+  col = col - 1
+  if col <= 0 then
+    return
+  end
+  vim.api.nvim_buf_set_mark(0, "[", lnum, 0)
+  vim.api.nvim_buf_set_mark(0, "]", lnum, col - 1)
+  vim.cmd("normal! `[v`]")
+end
+
+function M.line_trail_whitespace()
+  local lnum = vim.fn.line(".")
+
+  local line = vim.api.nvim_get_current_line()
+  local col = line:reverse():find("%S")
+  if not col then
+    col = 0
+  else
+    col = #line - col + 1
+  end
+  if col == #line then
+    return
+  end
+  vim.api.nvim_buf_set_mark(0, "[", lnum, col)
+  vim.api.nvim_buf_set_mark(0, "]", lnum, #line)
+  vim.cmd("normal! `[v`]")
 end
 
 return M

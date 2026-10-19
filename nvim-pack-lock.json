@@ -76,6 +76,10 @@
       "rev": "455856f765c78220fe547fb0862708942b52c42c",
       "src": "https://github.com/nvim-mini/mini.nvim"
     },
+    "mini.statusline": {
+      "rev": "127997ebef7ef632161203b960c5ef9d158f4810",
+      "src": "https://github.com/nvim-mini/mini.statusline"
+    },
     "mini.surround": {
       "rev": "8d5d0c5aa92449368ac251e85451d79d8f69d296",
       "src": "https://github.com/nvim-mini/mini.surround"
@@ -164,7 +168,7 @@
       "src": "https://github.com/nvim-lua/plenary.nvim"
     },
     "render-markdown.nvim": {
-      "rev": "f422cb5c6855f150e2ddcfaf44e7157b98b34f6a",
+      "rev": "8e8795368391036643b622875a6da6a51bcd33f4",
       "src": "https://github.com/MeanderingProgrammer/render-markdown.nvim"
     },
     "repeat.nvim": {

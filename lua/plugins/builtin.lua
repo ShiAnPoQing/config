@@ -25,6 +25,9 @@ return {
       "Texplore",
       "Vexplore",
     },
+    key = {
+      ["-"] = { "<cmd>Lexplore<cr>", "n" },
+    },
     before = function()
       vim.g.loaded_netrw = nil
       vim.g.loaded_netrwPlugin = nil

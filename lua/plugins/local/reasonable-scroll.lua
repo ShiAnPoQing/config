@@ -253,42 +253,42 @@ return {
       { "n", "x" },
       desc = "Place the col at the center of the window, offset by [count] cols",
     },
-    ["zm"] = {
+    ["sm"] = {
       function()
         require("reasonable-scroll").scroll_viewport_vertical_center()
       end,
       { "n", "x" },
       desc = "Place the col at the center of the window, offset by [count] cols",
     },
-    ["zh"] = {
+    ["sh"] = {
       function()
         require("reasonable-scroll").scroll_viewport_left()
       end,
       { "n", "x" },
       desc = "Place the col at the left of the window, offset by [count] cols",
     },
-    ["zj"] = {
+    ["sj"] = {
       function()
         require("reasonable-scroll").scroll_viewport_bottom()
       end,
       { "n", "x" },
       desc = "Place the line at the bottom of the window, offset by [count] lines",
     },
-    ["zk"] = {
+    ["sk"] = {
       function()
         require("reasonable-scroll").scroll_viewport_top()
       end,
       { "n", "x" },
       desc = "Place the line at the top of the window, offset by [count] lines",
     },
-    ["zl"] = {
+    ["sl"] = {
       function()
         require("reasonable-scroll").scroll_viewport_right()
       end,
       { "n", "x" },
       desc = "Place the col at the right of the window, offset by [count] cols",
     },
-    ["zn"] = {
+    ["sn"] = {
       "zz",
       { "n", "x" },
       desc = "line [count] at center of window (default cursor line)(leave the cursor in the same column).",

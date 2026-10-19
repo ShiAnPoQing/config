@@ -450,10 +450,18 @@ return {
       desc = "Grep",
     },
     ["<leader>gw"] = {
-      function()
-        require("fzf-lua").grep_cword()
-      end,
-      "n",
+      {
+        function()
+          require("fzf-lua").grep_cword()
+        end,
+        "n",
+      },
+      {
+        function()
+          require("fzf-lua").grep_visual()
+        end,
+        "x",
+      },
       desc = "Grep cword",
     },
     ["<leader>gW"] = {
@@ -468,7 +476,6 @@ return {
         require("fzf-lua").grep_visual()
       end,
       "x",
-      "n",
       desc = "Grep Visual",
     },
     ["<leader>gp"] = {

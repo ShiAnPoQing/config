@@ -125,4 +125,48 @@ function M.forward_WORD_start()
   vim.cmd("normal! " .. vim.v.count1 .. "W")
 end
 
+function M.backward_paragraph_start()
+  local view = vim.fn.winsaveview()
+  local _shared = my.motion._shared --[[@as my.env.pro.motion._shared]]
+  local lnum = _shared.find_backward_paragraph_start(vim.v.count1)
+  if not lnum then
+    return
+  end
+  vim.api.nvim_win_set_cursor(0, { lnum, view.curswant })
+  vim.fn.winrestview({ curswant = view.curswant })
+end
+
+function M.backward_paragraph_end()
+  local view = vim.fn.winsaveview()
+  local _shared = my.motion._shared --[[@as my.env.pro.motion._shared]]
+  local lnum = _shared.find_backward_paragraph_end(vim.v.count1)
+  if not lnum then
+    return
+  end
+  vim.api.nvim_win_set_cursor(0, { lnum, view.curswant })
+  vim.fn.winrestview({ curswant = view.curswant })
+end
+
+function M.forward_paragraph_end()
+  local view = vim.fn.winsaveview()
+  local _shared = my.motion._shared --[[@as my.env.pro.motion._shared]]
+  local lnum = _shared.find_forward_paragraph_end(vim.v.count1)
+  if not lnum then
+    return
+  end
+  vim.api.nvim_win_set_cursor(0, { lnum, view.curswant })
+  vim.fn.winrestview({ curswant = view.curswant })
+end
+
+function M.forward_paragraph_start()
+  local view = vim.fn.winsaveview()
+  local _shared = my.motion._shared --[[@as my.env.pro.motion._shared]]
+  local lnum = _shared.find_forward_paragraph_start(vim.v.count1)
+  if not lnum then
+    return
+  end
+  vim.api.nvim_win_set_cursor(0, { lnum, view.curswant })
+  vim.fn.winrestview({ curswant = view.curswant })
+end
+
 return M

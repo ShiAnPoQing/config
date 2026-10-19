@@ -5,14 +5,14 @@ require("window").setup()
 require("test").setup()
 require("command")
 require("global")
-require("option")
 require("autocmds")
 require("keymap").setup()
 require("native-packer").add({
   require("plugins.local.neo-lsp"),
   require("plugins.download.style"),
+  require("plugins.download.mini"),
   require("plugins.download.style.statuscol"),
-  require("plugins.download.style.lualine"),
+  -- require("plugins.download.style.lualine"),
   require("plugins.download.misc.nvim-navic"),
   require("plugins.download.misc.repeat"),
   require("plugins.local.native-diagnostic"),
@@ -20,7 +20,7 @@ require("native-packer").add({
   require("plugins.local.reasonable-screen-move"),
   require("plugins.local.window-swap"),
   require("plugins.local.buffer-swap"),
-  require("plugins.download.misc.linefuse"),
+  -- require("plugins.download.misc.linefuse"),
   require("plugins.local.move-line"),
   require("plugins.local.move-word"),
   require("plugins.local.cursorline"),
@@ -60,7 +60,6 @@ require("native-packer").add({
   -- require("plugins.download.misc.persistence"),
   -- require("plugins.download.misc.showkey"),
   require("plugins.download.misc.screenkey"),
-  require("plugins.download.mini"),
   require("plugins.download.filemanager.yazi"),
   require("plugins.download.misc.misc"),
   -- require("plugins.download.ai.copilot"),
@@ -122,6 +121,6 @@ vim.keymap.set("n", "m/", function()
   end, ns)
   vim.api.nvim_feedkeys("/", "n", true)
 end)
-
+require("option")
 -- require("promax")
 require("pro")

@@ -135,7 +135,7 @@ return {
   },
   ["ac"] = {
     function()
-      if vim.v.operator == "d" then
+      if vim.v.operator == "d" or (vim.v.operator == "g@" and vim.o.operatorfunc == "v:lua.my.operator._delete_") then
         vim.api.nvim_buf_clear_namespace(0, vim.api.nvim_create_namespace("nvim.multicursor"), 0, -1)
         return "<esc>"
       end
