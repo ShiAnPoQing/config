@@ -112,7 +112,7 @@ return {
       if time >= 17 or time < 7 then
         vim.o.background = "dark"
       else
-        -- vim.o.background = "light"
+        vim.o.background = "light"
       end
       vim.cmd([[colorscheme paradox]])
     end,

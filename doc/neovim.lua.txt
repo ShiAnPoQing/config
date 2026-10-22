@@ -1,0 +1,60 @@
+*neovim.lua.txt*
+
+vim.validate({name}, {value}, {validator}, {optional}, {message})  *vim.validate()*
+    验证函数参数。
+
+    此函数有两种有效形式：
+    1. `vim.validate(name, value, validator[, optional][, message])`
+       验证名为 {name}、值为 {value} 的参数满足 {validator}。
+       如果给定了 {optional} 且为 `true`，则 {value} 可以为 `nil`。如果给定了 {message}，则它用作错误消息中的预期类型。
+       示例： >lua
+         function vim.startswith(s, prefix)
+          vim.validate('s', s, 'string')
+          vim.validate('prefix', prefix, 'string')
+          -- ...
+        end
+<
+    2. `vim.validate(spec)`（已弃用），其中 `spec` 的类型为
+       `table<string,[value:any, validator: vim.validate.Validator, optional_or_msg? : boolean|string]>)`
+       验证参数规范。规范按字母数字顺序求值，直到第一次失败。
+
+    示例： >lua
+        vim.validate('arg1', {'foo'}, 'table')
+           --> NOP（成功）
+        vim.validate('arg2', 'foo', 'string')
+           --> NOP（成功）
+
+        vim.validate('arg1', 1, 'table')
+           --> error('arg1: expected table, got number')
+
+        vim.validate('arg1', 3, function(a) return (a % 2) == 0 end, 'even number')
+           --> error('arg1: expected even number, got 3')
+
+        -- 如果多个类型均有效，可以以列表形式给出：
+        vim.validate('arg1', {'foo'}, {'table', 'string'})
+        vim.validate('arg2', 'foo', {'table', 'string'})
+        -- NOP（成功）
+        vim.validate('arg1', 1, {'string', 'table'})
+        -- error('arg1: expected string|table, got number')
+<
+
+    注意：~
+      • `validator` 设置为 |lua-type()| 返回的值可提供最佳性能。
+
+    参数：~
+      • {name}       (`string`) 参数名称
+      • {value}      (`any`) 参数值
+      • {validator}  (`vim.validate.Validator`)
+                     • (`string|string[]`)：任何可由 |lua-type()| 返回的值，以及 `'callable'`：
+                       `'boolean'`、 `'callable'`、 `'function'`、 `'nil'`、
+                       `'number'`、 `'string'`、 `'table'`、 `'thread'`、
+                       `'userdata'`。
+                     • (`fun(val:any): boolean, string?`) 一个返回布尔值和可选字符串消息的函数。
+      • {optional}   (`boolean?`) （默认值： `false`）参数为可选（可以省略或为 `nil`）
+      • {message}    (`string?`) 验证失败时的消息
+
+    重载：~
+      • `fun(name: string, val: any, validator: vim.validate.Validator, message: string)`
+      • `fun(spec: table<string,[any, vim.validate.Validator, boolean|string]>)`
+
+vim:tw=78:ts=8:noet:ft=help:norl:

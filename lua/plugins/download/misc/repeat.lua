@@ -5,6 +5,7 @@ return {
       keymap = {
         undoline = "<space>u",
         redo = "U",
+        operation = ";.",
       },
     })
   end,

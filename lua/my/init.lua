@@ -12,6 +12,8 @@
 --- @field util my.util
 --- @field option my.option
 --- @field macro my.macro
+--- @field repeat my.repeat
+--- @field atom my.atom
 --- @field g my.g
 --- @field b my.b
 --- @field w my.w
@@ -36,6 +38,8 @@ my._submodules = {
   env = true,
   scroll = true,
   macro = true,
+  ["repeat"] = true,
+  atom = true,
 }
 
 setmetatable(my, {

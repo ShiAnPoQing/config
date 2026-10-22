@@ -7,6 +7,18 @@ require("command")
 require("global")
 require("autocmds")
 require("keymap").setup()
+my["repeat"].patch(function(atom)
+  if (atom.type == "operator" or atom.type == "visual") and atom.keys:find("g@") then
+    return {
+      keys = atom.keys:gsub(
+        "g@",
+        vim.keycode("<cmd>lua my.operator._pending_delete_({ reg = vim.v.register })<cr>") .. "g@"
+      ),
+    }
+  end
+  return atom
+end)
+my["repeat"].enable()
 require("native-packer").add({
   require("plugins.local.neo-lsp"),
   require("plugins.download.style"),

@@ -61,9 +61,10 @@ return {
   ["d"] = {
     {
       function()
-        my.operator.delete()
+        return my.operator.delete()
       end,
       { "n", "x" },
+      expr = true,
     },
     {
       function()

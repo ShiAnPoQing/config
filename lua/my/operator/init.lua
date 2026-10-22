@@ -198,12 +198,14 @@ end
 
 function M.delete()
   local count = vim.v.count
-  local pending_cmd = string.format(
-    "<Cmd>lua my.operator._pending_delete_(%s)<Cr>",
-    vim.fn.join(vim.fn.split(vim.inspect({ reg = vim.v.register }), "\n"), "")
-  )
-  vim.api.nvim_feedkeys(vim.keycode(pending_cmd), "nt", false)
-  vim.api.nvim_feedkeys((count ~= 0 and count or "") .. "g@", "n", false)
+  -- local pending_cmd = string.format(
+  --   "<Cmd>lua my.operator._pending_delete_(%s)<Cr>",
+  --   vim.fn.join(vim.fn.split(vim.inspect({ reg = vim.v.register }), "\n"), "")
+  -- )
+  my.operator._pending_delete_({ reg = vim.v.register })
+  -- vim.api.nvim_feedkeys(vim.keycode(pending_cmd), "nx", false)
+  return "g@"
+  -- vim.api.nvim_feedkeys((count ~= 0 and count or "") .. "g@", "n", false)
 end
 
 function M._pending_yank_(context)
