@@ -7,9 +7,13 @@ local M = vim._defer_require("my.atom", {
   _registry = true,
   _capture = true,
 })
+local enabled
+
+--- @class my.atom.Entry
+--- @field buf integer
+--- @field data vim.event.cmdatom.data
 
 --- @class my.atom.start.Opts
---- @field filter? fun(any): boolean|nil
 --- @field id? integer
 
 --- @param ns_id integer
@@ -19,9 +23,6 @@ function M.start(ns_id, opts)
   vim.validate("ns_id", ns_id, "number")
   vim.validate("opts", opts, "table", true)
   opts = opts or {}
-  if opts.filter then
-    vim.validate("opts.filter", opts.filter, "function")
-  end
   if opts.id then
     vim.validate("opts.id", opts.id, "number")
   end
@@ -50,6 +51,7 @@ end
 
 --- @param ns_id integer
 --- @param id integer
+--- @return my.atom.Entry[]
 function M.get_by_id(ns_id, id)
   vim.validate("ns_id", ns_id, "number")
   vim.validate("id", id, "number")
@@ -63,7 +65,8 @@ function M.replay(ns_id, id)
   vim.validate("id", id, "number")
   local atoms = M.get_by_id(ns_id, id)
   for _, atom in ipairs(atoms) do
-    vim.api.nvim_feedkeys(atom.keys or atom.lhs or "", atom.keys and "n" or "m", false)
+    local data = atom.data
+    vim.api.nvim_feedkeys(data.keys or data.lhs or "", data.keys and "n" or "m", false)
   end
 end
 
@@ -97,6 +100,40 @@ function M.clear(ns_id)
   M._registry.clear(ns_id)
 end
 
-M._capture.active()
+--- @param enable boolean?
+function M.enable(enable)
+  vim.validate("enable", enable, "boolean", true)
+  enable = enable ~= false
+  if enable == enabled then
+    return
+  end
+  enabled = enable
+  if enable then
+    M._capture.active()
+  else
+    M._capture.deactive()
+  end
+end
+
+--- @param event "AtomBefore"|"AtomAfter"
+--- @param callback fun(any): any
+function M.on(event, callback)
+  vim.validate("event", event, "string")
+  if event == "AtomBefore" then
+    M._capture.before(callback)
+  elseif event == "AtomAfter" then
+    return M._capture.after(callback)
+  end
+end
+
+--- @param ns_id integer
+--- @param id integer
+--- @param callback fun(data:vim.event.cmdatom.data): vim.event.cmdatom.data
+function M.patch(ns_id, id, callback)
+  vim.validate("ns_id", ns_id, "number")
+  vim.validate("id", id, "number")
+  vim.validate("callback", callback, "function")
+  M._capture.patch(ns_id, id, callback)
+end
 
 return M

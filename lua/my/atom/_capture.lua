@@ -16,8 +16,8 @@ function M.start(ns_id, id, opts)
   end
   capture_namespaces[ns_id][id] = {
     started = true,
-    filter = opts.filter,
     capture = {},
+    patch = {},
   }
 end
 
@@ -52,14 +52,14 @@ function M.watch(ns_id, id, callback)
   callback(capture_namespaces[ns_id][id].capture)
 end
 
-local id
+local cmdatom_id
 
 function M.active()
-  if id then
+  if cmdatom_id then
     return
   end
 
-  id = vim.api.nvim_create_autocmd("CmdAtom", {
+  cmdatom_id = vim.api.nvim_create_autocmd("CmdAtom", {
     callback = function(ev)
       local data = ev.data --[[@as vim.event.cmdatom.data]]
       for _, listener in ipairs(listeners.before) do
@@ -68,9 +68,13 @@ function M.active()
       for _, captures in pairs(capture_namespaces) do
         for _, capture in pairs(captures) do
           if capture.started then
-            if (capture.filter and capture.filter(data)) or not capture.filter then
-              capture.capture[#capture.capture + 1] = data
+            for _, patch in ipairs(capture.patch) do
+              data = patch(data)
             end
+            capture.capture[#capture.capture + 1] = {
+              buf = ev.buf,
+              data = data,
+            }
           end
         end
       end
@@ -82,11 +86,11 @@ function M.active()
 end
 
 function M.deactive()
-  if not id then
+  if not cmdatom_id then
     return
   end
-  vim.api.nvim_del_autocmd(id)
-  id = nil
+  vim.api.nvim_del_autocmd(cmdatom_id)
+  cmdatom_id = nil
 end
 
 --- @param callback fun()
@@ -97,6 +101,22 @@ end
 --- @param callback fun()
 function M.after(callback)
   table.insert(listeners.after, callback)
+end
+
+--- @param ns_id integer
+--- @param id integer
+--- @param callback fun(data:vim.event.cmdatom.data): vim.event.cmdatom.data
+function M.patch(ns_id, id, callback)
+  if not capture_namespaces[ns_id] then
+    return
+  end
+  if not capture_namespaces[ns_id][id] then
+    return
+  end
+  if not capture_namespaces[ns_id][id].started then
+    return
+  end
+  table.insert(capture_namespaces[ns_id][id].patch, callback)
 end
 
 return M
