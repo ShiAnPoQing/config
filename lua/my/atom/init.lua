@@ -1,103 +1,163 @@
---- @class my.atom
---- @field _namespace my.atom._namespace
---- @field _registry my.atom._registry
---- @field _capture my.atom._capture
-local M = vim._defer_require("my.atom", {
+local submodules = {
   _namespace = true,
   _registry = true,
   _capture = true,
-})
-local enabled
+  _ui = true,
+}
 
---- @class my.atom.Entry
+--- @class my.atom.data
 --- @field buf integer
 --- @field data vim.event.cmdatom.data
 
 --- @class my.atom.start.Opts
---- @field id? integer
+--- @field patch? fun(data: vim.event.cmdatom.data): vim.event.cmdatom.data|nil
+--- @field watch? fun(callback: fun(capture: any[]))
+
+--- @class my.atom.Namespace.Id
+--- @field start fun(opts?: my.atom.start.Opts): integer
+--- @field stop fun()
+--- @field get fun(): my.atom.data[]
+--- @field del fun()
+--- @field replay fun()
+--- @field show fun()
+
+--- @class my.atom.Namespace
+--- @field [integer] my.atom.Namespace.Id
+--- @field start fun(opts?: my.atom.start.Opts): integer
+--- @field start fun(id: integer, opts?: my.atom.start.Opts): integer
+--- @field stop fun(id: integer)
+--- @field get fun(): [integer, my.atom.data[]][]
+--- @field get fun(id: integer): my.atom.data[]
+--- @field del fun(id: integer?)
+--- @field replay fun(id: integer)
+--- @field show fun(id: integer?)
+
+--- @class my.atom
+--- @field _namespace my.atom._namespace
+--- @field _registry my.atom._registry
+--- @field _ui my.atom._ui
+--- @field _capture my.atom._capture
+--- @field [integer] my.atom.Namespace
+local M = { _submodules = submodules }
 
 --- @param ns_id integer
---- @param opts? my.atom.start.Opts
---- @return integer
-function M.start(ns_id, opts)
-  vim.validate("ns_id", ns_id, "number")
-  vim.validate("opts", opts, "table", true)
-  opts = opts or {}
-  if opts.id then
-    vim.validate("opts.id", opts.id, "number")
+local function has_namespace(ns_id)
+  return vim.tbl_contains(vim.tbl_values(vim.api.nvim_get_namespaces()), ns_id)
+end
+
+--- @param ns_id integer
+--- @param id integer
+local function has_namespace_id(ns_id, id)
+  return M._registry.has(ns_id, id)
+end
+
+--- @param ns_id integer
+--- @param id integer?
+local function create_handle(key, ns_id, id)
+  if key == "start" then
+    return function(param1, param2)
+      local opts
+      if not id then
+        if type(param1) == "table" then
+          opts = param1
+        elseif type(param1) == "number" then
+          id = param1
+          opts = param2
+        end
+      else
+        opts = param1
+      end
+      return M._capture.start(ns_id, id, opts)
+    end
   end
-  M._namespace.create(ns_id)
-  local id = opts.id or M._namespace.next_id(ns_id)
-  M._capture.start(ns_id, id, opts)
-  M._capture.watch(ns_id, id, function(capture)
-    M._registry.register(ns_id, id, capture)
-  end)
-  return id
+  if key == "stop" then
+    return function(_id)
+      id = id or _id
+      return M._capture.stop(ns_id, id)
+    end
+  end
+  if key == "get" then
+    return function(_id)
+      id = id or _id
+      return M._capture.get(ns_id, id)
+    end
+  end
+  if key == "del" then
+    return function(_id)
+      id = id or _id
+      return M._capture.del(ns_id, id)
+    end
+  end
+  if key == "replay" then
+    return function(_id)
+      id = id or _id
+      return M.replay(ns_id, id)
+    end
+  end
+  if key == "show" then
+    return function(_id)
+      id = id or _id
+      M._ui.open(ns_id)
+    end
+  end
+end
+
+local function create_namespace_id_proxy(ns_id, id)
+  return setmetatable({}, {
+    __index = function(_, k)
+      return create_handle(k, ns_id, id)
+    end,
+  })
 end
 
 --- @param ns_id integer
---- @param id integer
-function M.stop(ns_id, id)
-  vim.validate("ns_id", ns_id, "number")
-  vim.validate("id", id, "number")
-  M._capture.stop(ns_id, id)
+local function create_namespce_proxy(ns_id)
+  return setmetatable({}, {
+    __index = function(_, k)
+      if type(k) == "number" then
+        if not has_namespace_id(ns_id, k) then
+          vim.notify(string.format("my.atom[%d]: id %d does not exist!", ns_id, k), vim.log.levels.WARN)
+          return {}
+        end
+        return create_namespace_id_proxy(ns_id, k)
+      end
+      return create_handle(k, ns_id)
+    end,
+  })
 end
 
---- @param ns_id integer
-function M.get(ns_id)
-  vim.validate("ns_id", ns_id, "number")
-  return M._registry.get(ns_id)
-end
+setmetatable(M, {
+  ---@param t table<string, any>
+  ---@param k string
+  __index = function(t, k)
+    if type(k) == "number" then
+      if not has_namespace(k) then
+        vim.notify(string.format("my.atom: namespace %d does not exist!", k), vim.log.levels.WARN)
+        return {}
+      end
+      return create_namespce_proxy(k)
+    end
+    if not submodules[k] then
+      return
+    end
+    local name = string.format("%s.%s", "my.atom", k)
+    t[k] = require(name)
+    return t[k]
+  end,
+})
 
---- @param ns_id integer
---- @param id integer
---- @return my.atom.Entry[]
-function M.get_by_id(ns_id, id)
-  vim.validate("ns_id", ns_id, "number")
-  vim.validate("id", id, "number")
-  return M._registry.get_by_id(ns_id, id)
-end
+local enabled
 
 --- @param ns_id integer
 --- @param id integer
 function M.replay(ns_id, id)
   vim.validate("ns_id", ns_id, "number")
   vim.validate("id", id, "number")
-  local atoms = M.get_by_id(ns_id, id)
-  for _, atom in ipairs(atoms) do
-    local data = atom.data
+  local captures = M._registry.get(ns_id, id)
+  for _, capture in ipairs(captures) do
+    local data = capture.data
     vim.api.nvim_feedkeys(data.keys or data.lhs or "", data.keys and "n" or "m", false)
   end
-end
-
---- @class my.atom.capture.Opts
---- @field filter? fun(any): boolean|nil
-
---- @param ns_id integer
---- @param count integer
---- @param opts? my.atom.capture.Opts
-function M.capture(ns_id, count, opts)
-  vim.validate("ns_id", ns_id, "number")
-  vim.validate("count", count, "number")
-  vim.validate("opts", opts, "table", true)
-  opts = opts or {}
-  if opts.filter then
-    vim.validate("opts.filter", opts.filter, "function")
-  end
-end
-
---- @param ns_id integer
---- @param id integer
-function M.del(ns_id, id)
-  vim.validate("ns_id", ns_id, "number")
-  vim.validate("id", id, "number")
-  M._registry.remove(ns_id, id)
-end
-
---- @param ns_id integer
-function M.clear(ns_id)
-  vim.validate("ns_id", ns_id, "number")
-  M._registry.clear(ns_id)
 end
 
 --- @param enable boolean?
@@ -113,27 +173,6 @@ function M.enable(enable)
   else
     M._capture.deactive()
   end
-end
-
---- @param event "AtomBefore"|"AtomAfter"
---- @param callback fun(any): any
-function M.on(event, callback)
-  vim.validate("event", event, "string")
-  if event == "AtomBefore" then
-    M._capture.before(callback)
-  elseif event == "AtomAfter" then
-    return M._capture.after(callback)
-  end
-end
-
---- @param ns_id integer
---- @param id integer
---- @param callback fun(data:vim.event.cmdatom.data): vim.event.cmdatom.data
-function M.patch(ns_id, id, callback)
-  vim.validate("ns_id", ns_id, "number")
-  vim.validate("id", id, "number")
-  vim.validate("callback", callback, "function")
-  M._capture.patch(ns_id, id, callback)
 end
 
 return M

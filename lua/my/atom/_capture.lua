@@ -1,6 +1,11 @@
 --- @class my.atom._capture
 local M = {}
 
+local atom_modules = vim._defer_require("my.atom", {
+  _namespace = ..., --- @module 'my.atom._namespace'
+  _registry = ..., --- @module 'my.atom._registry'
+})
+
 local capture_namespaces = {}
 local listeners = {
   before = {},
@@ -9,47 +14,41 @@ local listeners = {
 
 --- @param ns_id integer
 --- @param id integer
---- @param opts? my.atom.start.Opts
-function M.start(ns_id, id, opts)
-  if not capture_namespaces[ns_id] then
-    capture_namespaces[ns_id] = {}
-  end
-  capture_namespaces[ns_id][id] = {
-    started = true,
-    capture = {},
-    patch = {},
-  }
-end
+--- @param callback fun(data:vim.event.cmdatom.data): vim.event.cmdatom.data
+local function patch(ns_id, id, callback)
+  local namespace = capture_namespaces[ns_id]
 
---- @param ns_id integer
---- @param id integer
-function M.stop(ns_id, id)
-  if not capture_namespaces[ns_id] then
+  if not namespace[id] then
     return
   end
-  if not capture_namespaces[ns_id][id] then
-    return
+
+  local session = namespace[id]
+  if not session.patch then
+    session.patch = {}
   end
-  if not capture_namespaces[ns_id][id].started then
-    return
-  end
-  capture_namespaces[ns_id][id] = nil
+  table.insert(session.patch, callback)
 end
 
 --- @param ns_id integer
 --- @param id integer
 --- @param callback fun(any)
-function M.watch(ns_id, id, callback)
+local function watch(ns_id, id, callback)
   if not capture_namespaces[ns_id] then
     return
   end
-  if not capture_namespaces[ns_id][id] then
-    return
+  local session = capture_namespaces[ns_id][id]
+  if not session.watch then
+    session.watch = {}
   end
-  if not capture_namespaces[ns_id][id].started then
-    return
-  end
-  callback(capture_namespaces[ns_id][id].capture)
+  table.insert(session.watch, callback)
+end
+
+--- @param ns_id integer
+--- @param id integer?
+function M.del(ns_id, id)
+  vim.validate("ns_id", ns_id, "number")
+  vim.validate("id", id, "number", true)
+  atom_modules._registry.del(ns_id, id)
 end
 
 local cmdatom_id
@@ -65,16 +64,22 @@ function M.active()
       for _, listener in ipairs(listeners.before) do
         listener(data)
       end
-      for _, captures in pairs(capture_namespaces) do
-        for _, capture in pairs(captures) do
-          if capture.started then
-            for _, patch in ipairs(capture.patch) do
-              data = patch(data)
+      for _, namespace in pairs(capture_namespaces) do
+        for _, session in pairs(namespace) do
+          if session.started then
+            for _, cb in ipairs(session.patch or {}) do
+              data = cb(data)
             end
-            capture.capture[#capture.capture + 1] = {
+            if not session.capture then
+              session.capture = {}
+            end
+            session.capture[#session.capture + 1] = {
               buf = ev.buf,
               data = data,
             }
+            for _, cb in ipairs(session.watch or {}) do
+              cb(session.capture)
+            end
           end
         end
       end
@@ -104,19 +109,58 @@ function M.after(callback)
 end
 
 --- @param ns_id integer
+--- @return [integer, my.atom.data[]][]
+--- @overload fun(ns_id: integer, id: integer): my.atom.data[]
+function M.get(ns_id, id)
+  vim.validate("ns_id", ns_id, "number")
+  vim.validate("id", id, "number", true)
+  if id then
+    return atom_modules._registry.get(ns_id, id)
+  end
+  local results = {}
+  for i, result in pairs(atom_modules._registry.get(ns_id) or {}) do
+    table.insert(results, { i, result })
+  end
+  return results
+end
+
+--- @param ns_id integer
+--- @param id integer?
+--- @param opts my.atom.start.Opts?
+function M.start(ns_id, id, opts)
+  vim.validate("ns_id", ns_id, "number")
+  vim.validate("opts", opts, "table", true)
+  opts = opts or {}
+  atom_modules._namespace.create(ns_id)
+  id = id or atom_modules._namespace.next_id(ns_id)
+  vim.validate("id", id, "number")
+  if not capture_namespaces[ns_id] then
+    capture_namespaces[ns_id] = {}
+  end
+  capture_namespaces[ns_id][id] = { started = true }
+  vim.validate("opts.watch", opts.watch, "function", true)
+  vim.validate("opts.patch", opts.patch, "function", true)
+  if opts.watch then
+    watch(ns_id, id, opts.watch)
+  end
+  if opts.patch then
+    patch(ns_id, id, opts.patch)
+  end
+  watch(ns_id, id, function(capture)
+    atom_modules._registry.register(ns_id, id, capture)
+  end)
+  return id
+end
+
+--- @param ns_id integer
 --- @param id integer
---- @param callback fun(data:vim.event.cmdatom.data): vim.event.cmdatom.data
-function M.patch(ns_id, id, callback)
+function M.stop(ns_id, id)
+  vim.validate("ns_id", ns_id, "number")
+  vim.validate("id", id, "number")
   if not capture_namespaces[ns_id] then
     return
   end
-  if not capture_namespaces[ns_id][id] then
-    return
-  end
-  if not capture_namespaces[ns_id][id].started then
-    return
-  end
-  table.insert(capture_namespaces[ns_id][id].patch, callback)
+  capture_namespaces[ns_id][id] = nil
 end
 
 return M

@@ -105,7 +105,7 @@ return {
         end,
       })
       -- require("paradox.utils").set_surface_hsl(50, 30)
-      require("paradox.utils").set_surface_hsl(230, 15)
+      -- require("paradox.utils").set_surface_hsl(230, 15)
       -- require("paradox.utils").set_surface_hsl(280, 10)
       -- require("paradox.utils").offset_hue_hsl(30, 20)
       local time = tonumber(os.date("%H"))
