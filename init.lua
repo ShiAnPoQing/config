@@ -122,56 +122,26 @@ vim.keymap.set("n", "m/", function()
   vim.api.nvim_feedkeys("/", "n", true)
 end)
 require("option")
--- require("promax")
 require("pro")
 
-my.atom.enable()
-local ns = vim.api.nvim_create_namespace("my.atom.repeat")
---- @type integer
-local current_id
---- @type integer
-local last_id
-local patch = function(data)
-  if (data.type == "operator" or data.type == "visual") and data.keys:find("g@") then
-    data.keys =
-      data.keys:gsub("g@", vim.keycode("<cmd>lua my.operator._pending_delete_({ reg = vim.v.register })<cr>") .. "g@")
-  end
-  return data
-end
-
-my.atom._capture.before(function()
-  current_id = my.atom[ns].start({ patch = patch })
-end)
-
-my.atom._capture.after(function()
-  my.atom[ns][current_id].stop()
-  local captures = my.atom[ns][current_id].get()
-  local capture = captures[1]
-  local is_redo_or_undo = capture.data.changed and (capture.data.undoseq or 0) <= (vim.b[capture.buf].maxseq or 0)
-  vim.b[capture.buf].maxseq = math.max(vim.b[capture.buf].maxseq or 0, capture.data.undoseq or 0)
-  if not (capture.data.keys ~= "." and capture.data.changed == true and not is_redo_or_undo) then
-    my.atom[ns].del(current_id)
-  else
-    last_id = current_id
-  end
-end)
-
-vim.keymap.set("n", ".", function()
-  if not last_id then
-    return
-  end
-  my.atom.replay(ns, last_id)
-end)
-
 do
-  vim.api.nvim_create_user_command("AtomHistory", function(ev)
-    local name = ev.args
-    local ns_id = vim.api.nvim_get_namespaces()[name]
-    if not ns_id then
-      return
+  my.atom.enable()
+  my.atom["repeat"].enable()
+  --- @type integer
+  local curr_id
+  local ns_id = vim.api.nvim_create_namespace("my.atom.motion")
+  my.atom.on("AtomBefore", function()
+    curr_id = my.atom[ns_id].create({
+      filter = function(atom)
+        return atom.data.type == "motion"
+      end,
+    })
+    my.atom[ns_id][curr_id].start()
+  end)
+  my.atom.on("AtomAfter", function()
+    my.atom[ns_id][curr_id].stop()
+    if #my.atom[ns_id][curr_id].get() == 0 then
+      my.atom[ns_id][curr_id].del()
     end
-    my.atom[ns_id].show()
-  end, {
-    nargs = 1,
-  })
+  end)
 end

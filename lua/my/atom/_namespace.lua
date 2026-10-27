@@ -20,6 +20,7 @@ end
 
 --- @param ns_id integer
 --- @param id integer
+--- @return boolean
 function M.has_id(ns_id, id)
   if not namespaces[ns_id] then
     return false

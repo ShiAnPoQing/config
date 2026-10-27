@@ -3,15 +3,21 @@ local submodules = {
   _registry = true,
   _capture = true,
   _ui = true,
+  ["repeat"] = true,
 }
 
 --- @class my.atom.data
 --- @field buf integer
 --- @field data vim.event.cmdatom.data
 
+--- @class my.atom.create.Opts
+--- @field patch? fun(data: vim.event.cmdatom.data): vim.event.cmdatom.data|nil
+--- @field watch? fun(capture: my.atom.data[])
+--- @field filter? fun(data: my.atom.data): boolean
+
 --- @class my.atom.start.Opts
 --- @field patch? fun(data: vim.event.cmdatom.data): vim.event.cmdatom.data|nil
---- @field watch? fun(callback: fun(capture: any[]))
+--- @field watch? fun(capture: my.atom.data[])
 
 --- @class my.atom.Namespace.Id
 --- @field start fun(opts?: my.atom.start.Opts): integer
@@ -23,8 +29,8 @@ local submodules = {
 
 --- @class my.atom.Namespace
 --- @field [integer] my.atom.Namespace.Id
---- @field start fun(opts?: my.atom.start.Opts): integer
---- @field start fun(id: integer, opts?: my.atom.start.Opts): integer
+--- @field create fun(opts: my.atom.create.Opts?): integer
+--- @field start fun(id: integer, opts?: my.atom.start.Opts)
 --- @field stop fun(id: integer)
 --- @field get fun(): [integer, my.atom.data[]][]
 --- @field get fun(id: integer): my.atom.data[]
@@ -37,6 +43,7 @@ local submodules = {
 --- @field _registry my.atom._registry
 --- @field _ui my.atom._ui
 --- @field _capture my.atom._capture
+--- @field repeat my.atom.repeat
 --- @field [integer] my.atom.Namespace
 local M = { _submodules = submodules }
 
@@ -54,19 +61,14 @@ end
 --- @param ns_id integer
 --- @param id integer?
 local function create_handle(key, ns_id, id)
+  if not id and key == "create" then
+    return function(opts)
+      return M._capture.create(ns_id, opts)
+    end
+  end
   if key == "start" then
-    return function(param1, param2)
-      local opts
-      if not id then
-        if type(param1) == "table" then
-          opts = param1
-        elseif type(param1) == "number" then
-          id = param1
-          opts = param2
-        end
-      else
-        opts = param1
-      end
+    return function(_id, opts)
+      id = id or _id
       return M._capture.start(ns_id, id, opts)
     end
   end
@@ -102,6 +104,8 @@ local function create_handle(key, ns_id, id)
   end
 end
 
+--- @param ns_id integer
+--- @param id integer
 local function create_namespace_id_proxy(ns_id, id)
   return setmetatable({}, {
     __index = function(_, k)
@@ -111,6 +115,7 @@ local function create_namespace_id_proxy(ns_id, id)
 end
 
 --- @param ns_id integer
+--- @return my.atom.Namespace
 local function create_namespce_proxy(ns_id)
   return setmetatable({}, {
     __index = function(_, k)
@@ -170,9 +175,37 @@ function M.enable(enable)
   enabled = enable
   if enable then
     M._capture.active()
+    vim.api.nvim_create_user_command("AtomShow", function(ev)
+      local name = ev.args
+      local ns_id = vim.api.nvim_get_namespaces()[name]
+      if not ns_id then
+        return
+      end
+      my.atom[ns_id].show()
+    end, {
+      nargs = 1,
+    })
   else
     M._capture.deactive()
+    vim.api.nvim_del_user_command("AtomShow")
   end
+end
+
+--- @param event "AtomBefore"|"AtomAfter"
+--- @param callback fun(ev: any)
+function M.on(event, callback)
+  vim.validate("event", event, "string")
+  vim.validate("callback", callback, "function")
+  if event == "AtomBefore" then
+    M._capture.before(callback)
+  elseif event == "AtomAfter" then
+    M._capture.after(callback)
+  end
+end
+
+--- @return boolean
+function M.is_enabled()
+  return enabled
 end
 
 return M

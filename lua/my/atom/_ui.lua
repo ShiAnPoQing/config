@@ -127,14 +127,16 @@ function M.open(ns_id, opts)
     col = 0,
     style = "minimal",
   })
-  vim.api.nvim_set_hl(0, "Winbar", { overline = true })
+  local title_hl = vim.api.nvim_get_hl(0, { name = "Title" })
+  vim.api.nvim_set_hl(0, "MyAtomUIWinbar", { overline = true, fg = title_hl.fg, bg = title_hl.bg })
   local name
   for key, _ns_id in pairs(vim.api.nvim_get_namespaces()) do
     if ns_id == _ns_id then
       name = key
     end
   end
-  vim.wo[win].winbar = string.format('my.atom["%s"]', name or "")
+  vim.wo[win].winbar = string.format('%%=my.atom["%s"]%%=', name or "")
+  vim.wo[win].winhighlight = "Winbar:MyAtomUIWinbar"
   vim.wo[win].winfixbuf = true
   vim.wo[win].number = true
 
