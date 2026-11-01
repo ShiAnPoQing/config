@@ -125,23 +125,71 @@ require("option")
 require("pro")
 
 do
-  my.atom.enable()
-  my.atom["repeat"].enable()
-  --- @type integer
-  local curr_id
-  local ns_id = vim.api.nvim_create_namespace("my.atom.motion")
-  my.atom.on("AtomBefore", function()
-    curr_id = my.atom[ns_id].create({
-      filter = function(atom)
-        return atom.data.type == "motion"
-      end,
-    })
-    my.atom[ns_id][curr_id].start()
-  end)
-  my.atom.on("AtomAfter", function()
-    my.atom[ns_id][curr_id].stop()
-    if #my.atom[ns_id][curr_id].get() == 0 then
-      my.atom[ns_id][curr_id].del()
-    end
-  end)
+  my._atom["repeat"].enable()
+  my._atom.marco.enable()
 end
+
+do
+  -- --- @type integer
+  -- local curr_id
+  -- local ns_id = vim.api.nvim_create_namespace("my.atom.motion")
+  -- local Atom = my.atom[ns_id]
+  -- my.atom.on("AtomBefore", function()
+  --   curr_id = Atom.create({
+  --     filter = function(atom)
+  --       return atom.data.type == "motion"
+  --     end,
+  --   })
+  --   Atom[curr_id].start()
+  -- end)
+  -- my.atom.on("AtomAfter", function()
+  --   Atom[curr_id].stop()
+  --   if #Atom[curr_id].get() == 0 then
+  --     Atom[curr_id].del()
+  --   end
+  -- end)
+end
+
+do
+  -- --- @type integer
+  -- local curr_id
+  -- local ns_id = vim.api.nvim_create_namespace("my.atom.insert")
+  -- local Atom = my.atom[ns_id]
+  -- my.atom.on("AtomBefore", function()
+  --   curr_id = Atom.create({
+  --     filter = function(atom)
+  --       return atom.data.type == "insert"
+  --     end,
+  --   })
+  --   Atom[curr_id].start()
+  -- end)
+  -- my.atom.on("AtomAfter", function()
+  --   Atom[curr_id].stop()
+  --   if #Atom[curr_id].get() == 0 then
+  --     Atom[curr_id].del()
+  --   end
+  -- end)
+end
+
+-- do
+--   vim.keymap.set("n", ";.", function()
+--     local capturer = my._atom.capturer()
+--     capturer:start()
+--     vim.api.nvim_feedkeys("ddgg", "n", false)
+--     capturer:stop(function(capture)
+--       vim.print(capture)
+--     end)
+--     local id1 = vim.api.nvim_create_autocmd("User", {
+--       pattern = "CmdAtomBefore",
+--       callback = function(ev)
+--         vim.print("hao")
+--       end,
+--     })
+--     local id2 = vim.api.nvim_create_autocmd("User", {
+--       pattern = "CmdAtomAfter",
+--       callback = function(ev)
+--
+--       end
+--     })
+--   end)
+-- end

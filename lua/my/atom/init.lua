@@ -14,6 +14,8 @@ local submodules = {
 --- @field patch? fun(data: vim.event.cmdatom.data): vim.event.cmdatom.data|nil
 --- @field watch? fun(capture: my.atom.data[])
 --- @field filter? fun(data: my.atom.data): boolean
+--- @field on_start? fun()
+--- @field on_stop? fun()
 
 --- @class my.atom.start.Opts
 --- @field patch? fun(data: vim.event.cmdatom.data): vim.event.cmdatom.data|nil
@@ -22,6 +24,7 @@ local submodules = {
 --- @class my.atom.Namespace.Id
 --- @field start fun(opts?: my.atom.start.Opts): integer
 --- @field stop fun()
+--- @field capture fun(sequence: string)
 --- @field get fun(): my.atom.data[]
 --- @field del fun()
 --- @field replay fun()
@@ -32,6 +35,7 @@ local submodules = {
 --- @field create fun(opts: my.atom.create.Opts?): integer
 --- @field start fun(id: integer, opts?: my.atom.start.Opts)
 --- @field stop fun(id: integer)
+--- @field capture fun(id: integer, sequence: string)
 --- @field get fun(): [integer, my.atom.data[]][]
 --- @field get fun(id: integer): my.atom.data[]
 --- @field del fun(id: integer?)
@@ -64,6 +68,12 @@ local function create_handle(key, ns_id, id)
   if not id and key == "create" then
     return function(opts)
       return M._capture.create(ns_id, opts)
+    end
+  end
+  if key == "capture" then
+    return function(_id, sequence)
+      id = id or _id
+      return M._capture.capture(ns_id, id, sequence)
     end
   end
   if key == "start" then

@@ -67,7 +67,7 @@ function M.last()
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(vim.v.count1 .. "A<C-f>", true, false, true), "n", false)
     return
   end
-  vim.api.nvim_feedkeys("$" .. vim.v.count1 .. "a", "n", false)
+  vim.api.nvim_feedkeys(vim.v.count1 .. "A", "n", false)
   -- Fallback:
   --[[
   -- First Atom: <Cmd>lua my.insert.NORMAL._reset_multicursor_to_line_last_character()<CR>
@@ -105,10 +105,19 @@ function M.last_non_blank()
     M[mode].last_non_blank()
     return
   end
+  local has_multicursor = my.multicursor.active()
 
-  if is_blank_line() and not my.multicursor.active() then
+  if is_blank_line() and not has_multicursor then
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(vim.v.count1 .. "A<C-f>", true, false, true), "n", false)
   else
+    -- 尽可能减少光标闪烁问题
+    if vim.v.count1 == 1 and not has_multicursor then
+      vim.cmd.startinsert()
+      local line = vim.api.nvim_get_current_line()
+      local col = #line - line:reverse():find("%S") + 1
+      vim.api.nvim_win_set_cursor(0, { vim.fn.line("."), col })
+      return
+    end
     vim.api.nvim_feedkeys("g_" .. vim.v.count1 .. "a", "n", false)
   end
 end

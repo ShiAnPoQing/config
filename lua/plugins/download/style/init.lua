@@ -102,10 +102,32 @@ return {
           end
           local BlinkCmpMenu = vim.api.nvim_get_hl(0, { name = "BlinkCmpMenu", link = false })
           vim.api.nvim_set_hl(0, "BlinkCmpMenuBackground", { fg = BlinkCmpMenu.bg, bg = BlinkCmpMenu.bg })
+
+          local normal_hl = vim.api.nvim_get_hl(0, {
+            name = "Normal",
+          })
+          vim.api.nvim_create_autocmd({ "UIEnter" }, {
+            callback = function()
+              vim.api.nvim_ui_send(("\27]21;cursor=#%06X;cursor_text=#%06X\27\\"):format(normal_hl.fg, normal_hl.bg))
+            end,
+          })
+
+          vim.api.nvim_create_autocmd({ "TermEnter", "TermChanged", "TermLeave" }, {
+            callback = function()
+              vim.schedule(function()
+                vim.api.nvim_ui_send(("\27]21;cursor=#%06X;cursor_text=#%06X\27\\"):format(normal_hl.fg, normal_hl.bg))
+              end)
+            end,
+          })
+          vim.api.nvim_create_autocmd({ "VimLeavePre", "VimSuspend" }, {
+            callback = function()
+              vim.api.nvim_ui_send("\27]112\27\\")
+            end,
+          })
         end,
       })
-      -- require("paradox.utils").set_surface_hsl(50, 30)
-      -- require("paradox.utils").set_surface_hsl(230, 15)
+      require("paradox.utils").set_surface_hsl(50, 30)
+      -- require("paradox.utils").set_surface_hsl(100, 15)
       -- require("paradox.utils").set_surface_hsl(280, 10)
       -- require("paradox.utils").offset_hue_hsl(30, 20)
       local time = tonumber(os.date("%H"))

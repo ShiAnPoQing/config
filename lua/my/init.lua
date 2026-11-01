@@ -14,6 +14,8 @@
 --- @field macro my.macro
 --- @field repeat my.repeat
 --- @field atom my.atom
+--- @field _atom my._atom
+--- @field lsp my.lsp
 --- @field g my.g
 --- @field b my.b
 --- @field w my.w
@@ -40,6 +42,8 @@ my._submodules = {
   macro = true,
   ["repeat"] = true,
   atom = true,
+  lsp = true,
+  _atom = true,
 }
 
 setmetatable(my, {
@@ -127,4 +131,4 @@ do
   my.bo = make_dict_accessor("b", nil, _opts)
 end
 
-my.macro.enable()
+-- my.macro.enable()

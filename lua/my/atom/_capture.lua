@@ -12,6 +12,8 @@ local atom_modules = vim._defer_require("my.atom", {
 --- @field patch? fun(data: vim.event.cmdatom.data): vim.event.cmdatom.data|nil
 --- @field watch? fun(datas: my.atom.data[])
 --- @field filter? fun(data: my.atom.data): boolean
+--- @field on_stop? fun()
+--- @field on_start? fun()
 
 --- @class my.atom._capture.Namespace
 --- @field [integer] my.atom._capture.Namespace.Id
@@ -22,6 +24,8 @@ local listeners = {
   before = {},
   after = {},
 }
+
+local pending_stop = {}
 
 --- @param ns_id integer
 --- @return boolean
@@ -148,15 +152,13 @@ function M.create(ns_id, opts)
   vim.validate("opts.watch", opts.watch, "function", true)
   vim.validate("opts.patch", opts.patch, "function", true)
   vim.validate("opts.filter", opts.filter, "function", true)
-  if opts.watch then
-    namespaces[ns_id][id].watch = watch
-  end
-  if opts.patch then
-    namespaces[ns_id][id].patch = opts.patch
-  end
-  if opts.filter then
-    namespaces[ns_id][id].filter = opts.filter
-  end
+  vim.validate("opts.on_start", opts.on_start, "function", true)
+  vim.validate("opts.on_stop", opts.on_stop, "function", true)
+  namespaces[ns_id][id].watch = watch
+  namespaces[ns_id][id].patch = opts.patch
+  namespaces[ns_id][id].filter = opts.filter
+  namespaces[ns_id][id].on_start = opts.on_start
+  namespaces[ns_id][id].on_stop = opts.on_stop
   return id
 end
 
@@ -185,6 +187,9 @@ function M.start(ns_id, id, opts)
   vim.validate("opts", opts, "table", true)
   opts = opts or {}
   namespaces[ns_id][id].started = true
+  if namespaces[ns_id][id].on_start then
+    namespaces[ns_id][id].on_start()
+  end
   vim.validate("opts.watch", opts.watch, "function", true)
   vim.validate("opts.patch", opts.patch, "function", true)
   if opts.watch then
@@ -207,7 +212,27 @@ function M.stop(ns_id, id)
   if not has_namespace_id(ns_id, id) then
     return
   end
+  -- table.insert(pending_stop, namespaces[ns_id][id])
   namespaces[ns_id][id].started = nil
+  if namespaces[ns_id][id].on_stop then
+    namespaces[ns_id][id].on_stop()
+  end
+  vim.api.nvim_feedkeys(vim.keycode("<Plug>my.atom.stop"), "nt", false)
 end
+
+--- @param ns_id integer
+--- @param id integer
+--- @param sequence string
+function M.capture(ns_id, id, sequence)
+  vim.validate("ns_id", ns_id, "number")
+  vim.validate("id", id, "number")
+  vim.validate("sequence", sequence, "string")
+  my.atom[ns_id][id].start()
+  local noremap = true
+  vim.api.nvim_feedkeys(sequence, noremap and "ni" or "mi", false)
+  my.atom[ns_id][id].stop()
+end
+
+vim.keymap.set({ "n", "x", "i" }, "<Plug>my.atom.stop", function() end)
 
 return M

@@ -28,11 +28,11 @@ function M.set_repeat(callback, opts)
   opts = opts or {}
   local noremap = opts.noremap
   if type(callback) == "string" then
-    -- my.atom[ns_id].start({ patch = patch })
+    local id
+    id = my.atom[ns_id].create({ patch = patch })
+    my.atom[ns_id][id].start()
     vim.api.nvim_feedkeys(callback, noremap and "ni" or "mi", false)
-    -- vim.api.nvim_feedkeys(vim.keycode("<cmd>lua my['repeat']._capture.finish()<cr>"), "nt", false)
-  elseif type(callback) == "function" then
-    callback()
+    my.atom[ns_id][id].stop()
   end
 end
 
@@ -80,7 +80,7 @@ function M.enable(enable)
     end
     init()
   else
-    vim.keymap.del("n", ".")
+    -- vim.keymap.del("n", ".")
     -- my.atom[ns_id].del()
   end
 end

@@ -115,8 +115,9 @@ local snippets = {
     t("--- @nodiscard"),
   }),
   s({ trig = "@module", show_condition = only_blank_or_comment_line }, {
-    t("--- @module"),
+    t("--- @module '"),
     i(1, "name"),
+    t("'")
   }),
   s({ trig = "@meta", show_condition = only_blank_or_comment_line }, {
     t("--- @meta "),
