@@ -64,7 +64,14 @@ return {
           },
         },
         completion = {
-          documentation = { auto_show = true, auto_show_delay_ms = 100, window = { border = "single" } },
+          documentation = {
+            auto_show = true,
+            auto_show_delay_ms = 100,
+            window = {
+              -- border = { "▛", "▀", "▜", "▐", "▟", "▄", "▙", "▌" },
+              border = { " ", " ", " ", " ", " ", " ", " ", " " },
+            },
+          },
           menu = {
             scrollbar = false,
             max_height = 10,
@@ -211,6 +218,76 @@ return {
             menu = {
               max_height = 1000,
               auto_show = true,
+              draw = {
+                gap = 0,
+                align_to = "label",
+                snippet_indicator = "󱑽",
+                padding = { 0, 0 },
+                columns = {
+                  { "left_block" },
+                  { "label", "source_name", gap = 1, "kind_icon" },
+                },
+                components = {
+                  right_black = {
+                    ellipsis = false,
+                    text = function()
+                      return "▐"
+                    end,
+                    highlight = function(ctx)
+                      local idx = cmp.get_selected_item_idx()
+                      if ctx.idx == idx then
+                        return { { group = ctx.kind_hl .. "Block", priority = 20000 } }
+                      end
+                      return { { group = "BlinkCmpMenuBackground" } }
+                    end,
+                  },
+                  test = {
+                    ellipsis = false,
+                    text = function(ctx)
+                      local idx_icon = idx_icons[ctx.idx] or ""
+                      return idx_icon
+                    end,
+                    highlight = function(ctx)
+                      return { { group = ctx.kind_hl .. "Block", priority = 20000 } }
+                    end,
+                  },
+                  left_block = {
+                    ellipsis = false,
+                    text = function()
+                      return "▌"
+                    end,
+                    highlight = function(ctx)
+                      local idx = cmp.get_selected_item_idx()
+                      if ctx.idx == idx then
+                        return { { group = ctx.kind_hl .. "Block", priority = 20000 } }
+                      end
+                      return { { group = "BlinkCmpMenuBackground" } }
+                    end,
+                  },
+                  kind_icon = {
+                    ellipsis = false,
+                    text = function(ctx)
+                      return " " .. ctx.kind_icon .. " "
+                    end,
+                    highlight = function(ctx)
+                      return { { group = ctx.kind_hl, priority = 20000 } }
+                    end,
+                  },
+                  source_name = {
+                    width = { max = 30 },
+                    text = function(ctx)
+                      return ctx.source_name
+                    end,
+                    highlight = function(ctx)
+                      local idx = cmp.get_selected_item_idx()
+                      if ctx.idx == idx then
+                        return { { group = ctx.kind_hl .. "Source", priority = 20000 } }
+                      end
+                      return { { group = "BlinkCmpSource", priority = 20000 } }
+                    end,
+                  },
+                },
+              },
             },
             list = {
               selection = {

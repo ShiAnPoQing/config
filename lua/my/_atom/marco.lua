@@ -1,8 +1,10 @@
 --- @class my._atom.marco
 local M = {}
 local enabled
+--- @type string
 local last_reg
-local ns
+--- @type integer
+local ns_id
 --- @type table<string, integer>|nil
 local regs = {}
 
@@ -19,7 +21,7 @@ local function replay()
   end
   if regs[reg] then
     local id = regs[reg]
-    my._atom.replay(ns, id)
+    my._atom.replay(ns_id, id)
   end
 end
 
@@ -36,14 +38,14 @@ function M.enable(enable)
     local reg
     --- @type my._atom.Capturer
     local Capturer
-    ns = vim.api.nvim_create_namespace("my.atom.marco")
+    ns_id = vim.api.nvim_create_namespace("my.atom.marco")
     local group = vim.api.nvim_create_augroup("my.atom.marco", { clear = true })
     vim.api.nvim_create_autocmd("RecordingEnter", {
       group = group,
       callback = function()
         reg = vim.fn.reg_recording()
         if regs[reg] then
-          my._atom.del(ns, regs[reg])
+          my._atom.del(ns_id, regs[reg])
         end
         Capturer = my._atom.capturer()
         Capturer:start({
@@ -66,7 +68,9 @@ function M.enable(enable)
       group = group,
       callback = function()
         Capturer:stop(function(capture)
-          regs[reg] = my._atom.create(ns, capture)
+          if #capture.atoms > 0 then
+            regs[reg] = my._atom.create(ns_id, capture)
+          end
         end)
       end,
     })
@@ -75,9 +79,11 @@ function M.enable(enable)
     end)
   else
     vim.api.nvim_del_augroup_by_name("my.atom.macro")
+    ---@diagnostic disable-next-line: cast-local-type
     last_reg = nil
     regs = nil
-    ns = nil
+    ---@diagnostic disable-next-line: cast-local-type
+    ns_id = nil
     pcall(vim.keymap.del, "n", "@")
   end
 end

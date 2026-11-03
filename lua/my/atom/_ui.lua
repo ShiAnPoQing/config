@@ -104,10 +104,10 @@ local function format_entry(entry)
   return line, line_highlights
 end
 
---- @class my.atom._ui.Opts
+--- @class my._atom._ui.Opts
 
 --- @param ns_id integer
---- @param opts? my.atom._ui.Opts
+--- @param opts? my._atom._ui.Opts
 function M.open(ns_id, opts)
   vim.validate("ns_id", ns_id, "number")
   vim.validate("opts", opts, "table", true)

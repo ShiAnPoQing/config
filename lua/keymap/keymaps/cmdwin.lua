@@ -30,7 +30,7 @@ return {
       toggle_cmdwin(":")
     end,
     { "n", "x" },
-    exclude_ft = { "pager" },
+    exclude_ft = { "pager", "qf" },
     desc = "[q:]Toggle the command-line window",
   },
   [my.keymap.keys.OPEN_CMDWIN_SEARCH] = {
@@ -38,7 +38,7 @@ return {
       toggle_cmdwin("/")
     end,
     { "n", "x" },
-    exclude_ft = { "pager" },
+    exclude_ft = { "pager", "qf" },
     desc = "[q/]Toggle the command-line window",
   },
   [my.keymap.keys.OPEN_CMDWIN_SEARCH_BACK] = {
@@ -46,7 +46,7 @@ return {
       toggle_cmdwin("?")
     end,
     { "n", "x" },
-    exclude_ft = { "pager" },
+    exclude_ft = { "pager", "qf" },
     desc = "[q/]Toggle the command-line window",
   },
 }

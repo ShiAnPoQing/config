@@ -234,7 +234,7 @@ vim.o.list = true
 -- vim.go.autoread = true
 vim.o.autoread = true
 -- vim.go.signcolumn = "yes:2"
-vim.o.signcolumn = "yes:2"
+-- vim.o.signcolumn = "yes:2"
 vim.o.laststatus = 3
 
 -- vim.go.tabstop = 2
@@ -279,7 +279,6 @@ vim.o.splitright = true
 vim.o.listchars = "extends:⭆,tab:󰌥󰌒,trail:·"
 -- ⣿
 -- vim.o.guicursor = "n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175"
-
 
 require("option.fold")
 require("option.tabline")

@@ -1,29 +1,27 @@
 local M = {}
 
-local function add_blank_line(count, above)
+--- @param lnum integer
+--- @param count integer
+--- @param above boolean
+local function add_blank_line(lnum, count, above)
   local offset = above and 1 or 0
   local repeated = vim.fn["repeat"]({ "" }, count)
-  local linenr = vim.api.nvim_win_get_cursor(0)[1]
-  vim.api.nvim_buf_set_lines(0, linenr - offset, linenr - offset, true, repeated)
+  vim.api.nvim_buf_set_lines(0, lnum - offset, lnum - offset, true, repeated)
 end
 
 local function insert_line(above, follow, indent)
   local mode = vim.api.nvim_get_mode().mode
   local count = vim.v.count1
-  add_blank_line(count, above)
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local lnum = cursor[1]
+  add_blank_line(lnum, count, above)
   if follow then
     return
   end
-  local key = count .. (above and "k" or "j")
-
+  vim.api.nvim_win_set_cursor(0, { lnum + (above and 0 or count), cursor[2] })
   if mode == "i" then
-    local indent_key = vim.api.nvim_replace_termcodes(indent and "<C-f><C-g>u" or "", true, false, true)
-    local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
-    key = esc .. key .. "A" .. indent_key
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(indent and "<C-f><C-g>u" or "", true, false, true), "n", true)
   end
-
-  vim.api.nvim_feedkeys(key, "n", true)
-  return key
 end
 
 function M.above()
@@ -35,9 +33,6 @@ end
 
 function M.above_no_follow()
   insert_line(true, false, true)
-  vim.schedule(function()
-    require("repeat").set_operation(M.above_no_follow)
-  end)
 end
 
 function M.above_no_follow_no_indent()
@@ -70,7 +65,6 @@ end
 
 function M.above_and_below()
   insert_line(false, true, true)
-  insert_line(true, true, true)
   vim.schedule(function()
     require("repeat").set_operation(M.above_and_below)
   end)

@@ -8,6 +8,7 @@
 --- @field insert my.insert
 --- @field operator my.operator
 --- @field motion my.motion
+--- @field edit my.edit
 --- @field cursor my.cursor
 --- @field util my.util
 --- @field option my.option
@@ -44,20 +45,37 @@ my._submodules = {
   atom = true,
   lsp = true,
   _atom = true,
+  motion = true,
+  insert = true,
+  edit = true,
 }
 
 setmetatable(my, {
   __index = function(t, key)
+    if key == "_" then
+      return setmetatable({}, {
+        __index = function(_, k)
+          if my._submodules[k] then
+            t[k] = require("my." .. k)
+            return t[k]
+          end
+        end,
+      })
+    end
+    if key == "env" then
+      t[key] = require("my." .. key)
+      return t[key]
+    end
     if type(key) == "number" then
       return my.env.get(key)
+    end
+    local env = my.env.get(0)
+    if env and env[key] then
+      return env[key]
     end
     if my._submodules[key] then
       t[key] = require("my." .. key)
       return t[key]
-    end
-    local env = my.env.get(0)
-    if env then
-      return env[key]
     end
   end,
 })

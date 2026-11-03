@@ -87,7 +87,7 @@ return {
       })
     end,
     "n",
-    exclude_ft = { "cmd", "msg", "pager", "dialog" },
+    exclude_ft = { "cmd", "msg", "pager", "dialog", "qf" },
     desc = "q-{motion}: multicursor: follow {motion} once",
   },
   -- dc

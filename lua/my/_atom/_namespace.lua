@@ -45,9 +45,14 @@ end
 function M.get(ns_id, id)
   vim.validate("ns_id", ns_id, "number")
   vim.validate("id", id, "number", true)
-  local result = vim.tbl_deep_extend("force", id and namespaces[ns_id][id] or namespaces[ns_id], {})
-  result.next_id = nil
-  return result
+  if id and namespaces[ns_id][id] then
+    return vim.tbl_deep_extend("force", namespaces[ns_id][id], {})
+  end
+  if not id and namespaces[ns_id] then
+    local result = vim.tbl_deep_extend("force", namespaces[ns_id], {})
+    result.next_id = nil
+    return result
+  end
 end
 
 --- @param ns_id integer

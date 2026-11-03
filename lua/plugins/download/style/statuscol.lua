@@ -10,28 +10,34 @@ return {
       segments = {
         {
           sign = {
-            namespace = { "gitsigns.*" },
-            name = { "gitsigns.*" },
+            namespace = { ".*" },
+            name = { ".*" },
             colwidth = 1,
             maxwidth = 1,
-            auto = true
           },
         },
         {
-          sign = {
-            namespace = { ".*" },
-            name = { ".*" },
+          text = { builtin.foldfunc, " " },
+          click = "v:lua.ScFa",
+          condition = {
+            true,
+            function(args)
+              return args.fold.width ~= 0
+            end,
           },
         },
         {
           text = {
-            builtin.lnumfunc,
+            function(args)
+              if args.relnum == 0 then
+                return "%=" .. args.lnum
+              end
+              return "%=" .. args.relnum
+            end,
             " ",
           },
-          -- condition = { true, builtin.not_empty },
           click = "v:lua.ScLa",
         },
-        { text = { builtin.foldfunc, " " }, click = "v:lua.ScFa" },
       },
     })
   end,

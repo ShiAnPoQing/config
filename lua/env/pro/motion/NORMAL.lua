@@ -93,36 +93,45 @@ function M.first()
   vim.cmd("normal! 0")
 end
 
+local cascade_count
+
+local function get_count()
+  if not vim.v.cascading then
+    cascade_count = vim.v.count1
+  end
+  return cascade_count
+end
+
 function M.backward_word_end()
-  vim.cmd("normal! " .. vim.v.count1 .. "ge")
+  vim.cmd("normal! " .. get_count() .. "ge")
 end
 
 function M.forward_word_end()
-  vim.cmd("normal! " .. vim.v.count1 .. "e")
+  vim.cmd("normal! " .. get_count() .. "e")
 end
 
 function M.backward_word_start()
-  vim.cmd("normal! " .. vim.v.count1 .. "b")
+  vim.cmd("normal! " .. get_count() .. "b")
 end
 
 function M.forward_word_start()
-  vim.cmd("normal! " .. vim.v.count1 .. "w")
+  vim.cmd("normal! " .. get_count() .. "w")
 end
 
 function M.backward_WORD_end()
-  vim.cmd("normal! " .. vim.v.count1 .. "gE")
+  vim.cmd("normal! " .. get_count() .. "gE")
 end
 
 function M.forward_WORD_end()
-  vim.cmd("normal! " .. vim.v.count1 .. "E")
+  vim.cmd("normal! " .. get_count() .. "E")
 end
 
 function M.backward_WORD_start()
-  vim.cmd("normal! " .. vim.v.count1 .. "B")
+  vim.cmd("normal! " .. get_count() .. "B")
 end
 
 function M.forward_WORD_start()
-  vim.cmd("normal! " .. vim.v.count1 .. "W")
+  vim.cmd("normal! " .. get_count() .. "W")
 end
 
 function M.backward_paragraph_start()
@@ -168,5 +177,11 @@ function M.forward_paragraph_start()
   vim.api.nvim_win_set_cursor(0, { lnum, view.curswant })
   vim.fn.winrestview({ curswant = view.curswant })
 end
+
+setmetatable(M, {
+  __index = function(t, k)
+    return my._.motion.NORMAL[k]
+  end,
+})
 
 return M

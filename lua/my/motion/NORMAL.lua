@@ -16,5 +16,8 @@ function M.backward_WORD_start() end
 function M.backward_WORD_end() end
 function M.forward_WORD_start() end
 function M.forward_WORD_end() end
+function M.test()
+  vim.print("test")
+end
 
 return M

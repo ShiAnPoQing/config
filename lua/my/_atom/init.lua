@@ -1,11 +1,13 @@
 --- @class my._atom
---- @field _capture my._atom._capture
---- @field _namespace my._atom._namespace
+--- @field private _capture my._atom._capture
+--- @field private _namespace my._atom._namespace
+--- @field private _menu my._atom._menu
 --- @field repeat my._atom.repeat
 --- @field marco my._atom.marco
 local M = vim._defer_require("my._atom", {
   _capture = ..., ---@module 'my._atom._capture'
   _namespace = ..., ---@module 'my._atom._namespace'
+  _menu = ..., ---@module 'my._atom._menu'
   ["repeat"] = ..., ---@module 'my._atom.repeat'
   marco = ..., ---@module 'my._atom.marco'
 })
@@ -90,7 +92,7 @@ function M.get(ns_id, id)
   if not id then
     local resource = M._namespace.get(ns_id, id) --[[@as table<integer, my.Atom>]]
     local results = {} --[[@as [integer, my.Atom][]]
-    for _id, atom in pairs(resource) do
+    for _id, atom in pairs(resource or {}) do
       table.insert(results, { _id, atom })
     end
     return results
@@ -105,5 +107,22 @@ function M.del(ns_id, id)
   vim.validate("id", id, "number", true)
   M._namespace.del(ns_id, id)
 end
+
+--- @param ns_id integer
+--- @param opts? my._atom._menu.Opts
+function M.show(ns_id, opts)
+  M._menu.open(ns_id, opts)
+end
+
+vim.api.nvim_create_user_command("AtomShow", function(ev)
+  local name = ev.args
+  local ns_id = vim.api.nvim_get_namespaces()[name]
+  if not ns_id then
+    return
+  end
+  my._atom.show(ns_id)
+end, {
+  nargs = 1,
+})
 
 return M
