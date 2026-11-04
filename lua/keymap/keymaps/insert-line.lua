@@ -59,29 +59,21 @@ return {
     desc = "Begin a new line above the cursor and start [count] insert and the indent same as cursor col",
   },
   ["<C-b>"] = {
+    "<Cmd>lua my.edit.above_add_blank_line_cursor_not_follow()<Cr>",
     {
-      "<Cmd>lua my.edit.above_add_blank_line_cursor_follow()<Cr>",
-      "n",
-      desc = "Begin [count] new line above the cursor, but not start insert",
-    },
-    {
-      -- function()
-      "<Cmd>lua my.edit.above_add_blank_line_cursor_follow()<Cr>",
-      -- vim.cmd("lua my.edit.above_add_blank_line_cursor_follow(" .. vim.v.count1 .. ")")
-      -- end,
-      "i",
-      desc = "Begin a new line above the cursor",
+      { "n", desc = "Begin [count] new line above the cursor, but not start insert" },
+      { "i", desc = "Begin a new line above the cursor" },
     },
   },
   ["<M-b>"] = {
-    insert_line.below_no_follow,
+    "<Cmd>lua my.edit.below_add_blank_line_cursor_not_follow()<Cr>",
     {
       { "n", desc = "Begin [count] new line below the cursor, but not start insert" },
       { "i", desc = "Begin a new line below the cursor" },
     },
   },
   ["<C-S-b>"] = {
-    insert_line.above,
+    "<Cmd>lua my.edit.above_add_blank_line_cursor_follow()<Cr>",
     {
 
       { "n", desc = "Add [count] new line above the cursor" },
@@ -89,7 +81,7 @@ return {
     },
   },
   ["<M-S-b>"] = {
-    insert_line.below,
+    "<Cmd>lua my.edit.below_add_blank_line_cursor_follow()<cr>",
     {
       { "n", desc = "Add [count] new line below the cursor" },
       { "i", desc = "Add a new line below the cursor" },
