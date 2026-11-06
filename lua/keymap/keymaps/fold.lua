@@ -28,6 +28,6 @@ return {
   -- ["<S-CR>"] = {
   --   "zMzv",
   --   "n",
-  --   desc = "Focus current Fold",   
+  --   desc = "Focus current Fold",
   -- },
 }

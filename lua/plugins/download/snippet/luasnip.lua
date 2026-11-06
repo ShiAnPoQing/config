@@ -48,8 +48,7 @@ return {
       local ls = require("luasnip")
       ls.setup({
         history = true,
-        update_events = "TextChanged,TextChangedI",
-        enable_autosnippets = true,
+        enable_autosnippets = false,
         cut_selection_keys = "<Tab>",
         store_selection_keys = "<Tab>",
       })
