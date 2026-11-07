@@ -15,6 +15,26 @@
 ---------------------------------------------------------------------------------------------------+
 
 return {
+  ["[c"] = {
+    function()
+      if not my.multicursor.active() then
+        return
+      end
+      vim.cmd("normal! Q" .. vim.v.count1 .. "[CQ")
+    end,
+    "n",
+    desc = "Swap primary and secondary roles with the next [count] cursor",
+  },
+  ["]c"] = {
+    function()
+      if not my.multicursor.active() then
+        return
+      end
+      vim.cmd("normal! Q" .. vim.v.count1 .. "]CQ")
+    end,
+    "n",
+    desc = "Swap primary and secondary roles with the previous [count] cursor",
+  },
   --- multi-cursor yank
   --- 1. 目前指针对于 unamed register 有效，同时考虑 */+ 寄存器继承问题
   ---    因为 "ay 总是需要显式 yank，所以有待考量
@@ -93,7 +113,7 @@ return {
   -- dc
   ["c"] = {
     function()
-      if vim.v.operator == "d" then
+      if vim.v.operator == "d" or (vim.v.operator == "g@" and vim.o.operatorfunc == "v:lua.my.operator._delete_") then
         local count = vim.v.count1
         local cursor = vim.api.nvim_win_get_cursor(0)
         local marks = my.multicursor.get(0, { cursor[1] - 1, cursor[2] }, -1)
@@ -117,7 +137,7 @@ return {
   -- dC
   ["C"] = {
     function()
-      if vim.v.operator == "d" then
+      if vim.v.operator == "d" or (vim.v.operator == "g@" and vim.o.operatorfunc == "v:lua.my.operator._delete_") then
         local cursor = vim.api.nvim_win_get_cursor(0)
         local ns_id = vim.api.nvim_create_namespace("nvim.multicursor")
         local marks = vim.api.nvim_buf_get_extmarks(0, ns_id, 0, { cursor[1] - 1, cursor[2] })

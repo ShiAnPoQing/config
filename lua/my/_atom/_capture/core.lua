@@ -91,16 +91,17 @@ end
 --- @param data my.CmdAtom
 local function capture(data)
   for capturer, _ in pairs(started_captures) do
+    local _data = vim.tbl_deep_extend("force", data, {})
     local config = started_captures[capturer]
     local patch = config.patch
     local filter = config.filter
     if patch then
-      data = patch(data) or data
+      _data = patch(_data) or _data
     end
     if
-      not filter or filter and filter(data --[[@as my.CmdAtom]])
+      not filter or filter and filter(_data --[[@as my.CmdAtom]])
     then
-      table.insert(capturer.capture.atoms, data)
+      table.insert(capturer.capture.atoms, _data)
     else
     end
   end

@@ -105,13 +105,6 @@ local function get_operator_origins()
   return origins
 end
 
-function M._pending_delete_(context)
-  vim.o.operatorfunc = "v:lua.my.operator._delete_"
-  op_ctx = context
-  op_ctx.origins = get_operator_origins()
-  op_ctx.mode = vim.api.nvim_get_mode().mode
-end
-
 local function is_empty(start_pos, end_pos)
   if end_pos[1] == start_pos[1] and end_pos[2] < start_pos[2] then
     return true
@@ -124,9 +117,24 @@ local function is_empty(start_pos, end_pos)
   return false
 end
 
+--- @return boolean
+function M.is_operatorfunc()
+  if type(vim.o.operatorfunc) == "string" and vim.o.operatorfunc:find("my.operator") then
+    return true
+  end
+  return false
+end
+
 -- better delete: better cursor position
---- @param type "char"|"line"|"block"
-function M._delete_(type)
+--- @param type "char"|"line"|"block"|nil
+function M.delete(type)
+  if not type then
+    vim.o.operatorfunc = "v:lua.my.operator.delete"
+    op_ctx = { reg = vim.v.register }
+    op_ctx.origins = get_operator_origins()
+    op_ctx.mode = vim.api.nvim_get_mode().mode
+    return "g@"
+  end
   local origin = table.remove(op_ctx.origins, 1)
   local delete = '"' .. op_ctx.reg .. "d"
   if type == "char" then
@@ -188,34 +196,15 @@ function M._delete_(type)
   end
 end
 
-function M.is_delete_operatorfunc()
-  return vim.o.operatorfunc == "v:lua.my.operator._delete_"
-end
+--- @param type "char"|"line"|"block"|nil
+function M.yank(type)
+  if not type then
+    vim.o.operatorfunc = "v:lua.my.operator.yank"
+    op_ctx = { reg = vim.v.register }
+    op_ctx.origins = get_operator_origins()
+    return "g@"
+  end
 
-function M.is_delete_operator()
-  return vim.v.operator == "g@" and M.is_delete_operatorfunc()
-end
-
-function M.delete()
-  local count = vim.v.count
-  -- local pending_cmd = string.format(
-  --   "<Cmd>lua my.operator._pending_delete_(%s)<Cr>",
-  --   vim.fn.join(vim.fn.split(vim.inspect({ reg = vim.v.register }), "\n"), "")
-  -- )
-  my.operator._pending_delete_({ reg = vim.v.register })
-  -- vim.api.nvim_feedkeys(vim.keycode(pending_cmd), "nx", false)
-  return "g@"
-  -- vim.api.nvim_feedkeys((count ~= 0 and count or "") .. "g@", "n", false)
-end
-
-function M._pending_yank_(context)
-  vim.o.operatorfunc = "v:lua.my.operator._yank_"
-  op_ctx = context
-  op_ctx.origins = get_operator_origins()
-end
-
---- @param type "char"|"line"|"block"
-function M._yank_(type)
   local origin = table.remove(op_ctx.origins, 1)
   local y = '"' .. op_ctx.reg .. "y"
   if type == "char" then
@@ -233,21 +222,152 @@ function M._yank_(type)
   vim.api.nvim_win_set_cursor(0, origin)
 end
 
+--- @param type "char"|"line"|"block"
+local function join(type)
+  local origin = table.remove(op_ctx.origins, 1)
+  if type == "line" then
+    local join_key = op_ctx.opts.only_join and "gJ" or "J"
+    local view = vim.fn.winsaveview()
+    view.col = origin[2]
+    if vim.list_contains({ "v", "V", "" }, op_ctx.mode) then
+      vim.cmd("normal! `[V`]" .. join_key)
+    end
+    local count = vim.v.count1 + 1
+    vim.cmd("normal! " .. count .. join_key)
+    vim.fn.winrestview(view)
+  end
+end
+
+--- @class my.operator.join.Opts
+--- @field only_join? boolean
+
+--- @param tp "char"|"line"|"block"
+--- @return string
+--- @overload fun(opts?: my.operator.join.Opts)
+function M.join(tp)
+  if type(tp) == "string" then
+    join(tp)
+    return
+  end
+  local opts = tp or {} --[[@as my.operator.join.Opts]]
+  if opts.only_join then
+    vim.o.operatorfunc = "v:lua.my.operator.join1"
+    M.join1 = function(t)
+      return M.join(t)
+    end
+  else
+    vim.o.operatorfunc = "v:lua.my.operator.join"
+  end
+  op_ctx = {}
+  op_ctx.origins = get_operator_origins()
+  op_ctx.mode = vim.api.nvim_get_mode().mode
+  op_ctx.opts = opts
+  return "g@"
+end
+
+local function uppercase(type)
+  local origin = table.remove(op_ctx.origins)
+  if type == "char" then
+    local start_pos = vim.api.nvim_buf_get_mark(0, "[")
+    local end_pos = vim.api.nvim_buf_get_mark(0, "]")
+    if is_empty(start_pos, end_pos) then
+      return
+    end
+    vim.cmd("normal! `[v`]gU")
+  elseif type == "line" then
+    vim.cmd("normal! '[V']gU")
+  elseif type == "block" then
+    vim.cmd("normal! `[" .. vim.keycode("<C-V>") .. "`]gU")
+  end
+  vim.api.nvim_win_set_cursor(0, origin)
+end
+
+local function lowercase(type)
+  local origin = table.remove(op_ctx.origins)
+  if type == "char" then
+    local start_pos = vim.api.nvim_buf_get_mark(0, "[")
+    local end_pos = vim.api.nvim_buf_get_mark(0, "]")
+    if is_empty(start_pos, end_pos) then
+      return
+    end
+    vim.cmd("normal! `[v`]gu")
+  elseif type == "line" then
+    vim.cmd("normal! '[V']gu")
+  elseif type == "block" then
+    vim.cmd("normal! `[" .. vim.keycode("<C-V>") .. "`]gu")
+  end
+  vim.api.nvim_win_set_cursor(0, origin)
+end
+
+function M.lowercase(tp)
+  if type(tp) == "string" then
+    lowercase(tp)
+  end
+  vim.o.operatorfunc = "v:lua.my.operator.lowercase"
+  op_ctx = {}
+  op_ctx.origins = get_operator_origins()
+  return "g@"
+end
+
+function M.uppercase(tp)
+  if type(tp) == "string" then
+    uppercase(tp)
+  end
+  vim.o.operatorfunc = "v:lua.my.operator.uppercase"
+  op_ctx = {}
+  op_ctx.origins = get_operator_origins()
+  return "g@"
+end
+
+function M.get_operatorfunc_command()
+  if not M.is_operatorfunc() then
+    return
+  end
+  local func = vim.o.operatorfunc
+  if func == "v:lua.my.operator.join1" then
+    return "<Cmd>lua my.operator.join({ only = true })<Cr>"
+  end
+  return "<Cmd>lua " .. func:gsub("v:lua.", "") .. "()<Cr>"
+end
+
+function M.is_delete_operatorfunc()
+  return vim.o.operatorfunc == "v:lua.my.operator.delete"
+end
+
+function M.is_delete_operator()
+  return vim.v.operator == "g@" and M.is_delete_operatorfunc()
+end
+
 function M.is_yank_operatorfunc()
-  return vim.o.operatorfunc == "v:lua.my.operator._yank_"
+  return vim.o.operatorfunc == "v:lua.my.operator.yank"
 end
 
 function M.is_yank_operator()
   return vim.v.operator == "g@" and M.is_yank_operatorfunc()
 end
 
-function M.yank()
-  local pending_cmd = string.format(
-    "<Cmd>lua my.operator._pending_yank_(%s)<Cr>",
-    vim.fn.join(vim.fn.split(vim.inspect({ reg = vim.v.register }), "\n"), "")
-  )
-  vim.api.nvim_feedkeys(vim.keycode(pending_cmd), "nt", false)
-  vim.api.nvim_feedkeys("g@", "n", false)
+function M.is_join_operatorfunc()
+  return vim.o.operatorfunc == "v:lua.my.operator.join" or vim.o.operatorfunc == "v:lua.my.operator.join1"
+end
+
+function M.is_join_operator()
+  return vim.v.operator == "g@" and M.is_join_operatorfunc()
+end
+
+function M.is_uppercase_operatorfunc()
+  return vim.o.operatorfunc == "v:lua.my.operator.uppercase"
+end
+
+function M.is_uppercase_operator()
+  return vim.v.operator == "g@" and M.is_uppercase_operatorfunc()
+end
+
+function M.is_lowercase_operatorfunc()
+  return vim.o.operatorfunc == "v:lua.my.operator.lowercase"
+end
+
+function M.is_lowercase_operator()
+  return vim.v.operator == "g@" and M.is_lowercase_operatorfunc()
 end
 
 return M

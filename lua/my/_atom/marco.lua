@@ -53,11 +53,15 @@ function M.enable(enable)
             return cmdAtom.cmd ~= "q"
           end,
           patch = function(cmdAtom)
-            if (cmdAtom.type == "operator" or cmdAtom.type == "visual") and cmdAtom.keys:find("g@") then
-              cmdAtom.keys = cmdAtom.keys:gsub(
-                "g@",
-                vim.keycode("<cmd>lua my.operator._pending_delete_({ reg = vim.v.register })<cr>") .. "g@"
-              )
+            if
+              (cmdAtom.type == "operator" or cmdAtom.type == "visual")
+              and cmdAtom.keys
+              and cmdAtom.keys:find("g@")
+            then
+              local cmd = my.operator.get_operatorfunc_command()
+              if cmd then
+                cmdAtom.keys = cmdAtom.keys:gsub("g@", vim.keycode(cmd) .. "g@")
+              end
             end
             return cmdAtom
           end,
