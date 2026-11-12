@@ -10,11 +10,14 @@
 --- @field width? my._atom._menu.Opts.Layout.Width
 --- @field align? 'left'|'center'|'right'
 --- @field ellipsis? string
---- @field text? string | fun(ctx: any):string
---- @field highlight? string | fun(ctx: any):string
+--- @field text? [string, string][]|fun(ctx):[string, string][]
+
+--- @class my._atom._menu.Opts.Layout.Columns
+--- @field gap? integer
+--- @field [integer] my._atom._menu.Opts.Layout.Column
 
 --- @class my._atom._menu.Opts.Layout
---- @field columns? my._atom._menu.Opts.Layout.Column[]
+--- @field columns? my._atom._menu.Opts.Layout.Columns
 --- @field components? table<string, my._atom._menu.Opts.Layout.Component>
 --- @field padding? integer | [integer, integer]
 

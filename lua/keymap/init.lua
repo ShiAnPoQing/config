@@ -47,6 +47,7 @@ function M.setup()
     "cmdwin",
     -- "dir",
     "multicursor",
+    "scroll",
   }
 
   for _, path in ipairs(paths) do

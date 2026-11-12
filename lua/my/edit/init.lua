@@ -96,4 +96,95 @@ function M.above_below_add_blank_line()
   M.below_add_blank_line_follow()
 end
 
+function M.trim_line()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local lnum = cursor[1]
+  local line = vim.api.nvim_get_current_line()
+  local col = line:find("%S") or #line + 1
+  col = col - 1
+  line = vim.trim(line)
+  vim.api.nvim_buf_set_lines(0, lnum - 1, lnum, false, { line })
+  vim.api.nvim_win_set_cursor(0, { lnum, math.max(cursor[2] - col, 1) })
+end
+
+--- @param WORD boolean|nil
+local function trim_cword_trail(WORD)
+  local pattern = WORD and [[\S\+]] or [[\(\%(\%(\k\)\@!\S\)\+\)\|\(\k\+\)]]
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local matches = my.buf_match(0, pattern, cursor, { count = 2 })
+  if #matches < 2 then
+    return
+  end
+  if matches[1].col > cursor[2] then
+    return
+  end
+  local cword_match = matches[1]
+  local nword_match = matches[2]
+  if cword_match.end_col == nword_match.col then
+    return
+  end
+  if cword_match.lnum == nword_match.lnum then
+    local line = vim.api.nvim_buf_get_lines(0, cword_match.lnum - 1, cword_match.lnum, true)[1]
+    local left_part = line:sub(1, cword_match.end_col)
+    local right_part = line:sub(nword_match.col + 1)
+    vim.api.nvim_buf_set_lines(0, cword_match.lnum - 1, cword_match.lnum, true, { left_part .. right_part })
+  else
+    local line = vim.api.nvim_buf_get_lines(0, cword_match.lnum - 1, cword_match.lnum, true)[1]
+    local new_line = line:sub(1, cword_match.end_col)
+    vim.api.nvim_buf_set_lines(0, cword_match.lnum - 1, cword_match.lnum, true, { new_line })
+  end
+end
+
+--- @param WORD boolean|nil
+local function trim_cword_lead(WORD)
+  local pattern = WORD and [[\S\+]] or [[\(\%(\%(\k\)\@!\S\)\+\)\|\(\k\+\)]]
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local start = { cursor[1], cursor[2] }
+  if WORD and my.cursor.at_WORD_start() or my.cursor.at_word_start() then
+    start[2] = start[2] + 1
+  end
+  local matches = my.buf_match(0, pattern, start, { count = 2, backward = true })
+  if #matches < 2 then
+    return
+  end
+  if matches[1].end_col < cursor[2] then
+    return
+  end
+  local cword_match = matches[1]
+  local nword_match = matches[2]
+  if cword_match.col == nword_match.end_col then
+    return
+  end
+  if cword_match.lnum == nword_match.lnum then
+    local line = vim.api.nvim_buf_get_lines(0, cword_match.lnum - 1, cword_match.lnum, true)[1]
+    local new_line = line:sub(1, nword_match.end_col) .. line:sub(cword_match.col + 1)
+    vim.api.nvim_buf_set_lines(0, cword_match.lnum - 1, cword_match.lnum, true, { new_line })
+    cursor[2] = cursor[2] + #new_line - #line
+  else
+    local line = vim.api.nvim_buf_get_lines(0, cword_match.lnum - 1, cword_match.lnum, true)[1]
+    local new_line = line:sub(cword_match.col + 1)
+    cursor[2] = cursor[2] + #new_line - #line
+    vim.api.nvim_buf_set_lines(0, cword_match.lnum - 1, cword_match.lnum, true, { new_line })
+  end
+  vim.api.nvim_win_set_cursor(0, cursor)
+end
+
+function M.trim_cword_trail()
+  trim_cword_trail()
+end
+
+function M.trim_cWORD_trail()
+  trim_cword_trail(true)
+end
+
+function M.trim_cword_lead()
+  trim_cword_lead()
+end
+
+function M.trim_cWORD_lead()
+  trim_cword_lead(true)
+end
+
+function M.trim_cword() end
+
 return M

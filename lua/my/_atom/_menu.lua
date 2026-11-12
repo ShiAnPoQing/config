@@ -1,3 +1,5 @@
+local layout = require("my._atom._menu.layout")
+
 --- @class (private) my._atom._menu
 local M = {}
 
@@ -14,28 +16,8 @@ local function install_buffer_maps(buf)
     M.close()
   end, { buf = buf })
   vim.keymap.set("n", "<CR>", function()
-    M.close()
+    local cursor = vim.api.nvim_win_get_cursor(0)
   end, { buf = buf })
-end
-
---- @param str string
---- @param base integer
-local function get_special_key_highlights(str, base)
-  local highlights = {}
-  --- @param s string
-  --- @param b integer
-  local function search(s, b)
-    local start = s:find("<", 1, true)
-    if start then
-      local end_ = s:find(">", 1, true)
-      if end_ then
-        table.insert(highlights, { start + b - 1, end_ + b, "Special" })
-        search(s:sub(end_ + 1), b + end_)
-      end
-    end
-  end
-  search(str, base)
-  return highlights
 end
 
 --- @param ns_id integer
@@ -87,6 +69,7 @@ function M.open(ns_id, opts)
   })
   local buf = Buf:get()
   Win:open(buf)
+  local Layout = layout.build(opts.layout, get_items(ns_id))
   require("my._atom._menu.render").draw(buf, get_items(ns_id), opts.layout)
   vim.api.nvim_create_autocmd("WinLeave", {
     callback = function(ev)

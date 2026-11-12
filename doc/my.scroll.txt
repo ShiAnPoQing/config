@@ -1,0 +1,30 @@
+*my.scroll.txt*
+
+==============================================================================
+my.scroll							*my.scroll*
+
+up({count})						*my.scroll.up()*
+
+down({count})						*my.scroll.down()*
+
+left({count}) 						*my.scroll.left()*
+
+right({count}) 						*my.scroll.right()*
+
+page_down({count})					*my.scroll.page_down()*
+
+page_up({count})					*my.scroll.page_up()*
+
+page_left({count})					*my.scroll.page_left()*
+
+page_right({count})					*my.scroll.page_right()*
+
+half_page_down({count})					*my.scroll.half_page_down()*
+
+half_page_up({count})					*my.scroll.half_page_up()*
+
+half_page_left({count})					*my.scroll.half_page_left()*
+
+half_page_right({count})				*my.scroll.half_page_right()*
+
+vim:tw=78:ts=8:noet:ft=help:norl:

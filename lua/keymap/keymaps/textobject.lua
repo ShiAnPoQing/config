@@ -95,14 +95,47 @@ local function line_outer_movement(count)
   return expand_select_key
 end
 
--- local ns = vim.api.nvim_create_namespace("textobject.nvim")
--- vim.on_key(function(k, t)
---   if t == 'd' then
---     vim.print('delee')
---   end
--- end, ns)
-
 return {
+  ["sI"] = {
+    function()
+      if vim.v.operator == "d" or my.operator.is_delete_operator() then
+        return "<esc><Cmd>lua my.edit.trim_cWORD_lead()<cr>"
+      end
+      return "<esc>"
+    end,
+    "o",
+    expr = true,
+  },
+  ["sO"] = {
+    function()
+      if vim.v.operator == "d" or my.operator.is_delete_operator() then
+        return "<esc><Cmd>lua my.edit.trim_cWORD_trail()<cr>"
+      end
+      return "<esc>"
+    end,
+    "o",
+    expr = true,
+  },
+  ["si"] = {
+    function()
+      if vim.v.operator == "d" or my.operator.is_delete_operator() then
+        return "<esc><Cmd>lua my.edit.trim_cword_lead()<cr>"
+      end
+      return "<esc>"
+    end,
+    "o",
+    expr = true,
+  },
+  ["so"] = {
+    function()
+      if vim.v.operator == "d" or my.operator.is_delete_operator() then
+        return "<esc><Cmd>lua my.edit.trim_cword_trail()<cr>"
+      end
+      return "<esc>"
+    end,
+    "o",
+    expr = true,
+  },
   ["ei"] = { "aw", { "x", "o" }, desc = "[textobject]: outer word" },
   ["wi"] = { "iw", { "x", "o" }, desc = "[textobject]: inner word" },
   ["eI"] = { "aW", { "x", "o" }, desc = "[textobject]: outer WORD" },
@@ -284,6 +317,17 @@ return {
     "<cmd>lua my.motion.OPERATOR.line_lead_whitespace()<CR>",
     "o",
     desc = "[textobject]: line leading whitespace",
+  },
+  ["ss"] = {
+    function()
+      if vim.v.operator == "d" or my.operator.is_delete_operator() then
+        return "<esc><Cmd>lua my.edit.trim_line()<cr>"
+      end
+      return "<esc>"
+    end,
+    "o",
+    expr = true,
+    desc = "[textobject]: line leading and trailing whitespace",
   },
   ["sl"] = {
     "<cmd>lua my.motion.OPERATOR.line_trail_whitespace()<CR>",

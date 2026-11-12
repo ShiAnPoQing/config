@@ -177,7 +177,7 @@ local function forward_word_start(is_WORD)
     return
   end
   -- Builtin behavior: 1 0, Like `dw`.
-  vim.cmd("normal! " .. key)
+  vim.cmd("normal! " .. vim.v.count1 .. key)
 end
 
 function M.backward_word_start()

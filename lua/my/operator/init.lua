@@ -266,7 +266,7 @@ function M.join(tp)
 end
 
 local function uppercase(type)
-  local origin = table.remove(op_ctx.origins)
+  local origin = table.remove(op_ctx.origins, 1)
   if type == "char" then
     local start_pos = vim.api.nvim_buf_get_mark(0, "[")
     local end_pos = vim.api.nvim_buf_get_mark(0, "]")
@@ -283,7 +283,7 @@ local function uppercase(type)
 end
 
 local function lowercase(type)
-  local origin = table.remove(op_ctx.origins)
+  local origin = table.remove(op_ctx.origins, 1)
   if type == "char" then
     local start_pos = vim.api.nvim_buf_get_mark(0, "[")
     local end_pos = vim.api.nvim_buf_get_mark(0, "]")
@@ -302,6 +302,7 @@ end
 function M.lowercase(tp)
   if type(tp) == "string" then
     lowercase(tp)
+    return
   end
   vim.o.operatorfunc = "v:lua.my.operator.lowercase"
   op_ctx = {}
@@ -312,6 +313,7 @@ end
 function M.uppercase(tp)
   if type(tp) == "string" then
     uppercase(tp)
+    return
   end
   vim.o.operatorfunc = "v:lua.my.operator.uppercase"
   op_ctx = {}

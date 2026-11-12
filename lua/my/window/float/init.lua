@@ -1,7 +1,44 @@
+local submodules = {
+  drag = ..., --- @module 'my.window.float.drag'
+}
+
 --- @class my.window.float
 --- @field drag my.window.float.drag
-local M = vim._defer_require("my.window.float", {
-  drag = ..., --- @module 'my.window.float.drag'
+--- @overload fun(file: string?)
+local M = { _submodules = submodules }
+
+---@diagnostic disable-next-line: param-type-mismatch
+setmetatable(M, {
+  ---@param t table<string, any>
+  ---@param k string
+  __index = function(t, k)
+    if not submodules[k] then
+      return
+    end
+    local name = string.format("%s.%s", "my.window.float", k)
+    t[k] = require(name)
+    return t[k]
+  end,
+  __call = function(_, ...)
+    local file = select(1, ...) or vim.api.nvim_buf_get_name(0)
+    local buf = vim.api.nvim_create_buf(false, true)
+    local width = math.floor(0.5 * vim.o.columns)
+    local height = math.floor(0.5 * vim.o.lines)
+    local row = math.floor(vim.o.lines / 2 - (height + 2) / 2)
+    local col = math.floor(vim.o.columns / 2 - (width + 2) / 2)
+    vim.api.nvim_open_win(buf, true, {
+      relative = "editor",
+      width = math.floor(0.5 * vim.o.columns),
+      height = math.floor(0.5 * vim.o.lines),
+      row = row,
+      col = col,
+      title = file,
+      title_pos = "center",
+      style = "minimal",
+      border = "single",
+    })
+    vim.cmd.edit(file)
+  end,
 })
 
 --- @param opts my.window.float.ResizeOpts?
@@ -197,58 +234,16 @@ function M.is_float(win)
   return false
 end
 
---- @param file string?
-function M.edit(file)
-  file = file or vim.api.nvim_buf_get_name(0)
-  local buf = vim.api.nvim_create_buf(false, true)
-  local width = math.floor(0.5 * vim.o.columns)
-  local height = math.floor(0.5 * vim.o.lines)
-  local row = math.floor(vim.o.lines / 2 - (height + 2) / 2)
-  local col = math.floor(vim.o.columns / 2 - (width + 2) / 2)
-  vim.api.nvim_open_win(buf, true, {
-    relative = "editor",
-    width = math.floor(0.5 * vim.o.columns),
-    height = math.floor(0.5 * vim.o.lines),
-    row = row,
-    col = col,
-    title = file,
-    title_pos = "center",
-    style = "minimal",
-    border = "single",
-  })
-  vim.cmd.edit(file)
-end
-
-function M.view(file)
-  file = file or vim.api.nvim_buf_get_name(0)
-  local buf = vim.api.nvim_create_buf(false, true)
-  local width = math.floor(0.5 * vim.o.columns)
-  local height = math.floor(0.5 * vim.o.lines)
-  local row = math.floor(vim.o.lines / 2 - (height + 2) / 2)
-  local col = math.floor(vim.o.columns / 2 - (width + 2) / 2)
-  vim.api.nvim_open_win(buf, true, {
-    relative = "editor",
-    width = math.floor(0.5 * vim.o.columns),
-    height = math.floor(0.5 * vim.o.lines),
-    row = row,
-    col = col,
-    title = file,
-    title_pos = "center",
-    border = "single",
-  })
-  vim.cmd.edit(file)
-  vim.bo.readonly = true
-end
-
 vim.api.nvim_create_user_command("FloatEdit", function(args)
-  my.window.float.edit(args.fargs[1])
+  my.window.float(args.fargs[1])
 end, {
   nargs = "?",
   complete = "file",
 })
 
 vim.api.nvim_create_user_command("FloatView", function(args)
-  my.window.float.view(args.fargs[1])
+  my.window.float(args.fargs[1])
+  vim.bo.readonly = true
 end, {
   nargs = "?",
   complete = "file",

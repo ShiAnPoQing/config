@@ -1,26 +1,6 @@
 --- @class my._atom._menu.render
 local M = vim._defer_require("my._atom._menu.render", {})
 
---- @param component my._atom._menu.Opts.Layout.Component
---- @param context any
---- @return string
-local function get_component_text(component, context)
-  local text = type(component.text) == "function" and component.text(context) or ""
-  if component.width then
-    local width = component.width
-    local text_width = #text
-    width.min = width.min or text_width
-    width.max = width.max or width.min
-    if width.min > text_width then
-      text = text .. string.rep(" ", width.min - text_width)
-    end
-    if width.max < text_width then
-      text = text:sub(1, width.max)
-    end
-  end
-  return text
-end
-
 --- @param buf integer
 --- @param items any
 --- @param opts my._atom._menu.Opts.Layout
@@ -42,11 +22,12 @@ function M.draw(buf, items, opts)
       local gap = span.gap or 0
       for s_i, name in ipairs(span) do
         local component = components[name]
-        local text = get_component_text(component, context)
-        local hl = type(component.highlight) == "function" and component.highlight(context) or ""
-        local start_pos = { context.idx, #line }
-        local end_pos = { context.idx, #line + #text }
-        table.insert(highlights, { start_pos, end_pos, hl })
+        local Component = require("my._atom._menu.component").create(component)
+        Component:build({ context.idx, #line }, context)
+        local text = Component:get_text()
+        for _, hl in ipairs(Component:get_highlight()) do
+          table.insert(highlights, hl)
+        end
         line = line .. text
         if s_i ~= #span then
           line = line .. string.rep(" ", gap)

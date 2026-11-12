@@ -17,6 +17,7 @@ local M = vim._defer_require("my._atom", {
 
 --- @class my.Atom
 --- @field atoms my.CmdAtom[]
+--- @field [string] any
 
 --- @param opts my._atom.Capturer.Opts?
 --- @return my._atom.Capturer
@@ -108,6 +109,19 @@ function M.del(ns_id, id)
   M._namespace.del(ns_id, id)
 end
 
+--- @return table<string, integer>
+function M.get_namespaces()
+  local namespaces = {}
+  local ns_ids = M._namespace.get_namespace_ids()
+  for name, ns_id in pairs(vim.api.nvim_get_namespaces()) do
+    if vim.list_contains(ns_ids, ns_id) then
+      namespaces[name] = ns_id
+    end
+  end
+
+  return namespaces
+end
+
 --- @param ns_id integer
 --- @param opts? my._atom._menu.Opts
 function M.show(ns_id, opts)
@@ -120,9 +134,34 @@ vim.api.nvim_create_user_command("AtomShow", function(ev)
   if not ns_id then
     return
   end
+  if name == "my.atom.marco" then
+    my._atom.get_namespaces()
+    my._atom.show(ns_id, {
+      window = {
+        height = 12,
+      },
+      layout = {
+        columns = {
+          { "register_type", "atom_action", gap = 4 },
+        },
+        components = {
+          register_type = {
+            text = function(ctx)
+              return { { ctx.item.type or "", "Type" } }
+            end,
+          },
+        },
+        padding = 0,
+      },
+    })
+    return
+  end
   my._atom.show(ns_id)
 end, {
   nargs = 1,
+  complete = function()
+    return vim.tbl_keys(my._atom.get_namespaces())
+  end,
 })
 
 return M

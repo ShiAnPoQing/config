@@ -193,3 +193,7 @@ end
 --     })
 --   end)
 -- end
+
+vim.keymap.set("n", ";;l", function()
+  vim.print(my.buf_match(0, [[\<\k\+\>]], { 2, 5 }, { count = 0, backward = true }))
+end)

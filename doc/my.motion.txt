@@ -1,0 +1,38 @@
+*my.motion.txt*
+
+==============================================================================
+my.motion							*my.motion*
+
+first()						*my.motion.first()*
+
+last()						*my.motion.last()*
+
+first_non_blank()				*my.motion.first_non_blank()*
+
+last_non_blank()				*my.motion.last_non_blank()*
+
+backward_word_start()				*my.motion.backward_word_start()*
+
+backward_WORD_start()				*my.motion.backward_WORD_start()*
+
+backward_word_end()				*my.motion.backward_word_end()*
+
+backward_WORD_end()				*my.motion.backward_WORD_end()*
+
+forward_word_start()				*my.motion.forward_word_start()*
+
+forward_WORD_start()				*my.motion.forward_WORD_start()*
+
+forward_word_end()				*my.motion.forward_word_end()*
+
+forward_WORD_end()				*my.motion.forward_WORD_end()*
+
+==============================================================================
+Submodules
+
+`my.motion.NORMAL(my.motion.n)`
+`my.motion.INSERT(my.motion.i)`
+`my.motion.COMMAND(my.motion.c)`
+`my.motion.OPERATOR_PENDING(my.motion.no)`
+
+vim:tw=78:ts=8:noet:ft=help:norl:

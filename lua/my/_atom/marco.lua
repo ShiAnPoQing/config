@@ -73,6 +73,7 @@ function M.enable(enable)
       callback = function()
         Capturer:stop(function(capture)
           if #capture.atoms > 0 then
+            capture.type = '"' .. reg
             regs[reg] = my._atom.create(ns_id, capture)
           end
         end)

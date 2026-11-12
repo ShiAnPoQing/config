@@ -179,7 +179,7 @@ function M.forward_paragraph_start()
 end
 
 setmetatable(M, {
-  __index = function(t, k)
+  __index = function(_, k)
     return my._.motion.NORMAL[k]
   end,
 })

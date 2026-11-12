@@ -1,3 +1,8 @@
+--- @class my.g: { [string]: any }
+--- @class my.b: vim.var_accessor
+--- @class my.w: vim.var_accessor
+--- @class my.t: vim.var_accessor
+
 --- @class my
 --- @field env my.env
 --- @field command my.command
@@ -21,13 +26,6 @@
 --- @field b my.b
 --- @field w my.w
 --- @field t my.t
-
---- @class my.g: { [string]: any }
---- @class my.b: vim.var_accessor
---- @class my.w: vim.var_accessor
---- @class my.t: vim.var_accessor
-
---- @type my
 _G.my = _G.my or {}
 my._submodules = {
   command = true,
@@ -147,6 +145,142 @@ do
   }
   my.go = make_dict_accessor("g", false, _opts)
   my.bo = make_dict_accessor("b", nil, _opts)
+  my.wo = make_dict_accessor("w", nil, _opts)
 end
 
--- my.macro.enable()
+do
+  --- @param buf integer
+  --- @param start [integer, integer]
+  --- @return boolean
+  local function check_start(buf, start)
+    local lnum = start[1]
+    local col = start[2]
+    if type(lnum) ~= "number" or type(col) ~= "number" then
+      vim.notify(
+        string.format('my.buf_match: "start" expected [integer, integer], but got [%s, %s]', type(lnum), type(col)),
+        vim.log.levels.ERROR
+      )
+      return false
+    end
+    if lnum <= 0 or lnum > vim.api.nvim_buf_line_count(buf) then
+      vim.notify("my.buf_match: start[1] out of buf", vim.log.levels.ERROR)
+      return false
+    end
+    if col <= 0 or col > #vim.api.nvim_buf_get_lines(buf, lnum - 1, lnum, true)[1] then
+      vim.notify("my.buf_match: start[2] out of buf", vim.log.levels.ERROR)
+      return false
+    end
+    return true
+  end
+
+  --- @class my.buf_match.Opts
+  --- @field count? integer 0 is match to buf start or buf end
+  --- @field backward? boolean default nil
+  --- @field strict? boolean
+
+  --- @class my.buf_match.match
+  --- @field lnum integer
+  --- @field col integer
+  --- @field end_lnum integer
+  --- @field end_col integer
+  --- @field text string
+
+  --- @param buf integer
+  --- @param pattern string
+  --- @param start [integer, integer]
+  --- @param opts my.buf_match.Opts?
+  --- @return my.buf_match.match[]
+  function my.buf_match(buf, pattern, start, opts)
+    vim.validate("buf", buf, "number")
+    vim.validate("pattern", pattern, "string")
+    vim.validate("start", start, "table")
+    vim.validate("opts", opts, "table", true)
+    buf = buf == 0 and vim.api.nvim_get_current_buf() or buf
+    opts = opts or {}
+    if not check_start(buf, start) then
+      return {}
+    end
+    local count = type(opts.count) == "number" and opts.count or 1
+    local strict = opts.strict
+    local backward = opts.backward
+    local all
+    if count == 0 then
+      all = true
+    end
+    local start_line = start[1]
+    local start_col = start[2]
+    local buf_line_count = vim.api.nvim_buf_line_count(buf)
+
+    local matches = {}
+
+    local should_match = function()
+      return all or #matches < count
+    end
+
+    local function match_backward(line)
+      if line < 1 then
+        return
+      end
+      --- @type any[]
+      local list = vim.fn.matchbufline(buf, pattern, line, line)
+      ---@diagnostic disable-next-line: undefined-field
+      list = vim.iter(list):rev():totable()
+      for _, item in ipairs(list) do
+        local col = item.byteidx
+        if
+          (line == start_line and ((strict and col + #item.text <= start_col) or (not strict and col < start_col)))
+          or line ~= start_line
+        then
+          if not should_match() then
+            break
+          end
+          table.insert(matches, {
+            col = item.byteidx,
+            lnum = line,
+            end_col = item.byteidx + #item.text,
+            end_lnum = line,
+            text = item.text,
+          })
+        end
+      end
+      if should_match then
+        match_backward(line - 1)
+      end
+    end
+
+    local function match_forward(line)
+      if line > buf_line_count then
+        return
+      end
+      --- @type any[]
+      local list = vim.fn.matchbufline(buf, pattern, line, line)
+      for _, item in ipairs(list) do
+        local col = item.byteidx
+        if
+          (line == start_line and ((strict and col >= start_col) or (not strict and col + #item.text > start_col)))
+          or line ~= start_line
+        then
+          if not should_match() then
+            break
+          end
+          table.insert(matches, {
+            col = item.byteidx,
+            lnum = line,
+            end_col = item.byteidx + #item.text,
+            end_lnum = line,
+            text = item.text,
+          })
+        end
+      end
+      if should_match then
+        match_forward(line + 1)
+      end
+    end
+    if backward then
+      match_backward(start_line)
+    else
+      match_forward(start_line)
+    end
+    return matches
+  end
+end

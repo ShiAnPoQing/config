@@ -11,13 +11,35 @@ local option_specs = {
       my.env.set(vim.api.nvim_create_namespace(v))
     end,
   },
+  scroll_only = {
+    type = "boolean",
+    scope = { "w" },
+    default = false,
+  },
 }
 
 --- @param k any
 --- @return boolean
 local function check_option_name(k)
   if not option_specs[k] then
-    vim.notify(string.format("my.option: Unknown option: '%s'", k), vim.log.levels.ERROR)
+    vim.notify(string.format('my.option: Unknown option: "%s"', k), vim.log.levels.ERROR)
+    return false
+  end
+  return true
+end
+
+local scopes = {
+  ["g"] = "global",
+  ["b"] = "local to buffer",
+  ["w"] = "local to window",
+}
+
+--- @param k any
+--- @param scope any
+--- @return boolean
+local function check_option_scope(k, scope)
+  if not vim.list_contains(option_specs[k].scope or {}, scope) then
+    vim.notify(string.format('my.option: "%s" is not a %s option', k, scopes[scope]), vim.log.levels.ERROR)
     return false
   end
   return true
@@ -28,15 +50,15 @@ end
 --- @param v any
 --- @return boolean
 local function check_option_value(scope, k, v)
-  if not vim.list_contains(option_specs[k].scope, scope) then
+  if not check_option_name(k) then
     return false
   end
-  if not check_option_name(k) then
+  if not check_option_scope(k, scope) then
     return false
   end
   if type(v) ~= option_specs[k].type then
     vim.notify(
-      string.format("my.option: Invalid '%s': expected a valid type, got %s", k, type(v)),
+      string.format('my.option: Invalid "%s": expected a valid type, got %s', k, type(v)),
       vim.log.levels.ERROR
     )
     return false
@@ -46,7 +68,7 @@ local function check_option_value(scope, k, v)
   end
   if not vim.list_contains(option_specs[k].list, v) then
     vim.notify(
-      string.format("my.option: Invalid '%s': expected one of %s, got %s", k, vim.inspect(option_specs[k].list), v),
+      string.format('my.option: Invalid "%s": expected one of %s, got %s', k, vim.inspect(option_specs[k].list), v),
       vim.log.levels.ERROR
     )
     return false

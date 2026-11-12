@@ -166,6 +166,7 @@ local function backward_word_end(key)
   end
 end
 
+--- @param key string
 local function forward_word_end(key)
   local mode = vim.api.nvim_get_mode().mode
   if vim.list_contains({ "n", "v", "V", "" }, mode) then
@@ -202,42 +203,50 @@ local function forward_word_start(key)
 end
 
 --- COMPLETE ATOM: you must map `<Cmd>lua my.motion.backward_word_start()<CR>`!!
-function M.backward_word_start()
+--- @param count? integer
+function M.backward_word_start(count)
   backward_word_start("b")
 end
 
 --- COMPLETE ATOM: you must map `<Cmd>lua my.motion.backward_WORD_start()<CR>`!!
-function M.backward_WORD_start()
+--- @param count? integer
+function M.backward_WORD_start(count)
   backward_word_start("B")
 end
 
 --- COMPLETE ATOM: you must map `<Cmd>lua my.motion.backward_word_end()<CR>`!!
-function M.backward_word_end()
+--- @param count? integer
+function M.backward_word_end(count)
   backward_word_end("ge")
 end
 
 --- COMPLETE ATOM: you must map `<Cmd>lua my.motion.backward_WORD_end()<CR>`!!
-function M.backward_WORD_end()
+--- @param count? integer
+function M.backward_WORD_end(count)
   backward_word_end("gE")
 end
 
 --- COMPLETE ATOM: you must map `<Cmd>lua my.motion.forward_word_start()<CR>`!!
-function M.forward_word_start()
+--- @param count? integer
+function M.forward_word_start(count)
   forward_word_start("w")
 end
 
 --- COMPLETE ATOM: you must map `<Cmd>lua my.motion.forward_WORD_start()<CR>`!!
-function M.forward_WORD_start()
+--- @param count? integer
+function M.forward_WORD_start(count)
   forward_word_start("W")
 end
 
 --- COMPLETE ATOM: you must map `<Cmd>lua my.motion.forward_word_end()<CR>`!!
-function M.forward_word_end()
+--- @param count? integer
+function M.forward_word_end(count)
   forward_word_end("e")
 end
 
 --- COMPLETE ATOM: you must map `<Cmd>lua my.motion.forward_WORD_end()<CR>`!!
-function M.forward_WORD_end()
+--- @param count? integer
+function M.forward_WORD_end(count)
   forward_word_end("E")
 end
 

@@ -1,0 +1,26 @@
+*my.options.txt*
+
+==============================================================================
+Setting options						*my.set-option*
+
+:lua my.go.{option}={value}
+				set global option to {value}
+:lua my.bo.{option}={value}
+				set local to buffer option to {value}
+:lua my.wo.{option}={value}
+				set local to window option to {value}
+
+==============================================================================
+Options
+
+'scroll_only'		boolean (default `nil`)
+			local to window
+	If `true`, the cursor remains stationary relative to the viewport during
+	scrolling.
+	Affects:
+		`my.scroll.scroll_up`
+		`my.scroll.scroll_down`
+		`my.scroll.scroll_left`
+		`my.scroll.scroll_right`
+
+vim:tw=78:ts=8:noet:ft=help:norl:

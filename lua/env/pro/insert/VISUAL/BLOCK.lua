@@ -14,13 +14,14 @@ function M.__first()
   local end_pos = vim.fn.getpos("'>")
   local top = math.min(start_pos[2], end_pos[2])
   local bottom = math.max(start_pos[2], end_pos[2])
-  local left = math.min(start_pos[3], end_pos[3])
+  local left = math.min(vim.fn.virtcol("'<") --[[@as integer]], vim.fn.virtcol("'>") --[[@as integer]])
 
   for i = top, bottom do
+    local col = vim.fn.virtcol2col(0, i, left) - 1
     if i == bottom then
-      pcall(vim.api.nvim_win_set_cursor, 0, { i, left - 1 })
+      pcall(vim.api.nvim_win_set_cursor, 0, { i, col })
     else
-      pcall(vim.api.nvim_buf_set_extmark, 0, my.multicursor.ns, i - 1, left - 1, {})
+      pcall(vim.api.nvim_buf_set_extmark, 0, my.multicursor.ns, i - 1, col, {})
     end
   end
 
@@ -70,15 +71,16 @@ function M.__last()
   local end_pos = vim.fn.getpos("'>")
   local top = math.min(start_pos[2], end_pos[2])
   local bottom = math.max(start_pos[2], end_pos[2])
-  local right = math.max(start_pos[3], end_pos[3])
+  local right = math.max(vim.fn.virtcol("'<") --[[@as integer]], vim.fn.virtcol("'>") --[[@as integer]])
 
   for i = top, bottom do
+    local col = vim.fn.virtcol2col(0, i, right) - 1
     if i == bottom then
-      vim.api.nvim_win_set_cursor(0, { i, right - 1 })
+      vim.api.nvim_win_set_cursor(0, { i, col })
     else
       local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1]
-      if right - 1 <= #line then
-        vim.api.nvim_buf_set_extmark(0, my.multicursor.ns, i - 1, right - 1, {})
+      if col <= #line then
+        vim.api.nvim_buf_set_extmark(0, my.multicursor.ns, i - 1, col, {})
       end
     end
   end

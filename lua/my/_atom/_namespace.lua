@@ -84,4 +84,8 @@ function M.has(ns_id, id)
   return id and namespace[id] ~= nil or true
 end
 
+function M.get_namespace_ids()
+  return vim.tbl_keys(namespaces)
+end
+
 return M
