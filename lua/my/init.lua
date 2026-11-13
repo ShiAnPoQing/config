@@ -4,6 +4,8 @@
 --- @class my.t: vim.var_accessor
 
 --- @class my
+--- @field private _ my
+--- @field [-1] my
 --- @field env my.env
 --- @field command my.command
 --- @field keymap my.keymap
@@ -26,7 +28,17 @@
 --- @field b my.b
 --- @field w my.w
 --- @field t my.t
-_G.my = _G.my or {}
+_G.my = _G.my
+  or {
+    [-1] = setmetatable({}, {
+      __index = function(t, k)
+        if my._submodules[k] then
+          t[k] = require("my." .. k)
+          return t[k]
+        end
+      end,
+    }),
+  }
 my._submodules = {
   command = true,
   keymap = true,
@@ -48,17 +60,64 @@ my._submodules = {
   edit = true,
 }
 
+local function accesss_my(paths)
+  local t = my[-1]
+  for _, path in ipairs(paths) do
+    local value = t[path]
+    if value == nil then
+      break
+    end
+    t = value
+  end
+  return t
+end
+
+local function is_only_index_metatable(t)
+  local metatable = getmetatable(t)
+  if not metatable then
+    return true
+  end
+  local keys = vim.tbl_keys(metatable)
+  if #keys == 1 and keys[1] == "__index" then
+    return true
+  end
+  return false
+end
+
+local function create_root(parent_root, path)
+  local root = vim.tbl_extend("force", {}, parent_root or {})
+  root[#root + 1] = path
+  return root
+end
+
+local function get_proxy_module(root, mod)
+  return setmetatable({ __root__ = root }, {
+    __index = function(_, k)
+      if type(mod) == "function" then
+        mod = mod()
+      end
+      local value = mod and mod[k]
+      if value then
+        if type(value) == "table" and is_only_index_metatable(value) then
+          return get_proxy_module(create_root(root, k), value)
+        end
+        return value
+      else
+        mod = accesss_my(root)
+        value = mod and mod[k]
+        if type(value) == "table" and is_only_index_metatable(value) then
+          return get_proxy_module(create_root(root, k), value)
+        end
+        return value
+      end
+    end,
+  })
+end
+
 setmetatable(my, {
   __index = function(t, key)
     if key == "_" then
-      return setmetatable({}, {
-        __index = function(_, k)
-          if my._submodules[k] then
-            t[k] = require("my." .. k)
-            return t[k]
-          end
-        end,
-      })
+      return my[-1]
     end
     if key == "env" then
       t[key] = require("my." .. key)
@@ -67,14 +126,10 @@ setmetatable(my, {
     if type(key) == "number" then
       return my.env.get(key)
     end
-    local env = my.env.get(0)
-    if env and env[key] then
-      return env[key]
-    end
-    if my._submodules[key] then
-      t[key] = require("my." .. key)
-      return t[key]
-    end
+    t[key] = get_proxy_module({ key }, function()
+      return (my.env.get(0) or {})[key]
+    end)
+    return t[key]
   end,
 })
 

@@ -17,66 +17,38 @@
 return {
   ["<C-i>"] = {
     function()
-      local function callback()
-        require("builtin.jump-list").jump(-1, "global")
-        require("repeat").set_motion(callback)
-      end
-      callback()
+      my.motion.jump(-1, { scope = "global" })
     end,
     { "n", "x" },
     desc = "Go to [count] older cursor position in jump list",
   },
   ["<C-o>"] = {
     function()
-      local function callback()
-        require("builtin.jump-list").jump(1, "global")
-        require("repeat").set_motion(callback)
-      end
-      callback()
+      my.motion.jump(1, { scope = "global" })
     end,
     { "n", "x" },
     desc = "Go to [count] newer cursor position in jump list",
   },
   ["<C-M-i>"] = {
-    function()
-      local function callback()
-        require("builtin.jump-list").jump(-1, "buffer")
-        require("repeat").set_motion(callback)
-      end
-      callback()
-    end,
+    function() end,
     "n",
     desc = "Go to [count] older cursor position in jump list",
   },
   ["<C-M-o>"] = {
-    function()
-      local function callback()
-        require("builtin.jump-list").jump(1, "buffer")
-        require("repeat").set_motion(callback)
-      end
-      callback()
-    end,
+    function() end,
     "n",
     desc = "Go to [count] newer cursor position in jump list",
   },
   ["<C-S-i>"] = {
     function()
-      local function callback()
-        require("builtin.jump-list").jump_buffer(-1)
-        require("repeat").set_motion(callback)
-      end
-      callback()
+      my.motion.jump(-1, { scope = "local" })
     end,
     "n",
     desc = "Go to [count] older cursor position in jump list[buffer]",
   },
   ["<C-S-o>"] = {
     function()
-      local function callback()
-        require("builtin.jump-list").jump_buffer(1)
-        require("repeat").set_motion(callback)
-      end
-      callback()
+      my.motion.jump(1, { scope = "local" })
     end,
     "n",
     desc = "Go to [count] newer cursor position in jump list[buffer]",

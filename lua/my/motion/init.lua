@@ -6,6 +6,8 @@
 --- @field ['i'] my.motion.INSERT
 --- @field ['c'] my.motion.COMMAND
 --- @field ['n'] my.motion.NORMAL
+--- @field jump my.motion.jump
+--- @field jump fun(dir: -1|1, opts?: my.motion.jump.Opts)
 local M = my.util.defer_require("my.motion", {
   INSERT = true,
   COMMAND = true,
@@ -15,6 +17,7 @@ local M = my.util.defer_require("my.motion", {
   ["n"] = "NORMAL",
   ["i"] = "INSERT",
   ["no"] = "OPERATOR_PENDING",
+  jump = true,
 })
 
 --- secondary cursor 应当 apply primary cursor 的 motion，各自评估

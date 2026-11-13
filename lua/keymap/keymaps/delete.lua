@@ -58,7 +58,7 @@ return {
       -- Issue: insert mode -> normal mode: 有闪烁，特别是 lsp 诊断
       -- '<Left><C-o>"_diw',
       function()
-        my.edit.insert_mode_delete_cword(true)
+        my.edit["i"].delete_cword(true)
       end,
       "i",
     },
@@ -76,7 +76,7 @@ return {
       -- Issue: insert mode -> normal mode: 有闪烁，特别是 lsp 诊断
       -- '<C-o>"_diw'
       function()
-        my.edit.insert_mode_delete_cword()
+        my.edit["i"].delete_cword()
       end,
       "i",
     },
@@ -93,7 +93,7 @@ return {
     {
       -- '<Left><C-o>"_diW',
       function()
-        my.edit.insert_mode_delete_cWORD(true)
+        my.edit["i"].delete_cWORD(true)
       end,
       "i",
     },
@@ -110,7 +110,7 @@ return {
     {
       -- '<C-o>"_diW',
       function()
-        my.edit.insert_mode_delete_cWORD()
+        my.edit["i"].delete_cWORD()
       end,
       "i",
     },
@@ -130,7 +130,6 @@ return {
     --     local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
     --     vim.api.nvim_feedkeys(esc .. 'vb"_c', "n", false)
     --   end,
-    --
     --   "i",
     -- },
     { "<C-w>", { "c", "i" } },
