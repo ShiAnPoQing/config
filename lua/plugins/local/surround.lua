@@ -10,20 +10,21 @@ end
 
 return {
   name = "surround",
-  keys = {
-    -- ["ds)"] = {
-    --   function()
-    --     surround_delete(")")
-    --   end,
-    --   "n",
-    -- },
-    -- -- {
-    -- ["ds("] = {
-    --   function()
-    --     surround_delete("(")
-    --   end,
-    --   "n",
-    -- },
+  key = {
+    ["ds)"] = {
+      function()
+        surround_delete(")")
+      end,
+      "n",
+    },
+    -- {
+    ["ds("] = {
+      function()
+        vim.print("hao")
+        surround_delete("(")
+      end,
+      "n",
+    },
     -- {
     --   "ds]",
     --   function()

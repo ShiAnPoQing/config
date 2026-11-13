@@ -166,7 +166,7 @@ do
       vim.notify("my.buf_match: start[1] out of buf", vim.log.levels.ERROR)
       return false
     end
-    if col <= 0 or col > #vim.api.nvim_buf_get_lines(buf, lnum - 1, lnum, true)[1] then
+    if col < 0 or col > #vim.api.nvim_buf_get_lines(buf, lnum - 1, lnum, true)[1] then
       vim.notify("my.buf_match: start[2] out of buf", vim.log.levels.ERROR)
       return false
     end

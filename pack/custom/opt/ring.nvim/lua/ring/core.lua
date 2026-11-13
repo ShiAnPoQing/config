@@ -72,9 +72,6 @@ local function delete(textobject, pair)
     then
       vim.api.nvim_win_set_cursor(0, { ctx.cursor[1], ctx.cursor[2] - #pair[1] })
     end
-    require("repeat").set_operation(function()
-      delete(textobject, pair)
-    end, ctx.count)
   end)
 end
 
@@ -143,10 +140,10 @@ local function add()
         texts[#texts] = texts[#texts] .. pair[2]
         vim.api.nvim_buf_set_text(0, start_line - 1, start_col, end_line - 1, end_col + 1, texts)
       end
-      require("repeat").set_operation(function()
-        add()
-        vim.api.nvim_feedkeys("g@", "n", true)
-      end)
+      -- require("repeat").set_operation(function()
+      --   add()
+      --   vim.api.nvim_feedkeys("g@", "n", true)
+      -- end)
     end)
   end
   vim.o.operatorfunc = "v:lua.ring_add"
@@ -166,7 +163,7 @@ function M.register(registers)
     local pair = register[2]
     vim.keymap.set("o", lhs, function()
       local operator = vim.v.operator
-      if operator == "d" then
+      if operator == "d" or my.operator.is_delete_operator() then
         delete(textobject, pair)
       elseif operator == "c" then
         change(textobject, pair)

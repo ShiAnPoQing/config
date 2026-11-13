@@ -1,6 +1,5 @@
 require("my")
 vim.pack.add({ { src = "https://github.com/BrokenSunny/native-packer", version = "branch" } })
-require("operator").setup()
 require("window").setup()
 require("test").setup()
 require("command")
@@ -56,6 +55,7 @@ require("native-packer").add({
   require("plugins.local.test.eye-track-treesitter"),
   require("plugins.local.test.eye"),
   require("plugins.local.doc"),
+  -- require("plugins.local.surround"),
   -- require("plugins.download.misc.ts-comments"),
   -- require("plugins.download.misc.persistence"),
   -- require("plugins.download.misc.showkey"),
@@ -69,7 +69,7 @@ require("native-packer").add({
   -- require("plugins.test.pulseline"),
   -- require("plugins.local.shell-connect"),
   -- require("plugins.test.luma"),
-  -- require("plugins.test.ring"),
+  require("plugins.test.ring"),
   require("plugins.test.window-resize"),
   require("plugins.test._eye"),
   require("plugins.builtin"),

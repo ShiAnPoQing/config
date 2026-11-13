@@ -54,8 +54,15 @@ return {
     desc = "Delete character after the cursor",
   },
   [my.keymap.keys.CTRL_BS] = {
-    { '<Left><C-o>"_diw', "i" },
-    { '"_diwi', "n" },
+    {
+      -- Issue: insert mode -> normal mode: 有闪烁，特别是 lsp 诊断
+      -- '<Left><C-o>"_diw',
+      function()
+        my.edit.insert_mode_delete_cword(true)
+      end,
+      "i",
+    },
+    { '"_ciw', "n" },
     {
       function()
         require("builtin.cmdline").delete_cword_before()
@@ -65,8 +72,15 @@ return {
     desc = "Delete cword(before)",
   },
   ["<M-BS>"] = {
-    { '<C-o>"_diw', "i" },
-    { '"_diwi', "n" },
+    {
+      -- Issue: insert mode -> normal mode: 有闪烁，特别是 lsp 诊断
+      -- '<C-o>"_diw'
+      function()
+        my.edit.insert_mode_delete_cword()
+      end,
+      "i",
+    },
+    { '"_ciw', "n" },
     {
       function()
         require("builtin.cmdline").delete_cword_after()
@@ -77,9 +91,13 @@ return {
   },
   ["<C-S-BS>"] = {
     {
-      '<Left><C-o>"_diW',
+      -- '<Left><C-o>"_diW',
+      function()
+        my.edit.insert_mode_delete_cWORD(true)
+      end,
       "i",
     },
+    { '"_ciW', "n" },
     {
       function()
         require("builtin.cmdline").delete_CWORD_before()
@@ -89,7 +107,14 @@ return {
     desc = "Delete the CWORD(before)",
   },
   ["<M-S-BS>"] = {
-    { '<C-o>"_diW', "i" },
+    {
+      -- '<C-o>"_diW',
+      function()
+        my.edit.insert_mode_delete_cWORD()
+      end,
+      "i",
+    },
+    { '"_ciW', "n" },
     {
       function()
         require("builtin.cmdline").delete_CWORD_after()

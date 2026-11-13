@@ -231,9 +231,10 @@ local function join(type)
     view.col = origin[2]
     if vim.list_contains({ "v", "V", "" }, op_ctx.mode) then
       vim.cmd("normal! `[V`]" .. join_key)
+    else
+      local count = vim.v.count1 + 1
+      vim.cmd("normal! " .. count .. join_key)
     end
-    local count = vim.v.count1 + 1
-    vim.cmd("normal! " .. count .. join_key)
     vim.fn.winrestview(view)
   end
 end
