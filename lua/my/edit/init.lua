@@ -95,7 +95,7 @@ function M.above_below_add_blank_line()
   M.below_add_blank_line_follow()
 end
 
-function M.trim_line()
+function M.trim_current_line()
   local cursor = vim.api.nvim_win_get_cursor(0)
   local lnum = cursor[1]
   local line = vim.api.nvim_get_current_line()

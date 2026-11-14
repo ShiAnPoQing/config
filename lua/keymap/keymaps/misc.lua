@@ -1,51 +1,53 @@
+local esc_map = {
+  {
+    item = "clear multicursor",
+    select = function()
+      my.multicursor.clear(0, 0, -1)
+    end,
+    condition = function()
+      return my.multicursor.active()
+    end,
+  },
+  {
+    item = "no hlsearch",
+    select = function()
+      vim.o.hlsearch = false
+    end,
+    condition = function()
+      return vim.o.hlsearch
+    end,
+  },
+  {
+    item = "hlsearch",
+    select = function()
+      vim.o.hlsearch = true
+    end,
+    condition = function()
+      return not vim.o.hlsearch
+    end,
+  },
+  {
+    item = "diffupdate",
+    select = function()
+      vim.cmd("diffupdate")
+    end,
+  },
+}
 return {
   ["0<esc>"] = {
     function()
-      local map = {
-        {
-          item = "clear multicursor",
-          select = function()
-            my.multicursor.clear(0, 0, -1)
-          end,
-          condition = function()
-            return my.multicursor.active()
-          end,
-        },
-        {
-          item = "no hlsearch",
-          select = function()
-            vim.o.hlsearch = false
-          end,
-          condition = function()
-            return vim.o.hlsearch
-          end,
-        },
-        {
-          item = "hlsearch",
-          select = function()
-            vim.o.hlsearch = true
-          end,
-          condition = function()
-            return not vim.o.hlsearch
-          end,
-        },
-        {
-          item = "diffupdate",
-          select = function()
-            vim.cmd("diffupdate")
-          end,
-        },
-      }
+      local actions = {}
       local items = {}
-      for _, value in ipairs(map) do
+      for _, value in ipairs(esc_map) do
         local condition = not value.condition and true or value.condition()
         if condition then
           items[#items + 1] = value.item
+          actions[#actions + 1] = value
         end
       end
       vim.ui.select(items, { prompt = "Super <Esc>" }, function(_, idx)
         if idx then
-          map[idx].select()
+          actions[idx].select()
         end
       end)
     end,

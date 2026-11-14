@@ -27,6 +27,8 @@
 --- @field b my.b
 --- @field w my.w
 --- @field t my.t
+--- @field buf my.buf
+--- @field win my.win
 _G.my = _G.my
   or {
     [-1] = setmetatable({}, {
@@ -57,6 +59,7 @@ my._submodules = {
   motion = true,
   insert = true,
   edit = true,
+  buf = true,
 }
 
 local function accesss_my(paths)
@@ -338,4 +341,9 @@ do
     end
     return matches
   end
+end
+
+function my.trim_current_line()
+  local lnum = vim.fn.line(".")
+  my.buf.trim_lines(0, lnum - 1, lnum)
 end

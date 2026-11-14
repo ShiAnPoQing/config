@@ -321,7 +321,7 @@ return {
   ["ss"] = {
     function()
       if vim.v.operator == "d" or my.operator.is_delete_operator() then
-        return "<esc><Cmd>lua my.edit.trim_line()<cr>"
+        return "<esc><Cmd>lua my.trim_current_line()<cr>"
       end
       return "<esc>"
     end,

@@ -694,6 +694,9 @@ function M.setup()
       local typed = vim.keycode(t)
 
       if #typed > 1 then
+        if vim.fn.keytrans(typed) == "0<Esc>" then
+          return
+        end
         if vim.fn.keytrans(typed:sub(-1)) == "<Esc>" then
           return ""
         end
