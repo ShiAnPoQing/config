@@ -31,19 +31,19 @@ end
 local n = {
   no_keep_cursor = {
     [-1] = {
-      "<Cmd>lua my.edit.above_add_blank_line()<cr>",
+      "<Cmd>lua my.edit.add_blank_line(-vim.v.count1, { follow= false })<cr>",
       "n",
       desc = "Add [count] new line above the cursor(no keep cursor)",
     },
     [1] = {
-      "<Cmd>lua my.edit.below_add_blank_line()<cr>",
+      "<Cmd>lua my.edit.add_blank_line(vim.v.count1, { follow= false })<cr>",
       "n",
       desc = "Add [count] new line below the cursor(no keep cursor)",
     },
   },
   keep_cursor = {
     [-1] = {
-      "<Cmd>lua my.edit.above_add_blank_line_follow()<cr>",
+      "<Cmd>lua my.edit.add_blank_line(-vim.v.count1, { follow= true })<cr>",
       "n",
       desc = "Add [count] new line above the cursor(keep cursor)",
     },
@@ -53,7 +53,7 @@ local n = {
       desc = "Add [count] new line above the cursor and below the cursor(keep cursor)",
     },
     [1] = {
-      "<Cmd>lua my.edit.below_add_blank_line_follow()<cr>",
+      "<Cmd>lua my.edit.add_blank_line(vim.v.count1, { follow= true })<cr>",
       "n",
       desc = "Add [count] new line below the cursor(keep cursor)",
     },

@@ -26,22 +26,24 @@ end
 
 --- @class my.edit.add_blank_line.Opts
 --- @field follow? boolean default false
---- @field count? integer default 1
---- @field above? boolean default false
 
+--- @param count integer
 --- @param opts? my.edit.add_blank_line.Opts
-function M.add_blank_line(opts)
+function M.add_blank_line(count, opts)
+  vim.validate("count", count, "number")
   vim.validate("opts", opts, "table", true)
+  count = math.floor(count)
+  if count == 0 then
+    return
+  end
   opts = opts or {}
-  vim.validate("opts.count", opts.count, "number", true)
   vim.validate("opts.follow", opts.follow, "boolean", true)
-  vim.validate("opts.above", opts.above, "boolean", true)
   if vim.v.cascading then
     return
   end
-  local count = math.max(opts.count or 1, 1)
   local follow = opts.follow
-  local above = opts.above
+  local above = count < 0
+  count = math.abs(count)
   local multicursors = my.multicursor.get(0, 0, -1)
   local cursor = vim.api.nvim_win_get_cursor(0)
   table.insert(multicursors, { -1, cursor[1] - 1, cursor[2] })
@@ -73,35 +75,19 @@ function M.add_blank_line(opts)
 end
 
 function M.below_add_blank_line()
-  M.add_blank_line({
-    count = vim.v.count1,
-    follow = false,
-    above = false,
-  })
+  M.add_blank_line(vim.v.count1, { follow = false })
 end
 
 function M.below_add_blank_line_follow()
-  M.add_blank_line({
-    count = vim.v.count1,
-    follow = true,
-    above = false,
-  })
+  M.add_blank_line(vim.v.count1, { follow = true })
 end
 
 function M.above_add_blank_line()
-  M.add_blank_line({
-    count = vim.v.count1,
-    follow = false,
-    above = true,
-  })
+  M.add_blank_line(-vim.v.count1, { follow = false })
 end
 
 function M.above_add_blank_line_follow()
-  M.add_blank_line({
-    count = vim.v.count1,
-    follow = true,
-    above = true,
-  })
+  M.add_blank_line(-vim.v.count1, { follow = true })
 end
 
 function M.above_below_add_blank_line()
