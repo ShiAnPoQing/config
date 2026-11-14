@@ -1,22 +1,22 @@
 --- @diagnostic disable: invisible
---- @class my._atom._capture.core
+--- @class my.atom._capture.core
 local M = {}
 
---- @class my._atom._capture.CaptureTask
---- @field id my._atom.Capturer
+--- @class my.atom._capture.CaptureTask
+--- @field id my.atom.Capturer
 --- @field callback? fun(any)
---- @field config my._atom._capture.CaptureConfig
+--- @field config my.atom._capture.CaptureConfig
 
---- @class my._atom._capture.CaptureConfig
+--- @class my.atom._capture.CaptureConfig
 --- @field patch? fun(data: my.CmdAtom): my.CmdAtom|nil
 --- @field filter? fun(data: my.CmdAtom): boolean
 
---- @type my._atom._capture.CaptureTask[]
+--- @type my.atom._capture.CaptureTask[]
 local start_queue = {}
---- @type my._atom._capture.CaptureTask[]
+--- @type my.atom._capture.CaptureTask[]
 local stop_queue = {}
 
---- @type table<my._atom.Capturer, my._atom._capture.CaptureConfig|nil>
+--- @type table<my.atom.Capturer, my.atom._capture.CaptureConfig|nil>
 local started_captures = {}
 
 local enabled
@@ -24,8 +24,8 @@ local CmdAtomId
 local CmdAtomEnter
 
 local signals = {
-  START = "<Plug>my._atom.Capturer.signal.start",
-  STOP = "<Plug>my._atom.Capturer.signal.stop",
+  START = "<Plug>my.atom.Capturer.signal.start",
+  STOP = "<Plug>my.atom.Capturer.signal.stop",
 }
 
 local function enable_signal()
@@ -60,9 +60,9 @@ local function start_capture(immediately)
   immediately = immediately ~= false
   local task
   if immediately then
-    task = table.remove(start_queue) --[[@as my._atom._capture.CaptureTask]]
+    task = table.remove(start_queue) --[[@as my.atom._capture.CaptureTask]]
   else
-    task = table.remove(start_queue, 1) --[[@as my._atom._capture.CaptureTask]]
+    task = table.remove(start_queue, 1) --[[@as my.atom._capture.CaptureTask]]
   end
   if type(task.callback) == "function" then
     task.callback()
@@ -78,9 +78,9 @@ local function stop_capture(immediately)
   immediately = immediately ~= false
   local task
   if immediately then
-    task = table.remove(stop_queue) --[[@as my._atom._capture.CaptureTask]]
+    task = table.remove(stop_queue) --[[@as my.atom._capture.CaptureTask]]
   else
-    task = table.remove(stop_queue, 1) --[[@as my._atom._capture.CaptureTask]]
+    task = table.remove(stop_queue, 1) --[[@as my.atom._capture.CaptureTask]]
   end
   if type(task.callback) == "function" then
     task.callback(task.id.capture)
@@ -164,11 +164,11 @@ function M.enable(enable)
   end
 end
 
---- @param capturer my._atom.Capturer
+--- @param capturer my.atom.Capturer
 --- @param callback fun()|nil
---- @param config my._atom._capture.CaptureConfig
+--- @param config my.atom._capture.CaptureConfig
 function M.start(capturer, callback, config)
-  --- @type my._atom._capture.CaptureTask
+  --- @type my.atom._capture.CaptureTask
   local task = {
     id = capturer,
     callback = callback,
@@ -182,10 +182,10 @@ function M.start(capturer, callback, config)
   end
 end
 
---- @param capturer my._atom.Capturer
+--- @param capturer my.atom.Capturer
 --- @param callback fun(capture: my.Atom)|nil
 function M.stop(capturer, callback)
-  --- @type my._atom._capture.CaptureTask
+  --- @type my.atom._capture.CaptureTask
   local pending = {
     id = capturer,
     callback = callback,

@@ -1,4 +1,4 @@
---- @class my._atom.marco
+--- @class my.atom.marco
 local M = {}
 local enabled
 --- @type string
@@ -21,7 +21,7 @@ local function replay()
   end
   if regs[reg] then
     local id = regs[reg]
-    my._atom.replay(ns_id, id)
+    my.atom.replay(ns_id, id)
   end
 end
 
@@ -36,7 +36,7 @@ function M.enable(enable)
   if enable then
     --- @type string
     local reg
-    --- @type my._atom.Capturer
+    --- @type my.atom.Capturer
     local Capturer
     ns_id = vim.api.nvim_create_namespace("my.atom.marco")
     local group = vim.api.nvim_create_augroup("my.atom.marco", { clear = true })
@@ -45,9 +45,9 @@ function M.enable(enable)
       callback = function()
         reg = vim.fn.reg_recording()
         if regs[reg] then
-          my._atom.del(ns_id, regs[reg])
+          my.atom.del(ns_id, regs[reg])
         end
-        Capturer = my._atom.capturer()
+        Capturer = my.atom.capturer()
         Capturer:start({
           filter = function(cmdAtom)
             return cmdAtom.cmd ~= "q"
@@ -74,7 +74,7 @@ function M.enable(enable)
         Capturer:stop(function(capture)
           if #capture.atoms > 0 then
             capture.type = '"' .. reg
-            regs[reg] = my._atom.create(ns_id, capture)
+            regs[reg] = my.atom.create(ns_id, capture)
           end
         end)
       end,

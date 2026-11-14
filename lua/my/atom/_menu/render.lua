@@ -1,9 +1,9 @@
---- @class my._atom._menu.render
-local M = vim._defer_require("my._atom._menu.render", {})
+--- @class my.atom._menu.render
+local M = vim._defer_require("my.atom._menu.render", {})
 
 --- @param buf integer
 --- @param items any
---- @param opts my._atom._menu.Opts.Layout
+--- @param opts my.atom._menu.Opts.Layout
 function M.draw(buf, items, opts)
   local padding = opts.padding or { 0, 0 }
   if type(padding) == "number" then
@@ -22,7 +22,7 @@ function M.draw(buf, items, opts)
       local gap = span.gap or 0
       for s_i, name in ipairs(span) do
         local component = components[name]
-        local Component = require("my._atom._menu.component").create(component)
+        local Component = require("my.atom._menu.component").create(component)
         Component:build({ context.idx, #line }, context)
         local text = Component:get_text()
         for _, hl in ipairs(Component:get_highlight()) do

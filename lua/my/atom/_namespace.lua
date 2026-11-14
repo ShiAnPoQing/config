@@ -1,44 +1,91 @@
---- @class (private) my.atom._namespace
+--- @class my.atom._namespace
 local M = {}
 local namespaces = {}
 
 --- @param ns_id integer
 function M.create(ns_id)
+  vim.validate("ns_id", ns_id, "number")
   if not namespaces[ns_id] then
-    namespaces[ns_id] = { last_id = 0 }
+    namespaces[ns_id] = {
+      next_id = 1,
+    }
   end
-end
-
---- @param ns_id integer
---- @return boolean
-function M.has(ns_id)
-  if not namespaces[ns_id] then
-    return false
-  end
-  return true
-end
-
---- @param ns_id integer
---- @param id integer
---- @return boolean
-function M.has_id(ns_id, id)
-  if not namespaces[ns_id] then
-    return false
-  end
-  return namespaces[ns_id][id] ~= nil
 end
 
 --- @param ns_id integer
 --- @return integer
 function M.next_id(ns_id)
-  local ns = namespaces[ns_id]
-  if not ns then
-    M.create(ns_id)
-    return M.next_id(ns_id)
+  vim.validate("ns_id", ns_id, "number")
+  local namespace = namespaces[ns_id]
+  if not namespace then
+    return -1
   end
-  local next_id = ns.last_id + 1
-  ns.last_id = next_id
-  return next_id
+  local id = namespace.next_id
+  namespace.next_id = namespace.next_id + 1
+  return id
+end
+
+--- @param ns_id integer
+--- @param id integer
+--- @param source any
+--- @return boolean
+function M.set(ns_id, id, source)
+  vim.validate("ns_id", ns_id, "number")
+  vim.validate("id", id, "number")
+  if not namespaces[ns_id] then
+    return false
+  end
+  namespaces[ns_id][id] = source
+  return true
+end
+
+--- @param ns_id integer
+--- @param id integer?
+--- @return any
+function M.get(ns_id, id)
+  vim.validate("ns_id", ns_id, "number")
+  vim.validate("id", id, "number", true)
+  if id and namespaces[ns_id][id] then
+    return vim.tbl_deep_extend("force", namespaces[ns_id][id], {})
+  end
+  if not id and namespaces[ns_id] then
+    local result = vim.tbl_deep_extend("force", namespaces[ns_id], {})
+    result.next_id = nil
+    return result
+  end
+end
+
+--- @param ns_id integer
+--- @param id integer?
+function M.del(ns_id, id)
+  vim.validate("ns_id", ns_id, "number")
+  vim.validate("id", id, "number", true)
+  local namespace = namespaces[ns_id]
+  if not namespace then
+    return
+  end
+  if not id then
+    namespaces[ns_id] = nil
+  else
+    namespace[id] = nil
+  end
+end
+
+--- @param ns_id integer
+--- @param id integer?
+--- @return boolean
+function M.has(ns_id, id)
+  vim.validate("ns_id", ns_id, "number")
+  vim.validate("id", id, "number", true)
+  local namespace = namespaces[ns_id]
+  if not namespace then
+    return false
+  end
+  return id and namespace[id] ~= nil or true
+end
+
+function M.get_namespace_ids()
+  return vim.tbl_keys(namespaces)
 end
 
 return M

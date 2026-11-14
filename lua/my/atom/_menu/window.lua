@@ -1,15 +1,15 @@
---- @class my._atom._menu.window
+--- @class my.atom._menu.window
 --- @field private win integer
---- @field private config my._atom._menu.window.Opts
+--- @field private config my.atom._menu.window.Opts
 local Win = {}
 Win.__index = Win
 
---- @class my._atom._menu.window.Opts
+--- @class my.atom._menu.window.Opts
 --- @field border? any[]|""|"none"|"single"|"double"|"rounded"|"solid"|"shadow"|"bold"
 --- @field height? integer
 --- @field option? table<string, any>
 
---- @param opts my._atom._menu.window.Opts?
+--- @param opts my.atom._menu.window.Opts?
 function Win:new(opts)
   vim.validate("opts", opts, "table", true)
   opts = opts or {}
@@ -36,7 +36,7 @@ function Win:get()
 end
 
 --- @param buf integer
---- @param opts? my._atom._menu.window.Opts
+--- @param opts? my.atom._menu.window.Opts
 --- @return integer
 function Win:open(buf, opts)
   vim.validate("buf", buf, "number")

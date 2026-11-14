@@ -1,15 +1,15 @@
---- @class my._atom._menu.buffer
+--- @class my.atom._menu.buffer
 --- @field buf integer
---- @field config my._atom._menu.buffer.Opts
+--- @field config my.atom._menu.buffer.Opts
 local Buf = {}
 Buf.__index = Buf
 
---- @class my._atom._menu.buffer.Opts
+--- @class my.atom._menu.buffer.Opts
 --- @field name? string
 --- @field option? table<string, any>
 --- @field on_line_count? fun()
 
---- @param opts my._atom._menu.buffer.Opts?
+--- @param opts my.atom._menu.buffer.Opts?
 function Buf:new(opts)
   vim.validate("opts", opts, "table", true)
   opts = opts or {}

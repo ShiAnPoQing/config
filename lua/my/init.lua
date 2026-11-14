@@ -18,10 +18,7 @@
 --- @field cursor my.cursor
 --- @field util my.util
 --- @field option my.option
---- @field macro my.macro
---- @field repeat my.repeat
 --- @field atom my.atom
---- @field _atom my._atom
 --- @field lsp my.lsp
 --- @field g my.g
 --- @field b my.b
@@ -54,11 +51,8 @@ my._submodules = {
   util = true,
   env = true,
   scroll = true,
-  macro = true,
-  ["repeat"] = true,
-  atom = true,
   lsp = true,
-  _atom = true,
+  atom = true,
   motion = true,
   insert = true,
   edit = true,

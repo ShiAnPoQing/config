@@ -1,17 +1,17 @@
---- @class my._atom._menu.component
---- @field private component my._atom._menu.Opts.Layout.Component
+--- @class my.atom._menu.component
+--- @field private component my.atom._menu.Opts.Layout.Component
 local M = {}
 M.__index = M
 
---- @param component my._atom._menu.Opts.Layout.Component
---- @return my._atom._menu.component
+--- @param component my.atom._menu.Opts.Layout.Component
+--- @return my.atom._menu.component
 function M.create(component)
   local o = setmetatable({}, M)
   o.component = component
   return o
 end
 
---- @class my._atom._menu.component.build.Config
+--- @class my.atom._menu.component.build.Config
 --- @field ctx any
 
 --- @param pos [integer, integer]

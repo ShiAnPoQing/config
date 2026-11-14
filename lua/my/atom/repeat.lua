@@ -1,87 +1,76 @@
 --- @class my.atom.repeat
 local M = {}
 
---- @class my.atom.repeat.set_repeat.Opts
---- @field noremap? boolean
-
-local enbaled
+local enabled
 --- @type integer
-local ns_id
---- @type integer
-local current_id
---- @type integer
-local last_id
+local ns_id, last_id, CmdAtomBefore, CmdAtomAfter
 
-local patch = function(data)
-  if (data.type == "operator" or data.type == "visual") and data.keys:find("g@") then
-    data.keys =
-      data.keys:gsub("g@", vim.keycode("<cmd>lua my.operator._pending_delete_({ reg = vim.v.register })<cr>") .. "g@")
-  end
-  return data
-end
-
---- @param callback fun()|string
---- @param opts? my.atom.repeat.set_repeat.Opts
-function M.set_repeat(callback, opts)
-  vim.validate("callback", callback, { "string", "function" })
-  vim.validate("opts", opts, "table", true)
-  opts = opts or {}
-  local noremap = opts.noremap
-  if type(callback) == "string" then
-    local id
-    id = my.atom[ns_id].create({ patch = patch })
-    my.atom[ns_id][id].start()
-    vim.api.nvim_feedkeys(callback, noremap and "ni" or "mi", false)
-    my.atom[ns_id][id].stop()
-  end
-end
-
-local function init()
-  ns_id = vim.api.nvim_create_namespace("my.atom.repeat")
-
-  my.atom.on("AtomBefore", function()
-    current_id = my.atom[ns_id].create({ patch = patch })
-    my.atom[ns_id].start(current_id)
-  end)
-
-  my.atom.on("AtomAfter", function()
-    my.atom[ns_id][current_id].stop()
-    local atoms = my.atom[ns_id][current_id].get()
-    local atom = atoms[1]
-    local is_redo_or_undo = atom.data.changed and (atom.data.undoseq or 0) <= (vim.b[atom.buf].maxseq or 0)
-    vim.b[atom.buf].maxseq = math.max(vim.b[atom.buf].maxseq or 0, atom.data.undoseq or 0)
-    if not (atom.data.keys ~= "." and atom.data.changed == true and not is_redo_or_undo) then
-      my.atom[ns_id].del(current_id)
-    else
-      last_id = current_id
-    end
-  end)
-
-  vim.keymap.set("n", ".", function()
-    vim.schedule(function()
-      if not last_id then
-        return
-      end
-      my.atom.replay(ns_id, last_id)
-    end)
+--- @param sequenue string
+function M.set_repeat(sequenue)
+  vim.validate("sequenue", sequenue, "string")
+  my.atom.feed(sequenue, function(atom)
+    last_id = my.atom.create(ns_id, atom)
   end)
 end
 
---- @param enable boolean?
+--- @param atom my.Atom
+--- @return boolean
+local function is_repeat_atom(atom)
+  local first_atom = atom.atoms[1]
+  local is_redo_or_undo = first_atom.changed and (first_atom.undoseq or 0) <= (vim.b[first_atom.buf].maxseq or 0)
+  vim.b[first_atom.buf].maxseq = math.max(vim.b[first_atom.buf].maxseq or 0, first_atom.undoseq or 0)
+  return first_atom.lhs ~= "." and first_atom.changed == true and not is_redo_or_undo
+end
+
+--- @param enable boolean|nil
 function M.enable(enable)
+  vim.validate("enable", enable, "boolean", true)
   enable = enable ~= false
-  if enable == enbaled then
+  if enabled == enable then
     return
   end
-  enbaled = enable
+  enabled = enable
   if enable then
-    if not my.atom.is_enabled() then
-      my.atom.enable()
-    end
-    init()
+    ns_id = vim.api.nvim_create_namespace("my.atom.repeat")
+    local Capturer = my.atom.capturer({
+      patch = function(cmdAtom)
+        if (cmdAtom.type == "operator" or cmdAtom.type == "visual") and cmdAtom.keys and cmdAtom.keys:find("g@") then
+          local cmd = my.operator.get_operatorfunc_command()
+          if cmd then
+            cmdAtom.keys = cmdAtom.keys:gsub("g@", vim.keycode(cmd) .. "g@")
+          end
+        end
+        return cmdAtom
+      end,
+    })
+    CmdAtomBefore = my.atom.on("CmdAtomBefore", function()
+      Capturer:start()
+    end)
+    CmdAtomAfter = my.atom.on("CmdAtomAfter", function()
+      Capturer:stop(function(atom)
+        if is_repeat_atom(atom) then
+          last_id = my.atom.create(ns_id, atom)
+        end
+      end)
+    end)
+
+    vim.keymap.set("n", ".", function()
+      vim.schedule(function()
+        if not last_id then
+          return
+        end
+        my.atom.replay(ns_id, last_id)
+      end)
+    end)
   else
-    -- vim.keymap.del("n", ".")
-    -- my.atom[ns_id].del()
+    ---@diagnostic disable-next-line: cast-local-type
+    ns_id = nil
+    last_id = nil
+    vim.api.nvim_del_autocmd(CmdAtomBefore)
+    vim.api.nvim_del_autocmd(CmdAtomAfter)
+    CmdAtomAfter = nil
+    CmdAtomBefore = nil
+    pcall(vim.keymap.del, "n", ".")
   end
 end
 

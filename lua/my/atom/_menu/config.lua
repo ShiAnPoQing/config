@@ -1,4 +1,4 @@
---- @class my._atom._menu.config
+--- @class my.atom._menu.config
 local M = {}
 
 local type_highlights = {
@@ -35,7 +35,7 @@ local function get_action_highlights(str)
   return texts
 end
 
---- @type my._atom._menu.Opts
+--- @type my.atom._menu.Opts
 local default_config = {
   window = {
     height = 12,
@@ -80,7 +80,7 @@ local default_config = {
   },
 }
 
---- @param config my._atom._menu.Opts
+--- @param config my.atom._menu.Opts
 function M.merge(config)
   return vim.tbl_deep_extend("force", default_config, config)
 end

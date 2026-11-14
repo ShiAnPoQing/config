@@ -1,19 +1,19 @@
-local component = require("my._atom._menu.component")
+local component = require("my.atom._menu.component")
 
---- @class my._atom._menu.layout
+--- @class my.atom._menu.layout
 local M = {}
 
---- @alias my._atom._menu.Layout.ColNode table
+--- @alias my.atom._menu.Layout.ColNode table
 
---- @alias my._atom._menu.Layout.LineNode my._atom._menu.Layout.ColNode[]
+--- @alias my.atom._menu.Layout.LineNode my.atom._menu.Layout.ColNode[]
 
---- @class my._atom._menu.Layout.Opts
+--- @class my.atom._menu.Layout.Opts
 --- @field columns? string[][]
---- @field components? table<string, my._atom._menu.Opts.Layout.Component>
+--- @field components? table<string, my.atom._menu.Opts.Layout.Component>
 
---- @param config my._atom._menu.Opts.Layout
+--- @param config my.atom._menu.Opts.Layout
 --- @param items my.Atom[]
---- @return my._atom._menu.Layout.LineNode[]
+--- @return my.atom._menu.Layout.LineNode[]
 function M.build(config, items)
   local layout = {}
   local padding = config.padding or { 0, 0 }
@@ -44,6 +44,5 @@ function M.build(config, items)
   end
   return layout
 end
-
 
 return M

@@ -1,11 +1,11 @@
-local layout = require("my._atom._menu.layout")
+local layout = require("my.atom._menu.layout")
 
---- @class (private) my._atom._menu
+--- @class (private) my.atom._menu
 local M = {}
 
---- @type my._atom._menu.window|nil
+--- @type my.atom._menu.window|nil
 local Win
---- @type my._atom._menu.buffer|nil
+--- @type my.atom._menu.buffer|nil
 local Buf
 
 local function install_buffer_maps(buf)
@@ -23,7 +23,7 @@ end
 --- @param ns_id integer
 --- @return my.Atom[]
 local function get_items(ns_id)
-  local atoms = my._atom.get(ns_id)
+  local atoms = my.atom.get(ns_id)
   --- @type my.Atom[]
   local items = {}
 
@@ -47,18 +47,18 @@ local function get_ns_name(ns_id)
 end
 
 --- @param ns_id integer
---- @param opts? my._atom._menu.Opts
+--- @param opts? my.atom._menu.Opts
 function M.open(ns_id, opts)
   vim.validate("ns_id", ns_id, "number")
   vim.validate("opts", opts, "table", true)
   if Win then
     return
   end
-  opts = require("my._atom._menu.config").merge(opts or {})
-  Buf = require("my._atom._menu.buffer"):new({
+  opts = require("my.atom._menu.config").merge(opts or {})
+  Buf = require("my.atom._menu.buffer"):new({
     name = "my.atom.menu",
   })
-  Win = require("my._atom._menu.window"):new({
+  Win = require("my.atom._menu.window"):new({
     border = "none",
     height = opts.window.height,
     option = {
@@ -70,7 +70,7 @@ function M.open(ns_id, opts)
   local buf = Buf:get()
   Win:open(buf)
   local Layout = layout.build(opts.layout, get_items(ns_id))
-  require("my._atom._menu.render").draw(buf, get_items(ns_id), opts.layout)
+  require("my.atom._menu.render").draw(buf, get_items(ns_id), opts.layout)
   vim.api.nvim_create_autocmd("WinLeave", {
     callback = function(ev)
       if ev.buf == buf then

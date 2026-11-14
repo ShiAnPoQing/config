@@ -1,13 +1,13 @@
-local core = require("my._atom._capture.core")
+local core = require("my.atom._capture.core")
 local id = 0
 
---- @class my._atom.Capturer.Opts: my._atom.Capturer.start.Opts
+--- @class my.atom.Capturer.Opts: my.atom.Capturer.start.Opts
 
---- @class my._atom.Capturer.start.Opts
+--- @class my.atom.Capturer.start.Opts
 --- @field patch? fun(data: my.CmdAtom): my.CmdAtom|nil
 --- @field filter? fun(data: my.CmdAtom): boolean
 
---- @class my._atom.Capturer
+--- @class my.atom.Capturer
 --- @field private running boolean|nil
 --- @field private capture my.Atom
 --- @field private patch? fun(data: my.CmdAtom): my.CmdAtom|nil
@@ -16,7 +16,7 @@ local M = {}
 M.__index = M
 
 --- @private
---- @param opts my._atom.Capturer.Opts?
+--- @param opts my.atom.Capturer.Opts?
 function M:new(opts)
   vim.validate("opts", opts, "table", true)
   opts = opts or {}
@@ -33,7 +33,7 @@ function M:new(opts)
   return o
 end
 
---- @param opts my._atom.Capturer.start.Opts?
+--- @param opts my.atom.Capturer.start.Opts?
 function M:start(opts)
   vim.validate("opts", opts, "table", true)
   opts = opts or {}

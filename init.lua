@@ -125,8 +125,8 @@ require("option")
 require("pro")
 
 do
-  my._atom["repeat"].enable()
-  my._atom.marco.enable()
+  my.atom["repeat"].enable()
+  my.atom.marco.enable()
 end
 
 do
@@ -173,7 +173,7 @@ end
 
 -- do
 --   vim.keymap.set("n", ";.", function()
---     local capturer = my._atom.capturer()
+--     local capturer = my.atom.capturer()
 --     capturer:start()
 --     vim.api.nvim_feedkeys("ddgg", "n", false)
 --     capturer:stop(function(capture)
