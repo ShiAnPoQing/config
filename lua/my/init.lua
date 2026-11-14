@@ -27,6 +27,9 @@
 --- @field b my.b
 --- @field w my.w
 --- @field t my.t
+--- @field go my.g
+--- @field bo my.b
+--- @field wo my.w
 --- @field buf my.buf
 --- @field win my.win
 _G.my = _G.my
@@ -281,7 +284,7 @@ do
       end
       --- @type any[]
       local list = vim.fn.matchbufline(buf, pattern, line, line)
-      ---@diagnostic disable-next-line: undefined-field
+      --- @diagnostic disable-next-line: undefined-field
       list = vim.iter(list):rev():totable()
       for _, item in ipairs(list) do
         local col = item.byteidx
@@ -343,7 +346,47 @@ do
   end
 end
 
-function my.trim_current_line()
-  local lnum = vim.fn.line(".")
-  my.buf.trim_lines(0, lnum - 1, lnum)
+do
+  function my.trim_current_line()
+    local lnum = vim.fn.line(".")
+    my.buf.trim_lines(0, lnum - 1, lnum)
+  end
+
+  function my.trim_current_line_trail()
+    local lnum = vim.fn.line(".")
+    my.buf.trim_lines(0, lnum - 1, lnum, { mode = "trail" })
+  end
+
+  function my.trim_current_line_lead()
+    local lnum = vim.fn.line(".")
+    my.buf.trim_lines(0, lnum - 1, lnum, { mode = "lead" })
+  end
+
+  vim.keymap.set("n", "<Plug>(my.trim_current_line)", "<Cmd>lua my.trim_current_line()<Cr>")
+  vim.keymap.set("n", "<Plug>(my.trim_current_line_lead)", "<Cmd>lua my.trim_current_line_lead()<Cr>")
+  vim.keymap.set("n", "<Plug>(my.trim_current_line_trail)", "<Cmd>lua my.trim_current_line_trail()<Cr>")
+
+  vim.api.nvim_create_user_command("TrimLine", function(args)
+    if args.range == 0 then
+      vim.api.nvim_feedkeys(vim.keycode("<Plug>(my.trim_current_line)"), "nt", false)
+      return
+    end
+    my.buf.trim_lines(0, args.line1 - 1, args.line2)
+  end, { range = true })
+
+  vim.api.nvim_create_user_command("TrimLineTrail", function(args)
+    if args.range == 0 then
+      vim.api.nvim_feedkeys(vim.keycode("<Plug>(my.trim_current_line_trail)"), "nt", false)
+      return
+    end
+    my.buf.trim_lines(0, args.line1 - 1, args.line2, { mode = "trail" })
+  end, { range = true })
+
+  vim.api.nvim_create_user_command("TrimLineLead", function(args)
+    if args.range == 0 then
+      vim.api.nvim_feedkeys(vim.keycode("<Plug>(my.trim_current_line_lead)"), "nt", false)
+      return
+    end
+    my.buf.trim_lines(0, args.line1 - 1, args.line2, { mode = "lead" })
+  end, { range = true })
 end

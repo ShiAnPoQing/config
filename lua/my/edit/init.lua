@@ -95,17 +95,6 @@ function M.above_below_add_blank_line()
   M.below_add_blank_line_follow()
 end
 
-function M.trim_current_line()
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  local lnum = cursor[1]
-  local line = vim.api.nvim_get_current_line()
-  local col = line:find("%S") or #line + 1
-  col = col - 1
-  line = vim.trim(line)
-  vim.api.nvim_buf_set_lines(0, lnum - 1, lnum, false, { line })
-  vim.api.nvim_win_set_cursor(0, { lnum, math.max(cursor[2] - col, 1) })
-end
-
 --- @param WORD boolean|nil
 local function trim_cword_trail(WORD)
   local pattern = WORD and [[\S\+]] or [[\(\%(\%(\k\)\@!\S\)\+\)\|\(\k\+\)]]

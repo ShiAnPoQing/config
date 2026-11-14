@@ -1,0 +1,29 @@
+*my.txt*
+
+==============================================================================
+
+my.trim_current_line()					*my.trim_current_line()*
+
+my.trim_current_line_lead()				*my.trim_current_line_lead()*
+
+my.trim_current_line_trail()				*my.trim_current_line_trail()*
+
+==============================================================================
+
+my.g									*my.g*
+
+my.b									*my.b*
+
+my.w									*my.w*
+
+my.t									*my.t*
+
+==============================================================================
+
+my.go									*my.go*
+
+my.bo									*my.bo*
+
+my.wo									*my.wo*
+
+vim:tw=78:ts=8:noet:ft=help:norl:

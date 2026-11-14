@@ -432,13 +432,13 @@ l[nore]map     |  -   | 是  | 是  |  -  |  -  |  -  |  -   | 是   |
 <M-C> 的映射是用 latin1 编码定义的，结果是一个 0xc3 字节。如果您在 UTF-8 编码中键入字符 á (0xe1 <M-a>)，则是两个字节 0xc3 0xa1。那么您不希望映射 0xc3 字节，否则将无法键入 á 字符。
 
 					*<Leader>* *mapleader*
-要定义使用 "g:mapleader" 变量的映射，可以使用特殊字符串 "<Leader>"。它被替换为 "g:mapleader" 的字符串值。如果 "g:mapleader" 未设置或为空，则改用反斜杠。示例：>
+要定义使用 "g:mapleader" 变量的映射，可以使用特殊字符串 "<Leader>"。它被替换为 "g:mapleader" 的字符串值。如果 "g:mapleader" 未设置或为空，则改用反斜杠。示例： >
 	map <Leader>A  oanother line<Esc>
-工作方式类似于：>
+工作方式类似于： >
 	map \A  oanother line<Esc>
-但在之后：>
+但在之后： >
 	let mapleader = ","
-它工作方式类似于：>
+它工作方式类似于： >
 	map ,A  oanother line<Esc>
 
 请注意，"g:mapleader" 的值在定义映射时使用。之后更改 "g:mapleader" 对已定义的映射没有影响。
@@ -508,7 +508,7 @@ l[nore]map     |  -   | 是  | 是  |  -  |  -  |  -  |  -   | 是   |
 
 1.8 示例						*map-examples*
 
-几个示例（按照您键入的方式：对于 "<CR>"，您键入四个字符）。>
+几个示例（按照您键入的方式：对于 "<CR>"，您键入四个字符）。 >
 
    :map <F3>  o#include
    :map <M-g> /foo<CR>cwbar<Esc>
@@ -608,8 +608,7 @@ g@{motion}		调用由 'operatorfunc' 选项设置的函数。
 			    "block"	{motion} 是 |blockwise-visual|
 			可以强制类型，参见 |forced-motion|。
 
-这是一个使用 <F4> 计算空格数的示例：>
-
+这是一个使用 <F4> 计算空格数的示例： >vim
 	nnoremap <expr> <F4> CountSpaces()
 	xnoremap <expr> <F4> CountSpaces()
 	" 双击 <F4> 在一行上起作用
@@ -1110,7 +1109,7 @@ non-id	  在匹配项前面是一个空格、制表符，或者是行或插入�
 预览结束后，Nvim 将丢弃预览期间对任何缓冲区所做的所有更改，并清除预览命名空间中的所有高亮。
 
 以下是一个支持增量命令预览的、用于删除行尾空格的命令示例：
->
+>lua
 	-- 如果作为预览回调调用，则通过高亮当前缓冲区中的尾随空格来执行 'inccommand' 预览。
 	local function trim_space_preview(opts, preview_ns, preview_buf)
 	  vim.cmd('hi clear Whitespace')
