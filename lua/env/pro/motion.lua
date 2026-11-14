@@ -31,7 +31,7 @@ setmetatable(M, {
   ---@param k string
   __index = function(t, k)
     if not submodules[k] then
-      return my._.motion[k]
+      return
     end
     -- alias
     if type(submodules[k]) == "string" then

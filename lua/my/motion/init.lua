@@ -7,7 +7,7 @@
 --- @field ['c'] my.motion.COMMAND
 --- @field ['n'] my.motion.NORMAL
 --- @field jump my.motion.jump
---- @field jump fun(dir: -1|1, opts?: my.motion.jump.Opts)
+--- @field jump fun(count: integer, opts?: my.motion.jump.Opts)
 local M = my.util.defer_require("my.motion", {
   INSERT = true,
   COMMAND = true,

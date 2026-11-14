@@ -4,7 +4,6 @@
 --- @class my.t: vim.var_accessor
 
 --- @class my
---- @field private _ my
 --- @field [-1] my
 --- @field env my.env
 --- @field command my.command
@@ -72,6 +71,8 @@ local function accesss_my(paths)
   return t
 end
 
+--- @param t table
+--- @return boolean
 local function is_only_index_metatable(t)
   local metatable = getmetatable(t)
   if not metatable then
@@ -91,24 +92,26 @@ local function create_root(parent_root, path)
 end
 
 local function get_proxy_module(root, mod)
-  return setmetatable({ __root__ = root }, {
-    __index = function(_, k)
+  return setmetatable({ ["[[__root__]]"] = root }, {
+    __index = function(t, k)
       if type(mod) == "function" then
         mod = mod()
       end
       local value = mod and mod[k]
       if value then
         if type(value) == "table" and is_only_index_metatable(value) then
-          return get_proxy_module(create_root(root, k), value)
+          t[k] = get_proxy_module(create_root(root, k), value)
+          return t[k]
         end
         return value
       else
-        mod = accesss_my(root)
-        value = mod and mod[k]
-        if type(value) == "table" and is_only_index_metatable(value) then
-          return get_proxy_module(create_root(root, k), value)
+        local _mod = accesss_my(root)
+        local _value = _mod and _mod[k]
+        if type(_value) == "table" and is_only_index_metatable(_value) then
+          t[k] = get_proxy_module(create_root(root, k), value)
+          return t[k]
         end
-        return value
+        return _value
       end
     end,
   })
@@ -116,9 +119,6 @@ end
 
 setmetatable(my, {
   __index = function(t, key)
-    if key == "_" then
-      return my[-1]
-    end
     if key == "env" then
       t[key] = require("my." .. key)
       return t[key]

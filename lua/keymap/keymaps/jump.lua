@@ -17,40 +17,44 @@
 return {
   ["<C-i>"] = {
     function()
-      my.motion.jump(-1, { scope = "global" })
+      my.motion.jump(-vim.v.count1, { scope = "global" })
     end,
     { "n", "x" },
-    desc = "Go to [count] older cursor position in jump list",
+    desc = "Go to [count] older cursor position",
   },
   ["<C-o>"] = {
     function()
-      my.motion.jump(1, { scope = "global" })
+      my.motion.jump(vim.v.count1, { scope = "global" })
     end,
     { "n", "x" },
-    desc = "Go to [count] newer cursor position in jump list",
-  },
-  ["<C-M-i>"] = {
-    function() end,
-    "n",
-    desc = "Go to [count] older cursor position in jump list",
-  },
-  ["<C-M-o>"] = {
-    function() end,
-    "n",
-    desc = "Go to [count] newer cursor position in jump list",
+    desc = "Go to [count] newer cursor position",
   },
   ["<C-S-i>"] = {
     function()
-      my.motion.jump(-1, { scope = "local" })
+      my.motion.jump.buffer(-vim.v.count1)
     end,
     "n",
-    desc = "Go to [count] older cursor position in jump list[buffer]",
+    desc = "Go to [count] older buffer[last cursor position]",
   },
   ["<C-S-o>"] = {
     function()
-      my.motion.jump(1, { scope = "local" })
+      my.motion.jump.buffer(vim.v.count1)
     end,
     "n",
-    desc = "Go to [count] newer cursor position in jump list[buffer]",
+    desc = "Go to [count] newer buffer[first cursor position]",
+  },
+  ["<C-M-i>"] = {
+    function()
+      my.motion.jump(-vim.v.count1, { scope = "local" })
+    end,
+    "n",
+    desc = "Go to [count] older cursor position[current buffer]",
+  },
+  ["<C-M-o>"] = {
+    function()
+      my.motion.jump(vim.v.count1, { scope = "local" })
+    end,
+    "n",
+    desc = "Go to [count] newer cursor position[current buffer]",
   },
 }

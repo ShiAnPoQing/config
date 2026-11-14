@@ -178,10 +178,4 @@ function M.forward_paragraph_start()
   vim.fn.winrestview({ curswant = view.curswant })
 end
 
-setmetatable(M, {
-  __index = function(_, k)
-    return my._.motion.NORMAL[k]
-  end,
-})
-
 return M
