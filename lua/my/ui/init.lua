@@ -1,6 +1,7 @@
 --- @class my.ui
 --- @field Box my.ui.Class.Box
 --- @field Window my.ui.Class.Window
+--- @field Window fun(opts: my.ui.Window.Opts): my.ui.Window
 --- @field Input my.ui.Class.Input
 local M = my.util.defer_require("my.ui", {
   Window = "window",

@@ -474,86 +474,107 @@ do
 end
 
 do
-  local function create_super_proxy(instance, Base)
-    local called
-    return setmetatable({}, {
-      __call = function(_, ...)
-        assert(not called, "super() called more than once")
-        if type(Base.init) == "function" then
-          Base.init(instance, ...)
-        end
-        called = true
-      end,
-      __index = Base,
-    })
+  --- @return boolean
+  local function is_subclass(class1, class2)
+    local static = getmetatable(class1.static).__index
+
+    while static do
+      if static == class2.static then
+        return true
+      end
+      local mt = getmetatable(static)
+      static = mt and mt.__index
+    end
+
+    return false
   end
 
-  --- @class my.Class<T>
-  --- @field is_subclass_of fun(class1: T, class2): boolean
+  --- @return boolean
+  local function is_instance(instance, class)
+    local prototype = getmetatable(instance).__index
 
-  --- @class my.Instance<T, E>
-  --- @field super E
-  --- @field is_instance_of fun(self: T, class: my.Class): boolean
+    while prototype do
+      if prototype == class.__prototype__ then
+        return true
+      end
+      local mt = getmetatable(prototype)
+      prototype = mt and mt.__index
+    end
+
+    return false
+  end
+
+  local create_class
+
+  --- @param name string
+  local function extend(base, name)
+    return create_class(name, base)
+  end
+
+  --- @param name string
+  function create_class(name, base)
+    local class = {
+      name = name,
+      __prototype__ = setmetatable({ is_instance_of = is_instance }, { __index = base and base.__prototype__ or {} }),
+      static = setmetatable({
+        is_subclass_of = is_subclass,
+        extend = extend,
+      }, { __index = base and base.static or {} }),
+    }
+
+    local super_mt = base
+        and {
+          __index = function(self, _k)
+            local value = base.__prototype__[_k]
+            if type(value) == "function" then
+              return function(_, ...)
+                return value(self.__instance__, ...)
+              end
+            end
+            return value
+          end,
+          __call = function(self, ...)
+            local init = base.__prototype__.init
+            if type(init) == "function" then
+              init(self.__instance__, ...)
+            end
+          end,
+        }
+      or nil
+
+    setmetatable(class, {
+      __index = class.static,
+      __newindex = function(_, k, v)
+        class.__prototype__[k] = v
+      end,
+      __call = function(_, ...)
+        local instance = {}
+        setmetatable(instance, { __index = class.__prototype__ })
+        if super_mt then
+          instance.super = setmetatable({ __instance__ = instance }, super_mt)
+        end
+        if instance.init then
+          instance:init(...)
+        end
+        return instance
+      end,
+    })
+    return class
+  end
+  --- @class my.Class<T>
+  --- @field name string
+  --- @field is_subclass_of fun(self: T, class2): boolean
+  --- @field extend fun(self: T, name: string): T
+  --- @overload fun(...): my.Instance|T
+
+  --- @class my.Instance<T>
+  --- @field super T
+  --- @field is_instance_of fun(self: my.Instance<T>, class): boolean
 
   ---@generic T
+  ---@param name T
   ---@return my.Class<T>
-  function my.class(Base)
-    local class = {}
-    class.__index = class
-
-    function class.is_instance_of(instance, cls)
-      local mt = getmetatable(instance)
-      while mt do
-        if mt == cls then
-          return true
-        end
-        local class_mt = getmetatable(mt)
-        mt = class_mt and class_mt.__index
-      end
-      return false
-    end
-
-    function class.is_subclass_of(class1, class2)
-      local current = class1
-
-      while true do
-        local mt = getmetatable(current)
-        current = mt and mt.__index
-
-        if not current then
-          return false
-        end
-
-        if current == class2 then
-          return true
-        end
-      end
-    end
-
-    if not Base then
-      setmetatable(class, {
-        __call = function(_, ...)
-          local instance = setmetatable({}, class)
-          if type(instance.init) == "function" then
-            instance:init(...)
-          end
-          return instance
-        end,
-      })
-    else
-      setmetatable(class, {
-        __index = Base,
-        __call = function(_, ...)
-          local instance = setmetatable({}, class)
-          instance.super = create_super_proxy(instance, Base)
-          if type(instance.init) == "function" then
-            instance:init(...)
-          end
-          return instance
-        end,
-      })
-    end
-
-    return class
+  function my.class(name)
+    return create_class(name)
   end
 end

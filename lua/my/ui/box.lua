@@ -5,8 +5,8 @@
 --- @field grow? integer
 
 --- @class my.ui.Class.Box: my.Class<my.ui.Class.Box>
---- @overload fun(boxs: (my.ui.Box|my.ui.Window)[], opts?: my.ui.Box.Opts): my.ui.Box
-local Box = my.class()
+--- @overload fun(boxs: (my.ui.Box|my.ui.Window)[], opts?: my.ui.Box.Opts): my.ui.Box|my.ui.Class.Box
+local Box = my.class("my.ui.Box")
 
 local function is_box(obj)
   return obj and obj.boxs

@@ -26,7 +26,7 @@
 --- @field title? any
 --- @field title_pos? "center"|"left"|"right"
 
---- @class my.ui.Window: my.Instance<my.ui.Window, nil>
+--- @class my.ui.Window: my.Instance<nil>
 --- @field buf integer
 --- @field win integer
 --- @field win_options table<string, any>
@@ -45,8 +45,8 @@ local function set_win_options(win, options)
 end
 
 --- @class my.ui.Class.Window: my.Class<my.ui.Class.Window>
---- @overload fun(opts: my.ui.Window.Opts): my.ui.Window
-local Window = my.class()
+--- @overload fun(opts: my.ui.Window.Opts): my.ui.Window|my.ui.Class.Window
+local Window = my.class("my.ui.Window")
 
 --- @param opts my.ui.Window.Opts
 function Window:init(opts)
