@@ -29,6 +29,7 @@
 --- @field wo my.w
 --- @field buf my.buf
 --- @field win my.win
+--- @field ui my.ui
 _G.my = _G.my
   or {
     [-1] = setmetatable({}, {
@@ -57,6 +58,7 @@ my._submodules = {
   insert = true,
   edit = true,
   buf = true,
+  ui = true,
 }
 
 local function accesss_my(paths)
@@ -383,4 +385,175 @@ do
     end
     my.buf.trim_lines(0, args.line1 - 1, args.line2, { mode = "lead" })
   end, { range = true })
+end
+
+do
+  --- @param WORD boolean|nil
+  local function trim_cword_trail(WORD)
+    local pattern = WORD and [[\S\+]] or [[\(\%(\%(\k\)\@!\S\)\+\)\|\(\k\+\)]]
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    local matches = my.buf_match(0, pattern, cursor, { count = 2 })
+    if #matches < 2 then
+      return
+    end
+    if matches[1].col > cursor[2] then
+      return
+    end
+    local cword_match = matches[1]
+    local nword_match = matches[2]
+    if cword_match.end_col == nword_match.col then
+      return
+    end
+    if cword_match.lnum == nword_match.lnum then
+      local line = vim.api.nvim_buf_get_lines(0, cword_match.lnum - 1, cword_match.lnum, true)[1]
+      local left_part = line:sub(1, cword_match.end_col)
+      local right_part = line:sub(nword_match.col + 1)
+      vim.api.nvim_buf_set_lines(0, cword_match.lnum - 1, cword_match.lnum, true, { left_part .. right_part })
+    else
+      local line = vim.api.nvim_buf_get_lines(0, cword_match.lnum - 1, cword_match.lnum, true)[1]
+      local new_line = line:sub(1, cword_match.end_col)
+      vim.api.nvim_buf_set_lines(0, cword_match.lnum - 1, cword_match.lnum, true, { new_line })
+    end
+  end
+
+  --- @param WORD boolean|nil
+  local function trim_cword_lead(WORD)
+    local pattern = WORD and [[\S\+]] or [[\(\%(\%(\k\)\@!\S\)\+\)\|\(\k\+\)]]
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    local start = { cursor[1], cursor[2] }
+    if WORD and my.cursor.at_WORD_start() or my.cursor.at_word_start() then
+      start[2] = start[2] + 1
+    end
+    local matches = my.buf_match(0, pattern, start, { count = 2, backward = true })
+    if #matches < 2 then
+      return
+    end
+    if matches[1].end_col < cursor[2] then
+      return
+    end
+    local cword_match = matches[1]
+    local nword_match = matches[2]
+    if cword_match.col == nword_match.end_col then
+      return
+    end
+    if cword_match.lnum == nword_match.lnum then
+      local line = vim.api.nvim_buf_get_lines(0, cword_match.lnum - 1, cword_match.lnum, true)[1]
+      local new_line = line:sub(1, nword_match.end_col) .. line:sub(cword_match.col + 1)
+      vim.api.nvim_buf_set_lines(0, cword_match.lnum - 1, cword_match.lnum, true, { new_line })
+      cursor[2] = cursor[2] + #new_line - #line
+    else
+      local line = vim.api.nvim_buf_get_lines(0, cword_match.lnum - 1, cword_match.lnum, true)[1]
+      local new_line = line:sub(cword_match.col + 1)
+      cursor[2] = cursor[2] + #new_line - #line
+      vim.api.nvim_buf_set_lines(0, cword_match.lnum - 1, cword_match.lnum, true, { new_line })
+    end
+    vim.api.nvim_win_set_cursor(0, cursor)
+  end
+
+  function my.trim_cword_trail()
+    trim_cword_trail()
+  end
+
+  function my.trim_cWORD_trail()
+    trim_cword_trail(true)
+  end
+
+  function my.trim_cword_lead()
+    trim_cword_lead()
+  end
+
+  function my.trim_cWORD_lead()
+    trim_cword_lead(true)
+  end
+
+  function my.trim_cword() end
+end
+
+do
+  function my.delete_surround() end
+end
+
+do
+  local function create_super_proxy(instance, Base)
+    local called
+    return setmetatable({}, {
+      __call = function(_, ...)
+        assert(not called, "super() called more than once")
+        if type(Base.init) == "function" then
+          Base.init(instance, ...)
+        end
+        called = true
+      end,
+      __index = Base,
+    })
+  end
+
+  --- @class my.Class<T>
+  --- @field is_subclass_of fun(class1: T, class2): boolean
+
+  --- @class my.Instance<T, E>
+  --- @field super E
+  --- @field is_instance_of fun(self: T, class: my.Class): boolean
+
+  ---@generic T
+  ---@return my.Class<T>
+  function my.class(Base)
+    local class = {}
+    class.__index = class
+
+    function class.is_instance_of(instance, cls)
+      local mt = getmetatable(instance)
+      while mt do
+        if mt == cls then
+          return true
+        end
+        local class_mt = getmetatable(mt)
+        mt = class_mt and class_mt.__index
+      end
+      return false
+    end
+
+    function class.is_subclass_of(class1, class2)
+      local current = class1
+
+      while true do
+        local mt = getmetatable(current)
+        current = mt and mt.__index
+
+        if not current then
+          return false
+        end
+
+        if current == class2 then
+          return true
+        end
+      end
+    end
+
+    if not Base then
+      setmetatable(class, {
+        __call = function(_, ...)
+          local instance = setmetatable({}, class)
+          if type(instance.init) == "function" then
+            instance:init(...)
+          end
+          return instance
+        end,
+      })
+    else
+      setmetatable(class, {
+        __index = Base,
+        __call = function(_, ...)
+          local instance = setmetatable({}, class)
+          instance.super = create_super_proxy(instance, Base)
+          if type(instance.init) == "function" then
+            instance:init(...)
+          end
+          return instance
+        end,
+      })
+    end
+
+    return class
+  end
 end

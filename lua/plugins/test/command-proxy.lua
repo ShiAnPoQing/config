@@ -365,7 +365,59 @@ return {
           end
         end,
         ["ls"] = function()
-          cmd_to_reg("ls")
+          -- local buf = vim.api.nvim_create_buf(false, true)
+          -- local bufs = vim.api.nvim_list_bufs()
+          -- local lines = {}
+          -- for _, b in ipairs(bufs) do
+          --   if
+          --     vim.api.nvim_buf_is_valid(buf)
+          --     and vim.api.nvim_get_option_value("buflisted", { scope = "local", buf = b })
+          --   then
+          --     local name = vim.api.nvim_buf_get_name(b)
+          --     name = name == "" and "[[No Name]]" or name
+          --     name = vim.fn.fnamemodify(name, ":~:.")
+          --     table.insert(lines, name)
+          --   end
+          -- end
+          -- local win = vim.api.nvim_open_win(buf, true, {
+          --   relative = "laststatus",
+          --   anchor = "SE",
+          --   height = #lines,
+          --   row = 0,
+          --   col = 0,
+          --   width = 1000,
+          --   style = "minimal",
+          -- })
+          -- vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+          -- cmd_to_reg("ls")
+          -- vim.api.nvim_set_hl(0, "CursorWord", {
+          --   bg = "#45475a",
+          -- })
+          --
+          -- local group = vim.api.nvim_create_augroup("CursorWord", {
+          --   clear = true,
+          -- })
+          --
+          -- vim.api.nvim_create_autocmd({
+          --   "CursorMoved",
+          --   "CursorMovedI",
+          -- }, {
+          --   buf = buf,
+          --   group = group,
+          --   callback = function()
+          --     if vim.w.cursor_word_match then
+          --       pcall(vim.fn.matchdelete, vim.w.cursor_word_match)
+          --       vim.w.cursor_word_match = nil
+          --     end
+          --
+          --     vim.w.cursor_word_match = vim.fn.matchadd("CursorWord", [[\k*\%#\k*]])
+          --   end,
+          -- })
+          if vim.v.register ~= "+" then
+            cmd_to_reg("ls")
+            return true
+          end
+          -- return true
         end,
         ["buffers"] = function()
           cmd_to_reg("buffers")

@@ -99,7 +99,7 @@ return {
   ["sI"] = {
     function()
       if vim.v.operator == "d" or my.operator.is_delete_operator() then
-        return "<esc><Cmd>lua my.edit.trim_cWORD_lead()<cr>"
+        return "<esc><Cmd>lua my.trim_cWORD_lead()<cr>"
       end
       return "<esc>"
     end,
@@ -109,7 +109,7 @@ return {
   ["sO"] = {
     function()
       if vim.v.operator == "d" or my.operator.is_delete_operator() then
-        return "<esc><Cmd>lua my.edit.trim_cWORD_trail()<cr>"
+        return "<esc><Cmd>lua my.trim_cWORD_trail()<cr>"
       end
       return "<esc>"
     end,
@@ -119,7 +119,7 @@ return {
   ["si"] = {
     function()
       if vim.v.operator == "d" or my.operator.is_delete_operator() then
-        return "<esc><Cmd>lua my.edit.trim_cword_lead()<cr>"
+        return "<esc><Cmd>lua my.trim_cword_lead()<cr>"
       end
       return "<esc>"
     end,
@@ -129,7 +129,7 @@ return {
   ["so"] = {
     function()
       if vim.v.operator == "d" or my.operator.is_delete_operator() then
-        return "<esc><Cmd>lua my.edit.trim_cword_trail()<cr>"
+        return "<esc><Cmd>lua my.trim_cword_trail()<cr>"
       end
       return "<esc>"
     end,
