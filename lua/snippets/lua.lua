@@ -81,49 +81,93 @@ local snippets = {
     t("--- @version "),
     i(1),
   }),
-  s({ trig = "@type", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@type",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @type "),
     i(1, "type"),
   }),
-  s({ trig = "@source", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@source",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @source "),
     i(1, "path"),
   }),
-  s({ trig = "@see", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@see",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @see "),
     i(1, "symbol"),
   }),
-  s({ trig = "@protected", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@protected",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @protected"),
   }),
   -- s("@private", {
   --   t("--- @private"),
   -- }),
-  s({ trig = "@package", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@package",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @package"),
   }),
-  s({ trig = "@overload", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@overload",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @overload fun("),
     i(1),
     t(") "),
     i(2),
   }),
-  s({ trig = "@operator", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@operator",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @operator"),
   }),
-  s({ trig = "@nodiscard", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@nodiscard",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @nodiscard"),
   }),
-  s({ trig = "@module", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@module",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @module '"),
     i(1, "name"),
-    t("'")
+    t("'"),
   }),
-  s({ trig = "@meta", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@meta",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @meta "),
     i(1, "name"),
   }),
-  s({ trig = "@generic", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@generic",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @generic "),
     i(1, "name"),
   }),
@@ -184,34 +228,46 @@ local snippets = {
     i(1, "type"),
     t("]]"),
   }),
-  s({ trig = "@alias", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@alias",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @alias "),
     i(1, "name"),
     t(" "),
     i(2, "type"),
   }),
-  s({ trig = "@diagnostic", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@diagnostic",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @diagnostic "),
     i(1),
   }),
-  s({ trig = "@field", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@field",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @field "),
     i(1, "name"),
     t(" "),
     i(2, "type"),
   }),
-  s({ trig = "@class", show_condition = only_blank_or_comment_line }, {
+  s({
+    trig = "@class",
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
+  }, {
     t("--- @class "),
     i(1),
   }),
   s({
     trig = "@param",
-    condition = function(line_to_start)
-      if line_to_start:find("%s") then
-        return false
-      end
-      return true
-    end,
+    show_condition = only_blank_or_comment_line,
+    resolveExpandParams = resolve_lua_ls_annotation,
   }, {
     t("--- @param "),
     i(1, "name"),

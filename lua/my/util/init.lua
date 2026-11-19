@@ -12,6 +12,7 @@ function M.get_mode()
 end
 
 --- @param root string
+--- @param mod table<string, boolean|string|fun(t: table): any>
 function M.defer_require(root, mod)
   return setmetatable({ _submodules = mod }, {
     ---@param t table<string, any>
@@ -20,11 +21,18 @@ function M.defer_require(root, mod)
       if not mod[k] then
         return
       end
+
+      if type(mod[k]) == "function" then
+        t[k] = mod[k](t)
+        return t[k]
+      end
+
       -- alias
       if type(mod[k]) == "string" then
         ---@diagnostic disable-next-line: cast-local-type
         k = mod[k]
       end
+
       local name = string.format("%s.%s", root, k)
       t[k] = require(name)
       return t[k]

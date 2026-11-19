@@ -30,6 +30,7 @@
 --- @field buf my.buf
 --- @field win my.win
 --- @field ui my.ui
+--- @field treesitter my.treesitter
 _G.my = _G.my
   or {
     [-1] = setmetatable({}, {
@@ -59,6 +60,7 @@ my._submodules = {
   edit = true,
   buf = true,
   ui = true,
+  treesitter = true,
 }
 
 local function accesss_my(paths)

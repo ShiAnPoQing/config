@@ -276,8 +276,16 @@ return {
   ["<M-]><M-space>"] = i.keep_cursor[-1],
   ["<M-space><M-space><M-[>"] = i.no_indent[-1],
   ["<M-space><M-space><M-]>"] = i.no_indent[1],
-
+  -- ["<CR>"] = {
+  --   function()
+  --     vim.print("<CR>")
+  --     return "<CR>"
+  --   end,
+  --   "i",
+  --   expr = true,
+  --   desc = "Super <CR>",
+  -- },
   -- ["<S-CR>"] = { "<CR><Space><C-U>", "i", desc = "Begin new line(non-blank)", exclude_ft = "prompt" },
-  ["<C-CR>"] = { "<CR><esc>k$a", "i", desc = "Begin new line(keep cursor)" },
-  ["<S-CR>"] = { "<CR><esc>O", "i", desc = "insert new line(line break)" },
+  ["<S-CR>"] = { "<CR><up><end>", "i", desc = "Begin new line(keep cursor)" },
+  ["<M-CR>"] = { "<CR><esc>O", "i", desc = "insert new line(line break)" },
 }

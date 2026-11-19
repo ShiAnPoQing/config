@@ -380,7 +380,45 @@ return {
               end
             end,
           },
-          ["<CR>"] = { "accept", "fallback" },
+          ["<CR>"] = {
+            "accept",
+            -- Super <CR>
+            function()
+              local node = vim.treesitter.get_node()
+              if not node then
+                return
+              end
+              local node_type = node:type()
+              if node_type == "function_declaration" then
+                local start_row, _, end_row = node:range()
+                if end_row == start_row then
+                  vim.api.nvim_feedkeys(vim.keycode("<cr><esc>O"), "n", false)
+                  return true
+                end
+              elseif node_type == "arguments" then
+                if node:named_child_count() == 0 then
+                  vim.api.nvim_feedkeys(vim.keycode("<cr><esc>O"), "n", false)
+                  return true
+                end
+              elseif node_type == "parameters" then
+                if node:named_child_count() == 0 then
+                  vim.api.nvim_feedkeys(vim.keycode("<cr><esc>O"), "n", false)
+                  return true
+                end
+              elseif node_type == "table_constructor" then
+                if node:named_child_count() then
+                  vim.api.nvim_feedkeys(vim.keycode("<cr><esc>O"), "n", false)
+                  return true
+                end
+              elseif node_type == "string_content" then
+                if node:byte_length() == 0 then
+                  vim.api.nvim_feedkeys(vim.keycode("<cr><esc>O"), "n", false)
+                  return true
+                end
+              end
+            end,
+            "fallback",
+          },
           --- 补全方案：
           ---        preselect = false,
           ---        auto_insert = true,

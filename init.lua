@@ -221,3 +221,17 @@ end, {
     return completes
   end,
 })
+
+-- vim.defer_fn(function()
+--   local Window1 = my.ui.Window({
+--     size = { width = 20, height = 10 },
+--   })
+--   local Window2 = my.ui.Window({
+--     size = { width = 20, height = 10 },
+--   })
+--   local Box = my.ui.Box({ Window1, Window2 }, { dir = "col", size = { width = 40, height = 20 } })
+--   my.ui.editor:place(Box, {
+--     row = 1,
+--     col = 1,
+--   })
+-- end, 2000)
