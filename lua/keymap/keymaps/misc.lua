@@ -34,6 +34,20 @@ local esc_map = {
   },
 }
 return {
+  ["<C-S-;>"] = {
+    function()
+      my.input_command()
+    end,
+    { "i", "s" },
+    desc = "Input command",
+  },
+  [":"] = {
+    function()
+      my.input_command()
+    end,
+    "x",
+    desc = "Input command",
+  },
   ["0<esc>"] = {
     function()
       local actions = {}

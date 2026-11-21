@@ -37,5 +37,5 @@ return {
   ["kk"] = right_esc,
   ["KJ"] = right_esc,
   ["KK"] = right_esc,
-  ["<C-0>"] = { "<C-o>", "i", desc = "CTRL-O" },
+  -- ["<C-0>"] = { "<C-o>", "i", desc = "CTRL-O" },
 }

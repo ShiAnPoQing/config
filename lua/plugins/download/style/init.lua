@@ -124,13 +124,13 @@ return {
               vim.api.nvim_ui_send("\27]112\27\\")
             end,
           })
-          vim.api.nvim_set_hl(0, "Normal", { bg = "NONE", fg = colors.names.fg})
+          -- vim.api.nvim_set_hl(0, "Normal", { bg = "NONE", fg = colors.names.fg})
         end,
       })
       -- require("paradox.utils").set_surface_hsl(100, 30)
       -- require("paradox.utils").set_surface_hsl(50, 15)
-      -- require("paradox.utils").set_surface_hsl(230, 30)
-      require("paradox.utils").set_hue_hsl(230, 80)
+      require("paradox.utils").set_surface_hsl(230, 20)
+      -- require("paradox.utils").set_hue_hsl(230, 80)
       -- require("paradox.utils").set_surface_hsl(200, 10)
       -- require("paradox.utils").offset_hue_hsl(30, 20)
       -- local time = tonumber(os.date("%H"))

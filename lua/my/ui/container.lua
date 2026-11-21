@@ -14,14 +14,17 @@ function Container:init(name)
   self.name = name
   vim.api.nvim_create_autocmd("VimResized", {
     callback = function()
-      Container:_update_size()
+      self:_update_size()
     end,
   })
+  self:_update_size()
 end
 
 function Container:_update_size()
-  self.size.width = vim.o.columns
-  self.size.height = vim.o.lines
+  self.size = {
+    width = vim.o.columns,
+    height = vim.o.lines,
+  }
 end
 
 --- @param ui my.ui.Window|my.ui.Box

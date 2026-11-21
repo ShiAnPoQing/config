@@ -12,9 +12,10 @@ local function get_percentage_string(str)
   end
 end
 
---- @param size number|string|my.ui.Opts.Size
+--- @param size number|string|my.ui.Opts.Size|nil
 --- @return my.ui.Pending.Size
 function M.normalize_size(size)
+  size = size or {}
   local normalized_size = {}
   if type(size) == "table" then
     normalized_size.width = size.width
@@ -24,17 +25,16 @@ function M.normalize_size(size)
     normalized_size.height = size
   end
   for key, value in pairs(normalized_size) do
-    if type(value) == "number" then
-      value = math.floor(math.max(value, 0))
-    elseif type(value) == "string" then
-      value = get_percentage_string(value)
-      if not value then
-        value = -1
+    if value then
+      if type(value) == "number" then
+        value = math.floor(math.max(value, 0))
+      elseif type(value) == "string" then
+        value = get_percentage_string(value)
+      else
+        value = nil
       end
-    else
-      value = -1
+      normalized_size[key] = value
     end
-    normalized_size[key] = value
   end
   return normalized_size
 end
@@ -71,10 +71,17 @@ function M.compute_size(size, container_size)
 
   for _, field in ipairs({ "width", "height" }) do
     local value = size[field]
-    if type(value) == "string" then
-      value = container_size[field] * tonumber(value) / 100
+    local container_value = container_size[field]
+    if not container_value then
+      value = nil
+    else
+      if type(value) == "string" then
+        value = container_size[field] * tonumber(value) / 100
+      end
+      if type(value) == "number" then
+        computed_size[field] = math.floor(value)
+      end
     end
-    computed_size[field] = math.floor(value)
   end
 
   return computed_size

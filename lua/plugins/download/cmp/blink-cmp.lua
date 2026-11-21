@@ -395,6 +395,18 @@ return {
                   vim.api.nvim_feedkeys(vim.keycode("<cr><esc>O"), "n", false)
                   return true
                 end
+              elseif node_type == "function_definition" then
+                if node:named_child_count() == 1 then
+                  local start_row, _, end_row = node:range()
+                  if end_row == start_row then
+                    vim.api.nvim_feedkeys(vim.keycode("<cr><esc>O"), "n", false)
+                    return true
+                  end
+                  if end_row == start_row then
+                    vim.api.nvim_feedkeys(vim.keycode("<cr><esc>O"), "n", false)
+                    return true
+                  end
+                end
               elseif node_type == "arguments" then
                 if node:named_child_count() == 0 then
                   vim.api.nvim_feedkeys(vim.keycode("<cr><esc>O"), "n", false)
@@ -406,9 +418,12 @@ return {
                   return true
                 end
               elseif node_type == "table_constructor" then
-                if node:named_child_count() then
-                  vim.api.nvim_feedkeys(vim.keycode("<cr><esc>O"), "n", false)
-                  return true
+                if node:named_child_count() == 0 then
+                  local start_row, _, end_row = node:range()
+                  if end_row == start_row then
+                    vim.api.nvim_feedkeys(vim.keycode("<cr><esc>O"), "n", false)
+                    return true
+                  end
                 end
               elseif node_type == "string_content" then
                 if node:byte_length() == 0 then

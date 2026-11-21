@@ -11,10 +11,17 @@
 --- @field position my.ui.Position
 --- @field pending my.ui.Pending
 local Box = my.class("my.ui.Box")
-
-local function is_box(obj)
-  return obj and obj.is_instance_of and obj:is_instance_of(my.ui.Box)
-end
+--[[
+ local box = my.ui.Box({
+   { component = component }
+ })
+ local box1 = my.ui.Box({
+   { component = component1, grow = 1 },
+   { component = component2, grow = 2 },
+   { component = box, grow = 2}
+ })
+ my.ui.editor:place(box1, { row = 0, col = 0, grow = 1})
+--]]
 
 --- @param dir "col"|"row"
 local function get_dir(dir)
@@ -35,7 +42,7 @@ function Box:init(boxs, opts)
   self.win_config = {}
   self.children = boxs or {}
   self.pending = { size = my.ui.util.normalize_size(opts.size) }
-  for _, box in ipairs(boxs) do
+  for _, box in ipairs(self.children) do
     if box:is_instance_of(my.ui.Window) then
       local window = box --[[@as my.ui.Window]]
       window.parent = self
@@ -51,13 +58,12 @@ function Box:_compute_layout()
   local dir = self.dir
   local base = self.position[self.dir]
   for _, component in ipairs(self.children) do
-    if not self.size then
-    end
     local size = my.ui.util.compute_size(component.pending.size, self.size)
-    component.pending.size = nil
+    -- component.pending.size = nil
     local position = { row = 0, col = 0, relative = relative }
     position[dir] = base
-    base = base + size[dir == "row" and "height" or "width"] + 1
+    local w = size[dir == "row" and "height" or "width"]
+    base = base + (w and w or 0)
     component.size = size
     component.position = position
     if component:is_instance_of(my.ui.Box) then

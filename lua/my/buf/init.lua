@@ -1,23 +1,36 @@
 --- @class my._buf
 --- @field trim_lines fun(start: integer, end_:integer, opts: my.buf.trim_lines.Opts)
 
+local submodules = {}
+
 --- @class my.buf
 --- @field [integer] my._buf
-local M = {}
+local M = { _submodules = submodules }
 
 setmetatable(M, {
-  __index = function(_, k)
+  __index = function(t, k)
     if type(k) == "number" then
-      return setmetatable({}, {
-        __index = function(_, key)
-          if type(M[key]) == "function" then
-            return function(...)
-              return M[key](k, ...)
-            end
-          end
+      local buf = k
+      if not vim.api.nvim_buf_is_valid(buf) then
+        vim.notify(string.format("my.buf[%d]: Invalid buf", buf), vim.log.levels.ERROR)
+        return nil
+      end
+      vim.api.nvim_create_autocmd({ "BufDelete", "BufWipeout" }, {
+        callback = function()
+          t[k] = nil
+          return true
         end,
+        buf = buf,
       })
+      t[k] = my.module.wrap_with_scope(buf, M)
+      return t[k]
     end
+    if not submodules[k] then
+      return
+    end
+    local name = string.format("%s.%s", "my.buf", k)
+    t[k] = require(name)
+    return t[k]
   end,
 })
 

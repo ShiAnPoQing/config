@@ -8,16 +8,15 @@
 --- @field height integer
 
 --- @class my.ui.Pending.Size
---- @field width integer|string
---- @field height integer|string
+--- @field width? integer|string
+--- @field height? integer|string
 
 --- @class my.ui.Pending.Position
 --- @field row integer|string
 --- @field col integer|string
 
 --- @class my.ui.Pending
---- @field size? my.ui.Pending.Size
---- @field position? my.ui.Pending.Position
+--- @field size my.ui.Pending.Size
 
 --- @class my.ui.Opts.Size
 --- @field width? number|string

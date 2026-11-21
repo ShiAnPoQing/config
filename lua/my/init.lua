@@ -31,6 +31,7 @@
 --- @field win my.win
 --- @field ui my.ui
 --- @field treesitter my.treesitter
+--- @field module my.module
 _G.my = _G.my
   or {
     [-1] = setmetatable({}, {
@@ -59,8 +60,10 @@ my._submodules = {
   insert = true,
   edit = true,
   buf = true,
+  win = true,
   ui = true,
   treesitter = true,
+  module = true,
 }
 
 local function accesss_my(paths)
@@ -536,7 +539,7 @@ do
             return value
           end,
           __call = function(self, ...)
-            local init = base.__prototype__.init
+            local init = rawget(base.__prototype__, "init")
             if type(init) == "function" then
               init(self.__instance__, ...)
             end
@@ -555,8 +558,9 @@ do
         if super_mt then
           instance.super = setmetatable({ __instance__ = instance }, super_mt)
         end
-        if instance.init then
-          instance:init(...)
+        local init = rawget(class.__prototype__, "init")
+        if type(init) == "function" then
+          init(instance, ...)
         end
         return instance
       end,
@@ -578,5 +582,69 @@ do
   ---@return my.Class<T>
   function my.class(name)
     return create_class(name)
+  end
+end
+
+do
+  --- @param hooks {leave_pre?: fun(ev: vim.api.keyset.create_autocmd.callback_args), leave?: fun(ev: vim.api.keyset.create_autocmd.callback_args), enter?: fun(ev: vim.api.keyset.create_autocmd.callback_args), changed?: fun(ev: vim.api.keyset.create_autocmd.callback_args)}
+  local function on_cmdline_once(hooks)
+    vim.api.nvim_create_autocmd("CmdlineEnter", {
+      callback = function()
+        local leaves = {}
+        if type(hooks.leave) == "function" then
+          table.insert(leaves, hooks.leave)
+        end
+        if type(hooks.leave_pre) == "function" then
+          vim.api.nvim_create_autocmd("CmdlineLeavePre", {
+            callback = function(ev)
+              hooks.leave_pre(ev)
+              return true
+            end,
+          })
+        end
+        if type(hooks.changed) == "function" then
+          local id = vim.api.nvim_create_autocmd("CmdlineChanged", {
+            callback = function(ev)
+              hooks.changed(ev)
+            end,
+          })
+          table.insert(leaves, function()
+            vim.api.nvim_del_autocmd(id)
+          end)
+        end
+        if #leaves ~= 0 then
+          vim.api.nvim_create_autocmd("CmdlineLeave", {
+            callback = function(ev)
+              for _, leave in ipairs(leaves) do
+                leave(ev)
+              end
+              return true
+            end,
+          })
+        end
+        return true
+      end,
+    })
+  end
+
+  function my.input_command()
+    local mode = vim.api.nvim_get_mode().mode
+    if mode == "i" then
+      vim.api.nvim_feedkeys(vim.keycode("<C-o>:"), "n", false)
+    elseif mode == "s" then
+      on_cmdline_once({
+        leave = function()
+          vim.cmd("normal! gv")
+        end,
+      })
+      vim.api.nvim_feedkeys(vim.keycode("<C-o>:"), "n", false)
+    elseif vim.list_contains({ "v", "V", "" }, mode) then
+      on_cmdline_once({
+        leave = function()
+          vim.cmd("normal! gv")
+        end,
+      })
+      vim.api.nvim_feedkeys(":", "n", false)
+    end
   end
 end
