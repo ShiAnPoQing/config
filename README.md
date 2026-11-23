@@ -45,4 +45,23 @@ my.win[0].cursor.motion
 my.win[win].cursor.set
 ```
 
-#### 
+## Mapping
+
+### Mapping sequence
+
+#### Interrupt mapping sequence
+
+> 通过某个映射中断当前映射序列
+
+内置映射：`:h CTRL-C` `:h <Esc>`
+
+问题：
+
+1. `<C-c>` 烦人的消息\
+   解决方案：`<cmd>silent normal! \\<C-c><Cr>`
+1. 在可视模式下 `<C-c>` 或 `<Esc>` 都会退出可视模式(即使本意是要中断当前映射)
+
+重新设计 `<esc>`：
+
+1. 处于未完成的映射序列中，`<esc>` 应当中断当前映射
+1. `fallback`

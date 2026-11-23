@@ -1,0 +1,50 @@
+*my.win.txt*
+
+==============================================================================
+
+my.win
+my.win[0]
+my.win[winid]
+
+==============================================================================
+my.win.cursor							*my.win.cursor*
+
+at_match({win}, {pattern})				*my.win.cursor.at_match()*
+
+at_match_start({win}, {pattern})			*my.win.cursor.at_match_start()*
+
+at_match_end({win}, {pattern})				*my.win.cursor.at_match_end()*
+
+at_word({win})						*my.win.cursor.at_word()*
+
+at_word_start({win})					*my.win.cursor.at_word_start()*
+
+at_word_end({win})					*my.win.cursor.at_word_end()*
+
+at_WORD({win})						*my.win.cursor.at_WORD()*
+
+at_WORD_start({win})					*my.win.cursor.at_WORD_start()*
+
+at_WORD_end({win})					*my.win.cursor.at_WORD_end()*
+
+match({win}, {pattern}, {opts})				*my.win.cursor.match()*
+
+match_word({win}, {opts})				*my.win.cursor.match_word()*
+
+match_WORD({win}, {opts})				*my.win.cursor.match_WORD()*
+
+match_cword({win})					*my.win.cursor.match_cword()*
+
+match_cWORD({win})					*my.win.cursor.match_cWORD()*
+
+==============================================================================
+my.win.cursor.motion					*my.win.cursor.motion*
+
+my.win.cursor.motion.INSERT
+my.win.cursor.motion.i
+my.win.cursor.motion.NORMAL
+my.win.cursor.motion.n
+my.win.cursor.motion.VISUAL
+my.win.cursor.motion.x
+
+vim:tw=78:ts=8:noet:ft=help:norl:

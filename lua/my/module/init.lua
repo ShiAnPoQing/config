@@ -6,6 +6,9 @@ local M = {}
 
 --- @alias my.submodules table<string, true|string|my.submodule.config|fun(t: table): any>
 
+--- @param submodules my.submodules
+--- @param key string
+--- @return true|string|my.submodule.config|fun(t: table): any
 local function get_module_config(submodules, key)
   local config = submodules[key]
   if type(config) == "string" then
@@ -14,6 +17,9 @@ local function get_module_config(submodules, key)
   return config
 end
 
+--- @param scope integer
+--- @param mod table
+--- @return table
 function M.wrap_with_scope(scope, mod)
   local submodules = mod._submodules or {}
   return setmetatable({}, {

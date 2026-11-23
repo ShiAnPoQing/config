@@ -670,7 +670,7 @@ function M.setup()
           local icon, icon_hl = get_icon(filetype)
           vim.api.nvim_buf_set_extmark(buf, ns, row, 0, {
             id = end_row,
-            virt_text = { { icon .. " ", icon_hl } },
+            virt_text = { { icon .. "  ", icon_hl } },
             virt_text_pos = "inline",
           })
         end

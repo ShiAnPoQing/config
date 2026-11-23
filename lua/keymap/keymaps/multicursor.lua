@@ -15,6 +15,12 @@
 ---------------------------------------------------------------------------------------------------+
 
 return {
+  -- ["ao"] = {
+  --   function()
+  --     vim.cmd("normal! Q" .. vim.v.count1 .. "e")
+  --   end,
+  --   "n",
+  -- },
   ["[c"] = {
     function()
       if not my.multicursor.active() then

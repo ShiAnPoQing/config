@@ -28,7 +28,11 @@ local function backward_word_start(is_WORD)
   local key = is_WORD and "B" or "b"
   local TYPE = is_WORD and "WORD" or "word"
   --- Builtin behavior: Cursor at the start of the word, exclude the cursor point
-  if my.cursor[string.format("at_%s_start", TYPE)]() then
+  if my.win.cursor[string.format("at_%s_start", TYPE)](0) then
+    if my.win.cursor[string.format("at_%s_end", TYPE)](0) then
+      vim.cmd("normal! v" .. vim.v.count1 .. key)
+      return
+    end
     vim.cmd("normal! " .. vim.v.count1 .. key)
     return
   end
@@ -49,7 +53,7 @@ local function backward_word_end(is_WORD)
   local TYPE = is_WORD and "WORD" or "word"
   local motion = "normal! v" .. vim.v.count1 .. (is_WORD and "gE" or "ge")
   local prev_word = my.cursor[string.format("match_prev_%s", TYPE)]() -- (1, 0) based
-  local at_word_start = my.cursor[string.format("at_%s_start", TYPE)]()
+  local at_word_start = my.win.cursor[string.format("at_%s_start", TYPE)](0)
 
   if not at_word_start then
     if prev_word then
@@ -99,7 +103,12 @@ local function forward_word_end(is_WORD)
   --- case2: next word doesn't exist
   ---        case2.1: forward has no blank
   ---        case2.2: forward has blank
-  if my.cursor[string.format("at_%s_end", TYPE)]() then
+  if my.win.cursor[string.format("at_%s_end", TYPE)](0) then
+    if my.win.cursor[string.format("at_%s_start", TYPE)](0) then
+      vim.cmd("normal! v" .. vim.v.count1 .. key)
+      return
+    end
+
     local next_word = my.cursor[string.format("match_next_%s", TYPE)]() -- (1, 0) based
 
     if next_word then
@@ -137,7 +146,7 @@ local function forward_word_start(is_WORD)
     return col == #vim.api.nvim_get_current_line() and vim.fn.line(".") == vim.fn.line("$")
   end
 
-  if my.cursor[string.format("at_%s_end", TYPE)]() then
+  if my.win.cursor[string.format("at_%s_end", TYPE)](0) then
     local col = vim.fn.col(".")
     local next_word = my.cursor[string.format("match_next_%s", TYPE)]() -- (1, 0) based
     -- case2:
@@ -239,7 +248,7 @@ function M.last_non_blank()
     end
     return
   end
-  if my.cursor.at_word_end() then
+  if my.win.cursor.at_word_end(0) then
     vim.cmd("normal! vg_ol")
     return
   end
@@ -268,7 +277,7 @@ function M.first_non_blank()
     end
     return
   end
-  if my.cursor.at_word_start() then
+  if my.win.cursor.at_word_start(0) then
     vim.cmd("normal! ^")
     return
   end
@@ -298,7 +307,7 @@ function M.last()
     vim.cmd("normal! lv$h")
     return
   end
-  if my.cursor.at_word_end() then
+  if my.win.cursor.at_word_end(0) then
     vim.cmd("normal! v$hol")
     return
   end
@@ -323,7 +332,7 @@ function M.first()
     vim.cmd("normal! 0")
     return
   end
-  if my.cursor.at_word_start() then
+  if my.win.cursor.at_word_start(0) then
     vim.cmd("normal! 0")
     return
   end

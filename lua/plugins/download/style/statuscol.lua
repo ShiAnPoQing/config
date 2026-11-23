@@ -17,6 +17,15 @@ return {
           },
         },
         {
+          text = {
+            function(args)
+              return "%=" .. (args.relnum == 0 and args.lnum or args.relnum)
+            end,
+            " ",
+          },
+          click = "v:lua.ScLa",
+        },
+        {
           text = { builtin.foldfunc, " " },
           click = "v:lua.ScFa",
           condition = {
@@ -25,18 +34,6 @@ return {
               return args.fold.width ~= 0
             end,
           },
-        },
-        {
-          text = {
-            function(args)
-              if args.relnum == 0 then
-                return "%=" .. args.lnum
-              end
-              return "%=" .. args.relnum
-            end,
-            " ",
-          },
-          click = "v:lua.ScLa",
         },
       },
     })

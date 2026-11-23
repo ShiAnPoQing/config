@@ -426,7 +426,7 @@ do
     local pattern = WORD and [[\S\+]] or [[\(\%(\%(\k\)\@!\S\)\+\)\|\(\k\+\)]]
     local cursor = vim.api.nvim_win_get_cursor(0)
     local start = { cursor[1], cursor[2] }
-    if WORD and my.cursor.at_WORD_start() or my.cursor.at_word_start() then
+    if (WORD and my.win.cursor.at_WORD_start(0)) or (not WORD and my.win.cursor.at_word_start(0)) then
       start[2] = start[2] + 1
     end
     local matches = my.buf_match(0, pattern, start, { count = 2, backward = true })

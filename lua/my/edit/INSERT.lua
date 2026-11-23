@@ -7,11 +7,12 @@ do
   local function delete_cword(cWORD, backward)
     local pattern = cWORD and [[\(\s\+\)\|\(\S\+\)]] or [[\(\%(\%(\k\)\@!\S\)\+\)\|\(\k\+\)\|\(\s\+\)]]
     local cursor = vim.api.nvim_win_get_cursor(0)
-    local cword_match = my.buf_match(0, pattern, cursor, { backward = backward })[1]
+    local cword_match =
+      my.buf.match(0, cursor, pattern, { count = backward and -1 or 1, strict = false, start_kind = "boundary" })[1]
     if not cword_match then
       return
     end
-    local lnum = cword_match.lnum
+    local lnum = cword_match.row
     if lnum > cursor[1] then
       local start = cursor[1] - 1
       local end_ = lnum

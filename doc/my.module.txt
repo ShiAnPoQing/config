@@ -1,0 +1,8 @@
+*my.module.txt*
+
+==============================================================================
+my.module								*my.module*
+
+defer_require({root}, {submodules})			*my.module.defer_require()*
+
+vim:tw=78:ts=8:noet:ft=help:norl:

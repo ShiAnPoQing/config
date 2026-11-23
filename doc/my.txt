@@ -3,10 +3,23 @@
 ==============================================================================
 
 my.trim_current_line()					*my.trim_current_line()*
+<Plug>(my.trim_current_line)				*<Plug>(my.trim_current_line)*
 
 my.trim_current_line_lead()				*my.trim_current_line_lead()*
+<Plug>(my.trim_current_line_lead)			*<Plug>(my.trim_current_line_lead)*
 
 my.trim_current_line_trail()				*my.trim_current_line_trail()*
+<Plug>(my.trim_current_line_trail)			*<Plug>(my.trim_current_line_trail)*
+
+	see |:TrimLine| |:TrimLineTrail| |:TrimLineLead|
+
+my.trim_cword_trail()					*my.trim_cword_trail()*
+
+my.trim_cWORD_trail()					*my.trim_cWORD_trail()*
+
+my.trim_cword_lead()					*my.trim_cword_lead()*
+
+my.trim_cword()						*my.trim_cword()*
 
 ==============================================================================
 
@@ -25,5 +38,23 @@ my.go									*my.go*
 my.bo									*my.bo*
 
 my.wo									*my.wo*
+
+==============================================================================
+my.class
+
+my.class({name})						*my.class()*
+
+------------------------------------------------------------------------------
+*my.Class*
+
+my.Class:is_subclass_of({class})				*my.Class:is_subclass_of()*
+
+my.Class:extend({name})						*my.Class:extend()*
+
+my.Class.name							*my.Class.name*
+
+==============================================================================
+
+my.input_command()						*my.input_command()*
 
 vim:tw=78:ts=8:noet:ft=help:norl:

@@ -103,27 +103,27 @@ return {
           local BlinkCmpMenu = vim.api.nvim_get_hl(0, { name = "BlinkCmpMenu", link = false })
           vim.api.nvim_set_hl(0, "BlinkCmpMenuBackground", { fg = BlinkCmpMenu.bg, bg = BlinkCmpMenu.bg })
 
-          local normal_hl = vim.api.nvim_get_hl(0, {
-            name = "Normal",
-          })
-          vim.api.nvim_create_autocmd({ "UIEnter" }, {
-            callback = function()
-              vim.api.nvim_ui_send(("\27]21;cursor=#%06X;cursor_text=#%06X\27\\"):format(normal_hl.fg, normal_hl.bg))
-            end,
-          })
-
-          vim.api.nvim_create_autocmd({ "TermEnter", "TermChanged", "TermLeave" }, {
-            callback = function()
-              vim.schedule(function()
-                vim.api.nvim_ui_send(("\27]21;cursor=#%06X;cursor_text=#%06X\27\\"):format(normal_hl.fg, normal_hl.bg))
-              end)
-            end,
-          })
-          vim.api.nvim_create_autocmd({ "VimLeavePre", "VimSuspend" }, {
-            callback = function()
-              vim.api.nvim_ui_send("\27]112\27\\")
-            end,
-          })
+          -- local normal_hl = vim.api.nvim_get_hl(0, {
+          --   name = "Normal",
+          -- })
+          -- vim.api.nvim_create_autocmd({ "UIEnter" }, {
+          --   callback = function()
+          --     vim.api.nvim_ui_send(("\27]21;cursor=#%06X;cursor_text=#%06X\27\\"):format(normal_hl.fg, normal_hl.bg))
+          --   end,
+          -- })
+          --
+          -- vim.api.nvim_create_autocmd({ "TermEnter", "TermChanged", "TermLeave" }, {
+          --   callback = function()
+          --     vim.schedule(function()
+          --       vim.api.nvim_ui_send(("\27]21;cursor=#%06X;cursor_text=#%06X\27\\"):format(normal_hl.fg, normal_hl.bg))
+          --     end)
+          --   end,
+          -- })
+          -- vim.api.nvim_create_autocmd({ "VimLeavePre", "VimSuspend" }, {
+          --   callback = function()
+          --     vim.api.nvim_ui_send("\27]112\27\\")
+          --   end,
+          -- })
           -- vim.api.nvim_set_hl(0, "Normal", { bg = "NONE", fg = colors.names.fg})
         end,
       })
@@ -133,12 +133,12 @@ return {
       -- require("paradox.utils").set_hue_hsl(230, 80)
       -- require("paradox.utils").set_surface_hsl(200, 10)
       -- require("paradox.utils").offset_hue_hsl(30, 20)
-      -- local time = tonumber(os.date("%H"))
-      -- if time >= 17 or time < 7 then
-      vim.o.background = "dark"
-      -- else
-      -- vim.o.background = "light"
-      -- end
+      local time = tonumber(os.date("%H"))
+      if time >= 17 or time < 7 then
+        vim.o.background = "dark"
+      else
+        vim.o.background = "light"
+      end
       vim.cmd([[colorscheme paradox]])
     end,
   },

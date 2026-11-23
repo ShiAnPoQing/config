@@ -1,0 +1,9 @@
+*my.atom.txt*
+
+==============================================================================
+
+my.atom['repeat']
+
+my.atom.marco
+
+vim:tw=78:ts=8:noet:ft=help:norl:

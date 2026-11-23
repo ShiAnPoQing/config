@@ -1,82 +1,5 @@
 --- @class my.cursor
 local M = vim._defer_require("my.cursor", {})
-local word_pattern = [[\(\%(\%(\k\)\@!\S\)\+\)\|\(\k\+\)]]
-local WORD_pattern = [[\S\+]]
-
---- @param pattern string
---- @return boolean
-function M.at_match_start(pattern)
-  local _, col = unpack(vim.api.nvim_win_get_cursor(0))
-  local r_line = vim.api.nvim_get_current_line():reverse()
-
-  local word = vim.fn.matchstrpos(r_line, pattern, #r_line - col - 1)
-  local start = word[2]
-  local end_ = word[3]
-  if start ~= -1 then
-    local _start = #r_line - start - 1
-    local _end_ = #r_line - end_ + 1
-    if _start == col and _end_ == _start + 1 then
-      return true
-    end
-  end
-  return false
-end
-
---- @param pattern string
---- @return boolean
-function M.at_match_end(pattern)
-  local _, col = unpack(vim.api.nvim_win_get_cursor(0))
-  local line = vim.api.nvim_get_current_line()
-
-  local word = vim.fn.matchstrpos(line, pattern, col)
-  local start = word[2]
-  local end_ = word[3]
-  if start ~= -1 then
-    if start == col and end_ == start + 1 then
-      return true
-    end
-  end
-  return false
-end
-
---- @param pattern string
---- @return boolean
-function M.at_match(pattern)
-  local col = vim.fn.col(".")
-  local word = vim.fn.matchstrpos(vim.api.nvim_get_current_line(), pattern, col - 1)
-  local start = word[2]
-  if start == -1 then
-    return false
-  end
-  if start == col - 1 then
-    return true
-  end
-  return false
-end
-
-function M.at_word_start()
-  return M.at_match_start(word_pattern)
-end
-
-function M.at_word_end()
-  return M.at_match_end(word_pattern)
-end
-
-function M.at_WORD_start()
-  return M.at_match_start(WORD_pattern)
-end
-
-function M.at_WORD_end()
-  return M.at_match_end(WORD_pattern)
-end
-
-function M.at_word()
-  return M.at_match(word_pattern)
-end
-
-function M.at_WORD()
-  return M.at_match(WORD_pattern)
-end
 
 --- @param pattern string
 --- @return table|nil
@@ -85,7 +8,7 @@ function M.match_next(pattern)
   local regex = vim.regex(pattern)
   local botline = vim.api.nvim_buf_line_count(0)
 
-  local target_match_idx = M.at_match(pattern) and 2 or 1
+  local target_match_idx = my.win.cursor.at_match(0, pattern) and 2 or 1
   local matchs = {}
   for i = topline, botline do
     local start_pos = (i == topline) and start_col or 0
@@ -112,7 +35,7 @@ end
 --- @return table|nil
 function M.match_prev(pattern)
   local regex = vim.regex(pattern)
-  local is_in_word = M.at_match(pattern)
+  local is_in_word = my.win.cursor.at_match(0, pattern)
   local topline = 1
   local botline, end_col = unpack(vim.api.nvim_win_get_cursor(0))
   local match
@@ -152,6 +75,9 @@ function M.match_prev(pattern)
   end
   return match
 end
+
+local word_pattern = [[\(\%(\%(\k\)\@!\S\)\+\)\|\(\k\+\)]]
+local WORD_pattern = [[\S\+]]
 
 function M.match_prev_word()
   return M.match_prev(word_pattern)
