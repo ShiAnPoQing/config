@@ -15,7 +15,6 @@
 --- @field operator my.operator
 --- @field motion my.motion
 --- @field edit my.edit
---- @field cursor my.cursor
 --- @field util my.util
 --- @field option my.option
 --- @field atom my.atom
@@ -48,7 +47,6 @@ my._submodules = {
   keymap = true,
   window = true,
   multicursor = true,
-  cursor = true,
   operator = true,
   option = true,
   util = true,
@@ -211,143 +209,6 @@ do
 end
 
 do
-  --- @param buf integer
-  --- @param start [integer, integer]
-  --- @return boolean
-  local function check_start(buf, start)
-    local lnum = start[1]
-    local col = start[2]
-    if type(lnum) ~= "number" or type(col) ~= "number" then
-      vim.notify(
-        string.format('my.buf_match: "start" expected [integer, integer], but got [%s, %s]', type(lnum), type(col)),
-        vim.log.levels.ERROR
-      )
-      return false
-    end
-    if lnum <= 0 or lnum > vim.api.nvim_buf_line_count(buf) then
-      vim.notify("my.buf_match: start[1] out of buf", vim.log.levels.ERROR)
-      return false
-    end
-    if col < 0 or col > #vim.api.nvim_buf_get_lines(buf, lnum - 1, lnum, true)[1] then
-      vim.notify("my.buf_match: start[2] out of buf", vim.log.levels.ERROR)
-      return false
-    end
-    return true
-  end
-
-  --- @class my.buf_match.Opts
-  --- @field count? integer 0 is match to buf start or buf end
-  --- @field backward? boolean default nil
-  --- @field strict? boolean
-
-  --- @class my.buf_match.match
-  --- @field lnum integer
-  --- @field col integer
-  --- @field end_lnum integer
-  --- @field end_col integer
-  --- @field text string
-
-  --- @param buf integer
-  --- @param pattern string
-  --- @param start [integer, integer]
-  --- @param opts my.buf_match.Opts?
-  --- @return my.buf_match.match[]
-  function my.buf_match(buf, pattern, start, opts)
-    vim.validate("buf", buf, "number")
-    vim.validate("pattern", pattern, "string")
-    vim.validate("start", start, "table")
-    vim.validate("opts", opts, "table", true)
-    buf = buf == 0 and vim.api.nvim_get_current_buf() or buf
-    opts = opts or {}
-    if not check_start(buf, start) then
-      return {}
-    end
-    local count = type(opts.count) == "number" and opts.count or 1
-    local strict = opts.strict
-    local backward = opts.backward
-    local all
-    if count == 0 then
-      all = true
-    end
-    local start_line = start[1]
-    local start_col = start[2]
-    local buf_line_count = vim.api.nvim_buf_line_count(buf)
-
-    local matches = {}
-
-    local should_match = function()
-      return all or #matches < count
-    end
-
-    local function match_backward(line)
-      if line < 1 then
-        return
-      end
-      --- @type any[]
-      local list = vim.fn.matchbufline(buf, pattern, line, line)
-      --- @diagnostic disable-next-line: undefined-field
-      list = vim.iter(list):rev():totable()
-      for _, item in ipairs(list) do
-        local col = item.byteidx
-        if
-          (line == start_line and ((strict and col + #item.text <= start_col) or (not strict and col < start_col)))
-          or line ~= start_line
-        then
-          if not should_match() then
-            break
-          end
-          table.insert(matches, {
-            col = item.byteidx,
-            lnum = line,
-            end_col = item.byteidx + #item.text,
-            end_lnum = line,
-            text = item.text,
-          })
-        end
-      end
-      if should_match then
-        match_backward(line - 1)
-      end
-    end
-
-    local function match_forward(line)
-      if line > buf_line_count then
-        return
-      end
-      --- @type any[]
-      local list = vim.fn.matchbufline(buf, pattern, line, line)
-      for _, item in ipairs(list) do
-        local col = item.byteidx
-        if
-          (line == start_line and ((strict and col >= start_col) or (not strict and col + #item.text > start_col)))
-          or line ~= start_line
-        then
-          if not should_match() then
-            break
-          end
-          table.insert(matches, {
-            col = item.byteidx,
-            lnum = line,
-            end_col = item.byteidx + #item.text,
-            end_lnum = line,
-            text = item.text,
-          })
-        end
-      end
-      if should_match then
-        match_forward(line + 1)
-      end
-    end
-    if backward then
-      match_backward(start_line)
-    else
-      match_forward(start_line)
-    end
-    return matches
-  end
-end
-
-do
   function my.trim_current_line()
     local lnum = vim.fn.line(".")
     my.buf.trim_lines(0, lnum - 1, lnum)
@@ -395,62 +256,65 @@ end
 do
   --- @param WORD boolean|nil
   local function trim_cword_trail(WORD)
+    if (WORD and not my.win.cursor.at_WORD(0)) or (not WORD and not my.win.cursor.at_word(0)) then
+      return
+    end
     local pattern = WORD and [[\S\+]] or [[\(\%(\%(\k\)\@!\S\)\+\)\|\(\k\+\)]]
     local cursor = vim.api.nvim_win_get_cursor(0)
-    local matches = my.buf_match(0, pattern, cursor, { count = 2 })
-    if #matches < 2 then
-      return
-    end
-    if matches[1].col > cursor[2] then
-      return
-    end
+    local matches = my.buf.match(0, cursor, pattern, { count = 2, strict = false })
     local cword_match = matches[1]
     local nword_match = matches[2]
+    if not nword_match then
+      local line = vim.api.nvim_buf_get_lines(0, cword_match.row - 1, cword_match.row, true)[1]
+      vim.api.nvim_buf_set_lines(0, cword_match.row - 1, cword_match.row, true, { line:sub(1, cword_match.end_col) })
+      return
+    end
     if cword_match.end_col == nword_match.col then
       return
     end
-    if cword_match.lnum == nword_match.lnum then
-      local line = vim.api.nvim_buf_get_lines(0, cword_match.lnum - 1, cword_match.lnum, true)[1]
+    if cword_match.row == nword_match.row then
+      local line = vim.api.nvim_buf_get_lines(0, cword_match.row - 1, cword_match.row, true)[1]
       local left_part = line:sub(1, cword_match.end_col)
       local right_part = line:sub(nword_match.col + 1)
-      vim.api.nvim_buf_set_lines(0, cword_match.lnum - 1, cword_match.lnum, true, { left_part .. right_part })
+      vim.api.nvim_buf_set_lines(0, cword_match.row - 1, cword_match.row, true, { left_part .. right_part })
     else
-      local line = vim.api.nvim_buf_get_lines(0, cword_match.lnum - 1, cword_match.lnum, true)[1]
+      local line = vim.api.nvim_buf_get_lines(0, cword_match.row - 1, cword_match.row, true)[1]
       local new_line = line:sub(1, cword_match.end_col)
-      vim.api.nvim_buf_set_lines(0, cword_match.lnum - 1, cword_match.lnum, true, { new_line })
+      vim.api.nvim_buf_set_lines(0, cword_match.row - 1, cword_match.row, true, { new_line })
     end
   end
 
   --- @param WORD boolean|nil
   local function trim_cword_lead(WORD)
+    if (WORD and not my.win.cursor.at_WORD(0)) or (not WORD and not my.win.cursor.at_word(0)) then
+      return
+    end
     local pattern = WORD and [[\S\+]] or [[\(\%(\%(\k\)\@!\S\)\+\)\|\(\k\+\)]]
     local cursor = vim.api.nvim_win_get_cursor(0)
-    local start = { cursor[1], cursor[2] }
-    if (WORD and my.win.cursor.at_WORD_start(0)) or (not WORD and my.win.cursor.at_word_start(0)) then
-      start[2] = start[2] + 1
-    end
-    local matches = my.buf_match(0, pattern, start, { count = 2, backward = true })
-    if #matches < 2 then
-      return
-    end
-    if matches[1].end_col < cursor[2] then
-      return
-    end
+    local matches = my.buf.match(0, cursor, pattern, { count = -2, strict = false })
     local cword_match = matches[1]
     local nword_match = matches[2]
+    if not nword_match then
+      local line = vim.api.nvim_buf_get_lines(0, cword_match.row - 1, cword_match.row, true)[1]
+      local new_line = line:sub(cword_match.col + 1)
+      vim.api.nvim_buf_set_lines(0, cword_match.row - 1, cword_match.row, true, { new_line })
+      cursor[2] = cursor[2] + #new_line - #line
+      vim.api.nvim_win_set_cursor(0, cursor)
+      return
+    end
     if cword_match.col == nword_match.end_col then
       return
     end
-    if cword_match.lnum == nword_match.lnum then
-      local line = vim.api.nvim_buf_get_lines(0, cword_match.lnum - 1, cword_match.lnum, true)[1]
+    if cword_match.row == nword_match.row then
+      local line = vim.api.nvim_buf_get_lines(0, cword_match.row - 1, cword_match.row, true)[1]
       local new_line = line:sub(1, nword_match.end_col) .. line:sub(cword_match.col + 1)
-      vim.api.nvim_buf_set_lines(0, cword_match.lnum - 1, cword_match.lnum, true, { new_line })
+      vim.api.nvim_buf_set_lines(0, cword_match.row - 1, cword_match.row, true, { new_line })
       cursor[2] = cursor[2] + #new_line - #line
     else
-      local line = vim.api.nvim_buf_get_lines(0, cword_match.lnum - 1, cword_match.lnum, true)[1]
+      local line = vim.api.nvim_buf_get_lines(0, cword_match.row - 1, cword_match.row, true)[1]
       local new_line = line:sub(cword_match.col + 1)
       cursor[2] = cursor[2] + #new_line - #line
-      vim.api.nvim_buf_set_lines(0, cword_match.lnum - 1, cword_match.lnum, true, { new_line })
+      vim.api.nvim_buf_set_lines(0, cword_match.row - 1, cword_match.row, true, { new_line })
     end
     vim.api.nvim_win_set_cursor(0, cursor)
   end
@@ -471,7 +335,10 @@ do
     trim_cword_lead(true)
   end
 
-  function my.trim_cword() end
+  function my.trim_cword()
+    trim_cword_trail()
+    trim_cword_lead()
+  end
 end
 
 do

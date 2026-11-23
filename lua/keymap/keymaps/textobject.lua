@@ -136,6 +136,26 @@ return {
     "o",
     expr = true,
   },
+  ["sw"] = {
+    function()
+      if vim.v.operator == "d" or my.operator.is_delete_operator() then
+        return "<esc><Cmd>lua my.trim_cword()<cr>"
+      end
+      return "<esc>"
+    end,
+    "o",
+    expr = true,
+  },
+  ["sW"] = {
+    function()
+      if vim.v.operator == "d" or my.operator.is_delete_operator() then
+        return "<esc><Cmd>lua my.trim_cWORD()<cr>"
+      end
+      return "<esc>"
+    end,
+    "o",
+    expr = true,
+  },
   ["ei"] = { "aw", { "x", "o" }, desc = "[textobject]: outer word" },
   ["wi"] = { "iw", { "x", "o" }, desc = "[textobject]: inner word" },
   ["eI"] = { "aW", { "x", "o" }, desc = "[textobject]: outer WORD" },

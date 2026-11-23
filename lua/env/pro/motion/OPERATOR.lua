@@ -15,6 +15,37 @@
 --- @class my.env.pro.motion.OPERATOR
 local M = {}
 
+local pattern = {
+  word = {
+    match_prev = function()
+      return my.win.cursor.match_word(0, { count = -1 })[1]
+    end,
+    match_next = function()
+      return my.win.cursor.match_word(0, { count = 1 })[1]
+    end,
+    at_match_start = function()
+      return my.win.cursor.at_word_start(0)
+    end,
+    at_match_end = function()
+      return my.win.cursor.at_word_end(0)
+    end,
+  },
+  WORD = {
+    match_prev = function()
+      return my.win.cursor.match_WORD(0, { count = -1 })[1]
+    end,
+    match_next = function()
+      return my.win.cursor.match_WORD(0, { count = 1 })[1]
+    end,
+    at_match_start = function()
+      return my.win.cursor.at_WORD_start(0)
+    end,
+    at_match_end = function()
+      return my.win.cursor.at_WORD_end(0)
+    end,
+  },
+}
+
 -- 'selection'='inclusive'
 -- 1 0 db
 -- 1 0 d:normal! b
@@ -27,9 +58,10 @@ local M = {}
 local function backward_word_start(is_WORD)
   local key = is_WORD and "B" or "b"
   local TYPE = is_WORD and "WORD" or "word"
+  local ctx = pattern[TYPE]
   --- Builtin behavior: Cursor at the start of the word, exclude the cursor point
-  if my.win.cursor[string.format("at_%s_start", TYPE)](0) then
-    if my.win.cursor[string.format("at_%s_end", TYPE)](0) then
+  if ctx.at_match_start() then
+    if ctx.at_match_end() then
       vim.cmd("normal! v" .. vim.v.count1 .. key)
       return
     end
@@ -52,8 +84,9 @@ end
 local function backward_word_end(is_WORD)
   local TYPE = is_WORD and "WORD" or "word"
   local motion = "normal! v" .. vim.v.count1 .. (is_WORD and "gE" or "ge")
-  local prev_word = my.cursor[string.format("match_prev_%s", TYPE)]() -- (1, 0) based
-  local at_word_start = my.win.cursor[string.format("at_%s_start", TYPE)](0)
+  local ctx = pattern[TYPE]
+  local prev_word = ctx.match_prev()
+  local at_word_start = ctx.at_match_start()
 
   if not at_word_start then
     if prev_word then
@@ -67,7 +100,7 @@ local function backward_word_end(is_WORD)
         return
       end
     else
-      if line == prev_word.line and col == prev_word.end_col + 1 then
+      if line == prev_word.row and col == prev_word.end_col + 1 then
         return
       end
       motion = motion .. "l"
@@ -98,18 +131,19 @@ end
 local function forward_word_end(is_WORD)
   local key = is_WORD and "E" or "e"
   local TYPE = is_WORD and "WORD" or "word"
+  local ctx = pattern[TYPE]
   --- Change builtin behavior: Cursor at the end of the word: exclude the cursor point(1 1 -> 0 1)
   --- case1: next word exists
   --- case2: next word doesn't exist
   ---        case2.1: forward has no blank
   ---        case2.2: forward has blank
-  if my.win.cursor[string.format("at_%s_end", TYPE)](0) then
-    if my.win.cursor[string.format("at_%s_start", TYPE)](0) then
+  if ctx.at_match_end() then
+    if ctx.at_match_start() then
       vim.cmd("normal! v" .. vim.v.count1 .. key)
       return
     end
 
-    local next_word = my.cursor[string.format("match_next_%s", TYPE)]() -- (1, 0) based
+    local next_word = ctx.match_next()
 
     if next_word then
       -- case1:
@@ -137,6 +171,7 @@ end
 local function forward_word_start(is_WORD)
   local key = is_WORD and "W" or "w"
   local TYPE = is_WORD and "WORD" or "word"
+  local ctx = pattern[TYPE]
   -- Change builtin behavior: 1 0 -> 0 0
   -- case1: next word exists
   -- case2: next word doesn't exist
@@ -146,9 +181,9 @@ local function forward_word_start(is_WORD)
     return col == #vim.api.nvim_get_current_line() and vim.fn.line(".") == vim.fn.line("$")
   end
 
-  if my.win.cursor[string.format("at_%s_end", TYPE)](0) then
+  if ctx.at_match_end() then
     local col = vim.fn.col(".")
-    local next_word = my.cursor[string.format("match_next_%s", TYPE)]() -- (1, 0) based
+    local next_word = ctx.match_next() -- (1, 0) based
     -- case2:
     if not next_word then
       if not is_forward_no_next_word_and_no_blank(col) then
@@ -165,7 +200,7 @@ local function forward_word_start(is_WORD)
     end
     -- case1:
     local line = vim.fn.line(".")
-    if line == next_word.line then
+    if line == next_word.row then
       if col ~= next_word.col then
         -- has space between the two words.
         -- like: "Hell|o|    World"
