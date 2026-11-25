@@ -221,7 +221,6 @@ end, {
     return completes
   end,
 })
---
 -- vim.defer_fn(function()
 --   local Window1 = my.ui.Window({
 --     size = { width = 20, height = 10 },

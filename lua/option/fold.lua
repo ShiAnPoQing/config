@@ -127,7 +127,7 @@ function _G.custom_foldtext()
 end
 
 -- vim.go.foldcolumn = "auto"
-vim.o.foldcolumn = "auto"
+vim.o.foldcolumn = "auto:9"
 -- vim.go.foldmethod = "expr"
 vim.o.foldmethod = "expr"
 -- vim.go.foldexpr = "v:lua.vim.treesitter.foldexpr()"

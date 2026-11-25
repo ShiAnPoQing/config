@@ -267,7 +267,8 @@ vim.o.matchpairs = "(:),{:},[:],<:>,【:】,《:》,（:）,`:`"
 -- vim.go.formatoptions = "jcroqql/"
 vim.o.formatoptions = "jcroqql/"
 -- vim.go.fillchars = "vert:│,horiz:─,fold: ,foldopen:,foldsep: ,foldclose:"
-vim.o.fillchars = "vert:│,horiz:─,fold: ,foldopen:,foldsep: ,foldclose:"
+vim.o.fillchars = "vert:│,horiz:─,fold: ,foldopen:┌,foldsep:│,foldclose:"
+-- vim.o.fillchars = "vert:│,horiz:─,fold: ,foldopen:,foldsep:│,foldclose:"
 -- vim.go.virtualedit = "none"
 vim.o.virtualedit = "none"
 -- vim.go.textwidth = 0
@@ -282,3 +283,4 @@ vim.o.listchars = "extends:⭆,tab:󰌥󰌒,trail:·"
 
 require("option.fold")
 require("option.tabline")
+-- require("option.statuscolumn")
