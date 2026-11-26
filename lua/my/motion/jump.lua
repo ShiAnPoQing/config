@@ -24,10 +24,21 @@ local function jump(count, opts)
   vim.validate("opts.scope", opts.scope, "string", true)
   local scope = opts.scope == "local" and opts.scope or "global"
   local jump_count
+  local jumplist, last_jump = unpack(vim.fn.getjumplist())
   if scope == "global" then
-    jump_count = count
+    if count < 0 then
+      local current_jump = jumplist[last_jump + 1]
+      local cursor = vim.api.nvim_win_get_cursor(0)
+      if current_jump and current_jump.lnum ~= cursor[1] and current_jump.lnum ~= cursor[2] then
+        vim.cmd("silent! normal! " .. vim.keycode("<C-o><C-i>"))
+        count = count + 1
+      end
+    end
+    if jump_count == 0 then
+      return
+    end
+    jump_count = math.abs(count)
   else
-    local jumplist, last_jump = unpack(vim.fn.getjumplist())
     if #jumplist == 0 then
       return
     end

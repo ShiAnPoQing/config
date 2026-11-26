@@ -46,6 +46,18 @@ local K = function()
 end
 
 return {
+  ["G"] = {
+    function()
+      -- :keepjumps
+      if vim.v.register == "_" then
+        vim.api.nvim_win_set_cursor(0, { vim.fn.line("$"), vim.fn.col(".") - 1 })
+        return
+      end
+      vim.cmd("normal! G")
+    end,
+    "n",
+    desc = "G",
+  },
   ["X"] = {
     function()
       vim.cmd("normal! xh")

@@ -84,6 +84,8 @@ vim.keymap.set("s", "<bs>", " <bs>")
 
 vim.keymap.set("n", "<M-l>", "la")
 vim.keymap.set("n", "<M-h>", "hi")
+vim.keymap.set("n", "<M-L>", "3la")
+vim.keymap.set("n", "<M-H>", "3hi")
 
 vim.keymap.set("i", "<M-space><M-h>", "<cmd>lua my.motion.INSERT.first_non_blank()<cr>")
 vim.keymap.set("i", "<M-space><M-l>", "<cmd>lua my.motion.INSERT.last_non_blank()<cr>")

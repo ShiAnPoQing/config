@@ -221,6 +221,28 @@ end, {
     return completes
   end,
 })
+
+-- local ns_id = vim.api.nvim_create_namespace("my.mark")
+-- local marks = {}
+-- vim.api.nvim_create_autocmd("MarkSet", {
+--   callback = function(ev)
+--     local buf = ev.buf
+--     local data = ev.data --[[@as vim.event.markset.data]]
+--     local name = data.name
+--     local old_mark = marks[name]
+--     if old_mark then
+--       pcall(vim.api.nvim_buf_del_extmark, old_mark.buf, ns_id, old_mark.id)
+--     end
+--     local id = vim.api.nvim_buf_set_extmark(buf, ns_id, data.line - 1, 0, {
+--       sign_hl_group = "String",
+--       sign_text = name,
+--     })
+--     marks[name] = {
+--       id = id,
+--       buf = buf,
+--     }
+--   end,
+-- })
 -- vim.defer_fn(function()
 --   local Window1 = my.ui.Window({
 --     size = { width = 20, height = 10 },

@@ -15,6 +15,11 @@
 ---------------------------------------------------------------------------------------------------+
 
 return {
+  ["`'"] = {
+    function() end,
+    "n",
+    desc = "Go to last position of jumplist",
+  },
   ["<C-i>"] = {
     function()
       my.motion.jump(-vim.v.count1, { scope = "global" })
