@@ -214,7 +214,7 @@ return {
         vim.api.nvim_feedkeys(count .. vim.keycode("o <bs>^<C-d>"), "n", false)
         return
       end
-      vim.api.nvim_feedkeys(count .. vim.keycode("o<C-d>"), "n", false)
+      vim.api.nvim_feedkeys(count .. vim.keycode("o^<C-d>"), "n", false)
     end,
     "n",
     desc = "Begin a new line(non-indent & non-comment) below the cursor, start [count] insert",
@@ -226,7 +226,7 @@ return {
         vim.api.nvim_feedkeys(count .. vim.keycode("O <bs>^<C-d>"), "n", false)
         return
       end
-      vim.api.nvim_feedkeys(count .. vim.keycode("O<C-d>"), "n", false)
+      vim.api.nvim_feedkeys(count .. vim.keycode("O^<C-d>"), "n", false)
     end,
     "n",
     desc = "Begin a new line(non-indent & non-comment) above the cursor, start [count] insert",

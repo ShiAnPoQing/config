@@ -287,4 +287,223 @@ do
   end
 end
 
+do
+  local function notify_error(formatstr, ...)
+    vim.notify(string.format("my.buf.list: " .. formatstr, ...), vim.log.levels.ERROR)
+  end
+
+  local function normalize_filter(filter)
+    if not filter then
+      return
+    end
+
+    if type(filter) == "function" then
+      return { filter = filter, pattern = {} }
+    end
+
+    if type(filter.mode) ~= "string" then
+      notify_error('"filter.mode" expected one of "filetype"|"glob"|"regex", but got type %s', type(filter.mode))
+      return
+    end
+
+    if not vim.list_contains({ "filetype", "glob", "regex" }, filter.mode) then
+      notify_error('"filter.mode" expected one of "filetype"|"glob"|"regex", but got %s', filter.mode)
+      return
+    end
+
+    local pattern = filter.pattern
+    local pattern_type = type(pattern)
+    if pattern_type == "table" then
+    elseif type(pattern_type) == "string" then
+      filter.pattern = { pattern }
+    else
+      notify_error('"filter.pattern" expected string|string[], but got type %s', type(pattern))
+      return
+    end
+
+    local filter_func = filter.filter
+    if filter_func and type(filter_func) ~= "function" then
+      notify_error('"filter.filter" expected function, but got type %s', type(filter_func))
+      return
+    end
+
+    return filter
+  end
+
+  local function get_filter_func(filter)
+    if not filter then
+      return function()
+        return true
+      end
+    end
+    local filterfunc
+
+    local mode = filter.mode
+    local patterns = filter.pattern
+    if mode == "filetype" then
+      filterfunc = function(buf, name)
+        local ft = vim.api.nvim_get_option_value("filetype", { buf = buf, scope = "local" })
+        if not vim.list_contains(patterns, ft) then
+          return false
+        end
+        if not filter.filter then
+          return true
+        end
+        return filter.filter({ buf = buf, name = name, filetype = ft, mode = mode, pattern = patterns })
+      end
+    elseif mode == "glob" then
+      local lpegs = {}
+      for _, pattern in ipairs(patterns) do
+        lpegs[#lpegs + 1] = vim.glob.to_lpeg(pattern)
+      end
+      filterfunc = function(buf, name)
+        local short_name = vim.fn.fnamemodify(name, ":t")
+        for _, lpeg in ipairs(lpegs) do
+          if lpeg:match(short_name) then
+            if not filter.filter then
+              return true
+            end
+            return filter.filter({ buf = buf, name = name, mode = mode, pattern = patterns })
+          end
+        end
+        return false
+      end
+    elseif mode == "regex" then
+      local regexs = {}
+      for _, pattern in ipairs(patterns) do
+        regexs[#regexs + 1] = vim.regex(pattern)
+      end
+      filterfunc = function(buf, name)
+        for _, regex in ipairs(regexs) do
+          if not vim.startswith(name, "term://") and regex:match_str(name) then
+            if not filter.filter then
+              return true
+            end
+            return filter.filter({ buf = buf, name = name, mode = mode, pattern = patterns })
+          end
+        end
+        return false
+      end
+    elseif not mode then
+      filterfunc = function(buf, name)
+        return filter.filter({ buf = buf, name = name })
+      end
+    end
+    return filterfunc
+  end
+
+  local function get_buf_items(opts)
+    local filterfunc = get_filter_func(normalize_filter(opts.filter))
+    local listed = opts.listed ~= false
+    local items = {}
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      local name = vim.api.nvim_buf_get_name(buf)
+      local buflisted = vim.api.nvim_get_option_value("buflisted", { scope = "local", buf = buf })
+      if listed and not buflisted then
+        goto next
+      end
+      local filter = filterfunc(buf, name)
+      if filter then
+        table.insert(items, {
+          buf = buf,
+          name = name,
+        })
+      end
+      ::next::
+    end
+    return items
+  end
+
+  local function format_items(items)
+    local new_items = {}
+    for _, item in ipairs(items) do
+      local a = vim.api.nvim_buf_get_mark(item.buf, '"')[1]
+      new_items[#new_items + 1] =
+        string.format('  %d   "%s"  line %d', item.buf, vim.fn.fnamemodify(item.name, ":~:."), a)
+    end
+    return new_items
+  end
+
+  --- @alias my.buf.list.Opts.Filter.Mode "filetype"|"glob"|"regex"
+
+  --- @class my.buf.list.Opts.FilterContext
+  --- @field buf integer
+  --- @field name string
+
+  --- @class my.buf.list.Opts.Filter.FilterContext: my.buf.list.Opts.FilterContext
+  --- @field pattern string[]
+  --- @field mode my.buf.list.Opts.Filter.Mode
+  --- @field filetype? string
+
+  --- @class my.buf.list.Opts.Filter
+  --- @field pattern? string|string[]
+  --- @field mode my.buf.list.Opts.Filter.Mode
+  --- @field filter? fun(ctx: my.buf.list.Opts.Filter.FilterContext): boolean|nil
+
+  --- @class my.buf.list.Opts
+  --- @field filter? my.buf.list.Opts.Filter|fun(ctx: my.buf.list.Opts.FilterContext): boolean|nil
+  --- @field listed? boolean
+
+  --- @param opts? my.buf.list.Opts Optional parameters:
+  --- - filter?: `my.buf.list.Opts.Filter|fun(ctx: my.buf.list.Opts.FilterContext): boolean|nil` 可选的过滤器，或 `nil` 表示全部。
+  ---   - `my.buf.list.Opts.Filter`:
+  ---     - pattern: `string|string[]`
+  ---     - mode: `"filetype"|"glob"|"regex"`
+  ---     - filter?: `fun(ctx: my.buf.list.Opts.Filter.FilterContext): boolean|nil`
+  --- - listed?: `boolean`(default: `true`) buflisted
+  function M.list(opts)
+    vim.validate("opts", opts, "table", true)
+    opts = opts or {}
+    vim.validate("opts.filter", opts.filter, { "table", "function" }, true)
+    local items = format_items(get_buf_items(opts))
+    local buf = vim.api.nvim_create_buf(false, true)
+    local win = vim.api.nvim_open_win(buf, false, {
+      relative = "laststatus",
+      anchor = "SW",
+      row = 0,
+      col = 0,
+      height = #items,
+      width = 10000,
+      style = "minimal",
+      border = {
+        " ",
+        { " ", "MsgSeparator" },
+        " ",
+        "",
+        "",
+        "",
+        "",
+        "",
+      },
+    })
+    vim.api.nvim_buf_set_name(buf, "[Buflist]")
+    vim.api.nvim_set_option_value("winhl", "Normal:MsgArea", { scope = "local", win = win })
+    vim.api.nvim_set_option_value("winfixbuf", true, { scope = "local", win = win })
+    vim.api.nvim_set_option_value("wrap", true, { scope = "local", win = win })
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, items)
+    vim.api.nvim_set_option_value("modifiable", false, { scope = "local", buf = buf })
+    vim.api.nvim_set_option_value("filetype", "buflist", { scope = "local", buf = buf })
+    local group = vim.api.nvim_create_augroup("my.buf.list.ui", { clear = true })
+
+    local function close()
+      vim.api.nvim_del_augroup_by_id(group)
+      vim.api.nvim_win_close(win, true)
+      vim.api.nvim_buf_delete(buf, { force = true })
+    end
+
+    vim.keymap.set("n", "q", close, { buf = buf, nowait = true })
+    vim.keymap.set("n", "<cr>", function() end, { buf = buf })
+    vim.keymap.set("n", "%", function() end, { buf = buf })
+    vim.api.nvim_create_autocmd("WinLeave", {
+      group = group,
+      callback = function()
+        if vim.api.nvim_get_current_win() == win then
+          close()
+          return true
+        end
+      end,
+    })
+  end
+end
+
 return M

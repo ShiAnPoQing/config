@@ -318,3 +318,9 @@ end, {
   nargs = "*",
   bang = true,
 })
+
+vim.api.nvim_create_user_command("Fbuffers", function() end, {
+  complete = get_filetype_completion,
+  nargs = "*",
+  bang = true,
+})
