@@ -16,7 +16,9 @@
 
 return {
   ["`'"] = {
-    function() end,
+    function()
+      my.motion.jump.jump_prev(-1)
+    end,
     "n",
     desc = "Go to last position of jumplist",
   },

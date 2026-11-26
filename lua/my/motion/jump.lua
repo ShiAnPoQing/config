@@ -5,10 +5,20 @@
 --- @overload fun(count: integer, opts?: my.motion.jump.Opts)
 local M = {}
 
+local last_jump_info
+
 --- @param count integer
 --- @return string
 local function get_jump_key(count)
   return vim.keycode(count > 0 and "<C-i>" or "<C-o>")
+end
+
+local function record_last_jump_info(key)
+  local jumplist, last_jump = unpack(vim.fn.getjumplist())
+  last_jump_info = {
+    jump = jumplist[last_jump + 1],
+    key = key,
+  }
 end
 
 --- @param count integer
@@ -73,6 +83,7 @@ local function jump(count, opts)
     return
   end
   vim.cmd("silent! normal! " .. jump_count .. get_jump_key(count))
+  record_last_jump_info(jump_count .. get_jump_key(-count))
 end
 
 --- @param count integer
@@ -115,6 +126,29 @@ function M.buffer(count)
     return
   end
   vim.cmd("silent! normal! " .. math.abs(jump_idx - current_jump) .. get_jump_key(count))
+end
+
+--- @param count integer
+function M.jump_prev(count)
+  vim.validate("count", count, "number")
+  count = math.floor(count)
+  if count == 0 then
+    return
+  end
+  if not last_jump_info then
+    return
+  end
+  local jumplist, idx = unpack(vim.fn.getjumplist())
+  local current_jump = jumplist[idx + 1]
+  local last_jump = last_jump_info.jump
+  if
+    current_jump and
+    current_jump.bufnr == last_jump.bufnr
+    and current_jump.col == last_jump.col
+    and current_jump.lnum == last_jump.lnum
+  then
+    vim.cmd("silent normal!" .. last_jump_info.key)
+  end
 end
 
 ---@diagnostic disable-next-line: param-type-mismatch

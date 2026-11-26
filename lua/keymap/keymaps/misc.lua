@@ -207,4 +207,20 @@ return {
   ["<space>r"] = { "gR", "n" },
   ["<M-f>"] = { ";", { "n" }, desc = "Repeat latest f, t, F or T [count] times" },
   ["<C-f>"] = { ",", { "n" }, desc = "Repeat latest f, t, F or T in opposite direction [count] times" },
+  ["m"] = {
+    function()
+      if vim.v.operator == "d" or my.operator.is_delete_operator() then
+        ---@diagnostic disable-next-line: param-type-mismatch
+        local char = vim.fn.nr2char(vim.fn.getchar())
+        if char:match("%w") or ('"^.[]'):find(char) then
+          if char == '"' then
+            char = "\\" .. char
+          end
+          vim.cmd("delmarks " .. char)
+        end
+      end
+    end,
+    "o",
+    desc = "marks",
+  },
 }
