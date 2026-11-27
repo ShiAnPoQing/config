@@ -128,7 +128,7 @@ return {
         end,
       })
       -- require("paradox.utils").set_surface_hsl(100, 30)
-      -- require("paradox.utils").set_surface_hsl(50, 15)
+      -- require("paradox.utils").set_surface_hsl(40, 15)
       require("paradox.utils").set_surface_hsl(230, 20)
       -- require("paradox.utils").set_hue_hsl(230, 80)
       -- require("paradox.utils").set_surface_hsl(200, 10)

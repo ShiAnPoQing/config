@@ -5,16 +5,13 @@ function M.setup()
 
   local paths = {
     -- "test",
-    "motion",
     "buffer",
     "change",
     "comment",
-    "copy",
     "delete",
     "directory",
     "file",
     "fold",
-    "indent",
     "insert-line",
     "jump",
     "location-list",
@@ -27,27 +24,20 @@ function M.setup()
     "operator",
     "paste",
     "quickfix",
-    "quit",
-    "register",
-    "screen-move",
+    -- "register",
+    -- "screen-move",
     "search",
     "start-insert-mode",
-    "start-select-mode",
-    "start-visual-mode",
-    "stop-insert-mode",
     "switch-option",
     "tabpage",
     "tagstack",
-    "terminal",
     "textobject",
-    "undo",
     "window",
     "word-move",
     "test",
     "cmdwin",
     -- "dir",
     "multicursor",
-    "scroll",
   }
 
   for _, path in ipairs(paths) do
@@ -58,6 +48,34 @@ function M.setup()
   end
   Key.del({
     ["in"] = { "x", "o" },
+  })
+
+  vim.api.nvim_create_autocmd("TermEnter", {
+    once = true,
+    callback = function()
+      Key.add(require("keymap.keymaps.terminal"))
+    end,
+  })
+
+  local pending_load_modes = {
+    ["no"] = "keymap.keymaps.omode",
+    ["i"] = "keymap.keymaps.imode",
+    ["s"] = "keymap.keymaps.smode",
+    ["c"] = "keymap.keymaps.cmode",
+  }
+  vim.api.nvim_create_autocmd("ModeChanged", {
+    callback = function()
+      if vim.tbl_isempty(pending_load_modes) then
+        pending_load_modes = nil
+        return true
+      end
+      local mode = vim.api.nvim_get_mode().mode
+      local pending = pending_load_modes[mode]
+      if pending then
+        Key.add(require(pending))
+        pending_load_modes[mode] = nil
+      end
+    end,
   })
 end
 

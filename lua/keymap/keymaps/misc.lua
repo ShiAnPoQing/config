@@ -1,3 +1,17 @@
+local left_esc = {
+  { "<Esc>", "i" },
+  { "<C-u><ESC>", "c" },
+  { "<C-\\><C-N>", "t", exclude_ft = { "yazi" } },
+  desc = "Quit insert mode quickly",
+}
+
+local right_esc = {
+  { "<Esc>l", "i" },
+  { "<C-u><ESC>", "c" },
+  { "<C-\\><C-N>", "t", exclude_ft = { "yazi" } },
+  desc = "Quit insert mode quickly",
+}
+
 local esc_map = {
   {
     item = "clear multicursor",
@@ -222,5 +236,283 @@ return {
     end,
     "o",
     desc = "marks",
+  },
+  ["<space><"] = {
+    function()
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, true, true), "nx", true)
+      local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
+      local end_row, end_col = unpack(vim.api.nvim_buf_get_mark(0, ">"))
+      local lines = vim.api.nvim_buf_get_lines(0, start_row - 1, end_row, false)
+      local min_indent
+
+      for _, line in ipairs(lines) do
+        local indent = line:find("[^%s]")
+        if not min_indent then
+          min_indent = indent
+        else
+          if indent and indent < min_indent then
+            min_indent = indent
+          end
+        end
+      end
+
+      if not min_indent then
+        return
+      end
+
+      local new_lines = {}
+
+      for i, line in ipairs(lines) do
+        new_lines[i] = line:sub(min_indent)
+      end
+      vim.api.nvim_buf_set_lines(0, start_row - 1, end_row, false, new_lines)
+      vim.api.nvim_buf_set_mark(0, "<", start_row, start_col, {})
+      vim.api.nvim_buf_set_mark(0, ">", end_row, end_col, {})
+    end,
+    "x",
+    desc = "Delete All Indext",
+  },
+  ["gV"] = {
+    { "`[v`]", "n", desc = "Visual Select last inserted or puted text" },
+    {
+      function()
+        vim.api.nvim_feedkeys("`[v`]", "nx", true)
+      end,
+      "o",
+      desc = "[Textobject]: last inserted or put text",
+    },
+  },
+  -- ["<space>v"] = {
+  --   function()
+  --     vim.api.nvim_feedkeys("v", "n", true)
+  --   end,
+  --   "n",
+  -- },
+  -- virtualedit = "all"
+  -- ["<space>v"] = {
+  --   {
+  --     "<C-v>",
+  --     "x",
+  --   },
+  --   {
+  --     function()
+  --       local line = vim.api.nvim_get_current_line()
+  --       local cursor = vim.api.nvim_win_get_cursor(0)
+  --       if cursor[2] + 1 == #line then
+  --         vim.opt.virtualedit = ""
+  --         vim.api.nvim_exec2(
+  --           [[
+  --         execute "normal! $\<C-v>"
+  --         ]],
+  --           {}
+  --         )
+  --         vim.api.nvim_create_autocmd("ModeChanged", {
+  --           group = vim.api.nvim_create_augroup("CustomModeChanged", { clear = true }),
+  --           callback = function(ev)
+  --             vim.opt.virtualedit = "all"
+  --             return true
+  --           end,
+  --         })
+  --       else
+  --         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-v>", true, false, true), "n", true)
+  --       end
+  --     end,
+  --     "n",
+  --   },
+  --   desc = "Start visual block mode",
+  -- },
+
+  ["jk"] = left_esc,
+  ["jj"] = left_esc,
+  ["JK"] = left_esc,
+  ["JJ"] = left_esc,
+  ["kj"] = right_esc,
+  ["kk"] = right_esc,
+  ["KJ"] = right_esc,
+  ["KK"] = right_esc,
+  -- ["<C-0>"] = { "<C-o>", "i", desc = "CTRL-O" },
+
+  ["<space>c"] = { "<cmd>close<cr>", { "n", "x" }, desc = "Close current window" },
+  ["<space><space>c"] = { "<cmd>close!<cr>", { "n", "x" }, desc = "Close! current window" },
+  ["<space>q"] = { "<cmd>q<cr>", { "n", "x" }, desc = "Quit" },
+  ["<space><space>q"] = { "<cmd>q!<cr>", { "n", "x" }, desc = "Quit!" },
+  ["<space>Q"] = { "<cmd>qa<cr>", { "n", "x" }, desc = "Quit all" },
+  ["<space><space>Q"] = { "<cmd>qa!<cr>", { "n", "x" }, desc = "Quit! all" },
+
+  ["<space><space>y"] = { '"+y', { "n", "x" } },
+  ["<space><space>Y"] = { '"+Y', { "n", "x" } },
+  ["<space><space>p"] = { '"+p', { "n", "x" } },
+  ["<space><space>P"] = { '"+P', { "n", "x" } },
+  ["<space><space>d"] = { '"+d', { "n", "x" } },
+
+  --- register
+  -- Nvim buitin: = filter operation
+  -- My change: "{reg}= replace register
+  -- NOTE: 这是两个完全不相关的功能，只不过 "{reg}=，刚好与原生 ={motion} 冲突，所以做了代理
+
+  -- neovim 原生手动修改寄存器的方法:
+  --        :let @/="Hello"
+  ["="] = {
+    function()
+      local clipboard = vim.opt.clipboard:get() --[[@as table<string>]]
+      local default_register = '"'
+      if vim.tbl_contains(clipboard, "unnamedplus") then
+        default_register = "+"
+      elseif vim.tbl_contains(clipboard, "unnamed") then
+        default_register = "*"
+      end
+
+      local register = vim.v.register
+      if register == default_register then
+        vim.api.nvim_feedkeys("=", "n", false)
+      else
+        local prompt
+        if register:match("%u") ~= nil then
+          prompt = "Register [" .. register .. "] append ⇒ "
+        else
+          prompt = "Register [" .. register .. "] replace ⇒ "
+        end
+        vim.ui.input({
+          prompt = prompt,
+          highlight = function(cmdline)
+            local ret = {}
+            local i = 0
+            while i < #cmdline do
+              table.insert(ret, { i, i + 1, "WarningMsg" })
+              i = i + 1
+            end
+            return ret
+          end,
+        }, function(input)
+          if not input then
+            return
+          end
+          vim.fn.setreg(register, input)
+        end)
+      end
+    end,
+    "n",
+  },
+  ["<leader>crg"] = {
+    function()
+      vim.ui.input({
+        prompt = "Clear register: ",
+      }, function(input)
+        if input then
+          local reg_str = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"'
+          local regs = {}
+          local clear_regs = {}
+          for c in reg_str:gmatch(".") do
+            table.insert(regs, c)
+          end
+          for c in input:gmatch(".") do
+            table.insert(clear_regs, c)
+          end
+
+          for _, value in ipairs(clear_regs) do
+            if vim.list_contains(regs, value) then
+              vim.fn.setreg(value, "")
+            end
+          end
+        end
+      end)
+    end,
+    "n",
+    desc = "Clear registers",
+  },
+  --- scroll
+  ["<C-k>"] = {
+    "<Cmd>lua my.scroll.down()<Cr>",
+    { "n", "x", "i" },
+    desc = "Scroll [count] line down(cursor follow)",
+  },
+  ["<C-j>"] = {
+    "<Cmd>lua my.scroll.up()<Cr>",
+    { "n", "x", "i" },
+    desc = "Scroll [count] line up(cursor follow)",
+  },
+  ["<C-l>"] = {
+    "<Cmd>lua my.scroll.right()<Cr>",
+    { "n", "x", "i" },
+    desc = "Scroll [count] col right(cursor follow)",
+  },
+  ["<C-h>"] = {
+    {
+      "<Cmd>lua my.scroll.left()<Cr>",
+      { "n", "x" },
+    },
+    {
+      "<Cmd>lua my.scroll.left()<Cr>",
+      "i",
+    },
+    desc = "Scroll [count] col left(cursor follow)",
+  },
+  ["<C-u>"] = {
+    "<Cmd>lua my.scroll.half_page_up()<Cr>",
+    { "n", "x" },
+    desc = "Scroll [count] half page up",
+  },
+  ["<C-d>"] = {
+    "<Cmd>lua my.scroll.half_page_down()<Cr>",
+    { "n", "x" },
+    desc = "Scroll [count] half page down",
+  },
+  ["<C-S-k>"] = {
+    {
+      "<Cmd>lua my.scroll.page_up()<Cr>",
+      { "n", "x" },
+    },
+    {
+      function()
+        my.scroll.i_scroll_page_up()
+      end,
+      "i",
+    },
+    desc = "Scroll [count] page up",
+  },
+  ["<C-S-j>"] = {
+    {
+      "<Cmd>lua my.scroll.page_down()<Cr>",
+      { "n", "x" },
+    },
+    {
+      function()
+        my.scroll.i_scroll_page_down()
+      end,
+      "i",
+    },
+    desc = "Scroll [count] page down",
+  },
+  ["<space><C-j>"] = {
+    function()
+      my.wo.scroll_only = not my.wo.scroll_only
+      my.scroll.up()
+    end,
+    { "n", "x" },
+    desc = "Scroll [count] line up(toggle cursor follow)",
+  },
+  ["<space><C-k>"] = {
+    function()
+      my.wo.scroll_only = not my.wo.scroll_only
+      my.scroll.down()
+    end,
+    { "n", "x" },
+    desc = "Scroll [count] line down(toggle cursor follow)",
+  },
+  ["<space><C-l>"] = {
+    function()
+      my.wo.scroll_only = not my.wo.scroll_only
+      my.scroll.right()
+    end,
+    { "n", "x" },
+    desc = "Scroll [count] col right(toggle cursor follow)",
+  },
+  ["<space><C-h>"] = {
+    function()
+      my.wo.scroll_only = not my.wo.scroll_only
+      my.scroll.left()
+    end,
+    { "n", "x" },
+    desc = "Scroll [count] col left(toggle cursor follow)",
   },
 }

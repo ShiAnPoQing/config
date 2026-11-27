@@ -18,6 +18,8 @@ local keys = {
   CTRL_0 = "<C-0>",
   CTRL_9 = "<C-9>",
   -- CTRL_/
+  ALT_SPACE = "<M-space>",
+  CTRL_SPACE = "<M-Esc><esc>",
 }
 
 if vim.env.TERM == "xterm-ghostty" or vim.env.TERM == "tmux-256color" then

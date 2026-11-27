@@ -172,7 +172,8 @@ return {
     "n",
     desc = "Vertical split and open all buffer [limit count windows]",
   },
-  ["<tab>b"] = { "<C-^>", "n", desc = "Go to the most recently accessed buffer, same as <C-^>" },
+  ["<tab>b"] = { "<C-^>", "n", desc = "Go to the most recently accessed buffer" },
+  ["<tab>w"] = { "<C-w>p", "n", desc = "Go to the most recently accessed window" },
   ["<tab>m"] = {
     function()
       ---@diagnostic disable-next-line: param-type-mismatch

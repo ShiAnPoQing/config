@@ -57,7 +57,18 @@ return {
       local root = ev.args == "" and "." or ev.args
       local opts = {
         winopts = {
-          title = "Directory",
+          --   title = " Directory ", -- 新增：浮窗标题
+          --   title_pos = "center", -- 新增：标题居中
+          border = {
+            "",
+            "",
+            "",
+            "",
+            "",
+            " ",
+            "",
+            "",
+          },
         },
         cwd = root,
         fzf_opts = {
@@ -66,7 +77,7 @@ return {
           p="${p/#\~/$HOME}";
           tree "$p"
           ]],
-          ["--preview-window"] = "nohidden,right,50%",
+          ["--preview-window"] = "nohidden,right,50%,noborder",
         },
         actions = {
           ["default"] = function(selected)
@@ -130,6 +141,7 @@ return {
       }
       local search = string.format(
         "find %s -path '*/pack/*/opt/*' -maxdepth 4 -type d -printf '%%f\\t%%p\\n'",
+        ---@diagnostic disable-next-line: param-type-mismatch
         table.concat(vim.opt.packpath:get(), " ")
       )
       require("fzf-lua").fzf_exec(search, opts)
@@ -667,14 +679,34 @@ return {
         -- row = 1, -- window row position (0=top, 1=bottom)
         -- width = 1,
         -- height = 1,
-        fullscreen = true,
+        -- fullscreen = true,
         -- backdrop = 80,
         -- layout = "vertical",
+        border = {
+          "",
+          " ",
+          "",
+          "",
+          "",
+          " ",
+          "",
+          "",
+        },
         preview = {
           border = "none",
-          layout = "vertical",
-          vertical = "up:70%",
+          layout = "horizontal",
+          horizontal = "right:50%",
+          scrollbar = false,
         },
+      },
+      fzf_opts = {
+        ["--separator"] = " ",
+        ["--layout"] = "reverse-list",
+        ["--border"] = "none",
+        ["--highlight-line"] = true,
+      },
+      defaults = {
+        prompt = "  ",
       },
       actions = {
         -- Below are the default actions, setting any value in these tables will override

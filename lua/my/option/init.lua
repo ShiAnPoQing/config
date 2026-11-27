@@ -4,7 +4,6 @@ local M = vim._defer_require("my.option", {})
 local option_specs = {
   env = {
     type = "string",
-    -- list = { "pro", "promax" },
     scope = { "g" },
     default = "pro",
     setter = function(_, _, _, v)
