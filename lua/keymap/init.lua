@@ -6,26 +6,18 @@ function M.setup()
   local paths = {
     -- "test",
     "buffer",
-    "change",
-    "comment",
     "delete",
     "directory",
     "file",
-    "fold",
     "insert-line",
-    "jump",
-    "location-list",
     "lsp",
     -- "macro",
     "misc",
     -- "move-select",
     "move",
     "nop",
-    "operator",
     "paste",
     "quickfix",
-    -- "register",
-    -- "screen-move",
     "search",
     "start-insert-mode",
     "switch-option",
@@ -62,6 +54,7 @@ function M.setup()
     ["i"] = "keymap.keymaps.imode",
     ["s"] = "keymap.keymaps.smode",
     ["c"] = "keymap.keymaps.cmode",
+    ["x"] = "keymap.keymaps.xmode",
   }
   vim.api.nvim_create_autocmd("ModeChanged", {
     callback = function()
@@ -70,6 +63,9 @@ function M.setup()
         return true
       end
       local mode = vim.api.nvim_get_mode().mode
+      if vim.list_contains({ "v", "V", "" }, mode) then
+        mode = "x"
+      end
       local pending = pending_load_modes[mode]
       if pending then
         Key.add(require(pending))

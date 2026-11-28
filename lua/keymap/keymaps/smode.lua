@@ -27,4 +27,33 @@ return {
     "s",
     desc = "Expand word[right]",
   },
+
+  ["<M-i>"] = {
+    function()
+      require("builtin.expand-select").expand_select_left_word()
+    end,
+    "s",
+    desc = "Expand word[left]",
+  },
+  ["<M-o>"] = {
+    function()
+      require("builtin.expand-select").expand_select_right_word()
+    end,
+    "s",
+    desc = "Expand word[right]",
+  },
+  ["<M-space><M-i>"] = {
+    function()
+      require("builtin.expand-select").expand_select_left_word_with_blank()
+    end,
+    "s",
+    desc = "Backward to the end of word",
+  },
+  ["<M-space><M-o>"] = {
+    function()
+      require("builtin.expand-select").expand_select_right_word_with_blank()
+    end,
+    "s",
+    desc = "Forword to the start of the word",
+  },
 }

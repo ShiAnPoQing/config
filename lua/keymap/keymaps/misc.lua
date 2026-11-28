@@ -515,4 +515,354 @@ return {
     { "n", "x" },
     desc = "Scroll [count] col left(toggle cursor follow)",
   },
+  [my.keymap.keys.GOTO_OLDER_CHANGE] = {
+    function()
+      local changelist = vim.fn.getchangelist(vim.api.nvim_get_current_buf())
+      local idx = changelist[2]
+      if idx > 0 then
+        return "g;"
+      end
+      vim.notify("Already at the start change")
+    end,
+    "n",
+    expr = true,
+    desc = "Go to [count] older position in change list.",
+  },
+  [my.keymap.keys.GOTO_NEWER_CHANGE] = {
+    function()
+      local changelist = vim.fn.getchangelist(vim.api.nvim_get_current_buf())
+      local list = changelist[1]
+      local idx = changelist[2]
+      if idx < #list - 1 then
+        return "g,"
+      end
+      vim.notify("Already at the last change")
+    end,
+    "n",
+    expr = true,
+    desc = "Go to [count] newer position in change list.",
+  },
+
+  --- Comment
+  [my.keymap.keys.TOGGLE_COMMENT] = {
+    {
+      function()
+        return require("vim._comment").operator() .. "_"
+      end,
+      "n",
+      expr = true,
+      desc = "Toggle comment line",
+    },
+    {
+      function()
+        return require("vim._comment").operator()
+      end,
+      "x",
+      expr = true,
+      desc = "Toggle Comment",
+    },
+    {
+      function()
+        require("vim._comment").textobject()
+      end,
+      "o",
+      desc = "Comment textobject",
+    },
+    {
+      function()
+        return "<Esc>" .. require("vim._comment").operator() .. "_a"
+      end,
+      "i",
+      desc = "Toggle Comment",
+      expr = true,
+    },
+  },
+  [my.keymap.keys.TOGGLE_COMMENT_ALT1] = {
+    {
+      function()
+        return require("vim._comment").operator() .. "_"
+      end,
+      "n",
+      expr = true,
+      desc = "Toggle comment line",
+    },
+    {
+      function()
+        return require("vim._comment").operator()
+      end,
+      "x",
+      expr = true,
+      desc = "Toggle Comment",
+    },
+    {
+      function()
+        require("vim._comment").textobject()
+      end,
+      "o",
+      desc = "Comment textobject",
+    },
+    {
+      function()
+        return "<Esc>" .. require("vim._comment").operator() .. "_a"
+      end,
+      "i",
+      desc = "Toggle Comment",
+      expr = true,
+    },
+  },
+
+  --- Location list
+  -- ["<leader>lo"] = { "<cmd>lopen<cr>zz", "n", desc = "Open location list" },
+  ["<leader>lc"] = { "<cmd>lclose<cr>zz", "n", desc = "Close location list" },
+  ["<leader>lo"] = {
+    function()
+      ---@diagnostic disable-next-line: param-type-mismatch
+      pcall(vim.cmd, "lnewer" .. vim.v.count1)
+    end,
+    "n",
+    desc = "Newer location list",
+  },
+  ["<leader>li"] = {
+    function()
+      ---@diagnostic disable-next-line: param-type-mismatch
+      pcall(vim.cmd, "lolder" .. vim.v.count1)
+    end,
+    "n",
+    desc = "Older location list",
+  },
+  ["<leader>ll"] = {
+    function()
+      require("builtin.location").toggle()
+    end,
+    "n",
+    desc = "Toggle Location List",
+  },
+  ["]l"] = {
+    function()
+      local function callback()
+        require("builtin.location").goto_next_location()
+        require("repeat").set_motion(callback)
+      end
+      callback()
+    end,
+    "n",
+    desc = "Next location list",
+  },
+  ["[l"] = {
+    function()
+      local function callback()
+        require("builtin.location").goto_prev_location()
+        require("repeat").set_motion(callback)
+      end
+      callback()
+    end,
+    "n",
+    desc = "Previous location list",
+  },
+  -- "[L"
+  -- "]L"
+  ["[<C-l>"] = {
+    function()
+      local count = vim.v.count1
+      --- @diagnostic disable-next-line
+      local ok = pcall(vim.cmd, count .. "lpfile")
+      if not ok then
+        vim.cmd("llast")
+      end
+    end,
+    "n",
+    desc = "Display the last location in the [count] previous file in the list that includes a file name.",
+  },
+  ["]<C-l>"] = {
+    function()
+      local count = vim.v.count1
+      --- @diagnostic disable-next-line
+      local ok = pcall(vim.cmd, count .. "lnfile")
+      if not ok then
+        vim.cmd("lfirst")
+      end
+    end,
+    "n",
+    desc = "Display the first location in the [count] next file in the list that includes a file name.",
+  },
+
+  --- Operator
+  ["y"] = {
+    {
+      function()
+        return my.operator.yank()
+      end,
+      "n",
+      expr = true,
+    },
+    {
+      function()
+        if my.operator.is_yank_operator() then
+          return "_"
+        end
+        return "<esc>"
+      end,
+      "o",
+      expr = true,
+    },
+  },
+  ["d"] = {
+    {
+      function()
+        return my.operator.delete()
+      end,
+      "n",
+      expr = true,
+    },
+    {
+      function()
+        if my.operator.is_delete_operator() then
+          return "_"
+        end
+      end,
+      "o",
+      expr = true,
+    },
+  },
+  ["-"] = {
+    {
+      function()
+        return my.operator.join()
+      end,
+      "n",
+      expr = true,
+    },
+    {
+      function()
+        if my.operator.is_join_operator() then
+          return "_"
+        end
+      end,
+      "o",
+      expr = true,
+    },
+  },
+  ["g-"] = {
+    {
+      function()
+        return my.operator.join({ only_join = true })
+      end,
+      "n",
+      expr = true,
+    },
+    {
+      function()
+        if my.operator.is_join_operator() then
+          return "_"
+        end
+      end,
+      "o",
+      expr = true,
+    },
+  },
+  ["gU"] = {
+    {
+      function()
+        return my.operator.uppercase()
+      end,
+      "n",
+      expr = true,
+    },
+    {
+      function()
+        if my.operator.is_uppercase_operator() then
+          return "_"
+        end
+      end,
+      "o",
+      expr = true,
+    },
+  },
+  ["gu"] = {
+    {
+      function()
+        return my.operator.lowercase()
+      end,
+      "n",
+      expr = true,
+    },
+    {
+      function()
+        if my.operator.is_lowercase_operator() then
+          return "_"
+        end
+        return "<esc>"
+      end,
+      "o",
+      expr = true,
+    },
+  },
+
+  --- Jump
+  ["`'"] = {
+    function()
+      my.motion.jump.jump_prev(-1)
+    end,
+    "n",
+    desc = "Go to last position of jumplist",
+  },
+  ["<C-i>"] = {
+    function()
+      my.motion.jump(-vim.v.count1, { scope = "global" })
+    end,
+    { "n", "x" },
+    desc = "Go to [count] older cursor position",
+  },
+  ["<C-o>"] = {
+    function()
+      my.motion.jump(vim.v.count1, { scope = "global" })
+    end,
+    { "n", "x" },
+    desc = "Go to [count] newer cursor position",
+  },
+  ["<C-S-i>"] = {
+    function()
+      my.motion.jump.buffer(-vim.v.count1)
+    end,
+    "n",
+    desc = "Go to [count] older buffer[last cursor position]",
+  },
+  ["<C-S-o>"] = {
+    function()
+      my.motion.jump.buffer(vim.v.count1)
+    end,
+    "n",
+    desc = "Go to [count] newer buffer[first cursor position]",
+  },
+  ["<C-M-i>"] = {
+    function()
+      my.motion.jump(-vim.v.count1, { scope = "local" })
+    end,
+    "n",
+    desc = "Go to [count] older cursor position[current buffer]",
+  },
+  ["<C-M-o>"] = {
+    function()
+      my.motion.jump(vim.v.count1, { scope = "local" })
+    end,
+    "n",
+    desc = "Go to [count] newer cursor position[current buffer]",
+  },
+
+  -- Fold
+  ["<CR>"] = {
+    function()
+      if vim.fn.foldlevel(vim.fn.line(".")) > 0 then
+        return "zo"
+      end
+    end,
+    "n",
+    expr = true,
+    exclude_ft = { "prompt", "qf", "neo-tree", "netrw", "oil" },
+  },
+  -- ["<S-CR>"] = {
+  --   "zMzv",
+  --   "n",
+  --   desc = "Focus current Fold",
+  -- },
 }

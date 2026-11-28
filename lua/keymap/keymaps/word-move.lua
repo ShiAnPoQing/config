@@ -54,49 +54,23 @@ return {
   },
 
   ["<M-i>"] = {
-    { "bi", "n", desc = "Backward to the start of word[count] and start insert mode" },
-    {
-      function()
-        require("builtin.expand-select").expand_select_left_word()
-      end,
-      "s",
-      desc = "Expand word[left]",
-    },
-    desc = "Backward to the start of word",
+    "bi",
+    "n",
+    desc = "Backward to the start of word[count] and start insert mode",
   },
   ["<M-o>"] = {
-    { "ea", "n", desc = "Forword to the end of the word[count] and start insert mode" },
-    {
-      function()
-        require("builtin.expand-select").expand_select_right_word()
-      end,
-      "s",
-      desc = "Expand word[right]",
-    },
-    desc = "Forword to the end of the word",
-  },
-  ["<M-space><M-i>"] = {
-    {
-      function()
-        require("builtin.expand-select").expand_select_left_word_with_blank()
-      end,
-      "s",
-    },
-    desc = "Backward to the end of word",
-  },
-  ["<M-space><M-o>"] = {
-    {
-      function()
-        require("builtin.expand-select").expand_select_right_word_with_blank()
-      end,
-      "s",
-    },
-    desc = "Forword to the start of the word",
+    "ea",
+    "n",
+    desc = "Forword to the end of the word[count] and start insert mode",
   },
   ["<M-S-i>"] = {
-    { "Bi", "n", desc = "Backward to the start of WORD and start insert mode" },
+    "Bi",
+    "n",
+    desc = "Backward to the start of WORD and start insert mode",
   },
   ["<M-S-o>"] = {
-    { "Ea", "n", desc = "Forword to the end of the WORD and start insert mode" },
+    "Ea",
+    "n",
+    desc = "Forword to the end of the WORD and start insert mode",
   },
 }
