@@ -87,18 +87,18 @@ vim.keymap.set("n", "<M-h>", "hi")
 vim.keymap.set("n", "<M-L>", "3la")
 vim.keymap.set("n", "<M-H>", "3hi")
 
-vim.keymap.set("i", "<M-space><M-h>", "<cmd>lua my.motion.INSERT.first_non_blank()<cr>")
-vim.keymap.set("i", "<M-space><M-l>", "<cmd>lua my.motion.INSERT.last_non_blank()<cr>")
-vim.keymap.set("c", "<M-space><M-h>", "<cmd>lua my.motion.COMMAND.first_non_blank()<cr>")
-vim.keymap.set("c", "<M-space><M-l>", "<cmd>lua my.motion.COMMAND.last_non_blank()<cr>")
+my.keymap.set("i", "<M-space><M-h>", "<cmd>lua my.motion.INSERT.first_non_blank()<cr>")
+my.keymap.set("i", "<M-space><M-l>", "<cmd>lua my.motion.INSERT.last_non_blank()<cr>")
+my.keymap.set("c", "<M-space><M-h>", "<cmd>lua my.motion.COMMAND.first_non_blank()<cr>")
+my.keymap.set("c", "<M-space><M-l>", "<cmd>lua my.motion.COMMAND.last_non_blank()<cr>")
 
-vim.keymap.set("n", "<M-space><M-h>", "<cmd>lua my.insert.NORMAL.first_non_blank()<cr>")
-vim.keymap.set("n", "<M-space><M-l>", "<cmd>lua my.insert.NORMAL.last_non_blank()<cr>")
+my.keymap.set("n", "<M-space><M-h>", "<cmd>lua my.insert.NORMAL.first_non_blank()<cr>")
+my.keymap.set("n", "<M-space><M-l>", "<cmd>lua my.insert.NORMAL.last_non_blank()<cr>")
 
-vim.keymap.set({ "i", "c" }, "<M-space><M-space><M-h>", "<Home>")
-vim.keymap.set({ "i", "c" }, "<M-space><M-space><M-l>", "<End>")
+my.keymap.set({ "i", "c" }, "<M-space><M-space><M-h>", "<Home>")
+my.keymap.set({ "i", "c" }, "<M-space><M-space><M-l>", "<End>")
 
-vim.keymap.set("n", "<M-space><M-space><M-h>", "<Home>i")
-vim.keymap.set("n", "<M-space><M-space><M-l>", "<End>a")
+my.keymap.set("n", "<M-space><M-space><M-h>", "<Home>i")
+my.keymap.set("n", "<M-space><M-space><M-l>", "<End>a")
 
 vim.keymap.set("n", "@", "<cmd>lua my.macro._repeat()<cr>")

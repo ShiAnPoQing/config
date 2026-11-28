@@ -25,7 +25,7 @@ local function toggle_cmdwin(cmdwintype)
 end
 
 return {
-  [my.keymap.keys.OPEN_CMDWIN_EXECMD] = {
+  ["q:"] = {
     function()
       toggle_cmdwin(":")
     end,
@@ -33,7 +33,7 @@ return {
     exclude_ft = { "pager", "qf", "buflist" },
     desc = "[q:]Toggle the command-line window",
   },
-  [my.keymap.keys.OPEN_CMDWIN_SEARCH] = {
+  ["q/"] = {
     function()
       toggle_cmdwin("/")
     end,
@@ -41,7 +41,7 @@ return {
     exclude_ft = { "pager", "qf", "buflist" },
     desc = "[q/]Toggle the command-line window",
   },
-  [my.keymap.keys.OPEN_CMDWIN_SEARCH_BACK] = {
+  ["q?"] = {
     function()
       toggle_cmdwin("?")
     end,

@@ -13,7 +13,6 @@
 -- tmap / tnoremap  |    -   |   -    |    -    |   -    |   -    |    -     |    @     |    -     |
 -- lmap / lnoremap  |    -   |   @    |    @    |   -    |   -    |    -     |    -     |    @     |
 ---------------------------------------------------------------------------------------------------+
-
 local j = function()
   return vim.v.count == 0 and "gj" or "j"
 end
@@ -226,7 +225,7 @@ return {
     desc = "Move to the last character of the line",
   },
 
-  [my.keymap.keys.CTRL_9] = {
+  ["<C-9>"] = {
     {
       "-",
       { "n", "x", "o" },
@@ -238,7 +237,7 @@ return {
       desc = "line upward, on the first non-blank character (linewise).",
     },
   },
-  [my.keymap.keys.CTRL_0] = {
+  ["<C-0>"] = {
     {
       "<up>g_",
       { "n", "x", "o" },

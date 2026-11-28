@@ -1,8 +1,6 @@
 local M = {}
 
 function M.setup()
-  local Key = require("native-packer.key")
-
   local paths = {
     -- "test",
     "buffer",
@@ -35,17 +33,17 @@ function M.setup()
   for _, path in ipairs(paths) do
     local ok, keymaps = pcall(require, "keymap.keymaps." .. path)
     if ok then
-      Key.add(keymaps)
+      my.keymap2.set(keymaps)
     end
   end
-  Key.del({
+  my.keymap2.del({
     ["in"] = { "x", "o" },
   })
 
   vim.api.nvim_create_autocmd("TermEnter", {
     once = true,
     callback = function()
-      Key.add(require("keymap.keymaps.terminal"))
+      my.keymap2.set(require("keymap.keymaps.terminal"))
     end,
   })
 
@@ -68,7 +66,7 @@ function M.setup()
       end
       local pending = pending_load_modes[mode]
       if pending then
-        Key.add(require(pending))
+        my.keymap2.set(require(pending))
         pending_load_modes[mode] = nil
       end
     end,

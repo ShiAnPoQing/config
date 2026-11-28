@@ -5,10 +5,14 @@ local submodules = {
   cursor = {
     scope = true,
   },
+  scroll = {
+    scope = true,
+  },
 }
 
 --- @class my.win
 --- @field cursor my.win.cursor
+--- @field scroll my.win.scroll
 --- @field [integer] my._win
 local M = { _submodules = submodules }
 

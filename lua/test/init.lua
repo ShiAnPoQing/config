@@ -609,7 +609,7 @@ function M.setup()
     --               <Esc> use to interrupt the current mapping, but not do <esc> command
 
     -- make sure <esc> is a mapping
-    vim.keymap.set("n", "<esc>", function() end)
+    vim.keymap.set("n", "<esc>", function() end, { nowait = true })
     local ns = vim.api.nvim_create_namespace("my.esc")
     vim.on_key(function(k, t)
       local typed = vim.keycode(t)

@@ -29,7 +29,7 @@ end
 return {
   ["<space>&"] = { ":*&&<cr>", "n", desc = ":*&&" },
   -- Select history
-  [my.keymap.keys.SELECT_EXPR_REG_HISTORY] = {
+  ["g="] = {
     function()
       select_history("=", function(item)
         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(":<C-\\>e", true, false, true) .. item, "n", false)
@@ -37,7 +37,7 @@ return {
     end,
     "n",
   },
-  [my.keymap.keys.SELECT_SEARCH_BACK_HISTORY] = {
+  ["g?"] = {
     function()
       select_history("?", function(item)
         vim.api.nvim_feedkeys("?" .. item, "n", false)
@@ -46,7 +46,7 @@ return {
     "n",
     desc = "Select ? history",
   },
-  [my.keymap.keys.SELECT_SEARCH_HISTORY] = {
+  ["g/"] = {
     function()
       select_history("/", function(item)
         vim.api.nvim_feedkeys("/" .. item, "n", false)
@@ -55,7 +55,7 @@ return {
     "n",
     desc = "Select / history",
   },
-  [my.keymap.keys.SELECT_EXECMD_HISTORY] = {
+  ["g:"] = {
     function()
       select_history(":", function(item)
         vim.api.nvim_feedkeys(":" .. item, "n", false)

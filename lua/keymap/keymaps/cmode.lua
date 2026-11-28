@@ -80,7 +80,7 @@ return {
   },
 
   ["<S-BS>"] = { "<Del>", "c", desc = "Delete character after the cursor" },
-  [my.keymap.keys.CTRL_BS] = {
+  ["<C-bs>"] = {
     function()
       require("builtin.cmdline").delete_cword_before()
     end,

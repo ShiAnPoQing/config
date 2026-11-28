@@ -8,6 +8,7 @@
 --- @field env my.env
 --- @field command my.command
 --- @field keymap my.keymap
+--- @field keymap2 my.keymap2
 --- @field window my.window
 --- @field scroll my.scroll
 --- @field multicursor my.multicursor
@@ -45,6 +46,7 @@ _G.my = _G.my
 my._submodules = {
   command = true,
   keymap = true,
+  keymap2 = true,
   window = true,
   multicursor = true,
   operator = true,

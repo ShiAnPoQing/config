@@ -90,22 +90,22 @@ return {
   --   end,
   --   "n",
   -- },
-  ["<M-space><M-k>"] = {
+  ["M-space><M-k>"] = {
     "<C-w>K",
     { "n", "x" },
     desc = "Move the current window to be at the very top, using the full width of the screen",
   },
-  ["<M-space><M-j>"] = {
+  ["M-space><M-j>"] = {
     "<C-w>J",
     { "n", "x" },
     desc = "Move the current window to be at the very bottom, using the full width of the screen",
   },
-  ["<M-space><M-h>"] = {
+  ["M-space><M-h>"] = {
     "<C-w>H",
     { "n", "x" },
     desc = "Move the current window to be at the far left, using the full height of the screen",
   },
-  ["<M-space><M-l>"] = {
+  ["M-space><M-l>"] = {
     "<C-w>L",
     { "n", "x" },
     desc = "Move the current window to be at the far right, using the full height of the screen",

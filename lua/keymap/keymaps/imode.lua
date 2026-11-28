@@ -1,8 +1,3 @@
-local M_j = my.keymap.keys.ALT_SPACE .. "<M-j>"
-local M_k = my.keymap.keys.ALT_SPACE .. "<M-k>"
-local M_h = my.keymap.keys.ALT_SPACE .. "<M-h>"
-local M_l = my.keymap.keys.ALT_SPACE .. "<M-l>"
-
 return {
   ["<M-j>"] = { "<down>", "i" },
   ["<M-k>"] = { "<up>", "i" },
@@ -18,12 +13,12 @@ return {
   ["<M-space>k"] = { "<C-o>H", "i" },
   ["<M-space>m"] = { "<C-o>gm", "i" },
   ["<M-space>n"] = { "<C-o>M", "i" },
-  [M_k] = { "<up><end>", "i" },
-  [M_j] = { "<down><end>", "i" },
+  ["<M-space><M-k>"] = { "<up><end>", "i" },
+  ["<M-space><M-j>"] = { "<down><end>", "i" },
   -- stylua: ignore
-  [M_h] = { "<cmd>lua my.motion.first_non_blank()<cr>", "i", desc = "Move to the first non-blank character", },
+  ["<M-space><M-h>"] = { "<cmd>lua my.motion.first_non_blank()<cr>", "i", desc = "Move to the first non-blank character", },
   -- stylua: ignore
-  [M_l] = { "<cmd>lua my.motion.last_non_blank()<cr>", "i", desc = "Move to the last non-blank character", },
+  ["<M-space><M-l>"] = { "<cmd>lua my.motion.last_non_blank()<cr>", "i", desc = "Move to the last non-blank character", },
   ["<M-space><M-space><M-k>"] = { "<up><home>", "i" },
   ["<M-space><M-space><M-j>"] = { "<down><home>", "i" },
   ["<M-space><M-space><M-h>"] = { "<End>", "i" },
@@ -74,7 +69,7 @@ return {
 
   --- Edit
   ["<S-BS>"] = { "<Del>", "i", desc = "Delete character after the cursor" },
-  [my.keymap.keys.CTRL_BS] = {
+  ["<C-bs>"] = {
     -- Issue: insert mode -> normal mode: 有闪烁，特别是 lsp 诊断
     -- '<Left><C-o>"_diw',
     function()

@@ -56,7 +56,7 @@ vim.api.nvim_create_autocmd("CmdwinEnter", {
     --          vim.keymap.set("n", "q", "<cmd>close<cr>", { buf = buf, nowait = true, desc = "quit cmdwin" })
 
     vim.keymap.set("n", "q", "<cmd>close<cr>", { buf = buf, nowait = true, desc = "quit cmdwin" })
-    vim.keymap.set("n", "<esc>", "<cmd>close<cr>", { buf = buf, desc = "quit cmdwin" })
+    vim.keymap.set("n", "<esc>", "<cmd>close<cr>", { buf = buf, desc = "quit cmdwin", nowait = true })
     --- <CR>: Execute cursor command and quit cmdwin
     --- Override global <CR> keymap
     vim.keymap.set({ "n", "i" }, "<cr>", "<cr>", { buf = buf })

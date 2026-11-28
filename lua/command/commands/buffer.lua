@@ -324,3 +324,31 @@ vim.api.nvim_create_user_command("Fbuffers", function() end, {
   nargs = "*",
   bang = true,
 })
+
+vim.api.nvim_create_user_command("InsertBuffer", function(data)
+  local buf_name = data.args
+  local buf = vim.fn.bufnr(buf_name)
+  if buf == -1 then
+    return
+  end
+  local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+  vim.fn.append(vim.fn.line("."), lines)
+end, {
+  nargs = 1,
+  complete = function()
+    local completes = {}
+    local bufs = vim.api.nvim_list_bufs()
+    for _, buf in ipairs(bufs) do
+      if
+        vim.api.nvim_buf_is_loaded(buf)
+        and vim.api.nvim_buf_is_valid(buf)
+        and vim.api.nvim_get_option_value("buflisted", { scope = "local", buf = buf })
+      then
+        local name = vim.api.nvim_buf_get_name(buf)
+        name = name == "" and "[[No Name]]" or name
+        table.insert(completes, name)
+      end
+    end
+    return completes
+  end,
+})

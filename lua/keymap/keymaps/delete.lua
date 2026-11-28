@@ -23,7 +23,7 @@ return {
     { "x", "n" },
     desc = "Delete character after the cursor",
   },
-  [my.keymap.keys.CTRL_BS] = {
+  ["<C-bs>"] = {
     { '"_ciw', "n" },
     desc = "Delete cword(before)",
   },

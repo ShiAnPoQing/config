@@ -515,7 +515,7 @@ return {
     { "n", "x" },
     desc = "Scroll [count] col left(toggle cursor follow)",
   },
-  [my.keymap.keys.GOTO_OLDER_CHANGE] = {
+  ["gi"] = {
     function()
       local changelist = vim.fn.getchangelist(vim.api.nvim_get_current_buf())
       local idx = changelist[2]
@@ -528,7 +528,7 @@ return {
     expr = true,
     desc = "Go to [count] older position in change list.",
   },
-  [my.keymap.keys.GOTO_NEWER_CHANGE] = {
+  ["go"] = {
     function()
       local changelist = vim.fn.getchangelist(vim.api.nvim_get_current_buf())
       local list = changelist[1]
@@ -544,7 +544,7 @@ return {
   },
 
   --- Comment
-  [my.keymap.keys.TOGGLE_COMMENT] = {
+  ["<C-/>"] = {
     {
       function()
         return require("vim._comment").operator() .. "_"
@@ -577,7 +577,7 @@ return {
       expr = true,
     },
   },
-  [my.keymap.keys.TOGGLE_COMMENT_ALT1] = {
+  ["<C-_>"] = {
     {
       function()
         return require("vim._comment").operator() .. "_"
