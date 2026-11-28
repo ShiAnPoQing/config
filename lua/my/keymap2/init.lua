@@ -3,6 +3,7 @@
 --- @field exclude_ft? string|string[]
 --- @field event? string|string[]
 --- @field depend? string|string[]
+--- @field trans? boolean
 
 --- @class my.keymap2.del.Opts: vim.keymap.del.Opts
 

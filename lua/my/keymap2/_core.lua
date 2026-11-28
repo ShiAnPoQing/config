@@ -243,7 +243,9 @@ local function _set(mode, lhs, rhs, opts, extra)
       _rhs(extra)
     end
   end
-  local ok, err = pcall(my.keymap.set, mode, lhs, rhs, opts)
+  local trans = extra.trans ~= false
+  local setfunc = trans and my.keymap.set or vim.keymap.set
+  local ok, err = pcall(setfunc, mode, lhs, rhs, opts)
   if not ok then
     vim.api.nvim_echo({ { "my.keymap2.set: vim.keymap.set: " .. vim.inspect(err), "ErrorMsg" } }, true)
   end
