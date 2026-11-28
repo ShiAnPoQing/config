@@ -42,7 +42,6 @@ if vim.env.TERM == "xterm-ghostty" or vim.env.TERM == "tmux-256color" then
   M.set("<c-9>", "<F19>")
   M.set("<c-0>", "<F18>")
   M.set("<c-bs>", "<F17>")
-  M.set("<esc>", "<F13>")
   M.set("<M-space>", "<C-esc>")
 end
 
